@@ -23,5 +23,4 @@ def scheduled_job():
     subprocess.call(['git', 'push'])
     print('Daily final push at 5:15pm.')
 
-# sched.configure(options_from_ini_file)
 sched.start()
