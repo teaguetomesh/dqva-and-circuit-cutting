@@ -148,10 +148,11 @@ def update_edges(dag, parent_node, original_node, new_register):
                 dest_node = edge[1]
                 edge_data = edge[2]
                 if edge_data['name'] == old_name or edge_data['name'] == new_name:
-                    # print('modify edge from %s to %s' %(source_node.name, dest_node.name))
+                    print('modify edge from %s to %s' %(source_node.name, dest_node.name))
                     dag._multi_graph.remove_edge(source_node, dest_node)
                     dag._multi_graph.add_edge(source_node, dest_node,
                     name=new_name, wire=new_register)
+                    print('updating %s node qargs' % dest_node.name)
                     dest_node.qargs = [new_register[0] if x==original_node else x for x in dest_node.qargs]
                     break
             parent_node = dest_node
@@ -213,38 +214,39 @@ def cut_edge(original_dag, wire, source_node_name, dest_node_name):
         cut_dag._multi_graph.add_edge(source_node, meas_node,
         name="%s[%s]" % (wire.register.name, wire.index), wire=wire)
 
-        # # print('removing edge from %s(source_node) to %s(dest_node)' % (source_node.name, dest_node.name))
-        # cut_dag._multi_graph.remove_edge(source_node, dest_node)
-
         # # print('adding edge from %s to %s' % (c_reg_in_node.name, meas_node.name))
         cut_dag._multi_graph.add_edge(c_reg_in_node, meas_node,
         name="%s[%s]" % (cut_c.name, cut_c[0].index), wire=cut_c)
 
         # # print('adding edge from %s to %s' % (meas_node.name, c_reg_out_node.name))
-        # cut_dag._multi_graph.add_edge(meas_node, c_reg_out_node,
-        # name="%s[%s]" % (cut_c.name, cut_c[0].index), wire=cut_c)
-
-        # # print('adding edge from %s to %s' % (meas_node.name, original_out_node.name))
-        # cut_dag._multi_graph.add_edge(meas_node, original_out_node,
-        # name="%s[%s]" % (wire.register.name, wire.index), wire=wire)
-
-        # # print('removing edge from %s to %s' % (ie[0].name, original_out_node.name))
-        # cut_dag._multi_graph.remove_edge(ie[0], original_out_node)
+        cut_dag._multi_graph.add_edge(meas_node, c_reg_out_node,
+        name="%s[%s]" % (cut_c.name, cut_c[0].index), wire=cut_c)
 
         # # print('removing edge from %s to %s' % (c_reg_in_node.name, c_reg_out_node.name))
-        # cut_dag._multi_graph.remove_edge(c_reg_in_node, c_reg_out_node)
+        cut_dag._multi_graph.remove_edge(c_reg_in_node, c_reg_out_node)
+
+        # # print('removing edge from %s(source_node) to %s(dest_node)' % (source_node.name, dest_node.name))
+        cut_dag._multi_graph.remove_edge(source_node, dest_node)
+
+        # # print('adding edge from %s to %s' % (meas_node.name, original_out_node.name))
+        cut_dag._multi_graph.add_edge(meas_node, original_out_node,
+        name="%s[%s]" % (wire.register.name, wire.index), wire=wire)
+
+        # # print('removing edge from %s to %s' % (ie[0].name, original_out_node.name))
+        cut_dag._multi_graph.remove_edge(ie[0], original_out_node)
 
         # # print('adding edge from %s to %s' % (q_reg_in_node.name, dest_node.name))
-        # cut_dag._multi_graph.add_edge(q_reg_in_node, dest_node,
-        # name="%s[%s]" % (cut_q.name, cut_q[0].index), wire=cut_q)
+        cut_dag._multi_graph.add_edge(q_reg_in_node, dest_node,
+        name="%s[%s]" % (cut_q.name, cut_q[0].index), wire=cut_q)
 
         # # print('adding edge from %s to %s' % (ie[0].name, q_reg_out_node.name))
-        # cut_dag._multi_graph.add_edge(ie[0], q_reg_out_node,
-        # name="%s[%s]" % (cut_q.name, cut_q[0].index), wire=cut_q)
+        cut_dag._multi_graph.add_edge(ie[0], q_reg_out_node,
+        name="%s[%s]" % (cut_q.name, cut_q[0].index), wire=cut_q)
 
         # # print('removing edge from %s to %s' % (q_reg_in_node.name, q_reg_out_node.name))
-        # cut_dag._multi_graph.remove_edge(q_reg_in_node, q_reg_out_node)
+        cut_dag._multi_graph.remove_edge(q_reg_in_node, q_reg_out_node)
 
-        # cut_dag.update_edges(parent_node=q_reg_in_node, original_node=wire, new_register=cut_q)
+        print('Updating edges')
+        cut_dag.update_edges(parent_node=q_reg_in_node, original_node=wire, new_register=cut_q)
 
         return cut_dag
