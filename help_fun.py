@@ -1,14 +1,14 @@
 import numpy as np
-from qiskit import *
-from qiskit.visualization import *
+from qiskit import QuantumCircuit
+from qiskit.tools.visualization import dag_drawer
 import random
 from qiskit.dagcircuit.exceptions import DAGCircuitError
 from qiskit.dagcircuit.dagnode import DAGNode
+from qiskit.circuit import Measure
 from qiskit.circuit.quantumregister import QuantumRegister, Qubit
 from qiskit.circuit.classicalregister import ClassicalRegister, Clbit
-from qiskit.circuit import Measure
-import copy
 import networkx as nx
+import copy
 
 # 2 dimensional q registers
 class q_register():
@@ -142,6 +142,69 @@ def supremacy_layer(circuit, q_reg, rotation_idx, single_qubit_gates):
     # circuit.barrier()
     return circuit
 
+def update_edges(dag, parent_node, original_node, new_register):
+    print('Updating edges')
+    old_name = '%s[%s]' % (original_node.register.name, original_node.index)
+    new_name = "%s[%s]" % (new_register[0].register.name, new_register[0].index)
+    while len(list(dag._multi_graph.successors(parent_node))) > 0:
+        for edge in dag.edges([parent_node]):
+            source_node = edge[0]
+            dest_node = edge[1]
+            edge_data = edge[2]
+            if edge_data['name'] == old_name or edge_data['name'] == new_name:
+                print('modify edge from %s to %s' %(source_node.name, dest_node.name))
+                dag._multi_graph.remove_edge(source_node, dest_node)
+                dag._multi_graph.add_edge(source_node, dest_node,
+                name=new_name, wire=new_register)
+                dest_node.qargs = [new_register[0] if x==original_node else x for x in dest_node.qargs]
+                print('updating %s node qargs to %s' % (dest_node.name,dest_node.qargs))
+                break
+        parent_node = dest_node
+    return dag._id_to_node[dag._max_node_id]
+
+def cut_edge(original_dag, wire, source_node_name, dest_node_name):
+        """Cut a single edge in the original_dag.
+
+        Args:
+            wire (Qubit): wire to cut in original_dag
+            source_node (DAGNode): start node of the edge to cut
+            dest_node (DAGNode): end node of the edge to cut
+
+        Returns:
+            DAGCircuit: dag circuit after cutting
+
+        Raises:
+            DAGCircuitError: if a leaf node is connected to multiple outputs
+
+        """
+
+        cut_dag = copy.deepcopy(original_dag)
+
+        cut_dag._check_bits([wire], cut_dag.output_map)
+
+        original_out_node = cut_dag.output_map[wire]
+        ie = list(cut_dag._multi_graph.predecessors(original_out_node))
+        if len(ie) != 1:
+            raise DAGCircuitError("output node has multiple in-edges")
+
+        source_node = None
+        dest_node = None
+        for node in cut_dag.op_nodes():
+            if node.name == source_node_name:
+                source_node = node
+            if node.name == dest_node_name:
+                dest_node = node
+
+        if source_node == None or dest_node == None:
+            raise ValueError('Did not find source or dest node.')
+        
+        cut_dag._multi_graph.remove_edge(source_node, dest_node)
+
+        return cut_dag
+
+def eq_qubit(a, b):
+    return a.register.name==b.register.name and a.index==b.index
+
 def sub_circs(cut_dag, wire_being_cut):
     sub_circs = []
     sub_reg_dicts = []
@@ -193,7 +256,7 @@ def sub_circs(cut_dag, wire_being_cut):
         # Update qargs of nodes
         for node in cut_dag.topological_op_nodes():
             if contains_cut_wire_out_node and node in component:
-                node.qargs = [reg_dict['cutQ'][0] if x.register.name==wire_being_cut.register.name and x.index==wire_being_cut.index else x for x in node.qargs]
+                node.qargs = [reg_dict['cutQ'][0] if eq_qubit(x, wire_being_cut) else x for x in node.qargs]
                 node.qargs = [reg_dict[x.register.name][x.index-total_circ_regs[x.register.name].size] if x.register.name in total_circ_regs else reg_dict[x.register.name][x.index] for x in node.qargs]
                 sub_circ.append(instruction=node.op, qargs=node.qargs, cargs=node.cargs)
                 print(node.type, node.name, node.qargs, node.cargs)
