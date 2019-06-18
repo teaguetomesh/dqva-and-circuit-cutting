@@ -142,26 +142,6 @@ def supremacy_layer(circuit, q_reg, rotation_idx, single_qubit_gates):
     # circuit.barrier()
     return circuit
 
-def update_edges(dag, parent_node, original_node, new_register):
-    print('Updating edges')
-    old_name = '%s[%s]' % (original_node.register.name, original_node.index)
-    new_name = "%s[%s]" % (new_register[0].register.name, new_register[0].index)
-    while len(list(dag._multi_graph.successors(parent_node))) > 0:
-        for edge in dag.edges([parent_node]):
-            source_node = edge[0]
-            dest_node = edge[1]
-            edge_data = edge[2]
-            if edge_data['name'] == old_name or edge_data['name'] == new_name:
-                print('modify edge from %s to %s' %(source_node.name, dest_node.name))
-                dag._multi_graph.remove_edge(source_node, dest_node)
-                dag._multi_graph.add_edge(source_node, dest_node,
-                name=new_name, wire=new_register)
-                dest_node.qargs = [new_register[0] if x==original_node else x for x in dest_node.qargs]
-                print('updating %s node qargs to %s' % (dest_node.name,dest_node.qargs))
-                break
-        parent_node = dest_node
-    return dag._id_to_node[dag._max_node_id]
-
 def cut_edge(original_dag, wire, source_node_name, dest_node_name):
         """Cut a single edge in the original_dag.
 
@@ -205,7 +185,7 @@ def cut_edge(original_dag, wire, source_node_name, dest_node_name):
 def eq_qubit(a, b):
     return a.register.name==b.register.name and a.index==b.index
 
-def sub_circs(cut_dag, wire_being_cut):
+def generate_sub_circs(cut_dag, wire_being_cut):
     sub_circs = []
     sub_reg_dicts = []
     total_circ_regs = {}

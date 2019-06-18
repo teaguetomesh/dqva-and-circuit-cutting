@@ -1,11 +1,11 @@
 import numpy as np
-from qiskit import *
-from qiskit.visualization import *
 import matplotlib.pyplot as plt
 import argparse
-from help_fun import *
+from help_fun import full_entangle, supremacy_layer, q_register
+from qiskit import QuantumRegister, ClassicalRegister, QuantumCircuit
 import random
 import pickle
+import os
 
 def circuit_generator(args):
 	row = args.circuit_dimension
@@ -43,19 +43,23 @@ def circuit_generator(args):
 	return circ
 
 def main():
-	parser = argparse.ArgumentParser(description='SKLearn classifiers for quantum readout')
+	parser = argparse.ArgumentParser(description='Google quantum supremacy circuit generator')
 
 	parser.add_argument('--circuit-dimension', type=int, default=4, metavar='N',
-	help='dimension of a square quantum supremacy circuit')
+	help='dimension of a square quantum supremacy circuit (default: 4)')
 	parser.add_argument('--circuit-depth', type=int, default=8, metavar='N',
-	help='depth of a square quantum supremacy circuit')
+	help='depth of a square quantum supremacy circuit (default:8)')
+	parser.add_argument('--home-dir', type=str, default='.',
+	help='home directory (default:.)')
 	args = parser.parse_args()
 
 	circ = circuit_generator(args)
-	circ.draw(output='text', line_length = 400, filename = 'circ_draw_%d.txt' % args.circuit_dimension)
-	pickle.dump(circ, open( "circuit.p", "wb" ))
-	# style = {'figwidth': 20}
-	# circ.draw(output='mpl', filename = 'circ_draw_%d.pdf' % args.circuit_dimension)
+
+	path = '%s/results' % args.home_dir
+	if not os.path.isdir(path):
+			os.makedirs(path)
+	circ.draw(output='text', line_length = 400, filename = '%s/circ_draw_%d.txt' % (path, args.circuit_dimension))
+	pickle.dump(circ, open( '%s/supremacy_circuit_%d_%d.p' %(path, args.circuit_dimension, args.circuit_depth), 'wb' ))
 
 if __name__ == '__main__':
 	main()
