@@ -1,5 +1,4 @@
 import numpy as np
-import matplotlib.pyplot as plt
 import argparse
 from help_fun import full_entangle, supremacy_layer, q_register
 from qiskit import QuantumRegister, ClassicalRegister, QuantumCircuit

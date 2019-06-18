@@ -3,8 +3,8 @@ from qiskit.converters import circuit_to_dag, dag_to_circuit
 from qiskit.tools.visualization import dag_drawer
 from qiskit.extensions.standard import CHGate, HGate, CnotGate, CyGate, CzGate
 from qiskit.circuit import Measure
-from qiskit.circuit.quantumregister import QuantumRegister, Qubit
-from qiskit.circuit.classicalregister import ClassicalRegister, Clbit
+from qiskit.circuit.quantumregister import QuantumRegister
+from qiskit.circuit.classicalregister import ClassicalRegister
 from qiskit import BasicAer
 from qiskit.visualization import plot_histogram
 from help_fun import cut_edge, generate_sub_circs

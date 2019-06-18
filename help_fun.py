@@ -5,8 +5,8 @@ import random
 from qiskit.dagcircuit.exceptions import DAGCircuitError
 from qiskit.dagcircuit.dagnode import DAGNode
 from qiskit.circuit import Measure
-from qiskit.circuit.quantumregister import QuantumRegister, Qubit
-from qiskit.circuit.classicalregister import ClassicalRegister, Clbit
+from qiskit.circuit.quantumregister import QuantumRegister
+from qiskit.circuit.classicalregister import ClassicalRegister
 import networkx as nx
 import copy
 
@@ -182,9 +182,6 @@ def cut_edge(original_dag, wire, source_node_name, dest_node_name):
 
         return cut_dag
 
-def eq_qubit(a, b):
-    return a.register.name==b.register.name and a.index==b.index
-
 def generate_sub_circs(cut_dag, wire_being_cut):
     sub_circs = []
     sub_reg_dicts = []
@@ -205,19 +202,19 @@ def generate_sub_circs(cut_dag, wire_being_cut):
         for node in cut_dag.topological_nodes():
             if node in component:
             # Component nodes in topological order
-                if node.type == 'in' and node.wire.register.name not in reg_dict:
-                    if type(node.wire) == Qubit:
-                        reg_dict[node.wire.register.name] = QuantumRegister(1, node.wire.register.name)
-                    elif type(node.wire) == Clbit:
-                        reg_dict[node.wire.register.name] = ClassicalRegister(1, node.wire.register.name)
-                elif node.type == 'in' and node.wire.register.name in reg_dict:
-                    if type(node.wire) == Qubit:
-                        reg_dict[node.wire.register.name] = QuantumRegister(reg_dict[node.wire.register.name].size+1,node.wire.register.name)
-                    elif type(node.wire) ==Clbit:
-                        reg_dict[node.wire.register.name] = ClassicalRegister(reg_dict[node.wire.register.name].size+1,node.wire.register.name)
-                if node.type == 'out' and node.name == '%s[%s]' %(wire_being_cut.register.name, wire_being_cut.index):
+                if node.type == 'in' and node.wire[0].name not in reg_dict:
+                    if type(node.wire[0]) == QuantumRegister:
+                        reg_dict[node.wire[0].name] = QuantumRegister(1, node.wire[0].name)
+                    elif type(node.wire[0]) == ClassicalRegister:
+                        reg_dict[node.wire[0].name] = ClassicalRegister(1, node.wire[0].name)
+                elif node.type == 'in' and node.wire[0].name in reg_dict:
+                    if type(node.wire[0]) == QuantumRegister:
+                        reg_dict[node.wire[0].name] = QuantumRegister(reg_dict[node.wire[0].name].size+1,node.wire[0].name)
+                    elif type(node.wire[0]) == ClassicalRegister:
+                        reg_dict[node.wire[0].name] = ClassicalRegister(reg_dict[node.wire[0].name].size+1,node.wire[0].name)
+                if node.type == 'out' and node.name == '%s[%s]' %(wire_being_cut[0].name, wire_being_cut[1]):
                     contains_cut_wire_out_node = True
-                if node.type == 'in' and node.name == '%s[%s]' %(wire_being_cut.register.name, wire_being_cut.index):
+                if node.type == 'in' and node.name == '%s[%s]' %(wire_being_cut[0].name, wire_being_cut[1]):
                     contains_cut_wire_in_node = True
         for reg in reg_dict.values():
             sub_circ.add_register(reg)
@@ -236,17 +233,17 @@ def generate_sub_circs(cut_dag, wire_being_cut):
         # Update qargs of nodes
         for node in cut_dag.topological_op_nodes():
             if contains_cut_wire_out_node and node in component:
-                node.qargs = [reg_dict['cutQ'][0] if eq_qubit(x, wire_being_cut) else x for x in node.qargs]
-                node.qargs = [reg_dict[x.register.name][x.index-total_circ_regs[x.register.name].size] if x.register.name in total_circ_regs else reg_dict[x.register.name][x.index] for x in node.qargs]
+                node.qargs = [reg_dict['cutQ'][0] if x[0].name==wire_being_cut[0].name and x[1]==wire_being_cut[1] else x for x in node.qargs]
+                node.qargs = [reg_dict[x[0].name][x[1]-total_circ_regs[x[0].name].size] if x[0].name in total_circ_regs else reg_dict[x[0].name][x[1]] for x in node.qargs]
                 sub_circ.append(instruction=node.op, qargs=node.qargs, cargs=node.cargs)
                 print(node.type, node.name, node.qargs, node.cargs)
             elif contains_cut_wire_in_node and node in component:
-                node.qargs = [reg_dict[x.register.name][x.index-total_circ_regs[x.register.name].size] if x.register.name in total_circ_regs else reg_dict[x.register.name][x.index] for x in node.qargs]
+                node.qargs = [reg_dict[x[0].name][x[1]-total_circ_regs[x[0].name].size] if x[0].name in total_circ_regs else reg_dict[x[0].name][x[1]] for x in node.qargs]
                 sub_circ.append(instruction=node.op, qargs=node.qargs, cargs=node.cargs)
                 print(node.type, node.name, node.qargs, node.cargs)
         if contains_cut_wire_in_node:
-            meas_reg = reg_dict[wire_being_cut.register.name]
-            meas_index = wire_being_cut.index - total_circ_regs[wire_being_cut.register.name].size if wire_being_cut.register.name in total_circ_regs else wire_being_cut.index
+            meas_reg = reg_dict[wire_being_cut[0].name]
+            meas_index = wire_being_cut[1] - total_circ_regs[wire_being_cut[0].name].size if wire_being_cut[0].name in total_circ_regs else wire_being_cut[1]
             sub_circ.append(instruction=Measure(), qargs=[meas_reg[meas_index]],cargs=[reg_dict['cutC'][0]])
             
         # Update total_circ_regs
