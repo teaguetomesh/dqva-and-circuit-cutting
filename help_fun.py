@@ -139,116 +139,83 @@ def supremacy_layer(circuit, q_reg, rotation_idx, single_qubit_gates):
     # circuit.barrier()
     return circuit
 
-def update_edges(dag, parent_node, original_node, new_register):
-    print('Updating edges')
-    old_name = '%s[%s]' % (original_node.register.name, original_node.index)
-    new_name = "%s[%s]" % (new_register[0].register.name, new_register[0].index)
-    while len(list(dag._multi_graph.successors(parent_node))) > 0:
-        for edge in dag.edges([parent_node]):
-            source_node = edge[0]
-            dest_node = edge[1]
-            edge_data = edge[2]
-            if edge_data['name'] == old_name or edge_data['name'] == new_name:
-                print('modify edge from %s to %s' %(source_node.name, dest_node.name))
-                dag._multi_graph.remove_edge(source_node, dest_node)
-                dag._multi_graph.add_edge(source_node, dest_node,
-                name=new_name, wire=new_register)
-                dest_node.qargs = [new_register[0] if x==original_node else x for x in dest_node.qargs]
-                print('updating %s node qargs to %s' % (dest_node.name,dest_node.qargs))
-                break
-        parent_node = dest_node
-    return dag._id_to_node[dag._max_node_id]
-
-def cut_edge(original_dag, wire, source_node_name, dest_node_name):
-        """Cut a single edge in the original_dag.
-
-        Args:
-            wire (Qubit): wire to cut in original_dag
-            source_node (DAGNode): start node of the edge to cut
-            dest_node (DAGNode): end node of the edge to cut
-
-        Returns:
-            DAGCircuit: dag circuit after cutting
-
-        Raises:
-            DAGCircuitError: if a leaf node is connected to multiple outputs
-
-        """
-
-        cut_dag = copy.deepcopy(original_dag)
-
-        cut_dag._check_bits([wire], cut_dag.output_map)
-
-        original_out_node = cut_dag.output_map[wire]
-        ie = list(cut_dag._multi_graph.predecessors(original_out_node))
-        if len(ie) != 1:
-            raise DAGCircuitError("output node has multiple in-edges")
-
-        source_node = None
-        dest_node = None
-        for node in cut_dag.op_nodes():
-            if node.name == source_node_name:
-                source_node = node
-            if node.name == dest_node_name:
-                dest_node = node
-
-        if source_node == None or dest_node == None:
-            raise ValueError('Did not find source or dest node.')
+def sub_circs(cut_dag, wire_being_cut):
+    sub_circs = []
+    sub_reg_dicts = []
+    total_circ_regs = {}
+    num_components = nx.number_weakly_connected_components(cut_dag._multi_graph)
+    components = list(nx.weakly_connected_components(cut_dag._multi_graph))
+    if num_components<2:
+        print('cut_dag has only one component')
+        return sub_circs
+    for i in range(num_components):
+        sub_circ = QuantumCircuit()
+        reg_dict = {}
+        contains_cut_wire_out_node = False
+        contains_cut_wire_in_node = False
+        component = components[i]
         
-        cut_dag._multi_graph.remove_edge(source_node, dest_node)
+        # Add appropriate registers
+        for node in cut_dag.topological_nodes():
+            if node in component:
+            # Component nodes in topological order
+                if node.type == 'in' and node.wire.register.name not in reg_dict:
+                    if type(node.wire) == Qubit:
+                        reg_dict[node.wire.register.name] = QuantumRegister(1, node.wire.register.name)
+                    elif type(node.wire) == Clbit:
+                        reg_dict[node.wire.register.name] = ClassicalRegister(1, node.wire.register.name)
+                elif node.type == 'in' and node.wire.register.name in reg_dict:
+                    if type(node.wire) == Qubit:
+                        reg_dict[node.wire.register.name] = QuantumRegister(reg_dict[node.wire.register.name].size+1,node.wire.register.name)
+                    elif type(node.wire) ==Clbit:
+                        reg_dict[node.wire.register.name] = ClassicalRegister(reg_dict[node.wire.register.name].size+1,node.wire.register.name)
+                if node.type == 'out' and node.name == '%s[%s]' %(wire_being_cut.register.name, wire_being_cut.index):
+                    contains_cut_wire_out_node = True
+                if node.type == 'in' and node.name == '%s[%s]' %(wire_being_cut.register.name, wire_being_cut.index):
+                    contains_cut_wire_in_node = True
+        for reg in reg_dict.values():
+            sub_circ.add_register(reg)
+        if contains_cut_wire_out_node:
+            # Needs to add cutQ ancilla
+            cutQ = QuantumRegister(1, 'cutQ')
+            sub_circ.add_register(cutQ)
+            reg_dict['cutQ'] = cutQ
+        if contains_cut_wire_in_node:
+            # Needs to add cutC to measure
+            cutC = ClassicalRegister(1,'cutC')
+            sub_circ.add_register(cutC)
+            reg_dict['cutC'] = cutC
+        print('reg_dict:', reg_dict)
         
-        """Insert a measure op for wire
-        After source_node and before dest_node
-        """
-        # cut_c = ClassicalRegister(1, 'cutC')
-        # cut_dag._add_op_node(op=Measure(), qargs=[wire], cargs=[cut_c[0]])
-        # meas_node = cut_dag._id_to_node[cut_dag._max_node_id]
-        # cut_dag.add_creg(cut_c)
-        # c_reg_in_node = cut_dag._id_to_node[cut_dag._max_node_id-1]
-        # c_reg_out_node = cut_dag._id_to_node[cut_dag._max_node_id]
+        # Update qargs of nodes
+        for node in cut_dag.topological_op_nodes():
+            if contains_cut_wire_out_node and node in component:
+                node.qargs = [reg_dict['cutQ'][0] if x.register.name==wire_being_cut.register.name and x.index==wire_being_cut.index else x for x in node.qargs]
+                node.qargs = [reg_dict[x.register.name][x.index-total_circ_regs[x.register.name].size] if x.register.name in total_circ_regs else reg_dict[x.register.name][x.index] for x in node.qargs]
+                sub_circ.append(instruction=node.op, qargs=node.qargs, cargs=node.cargs)
+                print(node.type, node.name, node.qargs, node.cargs)
+            elif contains_cut_wire_in_node and node in component:
+                node.qargs = [reg_dict[x.register.name][x.index-total_circ_regs[x.register.name].size] if x.register.name in total_circ_regs else reg_dict[x.register.name][x.index] for x in node.qargs]
+                sub_circ.append(instruction=node.op, qargs=node.qargs, cargs=node.cargs)
+                print(node.type, node.name, node.qargs, node.cargs)
+        if contains_cut_wire_in_node:
+            meas_reg = reg_dict[wire_being_cut.register.name]
+            meas_index = wire_being_cut.index - total_circ_regs[wire_being_cut.register.name].size if wire_being_cut.register.name in total_circ_regs else wire_being_cut.index
+            sub_circ.append(instruction=Measure(), qargs=[meas_reg[meas_index]],cargs=[reg_dict['cutC'][0]])
+            
+        # Update total_circ_regs
+        for key in reg_dict:
+            if key in total_circ_regs:
+                if type(total_circ_regs[key]) == QuantumRegister:
+                    total_circ_regs[key] = QuantumRegister(total_circ_regs[key].size + reg_dict[key].size, key)
+                elif type(total_circ_regs[key]) == ClassicalRegister:
+                    total_circ_regs[key] = ClassicalRegister(total_circ_regs[key].size + reg_dict[key].size, key)
+            else:
+                total_circ_regs[key] = reg_dict[key]
         
-        """Insert ancilla qubit"""
-        # cut_q = QuantumRegister(1, 'cutQ')
-        # cut_dag.add_qreg(cut_q)
-        # q_reg_in_node = cut_dag._id_to_node[cut_dag._max_node_id-1]
-        # q_reg_out_node = cut_dag._id_to_node[cut_dag._max_node_id]
-
-        # # print('adding edge from %s(source_node) to %s(meas_node)' % (source_node.name, meas_node.name))
-        # cut_dag._multi_graph.add_edge(source_node, meas_node,
-        # name="%s[%s]" % (wire.register.name, wire.index), wire=wire)
-
-        # # print('adding edge from %s to %s' % (c_reg_in_node.name, meas_node.name))
-        # cut_dag._multi_graph.add_edge(c_reg_in_node, meas_node,
-        # name="%s[%s]" % (cut_c.name, cut_c[0].index), wire=cut_c)
-
-        # # print('adding edge from %s to %s' % (meas_node.name, c_reg_out_node.name))
-        # cut_dag._multi_graph.add_edge(meas_node, c_reg_out_node,
-        # name="%s[%s]" % (cut_c.name, cut_c[0].index), wire=cut_c)
-
-        # # print('removing edge from %s to %s' % (c_reg_in_node.name, c_reg_out_node.name))
-        # cut_dag._multi_graph.remove_edge(c_reg_in_node, c_reg_out_node)
-
-        # # print('removing edge from %s(source_node) to %s(dest_node)' % (source_node.name, dest_node.name))
-        # cut_dag._multi_graph.remove_edge(source_node, dest_node)
-
-        # # print('adding edge from %s to %s' % (meas_node.name, original_out_node.name))
-        # cut_dag._multi_graph.add_edge(meas_node, original_out_node,
-        # name="%s[%s]" % (wire.register.name, wire.index), wire=wire)
-
-        # # print('removing edge from %s to %s' % (ie[0].name, original_out_node.name))
-        # cut_dag._multi_graph.remove_edge(ie[0], original_out_node)
-
-        # # print('adding edge from %s to %s' % (q_reg_in_node.name, dest_node.name))
-        # cut_dag._multi_graph.add_edge(q_reg_in_node, dest_node,
-        # name="%s[%s]" % (cut_q.name, cut_q[0].index), wire=cut_q)
-
-        # # print('adding edge from %s to %s' % (ie[0].name, q_reg_out_node.name))
-        # cut_dag._multi_graph.add_edge(ie[0], q_reg_out_node,
-        # name="%s[%s]" % (cut_q.name, cut_q[0].index), wire=cut_q)
-
-        # # print('removing edge from %s to %s' % (q_reg_in_node.name, q_reg_out_node.name))
-        # cut_dag._multi_graph.remove_edge(q_reg_in_node, q_reg_out_node)
-
-        # update_edges(dag=cut_dag, parent_node=q_reg_in_node, original_node=wire, new_register=cut_q)
-
-        return cut_dag
+        print('registers in the sub circuit:', sub_circ.qregs, sub_circ.cregs)
+        print('total registers counts:', total_circ_regs)
+        print('finished component %d\n' % i)
+        sub_circs.append(sub_circ)
+        sub_reg_dicts.append(reg_dict)
+    return sub_circs, sub_reg_dicts
