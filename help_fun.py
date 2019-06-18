@@ -189,9 +189,9 @@ def generate_sub_circs(cut_dag, wire_being_cut):
     num_components = nx.number_weakly_connected_components(cut_dag._multi_graph)
     components = list(nx.weakly_connected_components(cut_dag._multi_graph))
     if num_components<2:
-        print('cut_dag has only one component')
-        return sub_circs
+        raise Exception('cut_dag only has %d component' % num_components)
     for i in range(num_components):
+        print('component %d' % i)
         sub_circ = QuantumCircuit()
         reg_dict = {}
         contains_cut_wire_out_node = False
@@ -235,12 +235,14 @@ def generate_sub_circs(cut_dag, wire_being_cut):
             if contains_cut_wire_out_node and node in component:
                 node.qargs = [reg_dict['cutQ'][0] if x[0].name==wire_being_cut[0].name and x[1]==wire_being_cut[1] else x for x in node.qargs]
                 node.qargs = [reg_dict[x[0].name][x[1]-total_circ_regs[x[0].name].size] if x[0].name in total_circ_regs else reg_dict[x[0].name][x[1]] for x in node.qargs]
-                sub_circ.append(instruction=node.op, qargs=node.qargs, cargs=node.cargs)
+                node.cargs = [reg_dict[x[0].name][x[1]-total_circ_regs[x[0].name].size] if x[0].name in total_circ_regs else reg_dict[x[0].name][x[1]] for x in node.cargs]
                 print(node.type, node.name, node.qargs, node.cargs)
+                sub_circ.append(instruction=node.op, qargs=node.qargs, cargs=node.cargs)
             elif contains_cut_wire_in_node and node in component:
                 node.qargs = [reg_dict[x[0].name][x[1]-total_circ_regs[x[0].name].size] if x[0].name in total_circ_regs else reg_dict[x[0].name][x[1]] for x in node.qargs]
-                sub_circ.append(instruction=node.op, qargs=node.qargs, cargs=node.cargs)
+                node.cargs = [reg_dict[x[0].name][x[1]-total_circ_regs[x[0].name].size] if x[0].name in total_circ_regs else reg_dict[x[0].name][x[1]] for x in node.cargs]
                 print(node.type, node.name, node.qargs, node.cargs)
+                sub_circ.append(instruction=node.op, qargs=node.qargs, cargs=node.cargs)
         if contains_cut_wire_in_node:
             meas_reg = reg_dict[wire_being_cut[0].name]
             meas_index = wire_being_cut[1] - total_circ_regs[wire_being_cut[0].name].size if wire_being_cut[0].name in total_circ_regs else wire_being_cut[1]

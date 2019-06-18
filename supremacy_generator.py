@@ -2,6 +2,8 @@ import numpy as np
 import argparse
 from help_fun import full_entangle, supremacy_layer, q_register
 from qiskit import QuantumRegister, ClassicalRegister, QuantumCircuit
+from qiskit.converters import circuit_to_dag, dag_to_circuit
+from qiskit.tools.visualization import dag_drawer
 import random
 import pickle
 import os
@@ -57,8 +59,11 @@ def main():
 	path = '%s/results' % args.home_dir
 	if not os.path.isdir(path):
 			os.makedirs(path)
-	circ.draw(output='text', line_length = 400, filename = '%s/circ_draw_%d.txt' % (path, args.circuit_dimension))
-	pickle.dump(circ, open( '%s/supremacy_circuit_%d_%d.p' %(path, args.circuit_dimension, args.circuit_depth), 'wb' ))
+	circ.draw(output='text', line_length = 400, filename = '%s/supremacy_circ_%d_%d.txt' % 
+	(path, args.circuit_dimension, args.circuit_depth))
+	dag_drawer(circuit_to_dag(circ), filename='%s/supremacy_dag_%d_%d.pdf' %
+	(path, args.circuit_dimension, args.circuit_depth))
+	pickle.dump(circ, open('%s/supremacy_circuit_%d_%d.dump' %(path, args.circuit_dimension, args.circuit_depth), 'wb' ))
 
 if __name__ == '__main__':
 	main()

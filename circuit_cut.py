@@ -34,13 +34,13 @@ def foo(args):
     circ.draw()
 
     original_dag = circuit_to_dag(circ)
-    print('original_dag has %d connected components' % nx.number_weakly_connected_components(original_dag._multi_graph))
+    # print('original_dag has %d connected components' % nx.number_weakly_connected_components(original_dag._multi_graph))
     # print(nx.algorithms.connectivity.cuts.minimum_edge_cut(dag._multi_graph))
     dag_drawer(original_dag, filename='%s/original_dag.pdf' % path)
     circ.draw(output='mpl',filename='%s/original_circ.pdf' % path)
 
     cut_dag = cut_edge(original_dag=original_dag, wire=q[2],source_node_name='cy', dest_node_name='ch')
-    print('cut_dag has %d connected components' % nx.number_weakly_connected_components(cut_dag._multi_graph))
+    # print('cut_dag has %d connected components' % nx.number_weakly_connected_components(cut_dag._multi_graph))
     dag_drawer(cut_dag, filename='%s/cut_dag.pdf' % path)
     dag_to_circuit(cut_dag).draw(output='mpl',filename='%s/cut_circ.pdf' % path)
 
