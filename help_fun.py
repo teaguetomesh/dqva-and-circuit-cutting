@@ -142,45 +142,52 @@ def supremacy_layer(circuit, q_reg, rotation_idx, single_qubit_gates):
     # circuit.barrier()
     return circuit
 
-def cut_edge(original_dag, wire, source_node_name, dest_node_name):
-        """Cut a single edge in the original_dag.
+def cut_single_edge(original_dag, wire, source_node_name, dest_node_name):
+    """Cut a single edge in the original_dag.
 
-        Args:
-            wire (Qubit): wire to cut in original_dag
-            source_node (DAGNode): start node of the edge to cut
-            dest_node (DAGNode): end node of the edge to cut
+    Args:
+        wire (Qubit): wire to cut in original_dag
+        source_node (DAGNode): start node of the edge to cut
+        dest_node (DAGNode): end node of the edge to cut
 
-        Returns:
-            DAGCircuit: dag circuit after cutting
+    Returns:
+        DAGCircuit: dag circuit after cutting
 
-        Raises:
-            DAGCircuitError: if a leaf node is connected to multiple outputs
+    Raises:
+        DAGCircuitError: if a leaf node is connected to multiple outputs
 
-        """
+    """
 
-        cut_dag = copy.deepcopy(original_dag)
+    cut_dag = copy.deepcopy(original_dag)
 
-        cut_dag._check_bits([wire], cut_dag.output_map)
+    cut_dag._check_bits([wire], cut_dag.output_map)
 
-        original_out_node = cut_dag.output_map[wire]
-        ie = list(cut_dag._multi_graph.predecessors(original_out_node))
-        if len(ie) != 1:
-            raise DAGCircuitError("output node has multiple in-edges")
+    original_out_node = cut_dag.output_map[wire]
+    ie = list(cut_dag._multi_graph.predecessors(original_out_node))
+    if len(ie) != 1:
+        raise DAGCircuitError("output node has multiple in-edges")
 
-        source_node = None
-        dest_node = None
-        for node in cut_dag.op_nodes():
-            if node.name == source_node_name:
-                source_node = node
-            if node.name == dest_node_name:
-                dest_node = node
+    source_node = None
+    dest_node = None
+    for node in cut_dag.op_nodes():
+        if node.name == source_node_name:
+            source_node = node
+        if node.name == dest_node_name:
+            dest_node = node
 
-        if source_node == None or dest_node == None:
-            raise ValueError('Did not find source or dest node.')
-        
-        cut_dag._multi_graph.remove_edge(source_node, dest_node)
+    if source_node == None or dest_node == None:
+        raise ValueError('Did not find source or dest node.')
 
-        return cut_dag
+    cut_dag._multi_graph.remove_edge(source_node, dest_node)
+
+    return cut_dag
+
+def cut_edges(original_dag, positions):
+    cut_dag = copy.deepcopy(original_dag)
+    for position in positions:
+        wire, source_node_name, dest_node_name = position
+        cut_dag = cut_single_edge(cut_dag, wire, source_node_name, dest_node_name)
+    return cut_dag
 
 def generate_sub_circs(cut_dag, wire_being_cut):
     sub_circs = []
