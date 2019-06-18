@@ -4,8 +4,11 @@ from qiskit.visualization import *
 import random
 from qiskit.dagcircuit.exceptions import DAGCircuitError
 from qiskit.dagcircuit.dagnode import DAGNode
+from qiskit.circuit.quantumregister import QuantumRegister, Qubit
+from qiskit.circuit.classicalregister import ClassicalRegister, Clbit
 from qiskit.circuit import Measure
 import copy
+import networkx as nx
 
 # 2 dimensional q registers
 class q_register():
