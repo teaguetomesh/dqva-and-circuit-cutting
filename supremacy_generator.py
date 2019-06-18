@@ -36,7 +36,7 @@ def circuit_generator(args):
 
 	c_reg = ClassicalRegister(row*col, 'c')
 	meas = QuantumCircuit(q_reg.qubits, c_reg)
-	meas.barrier(q_reg.qubits)
+	# meas.barrier(q_reg.qubits)
 	meas.measure(q_reg.qubits,c_reg)
 
 	circ = circ+meas
