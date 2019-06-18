@@ -142,7 +142,7 @@ def supremacy_layer(circuit, q_reg, rotation_idx, single_qubit_gates):
     # circuit.barrier()
     return circuit
 
-def cut_single_edge(original_dag, wire, source_node_name, dest_node_name):
+def cut_single_edge(original_dag, wire, source_node_idx, dest_node_idx):
     """Cut a single edge in the original_dag.
 
     Args:
@@ -185,8 +185,8 @@ def cut_single_edge(original_dag, wire, source_node_name, dest_node_name):
 def cut_edges(original_dag, positions):
     cut_dag = copy.deepcopy(original_dag)
     for position in positions:
-        wire, source_node_name, dest_node_name = position
-        cut_dag = cut_single_edge(cut_dag, wire, source_node_name, dest_node_name)
+        wire, source_node_idx, dest_node_idx = position
+        cut_dag = cut_single_edge(cut_dag, wire, source_node_idx, dest_node_idx)
     return cut_dag
 
 def generate_sub_circs(cut_dag, wire_being_cut):
