@@ -7,7 +7,7 @@ from qiskit.circuit.quantumregister import QuantumRegister
 from qiskit.circuit.classicalregister import ClassicalRegister
 from qiskit import BasicAer
 from qiskit.visualization import plot_histogram
-from help_fun import cut_edge, generate_sub_circs
+from help_fun import cut_edges, generate_sub_circs
 import numpy as np
 import networkx as nx
 import pickle
@@ -39,8 +39,9 @@ def foo(args):
     dag_drawer(original_dag, filename='%s/original_dag.pdf' % path)
     circ.draw(output='mpl',filename='%s/original_circ.pdf' % path)
 
-    cut_dag = cut_edge(original_dag=original_dag, wire=q[2],source_node_name='cy', dest_node_name='ch')
-    # print('cut_dag has %d connected components' % nx.number_weakly_connected_components(cut_dag._multi_graph))
+    positions = [(q[2], 2)]
+    cut_dag = cut_edges(original_dag=original_dag, positions=positions)
+    print('cut_dag has %d connected components' % nx.number_weakly_connected_components(cut_dag._multi_graph))
     dag_drawer(cut_dag, filename='%s/cut_dag.pdf' % path)
     dag_to_circuit(cut_dag).draw(output='mpl',filename='%s/cut_circ.pdf' % path)
 
