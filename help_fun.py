@@ -183,6 +183,23 @@ def cut_edges(original_dag, positions):
         cut_dag = cut_single_edge(cut_dag, wire, source_node_idx)
     return cut_dag
 
+def is_being_cut(node, wires_being_cut):
+    ''' Returns -1 if node is not being cut or not in/out node
+    Returns index of the wire being cut if node is being cut'''
+    wires_being_cut_names = ['%s[%s]' % (x[0].name, x[1]) for x in wires_being_cut]
+    for idx, name in enumerate(wires_being_cut_names):
+        if node.name == name:
+            return idx
+    return -1
+
+def qarg_being_cut(qarg, wires_being_cut):
+    wires_being_cut_names = ['%s[%s]' % (x[0].name, x[1]) for x in wires_being_cut]
+    qarg_name = '%s[%s]' % (qarg[0].name, qarg[1])
+    for idx, name in enumerate(wires_being_cut_names):
+        if qarg_name == name:
+            return idx
+    return -1
+
 def generate_sub_circs(cut_dag, wires_being_cut):
     sub_circs = []
     sub_reg_dicts = []
@@ -192,11 +209,11 @@ def generate_sub_circs(cut_dag, wires_being_cut):
     if num_components<2:
         raise Exception('Minimum split is not met, cut_dag only has %d component' % num_components)
     for i in range(num_components):
-        # print('component %d' % i)
+        print('component %d' % i)
         sub_circ = QuantumCircuit()
         reg_dict = {}
-        contains_cut_wire_out_node = False
-        contains_cut_wire_in_node = False
+        contains_cut_wires_out_nodes = False
+        contains_cut_wires_in_nodes = False
         component = components[i]
         
         # Add appropriate registers
@@ -213,41 +230,42 @@ def generate_sub_circs(cut_dag, wires_being_cut):
                         reg_dict[node.wire[0].name] = QuantumRegister(reg_dict[node.wire[0].name].size+1,node.wire[0].name)
                     elif type(node.wire[0]) == ClassicalRegister:
                         reg_dict[node.wire[0].name] = ClassicalRegister(reg_dict[node.wire[0].name].size+1,node.wire[0].name)
-                if node.type == 'out' and node.name == '%s[%s]' %(wire_being_cut[0].name, wire_being_cut[1]):
-                    contains_cut_wire_out_node = True
-                if node.type == 'in' and node.name == '%s[%s]' %(wire_being_cut[0].name, wire_being_cut[1]):
-                    contains_cut_wire_in_node = True
+                if node.type == 'out' and is_being_cut(node, wires_being_cut) != -1:
+                    contains_cut_wires_out_nodes = True
+                if node.type == 'in' and is_being_cut(node, wires_being_cut) != -1:
+                    contains_cut_wires_in_nodes = True
         for reg in reg_dict.values():
             sub_circ.add_register(reg)
-        if contains_cut_wire_out_node:
+        if contains_cut_wires_out_nodes:
             # Needs to add cutQ ancilla
-            cutQ = QuantumRegister(1, 'cutQ')
+            cutQ = QuantumRegister(len(wires_being_cut), 'cutQ')
             sub_circ.add_register(cutQ)
             reg_dict['cutQ'] = cutQ
-        if contains_cut_wire_in_node:
+        if contains_cut_wires_in_nodes:
             # Needs to add cutC to measure
-            cutC = ClassicalRegister(1,'cutC')
+            cutC = ClassicalRegister(len(wires_being_cut),'cutC')
             sub_circ.add_register(cutC)
             reg_dict['cutC'] = cutC
-        # print('reg_dict:', reg_dict)
+        print('reg_dict:', reg_dict)
         
         # Update qargs of nodes
         for node in cut_dag.topological_op_nodes():
-            if contains_cut_wire_out_node and node in component:
-                node.qargs = [reg_dict['cutQ'][0] if x[0].name==wire_being_cut[0].name and x[1]==wire_being_cut[1] else x for x in node.qargs]
+            if contains_cut_wires_out_nodes and node in component:
+                node.qargs = [reg_dict['cutQ'][qarg_being_cut(x, wires_being_cut)] if qarg_being_cut(x, wires_being_cut) != -1 else x for x in node.qargs]
                 node.qargs = [reg_dict[x[0].name][x[1]-total_circ_regs[x[0].name].size] if x[0].name in total_circ_regs else reg_dict[x[0].name][x[1]] for x in node.qargs]
                 node.cargs = [reg_dict[x[0].name][x[1]-total_circ_regs[x[0].name].size] if x[0].name in total_circ_regs else reg_dict[x[0].name][x[1]] for x in node.cargs]
                 # print(node.type, node.name, node.qargs, node.cargs)
                 sub_circ.append(instruction=node.op, qargs=node.qargs, cargs=node.cargs)
-            elif contains_cut_wire_in_node and node in component:
+            elif contains_cut_wires_in_nodes and node in component:
                 node.qargs = [reg_dict[x[0].name][x[1]-total_circ_regs[x[0].name].size] if x[0].name in total_circ_regs else reg_dict[x[0].name][x[1]] for x in node.qargs]
                 node.cargs = [reg_dict[x[0].name][x[1]-total_circ_regs[x[0].name].size] if x[0].name in total_circ_regs else reg_dict[x[0].name][x[1]] for x in node.cargs]
                 # print(node.type, node.name, node.qargs, node.cargs)
                 sub_circ.append(instruction=node.op, qargs=node.qargs, cargs=node.cargs)
-        if contains_cut_wire_in_node:
-            meas_reg = reg_dict[wire_being_cut[0].name]
-            meas_index = wire_being_cut[1] - total_circ_regs[wire_being_cut[0].name].size if wire_being_cut[0].name in total_circ_regs else wire_being_cut[1]
-            sub_circ.append(instruction=Measure(), qargs=[meas_reg[meas_index]],cargs=[reg_dict['cutC'][0]])
+        if contains_cut_wires_in_nodes:
+            for wire in wires_being_cut:
+                meas_reg = reg_dict[wire[0].name]
+                meas_index = wire[1] - total_circ_regs[wire[0].name].size if wire[0].name in total_circ_regs else wire[1]
+                sub_circ.append(instruction=Measure(), qargs=[meas_reg[meas_index]],cargs=[reg_dict['cutC'][meas_index]])
             
         # Update total_circ_regs
         for key in reg_dict:
@@ -259,9 +277,9 @@ def generate_sub_circs(cut_dag, wires_being_cut):
             else:
                 total_circ_regs[key] = reg_dict[key]
         
-        # print('registers in the sub circuit:', sub_circ.qregs, sub_circ.cregs)
-        # print('total registers counts:', total_circ_regs)
-        # print('finished component %d\n' % i)
+        print('registers in the sub circuit:', sub_circ.qregs, sub_circ.cregs)
+        print('total registers counts:', total_circ_regs)
+        print('finished component %d\n' % i)
         sub_circs.append(sub_circ)
         sub_reg_dicts.append(reg_dict)
     return sub_circs, sub_reg_dicts
