@@ -142,7 +142,7 @@ def supremacy_layer(circuit, q_reg, rotation_idx, single_qubit_gates):
     # circuit.barrier()
     return circuit
 
-def cut_single_edge(original_dag, wire, source_node_idx, dest_node_idx):
+def cut_single_edge(original_dag, wire, source_node_idx):
     """Cut a single edge in the original_dag.
 
     Args:
@@ -169,14 +169,8 @@ def cut_single_edge(original_dag, wire, source_node_idx, dest_node_idx):
 
     source_node = None
     dest_node = None
-    for node in cut_dag.op_nodes():
-        if node.name == source_node_name:
-            source_node = node
-        if node.name == dest_node_name:
-            dest_node = node
-
-    if source_node == None or dest_node == None:
-        raise ValueError('Did not find source or dest node.')
+    source_node = list(cut_dag.nodes_on_wire(wire=wire, only_ops=True))[source_node_idx]
+    dest_node = list(cut_dag.nodes_on_wire(wire=wire, only_ops=True))[source_node_idx+1]
 
     cut_dag._multi_graph.remove_edge(source_node, dest_node)
 
@@ -185,8 +179,8 @@ def cut_single_edge(original_dag, wire, source_node_idx, dest_node_idx):
 def cut_edges(original_dag, positions):
     cut_dag = copy.deepcopy(original_dag)
     for position in positions:
-        wire, source_node_idx, dest_node_idx = position
-        cut_dag = cut_single_edge(cut_dag, wire, source_node_idx, dest_node_idx)
+        wire, source_node_idx = position
+        cut_dag = cut_single_edge(cut_dag, wire, source_node_idx)
     return cut_dag
 
 def generate_sub_circs(cut_dag, wire_being_cut):
