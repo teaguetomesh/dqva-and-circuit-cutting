@@ -28,3 +28,8 @@ def cargs(self, new_cargs):
     ""Sets the cargs to be the given list of cargs""
     self.data_dict['cargs'] = new_cargs"
 ```
+TODO:
+
+```
+1. Handle original_dag that already has >1 components
+```

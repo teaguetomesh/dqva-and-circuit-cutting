@@ -183,14 +183,14 @@ def cut_edges(original_dag, positions):
         cut_dag = cut_single_edge(cut_dag, wire, source_node_idx)
     return cut_dag
 
-def generate_sub_circs(cut_dag, wire_being_cut):
+def generate_sub_circs(cut_dag, wires_being_cut):
     sub_circs = []
     sub_reg_dicts = []
     total_circ_regs = {}
     num_components = nx.number_weakly_connected_components(cut_dag._multi_graph)
     components = list(nx.weakly_connected_components(cut_dag._multi_graph))
     if num_components<2:
-        raise Exception('cut_dag only has %d component' % num_components)
+        raise Exception('Minimum split is not met, cut_dag only has %d component' % num_components)
     for i in range(num_components):
         # print('component %d' % i)
         sub_circ = QuantumCircuit()
