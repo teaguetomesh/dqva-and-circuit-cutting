@@ -34,12 +34,12 @@ def circuit_generator(args):
 		circ = supremacy_layer(circuit = circ, q_reg = q_reg, rotation_idx = 5, single_qubit_gates = True)
 		circ = supremacy_layer(circuit = circ, q_reg = q_reg, rotation_idx = 7, single_qubit_gates = True)
 
-	c_reg = ClassicalRegister(row*col, 'c')
-	meas = QuantumCircuit(q_reg.qubits, c_reg)
+	# c_reg = ClassicalRegister(row*col, 'c')
+	# meas = QuantumCircuit(q_reg.qubits, c_reg)
 	# meas.barrier(q_reg.qubits)
-	meas.measure(q_reg.qubits,c_reg)
+	# meas.measure(q_reg.qubits,c_reg)
 
-	circ = circ+meas
+	# circ = circ+meas
 
 	return circ
 
