@@ -206,6 +206,7 @@ def reg_dict_counter(cut_dag, wires_being_cut):
         raise Exception('Minimum split is not met, cut_dag only has %d component' % num_components)
     components = list(nx.weakly_connected_components(cut_dag._multi_graph))
     sub_reg_dicts = []
+    input_wires_mapping = {}
     for i in range(num_components):
         reg_dict = {}
         component = components[i]
@@ -217,13 +218,21 @@ def reg_dict_counter(cut_dag, wires_being_cut):
                 if node.type == 'in' and node.wire[0].name not in reg_dict:
                     if type(node.wire[0]) == QuantumRegister:
                         reg_dict[node.wire[0].name] = QuantumRegister(1, node.wire[0].name)
+                        if 'cut' not in node.wire[0].name:
+                            input_wires_mapping['%s[%s]' % (node.wire[0].name, node.wire[1])] =  (i, 0)
                     elif type(node.wire[0]) == ClassicalRegister:
                         reg_dict[node.wire[0].name] = ClassicalRegister(1, node.wire[0].name)
+                        if 'cut' not in node.wire[0].name:
+                            input_wires_mapping['%s[%s]' % (node.wire[0].name, node.wire[1])] = (i, 0)
                 elif node.type == 'in' and node.wire[0].name in reg_dict:
                     if type(node.wire[0]) == QuantumRegister:
                         reg_dict[node.wire[0].name] = QuantumRegister(reg_dict[node.wire[0].name].size+1,node.wire[0].name)
+                        if 'cut' not in node.wire[0].name:
+                            input_wires_mapping['%s[%s]' % (node.wire[0].name, node.wire[1])] = (i, reg_dict[node.wire[0].name].size-1)
                     elif type(node.wire[0]) == ClassicalRegister:
                         reg_dict[node.wire[0].name] = ClassicalRegister(reg_dict[node.wire[0].name].size+1,node.wire[0].name)
+                        if 'cut' not in node.wire[0].name:
+                            input_wires_mapping['%s[%s]' % (node.wire[0].name, node.wire[1])] = (i, reg_dict[node.wire[0].name].size-1)
                 if node.type == 'in' and is_being_cut(node, wires_being_cut) != -1:
                     ''' Contains input node of wire being cut, need to measure '''
                     if 'cutC' not in reg_dict:
@@ -239,7 +248,7 @@ def reg_dict_counter(cut_dag, wires_being_cut):
 
         # print('reg_dict:', reg_dict)
         sub_reg_dicts.append(reg_dict)
-    return sub_reg_dicts
+    return sub_reg_dicts, input_wires_mapping
 
 def total_circ_regs_counter(sub_reg_dicts):
     total_circ_regs = {}
@@ -257,7 +266,8 @@ def total_circ_regs_counter(sub_reg_dicts):
 
 def generate_sub_circs(cut_dag, wires_being_cut):
     sub_circs = []
-    sub_reg_dicts = reg_dict_counter(cut_dag, wires_being_cut)
+    sub_reg_dicts, input_wires_mapping = reg_dict_counter(cut_dag, wires_being_cut)
+    print('input wires mapping: ', input_wires_mapping)
     # print('sub_reg_dicts calculation:', sub_reg_dicts)
     components = list(nx.weakly_connected_components(cut_dag._multi_graph))
 
@@ -291,6 +301,7 @@ def generate_sub_circs(cut_dag, wires_being_cut):
             for wire in wires_being_cut:
                 meas_reg = reg_dict[wire[0].name]
                 meas_index = wire[1] - total_circ_regs[wire[0].name].size if wire[0].name in total_circ_regs else wire[1]
+                # sub_circ.barrier(meas_reg[meas_index])
                 sub_circ.append(instruction=Measure(), qargs=[meas_reg[meas_index]],cargs=[reg_dict['cutC'][meas_index]])
         
         print('added registers in the sub circuit:', sub_circ.qregs, sub_circ.cregs)
