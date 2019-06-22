@@ -216,11 +216,10 @@ def io_node_is_cut(io_node, wires_being_cut):
             return (idx, io_node.type)
     return (-1, None)
 
-def qarg_being_cut(qarg, wires_being_cut):
+def qarg_is_cut(qarg, wires_being_cut):
     wires_being_cut_names = ['%s[%s]' % (x[0].name, x[1]) for x in wires_being_cut]
-    qarg_name = '%s[%s]' % (qarg[0].name, qarg[1])
     for idx, name in enumerate(wires_being_cut_names):
-        if qarg_name == name:
+        if qarg[0].name == name:
             return idx
     return -1
 
@@ -340,57 +339,59 @@ def generate_sub_circs(cut_dag, positions):
 
     bridge_maps = []
 
-    for component_idx, reg_dict in enumerate(sub_reg_dicts):
-        print('Begin component ', component_idx)
-        sub_circ = QuantumCircuit()
-        bridge_map = {}
-        # total_circ_regs = total_circ_regs_counter(sub_reg_dicts[:component_idx])
-        print('reg_dict: ', reg_dict)
-        # print('cumulative registers counts:', total_circ_regs)
+    # for component_idx, reg_dict in enumerate(sub_reg_dicts):
+    #     print('Begin component ', component_idx)
+    #     sub_circ = QuantumCircuit()
+    #     bridge_map = {}
+    #     # total_circ_regs = total_circ_regs_counter(sub_reg_dicts[:component_idx])
+    #     print('reg_dict: ', reg_dict)
+    #     # print('cumulative registers counts:', total_circ_regs)
         
-        ''' Add the registers '''
-        for reg in reg_dict.values():
-            sub_circ.add_register(reg)
-        print('added registers in the sub circuit:', sub_circ.qregs, sub_circ.cregs)
+    #     ''' Add the registers '''
+    #     for reg in reg_dict.values():
+    #         sub_circ.add_register(reg)
+    #     print('added registers in the sub circuit:', sub_circ.qregs, sub_circ.cregs)
         
-        # Update qargs of nodes
-        cutQ_idx = 0
-        for node in cut_dag.topological_op_nodes():
-            if node in components[component_idx]:
-                new_args = []
-                old_args = node.qargs
-                # print('changing args for ', node.name, old_args, end = ' ')
-                for x in old_args:
-                    if qarg_being_cut(x, wires_being_cut) != -1:
-                        has_out = contains_cut_wires_out_nodes[component_idx][qarg_being_cut(x, wires_being_cut)]
-                        has_in = contains_cut_wires_in_nodes[component_idx][qarg_being_cut(x, wires_being_cut)]
-                        if not has_in:
-                            key = '%s[%s]' % (x[0].name, x[1])
-                            if key in bridge_map:
-                                new_args.append(bridge_map[key])
-                            else:
-                                new_args.append(reg_dict['cutQ'][cutQ_idx])
-                                bridge_map[key] = reg_dict['cutQ'][cutQ_idx]
-                                cutQ_idx += 1
-                        if not has_out:
-                            new_args.append(reg_dict[x[0].name][input_wires_mapping['%s[%s]' % (x[0].name, x[1])][1]])
-                    else:
-                        new_args.append(reg_dict[x[0].name][input_wires_mapping['%s[%s]' % (x[0].name, x[1])][1]])
-                node.qargs = new_args
-                # print('to ', new_args)
-                sub_circ.append(instruction=node.op, qargs=node.qargs, cargs=node.cargs)
-        cutC_idx = 0
-        for idx, has_in in enumerate(contains_cut_wires_in_nodes[component_idx]):
-            if has_in:
-                wire = wires_being_cut[idx]
-                meas_reg = reg_dict[wire[0].name]
-                meas_index = input_wires_mapping['%s[%s]' % (wire[0].name, wire[1])][1]
-                # sub_circ.barrier(meas_reg[meas_index])
-                sub_circ.append(instruction=Measure(), qargs=[meas_reg[meas_index]],cargs=[reg_dict['cutC'][cutC_idx]])
-                cutC_idx += 1
+    #     # Update qargs of nodes
+    #     cutQ_idx = 0
+    #     for node in cut_dag.topological_op_nodes():
+    #         if node in components[component_idx]:
+    #             new_args = []
+    #             old_args = node.qargs
+    #             print('changing args for ', node.name, old_args, end = ' ')
+    #             for x in old_args:
+    #                 if qarg_is_cut(x, wires_being_cut) != -1:
+    #                     has_out = contains_cut_wires_out_nodes[component_idx][qarg_is_cut(x, wires_being_cut)]
+    #                     has_in = contains_cut_wires_in_nodes[component_idx][qarg_is_cut(x, wires_being_cut)]
+    #                     if not has_in:
+    #                         key = '%s[%s]' % (x[0].name, x[1])
+    #                         if key in bridge_map:
+    #                             new_args.append(bridge_map[key])
+    #                         else:
+    #                             new_args.append(reg_dict['cutQ'][cutQ_idx])
+    #                             bridge_map[key] = reg_dict['cutQ'][cutQ_idx]
+    #                             cutQ_idx += 1
+    #                     if not has_out:
+    #                         new_args.append(reg_dict[x[0].name][input_wires_mapping['%s[%s]' % (x[0].name, x[1])][1]])
+    #                 else:
+    #                     new_args.append(reg_dict[x[0].name][input_wires_mapping['%s[%s]' % (x[0].name, x[1])][1]])
+    #             node.qargs = new_args
+    #             # print('to ', new_args)
+    #             sub_circ.append(instruction=node.op, qargs=node.qargs, cargs=node.cargs)
+        
+    #     # cutC_idx = 0
+    #     # for idx, has_in in enumerate(contains_cut_wires_in_nodes[component_idx]):
+    #     #     if has_in:
+    #     #         wire = wires_being_cut[idx]
+    #     #         meas_reg = reg_dict[wire[0].name]
+    #     #         meas_index = input_wires_mapping['%s[%s]' % (wire[0].name, wire[1])][1]
+    #     #         # sub_circ.barrier(meas_reg[meas_index])
+    #     #         sub_circ.append(instruction=Measure(), qargs=[meas_reg[meas_index]],cargs=[reg_dict['cutC'][cutC_idx]])
+    #     #         cutC_idx += 1
     
-        print('finished component %d\n' % component_idx)
-        sub_circs.append(sub_circ)
-        bridge_maps.append(bridge_map)
-    bridge_map = bridges_calc(bridge_maps, input_wires_mapping)
+    #     print('finished component %d\n' % component_idx)
+    #     sub_circs.append(sub_circ)
+    #     bridge_maps.append(bridge_map)
+    # bridge_map = bridges_calc(bridge_maps, input_wires_mapping)
+    bridge_map = {}
     return sub_circs, bridge_map
