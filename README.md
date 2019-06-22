@@ -32,4 +32,10 @@ def cargs(self, new_cargs):
 
 ```
 1. Handle original_dag that already has >1 components
+2. Easy interface for the uniter
+```
+### Future Directions
+
+```
+1. Weighted tensor network contraction, considering 'hardness' of each cluster.
 ```
