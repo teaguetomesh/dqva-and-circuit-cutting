@@ -147,8 +147,7 @@ def cut_single_edge(original_dag, wire, source_node_idx):
 
     Args:
         wire (Qubit): wire to cut in original_dag
-        source_node (DAGNode): start node of the edge to cut
-        dest_node (DAGNode): end node of the edge to cut
+        source_node_idx (int): #op nodes in front of the edge to cut
 
     Returns:
         DAGCircuit: dag circuit after cutting
@@ -167,8 +166,6 @@ def cut_single_edge(original_dag, wire, source_node_idx):
     if len(ie) != 1:
         raise DAGCircuitError("output node has multiple in-edges")
 
-    source_node = None
-    dest_node = None
     source_node = list(cut_dag.nodes_on_wire(wire=wire, only_ops=True))[source_node_idx]
     dest_node = list(cut_dag.nodes_on_wire(wire=wire, only_ops=True))[source_node_idx+1]
 
@@ -177,20 +174,47 @@ def cut_single_edge(original_dag, wire, source_node_idx):
     return cut_dag
 
 def cut_edges(original_dag, positions):
+    '''Cut multiple edges in the original_dag.
+
+    Args:
+        original_dag (DAGCircuit): original dag circuit to cut
+        positions (list): list of cutting positions in (qubit, source noce idx) tuples
+
+    Returns:
+        DAGCircuit: dag circuit after cutting
+
+    Raises:
+        dag after cutting is not successfully splitted
+
+    '''
     cut_dag = copy.deepcopy(original_dag)
     for position in positions:
         wire, source_node_idx = position
         cut_dag = cut_single_edge(cut_dag, wire, source_node_idx)
+    num_components = nx.number_weakly_connected_components(cut_dag._multi_graph)
+    if num_components<2:
+        raise Exception('Not a split, cut_dag only has %d component' % num_components)
     return cut_dag
 
-def is_being_cut(node, wires_being_cut):
-    ''' Returns -1 if node is not being cut
-    Returns index of the wire being cut if node is being cut'''
+def io_node_is_cut(io_node, wires_being_cut):
+    ''' Test if io_node is among the wires being cut
+    
+    Args:
+        wires_being_cut (list): list of qubit tuples
+
+    Returns:
+        (-1, None) if io_node is not being cut or is not a i/o node
+        (index of the wire being cut, i/o type of io_node) if io_node is being cut
+    '''
+
+    # TODO: only i/o nodes will have the same name as wires being cut. Is this necessary?
+    if io_node.type != 'in' and io_node.type != 'out':
+        return (-1, None)
     wires_being_cut_names = ['%s[%s]' % (x[0].name, x[1]) for x in wires_being_cut]
     for idx, name in enumerate(wires_being_cut_names):
-        if node.name == name:
-            return idx
-    return -1
+        if io_node.name == name:
+            return (idx, io_node.type)
+    return (-1, None)
 
 def qarg_being_cut(qarg, wires_being_cut):
     wires_being_cut_names = ['%s[%s]' % (x[0].name, x[1]) for x in wires_being_cut]
@@ -201,9 +225,21 @@ def qarg_being_cut(qarg, wires_being_cut):
     return -1
 
 def reg_dict_counter(cut_dag, wires_being_cut):
+    '''Count #registers required in each component.
+
+    Args:
+        cut_dag (DAGCircuit): dag circuit after being cut
+        wires_being_cut (list): list of wires being cut in (QuantumRegister, idx) tuples
+
+    Returns:
+        list: list of dict object for # and type of registers in each component.
+        key: name of register. value: QuantumRegister or ClassicalRegister
+
+        dict: a dictionary for input wires from the original dag into each component
+        key: DAGNode of input wires in original circuit. value: (sub circuit index, bit tuple in the sub circuit)
+
+    '''
     num_components = nx.number_weakly_connected_components(cut_dag._multi_graph)
-    if num_components<2:
-        raise Exception('Minimum split is not met, cut_dag only has %d component' % num_components)
     components = list(nx.weakly_connected_components(cut_dag._multi_graph))
     sub_reg_dicts = []
     input_wires_mapping = {}
@@ -212,42 +248,51 @@ def reg_dict_counter(cut_dag, wires_being_cut):
         component = components[i]
 
         ''' Count reg_dict for the sub_circ '''
+        # TODO: is there a neater way to traverse the component nodes?
         for node in cut_dag.topological_nodes():
-            if node in component:
-            # Component nodes in topological order
-                if node.type == 'in' and node.wire[0].name not in reg_dict:
-                    if type(node.wire[0]) == QuantumRegister:
-                        reg_dict[node.wire[0].name] = QuantumRegister(1, node.wire[0].name)
-                        if 'cut' not in node.wire[0].name:
-                            input_wires_mapping['%s[%s]' % (node.wire[0].name, node.wire[1])] =  (i, 0)
-                    elif type(node.wire[0]) == ClassicalRegister:
-                        reg_dict[node.wire[0].name] = ClassicalRegister(1, node.wire[0].name)
-                        if 'cut' not in node.wire[0].name:
-                            input_wires_mapping['%s[%s]' % (node.wire[0].name, node.wire[1])] = (i, 0)
-                elif node.type == 'in' and node.wire[0].name in reg_dict:
-                    if type(node.wire[0]) == QuantumRegister:
-                        reg_dict[node.wire[0].name] = QuantumRegister(reg_dict[node.wire[0].name].size+1,node.wire[0].name)
-                        if 'cut' not in node.wire[0].name:
-                            input_wires_mapping['%s[%s]' % (node.wire[0].name, node.wire[1])] = (i, reg_dict[node.wire[0].name].size-1)
-                    elif type(node.wire[0]) == ClassicalRegister:
-                        reg_dict[node.wire[0].name] = ClassicalRegister(reg_dict[node.wire[0].name].size+1,node.wire[0].name)
-                        if 'cut' not in node.wire[0].name:
-                            input_wires_mapping['%s[%s]' % (node.wire[0].name, node.wire[1])] = (i, reg_dict[node.wire[0].name].size-1)
-                if node.type == 'in' and is_being_cut(node, wires_being_cut) != -1:
-                    ''' Contains input node of wire being cut, need to measure '''
-                    if 'cutC' not in reg_dict:
-                        reg_dict['cutC'] = ClassicalRegister(1,'cutC')
-                    else:
-                        reg_dict['cutC'] = ClassicalRegister(reg_dict['cutC'].size+1, 'cutC')
-                if node.type == 'out' and is_being_cut(node, wires_being_cut) != -1:
-                    ''' Contains output node of wire being cut, need to add ancilla '''
-                    if 'cutQ' not in reg_dict:
-                        reg_dict['cutQ'] = QuantumRegister(1, 'cutQ')
-                    else:
-                        reg_dict['cutQ'] = QuantumRegister(reg_dict['cutQ'].size+1, 'cutQ')
+            if node in component and node.type == 'in':
+            # Input nodes in the component
+                if node.wire[0].name not in reg_dict and type(node.wire[0]) == QuantumRegister:
+                    reg_dict[node.wire[0].name] = QuantumRegister(1, node.wire[0].name)
+                        # if 'cut' not in node.wire[0].name:
+                    input_wires_mapping[node] =  (i, reg_dict[node.wire[0].name][reg_dict[node.wire[0].name].size-1])
+                elif node.wire[0].name in reg_dict and type(node.wire[0]) == QuantumRegister:
+                    reg_dict[node.wire[0].name] = QuantumRegister(reg_dict[node.wire[0].name].size+1,node.wire[0].name)
+                        # if 'cut' not in node.wire[0].name:
+                    input_wires_mapping[node] =  (i, reg_dict[node.wire[0].name][reg_dict[node.wire[0].name].size-1])
+                
+                # TODO: do we want to have ClassicalRegister in cut_dag at all?
+                elif node.wire[0].name not in reg_dict and type(node.wire[0]) == ClassicalRegister:
+                    reg_dict[node.wire[0].name] = ClassicalRegister(1, node.wire[0].name)
+                        # if 'cut' not in node.wire[0].name:
+                    input_wires_mapping[node] =  (i, reg_dict[node.wire[0].name][reg_dict[node.wire[0].name].size-1])
+                elif node.wire[0].name in reg_dict and type(node.wire[0]) == ClassicalRegister:
+                    reg_dict[node.wire[0].name] = ClassicalRegister(reg_dict[node.wire[0].name].size+1,node.wire[0].name)
+                        # if 'cut' not in node.wire[0].name:
+                    input_wires_mapping[node] =  (i, reg_dict[node.wire[0].name][reg_dict[node.wire[0].name].size-1])
+            
+            if node in component and io_node_is_cut(node, wires_being_cut)[1] == 'in' :
+                ''' Contains input node of wire being cut, need to measure '''
+                measure_register_name = 'measure_' + node.wire[0].name
+                if measure_register_name not in reg_dict:
+                    reg_dict[measure_register_name] = ClassicalRegister(1,measure_register_name)
+                else:
+                    reg_dict[measure_register_name] = ClassicalRegister(reg_dict[measure_register_name].size+1, measure_register_name)
+            if node in component and io_node_is_cut(node, wires_being_cut)[1] == 'out' :
+                ''' Contains output node of wire being cut, need to add ancilla '''
+                ancilla_register_name = 'ancilla_' + node.wire[0].name
+                if ancilla_register_name not in reg_dict:
+                    reg_dict[ancilla_register_name] = QuantumRegister(1, ancilla_register_name)
+                else:
+                    reg_dict[ancilla_register_name] = QuantumRegister(reg_dict[ancilla_register_name].size+1, ancilla_register_name)
 
-        # print('reg_dict:', reg_dict)
         sub_reg_dicts.append(reg_dict)
+    for key in input_wires_mapping:
+        sub_circ_idx = input_wires_mapping[key][0]
+        sub_circ_reg_name = input_wires_mapping[key][1][0].name
+        sub_circ_reg_index = input_wires_mapping[key][1][1]
+        sub_circ_reg = sub_reg_dicts[sub_circ_idx][sub_circ_reg_name][sub_circ_reg_index]
+        input_wires_mapping[key] = (sub_circ_idx, sub_circ_reg)
     return sub_reg_dicts, input_wires_mapping
 
 def contains_cut_wires_io_nodes(cut_dag, wires_being_cut):
@@ -279,13 +324,25 @@ def total_circ_regs_counter(sub_reg_dicts):
                 total_circ_regs[key] = reg_dict[key]
     return total_circ_regs
 
-def generate_sub_circs(cut_dag, wires_being_cut):
+def bridges_calc(bridge_maps, input_wires_mapping):
+    total_bridge_map = {}
+    for idx, bridge_map in enumerate(bridge_maps):
+        for key in bridge_map:
+            measure = input_wires_mapping[key]
+            ancilla = (idx, '%s[%s]' % (bridge_map[key][0].name, bridge_map[key][1]))
+            total_bridge_map[measure] = ancilla
+    return total_bridge_map
+
+def generate_sub_circs(cut_dag, positions):
+    wires_being_cut = [x[0] for x in positions]
     sub_circs = []
     sub_reg_dicts, input_wires_mapping = reg_dict_counter(cut_dag, wires_being_cut)
     contains_cut_wires_in_nodes, contains_cut_wires_out_nodes = contains_cut_wires_io_nodes(cut_dag, wires_being_cut)
     print('input wires mapping: ', input_wires_mapping)
     # print('sub_reg_dicts calculation:', sub_reg_dicts)
     components = list(nx.weakly_connected_components(cut_dag._multi_graph))
+
+    bridge_maps = []
 
     for component_idx, reg_dict in enumerate(sub_reg_dicts):
         print('Begin component ', component_idx)
@@ -324,22 +381,10 @@ def generate_sub_circs(cut_dag, wires_being_cut):
                         if not has_out:
                             new_args.append(reg_dict[x[0].name][input_wires_mapping['%s[%s]' % (x[0].name, x[1])][1]])
                     else:
-                        # new_args.append(x)
                         new_args.append(reg_dict[x[0].name][input_wires_mapping['%s[%s]' % (x[0].name, x[1])][1]])
                 node.qargs = new_args
                 # print('to ', new_args)
-                # node.cargs = [reg_dict[x[0].name][input_wires_mapping['%s[%s]' % (x[0].name, x[1])][1]] if qarg_being_cut(x, wires_being_cut) == -1]
-                # node.qargs = [reg_dict[x[0].name][x[1]-total_circ_regs[x[0].name].size] if x[0].name in total_circ_regs else reg_dict[x[0].name][x[1]] for x in node.qargs]
-                # node.cargs = [reg_dict[x[0].name][x[1]-total_circ_regs[x[0].name].size] if x[0].name in total_circ_regs else reg_dict[x[0].name][x[1]] for x in node.cargs]
-                # print(node.type, node.name, node.qargs, node.cargs)
                 sub_circ.append(instruction=node.op, qargs=node.qargs, cargs=node.cargs)
-            # elif contains_cut_wires_in_nodes and node in components[component_idx]:
-                # node.qargs = [reg_dict['cutQ'][cutQ_idx] if qarg_being_cut(x, wires_being_cut) != -1 
-                # else reg_dict[x[0].name][input_wires_mapping['%s[%s]' % (x[0].name, x[1])][1]] for x in node.qargs]
-                # node.qargs = [reg_dict[x[0].name][x[1]-total_circ_regs[x[0].name].size] if x[0].name in total_circ_regs else reg_dict[x[0].name][x[1]] for x in node.qargs]
-                # node.cargs = [reg_dict[x[0].name][x[1]-total_circ_regs[x[0].name].size] if x[0].name in total_circ_regs else reg_dict[x[0].name][x[1]] for x in node.cargs]
-                # print(node.type, node.name, node.qargs, node.cargs)
-                # sub_circ.append(instruction=node.op, qargs=node.qargs, cargs=node.cargs)
         cutC_idx = 0
         for idx, has_in in enumerate(contains_cut_wires_in_nodes[component_idx]):
             if has_in:
@@ -352,4 +397,6 @@ def generate_sub_circs(cut_dag, wires_being_cut):
     
         print('finished component %d\n' % component_idx)
         sub_circs.append(sub_circ)
-    return sub_circs
+        bridge_maps.append(bridge_map)
+    bridge_map = bridges_calc(bridge_maps, input_wires_mapping)
+    return sub_circs, bridge_map
