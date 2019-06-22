@@ -254,21 +254,17 @@ def reg_dict_counter(cut_dag, wires_being_cut):
             # Input nodes in the component
                 if node.wire[0].name not in reg_dict and type(node.wire[0]) == QuantumRegister:
                     reg_dict[node.wire[0].name] = QuantumRegister(1, node.wire[0].name)
-                        # if 'cut' not in node.wire[0].name:
                     input_wires_mapping[node] =  (i, reg_dict[node.wire[0].name][reg_dict[node.wire[0].name].size-1])
                 elif node.wire[0].name in reg_dict and type(node.wire[0]) == QuantumRegister:
                     reg_dict[node.wire[0].name] = QuantumRegister(reg_dict[node.wire[0].name].size+1,node.wire[0].name)
-                        # if 'cut' not in node.wire[0].name:
                     input_wires_mapping[node] =  (i, reg_dict[node.wire[0].name][reg_dict[node.wire[0].name].size-1])
                 
                 # TODO: do we want to have ClassicalRegister in cut_dag at all?
                 elif node.wire[0].name not in reg_dict and type(node.wire[0]) == ClassicalRegister:
                     reg_dict[node.wire[0].name] = ClassicalRegister(1, node.wire[0].name)
-                        # if 'cut' not in node.wire[0].name:
                     input_wires_mapping[node] =  (i, reg_dict[node.wire[0].name][reg_dict[node.wire[0].name].size-1])
                 elif node.wire[0].name in reg_dict and type(node.wire[0]) == ClassicalRegister:
                     reg_dict[node.wire[0].name] = ClassicalRegister(reg_dict[node.wire[0].name].size+1,node.wire[0].name)
-                        # if 'cut' not in node.wire[0].name:
                     input_wires_mapping[node] =  (i, reg_dict[node.wire[0].name][reg_dict[node.wire[0].name].size-1])
             
             if node in component and io_node_is_cut(node, wires_being_cut)[1] == 'in' :
@@ -304,10 +300,10 @@ def contains_cut_wires_io_nodes(cut_dag, wires_being_cut):
     for i in range(num_components):
         component = components[i]
         for node in cut_dag.topological_nodes():
-            if node in component and node.type == 'in' and is_being_cut(node, wires_being_cut) != -1:
-                contains_cut_wires_in_nodes[i][is_being_cut(node, wires_being_cut)] = True
-            if node in component and node.type == 'out' and is_being_cut(node, wires_being_cut) != -1:
-                contains_cut_wires_out_nodes[i][is_being_cut(node, wires_being_cut)] = True
+            if node in component and io_node_is_cut(node, wires_being_cut)[1] == 'in':
+                contains_cut_wires_in_nodes[i][io_node_is_cut(node, wires_being_cut)[0]] = True
+            if node in component and io_node_is_cut(node, wires_being_cut)[1] =='out':
+                contains_cut_wires_out_nodes[i][io_node_is_cut(node, wires_being_cut)[0]] = True
     return contains_cut_wires_in_nodes, contains_cut_wires_out_nodes
 
 def total_circ_regs_counter(sub_reg_dicts):
@@ -338,7 +334,7 @@ def generate_sub_circs(cut_dag, positions):
     sub_circs = []
     sub_reg_dicts, input_wires_mapping = reg_dict_counter(cut_dag, wires_being_cut)
     contains_cut_wires_in_nodes, contains_cut_wires_out_nodes = contains_cut_wires_io_nodes(cut_dag, wires_being_cut)
-    print('input wires mapping: ', input_wires_mapping)
+    # print('input wires mapping: ', input_wires_mapping)
     # print('sub_reg_dicts calculation:', sub_reg_dicts)
     components = list(nx.weakly_connected_components(cut_dag._multi_graph))
 
@@ -348,17 +344,15 @@ def generate_sub_circs(cut_dag, positions):
         print('Begin component ', component_idx)
         sub_circ = QuantumCircuit()
         bridge_map = {}
-        total_circ_regs = total_circ_regs_counter(sub_reg_dicts[:component_idx])
+        # total_circ_regs = total_circ_regs_counter(sub_reg_dicts[:component_idx])
         print('reg_dict: ', reg_dict)
-        print('cumulative registers counts:', total_circ_regs)
+        # print('cumulative registers counts:', total_circ_regs)
         
         ''' Add the registers '''
         for reg in reg_dict.values():
             sub_circ.add_register(reg)
         print('added registers in the sub circuit:', sub_circ.qregs, sub_circ.cregs)
         
-        # contains_cut_wires_out_nodes = 'cutQ' in reg_dict
-        # contains_cut_wires_in_nodes = 'cutC' in reg_dict
         # Update qargs of nodes
         cutQ_idx = 0
         for node in cut_dag.topological_op_nodes():
