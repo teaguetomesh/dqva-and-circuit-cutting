@@ -25,14 +25,15 @@ By adding the following text:
 ```
 @cargs.setter
 def cargs(self, new_cargs):
-    ""Sets the cargs to be the given list of cargs""
-    self.data_dict['cargs'] = new_cargs"
+    """Sets the cargs to be the given list of cargs"""
+    self.data_dict['cargs'] = new_cargs
 ```
 ### TODO
 
 ```
 1. Handle original_dag that already has >1 components
 2. Easy interface for the uniter
+3. Implement uniter based on sub_circ, wiring, stitches interface
 ```
 ### Future Directions
 
