@@ -1,13 +1,8 @@
-from qiskit import QuantumRegister, ClassicalRegister, QuantumCircuit
 from qiskit.converters import circuit_to_dag, dag_to_circuit
 from qiskit.tools.visualization import dag_drawer
-from qiskit.extensions.standard import CHGate, HGate, CnotGate, CyGate, CzGate
-from qiskit.circuit import Measure
-from qiskit.circuit.quantumregister import QuantumRegister
-from qiskit.circuit.classicalregister import ClassicalRegister
-from qiskit import BasicAer
-from qiskit.visualization import plot_histogram
-from help_fun import cut_edges, generate_sub_circs
+from cutting_help_fun import *
+import pickle
+import networkx as nx
 import numpy as np
 import networkx as nx
 import pickle
@@ -19,36 +14,24 @@ def foo(args):
     if not os.path.isdir(path):
         os.makedirs(path)
 
-    q = QuantumRegister(4, 'q')
-    # c = ClassicalRegister(4, 'c')
-    circ = QuantumCircuit(q)
-    circ.h([q[2],q[1]])
-    circ.x([q[2],q[0]])
-    circ.y(q[3])
-    circ.cx(q[0], q[1])
-    circ.cy(q[2], q[3])
-    circ.ch(q[1], q[2])
-    circ.x(q[2])
-    # circ.barrier()
-    # circ.measure(q,c)
-    circ.draw()
-
+    circ = pickle.load(open('%s/supremacy_circuit_4_8.dump' % path, 'rb' ))
     original_dag = circuit_to_dag(circ)
-    # print('original_dag has %d connected components' % nx.number_weakly_connected_components(original_dag._multi_graph))
-    # print(nx.algorithms.connectivity.cuts.minimum_edge_cut(dag._multi_graph))
-    dag_drawer(original_dag, filename='%s/original_dag.pdf' % path)
-    circ.draw(output='mpl',filename='%s/original_circ.pdf' % path)
+    q = circ.qregs[0]
+    positions = [(q[2], 1), (q[7], 1), (q[10], 1), (q[14], 1)]
+    wires_being_cut = [x[0] for x in positions]
 
-    positions = [(q[2], 2)]
-    cut_dag = cut_edges(original_dag=original_dag, positions=positions)
-    print('cut_dag has %d connected components' % nx.number_weakly_connected_components(cut_dag._multi_graph))
-    dag_drawer(cut_dag, filename='%s/cut_dag.pdf' % path)
-    dag_to_circuit(cut_dag).draw(output='mpl',filename='%s/cut_circ.pdf' % path)
+    cut_dag, path_order_dict = cut_edges(original_dag=original_dag, positions=positions)
+    in_out_arg_dict = contains_wire_nodes(cut_dag)
+    components = list(nx.weakly_connected_components(cut_dag._multi_graph))
+    sub_reg_dicts, input_wires_mapping = reg_dict_counter(cut_dag, wires_being_cut)
+    translation_dict = translation_dict_calc(input_wires_mapping, components, in_out_arg_dict, sub_reg_dicts)
+    complete_path_map = complete_path_calc(path_order_dict, input_wires_mapping, translation_dict, sub_reg_dicts)
 
-    sub_circs, _ = generate_sub_circs(cut_dag, q[2])
-    for i, sub_circ in enumerate(sub_circs):
-        dag_drawer(circuit_to_dag(sub_circ), filename='%s/sub_dag_%d.pdf' % (path, i))
-        sub_circ.draw(output='mpl',filename='%s/sub_circ_%d.pdf' % (path, i))
+    [print(x, complete_path_map[x]) for x in complete_path_map]
+    sub_circs = generate_sub_circs(cut_dag, positions)
+    for sub_circ_idx, sub_circ in enumerate(sub_circs):
+        dag_drawer(circuit_to_dag(sub_circ), filename='%s/sub_dag_%d.pdf' % (path, sub_circ_idx))
+        sub_circ.draw(output='text',line_length = 400, filename='%s/sub_circ_%d.txt' % (path, sub_circ_idx))
 
 def main():
     parser = argparse.ArgumentParser(description='Single circuit cut testing')

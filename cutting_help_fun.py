@@ -278,12 +278,11 @@ def generate_sub_circs(cut_dag, positions):
     sub_reg_dicts, input_wires_mapping = reg_dict_counter(cut_dag, wires_being_cut)
     in_out_arg_dict = contains_wire_nodes(cut_dag)
     components = list(nx.weakly_connected_components(cut_dag._multi_graph))
+    translation_dict = translation_dict_calc(input_wires_mapping, components, in_out_arg_dict, sub_reg_dicts)
 
     sub_circs = []
     print('input wires mapping:\n', input_wires_mapping)
     # print('sub_reg_dicts calculation:\n', sub_reg_dicts)
-
-    translation_dict = translation_dict_calc(input_wires_mapping, components, in_out_arg_dict, sub_reg_dicts)
 
     print('translation_dict:')
     [print(key, translation_dict[key]) for key in translation_dict]
