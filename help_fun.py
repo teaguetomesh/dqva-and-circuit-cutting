@@ -325,6 +325,18 @@ def total_circ_regs_counter(sub_reg_dicts):
                 total_circ_regs[key] = reg_dict[key]
     return total_circ_regs
 
+def path_order_calc(cut_dag, input_wires_mapping, positions):
+    path_order_dict = {}
+    for input_wire in input_wires_mapping:
+        path_order_dict[input_wire] = 1
+    for position in positions:
+        path_order_dict_key = position[0]
+        path_order_dict[path_order_dict_key] += 1
+    for key in path_order_dict:
+        path_order_dict[key] = [None for x in path_order_dict[key]]
+
+
+
 def translation_dict_calc(input_wires_mapping, components, in_out_arg_dict, sub_reg_dicts):
     translation_dict = {}
     cl_measure_idx = [0 for component in components]
