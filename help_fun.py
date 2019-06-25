@@ -325,17 +325,25 @@ def total_circ_regs_counter(sub_reg_dicts):
                 total_circ_regs[key] = reg_dict[key]
     return total_circ_regs
 
-def path_order_calc(cut_dag, input_wires_mapping, positions):
+def path_order_calc(original_dag, input_wires_mapping, positions):
+    cut_dag = cut_edges(original_dag=original_dag, positions=positions)
+    components = list(nx.weakly_connected_components(cut_dag._multi_graph))
     path_order_dict = {}
     for input_wire in input_wires_mapping:
-        path_order_dict[input_wire] = 1
+        path_order_dict[input_wire] = []
     for position in positions:
-        path_order_dict_key = position[0]
-        path_order_dict[path_order_dict_key] += 1
-    for key in path_order_dict:
-        path_order_dict[key] = [None for x in path_order_dict[key]]
-
-
+        wire, source_node_idx = position
+        source_node = list(original_dag.nodes_on_wire(wire=wire, only_ops=True))[source_node_idx]
+        dest_node = list(original_dag.nodes_on_wire(wire=wire, only_ops=True))[source_node_idx+1]
+        source_node_sub_circ_idx = -99
+        dest_node_sub_circ_idx = -99
+        for component_idx, component in enumerate(components):
+            if source_node in component:
+                source_node_sub_circ_idx = component_idx
+            elif dest_node in component:
+                dest_node_sub_circ_idx = component_idx
+        path_order_dict[wire].append((source_node_sub_circ_idx, dest_node_sub_circ_idx))
+    return path_order_dict
 
 def translation_dict_calc(input_wires_mapping, components, in_out_arg_dict, sub_reg_dicts):
     translation_dict = {}
@@ -390,7 +398,8 @@ def generate_sub_circs(cut_dag, positions):
 
     translation_dict = translation_dict_calc(input_wires_mapping, components, in_out_arg_dict, sub_reg_dicts)
 
-    print('translation_dict:\n', translation_dict)
+    print('translation_dict:')
+    [print(key, translation_dict[key]) for key in translation_dict]
 
     for component_idx, reg_dict in enumerate(sub_reg_dicts):
         print('Begin component ', component_idx)
