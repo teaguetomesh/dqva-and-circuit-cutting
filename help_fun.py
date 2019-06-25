@@ -217,6 +217,27 @@ def cut_edges(original_dag, positions):
         path_order_dict[wire] = path
     return cut_dag, path_order_dict
 
+def complete_path_calc(path_order_dict, input_wires_mapping, translation_dict, sub_reg_dicts):
+    complete_path_map = {}
+    cl_measure_idx = [0 for reg_dict in sub_reg_dicts]
+    for wire in path_order_dict:
+        complete_path_map[wire] = []
+        for link in path_order_dict[wire]:
+            source_sub_circ_idx = link[0]
+            translation_dict_key = (wire, source_sub_circ_idx)
+            qubit_in_tuple = translation_dict[translation_dict_key]
+            reg_dict = sub_reg_dicts[source_sub_circ_idx]
+            clbit_out_tuple = reg_dict['measure_' + wire[0].name][cl_measure_idx[source_sub_circ_idx]]
+            cl_measure_idx[source_sub_circ_idx] += 1
+            complete_path_map[wire].append((source_sub_circ_idx, qubit_in_tuple, clbit_out_tuple))
+
+            dest_sub_circ_idx = link[1]
+            translation_dict_key = (wire, dest_sub_circ_idx)
+            qubit_in_tuple = translation_dict[translation_dict_key]
+            complete_path_map[wire].append((dest_sub_circ_idx, qubit_in_tuple))
+    return complete_path_map
+
+
 def io_node_is_cut(io_node, wires_being_cut):
     ''' Test if io_node is among the wires being cut
     
