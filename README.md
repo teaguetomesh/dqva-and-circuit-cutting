@@ -33,14 +33,18 @@ def cargs(self, new_cargs):
     """Sets the cargs to be the given list of cargs"""
     self.data_dict['cargs'] = new_cargs
 ```
-### TODO
+### variables explanation
+complete_path_map
+input_wires_mapping
+translation_dict
+## TODO
 
 ```
-1. Handle original_dag that already has >1 components
-2. Easy interface for the uniter
-3. Implement uniter based on sub_circ, wiring, stitches interface
+1. Handle original_dag that already has >1 components -- Wei
+2. Easy interface for the uniter -- Done
+3. Implement uniter based on sub_circ, wiring, stitches interface -- Teague
 ```
-### Future Directions
+## Future Directions
 
 ```
 1. Weighted tensor network contraction, considering 'hardness' of each cluster.
