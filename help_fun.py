@@ -188,13 +188,34 @@ def cut_edges(original_dag, positions):
 
     '''
     cut_dag = copy.deepcopy(original_dag)
+    path_order_dict = {}
+    for wire in cut_dag.wires:
+        path_order_dict[wire] = []
+
     for position in positions:
         wire, source_node_idx = position
-        cut_dag = cut_single_edge(cut_dag, wire, source_node_idx)
+        source_node = list(cut_dag.nodes_on_wire(wire=wire, only_ops=True))[source_node_idx]
+        dest_node = list(cut_dag.nodes_on_wire(wire=wire, only_ops=True))[source_node_idx+1]
+        cut_dag._multi_graph.remove_edge(source_node, dest_node)
+        path_order_dict[wire].append((source_node, dest_node))
     num_components = nx.number_weakly_connected_components(cut_dag._multi_graph)
     if num_components<2:
         raise Exception('Not a split, cut_dag only has %d component' % num_components)
-    return cut_dag
+    
+    components = list(nx.weakly_connected_components(cut_dag._multi_graph))
+    for wire in path_order_dict:
+        path = []
+        for link in path_order_dict[wire]:
+            source_node = link[0]
+            dest_node = link[1]
+            for component_idx, component in enumerate(components):
+                if source_node in component:
+                    source_circ_idx = component_idx
+                if dest_node in component:
+                    dest_circ_idx = component_idx
+            path.append((source_circ_idx, dest_circ_idx))
+        path_order_dict[wire] = path
+    return cut_dag, path_order_dict
 
 def io_node_is_cut(io_node, wires_being_cut):
     ''' Test if io_node is among the wires being cut
@@ -324,26 +345,6 @@ def total_circ_regs_counter(sub_reg_dicts):
             else:
                 total_circ_regs[key] = reg_dict[key]
     return total_circ_regs
-
-def path_order_calc(original_dag, input_wires_mapping, positions):
-    cut_dag = cut_edges(original_dag=original_dag, positions=positions)
-    components = list(nx.weakly_connected_components(cut_dag._multi_graph))
-    path_order_dict = {}
-    for input_wire in input_wires_mapping:
-        path_order_dict[input_wire] = []
-    for position in positions:
-        wire, source_node_idx = position
-        source_node = list(original_dag.nodes_on_wire(wire=wire, only_ops=True))[source_node_idx]
-        dest_node = list(original_dag.nodes_on_wire(wire=wire, only_ops=True))[source_node_idx+1]
-        source_node_sub_circ_idx = -99
-        dest_node_sub_circ_idx = -99
-        for component_idx, component in enumerate(components):
-            if source_node in component:
-                source_node_sub_circ_idx = component_idx
-            elif dest_node in component:
-                dest_node_sub_circ_idx = component_idx
-        path_order_dict[wire].append((source_node_sub_circ_idx, dest_node_sub_circ_idx))
-    return path_order_dict
 
 def translation_dict_calc(input_wires_mapping, components, in_out_arg_dict, sub_reg_dicts):
     translation_dict = {}
