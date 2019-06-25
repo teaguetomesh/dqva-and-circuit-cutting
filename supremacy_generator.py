@@ -1,6 +1,6 @@
 import numpy as np
 import argparse
-from help_fun import full_entangle, supremacy_layer, q_register
+from supremacy_help_fun import full_entangle, supremacy_layer, q_register
 from qiskit import QuantumRegister, ClassicalRegister, QuantumCircuit
 from qiskit.converters import circuit_to_dag, dag_to_circuit
 from qiskit.tools.visualization import dag_drawer
