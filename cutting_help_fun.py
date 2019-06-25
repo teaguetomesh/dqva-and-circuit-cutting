@@ -218,20 +218,6 @@ def contains_wire_nodes(cut_dag):
                 in_out_arg_dict[dict_key] = dict_val
     return in_out_arg_dict
 
-def total_circ_regs_counter(sub_reg_dicts):
-    total_circ_regs = {}
-    # Update total_circ_regs
-    for reg_dict in sub_reg_dicts:
-        for key in reg_dict:
-            if key in total_circ_regs:
-                if type(total_circ_regs[key]) == QuantumRegister:
-                    total_circ_regs[key] = QuantumRegister(total_circ_regs[key].size + reg_dict[key].size, key)
-                elif type(total_circ_regs[key]) == ClassicalRegister:
-                    total_circ_regs[key] = ClassicalRegister(total_circ_regs[key].size + reg_dict[key].size, key)
-            else:
-                total_circ_regs[key] = reg_dict[key]
-    return total_circ_regs
-
 def translation_dict_calc(input_wires_mapping, components, in_out_arg_dict, sub_reg_dicts):
     translation_dict = {}
     cl_measure_idx = [0 for component in components]
@@ -281,18 +267,16 @@ def generate_sub_circs(cut_dag, positions):
     translation_dict = translation_dict_calc(input_wires_mapping, components, in_out_arg_dict, sub_reg_dicts)
 
     sub_circs = []
-    print('input wires mapping:\n', input_wires_mapping)
+    # print('input wires mapping:\n', input_wires_mapping)
     # print('sub_reg_dicts calculation:\n', sub_reg_dicts)
 
-    print('translation_dict:')
-    [print(key, translation_dict[key]) for key in translation_dict]
+    # print('translation_dict:')
+    # [print(key, translation_dict[key]) for key in translation_dict]
 
     for component_idx, reg_dict in enumerate(sub_reg_dicts):
-        print('Begin component ', component_idx)
+        # print('Begin component ', component_idx)
         sub_circ = QuantumCircuit()
-        # total_circ_regs = total_circ_regs_counter(sub_reg_dicts[:component_idx])
-        print('reg_dict: ', reg_dict)
-        # print('cumulative registers counts:', total_circ_regs)
+        # print('reg_dict: ', reg_dict)
         
         ''' Add the registers '''
         for reg in reg_dict.values():
@@ -311,6 +295,6 @@ def generate_sub_circs(cut_dag, positions):
                     new_args.append(translation_dict[translation_dict_key])
                 node.qargs = new_args
                 sub_circ.append(instruction=node.op, qargs=node.qargs, cargs=node.cargs)
-        print('finished component %d\n' % component_idx)
+        # print('finished component %d\n' % component_idx)
         sub_circs.append(sub_circ)
     return sub_circs

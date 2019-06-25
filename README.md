@@ -1,5 +1,10 @@
-# circuit_cutting
+# Google quantum supremacy circuit generator
+```
+python supremacy_generator.py -h
+```
+for help information
 
+# circuit_cutting
 ## Getting Started
 
 ### Prerequisites

@@ -27,11 +27,17 @@ def foo(args):
     translation_dict = translation_dict_calc(input_wires_mapping, components, in_out_arg_dict, sub_reg_dicts)
     complete_path_map = complete_path_calc(path_order_dict, input_wires_mapping, translation_dict, sub_reg_dicts)
 
-    [print(x, complete_path_map[x]) for x in complete_path_map]
     sub_circs = generate_sub_circs(cut_dag, positions)
     for sub_circ_idx, sub_circ in enumerate(sub_circs):
         dag_drawer(circuit_to_dag(sub_circ), filename='%s/sub_dag_%d.pdf' % (path, sub_circ_idx))
         sub_circ.draw(output='text',line_length = 400, filename='%s/sub_circ_%d.txt' % (path, sub_circ_idx))
+    
+    print('complete_path_map:')
+    [print(x, complete_path_map[x]) for x in complete_path_map]
+    print('input_wires_mapping:')
+    [print(x, input_wires_mapping[x]) for x in input_wires_mapping]
+    print('translation_dict:')
+    [print(x, translation_dict[x]) for x in translation_dict]
 
 def main():
     parser = argparse.ArgumentParser(description='Single circuit cut testing')
