@@ -35,6 +35,10 @@ def cargs(self, new_cargs):
 ```
 ### variables explanation
 complete_path_map
+```
+key: qubit tuple in the original uncut circuit
+val: list(tuple) (sub circuit index, input qubit tuple in the sub circuit, classical bit tuple to measure to), (sub circuit index, ancilla quit tuple)
+```
 input_wires_mapping
 translation_dict
 ## TODO
