@@ -53,11 +53,16 @@ key: (tuple) (qubit tuple in the original uncut circuit, sub circuit index)
 value: (tuple) corresponding qubit tuple in the sub circuit
 ```
 ## TODO
+### Wei
 
 ```
-1. Handle original_dag that already has >1 components -- Wei
+1. Handle original_dag that already has >1 components
 2. Easy interface for the uniter -- Done
-3. Implement uniter based on sub_circ, wiring, stitches interface -- Teague
+3. Cut the circuit into multiple parts
+```
+### Teague
+```
+1. Implement uniter based on sub_circ, wiring, stitches interface
 ```
 ## Future Directions
 
