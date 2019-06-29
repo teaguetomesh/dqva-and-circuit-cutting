@@ -190,8 +190,44 @@ def reg_dict_counter(cut_dag, wires_being_cut):
         input_wires_mapping[key] = (sub_circ_idx, sub_circ_reg)
     return sub_reg_dicts, input_wires_mapping
 
+def update_reg_dict(reg_dict, register_names):
+    for register_name in register_names:
+        if register_name in reg_dict:
+            reg_dict[register_name] = QuantumRegister(reg_dict[register_name].size+1, register_name)
+        else:
+            reg_dict[register_name] = QuantumRegister(1, register_name)
+    return reg_dict
+
+def sub_circ_reg_counter(cut_dag, in_out_arg_dict):
+    components = list(nx.weakly_connected_components(cut_dag._multi_graph))
+    reg_dicts = []
+    for component_idx, component in enumerate(components):
+        reg_dict = {}
+        for key in in_out_arg_dict:
+            if key[1] == component_idx:
+                has_in, has_out, has_arg = in_out_arg_dict[key]
+                # Case 001
+                if not has_in and not has_out and has_arg:
+                    measure_register_name = 'measure_' + key[0][0].name
+                    ancilla_register_name = 'ancilla_' + key[0][0].name
+                    reg_dict = update_reg_dict(reg_dict, [measure_register_name, ancilla_register_name])
+                # Case 011
+                elif not has_in and has_out and has_arg:
+                    ancilla_register_name = 'ancilla_' + key[0][0].name
+                    reg_dict = update_reg_dict(reg_dict, [ancilla_register_name])
+                # Case 101
+                elif has_in and not has_out and has_arg:
+                    measure_register_name = 'measure_' + key[0][0].name
+                    input_register_name = key[0][0].name
+                    reg_dict = update_reg_dict(reg_dict, [measure_register_name, input_register_name])
+                # Case 111
+                elif has_in and has_out and has_arg:
+                    input_register_name = key[0][0].name
+                    reg_dict = update_reg_dict(reg_dict,[input_register_name])
+        reg_dicts.append(reg_dict)
+    return reg_dicts
+
 def contains_wire_nodes(cut_dag):
-    num_components = nx.number_weakly_connected_components(cut_dag._multi_graph)
     components = list(nx.weakly_connected_components(cut_dag._multi_graph))
     
     in_out_arg_dict = {}
