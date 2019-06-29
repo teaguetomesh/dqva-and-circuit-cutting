@@ -63,6 +63,7 @@ value: (tuple) corresponding qubit tuple in the sub circuit
 ### Teague
 ```
 1. Implement uniter based on sub_circ, wiring, stitches interface
+2. Add quantum_circuit_generator
 ```
 ## Future Directions
 
