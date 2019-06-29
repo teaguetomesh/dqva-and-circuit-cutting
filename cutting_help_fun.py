@@ -71,6 +71,7 @@ def cut_edges(original_dag, positions):
     components = list(nx.weakly_connected_components(cut_dag._multi_graph))
     for wire in path_order_dict:
         path = []
+        path_order_dict[wire].reverse()
         for link in path_order_dict[wire]:
             source_node = link[0]
             dest_node = link[1]
@@ -123,12 +124,37 @@ def io_node_is_cut(io_node, wires_being_cut):
             return (idx, io_node.type)
     return (-1, None)
 
-def reg_dict_counter(cut_dag, wires_being_cut):
+def update_reg_dict(reg_dict, input_wires_mapping, sub_circ_idx, qubit_tuple, add_measure=False, add_ancilla=False, add_input=False):
+    measure_register_name = 'measure_' + qubit_tuple[0].name
+    ancilla_register_name = 'ancilla_' + qubit_tuple[0].name
+    input_register_name = qubit_tuple[0].name
+
+    if add_measure:
+        if measure_register_name in reg_dict:
+            reg_dict[measure_register_name] = ClassicalRegister(reg_dict[measure_register_name].size+1, measure_register_name)
+        else:
+            reg_dict[measure_register_name] = ClassicalRegister(1, measure_register_name)
+
+    if add_ancilla:
+        if ancilla_register_name in reg_dict:
+            reg_dict[ancilla_register_name] = QuantumRegister(reg_dict[ancilla_register_name].size+1, ancilla_register_name)
+        else:
+            reg_dict[ancilla_register_name] = QuantumRegister(1, ancilla_register_name)
+    
+    if add_input:
+        if input_register_name in reg_dict:
+            reg_dict[input_register_name] = QuantumRegister(reg_dict[input_register_name].size+1, input_register_name)
+        else:
+            reg_dict[input_register_name] = QuantumRegister(1, input_register_name)
+        input_wires_mapping[qubit_tuple] = (sub_circ_idx, reg_dict[input_register_name][reg_dict[input_register_name].size-1])
+    return reg_dict, input_wires_mapping
+
+def sub_circ_reg_counter(cut_dag, in_out_arg_dict):
     '''Count #registers required in each component.
 
     Args:
         cut_dag (DAGCircuit): dag circuit after being cut
-        wires_being_cut (list): list of wires being cut in (QuantumRegister, idx) tuples
+        in_out_arg_dict (dict): in_out_arg of each wire in each component
 
     Returns:
         list: list of dict object for # and type of registers in each component.
@@ -138,94 +164,23 @@ def reg_dict_counter(cut_dag, wires_being_cut):
         key: DAGNode of input wires in original circuit. value: (sub circuit index, bit tuple in the sub circuit)
 
     '''
-    num_components = nx.number_weakly_connected_components(cut_dag._multi_graph)
-    components = list(nx.weakly_connected_components(cut_dag._multi_graph))
-    sub_reg_dicts = []
-    input_wires_mapping = {}
-    for i in range(num_components):
-        reg_dict = {}
-        component = components[i]
-
-        ''' Count reg_dict for the sub_circ '''
-        # TODO: is there a neater way to traverse the component nodes?
-        for node in cut_dag.topological_nodes():
-            if node in component and node.type == 'in':
-            # Input nodes in the component
-                if node.wire[0].name not in reg_dict and type(node.wire[0]) == QuantumRegister:
-                    reg_dict[node.wire[0].name] = QuantumRegister(1, node.wire[0].name)
-                    input_wires_mapping[node.wire] =  (i, reg_dict[node.wire[0].name][reg_dict[node.wire[0].name].size-1])
-                elif node.wire[0].name in reg_dict and type(node.wire[0]) == QuantumRegister:
-                    reg_dict[node.wire[0].name] = QuantumRegister(reg_dict[node.wire[0].name].size+1,node.wire[0].name)
-                    input_wires_mapping[node.wire] =  (i, reg_dict[node.wire[0].name][reg_dict[node.wire[0].name].size-1])
-                
-                # TODO: do we want to have ClassicalRegister in cut_dag at all?
-                elif node.wire[0].name not in reg_dict and type(node.wire[0]) == ClassicalRegister:
-                    reg_dict[node.wire[0].name] = ClassicalRegister(1, node.wire[0].name)
-                    input_wires_mapping[node.wire] =  (i, reg_dict[node.wire[0].name][reg_dict[node.wire[0].name].size-1])
-                elif node.wire[0].name in reg_dict and type(node.wire[0]) == ClassicalRegister:
-                    reg_dict[node.wire[0].name] = ClassicalRegister(reg_dict[node.wire[0].name].size+1,node.wire[0].name)
-                    input_wires_mapping[node.wire] =  (i, reg_dict[node.wire[0].name][reg_dict[node.wire[0].name].size-1])
-            
-            if node in component and io_node_is_cut(node, wires_being_cut)[1] == 'in' :
-                ''' Contains input node of wire being cut, need to measure '''
-                measure_register_name = 'measure_' + node.wire[0].name
-                if measure_register_name not in reg_dict:
-                    reg_dict[measure_register_name] = ClassicalRegister(1,measure_register_name)
-                else:
-                    reg_dict[measure_register_name] = ClassicalRegister(reg_dict[measure_register_name].size+1, measure_register_name)
-            if node in component and io_node_is_cut(node, wires_being_cut)[1] == 'out' :
-                ''' Contains output node of wire being cut, need to add ancilla '''
-                ancilla_register_name = 'ancilla_' + node.wire[0].name
-                if ancilla_register_name not in reg_dict:
-                    reg_dict[ancilla_register_name] = QuantumRegister(1, ancilla_register_name)
-                else:
-                    reg_dict[ancilla_register_name] = QuantumRegister(reg_dict[ancilla_register_name].size+1, ancilla_register_name)
-
-        sub_reg_dicts.append(reg_dict)
-    for key in input_wires_mapping:
-        sub_circ_idx = input_wires_mapping[key][0]
-        sub_circ_reg_name = input_wires_mapping[key][1][0].name
-        sub_circ_reg_index = input_wires_mapping[key][1][1]
-        sub_circ_reg = sub_reg_dicts[sub_circ_idx][sub_circ_reg_name][sub_circ_reg_index]
-        input_wires_mapping[key] = (sub_circ_idx, sub_circ_reg)
-    return sub_reg_dicts, input_wires_mapping
-
-def update_reg_dict(reg_dict, register_names):
-    for register_name in register_names:
-        if register_name in reg_dict:
-            reg_dict[register_name] = QuantumRegister(reg_dict[register_name].size+1, register_name)
-        else:
-            reg_dict[register_name] = QuantumRegister(1, register_name)
-    return reg_dict
-
-def sub_circ_reg_counter(cut_dag, in_out_arg_dict):
     components = list(nx.weakly_connected_components(cut_dag._multi_graph))
     reg_dicts = []
+    input_wires_mapping = {}
     for component_idx, component in enumerate(components):
         reg_dict = {}
         for key in in_out_arg_dict:
             if key[1] == component_idx:
                 has_in, has_out, has_arg = in_out_arg_dict[key]
-                # Case 001
-                if not has_in and not has_out and has_arg:
-                    measure_register_name = 'measure_' + key[0][0].name
-                    ancilla_register_name = 'ancilla_' + key[0][0].name
-                    reg_dict = update_reg_dict(reg_dict, [measure_register_name, ancilla_register_name])
-                # Case 011
-                elif not has_in and has_out and has_arg:
-                    ancilla_register_name = 'ancilla_' + key[0][0].name
-                    reg_dict = update_reg_dict(reg_dict, [ancilla_register_name])
-                # Case 101
-                elif has_in and not has_out and has_arg:
-                    measure_register_name = 'measure_' + key[0][0].name
-                    input_register_name = key[0][0].name
-                    reg_dict = update_reg_dict(reg_dict, [measure_register_name, input_register_name])
-                # Case 111
-                elif has_in and has_out and has_arg:
-                    input_register_name = key[0][0].name
-                    reg_dict = update_reg_dict(reg_dict,[input_register_name])
+                add_measure = not has_out and has_arg
+                add_ancilla = not has_in and has_arg
+                add_input = has_in and has_arg
+                reg_dict, input_wires_mapping = update_reg_dict(reg_dict=reg_dict, 
+                input_wires_mapping=input_wires_mapping, sub_circ_idx=component_idx,
+                qubit_tuple=key[0],
+                add_measure=add_measure, add_ancilla=add_ancilla, add_input=add_input)
         reg_dicts.append(reg_dict)
-    return reg_dicts
+    return reg_dicts, input_wires_mapping
 
 def contains_wire_nodes(cut_dag):
     components = list(nx.weakly_connected_components(cut_dag._multi_graph))
