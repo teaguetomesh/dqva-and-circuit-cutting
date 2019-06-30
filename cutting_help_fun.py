@@ -104,27 +104,7 @@ def complete_path_calc(path_order_dict, input_wires_mapping, translation_dict, s
             complete_path_map[wire].append((dest_sub_circ_idx, qubit_in_tuple))
     return complete_path_map
 
-def io_node_is_cut(io_node, wires_being_cut):
-    ''' Test if io_node is among the wires being cut
-    
-    Args:
-        wires_being_cut (list): list of qubit tuples
-
-    Returns:
-        (-1, None) if io_node is not being cut or is not a i/o node
-        (index of the wire being cut, i/o type of io_node) if io_node is being cut
-    '''
-
-    # TODO: only i/o nodes will have the same name as wires being cut. Is this necessary?
-    if io_node.type != 'in' and io_node.type != 'out':
-        return (-1, None)
-    wires_being_cut_names = ['%s[%s]' % (x[0].name, x[1]) for x in wires_being_cut]
-    for idx, name in enumerate(wires_being_cut_names):
-        if io_node.name == name:
-            return (idx, io_node.type)
-    return (-1, None)
-
-def update_reg_dict(reg_dict, input_wires_mapping, sub_circ_idx, qubit_tuple, add_measure=False, add_ancilla=False, add_input=False):
+def update_reg_dict(reg_dict, qubit_tuple, add_measure=False, add_ancilla=False, add_input=False):
     measure_register_name = 'measure_' + qubit_tuple[0].name
     ancilla_register_name = 'ancilla_' + qubit_tuple[0].name
     input_register_name = qubit_tuple[0].name
@@ -146,8 +126,7 @@ def update_reg_dict(reg_dict, input_wires_mapping, sub_circ_idx, qubit_tuple, ad
             reg_dict[input_register_name] = QuantumRegister(reg_dict[input_register_name].size+1, input_register_name)
         else:
             reg_dict[input_register_name] = QuantumRegister(1, input_register_name)
-        input_wires_mapping[qubit_tuple] = (sub_circ_idx, reg_dict[input_register_name][reg_dict[input_register_name].size-1])
-    return reg_dict, input_wires_mapping
+    return reg_dict
 
 def sub_circ_reg_counter(cut_dag, in_out_arg_dict):
     '''Count #registers required in each component.
@@ -166,7 +145,6 @@ def sub_circ_reg_counter(cut_dag, in_out_arg_dict):
     '''
     components = list(nx.weakly_connected_components(cut_dag._multi_graph))
     reg_dicts = []
-    input_wires_mapping = {}
     for component_idx, component in enumerate(components):
         reg_dict = {}
         for key in in_out_arg_dict:
@@ -175,11 +153,22 @@ def sub_circ_reg_counter(cut_dag, in_out_arg_dict):
                 add_measure = not has_out and has_arg
                 add_ancilla = not has_in and has_arg
                 add_input = has_in and has_arg
-                reg_dict, input_wires_mapping = update_reg_dict(reg_dict=reg_dict, 
-                input_wires_mapping=input_wires_mapping, sub_circ_idx=component_idx,
-                qubit_tuple=key[0],
+                reg_dict = update_reg_dict(reg_dict=reg_dict, qubit_tuple=key[0],
                 add_measure=add_measure, add_ancilla=add_ancilla, add_input=add_input)
         reg_dicts.append(reg_dict)
+    
+    input_wires_mapping = {}
+    input_reg_idx = [0 for reg_dict in reg_dicts]
+    for component_idx, component in enumerate(components):
+        for key in in_out_arg_dict:
+            if key[1] == component_idx:
+                has_in, has_out, has_arg = in_out_arg_dict[key]
+                add_input = has_in and has_arg
+                if add_input:
+                    input_register_name = key[0][0].name
+                    input_wires_mapping[key[0]] = (component_idx, 
+                    reg_dicts[component_idx][input_register_name][input_reg_idx[component_idx]])
+                    input_reg_idx[component_idx] += 1
     return reg_dicts, input_wires_mapping
 
 def contains_wire_nodes(cut_dag):
@@ -216,7 +205,7 @@ def translation_dict_calc(input_wires_mapping, components, in_out_arg_dict, sub_
 
     for input_wire in input_wires_mapping:
         for component_idx, component in enumerate(components):
-            has_in, has_out, has_arg = in_out_arg_dict[input_wire, component_idx]
+            has_in, has_out, has_arg = in_out_arg_dict[(input_wire, component_idx)]
             if has_arg:
                 # Case 001
                 if not has_in and not has_out:
@@ -251,9 +240,9 @@ def translation_dict_calc(input_wires_mapping, components, in_out_arg_dict, sub_
     return translation_dict
 
 def generate_sub_circs(cut_dag, positions):
-    wires_being_cut = [x[0] for x in positions]
-    sub_reg_dicts, input_wires_mapping = reg_dict_counter(cut_dag, wires_being_cut)
+    # wires_being_cut = [x[0] for x in positions]
     in_out_arg_dict = contains_wire_nodes(cut_dag)
+    sub_reg_dicts, input_wires_mapping = sub_circ_reg_counter(cut_dag, in_out_arg_dict)
     components = list(nx.weakly_connected_components(cut_dag._multi_graph))
     translation_dict = translation_dict_calc(input_wires_mapping, components, in_out_arg_dict, sub_reg_dicts)
 
