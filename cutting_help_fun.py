@@ -89,7 +89,7 @@ def complete_path_calc(path_order_dict, input_wires_mapping, translation_dict, s
     cl_measure_idx = [0 for reg_dict in sub_reg_dicts]
     for wire in path_order_dict:
         complete_path_map[wire] = []
-        for link in path_order_dict[wire]:
+        for link_idx, link in enumerate(path_order_dict[wire]):
             source_sub_circ_idx = link[0]
             translation_dict_key = (wire, source_sub_circ_idx)
             qubit_in_tuple = translation_dict[translation_dict_key]
@@ -101,7 +101,8 @@ def complete_path_calc(path_order_dict, input_wires_mapping, translation_dict, s
             dest_sub_circ_idx = link[1]
             translation_dict_key = (wire, dest_sub_circ_idx)
             qubit_in_tuple = translation_dict[translation_dict_key]
-            complete_path_map[wire].append((dest_sub_circ_idx, qubit_in_tuple))
+            if link_idx == len(path_order_dict[wire]) - 1:
+                complete_path_map[wire].append((dest_sub_circ_idx, qubit_in_tuple))
     return complete_path_map
 
 def update_reg_dict(reg_dict, qubit_tuple, add_measure=False, add_ancilla=False, add_input=False):

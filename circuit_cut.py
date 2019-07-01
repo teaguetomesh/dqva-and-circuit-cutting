@@ -16,12 +16,13 @@ def foo(args):
 
     circ = pickle.load(open('results/supremacy_circuit_4_8.dump', 'rb' ))
     original_dag = circuit_to_dag(circ)
+    dag_drawer(original_dag, filename='%s/original_dag.pdf' % path)
     q = circ.qregs[0]
     
     ''' Test positions that will cut into 3 parts'''
-    # positions = [(q[2], 1), (q[7], 1), (q[8],3), (q[9],6), (q[10], 4), (q[10],1), (q[14], 1)]
+    positions = [(q[2], 1), (q[7], 1), (q[8],3), (q[9],6), (q[10], 4), (q[10],1), (q[14], 1)]
     ''' Test positions that will cut into 2 parts'''
-    positions = [(q[2], 1), (q[7], 1), (q[10],1), (q[14], 1)]
+    # positions = [(q[2], 1), (q[7], 1), (q[10],1), (q[14], 1)]
 
     cut_dag, path_order_dict = cut_edges(original_dag=original_dag, positions=positions)
     dag_drawer(cut_dag, filename='%s/cut_dag.pdf' % path)
@@ -36,6 +37,9 @@ def foo(args):
     components = list(nx.weakly_connected_components(cut_dag._multi_graph))
     translation_dict = translation_dict_calc(input_wires_mapping, components, in_out_arg_dict, sub_reg_dicts)
     complete_path_map = complete_path_calc(path_order_dict, input_wires_mapping, translation_dict, sub_reg_dicts)
+
+    print('\ntranslation_dict:')
+    [print(x, translation_dict[x]) for x in translation_dict]
     print('\ncomplete_path_map:')
     [print(x, complete_path_map[x]) for x in complete_path_map]
 
