@@ -56,16 +56,16 @@ value: (tuple) corresponding qubit tuple in the sub circuit
 ### Wei
 
 ```
-- [ ] Handle original_dag that already has >1 components
-- [x] Easy interface for the uniter
-- [x] Cut the circuit into multiple parts
-- [ ] Automatic algorithm to find positions to cut
-- [ ] Is modification to Qiskit source code still needed?
+ [ ] Handle original_dag that already has >1 components
+ [x] Easy interface for the uniter
+ [x] Cut the circuit into multiple parts
+ [ ] Automatic algorithm to find positions to cut
+ [ ] Is modification to Qiskit source code still needed?
 ```
 ### Teague
 ```
-- [ ] Implement uniter based on sub_circ, wiring, stitches interface
-- [ ] Add quantum_circuit_generator
+ [ ] Implement uniter based on sub_circ, wiring, stitches interface
+ [ ] Add quantum_circuit_generator
 ```
 ## Future Directions
 
