@@ -40,7 +40,7 @@ key: qubit tuple in the original uncut circuit
 value: list(tuple)
 (sub circuit index, input qubit tuple in the sub circuit, classical bit tuple to measure to), 
 ...
-(sub circuit index, ancilla quit tuple)
+(sub circuit index, ancilla qubit tuple)
 ```
 input_wires_mapping
 ```
@@ -56,14 +56,16 @@ value: (tuple) corresponding qubit tuple in the sub circuit
 ### Wei
 
 ```
-1. Handle original_dag that already has >1 components
-2. Easy interface for the uniter -- Done
-3. Cut the circuit into multiple parts
+- [] Handle original_dag that already has >1 components
+- [x] Easy interface for the uniter
+- [x] Cut the circuit into multiple parts
+- [] Automatic algorithm to find positions to cut
+- [] Is modification to Qiskit source code still needed?
 ```
 ### Teague
 ```
-1. Implement uniter based on sub_circ, wiring, stitches interface
-2. Add quantum_circuit_generator
+- [] Implement uniter based on sub_circ, wiring, stitches interface
+- [] Add quantum_circuit_generator
 ```
 ## Future Directions
 
