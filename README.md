@@ -56,6 +56,8 @@ value: (tuple) corresponding qubit tuple in the sub circuit
 ### Wei
 
 ```
+ - [ ] Sort input positions in reverse topological order
+ - [ ] Abstract DAGCircuit to multi graph
  - [ ] Handle original_dag that already has >1 components
  - [x] Easy interface for the uniter
  - [x] Cut the circuit into multiple parts
