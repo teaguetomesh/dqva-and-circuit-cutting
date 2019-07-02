@@ -17,6 +17,7 @@ After creating a python virtual environment and installing Qiskit,
 python3 -m venv my_venv
 
 pip install qiskit
+pip install nxpd pydot
 ```
 
 Modify the file at
@@ -69,11 +70,8 @@ value: (tuple) corresponding qubit tuple in the sub circuit
  - [ ] Add quantum_circuit_generator
 
 ### Misc
-```
  - [ ] Add a dependency installation file
-```
 ## Future Directions
 
-```
-1. Weighted tensor network contraction, considering 'hardness' of each cluster.
-```
+
+ - [ ] Weighted tensor network contraction, considering 'hardness' of each cluster.
