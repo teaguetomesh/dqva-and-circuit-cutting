@@ -25,7 +25,7 @@ Modify the file at
 my_venv/lib/python3.7/site-packages/qiskit/dagcircuit/dagnode.py
 ```
 
-By adding the following text:
+By adding the following text (not necessary anymore but keep it for now):
 
 ```
 @cargs.setter
@@ -55,20 +55,19 @@ value: (tuple) corresponding qubit tuple in the sub circuit
 ## TODO
 ### Wei
 
-```
  - [ ] Sort input positions in reverse topological order
  - [ ] Abstract DAGCircuit to multi graph
  - [ ] Handle original_dag that already has >1 components
  - [x] Easy interface for the uniter
  - [x] Cut the circuit into multiple parts
  - [ ] Automatic algorithm to find positions to cut
- - [ ] Is modification to Qiskit source code still needed?
-```
+ - [x] Is modification to Qiskit source code still needed?
+
 ### Teague
-```
+
  - [ ] Implement uniter based on sub_circ, wiring, stitches interface
  - [ ] Add quantum_circuit_generator
-```
+
 ### Misc
 ```
  - [ ] Add a dependency installation file
