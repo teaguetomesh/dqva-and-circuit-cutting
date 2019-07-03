@@ -4,6 +4,8 @@ from qiskit.converters import circuit_to_dag, dag_to_circuit
 from qiskit.circuit.quantumregister import QuantumRegister
 from qiskit.tools.visualization import dag_drawer
 from cutting_help_fun import *
+from qiskit.circuit import Measure
+from qiskit.extensions.standard import HGate, SGate, SdgGate
 import networkx as nx
 import os
 
@@ -15,6 +17,65 @@ def toy_circ():
 	for i in range(num_qubits):
 		circ.cx(q[i], q[(i+1)%num_qubits])
 	return circ
+
+def sub_circ_sampler(s, sub_cirs, complete_path_map):
+	s_idx = 0
+	for map_key in complete_path_map:
+		path = complete_path_map[map_key]
+		num_links = len(path) - 1
+		for link_idx in range(num_links):
+			sample_s = s[s_idx]
+			s_idx += 1
+			source_sub_circ = sub_cirs[path[link_idx][0]]
+			dest_sub_circ = sub_cirs[path[link_idx+1][0]]
+			dest_ancilla = path[link_idx+1][1]
+			print('inserting for path:', path, 'sample_s = ', sample_s)
+			if sample_s == 1:
+				source_sub_circ.append(instruction=Measure(), 
+				qargs=[path[link_idx][1]],
+				cargs=[path[link_idx][2]])
+			if sample_s == 2:
+				source_sub_circ.append(instruction=Measure(), 
+				qargs=[path[link_idx][1]],
+				cargs=[path[link_idx][2]])
+			if sample_s == 3:
+				source_sub_circ.append(instruction=HGate(), 
+				qargs=[path[link_idx][1]])
+				source_sub_circ.append(instruction=Measure(), 
+				qargs=[path[link_idx][1]],
+				cargs=[path[link_idx][2]])
+			if sample_s == 4:
+				source_sub_circ.append(instruction=HGate(), 
+				qargs=[path[link_idx][1]])
+				source_sub_circ.append(instruction=Measure(), 
+				qargs=[path[link_idx][1]],
+				cargs=[path[link_idx][2]])
+			if sample_s == 5:
+				source_sub_circ.append(instruction=SdgGate(), 
+				qargs=[path[link_idx][1]])
+				source_sub_circ.append(instruction=HGate(), 
+				qargs=[path[link_idx][1]])
+				source_sub_circ.append(instruction=Measure(), 
+				qargs=[path[link_idx][1]],
+				cargs=[path[link_idx][2]])
+			if sample_s == 6:
+				source_sub_circ.append(instruction=SdgGate(), 
+				qargs=[path[link_idx][1]])
+				source_sub_circ.append(instruction=HGate(), 
+				qargs=[path[link_idx][1]])
+				source_sub_circ.append(instruction=Measure(), 
+				qargs=[path[link_idx][1]],
+				cargs=[path[link_idx][2]])
+			if sample_s == 7:
+				source_sub_circ.append(instruction=Measure(), 
+				qargs=[path[link_idx][1]],
+				cargs=[path[link_idx][2]])
+			if sample_s == 8:
+				source_sub_circ.append(instruction=Measure(), 
+				qargs=[path[link_idx][1]],
+				cargs=[path[link_idx][2]])
+
+	return sub_cirs
 
 def main():
 	parser = argparse.ArgumentParser(description='Uniter for circuit cutting')
@@ -57,8 +118,14 @@ def main():
 
 	sub_circs = generate_sub_circs(cut_dag, positions)
 	for idx, sub_circ in enumerate(sub_circs):
-			sub_circ.draw(output='text',line_length = 400, filename='%s/sub_circ_%d.txt' % (path, idx))
-			dag_drawer(circuit_to_dag(sub_circ), filename='%s/sub_dag_%d.pdf' % (path, idx))
+		sub_circ.draw(output='text',line_length = 400, filename='%s/sub_circ_%d.txt' % (path, idx))
+		dag_drawer(circuit_to_dag(sub_circ), filename='%s/sub_dag_%d.pdf' % (path, idx))
+
+	s = [2,5]
+	sub_circs_sample = sub_circ_sampler(s, sub_circs, complete_path_map)
+	for idx, sub_circ in enumerate(sub_circs):
+		sub_circ.draw(output='text',line_length = 400, filename='%s/25_sub_circ_%d.txt' % (path, idx))
+		dag_drawer(circuit_to_dag(sub_circ), filename='%s/25_sub_dag_%d.pdf' % (path, idx))
 
 if __name__ == '__main__':
 	main()
