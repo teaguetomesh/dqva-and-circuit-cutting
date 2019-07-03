@@ -103,6 +103,9 @@ def complete_path_calc(path_order_dict, input_wires_mapping, translation_dict, s
             qubit_in_tuple = translation_dict[translation_dict_key]
             if link_idx == len(path_order_dict[wire]) - 1:
                 complete_path_map[wire].append((dest_sub_circ_idx, qubit_in_tuple))
+    for key in complete_path_map:
+        if complete_path_map[key] == []:
+            complete_path_map[key] = input_wires_mapping[key]
     return complete_path_map
 
 def update_reg_dict(reg_dict, qubit_tuple, add_measure=False, add_ancilla=False, add_input=False):
@@ -279,3 +282,16 @@ def generate_sub_circs(cut_dag, positions):
         # print('finished component %d\n' % component_idx)
         sub_circs.append(sub_circ)
     return sub_circs
+
+def cluster_character(sub_reg_dicts, positions):
+    K = len(positions)
+    d = 0
+    for reg_dict in sub_reg_dicts:
+        num_regs = 0
+        print(reg_dict)
+        for reg in reg_dict:
+            if type(reg_dict[reg]) == QuantumRegister:
+                num_regs += reg_dict[reg].size
+        if num_regs > d:
+            d = num_regs
+    return K, d
