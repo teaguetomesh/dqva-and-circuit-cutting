@@ -5,7 +5,7 @@ from qiskit.circuit.quantumregister import QuantumRegister
 from qiskit.tools.visualization import dag_drawer
 from cutting_help_fun import *
 from qiskit.circuit import Measure
-from qiskit.extensions.standard import HGate, SGate, SdgGate
+from qiskit.extensions.standard import HGate, SGate, SdgGate, XGate
 import networkx as nx
 import os
 
@@ -26,54 +26,86 @@ def sub_circ_sampler(s, sub_cirs, complete_path_map):
 		for link_idx in range(num_links):
 			sample_s = s[s_idx]
 			s_idx += 1
-			source_sub_circ = sub_cirs[path[link_idx][0]]
-			dest_sub_circ = sub_cirs[path[link_idx+1][0]]
+			source_circ_dag = circuit_to_dag(sub_cirs[path[link_idx][0]])
+			dest_circ_dag = circuit_to_dag(sub_cirs[path[link_idx+1][0]])
 			dest_ancilla = path[link_idx+1][1]
-			print('inserting for path:', path, 'sample_s = ', sample_s)
+			print('modify io for path:', path, 'sample_s = ', sample_s)
 			if sample_s == 1:
-				source_sub_circ.append(instruction=Measure(), 
+				source_circ_dag.apply_operation_back(op=Measure(), 
 				qargs=[path[link_idx][1]],
 				cargs=[path[link_idx][2]])
 			if sample_s == 2:
-				source_sub_circ.append(instruction=Measure(), 
+				source_circ_dag.apply_operation_back(op=Measure(), 
 				qargs=[path[link_idx][1]],
 				cargs=[path[link_idx][2]])
+				dest_circ_dag.apply_operation_front(op=XGate(),
+				qargs=[dest_ancilla],
+				cargs=[])
 			if sample_s == 3:
-				source_sub_circ.append(instruction=HGate(), 
+				source_circ_dag.apply_operation_back(op=HGate(), 
 				qargs=[path[link_idx][1]])
-				source_sub_circ.append(instruction=Measure(), 
+				source_circ_dag.apply_operation_back(op=Measure(), 
 				qargs=[path[link_idx][1]],
 				cargs=[path[link_idx][2]])
+				dest_circ_dag.apply_operation_front(op=HGate(),
+				qargs=[dest_ancilla],
+				cargs=[])
 			if sample_s == 4:
-				source_sub_circ.append(instruction=HGate(), 
+				source_circ_dag.apply_operation_back(op=HGate(), 
 				qargs=[path[link_idx][1]])
-				source_sub_circ.append(instruction=Measure(), 
+				source_circ_dag.apply_operation_back(op=Measure(), 
 				qargs=[path[link_idx][1]],
 				cargs=[path[link_idx][2]])
+				dest_circ_dag.apply_operation_front(op=HGate(),
+				qargs=[dest_ancilla],
+				cargs=[])
+				dest_circ_dag.apply_operation_front(op=XGate(),
+				qargs=[dest_ancilla],
+				cargs=[])
 			if sample_s == 5:
-				source_sub_circ.append(instruction=SdgGate(), 
+				source_circ_dag.apply_operation_back(op=SdgGate(), 
 				qargs=[path[link_idx][1]])
-				source_sub_circ.append(instruction=HGate(), 
+				source_circ_dag.apply_operation_back(op=HGate(), 
 				qargs=[path[link_idx][1]])
-				source_sub_circ.append(instruction=Measure(), 
+				source_circ_dag.apply_operation_back(op=Measure(), 
 				qargs=[path[link_idx][1]],
 				cargs=[path[link_idx][2]])
+				dest_circ_dag.apply_operation_front(op=SGate(),
+				qargs=[dest_ancilla],
+				cargs=[])
+				dest_circ_dag.apply_operation_front(op=HGate(),
+				qargs=[dest_ancilla],
+				cargs=[])
 			if sample_s == 6:
-				source_sub_circ.append(instruction=SdgGate(), 
+				source_circ_dag.apply_operation_back(op=SdgGate(), 
 				qargs=[path[link_idx][1]])
-				source_sub_circ.append(instruction=HGate(), 
+				source_circ_dag.apply_operation_back(op=HGate(), 
 				qargs=[path[link_idx][1]])
-				source_sub_circ.append(instruction=Measure(), 
+				source_circ_dag.apply_operation_back(op=Measure(), 
 				qargs=[path[link_idx][1]],
 				cargs=[path[link_idx][2]])
+				dest_circ_dag.apply_operation_front(op=SGate(),
+				qargs=[dest_ancilla],
+				cargs=[])
+				dest_circ_dag.apply_operation_front(op=HGate(),
+				qargs=[dest_ancilla],
+				cargs=[])
+				dest_circ_dag.apply_operation_front(op=XGate(),
+				qargs=[dest_ancilla],
+				cargs=[])
 			if sample_s == 7:
-				source_sub_circ.append(instruction=Measure(), 
+				source_circ_dag.apply_operation_back(op=Measure(), 
 				qargs=[path[link_idx][1]],
 				cargs=[path[link_idx][2]])
 			if sample_s == 8:
-				source_sub_circ.append(instruction=Measure(), 
+				source_circ_dag.apply_operation_back(op=Measure(), 
 				qargs=[path[link_idx][1]],
 				cargs=[path[link_idx][2]])
+				dest_circ_dag.apply_operation_front(op=XGate(),
+				qargs=[dest_ancilla],
+				cargs=[])
+			sub_cirs[path[link_idx][0]] = dag_to_circuit(source_circ_dag)
+			sub_cirs[path[link_idx+1][0]] = dag_to_circuit(dest_circ_dag)
 
 	return sub_cirs
 
@@ -121,7 +153,7 @@ def main():
 		sub_circ.draw(output='text',line_length = 400, filename='%s/sub_circ_%d.txt' % (path, idx))
 		dag_drawer(circuit_to_dag(sub_circ), filename='%s/sub_dag_%d.pdf' % (path, idx))
 
-	s = [2,5]
+	s = [7,8]
 	sub_circs_sample = sub_circ_sampler(s, sub_circs, complete_path_map)
 	for idx, sub_circ in enumerate(sub_circs):
 		sub_circ.draw(output='text',line_length = 400, filename='%s/25_sub_circ_%d.txt' % (path, idx))
