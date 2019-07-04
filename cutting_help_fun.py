@@ -87,6 +87,7 @@ def cut_edges(original_dag, positions):
 def complete_path_calc(path_order_dict, input_wires_mapping, translation_dict, sub_reg_dicts):
     complete_path_map = {}
     cl_measure_idx = [0 for reg_dict in sub_reg_dicts]
+    output_measure_idx = [0 for reg_dict in sub_reg_dicts]
     for wire in path_order_dict:
         complete_path_map[wire] = []
         for link_idx, link in enumerate(path_order_dict[wire]):
@@ -101,17 +102,25 @@ def complete_path_calc(path_order_dict, input_wires_mapping, translation_dict, s
             dest_sub_circ_idx = link[1]
             translation_dict_key = (wire, dest_sub_circ_idx)
             qubit_in_tuple = translation_dict[translation_dict_key]
+            reg_dict = sub_reg_dicts[dest_sub_circ_idx]
+            qubit_out_tuple = reg_dict['output_' + wire[0].name][output_measure_idx[dest_sub_circ_idx]]
+            output_measure_idx[dest_sub_circ_idx] += 1
             if link_idx == len(path_order_dict[wire]) - 1:
-                complete_path_map[wire].append((dest_sub_circ_idx, qubit_in_tuple))
+                complete_path_map[wire].append((dest_sub_circ_idx, qubit_in_tuple, qubit_out_tuple))
     for key in complete_path_map:
         if complete_path_map[key] == []:
-            complete_path_map[key] = [input_wires_mapping[key]]
+            output_circ_idx = input_wires_mapping[key][0]
+            reg_dict = sub_reg_dicts[output_circ_idx]
+            qubit_out_tuple = reg_dict['output_' + wire[0].name][output_measure_idx[output_circ_idx]]
+            output_measure_idx[output_circ_idx] += 1
+            complete_path_map[key] = [(input_wires_mapping[key][0],input_wires_mapping[key][1],qubit_out_tuple)]
     return complete_path_map
 
-def update_reg_dict(reg_dict, qubit_tuple, add_measure=False, add_ancilla=False, add_input=False):
+def update_reg_dict(reg_dict, qubit_tuple, add_measure=False, add_ancilla=False, add_input=False, add_output=False):
     measure_register_name = 'measure_' + qubit_tuple[0].name
     ancilla_register_name = 'ancilla_' + qubit_tuple[0].name
     input_register_name = qubit_tuple[0].name
+    output_register_name = 'output_' + qubit_tuple[0].name
 
     if add_measure:
         if measure_register_name in reg_dict:
@@ -130,6 +139,11 @@ def update_reg_dict(reg_dict, qubit_tuple, add_measure=False, add_ancilla=False,
             reg_dict[input_register_name] = QuantumRegister(reg_dict[input_register_name].size+1, input_register_name)
         else:
             reg_dict[input_register_name] = QuantumRegister(1, input_register_name)
+    if add_output:
+        if output_register_name in reg_dict:
+            reg_dict[output_register_name] = ClassicalRegister(reg_dict[output_register_name].size+1, output_register_name)
+        else:
+            reg_dict[output_register_name] = ClassicalRegister(1, output_register_name)
     return reg_dict
 
 def sub_circ_reg_counter(cut_dag, in_out_arg_dict):
@@ -157,8 +171,10 @@ def sub_circ_reg_counter(cut_dag, in_out_arg_dict):
                 add_measure = not has_out and has_arg
                 add_ancilla = not has_in and has_arg
                 add_input = has_in and has_arg
+                add_output = has_out
                 reg_dict = update_reg_dict(reg_dict=reg_dict, qubit_tuple=key[0],
-                add_measure=add_measure, add_ancilla=add_ancilla, add_input=add_input)
+                add_measure=add_measure, add_ancilla=add_ancilla,
+                add_input=add_input, add_output=add_output)
         reg_dicts.append(reg_dict)
     
     input_wires_mapping = {}
@@ -288,7 +304,7 @@ def cluster_character(sub_reg_dicts, positions):
     d = 0
     for reg_dict in sub_reg_dicts:
         num_regs = 0
-        print(reg_dict)
+        # print(reg_dict)
         for reg in reg_dict:
             if type(reg_dict[reg]) == QuantumRegister:
                 num_regs += reg_dict[reg].size

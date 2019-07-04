@@ -1,5 +1,6 @@
 import argparse
 from qiskit import QuantumCircuit
+from qiskit import BasicAer, execute
 from qiskit.converters import circuit_to_dag, dag_to_circuit
 from qiskit.circuit.quantumregister import QuantumRegister
 from qiskit.tools.visualization import dag_drawer
@@ -18,7 +19,7 @@ def toy_circ():
 		circ.cx(q[i], q[(i+1)%num_qubits])
 	return circ
 
-def sub_circ_sampler(s, sub_cirs, complete_path_map):
+def sub_circ_sampler(s, sub_circs, complete_path_map):
 	s_idx = 0
 	for map_key in complete_path_map:
 		path = complete_path_map[map_key]
@@ -26,8 +27,8 @@ def sub_circ_sampler(s, sub_cirs, complete_path_map):
 		for link_idx in range(num_links):
 			sample_s = s[s_idx]
 			s_idx += 1
-			source_circ_dag = circuit_to_dag(sub_cirs[path[link_idx][0]])
-			dest_circ_dag = circuit_to_dag(sub_cirs[path[link_idx+1][0]])
+			source_circ_dag = circuit_to_dag(sub_circs[path[link_idx][0]])
+			dest_circ_dag = circuit_to_dag(sub_circs[path[link_idx+1][0]])
 			dest_ancilla = path[link_idx+1][1]
 			print('modify io for path:', path, 'sample_s = ', sample_s)
 			if sample_s == 1:
@@ -104,10 +105,20 @@ def sub_circ_sampler(s, sub_cirs, complete_path_map):
 				dest_circ_dag.apply_operation_front(op=XGate(),
 				qargs=[dest_ancilla],
 				cargs=[])
-			sub_cirs[path[link_idx][0]] = dag_to_circuit(source_circ_dag)
-			sub_cirs[path[link_idx+1][0]] = dag_to_circuit(dest_circ_dag)
+			sub_circs[path[link_idx][0]] = dag_to_circuit(source_circ_dag)
+			sub_circs[path[link_idx+1][0]] = dag_to_circuit(dest_circ_dag)
+		# output_qubit_sub_circ = path[len(path)-1][0]
+		# output_qubit = path[len(path)-1][1]
+		# sub_circs[output_qubit_sub_circ]
 
-	return sub_cirs
+	return sub_circs
+
+def ts_calc(sub_circs, post_process_fn):
+	backend_sim = BasicAer.get_backend('qasm_simulator')
+	for sub_circ in sub_circs:
+		job_sim = execute(sub_circ, backend_sim, shots=1024)
+		result_sim = job_sim.result()
+		counts = result_sim.get_counts(sub_circ)
 
 def main():
 	parser = argparse.ArgumentParser(description='Uniter for circuit cutting')
@@ -132,8 +143,12 @@ def main():
 	in_out_arg_dict = contains_wire_nodes(cut_dag)
 	sub_reg_dicts, input_wires_mapping = sub_circ_reg_counter(cut_dag, in_out_arg_dict)
 
+	print('sub_reg_dicts:')
+	for reg_dict in sub_reg_dicts:
+		print(reg_dict)
+
 	K, d = cluster_character(sub_reg_dicts, positions)
-	print('cut_dag has %d connected components, K = %d, d = %d'
+	print('\ncut_dag has %d connected components, K = %d, d = %d'
 	% (nx.number_weakly_connected_components(cut_dag._multi_graph), K, d))
 
 	print('\ninput_wires_mapping:')
