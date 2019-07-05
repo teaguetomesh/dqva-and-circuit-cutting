@@ -9,6 +9,8 @@ from qiskit.circuit import Measure
 from qiskit.extensions.standard import HGate, SGate, SdgGate, XGate
 import networkx as nx
 import os
+import pickle
+import random
 
 def toy_circ():
 	num_qubits = 5
@@ -30,7 +32,7 @@ def sub_circ_sampler(s, sub_circs, complete_path_map):
 			source_circ_dag = circuit_to_dag(sub_circs[path[link_idx][0]])
 			dest_circ_dag = circuit_to_dag(sub_circs[path[link_idx+1][0]])
 			dest_ancilla = path[link_idx+1][1]
-			print('modify io for path:', path, 'sample_s = ', sample_s)
+			# print('modify io for path:', path, 'sample_s = ', sample_s)
 			if sample_s == 1:
 				source_circ_dag.apply_operation_back(op=Measure(), 
 				qargs=[path[link_idx][1]],
@@ -64,6 +66,7 @@ def sub_circ_sampler(s, sub_circs, complete_path_map):
 				qargs=[dest_ancilla],
 				cargs=[])
 			if sample_s == 5:
+				# print('modifying for sample_s', sample_s, 'qargs = ', [path[link_idx][1]])
 				source_circ_dag.apply_operation_back(op=SdgGate(), 
 				qargs=[path[link_idx][1]])
 				source_circ_dag.apply_operation_back(op=HGate(), 
@@ -107,18 +110,27 @@ def sub_circ_sampler(s, sub_circs, complete_path_map):
 				cargs=[])
 			sub_circs[path[link_idx][0]] = dag_to_circuit(source_circ_dag)
 			sub_circs[path[link_idx+1][0]] = dag_to_circuit(dest_circ_dag)
-		# output_qubit_sub_circ = path[len(path)-1][0]
-		# output_qubit = path[len(path)-1][1]
-		# sub_circs[output_qubit_sub_circ]
+		output_qubit_sub_circ = path[len(path)-1][0]
+		output_qubit = path[len(path)-1][1]
+		output_qubit_measure = path[len(path)-1][2]
+		sub_circs[output_qubit_sub_circ].append(instruction=Measure(),qargs=[output_qubit],cargs=[output_qubit_measure])
 
 	return sub_circs
 
-def ts_calc(sub_circs, post_process_fn):
+def ts_calc(sub_circs, post_process_fn=None):
 	backend_sim = BasicAer.get_backend('qasm_simulator')
+	y = []
+	sigma_product = 1
 	for sub_circ in sub_circs:
 		job_sim = execute(sub_circ, backend_sim, shots=1024)
 		result_sim = job_sim.result()
+		print(sub_circ.cregs)
 		counts = result_sim.get_counts(sub_circ)
+	return y
+
+def random_s(length):
+	s = [random.randint(1,8) for i in range(length)]
+	return s
 
 def main():
 	parser = argparse.ArgumentParser(description='Uniter for circuit cutting')
@@ -129,14 +141,18 @@ def main():
 	if not os.path.isdir(path):
 		os.makedirs(path)
 
-	circ = toy_circ()
+	# circ = toy_circ()
+	circ = pickle.load(open('%s/supremacy_circuit_4_8.dump' % path, 'rb' ))
 
 	original_dag = circuit_to_dag(circ)
 	dag_drawer(original_dag, filename='%s/original_dag.pdf' % path)
 	q = circ.qregs[0]
 	
-	''' Test positions that will cut into 3 parts'''
-	positions = [(q[1],1), (q[0],1)]
+	''' Test positions for the toy circuit'''
+	# positions = [(q[1],1), (q[0],1)]
+
+	''' Test positions that will cut into 2 parts'''
+	positions = [(q[2], 1), (q[7], 1), (q[10],1), (q[14], 1)]
 
 	cut_dag, path_order_dict = cut_edges(original_dag=original_dag, positions=positions)
 	dag_drawer(cut_dag, filename='%s/cut_dag.pdf' % path)
@@ -168,11 +184,14 @@ def main():
 		sub_circ.draw(output='text',line_length = 400, filename='%s/sub_circ_%d.txt' % (path, idx))
 		dag_drawer(circuit_to_dag(sub_circ), filename='%s/sub_dag_%d.pdf' % (path, idx))
 
-	s = [7,8]
+	# s = random_s(len(positions))
+	s = [1,5,8,2]
 	sub_circs_sample = sub_circ_sampler(s, sub_circs, complete_path_map)
 	for idx, sub_circ in enumerate(sub_circs):
 		sub_circ.draw(output='text',line_length = 400, filename='%s/25_sub_circ_%d.txt' % (path, idx))
 		dag_drawer(circuit_to_dag(sub_circ), filename='%s/25_sub_dag_%d.pdf' % (path, idx))
+	all_counts = ts_calc(sub_circs_sample)
+	# [print(x) for x in all_counts]
 
 if __name__ == '__main__':
 	main()

@@ -41,7 +41,7 @@ key: qubit tuple in the original uncut circuit
 value: list(tuple)
 (sub circuit index, input qubit tuple in the sub circuit, classical bit tuple to measure to), 
 ...
-(sub circuit index, ancilla qubit tuple)
+(sub circuit index, input qubit tuple in the sub circuit, classical bit tuple to measure to) --> Last one is the final output measurement
 ```
 input_wires_mapping
 ```
@@ -57,8 +57,6 @@ value: (tuple) corresponding qubit tuple in the sub circuit
 ### Wei
 
  - [ ] Sort input positions in reverse topological order
- - [ ] Abstract DAGCircuit to multi graph
- - [ ] Handle original_dag that already has >1 components
  - [x] Easy interface for the uniter
  - [x] Cut the circuit into multiple parts
  - [ ] Automatic algorithm to find positions to cut
