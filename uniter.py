@@ -151,7 +151,6 @@ def y_sigma_separator(counts, cregs):
 	return new_counts, y_reg_idx
 
 def fragment_output_organizer(fragments, complete_path_map):
-	t_s = []
 	fragments_output_orders = {}
 	for fragment_idx, fragment in enumerate(fragments):
 		fragment_output_position = []
@@ -169,16 +168,30 @@ def fragment_output_organizer(fragments, complete_path_map):
 					fragment_output_position.append(input_position)
 		fragments_output_orders[fragment_idx] = fragment_output_position
 	# print('fragments_output_orders', fragments_output_orders)
-	fragment_idx = 0
-	while fragment_idx < len(fragments):
-		sub_circ_idx, _, sub_circ_output = fragments[fragment_idx]
-		qubit_output_positions = fragments_output_orders[fragment_idx]
-		print(sub_circ_output, qubit_output_positions)
-		fragment_idx += 1
-			
+	# print('fragments:', fragments)
+	t_s = {}
+	for final_measurement_output in range(np.power(2, len(complete_path_map))):
+		'''Loop over all 2^n final output states'''
+		final_measurement_output_binary = bin(final_measurement_output)[2:].zfill(len(complete_path_map))
+		# print('final measurement output state = ', final_measurement_output_binary)
+
+		final_measurement_output_prob = 1
+		for fragment_idx, fragment in enumerate(fragments):
+			_, _, sub_circ_output = fragments[fragment_idx]
+			qubit_output_positions = fragments_output_orders[fragment_idx]
+			sub_circ_output_key = ''
+			for position in qubit_output_positions:
+				sub_circ_output_key += final_measurement_output_binary[position]
+			# print('fragment ', fragment_idx, 'key = ', type(sub_circ_output_key), sub_circ_output_key)
+			if sub_circ_output_key in sub_circ_output:
+				# print('multiply ', sub_circ_output[sub_circ_output_key])
+				final_measurement_output_prob *= sub_circ_output[sub_circ_output_key]
+			else:
+				# print('multiply 0')
+				final_measurement_output_prob *= 0
+		# print('prob = ', final_measurement_output_prob)
+		t_s[final_measurement_output_binary] = final_measurement_output_prob	
 	return t_s
-
-
 
 def ts_sampler(s, sub_circs_no_bridge, complete_path_map, num_shots=1024, post_process_fn=None):
 	sub_circs_bridge = sub_circ_sampler(s, sub_circs_no_bridge, complete_path_map)
@@ -202,7 +215,7 @@ def ts_sampler(s, sub_circs_no_bridge, complete_path_map, num_shots=1024, post_p
 	return t_s
 
 def tensor_network_val_calc(sub_circs_no_bridge, complete_path_map, positions, num_samples, post_process_fn=None):
-	cumulative_T_s = []
+	cumulative_T_s = {}
 	for i in range(num_samples):
 		s = random_s(len(positions))
 		print('sampling for s = ', s)
@@ -212,14 +225,19 @@ def tensor_network_val_calc(sub_circs_no_bridge, complete_path_map, positions, n
 				c_s *= -0.5
 			else:
 				c_s *= 0.5
-		print('c_s = ', c_s)
+		# print('c_s = ', c_s)
 		t_s = ts_sampler(s, sub_circs_no_bridge, complete_path_map)
-		print('t_s = ', t_s)
-		T_s = {}
-		for outcome in t_s:
-			T_s[outcome] = c_s * t_s[outcome]
-		cumulative_T_s.append(T_s)
-		# TODO: add expectation calculation
+		# print('t_s = ', type(t_s), len(t_s))
+		single_shot_T_s = {}
+		for output_state in t_s:
+			single_shot_T_s[output_state] = c_s * t_s[output_state] * np.power(8,len(positions))
+		for key in single_shot_T_s:
+			if key in cumulative_T_s:
+				cumulative_T_s[key] += single_shot_T_s[key]
+			else:
+				cumulative_T_s[key] = single_shot_T_s[key]
+	for output_state in cumulative_T_s:
+		cumulative_T_s[output_state] /= num_samples
 	return cumulative_T_s
 
 def random_s(length):
@@ -278,11 +296,24 @@ def main():
 		sub_circ.draw(output='text',line_length = 400, filename='%s/sub_circ_%d.txt' % (path, idx))
 		dag_drawer(circuit_to_dag(sub_circ), filename='%s/sub_dag_%d.pdf' % (path, idx))
 	
-	result = tensor_network_val_calc(sub_circs_no_bridge, complete_path_map, positions, 1, post_process_fn=None)
-	print('cut circ result = ', result)
-
-	# all_counts = ts_calc(sub_circs_sample)
-	# [print(x) for x in all_counts]
+	c = ClassicalRegister(5, 'c')
+	meas = QuantumCircuit(q, c)
+	meas.measure(q,c)
+	qc = circ+meas
+	backend_sim = BasicAer.get_backend('qasm_simulator')
+	job_sim = execute(qc, backend_sim, shots=1024)
+	result_sim = job_sim.result()
+	counts = result_sim.get_counts(qc)
+	for x in counts:
+		counts[x] /= 1024
+	print('original circ output prob = ', counts)
+	
+	result = tensor_network_val_calc(sub_circs_no_bridge, complete_path_map, positions, 10, post_process_fn=None)
+	print(result)
+	cut_circ_total_prob = 0
+	for x in result.values():
+		cut_circ_total_prob += x
+	print('use cutting technique = ', cut_circ_total_prob)
 
 if __name__ == '__main__':
 	main()
