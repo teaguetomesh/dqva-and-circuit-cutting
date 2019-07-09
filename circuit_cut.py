@@ -8,21 +8,25 @@ import networkx as nx
 import pickle
 import argparse
 import os
+from quantum_circuit_generator.generators import gen_supremacy
+
 
 def foo(args):
     path = '%s/results' % args.home_dir
     if not os.path.isdir(path):
         os.makedirs(path)
 
-    circ = pickle.load(open('results/supremacy_circuit_4_8.dump', 'rb' ))
+    #circ = pickle.load(open('results/supremacy_circuit_4_8.dump', 'rb' ))
+    circ = gen_supremacy(4,4,8, order='01352746')
+    print(circ)
     original_dag = circuit_to_dag(circ)
     dag_drawer(original_dag, filename='%s/original_dag.pdf' % path)
     q = circ.qregs[0]
     
     ''' Test positions that will cut into 3 parts'''
-    positions = [(q[2], 1), (q[7], 1), (q[8],3), (q[9],6), (q[10], 4), (q[10],1), (q[14], 1)]
+    #positions = [(q[2], 1), (q[7], 1), (q[8],3), (q[9],6), (q[10], 4), (q[10],1), (q[14], 1)]
     ''' Test positions that will cut into 2 parts'''
-    # positions = [(q[2], 1), (q[7], 1), (q[10],1), (q[14], 1)]
+    positions = [(q[11], 2), (q[10], 5), (q[9], 4), (q[8], 4)]
 
     cut_dag, path_order_dict = cut_edges(original_dag=original_dag, positions=positions)
     dag_drawer(cut_dag, filename='%s/cut_dag.pdf' % path)
