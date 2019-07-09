@@ -56,15 +56,15 @@ value: (tuple) corresponding qubit tuple in the sub circuit
 ## TODO
 ### Wei
 
- - [ ] Sort input positions in reverse topological order
+ - [ ] Sort input positions in reverse topological order to prevent bad user input
  - [x] Easy interface for the uniter
  - [x] Cut the circuit into multiple parts
  - [ ] Automatic algorithm to find positions to cut
  - [x] Is modification to Qiskit source code still needed?
+ - [x] Implement uniter based on sub_circ, wiring, stitches interface
 
 ### Teague
 
- - [ ] Implement uniter based on sub_circ, wiring, stitches interface
  - [ ] Add quantum_circuit_generator
 
 ### Misc
