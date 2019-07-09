@@ -63,10 +63,6 @@ value: (tuple) corresponding qubit tuple in the sub circuit
  - [x] Is modification to Qiskit source code still needed?
  - [x] Implement uniter based on sub_circ, wiring, stitches interface
 
-### Teague
-
- - [ ] Add quantum_circuit_generator
-
 ### Misc
  - [ ] Add a dependency installation file
 ## Future Directions
