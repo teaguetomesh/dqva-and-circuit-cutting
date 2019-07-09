@@ -127,89 +127,139 @@ def sub_circ_sampler(s, sub_circs_no_bridge, complete_path_map):
 
 	return sub_circs_bridge
 
-def y_sigma_separator(counts, cregs):
-	# print('separating y and sigma in the sub circuit')
-	sigma_reg_idx = None
-	y_reg_idx = None
-	for creg_idx, creg in enumerate(cregs):
-		if 'measure' in creg.name:
-			sigma_reg_idx = creg_idx
-			break
-	for creg_idx, creg in enumerate(cregs):
-		if 'output' in creg.name:
-			y_reg_idx = creg_idx
-			break
-	# print('sigma register: ', sigma_reg_idx, ' y register: ', y_reg_idx)
-	new_counts = {}
-	for key in counts:
-		sigma_y = key.split(' ')
-		# print('sigma_y = ', sigma_y)
+def y_sigma_separator(y_sigma_freq, cregs, complete_path_map):
+	print('separating y and sigma in the sub circuit')
+	print('y_sigma_freq : ', y_sigma_freq)
+	print('cregs : ', cregs)
+	y_freq = {}
+	sigma_products = {}
+	for y_sigma_state in y_sigma_freq:
+		print('looking at y_sigma_state: ', y_sigma_state)
 		sigma_product = 1
-		if sigma_reg_idx != None:
-			sigmas = sigma_y[len(sigma_y) - 1 - sigma_reg_idx]
-			for sigma_char in sigmas:
-				sigma = -1 if int(sigma_char)==1 else 1
-				sigma_product *= sigma
+		y_freq_state = ''
+		for reg_idx, reg_state in enumerate(y_sigma_state.split(' ')):
+			print('register ', cregs[reg_idx].name, ' has state ', reg_state)
+			if 'measure' in cregs[reg_idx].name:
+				for sigma_char in reg_state:
+					sigma = -1 if int(sigma_char)==1 else 1
+					# print('multiply sigma_product by ', sigma)
+					sigma_product *= sigma
+			elif 'output' in cregs[reg_idx].name:
+				y_freq_state += reg_state
+		print('y_freq_state = ', y_freq_state)
+		print('sigma product = ', sigma_product)
+		
+		if y_freq_state != '' and y_freq_state not in y_freq:
+			y_freq[y_freq_state] = y_sigma_freq[y_sigma_state]
+		elif y_freq_state != '' and y_freq_state in y_freq:
+			y_freq[y_freq_state] += y_sigma_freq[y_sigma_state]
+		if y_freq_state != '' and y_freq_state not in sigma_products:
+			sigma_products[y_freq_state] = sigma_product
+		elif y_freq_state != '' and y_freq_state in sigma_products:
+			sigma_products[y_freq_state] *= sigma_product
+	print('y_freq for the subcircuit = ', y_freq)
+	print('sigma_products for the subcircuit = ', sigma_products)
+	return y_freq, sigma_products
 
-		ys = sigma_y[len(sigma_y) - 1 - y_reg_idx][::-1]
-		# print('sigmas = ', sigmas, 'sigma_product = ', sigma_product, 'y = ', ys)
-		# print('original count = ', counts[key], 'modified count = ', counts[key]*sigma_product)
-		new_counts_key = ys
-		new_counts_val = counts[key]*sigma_product
-		if new_counts_key in new_counts:
-			new_counts[new_counts_key] += new_counts_val
-		else:
-			new_counts[new_counts_key] = new_counts_val
-	# print('new counts = ', new_counts)
-	return new_counts, y_reg_idx
+def fragment_combiner(frag_0, frag_1, complete_path_map):
+	# print('combine : ')
+	# print(frag_0)
+	# print(frag_1)
+	combined_0_1 = {}
+
+	frag_0_y_sigma_states = frag_0[0]
+	frag_0_registers = frag_0[1]
+	frag_1_y_sigma_states = frag_1[0]
+	frag_1_registers = frag_1[1]
+
+	for frag_0_state in frag_0_y_sigma_states:
+		for frag_1_state in frag_1_y_sigma_states:
+			if frag_0_state != '':
+				key = frag_0_state + ' ' + frag_1_state
+			else:
+				key = frag_0_state + frag_1_state
+			prob = frag_0_y_sigma_states[frag_0_state] * frag_1_y_sigma_states[frag_1_state]
+			combined_0_1[key] = prob
+	combined_registers = frag_0_registers + frag_1_registers
+	combined_fragment = (combined_0_1, combined_registers)
+	# print('combined_fragment = ', combined_fragment)
+	return combined_fragment
+
+def input_qubit_locator(complete_path_map, sub_circ_idx, qubit):
+	for input_qubit in complete_path_map:
+		path = complete_path_map[input_qubit]
+		output_sub_circ_idx = path[len(path)-1][0]
+		output_qubit = path[len(path)-1][2]
+		if sub_circ_idx == output_sub_circ_idx and qubit == output_qubit:
+			return input_qubit
+	return None
+
 
 def fragment_output_organizer(fragments, complete_path_map):
-	fragments_output_orders = {}
-	for fragment_idx, fragment in enumerate(fragments):
-		fragment_output_position = []
-		# print(fragment)
-		sub_circ_idx, y_reg, _ = fragment
-		for i in range(y_reg.size):
-			# print('looking for:', y_reg[i], 'in sub_circ ', sub_circ_idx)
-			for input_qubit in complete_path_map:
-				path = complete_path_map[input_qubit]
-				output_sub_circ_idx = path[len(path)-1][0]
-				output_cl_bit = path[len(path)-1][2]
-				if output_sub_circ_idx == sub_circ_idx and y_reg[i] == output_cl_bit:
-					# print('input qubit is:', input_qubit)
-					input_position = list(complete_path_map.keys()).index(input_qubit)
-					fragment_output_position.append(input_position)
-		fragments_output_orders[fragment_idx] = fragment_output_position
-	print('fragments_output_orders', fragments_output_orders)
-	# print('fragments:', fragments)
-	t_s = {}
-	for final_measurement_output in range(np.power(2, len(complete_path_map))):
-		'''Loop over all 2^n final output states'''
-		final_measurement_output_binary = bin(final_measurement_output)[2:].zfill(len(complete_path_map))
-		# print('final measurement output state = ', final_measurement_output_binary)
+	# print('*' * 100)
+	# print('calling fragment_output_organizer')
 
-		final_measurement_output_prob = 1
-		for fragment_idx, fragment in enumerate(fragments):
-			_, _, sub_circ_output = fragments[fragment_idx]
-			qubit_output_positions = fragments_output_orders[fragment_idx]
-			sub_circ_output_key = ''
-			for position in qubit_output_positions:
-				sub_circ_output_key += final_measurement_output_binary[position]
-			# print('fragment ', fragment_idx, 'key = ', type(sub_circ_output_key), sub_circ_output_key)
-			if sub_circ_output_key in sub_circ_output:
-				# print('multiply ', sub_circ_output[sub_circ_output_key])
-				final_measurement_output_prob *= sub_circ_output[sub_circ_output_key]
-			else:
-				# print('multiply 0')
-				final_measurement_output_prob *= 0
-		# print('prob = ', final_measurement_output_prob)
-		t_s[final_measurement_output_binary] = final_measurement_output_prob	
+	t_s = {}
+
+	empty_dict = {}
+	empty_dict[''] = 1
+	combined_fragments = (empty_dict, [])
+	# print('base_frag = ', base_frag)
+	for frag_to_combine in fragments:
+		combined_fragments = fragment_combiner(combined_fragments, frag_to_combine, complete_path_map)
+
+	# print('combined_fragment = ', combined_fragments)
+
+	y_sigma_distribution = combined_fragments[0]
+	y_sigma_registers = combined_fragments[1]
+
+	y_state_length = 0
+	for element in y_sigma_registers:
+		if 'output' in element[1].name:
+			y_state_length += element[1].size
+	# print('y_state should have %d digits' % y_state_length)
+
+	for y_sigma in y_sigma_distribution:
+		prob = y_sigma_distribution[y_sigma]
+		y_state = [-1 for x in range(y_state_length)]
+		# print('y_sigma = ', y_sigma, 'prob = ', prob)
+		# print('initialize y_state = ', y_state)
+		for register_idx, register_measurement in enumerate(y_sigma.split(' ')):
+			# print('looking at y_sigma', register_measurement)
+			sub_circ_idx = y_sigma_registers[register_idx][0]
+			register = y_sigma_registers[register_idx][1]
+			if 'measure' in register.name:
+				# print('is a measure, multiply sigma for ', register_measurement)
+				for sigma in register_measurement:
+					sigma = 1 if int(sigma) == 0 else -1
+					prob *= sigma
+			elif 'output' in register.name:
+				# print('is an output')
+				for register_offset, y in enumerate(register_measurement):
+					input_qubit = input_qubit_locator(complete_path_map, sub_circ_idx, register[register_offset])
+					# print('y register_measurement ', y, 'is for qubit:')
+					# print(input_qubit)
+					y_state[input_qubit[1]] = y
+		final_y_state = ''
+		for x in y_state:
+			final_y_state += x
+		# print('y_state = ', final_y_state)
+		# print('prob after multiplying sigma = ', prob)
+		if final_y_state in t_s:
+			t_s[final_y_state] += prob
+		else:
+			t_s[final_y_state] = prob
+	# print('t_s is: ', t_s)
+	
+	# print('finished fragment_output_organizer')
+	# print('*' * 100)
 	return t_s
 
 def ts_sampler(s, sub_circs_no_bridge, complete_path_map, num_shots=1024, post_process_fn=None):
 	sub_circs_bridge = sub_circ_sampler(s, sub_circs_no_bridge, complete_path_map)
 	backend_sim = BasicAer.get_backend('qasm_simulator')
 	fragments = []
+
 	for sub_circ_idx, sub_circ in enumerate(sub_circs_bridge):
 		print('sub_circ_bridge %d' % (sub_circ_idx))
 		print(sub_circ)
@@ -217,16 +267,19 @@ def ts_sampler(s, sub_circs_no_bridge, complete_path_map, num_shots=1024, post_p
 		result_sim = job_sim.result()
 		# print(type(result_sim), result_sim)
 		counts = result_sim.get_counts(sub_circ)
-		print('sub_circ_bridge %d raw counts:' % sub_circ_idx, counts)
+		y_sigma_freq  = {}
+		for key in counts:
+			y_sigma_freq[key[::-1]] = counts[key]/num_shots
+		# print('sub_circ_bridge %d y_sigma_freq distribution:' % sub_circ_idx, y_sigma_freq)
 		# print('sub_circ_bridge %d cregs:'%sub_circ_idx, sub_circ.cregs)
-		sub_circ_output, y_reg_idx = y_sigma_separator(counts, sub_circ.cregs)
+		# sub_circ_output, y_reg_idx = y_sigma_separator(y_sigma_freq, sub_circ.cregs, complete_path_map)
 		# print('sub_circ %d output:' % sub_circ_idx, sub_circ_output)
-		for x in sub_circ_output:
-			sub_circ_output[x] /= num_shots
-		print('sub_circ_bridge %d output measure: ' % sub_circ_idx, sub_circ_output)
-		fragment = (sub_circ_idx, sub_circ.cregs[y_reg_idx], sub_circ_output)
-		# print('fragment:', fragment)
-		fragments.append(fragment)
+		print('sub_circ_bridge %d y_sigma measurement = ' % sub_circ_idx, y_sigma_freq)
+		print('cregs : ', sub_circ.cregs)
+		[(sub_circ_idx, creg) for creg in sub_circ.cregs]
+		fragments.append((y_sigma_freq, [(sub_circ_idx, creg) for creg in sub_circ.cregs]))
+	
+	print('fragments for s = ', s, ' are:', fragments)
 	t_s = fragment_output_organizer(fragments, complete_path_map)
 	# print('combined output prob for sample: ', t_s)
 	return t_s
@@ -234,7 +287,7 @@ def ts_sampler(s, sub_circs_no_bridge, complete_path_map, num_shots=1024, post_p
 def tensor_network_val_calc(sub_circs_no_bridge, complete_path_map, positions, num_samples, post_process_fn=None):
 	cumulative_tn_val = {}
 	all_s = sequential_s(len(positions))
-	print('sequential_s = ', all_s, 'len(positions) = ', len(positions))
+	print('sequential_s = ', all_s)
 	num_trials = 0
 	# for i in range(num_samples):
 	# 	s = random_s(len(positions))
@@ -268,16 +321,15 @@ def tensor_network_val_calc(sub_circs_no_bridge, complete_path_map, positions, n
 	return cumulative_tn_val
 
 def sequential_s(length):
-	if length == 1:
-		return [[1],[2],[3],[4],[5],[6],[7],[8]]
-	else:
-		all_prev_s = sequential_s(length - 1)
-		all_s = []
-		for prev_s in all_prev_s:
-			for i in range(1,8):
-				prev_s.append(i)
-				all_s.append(prev_s)
-	return all_s
+    if length == 1:
+        return [[1],[2],[3],[4],[5],[6],[7],[8]]
+    else:
+        all_prev_s = sequential_s(length - 1)
+        all_s = []
+        for prev_s in all_prev_s:
+            for i in range(1,9):
+                all_s.append(prev_s + [i])
+    return all_s
 
 def random_s(length):
 	s = [random.randint(1,8) for i in range(length)]
@@ -299,12 +351,13 @@ def main():
 	# circ = pickle.load(open('%s/supremacy_circuit_4_8.dump' % path, 'rb' ))
 
 	original_dag = circuit_to_dag(circ)
-	# dag_drawer(original_dag, filename='%s/original_dag.pdf' % path)
+	dag_drawer(original_dag, filename='%s/original_dag.pdf' % path)
 	q = circ.qregs[0]
 	
 	''' Test positions for the toy circuit'''
 	# positions = [(q[4],1), (q[1],1)]
-	positions = [(q[1],0)]
+	positions = [(q[1],0), (q[0],0)]
+	# positions = [(q[1],0)]
 
 	''' Test positions that will cut into 2 parts'''
 	# positions = [(q[2], 1), (q[7], 1), (q[10],1), (q[14], 1)]
