@@ -65,6 +65,7 @@ value: (tuple) corresponding qubit tuple in the sub circuit
 
 ### Misc
  - [ ] Add a dependency installation file
+ - [ ] Current codes may crash if user input circuit has registers names containing 'measure' and 'output'
 ## Future Directions
 
 

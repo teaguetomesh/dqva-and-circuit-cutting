@@ -29,16 +29,23 @@ class Graph(object):
 
     def merge_vertices(self, edge_index):
         hi, ti = self.edges[edge_index]
+        # print('removing edge ', self.edges[edge_index])
         
         head = self.verts[hi]
         tail = self.verts[ti]
+
+        # print('head = ', head, 'tail = ', tail)
 
         # Remove the edge between head and tail
         del head[ti]
         del tail[hi]
 
+        # print('After removing head->tail, head = ', head, 'tail = ', tail)
+
         # Merge tails
         head.update(tail)
+
+        # print('After merging tail, head = ', head)
 
         # Update all the neighboring vertices of the fused vertex
         for i in tail.keys():
@@ -80,6 +87,7 @@ def _fast_min_cut(graph):
         g1 = contract(graph, t)
         g2 = contract(graph, t)
         
+        # print('m = ', min(_fast_min_cut(g1), _fast_min_cut(g2)))
         return min(_fast_min_cut(g1), _fast_min_cut(g2))
 
 # Karger Stein algorithm. Refer https://en.wikipedia.org/wiki/Karger%27s_algorithm#Karger.E2.80.93Stein_algorithm
@@ -87,6 +95,7 @@ def _fast_min_cut(graph):
 def fast_min_cut(graph):
     m = graph.edge_count
     n = graph.vertex_count
+    print('will run %d times' % int(n * math.log(n)/(n - 1)))
     for i in range(int(n * math.log(n)/(n - 1))):
         random.seed(datetime.now())
         m = min(m, _fast_min_cut(graph))
@@ -94,6 +103,8 @@ def fast_min_cut(graph):
     return m
     
 # Simple test
-graph = Graph([[1,2,3],[2,1,3,4],[3,1,2,4],[4,2,3]])
+graph = Graph([[0,1], [1,0,2], [2,1,3], [3,2], [4,5], [5,4,6], [6,5,7], [7,6]])
 print(graph.verts)
+print(graph.edges)
+print('*' * 100)
 print(fast_min_cut(graph))
