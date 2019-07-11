@@ -12,7 +12,6 @@ import os
 import pickle
 import random
 import copy
-from colorama import Fore, Back, Style
 
 def sub_circ_sampler(s, sub_circs_no_bridge, complete_path_map):
 	# print('building bridges for s = ', s)
