@@ -1,3 +1,5 @@
 venv
 q-split-master
 __pycache__
+.vscode
+.ipynb_checkpoints

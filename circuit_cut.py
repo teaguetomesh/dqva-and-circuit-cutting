@@ -8,16 +8,26 @@ import networkx as nx
 import pickle
 import argparse
 import os
-from quantum_circuit_generator.generators import gen_supremacy
 
+def cut_circuit(circ, positions):
+    original_dag = circuit_to_dag(circ)
+    cut_dag, path_order_dict = cut_edges(original_dag=original_dag, positions=positions)
+    in_out_arg_dict = contains_wire_nodes(cut_dag)
+    sub_reg_dicts, input_wires_mapping = sub_circ_reg_counter(cut_dag, in_out_arg_dict)
+    components = list(nx.weakly_connected_components(cut_dag._multi_graph))
+    translation_dict = translation_dict_calc(input_wires_mapping, components, in_out_arg_dict, sub_reg_dicts)
+    complete_path_map = complete_path_calc(path_order_dict, input_wires_mapping, translation_dict, sub_reg_dicts)
+    sub_circs_no_bridge = generate_sub_circs(cut_dag, positions)
+
+    return sub_circs_no_bridge, complete_path_map
 
 def foo(args):
     path = '%s/results' % args.home_dir
     if not os.path.isdir(path):
         os.makedirs(path)
 
-    #circ = pickle.load(open('results/supremacy_circuit_4_8.dump', 'rb' ))
-    circ = gen_supremacy(4,4,8, order='01352746')
+    circ = pickle.load(open('supremacy_circuit_4_8.dump', 'rb' ))
+    # circ = gen_supremacy(4,4,8, order='01352746')
     print(circ)
     original_dag = circuit_to_dag(circ)
     dag_drawer(original_dag, filename='%s/original_dag.pdf' % path)

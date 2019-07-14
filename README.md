@@ -54,19 +54,22 @@ key: (tuple) (qubit tuple in the original uncut circuit, sub circuit index)
 value: (tuple) corresponding qubit tuple in the sub circuit
 ```
 ## TODO
-### Wei
+### Cutter
 
  - [ ] Sort input positions in reverse topological order to prevent bad user input
  - [x] Easy interface for the uniter
  - [x] Cut the circuit into multiple parts
  - [ ] Automatic algorithm to find positions to cut
- - [x] Is modification to Qiskit source code still needed?
- - [x] Implement uniter based on sub_circ, wiring, stitches interface
+ - [ ] Check if cut_dag is legal
+
+### Uniter/combiner
+ - [x] Implement uniter
+ - [ ] Use MPI to speed up combiner
 
 ### Misc
+ - [x] Is modification to Qiskit source code still needed?
  - [ ] Add a dependency installation file
  - [ ] Current codes may crash if user input circuit has registers names containing 'measure' and 'output'
+
 ## Future Directions
-
-
  - [ ] Weighted tensor network contraction, considering 'hardness' of each cluster.
