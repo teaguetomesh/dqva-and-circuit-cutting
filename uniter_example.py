@@ -13,6 +13,7 @@ import pickle
 import random
 import copy
 from uniter import *
+import supremacy_generator as suprem_gen
 
 def toy_circ():
 	num_qubits = 2
@@ -34,9 +35,11 @@ def main():
         os.makedirs(path)
 
     ''' Test example for a toy circuit'''
-    circ = toy_circ()
+    # circ = toy_circ()
+    circ = suprem_gen.circuit_generator(circuit_dimension=[4,4,8])
     q = circ.qregs[0]
-    positions = [(q[0],0)]
+    positions = [(q[7],1),(q[2],1),(q[14],2),(q[10],1)]
+    # positions = [(q[3],2), (q[4],4), (q[5],1)]
 
     ''' Test example for a supremacy circuit that will cut into 2 parts'''
     # circ = pickle.load(open('%s/supremacy_circuit_4_8.dump' % path, 'rb' ))

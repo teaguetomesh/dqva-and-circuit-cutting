@@ -12,6 +12,14 @@ import os
 import pickle
 import random
 import copy
+import timeit
+
+def fragment_simulator(sub_circs_no_bridge, complete_path_map, positions):
+    fragment_all_s, all_s = fragment_all_s_calc(sub_circs_no_bridge, complete_path_map, positions)
+    fragment_all_s = coefficients_multiplier(fragment_all_s, positions, all_s, complete_path_map)
+    # fragment_all_s = combiner(fragment_all_s)
+    # reconstructed_prob = reconstructor(fragment_all_s, complete_path_map)
+    return fragment_all_s
 
 def sub_circ_sampler(s, sub_circs_no_bridge, complete_path_map):
 	# print('building bridges for s = ', s)
@@ -138,12 +146,19 @@ def fragment_all_s_calc(sub_circs_no_bridge, complete_path_map, positions):
     # for i in range(np.power(8, len(positions))):
     print('Simulating fragments for %d s samples * %d fragment circuits' % 
     (len(all_s), len(sub_circs_no_bridge)))
-    for s in all_s:
+    start = timeit.default_timer()
+    for s_idx, s in enumerate(all_s):
         key = ''
         for char in s:
             key += str(char)
         fragment_s = fragment_s_calc(s, sub_circs_no_bridge, complete_path_map)
         fragment_all_s[key] = fragment_s
+        if s_idx%50 == 49:
+            stop = timeit.default_timer()
+            time_remaining = (stop-start)/(s_idx/len(all_s))-(stop-start)
+            print('%.2f %% completed, estimated time remaining = %.2f seconds' % ((100*s_idx/len(all_s)),time_remaining))
+    stop = timeit.default_timer()
+    print('Time: ', stop - start)  
     return fragment_all_s, all_s
 
 def link_fragment_idx_calc(complete_path_map, positions, cut_idx):
@@ -161,59 +176,60 @@ def link_fragment_idx_calc(complete_path_map, positions, cut_idx):
 	return start_frag_idx, end_frag_idx
 
 def coefficients_multiplier(fragment_all_s, positions, all_s, complete_path_map):
-	for cut_idx, cut in enumerate(positions):
-		start_frag_idx, end_frag_idx = link_fragment_idx_calc(complete_path_map, positions, cut_idx)
-		cut_qubit, _ = cut
-		path = complete_path_map[cut_qubit]
-		# print('start_frag_idx = ', start_frag_idx)
-		# print('path = ', path)
-		# start_frag = path[start_frag_idx]
-		start_frag = None
-		for x in path:
-			if x[0] == start_frag_idx:
-				start_frag = x
-		# print('start_frag_idx = %d, end_frag_idx = %d' % (start_frag_idx, end_frag_idx))
-		for s_idx, s in enumerate(all_s):
-			key = ''
-			for char in s:
-				key += str(char)
-			fragment_s = fragment_all_s[key]
-			# print('fragment_s = ', fragment_s)
-			for sub_circ_measure, sub_circ_registers in fragment_s:
-				sub_circ_idx = sub_circ_registers[0][0]
-				# print(Fore.RED + 'cut(i) = %d, circ_config_idx (j) = %d, s = %s, fragment (k) = %d' %(cut_idx,s_idx,s,sub_circ_idx) + Style.RESET_ALL)
-				sub_circ_prob_sum = 0
-				for x in sub_circ_measure:
-					sub_circ_prob_sum += sub_circ_measure[x]
-				# print('old probs:', sub_circ_measure, 'old probs sum = ', sub_circ_prob_sum)
-				if sub_circ_idx == end_frag_idx:
-					# print('sub_circ_idx = end_frag_index = ', sub_circ_idx)
-					if s[cut_idx] == 4 or s[cut_idx] == 6 or s[cut_idx] == 8:
-						for key in sub_circ_measure:
-							# print('multiply -0.5 for key ', key)
-							sub_circ_measure[key] *= -0.5
-					else:
-						for key in sub_circ_measure:
-							# print('multiply +0.5 for key ', key)
-							sub_circ_measure[key] *= 0.5
-				elif sub_circ_idx == start_frag_idx:
-					# print('sub_circ_idx = start_frag_index = ', sub_circ_idx)
-					if s[cut_idx] != 1 and s[cut_idx] != 2:
-						# print('sub_circ_measure = ', sub_circ_measure)
-						# print('sub_circ_registers = ', sub_circ_registers)
-						# print('start_frag = ', start_frag)
-						for key in sub_circ_measure:
-							for register_idx, register_measurement in enumerate(key.split(' ')):
-								_, sub_circ_register = sub_circ_registers[register_idx]
-								if sub_circ_register == start_frag[2][0] and register_measurement[start_frag[2][1]] == '1':
-									# print('multiply -1 for key', key)
-									sub_circ_measure[key] *= -1
+    print('Multiplying sigma and c for %d combinations' % len(fragment_all_s))
+    for cut_idx, cut in enumerate(positions):
+        start_frag_idx, end_frag_idx = link_fragment_idx_calc(complete_path_map, positions, cut_idx)
+        cut_qubit, _ = cut
+        path = complete_path_map[cut_qubit]
+        # print('start_frag_idx = ', start_frag_idx)
+        # print('path = ', path)
+        # start_frag = path[start_frag_idx]
+        start_frag = None
+        for x in path:
+            if x[0] == start_frag_idx:
+                start_frag = x
+        # print('start_frag_idx = %d, end_frag_idx = %d' % (start_frag_idx, end_frag_idx))
+        for s_idx, s in enumerate(all_s):
+            key = ''
+            for char in s:
+                key += str(char)
+            fragment_s = fragment_all_s[key]
+            # print('fragment_s = ', fragment_s)
+            for sub_circ_measure, sub_circ_registers in fragment_s:
+                sub_circ_idx = sub_circ_registers[0][0]
+                # print(Fore.RED + 'cut(i) = %d, circ_config_idx (j) = %d, s = %s, fragment (k) = %d' %(cut_idx,s_idx,s,sub_circ_idx) + Style.RESET_ALL)
+                sub_circ_prob_sum = 0
+                for x in sub_circ_measure:
+                    sub_circ_prob_sum += sub_circ_measure[x]
+                # print('old probs:', sub_circ_measure, 'old probs sum = ', sub_circ_prob_sum)
+                if sub_circ_idx == end_frag_idx:
+                    # print('sub_circ_idx = end_frag_index = ', sub_circ_idx)
+                    if s[cut_idx] == 4 or s[cut_idx] == 6 or s[cut_idx] == 8:
+                        for key in sub_circ_measure:
+                            # print('multiply -0.5 for key ', key)
+                            sub_circ_measure[key] *= -0.5
+                    else:
+                        for key in sub_circ_measure:
+                            # print('multiply +0.5 for key ', key)
+                            sub_circ_measure[key] *= 0.5
+                elif sub_circ_idx == start_frag_idx:
+                    # print('sub_circ_idx = start_frag_index = ', sub_circ_idx)
+                    if s[cut_idx] != 1 and s[cut_idx] != 2:
+                        # print('sub_circ_measure = ', sub_circ_measure)
+                        # print('sub_circ_registers = ', sub_circ_registers)
+                        # print('start_frag = ', start_frag)
+                        for key in sub_circ_measure:
+                            for register_idx, register_measurement in enumerate(key.split(' ')):
+                                _, sub_circ_register = sub_circ_registers[register_idx]
+                                if sub_circ_register == start_frag[2][0] and register_measurement[start_frag[2][1]] == '1':
+                                    # print('multiply -1 for key', key)
+                                    sub_circ_measure[key] *= -1
 
 			# 	print('modified sub_circ_measure = ', sub_circ_measure)
 			# print('new fragment_s : ', fragment_s, '\n')
 	# print('fragment_all_s = ')
 	# print(fragment_all_s)
-	return fragment_all_s
+    return fragment_all_s
 
 def fragment_combiner(frag_a, frag_b):
 	# print('combine : ')

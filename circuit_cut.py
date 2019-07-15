@@ -18,8 +18,9 @@ def cut_circuit(circ, positions):
     translation_dict = translation_dict_calc(input_wires_mapping, components, in_out_arg_dict, sub_reg_dicts)
     complete_path_map = complete_path_calc(path_order_dict, input_wires_mapping, translation_dict, sub_reg_dicts)
     sub_circs_no_bridge = generate_sub_circs(cut_dag, positions)
+    K, d = cluster_character(sub_reg_dicts, positions)
 
-    return sub_circs_no_bridge, complete_path_map
+    return sub_circs_no_bridge, complete_path_map, K, d
 
 def foo(args):
     path = '%s/results' % args.home_dir
