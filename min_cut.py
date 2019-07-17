@@ -78,7 +78,6 @@ def min_cut(graph):
         # print(i, m)
     return m
 
-
 def _fast_min_cut(graph):
     if graph.vertex_count <= 6:
         return min_cut(graph)
@@ -103,7 +102,9 @@ def fast_min_cut(graph):
     return m
     
 # Simple test
-graph = Graph([[0,1], [1,0,2], [2,1,3], [3,2], [4,5], [5,4,6], [6,5,7], [7,6]])
+# graph = Graph([[4,6,7], [5,6,7], [6,4,5], [7,4,5]])
+# graph = Graph([['a','c','d'],['b','c','d'],['c','a','b'],['d','a','b']])
+graph = Graph([['a','c','d'],['b','c','d'],['c','a','b'],['d','a','b']])
 print(graph.verts)
 print(graph.edges)
 print('*' * 100)

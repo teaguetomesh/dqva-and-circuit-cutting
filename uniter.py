@@ -123,12 +123,14 @@ def sub_circ_sampler(s, sub_circs_no_bridge, complete_path_map):
 
 	return sub_circs_bridge
 
-def fragment_s_calc(s, sub_circs_no_bridge, complete_path_map, num_shots=1024):
+def fragment_s_calc(s, sub_circs_no_bridge, complete_path_map, num_shots=1024, backend = 'qasm_simulator'):
 	sub_circs_bridge = sub_circ_sampler(s, sub_circs_no_bridge, complete_path_map)
 	backend_sim = BasicAer.get_backend('qasm_simulator')
 	fragment_s = []
+	# print('s = ', s)
 
 	for sub_circ_idx, sub_circ in enumerate(sub_circs_bridge):
+		# print(sub_circ)
 		job_sim = execute(sub_circ, backend_sim, shots=num_shots)
 		result_sim = job_sim.result()
 		# print(type(result_sim), result_sim)
@@ -136,30 +138,30 @@ def fragment_s_calc(s, sub_circs_no_bridge, complete_path_map, num_shots=1024):
 		y_sigma_freq  = {}
 		for key in counts:
 			y_sigma_freq[key[::-1]] = counts[key]/num_shots
-		[(sub_circ_idx, creg) for creg in sub_circ.cregs]
+		# [(sub_circ_idx, creg) for creg in sub_circ.cregs]
 		fragment_s.append((y_sigma_freq, [(sub_circ_idx, creg) for creg in sub_circ.cregs]))
 	return fragment_s
 
 def fragment_all_s_calc(sub_circs_no_bridge, complete_path_map, positions):
-    all_s = sequential_s(len(positions))
-    fragment_all_s = {}
-    # for i in range(np.power(8, len(positions))):
-    print('Simulating fragments for %d s samples * %d fragment circuits' % 
-    (len(all_s), len(sub_circs_no_bridge)))
-    start = timeit.default_timer()
-    for s_idx, s in enumerate(all_s):
-        key = ''
-        for char in s:
-            key += str(char)
-        fragment_s = fragment_s_calc(s, sub_circs_no_bridge, complete_path_map)
-        fragment_all_s[key] = fragment_s
-        if s_idx%50 == 49:
-            stop = timeit.default_timer()
-            time_remaining = (stop-start)/(s_idx/len(all_s))-(stop-start)
-            print('%.2f %% completed, estimated time remaining = %.2f seconds' % ((100*s_idx/len(all_s)),time_remaining))
-    stop = timeit.default_timer()
-    print('Time: ', stop - start)  
-    return fragment_all_s, all_s
+	all_s = sequential_s(len(positions))
+	fragment_all_s = {}
+	# for i in range(np.power(8, len(positions))):
+	print('Simulating fragments for %d s samples * %d fragment circuits' % 
+	(len(all_s), len(sub_circs_no_bridge)))
+	start = timeit.default_timer()
+	for s_idx, s in enumerate(all_s):
+		key = ''
+		for char in s:
+			key += str(char)
+		fragment_s = fragment_s_calc(s, sub_circs_no_bridge, complete_path_map)
+		fragment_all_s[key] = fragment_s
+		if s_idx%50 == 49:
+			stop = timeit.default_timer()
+			time_remaining = (stop-start)/(s_idx/len(all_s))-(stop-start)
+			print('%.2f %% completed, estimated time remaining = %.2f seconds' % ((100*s_idx/len(all_s)),time_remaining))
+	stop = timeit.default_timer()
+	print('Time: ', stop - start)  
+	return fragment_all_s, all_s
 
 def link_fragment_idx_calc(complete_path_map, positions, cut_idx):
 	cut_qubit, cut_gate_idx = positions[cut_idx]

@@ -21,6 +21,7 @@ def main():
     ''' Test positions that will cut into 2 parts'''
     positions = [(q[7],1),(q[2],1),(q[14],2),(q[10],1)]
     sub_circs_no_bridge, complete_path_map, K, d = cutter.cut_circuit(circ, positions)
+    print(sub_circs_no_bridge[0])
     print('K=%d, d=%d cluster' % (K,d))
     for i, sub_circ_no_bridge in enumerate(sub_circs_no_bridge):
         sub_circ_no_bridge.draw(output='text', line_length=400,filename='./results/sub_circ_%d.txt'%i)
