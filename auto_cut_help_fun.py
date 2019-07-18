@@ -63,7 +63,10 @@ class Graph(object):
         # print('FINISHED verts:', self.verts)
 
 def translate(original_r, original_g, curr_g, grouping):
+    # print('translating edge index', original_r)
     original_head, original_tail = original_g.edges[original_r]
+    # print('original head =', original_head, 'original tail =', original_tail)
+    # print('current graph:', curr_g.verts)
     curr_head = None
     if original_head in curr_g.verts:
         curr_head = original_head
@@ -100,9 +103,8 @@ def contract(graph, min_v=2):
         contracted_edges.append(graph.edges[graph_r])
         g_r = translate(original_r=graph_r, original_g=graph, curr_g=g, grouping=grouping)
         g_head, g_tail = g.edges[g_r]
-        print('contracting', graph.edges[graph_r])
-
-        # print('keep the edge', (head, tail))
+        # print('contracting', graph.edges[graph_r], 'in the original graph')
+        # print('keep the edge', (g_head, g_tail), 'in the contracted graph')
         g.merge_vertices(g_r)
         
         hi = -1
@@ -116,39 +118,47 @@ def contract(graph, min_v=2):
         del grouping[min(hi,ti)]
         del grouping[max(hi,ti)-1]
         # print('updated grouping:', grouping)
+        # print('*'*100)
 
     cut_edges = []
     for edge in graph.edges:
-        if edge not in contracted_edges:
+        head, tail = edge
+        contracted = False
+        for group in grouping:
+            if head in group.split(' ') and tail in group.split(' '):
+                contracted = True
+                break
+        if not contracted:
             cut_edges.append(edge)
-            print('original edge', edge)
-            print('is not contracted in', contracted_edges)
-            print()
+
     return g, grouping, cut_edges
 
 def cluster_character(grouping):
-    # FIXME: double check d calculation
     max_d = 0
     for group in grouping:
         d = 0
+        group_qubits = []
         for vertex in group.split(' '):
             qargs = vertex.split(',')
             for qarg in qargs:
-                if qarg[len(qarg)-1] == '0':
-                    d += 1
+                qubit = qarg[:len(qarg)-1]
+                if qubit not in group_qubits:
+                    d+=1
+                    group_qubits.append(qubit)
+                
         max_d = max(max_d, d)
     return max_d
 
 # Karger's Algorithm
 # For failure probabilty upper bound of 1/n, repeat the algorithm nC2 logn times
-def min_cut(graph):
+def min_cut(graph, min_v=2):
     m = graph.edge_count
     n = graph.vertex_count
     all_K_d = {}
     print('will run %d times' % int(n * (n-1) * math.log(n)/2))
     for i in range(int(n * (n-1) * math.log(n)/2)):
         random.seed(datetime.now())
-        g, grouping, cut_edges = contract(graph)
+        g, grouping, cut_edges = contract(graph, min_v)
         m = min(m, g.edge_count)
         K = g.edge_count
         d = cluster_character(grouping)
@@ -218,8 +228,8 @@ def circuit_to_graph(stripped_circ):
     graph = Graph(abstraction) 
     return graph
 
-def find_pareto_solutions(circ):
+def find_pareto_solutions(circ, num_clusters=2):
     stripped_circ = circ_stripping(circ)
     graph = circuit_to_graph(stripped_circ)
-    pareto_K_d = min_cut(graph)
+    pareto_K_d = min_cut(graph, num_clusters)
     return pareto_K_d
