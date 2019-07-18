@@ -141,6 +141,7 @@ def cluster_character(grouping):
         for vertex in group.split(' '):
             qargs = vertex.split(',')
             for qarg in qargs:
+                # FIXME: wrong if multi qubit gate count > 9
                 qubit = qarg[:len(qarg)-1]
                 if qubit not in group_qubits:
                     d+=1
@@ -228,8 +229,46 @@ def circuit_to_graph(stripped_circ):
     graph = Graph(abstraction) 
     return graph
 
+def pareto_K_d_parser(pareto_K_d, circ):
+    dag = circuit_to_dag(circ)
+    for pareto_solution in pareto_K_d:
+        cuts = pareto_K_d[pareto_solution]
+        positions = []
+        # print('cuts:', cuts)
+        for position in cuts:
+            source, dest = position
+            source_qargs = [x[:len(x)-1] for x in source.split(',')]
+            dest_qargs = [x[:len(x)-1] for x in dest.split(',')]
+            qubit_cut = list(set(source_qargs).intersection(set(dest_qargs)))
+            if len(qubit_cut)>1:
+                raise Exception('one cut is cutting on multiple qubits')
+            for x in source.split(','):
+                if x[:len(x)-1] == qubit_cut[0]:
+                    source_idx = int(x[len(x)-1])
+            for x in dest.split(','):
+                if x[:len(x)-1] == qubit_cut[0]:
+                    dest_idx = int(x[len(x)-1])
+            multi_Q_gate_idx = max(source_idx, dest_idx)
+            # print('cut qubit:', qubit_cut[0], 'after %d multi qubit gate'% multi_Q_gate_idx)
+            wire = None
+            for qubit in circ.qubits:
+                if qubit[0].name == qubit_cut[0].split('[')[0] and qubit[1] == int(qubit_cut[0].split('[')[1].split(']')[0]):
+                    wire = qubit
+            tmp = 0
+            all_Q_gate_idx = None
+            for gate_idx, gate in enumerate(list(dag.nodes_on_wire(wire=wire, only_ops=True))):
+                if len(gate.qargs)>1:
+                    tmp += 1
+                    if tmp == multi_Q_gate_idx:
+                        all_Q_gate_idx = gate_idx
+            positions.append((wire, all_Q_gate_idx))
+        pareto_K_d[pareto_solution] = positions
+    return pareto_K_d
+
 def find_pareto_solutions(circ, num_clusters=2):
     stripped_circ = circ_stripping(circ)
     graph = circuit_to_graph(stripped_circ)
     pareto_K_d = min_cut(graph, num_clusters)
+    pareto_K_d = pareto_K_d_parser(pareto_K_d, circ)
+            
     return pareto_K_d
