@@ -141,8 +141,7 @@ def cluster_character(grouping):
         for vertex in group.split(' '):
             qargs = vertex.split(',')
             for qarg in qargs:
-                # FIXME: wrong if multi qubit gate count > 9
-                qubit = qarg[:len(qarg)-1]
+                qubit = qarg.split(']')[0] + ']'
                 if qubit not in group_qubits:
                     d+=1
                     group_qubits.append(qubit)
@@ -163,7 +162,7 @@ def min_cut(graph, min_v=2):
         m = min(m, g.edge_count)
         K = g.edge_count
         d = cluster_character(grouping)
-        # TODO: K,d cluster is overwritten
+        # TODO: same K,d cluster is overwritten
         all_K_d[(K,d)] = cut_edges
         # print('Run %d cut_edges:' % i, cut_edges)
         # print('*'* 100)

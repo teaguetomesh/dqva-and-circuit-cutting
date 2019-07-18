@@ -59,7 +59,8 @@ value: (tuple) corresponding qubit tuple in the sub circuit
  - [ ] Sort input positions in reverse topological order to prevent bad user input
  - [x] Easy interface for the uniter
  - [x] Cut the circuit into multiple parts
- - [ ] Automatic algorithm to find positions to cut
+ - [x] Automatic algorithm to find positions to cut
+ - [ ] Use Karger_stein for auto cutter
  - [ ] Check if cut_dag is legal
 
 ### Uniter/combiner
