@@ -139,7 +139,7 @@ def supremacy_layer(circuit, q_reg, rotation_idx, single_qubit_gates):
     # circuit.barrier()
     return circuit
 
-def circuit_generator(circuit_dimension, layer_order=[0,2,1,3,4,6,5,7], random=False, measure=False):
+def circuit_generator(circuit_dimension, layer_order=[0,2,1,3,4,6,5,7], random_order=False, measure=False):
     row = circuit_dimension[0]
     col = circuit_dimension[1]
     circuit_depth = circuit_dimension[2]
@@ -147,7 +147,7 @@ def circuit_generator(circuit_dimension, layer_order=[0,2,1,3,4,6,5,7], random=F
     circ = QuantumCircuit(q_reg.qubits)
 
     circ = full_entangle(circuit = circ, q_reg = q_reg)
-    if not random:
+    if not random_order:
         for idx in range(circuit_depth):
             order = layer_order[idx%8]
             if idx==0:

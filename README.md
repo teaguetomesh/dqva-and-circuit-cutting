@@ -54,14 +54,20 @@ key: (tuple) (qubit tuple in the original uncut circuit, sub circuit index)
 value: (tuple) corresponding qubit tuple in the sub circuit
 ```
 ## TODO
+### Auto Cut Finder
+
+- [x] Implement Karger auto cutter
+- [ ] Implement fast Karger_stein auto cutter
+- [x] Sort output cuts in rever topological order
+
 ### Cutter
 
  - [ ] Sort input positions in reverse topological order to prevent bad user input
  - [x] Easy interface for the uniter
  - [x] Cut the circuit into multiple parts
  - [x] Automatic algorithm to find positions to cut
- - [ ] Use Karger_stein for auto cutter
  - [ ] Check if cut_dag is legal
+ - [ ] Need to address one qubit entering a fragment more than once
 
 ### Uniter/combiner
  - [x] Implement uniter
@@ -69,6 +75,7 @@ value: (tuple) corresponding qubit tuple in the sub circuit
 
 ### Misc
  - [x] Is modification to Qiskit source code still needed?
+ - [ ] Is Qiskit 0.11 going to crash the current codes?
  - [ ] Add a dependency installation file
  - [ ] Current codes may crash if user input circuit has registers names containing 'measure' and 'output'
 
