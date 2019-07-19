@@ -58,7 +58,7 @@ value: (tuple) corresponding qubit tuple in the sub circuit
 
 - [x] Implement Karger auto cutter
 - [ ] Implement fast Karger_stein auto cutter
-- [x] Sort output cuts in rever topological order
+- [x] Sort output cuts in reverse topological order
 
 ### Cutter
 
