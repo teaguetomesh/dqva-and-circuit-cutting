@@ -134,6 +134,8 @@ def contract(graph, min_v=2):
     return g, grouping, cut_edges
 
 def cluster_character(grouping):
+    # FIXME: does not handle same qubit enter fragment more than once
+    # TODO: change to fragment hardness metric
     max_d = 0
     for group in grouping:
         d = 0
