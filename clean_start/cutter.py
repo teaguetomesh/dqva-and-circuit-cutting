@@ -91,6 +91,7 @@ def fragments_generator(cut_dag):
     for component_idx, component in enumerate(components):
         print('component %d' % component_idx)
         component_qregs = {}
+        component_qubits = {}
         for node in component:
             if node.type == 'in':
                 # print(node.type, node.name, node.wire[0].name)
@@ -98,11 +99,19 @@ def fragments_generator(cut_dag):
                     old_register = component_qregs[node.wire[0].name]
                     new_register = QuantumRegister(old_register.size+1, old_register.name)
                     component_qregs[node.wire[0].name] = new_register
+                    component_qubits[node.wire] = (new_register.name, new_register.size-1)
                     # print('has {}, changed from {} to {}' % (node.wire[0].name,old_register,new_register))
                 else:
-                    component_qregs[node.wire[0].name] = QuantumRegister(1, node.wire[0].name)
+                    new_register = QuantumRegister(1, node.wire[0].name)
+                    component_qregs[node.wire[0].name] = new_register
+                    component_qubits[node.wire] = (new_register.name, new_register.size-1)
                     # print('does not have {}, add {}' % (node.wire[0].name,old_register,new_register))
+        for qubit in component_qubits:
+            qubit_register = component_qregs[component_qubits[qubit][0]]
+            qubit_register_idx = component_qubits[qubit][1]
+            component_qubits[qubit] = qubit_register[qubit_register_idx]
         print('registers:', component_qregs)
+        print('qubits:', component_qubits)
         fragment = QuantumCircuit()
         for qreg in component_qregs.values():
             fragment.add_register(qreg)
