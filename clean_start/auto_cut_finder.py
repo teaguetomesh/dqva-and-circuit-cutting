@@ -133,21 +133,37 @@ def contract(graph, min_v=2):
 
     return g, grouping, cut_edges
 
+def find_crevices(l):
+    rolling_idx = l[0]
+    d = 1
+    for idx, ele in enumerate(l):
+        if ele == rolling_idx:
+            rolling_idx += 1
+        else:
+            d += 1
+            rolling_idx = ele + 1
+    return d
+
 def cluster_character(grouping):
     # FIXME: does not handle same qubit enter fragment more than once
     # TODO: change to fragment hardness metric
     max_d = 0
     for group in grouping:
-        d = 0
-        group_qubits = []
+        group_qubits = {}
         for vertex in group.split(' '):
             qargs = vertex.split(',')
             for qarg in qargs:
                 qubit = qarg.split(']')[0] + ']'
+                multi_Qgate_idx = int(qarg.split(']')[1])
                 if qubit not in group_qubits:
-                    d+=1
-                    group_qubits.append(qubit)
-                
+                    group_qubits[qubit] = [multi_Qgate_idx]
+                else:
+                    group_qubits[qubit].append(multi_Qgate_idx)
+        # print(group_qubits)
+        d = 0
+        for qubit in group_qubits:
+            l = sorted(group_qubits[qubit])
+            d += find_crevices(l)
         max_d = max(max_d, d)
     return max_d
 
@@ -165,7 +181,7 @@ def min_cut(graph, min_v=2):
         K = g.edge_count
         d = cluster_character(grouping)
         # TODO: same K,d cluster is overwritten
-        all_K_d[(K,d)] = cut_edges
+        all_K_d[(K,d)] = (cut_edges, grouping)
         # print('Run %d cut_edges:' % i, cut_edges)
         # print('*'* 100)
     
@@ -233,7 +249,7 @@ def circuit_to_graph(stripped_circ):
 def pareto_K_d_parser(pareto_K_d, circ):
     dag = circuit_to_dag(circ)
     for pareto_solution in pareto_K_d:
-        cuts = pareto_K_d[pareto_solution]
+        cuts = pareto_K_d[pareto_solution][0]
         positions = []
         # print('cuts:', cuts)
         for position in cuts:
@@ -263,7 +279,7 @@ def pareto_K_d_parser(pareto_K_d, circ):
                     if tmp == multi_Q_gate_idx:
                         all_Q_gate_idx = gate_idx
             positions.append((wire, all_Q_gate_idx))
-        pareto_K_d[pareto_solution] = sorted(positions, reverse=True, key=lambda cut: cut[1])
+        pareto_K_d[pareto_solution] = (sorted(positions, reverse=True, key=lambda cut: cut[1]), pareto_K_d[pareto_solution][1])
     return pareto_K_d
 
 def find_pareto_solutions(circ, num_clusters=2):
