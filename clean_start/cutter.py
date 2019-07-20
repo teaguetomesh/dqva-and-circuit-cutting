@@ -39,6 +39,9 @@ def cut_edges(original_dag, positions):
     cut_dag = copy.deepcopy(original_dag)
     cutQ_register = QuantumRegister(len(positions), 'cutQ')
     cut_dag.add_qreg(cutQ_register)
+    complete_path_map = {}
+    for input_qubit in original_dag.qubits():
+        complete_path_map[input_qubit] = []
 
     for cutQ_idx, position in enumerate(positions):
         wire, source_node_idx = position
@@ -46,6 +49,7 @@ def cut_edges(original_dag, positions):
         nodes_before_cut = list(cut_dag.nodes_on_wire(wire=wire, only_ops=True))[:source_node_idx+1]
         nodes_after_cut = list(cut_dag.nodes_on_wire(wire=wire, only_ops=True))[source_node_idx+1:]
         cut_qubit = cutQ_register[cutQ_idx]
+        complete_path_map[wire].append(cut_qubit)
         
         _, original_out_node = find_io_node(cut_dag, wire)
         cut_in_node, cut_out_node = find_io_node(cut_dag, cut_qubit)
@@ -60,7 +64,7 @@ def cut_edges(original_dag, positions):
         cut_dag._multi_graph.remove_edge(nodes_before_cut[len(nodes_before_cut)-1], nodes_after_cut[0])
         cut_dag._multi_graph.remove_edge(cut_in_node, cut_out_node)
 
-        for node in nodes_after_cut:
+        for idx, node in enumerate(nodes_after_cut):
             updated_qargs = []
             for qarg in node.qargs:
                 if qarg == wire:
@@ -68,9 +72,39 @@ def cut_edges(original_dag, positions):
                 else:
                     updated_qargs.append(qarg)
             node.qargs = updated_qargs
+            if idx<len(nodes_after_cut)-1:
+                cut_dag._multi_graph.remove_edge(nodes_after_cut[idx], nodes_after_cut[idx+1])
+                cut_dag._multi_graph.add_edge(nodes_after_cut[idx], nodes_after_cut[idx+1],
+                name="%s[%s]" % (cut_qubit[0].name, cut_qubit[1]), wire=cut_qubit)
+    for input_qubit in complete_path_map:
+        complete_path_map[input_qubit].append(input_qubit)
+        complete_path_map[input_qubit] = complete_path_map[input_qubit][::-1]
     
     components = list(nx.weakly_connected_components(cut_dag._multi_graph))
     num_components = len(components)
     if num_components<2:
         raise Exception('Not a split, cut_dag only has %d component' % num_components)
-    return cut_dag
+    return cut_dag, complete_path_map
+
+def fragments_generator(cut_dag):
+    components = list(nx.weakly_connected_components(cut_dag._multi_graph))
+    for component_idx, component in enumerate(components):
+        print('component %d' % component_idx)
+        component_qregs = {}
+        for node in component:
+            if node.type == 'in':
+                # print(node.type, node.name, node.wire[0].name)
+                if node.wire[0].name in component_qregs:
+                    old_register = component_qregs[node.wire[0].name]
+                    new_register = QuantumRegister(old_register.size+1, old_register.name)
+                    component_qregs[node.wire[0].name] = new_register
+                    # print('has {}, changed from {} to {}' % (node.wire[0].name,old_register,new_register))
+                else:
+                    component_qregs[node.wire[0].name] = QuantumRegister(1, node.wire[0].name)
+                    # print('does not have {}, add {}' % (node.wire[0].name,old_register,new_register))
+        print('registers:', component_qregs)
+        fragment = QuantumCircuit()
+        for qreg in component_qregs.values():
+            fragment.add_register(qreg)
+        print('*'*100)
+    return
