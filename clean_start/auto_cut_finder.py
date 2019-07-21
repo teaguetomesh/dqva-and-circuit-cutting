@@ -145,7 +145,6 @@ def find_crevices(l):
     return d
 
 def cluster_character(grouping):
-    # FIXME: does not handle same qubit enter fragment more than once
     # TODO: change to fragment hardness metric
     max_d = 0
     for group in grouping:
