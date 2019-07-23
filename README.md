@@ -56,6 +56,8 @@ num_clusters: number of fragments to split into. Default and minimum is 2.
 ```
 a Python dict. Keys are tuples of (K, d). Values are (cut positions, groupings). 'groupings' was for development purposes. Will remove in future.
 ```
+### Cut searcher benchmark
+Benchmarking the running speed of cut searcher.
 ## Cutter
 Cut a circuit into fragments and provide necessary information for simulator and uniter.
 ```
@@ -77,6 +79,8 @@ value: list(tuple)
 ...
 (sub circuit index, input qubit tuple in the sub circuit) --> Last one indicates the final output qubit
 ```
+### Cutter verifier
+Compares the operations on each qubit in the original uncut circuit and all the fragments. Test for correctness.
 
 ## TODO
 ### Wei

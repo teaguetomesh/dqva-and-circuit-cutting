@@ -1,5 +1,5 @@
 import supremacy_generator as suprem_gen
-import auto_cut_finder as cut_finder
+import cut_searcher as cut_searcher
 import cutter
 import random
 from qiskit.tools.visualization import dag_drawer
@@ -25,7 +25,7 @@ def find_original_qubit(fragment_idx, qubit):
 
 circ = suprem_gen.circuit_generator([5,5,8], random_order = True)
 
-pareto_K_d = cut_finder.find_pareto_solutions(circ=circ, num_clusters=3)
+pareto_K_d = cut_searcher.find_pareto_solutions(circ=circ, num_clusters=3)
 keys = list(pareto_K_d.keys())
 key = random.choice(keys)
 pareto_cuts, pareto_grouping = pareto_K_d[key]
