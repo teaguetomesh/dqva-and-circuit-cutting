@@ -54,7 +54,8 @@ value: list(tuple)
  - [x] Need to address one qubit entering a fragment more than once
 
 #### Simulator
- - [ ] Implement simulator in Qiskit
+ - [x] Implement simulator in Qiskit
+ - [ ] Apply memoization to speed up
 
 #### Uniter
  - [ ] Implement uniter in python
