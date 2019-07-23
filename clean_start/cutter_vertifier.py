@@ -25,7 +25,7 @@ def find_original_qubit(fragment_idx, qubit):
 
 circ = suprem_gen.circuit_generator([5,5,8], random_order = True)
 
-pareto_K_d = cut_finder.find_pareto_solutions(circ=circ, num_clusters=2)
+pareto_K_d = cut_finder.find_pareto_solutions(circ=circ, num_clusters=3)
 keys = list(pareto_K_d.keys())
 key = random.choice(keys)
 pareto_cuts, pareto_grouping = pareto_K_d[key]
@@ -34,8 +34,8 @@ fragments, complete_path_map, K, d = cutter.cut_circuit(circ, pareto_cuts)
 print('a random pareto solution:')
 print(key, pareto_cuts)
 # [print(x) for x in pareto_grouping]
-# print('Complete Path Map:')
-# [print(x, complete_path_map[x]) for x in complete_path_map]
+print('Complete Path Map:')
+[print(x, complete_path_map[x]) for x in complete_path_map]
 print('K=%d, d=%d' % (K,d))
 print('*'*100)
 
