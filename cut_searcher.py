@@ -7,6 +7,7 @@ import copy
 from collections import Counter
 from datetime import datetime
 import sys
+import numpy as np
 
 class Graph(object):
     def __init__(self, vlist):
@@ -61,6 +62,47 @@ class Graph(object):
         self.update_edges()
         # print('FINISHED edges:', self.edges)
         # print('FINISHED verts:', self.verts)
+
+def circ_stripping(circ):
+    # Remove all single qubit gates in the circuit
+    dag = circuit_to_dag(circ)
+    stripped_dag = DAGCircuit()
+    [stripped_dag.add_qreg(x) for x in circ.qregs]
+    for vertex in dag.topological_op_nodes():
+        if len(vertex.qargs) >= 2:
+            stripped_dag.apply_operation_back(op=vertex.op, qargs=vertex.qargs)
+    return dag_to_circuit(stripped_dag)
+
+def circuit_to_graph(stripped_circ):
+    input_qubit_itr = {}
+    for x in stripped_circ.qubits:
+        input_qubit_itr[x] = 0
+    stripped_dag = circuit_to_dag(stripped_circ)
+    vert_info = []
+    for vertex in stripped_dag.topological_op_nodes():
+        vertex_name = ''
+        for qarg in vertex.qargs:
+            if vertex_name == '':
+                vertex_name += '%s[%d]%d' % (qarg[0].name,qarg[1],input_qubit_itr[qarg])
+                input_qubit_itr[qarg] += 1
+            else:
+                vertex_name += ',%s[%d]%d' % (qarg[0].name,qarg[1],input_qubit_itr[qarg])
+                input_qubit_itr[qarg] += 1
+        vert_info.append((vertex_name, vertex.qargs))
+    
+    abstraction = []
+    for idx, (vertex_name, vertex_qargs) in enumerate(vert_info):
+        abstraction_item = [vertex_name]
+        for qarg in vertex_qargs:
+            prev_vertex_name, prev_found = find_neighbor(qarg, vert_info[:idx][::-1])
+            next_vertex_name, next_found = find_neighbor(qarg, vert_info[idx+1:])
+            if prev_found:
+                abstraction_item.append(prev_vertex_name)
+            if next_found:
+                abstraction_item.append(next_vertex_name)
+        abstraction.append(abstraction_item)
+    graph = Graph(abstraction) 
+    return graph
 
 def translate_edge_index(original_r, original_g, curr_g, grouping):
     # print('translating edge index', original_r)
@@ -144,9 +186,10 @@ def find_crevices(l):
             rolling_idx = ele + 1
     return d
 
-def cluster_character(grouping):
-    # TODO: change to fragment hardness metric
+def cluster_character(graph, grouping, hw_max_qubit=24):
+    K = graph.edge_count
     max_d = 0
+    cumulative_hardness = 0
     for group in grouping:
         group_qubits = {}
         for vertex in group.split(' '):
@@ -160,43 +203,15 @@ def cluster_character(grouping):
                     group_qubits[qubit].append(multi_Qgate_idx)
         # print(group_qubits)
         d = 0
+        K = 0
         for qubit in group_qubits:
             l = sorted(group_qubits[qubit])
             d += find_crevices(l)
+            K += find_crevices(l) - 1
+        # print('K = %d, d = %d' % (K, d))
+        cumulative_hardness += float('inf') if d > hw_max_qubit else np.power(2,d)*np.power(8,K)
         max_d = max(max_d, d)
-    return max_d
-
-# Karger's Algorithm
-# For failure probabilty upper bound of 1/n, repeat the algorithm nC2 logn times
-def min_cut(graph, min_v=2):
-    m = graph.edge_count
-    n = graph.vertex_count
-    all_K_d = {}
-    print('%d edges %d vertices graph will run %d times' % (m, n, int(n * (n-1) * math.log(n)/2)))
-    for i in range(int(n * (n-1) * math.log(n)/2)):
-        random.seed(datetime.now())
-        g, grouping, cut_edges = contract(graph, min_v)
-        m = min(m, g.edge_count)
-        K = g.edge_count
-        d = cluster_character(grouping)
-        # TODO: same K,d cluster is overwritten
-        all_K_d[(K,d)] = cut_edges
-        # print('Run %d cut_edges:' % i, cut_edges)
-        # print('*'* 100)
-    
-    pareto_K_d = {}
-    for key0 in all_K_d:
-        K0, d0 = key0
-        is_pareto = True
-        for key1 in all_K_d:
-            K1, d1 = key1
-            if key1!=key0 and ((K1<K0 and d1<d0) or (K1==K0 and d1<d0) or (K1<K0 and d1==d0)):
-                is_pareto = False
-                break
-        if is_pareto:
-            pareto_K_d[key0] = all_K_d[key0]
-
-    return pareto_K_d
+    return K, max_d, cumulative_hardness
 
 def find_neighbor(qarg, vert_info):
     for idx, (vertex_name, qargs) in enumerate(vert_info):
@@ -204,87 +219,84 @@ def find_neighbor(qarg, vert_info):
             return vertex_name, True
     return None, False
 
-def circ_stripping(circ):
-    # Remove all single qubit gates in the circuit
+def cuts_parser(cuts, circ):
     dag = circuit_to_dag(circ)
-    stripped_dag = DAGCircuit()
-    [stripped_dag.add_qreg(x) for x in circ.qregs]
-    for vertex in dag.topological_op_nodes():
-        if len(vertex.qargs) >= 2:
-            stripped_dag.apply_operation_back(op=vertex.op, qargs=vertex.qargs)
-    return dag_to_circuit(stripped_dag)
+    positions = []
+    for position in cuts:
+        source, dest = position
+        source_qargs = [x[:len(x)-1] for x in source.split(',')]
+        dest_qargs = [x[:len(x)-1] for x in dest.split(',')]
+        qubit_cut = list(set(source_qargs).intersection(set(dest_qargs)))
+        if len(qubit_cut)>1:
+            raise Exception('one cut is cutting on multiple qubits')
+        for x in source.split(','):
+            if x[:len(x)-1] == qubit_cut[0]:
+                source_idx = int(x[len(x)-1])
+        for x in dest.split(','):
+            if x[:len(x)-1] == qubit_cut[0]:
+                dest_idx = int(x[len(x)-1])
+        multi_Q_gate_idx = max(source_idx, dest_idx)
+        # print('cut qubit:', qubit_cut[0], 'after %d multi qubit gate'% multi_Q_gate_idx)
+        wire = None
+        for qubit in circ.qubits:
+            if qubit[0].name == qubit_cut[0].split('[')[0] and qubit[1] == int(qubit_cut[0].split('[')[1].split(']')[0]):
+                wire = qubit
+        tmp = 0
+        all_Q_gate_idx = None
+        for gate_idx, gate in enumerate(list(dag.nodes_on_wire(wire=wire, only_ops=True))):
+            if len(gate.qargs)>1:
+                tmp += 1
+                if tmp == multi_Q_gate_idx:
+                    all_Q_gate_idx = gate_idx
+        positions.append((wire, all_Q_gate_idx))
+    positions = sorted(positions, reverse=True, key=lambda cut: cut[1])
+    return positions
 
-def circuit_to_graph(stripped_circ):
-    input_qubit_itr = {}
-    for x in stripped_circ.qubits:
-        input_qubit_itr[x] = 0
-    stripped_dag = circuit_to_dag(stripped_circ)
-    vert_info = []
-    for vertex in stripped_dag.topological_op_nodes():
-        vertex_name = ''
-        for qarg in vertex.qargs:
-            if vertex_name == '':
-                vertex_name += '%s[%d]%d' % (qarg[0].name,qarg[1],input_qubit_itr[qarg])
-                input_qubit_itr[qarg] += 1
-            else:
-                vertex_name += ',%s[%d]%d' % (qarg[0].name,qarg[1],input_qubit_itr[qarg])
-                input_qubit_itr[qarg] += 1
-        vert_info.append((vertex_name, vertex.qargs))
-    
-    abstraction = []
-    for idx, (vertex_name, vertex_qargs) in enumerate(vert_info):
-        abstraction_item = [vertex_name]
-        for qarg in vertex_qargs:
-            prev_vertex_name, prev_found = find_neighbor(qarg, vert_info[:idx][::-1])
-            next_vertex_name, next_found = find_neighbor(qarg, vert_info[idx+1:])
-            if prev_found:
-                abstraction_item.append(prev_vertex_name)
-            if next_found:
-                abstraction_item.append(next_vertex_name)
-        abstraction.append(abstraction_item)
-    graph = Graph(abstraction) 
-    return graph
+# Karger's Algorithm
+# For failure probabilty upper bound of 1/n, repeat the algorithm nC2 logn times
+def min_cut(graph, min_v=2):
+    m = graph.edge_count
+    n = graph.vertex_count
+    min_hardness = float('inf')
+    min_hardness_cuts = None
+    # print('%d edges %d vertices graph will run %d times' % (m, n, int(n * (n-1) * math.log(n)/2)))
+    for i in range(int(n * (n-1) * math.log(n)/2)):
+        random.seed(datetime.now())
+        g, grouping, cut_edges = contract(graph, min_v)
+        K, d, hardness = cluster_character(g, grouping)
+        if hardness < min_hardness:
+            min_hardness = hardness
+            min_hardness_cuts = cut_edges
 
-def pareto_K_d_parser(pareto_K_d, circ):
-    dag = circuit_to_dag(circ)
-    for pareto_solution in pareto_K_d:
-        cuts = pareto_K_d[pareto_solution]
-        positions = []
-        # print('cuts:', cuts)
-        for position in cuts:
-            source, dest = position
-            source_qargs = [x[:len(x)-1] for x in source.split(',')]
-            dest_qargs = [x[:len(x)-1] for x in dest.split(',')]
-            qubit_cut = list(set(source_qargs).intersection(set(dest_qargs)))
-            if len(qubit_cut)>1:
-                raise Exception('one cut is cutting on multiple qubits')
-            for x in source.split(','):
-                if x[:len(x)-1] == qubit_cut[0]:
-                    source_idx = int(x[len(x)-1])
-            for x in dest.split(','):
-                if x[:len(x)-1] == qubit_cut[0]:
-                    dest_idx = int(x[len(x)-1])
-            multi_Q_gate_idx = max(source_idx, dest_idx)
-            # print('cut qubit:', qubit_cut[0], 'after %d multi qubit gate'% multi_Q_gate_idx)
-            wire = None
-            for qubit in circ.qubits:
-                if qubit[0].name == qubit_cut[0].split('[')[0] and qubit[1] == int(qubit_cut[0].split('[')[1].split(']')[0]):
-                    wire = qubit
-            tmp = 0
-            all_Q_gate_idx = None
-            for gate_idx, gate in enumerate(list(dag.nodes_on_wire(wire=wire, only_ops=True))):
-                if len(gate.qargs)>1:
-                    tmp += 1
-                    if tmp == multi_Q_gate_idx:
-                        all_Q_gate_idx = gate_idx
-            positions.append((wire, all_Q_gate_idx))
-        pareto_K_d[pareto_solution] = (sorted(positions, reverse=True, key=lambda cut: cut[1]), pareto_K_d[pareto_solution][1])
-    return pareto_K_d
+    return min_hardness, min_hardness_cuts
+
+def _fast_min_cut(graph):
+    if graph.vertex_count <= 6:
+        return min_cut(graph)
+    else:
+        t = math.floor(1 + graph.vertex_count / math.sqrt(2))
+        
+        g1, grouping1, cut_edges1 = contract(graph, t)
+
+        g2, grouping2, cut_edges2 = contract(graph, t)
+
+        min_hardness1, min_hardness_cuts1 = _fast_min_cut(g1)
+        min_hardness2, min_hardness_cuts2 = _fast_min_cut(g2)
+
+        if min_hardness1 < min_hardness2:
+            return min_hardness1, cut_edges1 + min_hardness_cuts1
+        else:
+            return min_hardness2, cut_edges2 + min_hardness_cuts2
 
 def find_pareto_solutions(circ, num_clusters=2):
     stripped_circ = circ_stripping(circ)
     graph = circuit_to_graph(stripped_circ)
-    pareto_K_d = min_cut(graph, num_clusters)
-    pareto_K_d = pareto_K_d_parser(pareto_K_d, circ)
+    min_hardness, min_hardness_cuts = min_cut(graph, num_clusters)
+    print('karger cuts:', min_hardness_cuts)
+    print('hardness = ', min_hardness)
+    # min_hardness, min_hardness_cuts = _fast_min_cut(graph)
+    # print('single run Karger-Stein returns', min_hardness_cuts)
+    # print('hardness = ', min_hardness)
+    min_hardness_cuts = cuts_parser(min_hardness_cuts, circ)
             
-    return pareto_K_d
+    return min_hardness_cuts

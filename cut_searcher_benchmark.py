@@ -8,7 +8,7 @@ from qiskit.tools.visualization import dag_drawer
 import timeit
 import matplotlib.pyplot as plt
 
-dimensions = range(2,4)
+dimensions = range(2,9)
 num_qubits = [np.power(x,2) for x in dimensions]
 fixed_depth_times = np.zeros(len(dimensions))
 
