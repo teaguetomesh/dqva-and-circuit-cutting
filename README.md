@@ -1,9 +1,3 @@
-# Google quantum supremacy circuit generator
-```
-python supremacy_generator.py -h
-```
-for help information
-
 # circuit_cutting
 ## Getting Started
 
@@ -39,20 +33,11 @@ complete_path_map
 ```
 key: qubit tuple in the original uncut circuit
 value: list(tuple)
-(sub circuit index, input qubit tuple in the sub circuit, classical bit tuple to measure to), 
+(sub circuit index, input qubit tuple in the sub circuit), 
 ...
-(sub circuit index, input qubit tuple in the sub circuit, classical bit tuple to measure to) --> Last one is the final output measurement
+(sub circuit index, input qubit tuple in the sub circuit) --> Last one is the final output measurement
 ```
-input_wires_mapping
-```
-key: qubit tuple in the original uncut circuit
-value: (tuple) (sub circuit index, input qubit tuple in the sub circuit)
-```
-translation_dict
-```
-key: (tuple) (qubit tuple in the original uncut circuit, sub circuit index)
-value: (tuple) corresponding qubit tuple in the sub circuit
-```
+
 ## TODO
 ### Wei
 #### Auto Cut Finder
@@ -75,6 +60,9 @@ value: (tuple) corresponding qubit tuple in the sub circuit
  - [ ] Implement uniter in python
 
 ### Teague
+#### Circuit generator
+ - [ ] Update to newest supremacy circuit generator
+
 #### Simulator
  - [ ] Implement simulator in Intel QS
 
