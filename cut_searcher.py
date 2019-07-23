@@ -202,15 +202,16 @@ def cluster_character(graph, grouping, hw_max_qubit=24):
                 else:
                     group_qubits[qubit].append(multi_Qgate_idx)
         # print(group_qubits)
-        d = 0
-        K = 0
+        group_d = 0
+        group_K = 0
         for qubit in group_qubits:
             l = sorted(group_qubits[qubit])
-            d += find_crevices(l)
-            K += find_crevices(l) - 1
+            group_d += find_crevices(l)
+            group_K += find_crevices(l) - 1
         # print('K = %d, d = %d' % (K, d))
-        cumulative_hardness += float('inf') if d > hw_max_qubit else np.power(2,d)*np.power(8,K)
-        max_d = max(max_d, d)
+        group_hardness = float('inf') if group_d > hw_max_qubit else np.power(2,group_d)*np.power(8,group_K)
+        cumulative_hardness += math.log(group_hardness)
+        max_d = max(max_d, group_d)
     return K, max_d, cumulative_hardness
 
 def find_neighbor(qarg, vert_info):
@@ -254,21 +255,26 @@ def cuts_parser(cuts, circ):
 
 # Karger's Algorithm
 # For failure probabilty upper bound of 1/n, repeat the algorithm nC2 logn times
-def min_cut(graph, min_v=2):
+def min_cut(graph, min_v=2, hw_max_qubit=20):
     m = graph.edge_count
     n = graph.vertex_count
     min_hardness = float('inf')
     min_hardness_cuts = None
-    # print('%d edges %d vertices graph will run %d times' % (m, n, int(n * (n-1) * math.log(n)/2)))
-    for i in range(int(n * (n-1) * math.log(n)/2)):
+    min_hardness_K = None
+    min_hardness_d = None
+    print('splitting into %d fragments, %d edges %d vertices graph will run %d times' % (min_v, m, n, int(n * (n-1) * math.log(n)/2)))
+    # TODO: figure out how many trials actually required
+    # for i in range(int(n * (n-1) * math.log(n)/2)):
+    for i in range(1000):
         random.seed(datetime.now())
         g, grouping, cut_edges = contract(graph, min_v)
-        K, d, hardness = cluster_character(g, grouping)
+        K, d, hardness = cluster_character(g, grouping, hw_max_qubit)
         if hardness < min_hardness:
             min_hardness = hardness
             min_hardness_cuts = cut_edges
-
-    return min_hardness, min_hardness_cuts
+            min_hardness_K = K
+            min_hardness_d = d
+    return min_hardness_cuts, min_hardness, min_hardness_K, min_hardness_d
 
 def _fast_min_cut(graph):
     if graph.vertex_count <= 6:
@@ -288,15 +294,24 @@ def _fast_min_cut(graph):
         else:
             return min_hardness2, cut_edges2 + min_hardness_cuts2
 
-def find_pareto_solutions(circ, num_clusters=2):
+def find_best_cuts(circ, hw_max_qubit=20,num_clusters=[2]):
     stripped_circ = circ_stripping(circ)
     graph = circuit_to_graph(stripped_circ)
-    min_hardness, min_hardness_cuts = min_cut(graph, num_clusters)
-    print('karger cuts:', min_hardness_cuts)
-    print('hardness = ', min_hardness)
-    # min_hardness, min_hardness_cuts = _fast_min_cut(graph)
-    # print('single run Karger-Stein returns', min_hardness_cuts)
-    # print('hardness = ', min_hardness)
-    min_hardness_cuts = cuts_parser(min_hardness_cuts, circ)
-            
-    return min_hardness_cuts
+    min_hardness = float('inf')
+    best_cuts = None
+    best_K = None
+    best_d = None
+    for i in num_clusters:
+        cuts, hardness, K, d = min_cut(graph, i, hw_max_qubit)
+        if cuts != None:
+            if hardness < min_hardness:
+                best_cuts = cuts
+                min_hardness = hardness
+                best_K = K
+                best_d = d
+                best_num_clusters = i
+
+    if best_cuts == None:
+        raise Exception('Did not find cuts for hw_max_qubit = %d' %hw_max_qubit)
+    best_cuts = cuts_parser(best_cuts, circ)
+    return best_cuts, min_hardness, best_K, best_d, best_num_clusters
