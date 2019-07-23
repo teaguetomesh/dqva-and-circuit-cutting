@@ -54,30 +54,39 @@ key: (tuple) (qubit tuple in the original uncut circuit, sub circuit index)
 value: (tuple) corresponding qubit tuple in the sub circuit
 ```
 ## TODO
-### Auto Cut Finder
+### Wei
+#### Auto Cut Finder
 
 - [x] Implement Karger auto cutter
 - [ ] Implement fast Karger_stein auto cutter
 - [x] Sort output cuts in reverse topological order
 
-### Cutter
+#### Cutter
 
- - [ ] Sort input positions in reverse topological order to prevent bad user input
  - [x] Easy interface for the uniter
  - [x] Cut the circuit into multiple parts
- - [x] Automatic algorithm to find positions to cut
  - [ ] Check if cut_dag is legal
- - [ ] Need to address one qubit entering a fragment more than once
+ - [x] Need to address one qubit entering a fragment more than once
 
-### Uniter/combiner
- - [x] Implement uniter
- - [ ] Use MPI to speed up combiner
+#### Simulator
+ - [ ] Implement simulator in Qiskit
+
+#### Uniter
+ - [ ] Implement uniter in python
+
+### Teague
+#### Simulator
+ - [ ] Implement simulator in Intel QS
+
+#### Uniter
+ - [ ] Implement uniter in MPI
 
 ### Misc
  - [x] Is modification to Qiskit source code still needed?
  - [ ] Is Qiskit 0.11 going to crash the current codes?
  - [ ] Add a dependency installation file
- - [ ] Current codes may crash if user input circuit has registers names containing 'measure' and 'output'
 
 ## Future Directions
  - [ ] Weighted tensor network contraction, considering 'hardness' of each cluster.
+
+
