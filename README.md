@@ -54,7 +54,7 @@ num_clusters: number of fragments to split into. Default and minimum is 2.
 ```
 @return:
 ```
-a Python dict. Keys are tuples of (K, d). Values are (cut positions, groupings). 'groupings' was for development purposes. Will remove in future.
+a Python dict. Keys are tuples of (K, d). Values are cut positions.
 ```
 ### Cut searcher benchmark
 Benchmarking the running speed of cut searcher.

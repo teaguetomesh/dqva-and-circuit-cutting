@@ -172,7 +172,7 @@ def min_cut(graph, min_v=2):
     m = graph.edge_count
     n = graph.vertex_count
     all_K_d = {}
-    print('will run %d times' % int(n * (n-1) * math.log(n)/2))
+    print('%d edges %d vertices graph will run %d times' % (m, n, int(n * (n-1) * math.log(n)/2)))
     for i in range(int(n * (n-1) * math.log(n)/2)):
         random.seed(datetime.now())
         g, grouping, cut_edges = contract(graph, min_v)
@@ -180,7 +180,7 @@ def min_cut(graph, min_v=2):
         K = g.edge_count
         d = cluster_character(grouping)
         # TODO: same K,d cluster is overwritten
-        all_K_d[(K,d)] = (cut_edges, grouping)
+        all_K_d[(K,d)] = cut_edges
         # print('Run %d cut_edges:' % i, cut_edges)
         # print('*'* 100)
     
@@ -248,7 +248,7 @@ def circuit_to_graph(stripped_circ):
 def pareto_K_d_parser(pareto_K_d, circ):
     dag = circuit_to_dag(circ)
     for pareto_solution in pareto_K_d:
-        cuts = pareto_K_d[pareto_solution][0]
+        cuts = pareto_K_d[pareto_solution]
         positions = []
         # print('cuts:', cuts)
         for position in cuts:
