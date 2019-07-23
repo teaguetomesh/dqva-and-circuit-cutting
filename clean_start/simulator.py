@@ -15,6 +15,11 @@ import random
 import copy
 import timeit
 
+def simulate_fragments(sub_circs_no_bridge, complete_path_map):
+	fragment_all_s, all_s = fragment_all_s_calc(sub_circs_no_bridge, complete_path_map, random_sampling=False)
+	fragment_all_s = coefficients_multiplier(fragment_all_s, complete_path_map)
+	return fragment_all_s
+
 def sub_circ_sampler(s, sub_circs_no_bridge, complete_path_map):
 	s_idx = 0
 	sub_circs_bridge = copy.deepcopy(sub_circs_no_bridge)
@@ -100,7 +105,7 @@ def fragment_s_calc(s, sub_circs_no_bridge, complete_path_map):
 
 		# print('outputprob = ', len(outputprob))
 		# print('*'*100)
-		fragment_prob.append((outputprob, sub_circ.qubits[::-1]))
+		fragment_prob.append(outputprob)
 	return fragment_prob
 
 def fragment_all_s_calc(sub_circs_no_bridge, complete_path_map, random_sampling=False):
@@ -112,6 +117,11 @@ def fragment_all_s_calc(sub_circs_no_bridge, complete_path_map, random_sampling=
 		all_s = sequential_s(num_cuts)
 	else:
 		all_s = random_s(num_cuts, np.power(8,num_cuts))
+	
+	sub_circ_qubits = []
+	for sub_circ in sub_circs_no_bridge:
+		sub_circ_qubits.append(sub_circ.qubits[::-1])
+	
 	fragment_all_s = {}
 	print('Simulating fragments for %d s samples * %d fragment circuits' % 
 	(len(all_s), len(sub_circs_no_bridge)))
@@ -130,7 +140,7 @@ def fragment_all_s_calc(sub_circs_no_bridge, complete_path_map, random_sampling=
 	stop = timeit.default_timer()
 	print('Total Time: %.2f seconds' % (stop - start))
 	print('*'*100)
-	return fragment_all_s, all_s
+	return fragment_all_s, all_s, sub_circ_qubits
 
 def coefficients_multiplier_helper(qubits):
 	# print('qubits are:', qubits)
