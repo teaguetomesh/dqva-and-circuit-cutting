@@ -2,7 +2,7 @@ import sys
 import numpy as np
 from qiskit.converters import circuit_to_dag, dag_to_circuit
 import supremacy_generator as suprem_gen
-import auto_cut_finder as cut_finder
+import cut_searcher as cut_searcher
 import cutter
 from qiskit.tools.visualization import dag_drawer
 import timeit
@@ -15,7 +15,7 @@ fixed_depth_times = np.zeros(len(dimensions))
 for idx, i in enumerate(dimensions):
     circ = suprem_gen.circuit_generator([i,i,8], random_order = True)
     searcher_start = timeit.default_timer()
-    pareto_K_d = cut_finder.find_pareto_solutions(circ=circ, num_clusters=2)
+    pareto_K_d = cut_searcher.find_pareto_solutions(circ=circ, num_clusters=2)
     searcher_end = timeit.default_timer()
     fixed_depth_times[idx] = searcher_end-searcher_start
     for pareto_key in pareto_K_d:
@@ -30,7 +30,7 @@ fixed_qubits_times = np.zeros(len(depth))
 for idx, d in enumerate(depth):
     circ = suprem_gen.circuit_generator([4,4,d], random_order = True)
     searcher_start = timeit.default_timer()
-    pareto_K_d = cut_finder.find_pareto_solutions(circ=circ, num_clusters=2)
+    pareto_K_d = cut_searcher.find_pareto_solutions(circ=circ, num_clusters=2)
     searcher_end = timeit.default_timer()
     fixed_qubits_times[idx] = searcher_end-searcher_start
     for pareto_key in pareto_K_d:

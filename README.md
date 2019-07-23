@@ -1,9 +1,7 @@
 # circuit_cutting
-## Getting Started
+A circuit cutting project
 
-### Prerequisites
-
-Requires a small change to the Qiskit source code.
+## Prerequisites
 
 After creating a python virtual environment and installing Qiskit,
 
@@ -20,7 +18,7 @@ Modify the file at
 my_venv/lib/python3.7/site-packages/qiskit/dagcircuit/dagnode.py
 ```
 
-By adding the following text (not necessary anymore but keep it for now):
+By adding the following text (not necessary anymore but keep it in the README for now):
 
 ```
 @cargs.setter
@@ -28,14 +26,56 @@ def cargs(self, new_cargs):
     """Sets the cargs to be the given list of cargs"""
     self.data_dict['cargs'] = new_cargs
 ```
-### variables explanation
-complete_path_map
+## Supremacy circuit generator
+To generate a Google quantum supremacy circuit:
 ```
+circuit_generator(circuit_dimension, layer_order, random_order, measure)
+```
+@args:
+```
+circuit_dimension: tuple of horizontal #qubits, vertical #qubits, depth. E.g. [4,4,8]
+layer_order: cycling through 0-7 indexed two qubit gates layers. Default order is [0,2,1,3,4,6,5,7]
+random_order: if True, will randomize the two qubit gates layer orderings. Makes layer_order irrelevant. Default is False.
+measure: if True, add classical registers and append measurements. Default is False.
+```
+@return:
+```
+a Qiskit circuit object
+```
+## Auto cut searcher
+Solves the bi-objective graph clustering problem. Objectives are: 1. K = # cuts. 2. d = Maximum qubit size of the fragments.
+```
+find_pareto_solutions(circ, num_clusters)
+```
+@args:
+```
+circ: a Qiskit circuit object
+num_clusters: number of fragments to split into. Default and minimum is 2.
+```
+@return:
+```
+a Python dict. Keys are tuples of (K, d). Values are (cut positions, groupings). 'groupings' was for development purposes. Will remove in future.
+```
+## Cutter
+Cut a circuit into fragments and provide necessary information for simulator and uniter.
+```
+cut_circuit(circ, cuts)
+```
+@args:
+```
+circ: a Qiskit circuit object
+cuts: a list of tuples (wire, 0-indexed gate) to cut the circuit.
+```
+@returns:
+```
+fragments: list of fragment Qiskit circuits
+K, d: (K, d) clustering of the fragments. Used to test the correctness of cut searcher.
+complete_path_map:
 key: qubit tuple in the original uncut circuit
 value: list(tuple)
 (sub circuit index, input qubit tuple in the sub circuit), 
 ...
-(sub circuit index, input qubit tuple in the sub circuit) --> Last one is the final output measurement
+(sub circuit index, input qubit tuple in the sub circuit) --> Last one indicates the final output qubit
 ```
 
 ## TODO
@@ -52,13 +92,6 @@ value: list(tuple)
  - [x] Cut the circuit into multiple parts
  - [ ] Check if cut_dag is legal
  - [x] Need to address one qubit entering a fragment more than once
-
-#### Simulator
- - [x] Implement simulator in Qiskit
- - [ ] Apply memoization to speed up
-
-#### Uniter
- - [ ] Implement uniter in python
 
 ### Teague
 #### Circuit generator
@@ -77,5 +110,3 @@ value: list(tuple)
 
 ## Future Directions
  - [ ] Weighted tensor network contraction, considering 'hardness' of each cluster.
-
-
