@@ -61,6 +61,7 @@ class Basic_Model(object):
         self.model.params.updatemode = 1
         
         self.mvars = []
+        # Indicates if a vertex is in cluster k
         for i in range(k):
             cvars = []
             for j in range(n_vertices):
@@ -116,6 +117,8 @@ class Basic_Model(object):
         self.model.params.OutputFlag = self.verbosity
                
     def check_graph(self, n_vertices, edges):
+        # 1. edges must include all vertices
+        # 2. all u,v must be ordered and smaller than n_vertices
         vertices = set([i for (i, _) in edges])
         vertices |= set([i for (_, i) in edges])
         assert(vertices == set(range(n_vertices)))
