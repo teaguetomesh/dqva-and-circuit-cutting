@@ -5,8 +5,8 @@
 #include <string.h>
 #include <math.h>
 
-#define num_row 5000
-#define num_col 5000       /* number of rows and columns in matrix */
+#define num_row 500
+#define num_col 500       /* number of rows and columns in matrix */
 
 double matrix_a[num_row][num_col], matrix_b[num_row][num_col], matrix_c[num_row][num_col];
 

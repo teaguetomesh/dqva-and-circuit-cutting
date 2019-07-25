@@ -189,7 +189,7 @@ def find_crevices(l):
 def cluster_character(graph, grouping, hw_max_qubit=24):
     K = graph.edge_count
     max_d = 0
-    cumulative_hardness = 0
+    cumulative_hardness = 0.0
     for group in grouping:
         group_qubits = {}
         for vertex in group.split(' '):
@@ -262,7 +262,8 @@ def min_cut(graph, min_v=2, hw_max_qubit=20):
     min_hardness_cuts = None
     min_hardness_K = None
     min_hardness_d = None
-    print('splitting into %d fragments, %d edges %d vertices graph will run %d times' % (min_v, m, n, int(n * (n-1) * math.log(n)/2)))
+    # print('splitting into %d fragments, %d edges %d vertices graph will run %d times' % (min_v, m, n, int(n * (n-1) * math.log(n)/2)))
+    print('splitting into %d fragments, %d edges %d vertices graph' % (min_v, m, n))
     # TODO: figure out how many trials actually required
     # for i in range(int(n * (n-1) * math.log(n)/2)):
     for i in range(1000):
