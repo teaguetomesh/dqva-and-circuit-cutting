@@ -30,3 +30,9 @@ Iteration    Objective       Primal Inf.    Dual Inf.      Time
 
 Solved in 0 iterations and 0.01 seconds
 Optimal objective  5.500000000e+03
+
+Gurobi 8.1.1 (mac64, Python) logging started Thu Jul 25 11:59:04 2019
+
+Academic license - for non-commercial use only
+Parameter updatemode unchanged
+   Value: 1  Min: 0  Max: 1  Default: 1

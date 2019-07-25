@@ -277,24 +277,6 @@ def min_cut(graph, min_v=2, hw_max_qubit=20):
             min_hardness_d = d
     return min_hardness_cuts, min_hardness, min_hardness_K, min_hardness_d
 
-def _fast_min_cut(graph):
-    if graph.vertex_count <= 6:
-        return min_cut(graph)
-    else:
-        t = math.floor(1 + graph.vertex_count / math.sqrt(2))
-        
-        g1, grouping1, cut_edges1 = contract(graph, t)
-
-        g2, grouping2, cut_edges2 = contract(graph, t)
-
-        min_hardness1, min_hardness_cuts1 = _fast_min_cut(g1)
-        min_hardness2, min_hardness_cuts2 = _fast_min_cut(g2)
-
-        if min_hardness1 < min_hardness2:
-            return min_hardness1, cut_edges1 + min_hardness_cuts1
-        else:
-            return min_hardness2, cut_edges2 + min_hardness_cuts2
-
 def find_best_cuts(circ, hw_max_qubit=20,num_clusters=[2]):
     stripped_circ = circ_stripping(circ)
     graph = circuit_to_graph(stripped_circ)
