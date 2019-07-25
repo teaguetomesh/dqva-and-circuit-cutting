@@ -154,5 +154,3 @@ class Basic_Model(object):
         
     def print_stat(self):
         pass
-
-
