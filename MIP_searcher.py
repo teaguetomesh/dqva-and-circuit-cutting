@@ -57,14 +57,44 @@ class Basic_Model(object):
         
         return connectivity_vars
 
-    def __init__(self, n_vertices, edges, constraints, node_ids, k, verbosity=0):
+    def cluster_character(self, cluster):
+        print('cluster%d'%cluster)
+        cluster_hardness = 0.0
+        # print(self.node_ids)
+        group_qubits = {}
+        for vertex in self.node_ids:
+            if self.mvars[cluster][vertex].x > 1e-4:
+                qargs = self.node_ids[vertex].split(' ')
+                print(qargs)
+                # for qarg in qargs:
+        #         qubit = qarg.split(']')[0] + ']'
+        #         multi_Qgate_idx = int(qarg.split(']')[1])
+        #         if qubit not in group_qubits:
+        #             group_qubits[qubit] = [multi_Qgate_idx]
+        #         else:
+        #             group_qubits[qubit].append(multi_Qgate_idx)
+        #     # print(group_qubits)
+        #     group_d = 0
+        #     group_K = 0
+        #     for qubit in group_qubits:
+        #         l = sorted(group_qubits[qubit])
+        #         group_d += find_crevices(l)
+        #         group_K += find_crevices(l) - 1
+        #     # print('K = %d, d = %d' % (K, d))
+        #     group_hardness = float('inf') if group_d > hw_max_qubit else np.power(2,group_d)*np.power(8,group_K)
+        #     cumulative_hardness += math.log(group_hardness)
+        #     max_d = max(max_d, group_d)
+        return cluster_hardness
+    
+    def __init__(self, n_vertices, edges, constraints, node_ids, k, hw_max_qubit, verbosity=0):
         print('*'*200)
         print('Initializing MIP model')
         self.check_graph(n_vertices, edges)
         self.n_vertices = n_vertices
         self.edges = edges
-        self.k = k
         self.node_ids = node_ids
+        self.k = k
+        self.hw_max_qubit = hw_max_qubit
         self.verbosity = verbosity
         self.create_graph()
 
@@ -82,8 +112,7 @@ class Basic_Model(object):
 
         # constraint: each vertex in exactly/at least one cluster
         for v in range(n_vertices):
-            self.model.addConstr(quicksum([self.mvars[i][v] for i in range(k)]), 
-                                          GRB.EQUAL, 1)
+            self.model.addConstr(quicksum([self.mvars[i][v] for i in range(k)]), GRB.EQUAL, 1)
 
         # connectivity constraints:
         print('adding connectivity constraints')
@@ -107,11 +136,10 @@ class Basic_Model(object):
         # Objective function
         obj_expr = LinExpr()
         for cluster in range(k):
-            for (u,v) in edges:
-                y = self.model.addVar(lb=0.0, ub=1.0, vtype=GRB.BINARY)
-                dummy = self.model.addVar(lb=2.0, ub=2.0, vtype=GRB.INTEGER)
-                self.model.addConstr(y >= (self.mvars[cluster][u] + self.mvars[cluster][v])%dummy)
-                obj_expr.add(y)
+            # TODO: figure out how to compute cluster_hardness
+            cluster_hardness = self.model.addVar(lb=0.0, ub=100.0, vtype=GRB.CONTINUOUS)
+            # cluster_hardness = self.cluster_character(cluster)
+            obj_expr.add(cluster_hardness)
         
         self.model.setObjective(obj_expr, GRB.MINIMIZE)
         self.model.update()
@@ -218,7 +246,8 @@ if __name__ == '__main__':
                   edges=edges,
                   constraints=constraints,
                   node_ids=node_ids,
-                  k=2)
+                  k=2,
+                  hw_max_qubit=24)
     print('kwargs:')
     [print(x, kwargs[x]) for x in kwargs]
 
