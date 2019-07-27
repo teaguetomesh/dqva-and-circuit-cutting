@@ -106,7 +106,7 @@ class Basic_Model(object):
         for cluster in range(k):
             # TODO: figure out how to compute cluster_hardness
             # FIXME: upper bound should not be hardcoded
-            cluster_K = self.model.addVar(lb=0.0, ub=100.0, vtype=GRB.INTEGER)
+            cluster_K = self.model.addVar(lb=0.0, ub=10.0, vtype=GRB.INTEGER)
             self.model.addConstr(cluster_K == 
             quicksum([self.edge_vars[cluster][i] for i in range(self.n_edges)]))
             
@@ -120,7 +120,7 @@ class Basic_Model(object):
             quicksum([self.edge_vars[cluster][i] * self.node_vars[cluster][self.edges[i][1]]
             for i in range(self.n_edges)]))
 
-            cluster_d = self.model.addVar(lb=0.0, ub=100.0, vtype=GRB.INTEGER)
+            cluster_d = self.model.addVar(lb=0.0, ub=self.hw_max_qubit, vtype=GRB.INTEGER)
             self.model.addConstr(cluster_d == cluster_original_qubit + cluster_cut_qubit)
 
             obj_expr.add(cluster_K)
@@ -183,6 +183,8 @@ class Basic_Model(object):
     def solve(self):
         print('*'*200)
         print('solving model')   
+        print('model has %d variables, %d linear constraints,%d quadratic constraints, %d general constraints'
+        % (self.model.NumVars,self.model.NumConstrs, self.model.NumQConstrs, self.model.NumGenConstrs))
         try:
             self.model.optimize()
         except GurobiError:
