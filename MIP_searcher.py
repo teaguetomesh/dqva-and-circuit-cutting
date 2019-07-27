@@ -1,5 +1,6 @@
 from qiskit.dagcircuit.dagcircuit import DAGCircuit
 from qiskit.converters import circuit_to_dag, dag_to_circuit
+from qiskit.tools.visualization import dag_drawer
 from gurobipy import *
 import networkx as nx
 from qcg.generators import gen_supremacy
@@ -9,6 +10,7 @@ import numpy as np
 
 class Basic_Model(object):
     def create_graph(self):
+        # Need the graph for connectivity checks
         G = nx.Graph()
         G.add_nodes_from(range(self.n_vertices))
 
@@ -57,7 +59,7 @@ class Basic_Model(object):
         
         return connectivity_vars
     
-    def __init__(self, n_vertices, edges, constraints, node_ids, k, hw_max_qubit, verbosity=0):
+    def __init__(self, n_vertices, edges, node_ids, k, hw_max_qubit, verbosity=0):
         print('*'*200)
         print('Initializing MIP model')
         self.check_graph(n_vertices, edges)
@@ -73,6 +75,18 @@ class Basic_Model(object):
         self.model = Model('cut_searching')
         self.model.params.updatemode = 1
 
+        self.node_qubits = {}
+        for node in self.node_ids:
+            qargs = self.node_ids[node].split(' ')
+            print('node', node, 'qargs:',qargs)
+            num_in_qubits = 0
+            for qarg in qargs:
+                if int(qarg.split(']')[1]) == 0:
+                    num_in_qubits += 1
+            self.node_qubits[node] = num_in_qubits
+
+        print('node qubits:')
+        print(self.node_qubits)
         self.node_vars = []
         self.not_node_vars = []
         # Indicates if a vertex is in cluster k
@@ -144,7 +158,7 @@ class Basic_Model(object):
             
             cluster_original_qubit = self.model.addVar(lb=0.0, ub=100.0, vtype=GRB.INTEGER)
             self.model.addConstr(cluster_original_qubit ==
-            quicksum([self.node_vars[cluster][i] for i in range(self.n_vertices)]))
+            quicksum([self.node_qubits[i]*self.node_vars[cluster][i] for i in range(self.n_vertices)]))
             
             cluster_cut_qubit = self.model.addVar(lb=0.0, ub=100.0, vtype=GRB.INTEGER)
             self.model.addConstr(cluster_cut_qubit ==
@@ -195,84 +209,51 @@ class Basic_Model(object):
         print('mip gap:', self.mip_gap)
         print('objective value:', self.objective)
         print('runtime:', self.runtime)
-        for i in range(self.k):
-            print('cluster %d has edges:' % i)
-            for j in range(self.n_edges):
-                if abs(self.edge_vars[i][j].x) < 1e-4:
-                    print(self.edges[j])
-
 
         if (self.optimal):
             print('OPTIMAL')
         else:
             print('NOT OPTIMAL')
 
-def read_graph(graph_fname, cons_fname=None):
-    node_names = dict()
-    node_ids = dict()
-    edges = set()
+def read_circ(circ):
+    dag = circuit_to_dag(circ)
+    n_vertices = len(list(dag.topological_op_nodes()))
+    edges = []
+    node_ids = {}
+    curr_node_id = 0
+    for vertex in dag.topological_op_nodes():
+        if len(vertex.qargs) != 2:
+            raise Exception('vertex does not have 2 qargs!')
+        vertex_name = '%s[%d] %s[%d]' % (vertex.qargs[0][0].name, vertex.qargs[0][1],
+                                        vertex.qargs[1][0].name, vertex.qargs[1][1])
+        if vertex_name not in node_ids:
+            node_ids[vertex_name] = curr_node_id
+            curr_node_id += 1
     
-    def get_id(name):
-        # node_id is ordered 0 to n_vertices
-        if not name in node_names:
-            node_id = len(node_names)
-            node_names[name] = node_id
-            node_ids[node_id] = name 
-
-        return node_names[name]
-
-    def add_edge(v1, v2):
-        first = min(v1, v2)
-        second = max(v1, v2)
-        edges.add((first, second))
-
-
-    with open(graph_fname) as f:
-        f.readline()
-        for line in f:
-            line = line.strip()
-            if not line: continue
-            [n1, n2] = line.strip().split(',')
-            [v1, v2] = [get_id(i) for i in (n1, n2)]
-            add_edge(v1, v2)
-
-    n_vertices = max(node_ids.keys()) + 1
-    
-    constraints = []
-    if cons_fname is not None:
-        with open(cons_fname) as f:
-            f.readline()
-            for line in f:
-                line = line.strip()
-                if not line: continue
-                [n1, n2, w] = line.split(',')
-                [v1, v2] = [get_id(i) for i in (n1, n2)]
-                w = float(w)
-                constraints.append((v1, v2, w))
-    
-    return n_vertices, list(edges), constraints, node_ids
+    for edge in dag.edges():
+        u, v, _ = edge
+        if u.type == 'op' and v.type == 'op':
+            u_name = '%s[%d] %s[%d]' % (u.qargs[0][0].name, u.qargs[0][1],
+                                        u.qargs[1][0].name, u.qargs[1][1])
+            v_name = '%s[%d] %s[%d]' % (v.qargs[0][0].name, v.qargs[0][1],
+                                        v.qargs[1][0].name, v.qargs[1][1])
+            edges.append((node_ids[u_name], node_ids[v_name]))
+         
+    return n_vertices, edges, node_ids
 
 if __name__ == '__main__':
     circ = gen_supremacy(3,3,8,'71230456')
     stripped_circ = r_s.circ_stripping(circ)
-    graph = r_s.circuit_to_graph(stripped_circ)
-    with open('graph.csv', 'w') as writeFile:
-        for u,v in graph.edges:
-            writer = csv.writer(writeFile)
-            u = u.replace(',',' ')
-            v = v.replace(',',' ')
-            writer.writerow([u,v])
-    writeFile.close()
-    n_vertices, edges, constraints, node_ids = read_graph('graph.csv')
-    kwargs = dict(n_vertices=n_vertices, 
+    dag_drawer(circuit_to_dag(stripped_circ),filename='dag.pdf')
+    n_vertices, edges, node_ids = read_circ(stripped_circ)
+    kwargs = dict(n_vertices=n_vertices,
                   edges=edges,
-                  constraints=constraints,
                   node_ids=node_ids,
                   k=2,
                   hw_max_qubit=24)
     print('kwargs:')
     [print(x, kwargs[x]) for x in kwargs]
 
-    m = Basic_Model(**kwargs)
-    m.solve()
-    m.print_stat()
+    # m = Basic_Model(**kwargs)
+    # m.solve()
+    # m.print_stat()

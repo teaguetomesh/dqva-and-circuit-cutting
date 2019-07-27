@@ -74,6 +74,7 @@ def circ_stripping(circ):
     return dag_to_circuit(stripped_dag)
 
 def circuit_to_graph(stripped_circ):
+    # FIXME: edge directions are wrong
     input_qubit_itr = {}
     for x in stripped_circ.qubits:
         input_qubit_itr[x] = 0
