@@ -81,15 +81,15 @@ class Basic_Model(object):
         # connectivity constraints:
         # TODO: check the implementations
         # TODO: add BnC method?
-        print('adding connectivity constraints')
-        for v1 in range(n_vertices):
-            for v2 in range(v1+1, n_vertices):
-                if (v1, v2) in self.edges: continue
-                for i in range(k):
-                    cvars = self.connectivity_vars(i, v1, v2)
-                    self.model.addConstr(self.node_vars[i][v1] + self.node_vars[i][v2], 
-                                         GRB.LESS_EQUAL,
-                                         quicksum(cvars) + 1)
+        # print('adding connectivity constraints')
+        # for v1 in range(n_vertices):
+        #     for v2 in range(v1+1, n_vertices):
+        #         if (v1, v2) in self.edges: continue
+        #         for i in range(k):
+        #             cvars = self.connectivity_vars(i, v1, v2)
+        #             self.model.addConstr(self.node_vars[i][v1] + self.node_vars[i][v2], 
+        #                                  GRB.LESS_EQUAL,
+        #                                  quicksum(cvars) + 1)
 
         # symmetry-breaking constraints
         # TODO: check the implementation
@@ -129,6 +129,9 @@ class Basic_Model(object):
         self.model.setObjective(obj_expr, GRB.MINIMIZE)
         self.model.update()
         self.model.params.OutputFlag = self.verbosity
+
+        print('model has %d variables, %d linear constraints,%d quadratic constraints, %d general constraints'
+        % (self.model.NumVars,self.model.NumConstrs, self.model.NumQConstrs, self.model.NumGenConstrs))
     
     def check_graph(self, n_vertices, edges):
         # 1. edges must include all vertices
@@ -182,9 +185,7 @@ class Basic_Model(object):
     
     def solve(self):
         print('*'*200)
-        print('solving model')   
-        print('model has %d variables, %d linear constraints,%d quadratic constraints, %d general constraints'
-        % (self.model.NumVars,self.model.NumConstrs, self.model.NumQConstrs, self.model.NumGenConstrs))
+        print('solving model')
         try:
             self.model.optimize()
         except GurobiError:
@@ -261,7 +262,7 @@ def read_circ(circ):
     return n_vertices, edges, node_name_ids, id_node_names
 
 if __name__ == '__main__':
-    circ = gen_supremacy(4,4,8,'71230456')
+    circ = gen_supremacy(8,8,8,'71230456')
     stripped_circ = r_s.circ_stripping(circ)
     dag_drawer(circuit_to_dag(stripped_circ),filename='dag.pdf')
     n_vertices, edges, node_ids, id_nodes = read_circ(stripped_circ)
@@ -269,7 +270,7 @@ if __name__ == '__main__':
                   edges=edges,
                   node_ids=node_ids,
                   id_nodes=id_nodes,
-                  k=2,
+                  k=5,
                   hw_max_qubit=24)
     print('*'*200)
     print('kwargs:')
