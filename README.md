@@ -43,19 +43,26 @@ measure: if True, add classical registers and append measurements. Default is Fa
 a Qiskit circuit object
 ```
 ## Auto cut searcher
-Solves the bi-objective graph clustering problem. Objectives are: 1. K = # cuts. 2. d = Maximum qubit size of the fragments.
+### Randomized Searcher
+A randomized cut searcher using random graph contraction. Randomly contract and calculate the clustering hardness metric as a function of 1. K = # cuts. 2. d = Maximum qubit size of the fragments.
 ```
-find_pareto_solutions(circ, num_clusters)
+find_best_cuts(circ, hw_max_qubit,num_clusters=)
 ```
 @args:
 ```
 circ: a Qiskit circuit object
-num_clusters: number of fragments to split into. Default and minimum is 2.
+hw_max_qubit: upper limit of the number of qubits in each fragment circuit
+num_clusters: list of numbers. Number of fragments to split into. Default and minimum is 2.
 ```
 @return:
 ```
-a Python dict. Keys are tuples of (K, d). Values are cut positions.
+Cut positions that have the minimum cluster hardness metric across all iterations.
 ```
+### Mixed Integer Quadratically Constrained Programming (MIQCP) Solver in Gurobi
+A quadratic programming solver to solve the circuit clustering problem.
+- [ ] Implement piecewise linear approximation for the exponential objective. Refer to gurobi_test.py
+- [ ] Enforce connectivity constraint
+- [ ] Start with incumbent found by the randomized searcher. https://www.gurobi.com/documentation/8.1/refman/start.html
 ### Cut searcher benchmark
 Benchmarking the running speed of cut searcher.
 ## Cutter
@@ -87,8 +94,8 @@ Compares the operations on each qubit in the original uncut circuit and all the 
 #### Auto Cut Finder
 
 - [x] Implement Karger auto cutter
-- [ ] Implement fast Karger_stein auto cutter
 - [x] Sort output cuts in reverse topological order
+- [ ] Finish MIQCP formulation
 
 #### Cutter
 
@@ -99,7 +106,7 @@ Compares the operations on each qubit in the original uncut circuit and all the 
 
 ### Teague
 #### Circuit generator
- - [ ] Update to newest supremacy circuit generator
+ - [x] Update to newest supremacy circuit generator
 
 #### Simulator
  - [ ] Implement simulator in Intel QS

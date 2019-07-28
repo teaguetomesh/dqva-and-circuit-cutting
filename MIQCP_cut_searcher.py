@@ -5,6 +5,7 @@ from gurobipy import *
 import networkx as nx
 from qcg.generators import gen_supremacy
 import randomized_searcher as r_s
+from math import exp
 
 class Basic_Model(object):
     def __init__(self, n_vertices, edges, node_ids, id_nodes, k, hw_max_qubit, verbosity=0):
@@ -182,6 +183,9 @@ class Basic_Model(object):
             connectivity_vars.append(cvar)
         
         return connectivity_vars
+    
+    def exp_fn(u):
+        return exp(u)
     
     def solve(self):
         print('*'*200)
