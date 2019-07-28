@@ -176,42 +176,26 @@ def contract(graph, min_v=2):
 
     return g, grouping, cut_edges
 
-def find_crevices(l):
-    rolling_idx = l[0]
-    d = 1
-    for idx, ele in enumerate(l):
-        if ele == rolling_idx:
-            rolling_idx += 1
-        else:
-            d += 1
-            rolling_idx = ele + 1
-    return d
-
-def cluster_character(graph, grouping, hw_max_qubit=24):
+def cluster_character(graph, grouping, cut_edges, hw_max_qubit=24):
     K = graph.edge_count
     max_d = 0
     cumulative_hardness = 0.0
-    for group in grouping:
-        group_qubits = {}
+    for idx, group in enumerate(grouping):
+        group_K = 0
+        group_d = 0
         for vertex in group.split(' '):
             qargs = vertex.split(',')
             for qarg in qargs:
-                qubit = qarg.split(']')[0] + ']'
-                multi_Qgate_idx = int(qarg.split(']')[1])
-                if qubit not in group_qubits:
-                    group_qubits[qubit] = [multi_Qgate_idx]
-                else:
-                    group_qubits[qubit].append(multi_Qgate_idx)
-        # print(group_qubits)
-        group_d = 0
-        group_K = 0
-        for qubit in group_qubits:
-            l = sorted(group_qubits[qubit])
-            group_d += find_crevices(l)
-            group_K += find_crevices(l) - 1
-        # print('K = %d, d = %d' % (K, d))
-        group_hardness = float('inf') if group_d > hw_max_qubit else np.power(2,group_d)*np.power(8,group_K)
-        cumulative_hardness += math.log(group_hardness)
+                if int(qarg.split(']')[1]) == 0:
+                    group_d += 1
+            for u, v in cut_edges:
+                if vertex == v:
+                    group_K += 1
+                    group_d += 1
+                elif vertex == u:
+                    group_K += 1
+        # print('K = %d, d = %d' % (group_K, group_d))
+        cumulative_hardness += float('inf') if group_d > hw_max_qubit else np.power(2,group_d)*np.power(8,group_K)
         max_d = max(max_d, group_d)
     return K, max_d, cumulative_hardness
 
@@ -270,7 +254,7 @@ def min_cut(graph, min_v=2, hw_max_qubit=20):
     for i in range(1000):
         random.seed(datetime.now())
         g, grouping, cut_edges = contract(graph, min_v)
-        K, d, hardness = cluster_character(g, grouping, hw_max_qubit)
+        K, d, hardness = cluster_character(g, grouping, cut_edges, hw_max_qubit)
         if hardness < min_hardness:
             min_hardness = hardness
             min_hardness_cuts = cut_edges

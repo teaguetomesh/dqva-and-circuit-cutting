@@ -5,7 +5,7 @@ from gurobipy import *
 import networkx as nx
 from qcg.generators import gen_supremacy
 import randomized_searcher as r_s
-from math import exp
+import numpy as np
 
 class Basic_Model(object):
     def __init__(self, n_vertices, edges, node_ids, id_nodes, k, hw_max_qubit, verbosity=0):
@@ -103,11 +103,10 @@ class Basic_Model(object):
         
         # Objective function
         print('adding objective')
-        obj_expr = QuadExpr()
+        obj_expr = LinExpr()
         for cluster in range(k):
-            # TODO: figure out how to compute cluster_hardness
-            # FIXME: upper bound should not be hardcoded
-            cluster_K = self.model.addVar(lb=0.0, ub=10.0, vtype=GRB.INTEGER)
+            # FIXME: upper bound on variables should not be hardcoded
+            cluster_K = self.model.addVar(lb=0.0, ub=10.0, vtype=GRB.INTEGER, name='cluster_K_%d'%cluster)
             self.model.addConstr(cluster_K == 
             quicksum([self.edge_vars[cluster][i] for i in range(self.n_edges)]))
             
@@ -121,18 +120,31 @@ class Basic_Model(object):
             quicksum([self.edge_vars[cluster][i] * self.node_vars[cluster][self.edges[i][1]]
             for i in range(self.n_edges)]))
 
-            cluster_d = self.model.addVar(lb=0.0, ub=self.hw_max_qubit, vtype=GRB.INTEGER)
+            cluster_d = self.model.addVar(lb=0.0, ub=self.hw_max_qubit, vtype=GRB.INTEGER, name='cluster_d_%d'%cluster)
             self.model.addConstr(cluster_d == cluster_original_qubit + cluster_cut_qubit)
+            
+            lb = 1
+            ub = 3*10+self.hw_max_qubit
+            ptx, ptf = self.pwl_exp(2,lb,ub)
+            cluster_hardness_exponent = self.model.addVar(lb=lb,ub=ub,vtype=GRB.INTEGER)
+            self.model.addConstr(cluster_hardness_exponent == 3*cluster_K + cluster_d)
+            self.model.setPWLObj(cluster_hardness_exponent, ptx, ptf)
 
-            obj_expr.add(cluster_K)
-            obj_expr.add(cluster_d*cluster_d)
-
-        self.model.setObjective(obj_expr, GRB.MINIMIZE)
+        # self.model.setObjective(obj_expr, GRB.MINIMIZE)
         self.model.update()
         self.model.params.OutputFlag = self.verbosity
 
         print('model has %d variables, %d linear constraints,%d quadratic constraints, %d general constraints'
         % (self.model.NumVars,self.model.NumConstrs, self.model.NumQConstrs, self.model.NumGenConstrs))
+    
+    def pwl_exp(self, base, lb, ub):
+        ptx = []
+        ptf = []
+
+        for i in range(lb,ub+1):
+            ptx.append(i)
+            ptf.append(np.power(base,(ptx[i-lb])))
+        return ptx, ptf
     
     def check_graph(self, n_vertices, edges):
         # 1. edges must include all vertices
@@ -184,9 +196,6 @@ class Basic_Model(object):
         
         return connectivity_vars
     
-    def exp_fn(u):
-        return exp(u)
-    
     def solve(self):
         print('*'*200)
         print('solving model')
@@ -223,6 +232,10 @@ class Basic_Model(object):
         print('mip gap:', self.mip_gap)
         print('objective value:', self.objective)
         print('runtime:', self.runtime)
+
+        for v in self.model.getVars():
+            if 'cluster' in v.VarName:
+                print('%s %g' % (v.VarName, v.X))
 
         if (self.optimal):
             print('OPTIMAL')
@@ -266,7 +279,7 @@ def read_circ(circ):
     return n_vertices, edges, node_name_ids, id_node_names
 
 if __name__ == '__main__':
-    circ = gen_supremacy(8,8,8,'71230456')
+    circ = gen_supremacy(3,3,8,'71230456')
     stripped_circ = r_s.circ_stripping(circ)
     dag_drawer(circuit_to_dag(stripped_circ),filename='dag.pdf')
     n_vertices, edges, node_ids, id_nodes = read_circ(stripped_circ)
@@ -274,8 +287,8 @@ if __name__ == '__main__':
                   edges=edges,
                   node_ids=node_ids,
                   id_nodes=id_nodes,
-                  k=5,
-                  hw_max_qubit=24)
+                  k=2,
+                  hw_max_qubit=20)
     print('*'*200)
     print('kwargs:')
     [print(x, kwargs[x],'\n') for x in kwargs]

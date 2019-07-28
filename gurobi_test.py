@@ -44,6 +44,7 @@ try:
     m.setObjective(-y)
 
     # Add piecewise-linear objective functions for x and z
+    # f(x) = exp(-x) and g(z) = 2 z^2 - 4 z
 
     npts = 101
     ptu = []

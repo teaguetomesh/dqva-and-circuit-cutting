@@ -56,13 +56,15 @@ num_clusters: list of numbers. Number of fragments to split into. Default and mi
 ```
 @return:
 ```
-Cut positions that have the minimum cluster hardness metric across all iterations.
+Cut positions that have the minimum cluster hardness metric across all iterations. Note that the solution does not guarantee optimality but will be a valid cut.
 ```
+- [x] Correct cluster_K calculation
 ### Mixed Integer Quadratically Constrained Programming (MIQCP) Solver in Gurobi
 A quadratic programming solver to solve the circuit clustering problem.
-- [ ] Implement piecewise linear approximation for the exponential objective. Refer to gurobi_test.py
+- [x] Implement exponential objectives as piecewise linear
 - [ ] Enforce connectivity constraint
 - [ ] Start with incumbent found by the randomized searcher. https://www.gurobi.com/documentation/8.1/refman/start.html
+- [ ] Output parser
 ### Cut searcher benchmark
 Benchmarking the running speed of cut searcher.
 ## Cutter
