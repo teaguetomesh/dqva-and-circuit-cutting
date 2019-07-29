@@ -6,6 +6,7 @@ import networkx as nx
 from qcg.generators import gen_supremacy
 import randomized_searcher as r_s
 import numpy as np
+import cutter
 
 class Basic_Model(object):
     def __init__(self, n_vertices, edges, node_ids, id_nodes, k, hw_max_qubit, verbosity=0):
@@ -57,6 +58,15 @@ class Basic_Model(object):
                 v = self.model.addVar(lb=0.0, ub=1.0, vtype=GRB.BINARY)
                 cluster_vars.append(v)
             self.edge_vars.append(cluster_vars)
+
+        # Indicate if a cluster contains an edge
+        self.has_edge = []
+        for i in range(k):
+            cluster_vars = []
+            for j in range(self.n_edges):
+                v = self.model.addVar(lb=0.0, ub=1.0, vtype=GRB.BINARY)
+                cluster_vars.append(v)
+            self.has_edge.append(cluster_vars)
         
         # constraint: each vertex in exactly one cluster
         print('adding vertex non-overlapping constraint')
@@ -65,7 +75,8 @@ class Basic_Model(object):
         
         # constraint: edge_var=1 indicates one and only one vertex of an edge is in cluster
         # edge_var[cluster][edge] = node_var[cluster][u] XOR node_var[cluster][v]
-        print('adding cutting edges constraint')
+        # has_edge[cluster][edge] = node_var[cluster][u] AND node_var[cluster][v]
+        print('adding edges and cluster constraint')
         for i in range(k):
             for e in range(self.n_edges):
                 u, v = self.edges[e]
@@ -78,19 +89,15 @@ class Basic_Model(object):
                 tmp2 = self.model.addVar(lb=0.0, ub=1.0, vtype=GRB.BINARY)
                 self.model.addConstr(tmp2 == and_(not_u_node_var, v_node_var))
                 self.model.addConstr(self.edge_vars[i][e] == or_(tmp1, tmp2))
+                # self.model.addConstr(self.has_edge[i][e] == and_(u_node_var, v_node_var))
         
         # connectivity constraints:
-        # TODO: check the implementations
         # TODO: add BnC method?
         # print('adding connectivity constraints')
-        # for v1 in range(n_vertices):
-        #     for v2 in range(v1+1, n_vertices):
-        #         if (v1, v2) in self.edges: continue
-        #         for i in range(k):
-        #             cvars = self.connectivity_vars(i, v1, v2)
-        #             self.model.addConstr(self.node_vars[i][v1] + self.node_vars[i][v2], 
-        #                                  GRB.LESS_EQUAL,
-        #                                  quicksum(cvars) + 1)
+        # for cluster in range(k):
+        #     self.model.addConstr(
+        #     quicksum([self.node_vars[cluster][i] for i in range(self.n_vertices)])-1 == 
+        #     quicksum([self.has_edge[cluster][e] for e in range(self.n_edges)]))
 
         # symmetry-breaking constraints
         # TODO: check the implementation
@@ -106,6 +113,7 @@ class Basic_Model(object):
         obj_expr = LinExpr()
         for cluster in range(k):
             # FIXME: upper bound on variables should not be hardcoded
+            # FIXME: I think it is maximizing the objective function now
             cluster_K = self.model.addVar(lb=0.0, ub=10.0, vtype=GRB.INTEGER, name='cluster_K_%d'%cluster)
             self.model.addConstr(cluster_K == 
             quicksum([self.edge_vars[cluster][i] for i in range(self.n_edges)]))
@@ -162,39 +170,10 @@ class Basic_Model(object):
         G.add_nodes_from(range(self.n_vertices))
 
         for v1, v2 in self.edges:
-            G.add_edge(v1, v2) 
+            G.add_edge(v1, v2)
         self.graph = G
         self.node_sets = set()
         self.node_set_vars = dict()
-
-    def connectivity_vars(self, cluster, v1, v2):
-        assert((v1, v2) not in self.edges)
-
-        connectivity_vars = []
-        for path in nx.all_simple_paths(self.graph, v1, v2):
-            node_set = tuple(sorted(path[1:-1]))
-            n = len(node_set)
-            
-            if n == 1:
-                node = node_set[0]
-                cvar = self.node_vars[cluster][node]
-            else:            
-                # check if the node set is new
-                if not node_set in self.node_sets:
-                    n = len(node_set)
-                    for i in range(self.k):
-                        var = self.model.addVar(lb=0.0, ub=1.0, vtype=GRB.BINARY)
-                        ns_vars = [self.node_vars[i][j] for j in node_set]
-                        self.node_set_vars[(node_set, i)] = var
-                        self.model.addConstr(quicksum(ns_vars) - n*var <= n-1)
-                        self.model.addConstr(quicksum(ns_vars) - n*var >= 0)
-
-                    self.node_sets.add(node_set)
-                cvar = self.node_set_vars[(node_set, cluster)]
-
-            connectivity_vars.append(cvar)
-        
-        return connectivity_vars
     
     def solve(self):
         print('*'*200)
@@ -218,20 +197,31 @@ class Basic_Model(object):
                 cluster = []
                 for j in range(self.n_vertices):
                     if abs(self.node_vars[i][j].x) > 1e-4:
-                        cluster.append(j)
+                        cluster.append(self.id_nodes[j])
                 clusters.append(cluster)
             self.clusters = clusters
+
+            cut_edges_idx = []
+            cut_edges = []
+            for i in range(self.k):
+                for j in range(self.n_edges):
+                    if abs(self.edge_vars[i][j].x) > 1e-4 and j not in cut_edges_idx:
+                        cut_edges_idx.append(j)
+                        u, v = self.edges[j]
+                        cut_edges.append((self.id_nodes[u], self.id_nodes[v]))
+            self.cut_edges = cut_edges
     
     def print_stat(self):
         print('*'*200)
         print('MIQCP stats:')
-        print('clusters:')
-        print(self.clusters)
+        [print('cluster %d\n'%i, x) for i, x in enumerate(self.clusters)]
+        print('edges to cut:')
+        print(self.cut_edges)
 
-        print('node count:', self.node_count)
-        print('mip gap:', self.mip_gap)
+        # print('node count:', self.node_count)
+        # print('mip gap:', self.mip_gap)
         print('objective value:', self.objective)
-        print('runtime:', self.runtime)
+        # print('runtime:', self.runtime)
 
         for v in self.model.getVars():
             if 'cluster' in v.VarName:
@@ -259,7 +249,7 @@ def read_circ(circ):
         # print('qargs:', vertex.qargs)
         arg0, arg1 = vertex.qargs
         vertex_name = '%s[%d]%d %s[%d]%d' % (arg0[0].name, arg0[1],qubit_gate_idx[arg0],
-                                             arg1[0].name, arg1[1],qubit_gate_idx[arg1])
+                                                arg1[0].name, arg1[1],qubit_gate_idx[arg1])
         qubit_gate_idx[arg0] += 1
         qubit_gate_idx[arg1] += 1
         # print('vertex_name:', vertex_name)
@@ -268,18 +258,51 @@ def read_circ(circ):
             id_node_names[curr_node_id] = vertex_name
             node_ids[id(vertex)] = curr_node_id
             curr_node_id += 1
-    
+
     for u, v, attr in dag.edges():
         if u.type == 'op' and v.type == 'op':
             u_id = node_ids[id(u)]
             v_id = node_ids[id(v)]
             edges.append((u_id, v_id))
-         
+            
     n_vertices = len(list(dag.topological_op_nodes()))
     return n_vertices, edges, node_name_ids, id_node_names
 
+def cuts_parser(cuts, circ):
+    dag = circuit_to_dag(circ)
+    positions = []
+    for position in cuts:
+        source, dest = position
+        source_qargs = [x[:len(x)-1] for x in source.split(' ')]
+        dest_qargs = [x[:len(x)-1] for x in dest.split(' ')]
+        qubit_cut = list(set(source_qargs).intersection(set(dest_qargs)))
+        if len(qubit_cut)>1:
+            raise Exception('one cut is cutting on multiple qubits')
+        for x in source.split(' '):
+            if x[:len(x)-1] == qubit_cut[0]:
+                source_idx = int(x[len(x)-1])
+        for x in dest.split(' '):
+            if x[:len(x)-1] == qubit_cut[0]:
+                dest_idx = int(x[len(x)-1])
+        multi_Q_gate_idx = max(source_idx, dest_idx)
+        # print('cut qubit:', qubit_cut[0], 'after %d multi qubit gate'% multi_Q_gate_idx)
+        wire = None
+        for qubit in circ.qubits:
+            if qubit[0].name == qubit_cut[0].split('[')[0] and qubit[1] == int(qubit_cut[0].split('[')[1].split(']')[0]):
+                wire = qubit
+        tmp = 0
+        all_Q_gate_idx = None
+        for gate_idx, gate in enumerate(list(dag.nodes_on_wire(wire=wire, only_ops=True))):
+            if len(gate.qargs)>1:
+                tmp += 1
+                if tmp == multi_Q_gate_idx:
+                    all_Q_gate_idx = gate_idx
+        positions.append((wire, all_Q_gate_idx))
+    positions = sorted(positions, reverse=True, key=lambda cut: cut[1])
+    return positions
+
 if __name__ == '__main__':
-    circ = gen_supremacy(3,3,8,'71230456')
+    circ = gen_supremacy(4,4,8,'71230456')
     stripped_circ = r_s.circ_stripping(circ)
     dag_drawer(circuit_to_dag(stripped_circ),filename='dag.pdf')
     n_vertices, edges, node_ids, id_nodes = read_circ(stripped_circ)
@@ -296,3 +319,7 @@ if __name__ == '__main__':
     m = Basic_Model(**kwargs)
     m.solve()
     m.print_stat()
+    positions = cuts_parser(m.cut_edges, circ)
+    print(positions)
+    fragments, complete_path_map, K, d = cutter.cut_circuit(circ, positions)
+    print('K =', K, 'd =', d)

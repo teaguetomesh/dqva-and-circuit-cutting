@@ -180,23 +180,31 @@ def cluster_character(graph, grouping, cut_edges, hw_max_qubit=24):
     K = graph.edge_count
     max_d = 0
     cumulative_hardness = 0.0
+    print('cut_edges are:', cut_edges)
     for idx, group in enumerate(grouping):
+        print('group is:', group)
         group_K = 0
         group_d = 0
         for vertex in group.split(' '):
+            print('looking at vertex:', vertex)
             qargs = vertex.split(',')
             for qarg in qargs:
                 if int(qarg.split(']')[1]) == 0:
+                    print('qarg %s is a starting node, d++'%qarg)
                     group_d += 1
             for u, v in cut_edges:
                 if vertex == v:
+                    print('vertex %s is cutting dest node, d++, K++'%vertex)
                     group_K += 1
                     group_d += 1
                 elif vertex == u:
+                    print('vertex %s is cutting src node, K++'%vertex)
                     group_K += 1
-        # print('K = %d, d = %d' % (group_K, group_d))
+        print('K = %d, d = %d' % (group_K, group_d))
+        print('-'*100)
         cumulative_hardness += float('inf') if group_d > hw_max_qubit else np.power(2,group_d)*np.power(8,group_K)
         max_d = max(max_d, group_d)
+    print('cumulative hardness =', cumulative_hardness)
     return K, max_d, cumulative_hardness
 
 def find_neighbor(qarg, vert_info):
@@ -251,7 +259,7 @@ def min_cut(graph, min_v=2, hw_max_qubit=20):
     print('splitting into %d fragments, %d edges %d vertices graph' % (min_v, m, n))
     # TODO: figure out how many trials actually required
     # for i in range(int(n * (n-1) * math.log(n)/2)):
-    for i in range(1000):
+    for i in range(1):
         random.seed(datetime.now())
         g, grouping, cut_edges = contract(graph, min_v)
         K, d, hardness = cluster_character(g, grouping, cut_edges, hw_max_qubit)
@@ -262,24 +270,27 @@ def min_cut(graph, min_v=2, hw_max_qubit=20):
             min_hardness_d = d
     return min_hardness_cuts, min_hardness, min_hardness_K, min_hardness_d
 
-def find_best_cuts(circ, hw_max_qubit=20,num_clusters=[2]):
+def find_best_cuts(circ, hw_max_qubit=20,num_clusters=2):
     stripped_circ = circ_stripping(circ)
     graph = circuit_to_graph(stripped_circ)
-    min_hardness = float('inf')
-    best_cuts = None
-    best_K = None
-    best_d = None
-    for i in num_clusters:
-        cuts, hardness, K, d = min_cut(graph, i, hw_max_qubit)
-        if cuts != None:
-            if hardness < min_hardness:
-                best_cuts = cuts
-                min_hardness = hardness
-                best_K = K
-                best_d = d
-                best_num_clusters = i
+    positions, hardness, K, d = min_cut(graph, num_clusters, hw_max_qubit)
+    positions = cuts_parser(positions, circ)
+    return positions, hardness, K, d
+    # min_hardsnes = float('inf')
+    # best_cuts = None
+    # best_K = None
+    # best_d = None
+    # for i in num_clusters:
+    #     cuts, hardness, K, d = min_cut(graph, i, hw_max_qubit)
+    #     if cuts != None:
+    #         if hardness < min_hardness:
+    #             best_cuts = cuts
+    #             min_hardness = hardness
+    #             best_K = K
+    #             best_d = d
+    #             best_num_clusters = i
 
-    if best_cuts == None:
-        raise Exception('Did not find cuts for hw_max_qubit = %d' %hw_max_qubit)
-    best_cuts = cuts_parser(best_cuts, circ)
-    return best_cuts, min_hardness, best_K, best_d, best_num_clusters
+    # if best_cuts == None:
+    #     raise Exception('Did not find cuts for hw_max_qubit = %d' %hw_max_qubit)
+    # best_cuts = cuts_parser(best_cuts, circ)
+    # return best_cuts, min_hardness, best_K, best_d, best_num_clusters

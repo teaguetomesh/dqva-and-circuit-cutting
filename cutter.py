@@ -148,8 +148,9 @@ def cut_circuit(circ, positions):
     fragments, fragment_qubits = fragments_generator(cut_dag, path_map)
     complete_path_map = complete_path_map_generator(path_map, fragment_qubits)
     K = len(positions)
-    d = -1
+    d = []
     for x in fragment_qubits:
-        d = max(d, len(x))
+        # d = max(d, len(x))
+        d.append(len(x))
 
     return fragments, complete_path_map, K, d
