@@ -60,7 +60,7 @@ Cut positions that have the minimum cluster hardness metric across all iteration
 ```
 - [x] Correct cluster_K calculation
 - [ ] Allow 1 cluster if qubits in original circuit does not exceed max allowed
-- [ ] graph implementation using counter does not count edge directionality properly!!! Causing wrong cluster_d calculations.
+- [ ] Graph implementation using counter does not count edge directionality properly!!! Causing wrong cluster_d calculations.
 ### Mixed Integer Quadratically Constrained Programming (MIQCP) Solver in Gurobi
 A quadratic programming solver to solve the circuit clustering problem.
 - [x] Implement exponential objectives as piecewise linear

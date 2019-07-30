@@ -18,7 +18,6 @@ int ind_f(int i, int j, int MAX_COL)
     return ind(i, j);
 }
 
-void setup(int rank, int proc, int argc, char **argv, int *A_MAX_ROW, int *A_MAX_COL, int *B_MAX_ROW, int *B_MAX_COL,int *final_flag);
 void print_matrix(double matrix[], int MAX_ROW, int MAX_COLUMN);
 
 int main(int argc, char **argv)
@@ -34,13 +33,6 @@ int main(int argc, char **argv)
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
     MPI_Comm_size(MPI_COMM_WORLD, &size);
     numworkers = size - 1;
-    /* argument checking and setting */
-    // setup(rank, size, argc, argv, &A_MAX_ROW, &A_MAX_COL, &B_MAX_ROW, &B_MAX_COL, &final_flag);
-
-    // if (final_flag == 1) {
-    //     MPI_Finalize();
-    //     exit(0);
-    // }
 
     if (rank == 0) {
         /* ------------- Master -------------- */
