@@ -302,7 +302,7 @@ def cuts_parser(cuts, circ):
     return positions
 
 if __name__ == '__main__':
-    circ = gen_supremacy(7,7,8,'71230456')
+    circ = gen_supremacy(4,4,8,'71230456')
     stripped_circ = r_s.circ_stripping(circ)
     dag_drawer(circuit_to_dag(stripped_circ),filename='dag.pdf')
     n_vertices, edges, node_ids, id_nodes = read_circ(stripped_circ)
