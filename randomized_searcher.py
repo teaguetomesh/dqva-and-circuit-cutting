@@ -1,6 +1,7 @@
 from qiskit import QuantumCircuit
 from qiskit.dagcircuit.dagcircuit import DAGCircuit
 from qiskit.converters import circuit_to_dag, dag_to_circuit
+from qiskit.tools.visualization import dag_drawer
 import random
 import math
 import copy
@@ -8,17 +9,29 @@ from collections import Counter
 from datetime import datetime
 import sys
 import numpy as np
+from qcg.generators import gen_supremacy
 
 class Graph(object):
     def __init__(self, vlist):
-        self.verts = {v[0]:Counter(v[1:]) for v in vlist}
+        self.verts = {}
+        all_vertices = []
+        for l in vlist:
+            [all_vertices.append(x) for x in l]
+            v = l[0]
+            vertex = Counter(l[1:])
+            self.verts[v] = vertex
+        all_vertices = set(all_vertices)
+        for v in all_vertices:
+            if v not in self.verts:
+                self.verts[v] = Counter([])
         self.update_edges()
 
     def update_edges(self):
         self.edges = []
         
-        for k, v in self.verts.items():
-            self.edges += ([(k, t) for t in v.keys() for n in range(v[t]) if k < t])
+        for src in self.verts:
+            dest_l = list(self.verts[src].elements())
+            self.edges += [(src,x) for x in dest_l]
 
     @property
     def vertex_count(self):
@@ -30,38 +43,29 @@ class Graph(object):
 
     def merge_vertices(self, edge_index):
         head_key, tail_key = self.edges[edge_index]
-        # print('removing edge ', self.edges[edge_index], head_key, tail_key)
         
         head = self.verts[head_key]
         tail = self.verts[tail_key]
 
-        # print('merging head =', head_key, head, 'tail =', tail_key, tail)
-
-        # Remove the edge between head and tail
+        # Remove the edge from head to tail
         del head[tail_key]
-        del tail[head_key]
 
-        # print('After removing head->tail, head =', head, 'tail =', tail)
-
-        # Merge tails
+        # Merge tail into head
         head.update(tail)
 
-        # print('After merging tail, head =', head_key, head)
-
-        # Update all the neighboring vertices of the fused vertex
-        for i in tail.keys():
-            v = self.verts[i]
-            # print('tail neighboring vertex', i, 'vertex', v)
-            v[head_key] += v[tail_key]
-            del v[tail_key]
-            # print('updated to', v)
+        # Vertices pointing to tail should now point to head
+        for vertex in self.verts:
+            if tail_key in self.verts[vertex] and vertex != head_key:
+                if head_key in self.verts[vertex]:
+                    self.verts[vertex][head_key] += self.verts[vertex][tail_key]
+                else:
+                    self.verts[vertex][head_key] = self.verts[vertex][tail_key]
+                del self.verts[vertex][tail_key]
             
         # Finally remove the tail vertex
         del self.verts[tail_key]
 
         self.update_edges()
-        # print('FINISHED edges:', self.edges)
-        # print('FINISHED verts:', self.verts)
 
 def circ_stripping(circ):
     # Remove all single qubit gates in the circuit
@@ -73,224 +77,200 @@ def circ_stripping(circ):
             stripped_dag.apply_operation_back(op=vertex.op, qargs=vertex.qargs)
     return dag_to_circuit(stripped_dag)
 
-def circuit_to_graph(stripped_circ):
-    # FIXME: edge directions are wrong
-    input_qubit_itr = {}
-    for x in stripped_circ.qubits:
-        input_qubit_itr[x] = 0
-    stripped_dag = circuit_to_dag(stripped_circ)
-    vert_info = []
-    for vertex in stripped_dag.topological_op_nodes():
+def circuit_to_graph(circ):
+    dag = circuit_to_dag(circ)
+    input_qubit_gate_counter = {}
+    for qubit in circ.qubits:
+        input_qubit_gate_counter[qubit] = 0
+    
+    id_name = {}
+    for vertex in dag.topological_op_nodes():
         vertex_name = ''
         for qarg in vertex.qargs:
-            if vertex_name == '':
-                vertex_name += '%s[%d]%d' % (qarg[0].name,qarg[1],input_qubit_itr[qarg])
-                input_qubit_itr[qarg] += 1
-            else:
-                vertex_name += ',%s[%d]%d' % (qarg[0].name,qarg[1],input_qubit_itr[qarg])
-                input_qubit_itr[qarg] += 1
-        vert_info.append((vertex_name, vertex.qargs))
+            gate_count = input_qubit_gate_counter[qarg]
+            vertex_name += '%s[%d]%d ' % (qarg[0].name, qarg[1], gate_count)
+            input_qubit_gate_counter[qarg] += 1
+        vertex_name = vertex_name[:len(vertex_name)-1]
+        id_name[id(vertex)] = vertex_name
     
-    abstraction = []
-    for idx, (vertex_name, vertex_qargs) in enumerate(vert_info):
-        abstraction_item = [vertex_name]
-        for qarg in vertex_qargs:
-            prev_vertex_name, prev_found = find_neighbor(qarg, vert_info[:idx][::-1])
-            next_vertex_name, next_found = find_neighbor(qarg, vert_info[idx+1:])
-            if prev_found:
-                abstraction_item.append(prev_vertex_name)
-            if next_found:
-                abstraction_item.append(next_vertex_name)
-        abstraction.append(abstraction_item)
-    graph = Graph(abstraction) 
+    graph_edges = {}
+    for edge in dag.edges():
+        source, dest, attr = edge
+        if source.type == 'op' and dest.type == 'op':
+            source_vertex_name = id_name[id(source)]
+            dest_vertex_name = id_name[id(dest)]
+            # print(source_vertex_name, 'to', dest_vertex_name)
+            if source_vertex_name in graph_edges:
+                graph_edges[source_vertex_name].append(dest_vertex_name)
+            else:
+                graph_edges[source_vertex_name] = [dest_vertex_name]
+    
+    # [print(x, graph_edges[x]) for x in graph_edges]
+
+    graph_init = []
+    for source_vertex in graph_edges:
+        graph_init_ele = [source_vertex]
+        for dest_vertex in graph_edges[source_vertex]:
+            graph_init_ele.append(dest_vertex)
+        graph_init.append(graph_init_ele)
+    # [print(x) for x in graph_init]
+
+    graph = Graph(graph_init)
     return graph
 
-def translate_edge_index(original_r, original_g, curr_g, grouping):
-    # print('translating edge index', original_r)
-    original_head, original_tail = original_g.edges[original_r]
-    # print('original head =', original_head, 'original tail =', original_tail)
-    # print('current graph:', curr_g.verts)
-    curr_head = None
-    if original_head in curr_g.verts:
-        curr_head = original_head
-    else:
-        for group in grouping:
-            if original_head in group.split(' '):
-                curr_head = group.split(' ')[0]
-    curr_tail = None
-    if original_tail in curr_g.verts:
-        curr_tail = original_tail
-    else:
-        for group in grouping:
-            if original_tail in group.split(' '):
-                curr_tail = group.split(' ')[0]
-    curr_r = -1
-    for edge_idx, edge in enumerate(curr_g.edges):
-        if (curr_head, curr_tail) == edge:
-            curr_r = edge_idx
-    return curr_r
+def translate_idx(graph_edge, grouping, g):
+    graph_edge_head, graph_edge_tail = graph_edge
+    g_edge_head = None
+    g_edge_tail = None
+    hi = None
+    ti = None
+    g_contraction_idx = None
+    for idx, group in enumerate(grouping):
+        if graph_edge_head in group:
+            g_edge_head = group[0]
+            hi = idx
+        if graph_edge_tail in group:
+            g_edge_tail = group[0]
+            ti = idx
+    # print('graph_edge_head is in group', grouping[hi], 'converting to ', g_edge_head)
+    # print('graph_edge_head is in group', grouping[ti], 'converting to ', g_edge_tail)
+    if hi!=ti and hi!=None and ti!=None:
+        grouping[hi] += grouping[ti]
+        del grouping[ti]
+        for idx, g_edge in enumerate(g.edges):
+            if (g_edge_head, g_edge_tail) == g_edge:
+                g_contraction_idx = idx
+                # print('contracting edge', g.edges[g_contraction_idx], 'in g')
+    return g_contraction_idx, grouping
 
 def contract(graph, min_v=2):
     g = copy.deepcopy(graph)
-    grouping = [x for x in g.verts]
-    contracted_edges = []
+    grouping = [[x] for x in g.verts]
     contraction_order = random.sample(range(0,graph.edge_count), graph.edge_count)
-    i = 0
-    # print('initial grouping:', grouping)
+    counter = 0
     while g.vertex_count > min_v:
-        # r = random.randrange(0, g.edge_count)
-        # head, tail = g.edges[r]
-        # graph_r = random.randrange(0, graph.edge_count)
-        graph_r = contraction_order[i]
-        i+=1
-        contracted_edges.append(graph.edges[graph_r])
-        g_r = translate_edge_index(original_r=graph_r, original_g=graph, curr_g=g, grouping=grouping)
-        g_head, g_tail = g.edges[g_r]
-        # print('contracting', graph.edges[graph_r], 'in the original graph')
-        # print('keep the edge', (g_head, g_tail), 'in the contracted graph')
-        g.merge_vertices(g_r)
-        
-        hi = -1
-        ti = -1
-        for group_idx, group in enumerate(grouping):
-            if g_head in group:
-                hi = group_idx
-            if g_tail in group:
-                ti = group_idx
-        grouping.append(grouping[hi] + ' ' + grouping[ti])
-        del grouping[min(hi,ti)]
-        del grouping[max(hi,ti)-1]
-        # print('updated grouping:', grouping)
-        # print('*'*100)
-
-    cut_edges = []
-    for edge in graph.edges:
-        head, tail = edge
-        contracted = False
+        graph_edge_idx = contraction_order[counter]
+        graph_edge = graph.edges[graph_edge_idx]
+        # print('contracting edge', graph_edge, 'in graph')
+        g_edge_idx, grouping = translate_idx(graph_edge, grouping, g)
+        if g_edge_idx != None:
+            # print('contracting edge', g.edges[g_edge_idx], 'in g')
+            g.merge_vertices(g_edge_idx)
+        # print(len(g.edges))
+        counter += 1
+    # print('contracted %d/%d edges' %(counter, len(contraction_order)))
+    cut_edges = [graph.edges[x] for x in contraction_order[counter:]]
+    # print('original edges not being contracted:', cut_edges)
+    true_cut_edges = []
+    for edge in cut_edges:
+        implicitly_contracted = False
+        u, v = edge
+        # print('edge', edge, 'is not explicitly contracted')
         for group in grouping:
-            if head in group.split(' ') and tail in group.split(' '):
-                contracted = True
+            if u in group and v in group:
+                implicitly_contracted = True
+                # print('but is implicitly contracted')
                 break
-        if not contracted:
-            cut_edges.append(edge)
+        if not implicitly_contracted:
+            true_cut_edges.append(edge)
+    # print('cut_edges:', true_cut_edges)
+    # print('grouping is:', grouping)
+    # print('remaining edges in g:', g.edges)
+    return g, grouping, true_cut_edges
 
-    return g, grouping, cut_edges
-
-def cluster_character(graph, grouping, cut_edges, hw_max_qubit=24):
-    K = graph.edge_count
-    max_d = 0
+def cluster_character(grouping, cut_edges, hw_max_qubit=24):
+    d = []
+    K = []
     cumulative_hardness = 0.0
-    print('cut_edges are:', cut_edges)
     for idx, group in enumerate(grouping):
-        print('group is:', group)
+        # print('group is:', group)
         group_K = 0
         group_d = 0
-        for vertex in group.split(' '):
-            print('looking at vertex:', vertex)
-            qargs = vertex.split(',')
+        for vertex in group:
+            # print('looking at vertex:', vertex)
+            qargs = vertex.split(' ')
             for qarg in qargs:
                 if int(qarg.split(']')[1]) == 0:
-                    print('qarg %s is a starting node, d++'%qarg)
+                    # print('qarg %s is a starting node, d++'%qarg)
                     group_d += 1
             for u, v in cut_edges:
                 if vertex == v:
-                    print('vertex %s is cutting dest node, d++, K++'%vertex)
+                    # print('vertex %s is cutting dest node, d++, K++'%vertex)
                     group_K += 1
                     group_d += 1
                 elif vertex == u:
-                    print('vertex %s is cutting src node, K++'%vertex)
+                    # print('vertex %s is cutting src node, K++'%vertex)
                     group_K += 1
-        print('K = %d, d = %d' % (group_K, group_d))
-        print('-'*100)
-        cumulative_hardness += float('inf') if group_d > hw_max_qubit else np.power(2,group_d)*np.power(8,group_K)
-        max_d = max(max_d, group_d)
-    print('cumulative hardness =', cumulative_hardness)
-    return K, max_d, cumulative_hardness
+        # print('K = %d, d = %d' % (group_K, group_d))
+        K.append(group_K)
+        d.append(group_d)
+        if group_d>hw_max_qubit:
+            cumulative_hardness = float('inf')
+            break
+        else:
+            # TODO: better ways to catch overflow?
+            # Exponent divided by 10 to prevent overflow
+            cumulative_hardness += np.power(2,(group_d+3*group_K)/10)
+    return K, d, cumulative_hardness
 
-def find_neighbor(qarg, vert_info):
-    for idx, (vertex_name, qargs) in enumerate(vert_info):
-        if qarg in qargs:
-            return vertex_name, True
-    return None, False
-
-def cuts_parser(cuts, circ):
-    dag = circuit_to_dag(circ)
-    positions = []
-    for position in cuts:
-        source, dest = position
-        source_qargs = [x[:len(x)-1] for x in source.split(',')]
-        dest_qargs = [x[:len(x)-1] for x in dest.split(',')]
-        qubit_cut = list(set(source_qargs).intersection(set(dest_qargs)))
-        if len(qubit_cut)>1:
-            raise Exception('one cut is cutting on multiple qubits')
-        for x in source.split(','):
-            if x[:len(x)-1] == qubit_cut[0]:
-                source_idx = int(x[len(x)-1])
-        for x in dest.split(','):
-            if x[:len(x)-1] == qubit_cut[0]:
-                dest_idx = int(x[len(x)-1])
-        multi_Q_gate_idx = max(source_idx, dest_idx)
-        # print('cut qubit:', qubit_cut[0], 'after %d multi qubit gate'% multi_Q_gate_idx)
-        wire = None
-        for qubit in circ.qubits:
-            if qubit[0].name == qubit_cut[0].split('[')[0] and qubit[1] == int(qubit_cut[0].split('[')[1].split(']')[0]):
-                wire = qubit
-        tmp = 0
-        all_Q_gate_idx = None
-        for gate_idx, gate in enumerate(list(dag.nodes_on_wire(wire=wire, only_ops=True))):
-            if len(gate.qargs)>1:
-                tmp += 1
-                if tmp == multi_Q_gate_idx:
-                    all_Q_gate_idx = gate_idx
-        positions.append((wire, all_Q_gate_idx))
-    positions = sorted(positions, reverse=True, key=lambda cut: cut[1])
-    return positions
-
-# Karger's Algorithm
-# For failure probabilty upper bound of 1/n, repeat the algorithm nC2 logn times
 def min_cut(graph, min_v=2, hw_max_qubit=20):
-    m = graph.edge_count
-    n = graph.vertex_count
     min_hardness = float('inf')
     min_hardness_cuts = None
     min_hardness_K = None
     min_hardness_d = None
-    # print('splitting into %d fragments, %d edges %d vertices graph will run %d times' % (min_v, m, n, int(n * (n-1) * math.log(n)/2)))
-    print('splitting into %d fragments, %d edges %d vertices graph' % (min_v, m, n))
-    # TODO: figure out how many trials actually required
-    # for i in range(int(n * (n-1) * math.log(n)/2)):
-    for i in range(1):
+    for trial in range(2000):
         random.seed(datetime.now())
         g, grouping, cut_edges = contract(graph, min_v)
-        K, d, hardness = cluster_character(g, grouping, cut_edges, hw_max_qubit)
-        if hardness < min_hardness:
+        K, d, hardness = cluster_character(grouping, cut_edges, hw_max_qubit)
+        if hardness<min_hardness:
             min_hardness = hardness
             min_hardness_cuts = cut_edges
             min_hardness_K = K
             min_hardness_d = d
     return min_hardness_cuts, min_hardness, min_hardness_K, min_hardness_d
 
-def find_best_cuts(circ, hw_max_qubit=20,num_clusters=2):
+def positions_parser(stripped_circ_cuts, circ):
+    dag = circuit_to_dag(circ)
+    circ_cuts = []
+    for cut in stripped_circ_cuts:
+        multiQ_gate_idx = None
+        wire = None
+        # print('cut in stripped circ:', cut)
+        u, v = cut
+        u_qargs = [x.split(']')[0]+']' for x in u.split(' ')]
+        v_qargs = [x.split(']')[0]+']' for x in v.split(' ')]
+        common_vertex = list(set(u_qargs).intersection(v_qargs))
+        # FIXME: how to account for this possibility in the input circuit?
+        if len(common_vertex)>1:
+            raise Exception('vertices have more than one edge in between')
+        common_vertex = common_vertex[0]
+        for qarg in u.split(' '):
+            if qarg.split(']')[0]+']' == common_vertex:
+                multiQ_gate_idx = int(qarg.split(']')[1])
+        for qubit in circ.qubits:
+            if '%s[%d]' % (qubit[0].name,qubit[1]) == common_vertex:
+                wire = qubit
+        # print('wire:', wire, 'multiQ_gate_idx=', multiQ_gate_idx)
+        counter = 0
+        for idx, op_node in enumerate(dag.nodes_on_wire(wire, only_ops=True)):
+            # TODO: only counting 2q gates now
+            if len(op_node.qargs) == 2:
+                if counter == multiQ_gate_idx:
+                    circ_cuts.append((wire, idx))
+                    break
+                else:
+                    counter += 1
+    return circ_cuts
+
+if __name__ == '__main__':
+    circ = gen_supremacy(5,5,8,'71230456')
     stripped_circ = circ_stripping(circ)
     graph = circuit_to_graph(stripped_circ)
-    positions, hardness, K, d = min_cut(graph, num_clusters, hw_max_qubit)
-    positions = cuts_parser(positions, circ)
-    return positions, hardness, K, d
-    # min_hardsnes = float('inf')
-    # best_cuts = None
-    # best_K = None
-    # best_d = None
-    # for i in num_clusters:
-    #     cuts, hardness, K, d = min_cut(graph, i, hw_max_qubit)
-    #     if cuts != None:
-    #         if hardness < min_hardness:
-    #             best_cuts = cuts
-    #             min_hardness = hardness
-    #             best_K = K
-    #             best_d = d
-    #             best_num_clusters = i
-
-    # if best_cuts == None:
-    #     raise Exception('Did not find cuts for hw_max_qubit = %d' %hw_max_qubit)
-    # best_cuts = cuts_parser(best_cuts, circ)
-    # return best_cuts, min_hardness, best_K, best_d, best_num_clusters
+    positions, hardness, K, d = min_cut(graph, 3, 14)
+    if hardness == float('inf'):
+        raise Exception('cannot find any cut')
+    positions = positions_parser(positions, circ)
+    print('%d cuts at:'%len(positions), positions)
+    [print('cluster %d, K ='%i,K[i],'d =',d[i]) for i in range(len(K))]
+    print('objective =', hardness)
+    print('*'*100)
