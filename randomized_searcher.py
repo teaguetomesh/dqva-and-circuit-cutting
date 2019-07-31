@@ -218,7 +218,7 @@ def min_cut(graph, min_v=2, hw_max_qubit=20):
     min_hardness_cuts = None
     min_hardness_K = None
     min_hardness_d = None
-    for trial in range(2000):
+    for trial in range(int(1e5)):
         random.seed(datetime.now())
         g, grouping, cut_edges = contract(graph, min_v)
         K, d, hardness = cluster_character(grouping, cut_edges, hw_max_qubit)
@@ -263,10 +263,10 @@ def positions_parser(stripped_circ_cuts, circ):
     return circ_cuts
 
 if __name__ == '__main__':
-    circ = gen_supremacy(5,5,8,'71230456')
+    circ = gen_supremacy(7,7,8,'71230456')
     stripped_circ = circ_stripping(circ)
     graph = circuit_to_graph(stripped_circ)
-    positions, hardness, K, d = min_cut(graph, 3, 14)
+    positions, hardness, K, d = min_cut(graph, 4, 20)
     if hardness == float('inf'):
         raise Exception('cannot find any cut')
     positions = positions_parser(positions, circ)

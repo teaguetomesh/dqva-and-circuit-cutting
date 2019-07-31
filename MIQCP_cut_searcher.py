@@ -100,7 +100,6 @@ class Basic_Model(object):
         #     quicksum([self.has_edge[cluster][e] for e in range(self.n_edges)]))
 
         # symmetry-breaking constraints
-        # TODO: check the implementation
         print('adding symmetry-breaking constraints')
         self.model.addConstr(self.node_vars[0][0], GRB.EQUAL, 1)
         for i in range(2, k):
@@ -151,7 +150,7 @@ class Basic_Model(object):
 
         for i in range(lb,ub+1):
             ptx.append(i)
-            ptf.append(np.power(base,(ptx[i-lb])))
+            ptf.append(np.power(base,(ptx[i-lb]/10)))
         return ptx, ptf
     
     def check_graph(self, n_vertices, edges):
@@ -231,6 +230,7 @@ class Basic_Model(object):
             print('OPTIMAL')
         else:
             print('NOT OPTIMAL')
+        print('*'*200)
 
 def read_circ(circ):
     dag = circuit_to_dag(circ)
@@ -302,7 +302,7 @@ def cuts_parser(cuts, circ):
     return positions
 
 if __name__ == '__main__':
-    circ = gen_supremacy(4,4,8,'71230456')
+    circ = gen_supremacy(7,7,8,'71230456')
     stripped_circ = r_s.circ_stripping(circ)
     dag_drawer(circuit_to_dag(stripped_circ),filename='dag.pdf')
     n_vertices, edges, node_ids, id_nodes = read_circ(stripped_circ)
@@ -310,7 +310,7 @@ if __name__ == '__main__':
                   edges=edges,
                   node_ids=node_ids,
                   id_nodes=id_nodes,
-                  k=2,
+                  k=4,
                   hw_max_qubit=20)
     print('*'*200)
     print('kwargs:')
@@ -322,4 +322,4 @@ if __name__ == '__main__':
     positions = cuts_parser(m.cut_edges, circ)
     print(positions)
     fragments, complete_path_map, K, d = cutter.cut_circuit(circ, positions)
-    print('K =', K, 'd =', d)
+    print('%d fragments, %d cuts'%(len(fragments),len(positions)),'K =', K, 'd =', d)

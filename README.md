@@ -67,7 +67,7 @@ A quadratic programming solver to solve the circuit clustering problem.
 - [x] Enforce semi-connectedness constraint
 - [ ] Start with incumbent found by the randomized searcher. https://www.gurobi.com/documentation/8.1/refman/start.html
 - [ ] Implement auto number of cluster optimization
-- [ ] Output parser (try the parsed output with cutter to verify K,d calculation)
+- [x] Output parser (try the parsed output with cutter to verify K,d calculation)
 ### Cut searcher benchmark
 Benchmarking the running speed of cut searcher.
 ## Cutter
