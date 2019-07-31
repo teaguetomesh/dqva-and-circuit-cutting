@@ -11,6 +11,10 @@ python3 -m venv my_venv
 pip install qiskit
 pip install nxpd pydot
 ```
+Install Gurobi solver. Change your current directory to the Gurobi <installdir> (the directory that contains the file setup.py), and issue the following command:
+```
+python setup.py install
+```
 
 Modify the file at
 
