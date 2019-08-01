@@ -67,16 +67,17 @@ Cut positions that have the minimum cluster hardness metric across all iteration
 - [x] Implement auto number of cluster optimization
 - [x] Graph implementation using counter does not count edge directionality properly!!! Causing wrong cluster_d calculations.
 ### Exhaustive Searcher
-- [ ] Unnecessary to repeat when the same starting contraction orders are enough to contract the graph
+- [x] Unnecessary to repeat when the same starting contraction orders are enough to contract the graph
 ### Mixed Integer Quadratically Constrained Programming (MIQCP) Solver in Gurobi
 A quadratic programming solver to solve the circuit clustering problem.
 - [x] Implement exponential objectives as piecewise linear
 - [x] Enforce weakly-connectedness constraint (turns out not needed)
-- [ ] Start with incumbent found by the randomized searcher. https://www.gurobi.com/documentation/8.1/refman/start.html
+- [x] Start with incumbent found by the randomized searcher. https://www.gurobi.com/documentation/8.1/refman/start.html. Task removed. Randomized searcher is too slow to find a solution.
 - [x] Implement auto number of cluster optimization
 - [x] Output parser (try the parsed output with cutter to verify K,d calculation)
+- [ ] Replace exponential objective with linear?
 ### Cut searcher benchmark
-Benchmarking the running speed of cut searcher.
+Benchmarking the running speed of randomized cut searcher vs MIQCP solver. MIQCP solver is both much faster and offers better cuts.
 ## Cutter
 Cut a circuit into fragments and provide necessary information for simulator and uniter.
 ```

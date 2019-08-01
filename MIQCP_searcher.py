@@ -344,7 +344,7 @@ def find_cuts(circ, hw_max_qubit=20, verbose=False):
     return min_objective, best_positions, best_K, best_d, best_num_cluster
 
 if __name__ == '__main__':
-    circ = gen_supremacy(6,6,8,'71230456')
+    circ = gen_supremacy(2,3,8,'71230456')
     stripped_circ = r_s.circ_stripping(circ)
     n_vertices, edges, node_ids, id_nodes = read_circ(stripped_circ)
     k=2
