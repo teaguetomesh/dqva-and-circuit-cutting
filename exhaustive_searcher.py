@@ -229,12 +229,12 @@ def min_cut(graph, min_v=2, hw_max_qubit=20):
     min_hardness_d = None
     contraction_orders = exhaustive_contraction_orders(graph.edge_count)
     for counter, contraction_order in enumerate(contraction_orders):
-        if counter%int(1e5) == int(1e5)-1:
+        if counter%int(1e4) == int(1e4)-1:
             elapsed = timeit.default_timer()-start
             percent = (counter+1)/math.factorial(graph.edge_count)
             print('%d/%d searches' % (counter+1, math.factorial(graph.edge_count)))
             print('elapsed time =', str(timedelta(seconds=elapsed)),
-            'estimated remaining time =',elapsed/percent-elapsed)
+            'estimated remaining time =',str(timedelta(seconds=elapsed/percent-elapsed)))
         random.seed(datetime.now())
         g, grouping, cut_edges = contract(graph, contraction_order, min_v)
         K, d, hardness = cluster_character(grouping, cut_edges, hw_max_qubit)
@@ -281,7 +281,7 @@ def positions_parser(stripped_circ_cuts, circ):
 if __name__ == '__main__':
     k=2
     hw_max_qubit=20
-    circ = gen_supremacy(2,3,8,'71230456')
+    circ = gen_supremacy(2,2,8,'71230456')
     stripped_circ = circ_stripping(circ)
     graph = circuit_to_graph(stripped_circ)
     print('splitting %d vertices %d edges graph into %d clusters. Max qubit = %d'%
