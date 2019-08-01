@@ -7,6 +7,7 @@ import math
 import copy
 from collections import Counter
 from datetime import datetime
+from datetime import timedelta
 import sys
 import numpy as np
 from qcg.generators import gen_supremacy
@@ -220,12 +221,20 @@ def exhaustive_contraction_orders(n_edges):
     return perms
 
 def min_cut(graph, min_v=2, hw_max_qubit=20):
+    print('%d exhaustive searches'%math.factorial(graph.edge_count))
+    start = timeit.default_timer()
     min_hardness = float('inf')
     min_hardness_cuts = None
     min_hardness_K = None
     min_hardness_d = None
     contraction_orders = exhaustive_contraction_orders(graph.edge_count)
-    for contraction_order in contraction_orders:
+    for counter, contraction_order in enumerate(contraction_orders):
+        if counter%int(1e5) == int(1e5)-1:
+            elapsed = timeit.default_timer()-start
+            percent = (counter+1)/math.factorial(graph.edge_count)
+            print('%d/%d searches' % (counter+1, math.factorial(graph.edge_count)))
+            print('elapsed time =', str(timedelta(seconds=elapsed)),
+            'estimated remaining time =',elapsed/percent-elapsed)
         random.seed(datetime.now())
         g, grouping, cut_edges = contract(graph, contraction_order, min_v)
         K, d, hardness = cluster_character(grouping, cut_edges, hw_max_qubit)
@@ -277,7 +286,6 @@ if __name__ == '__main__':
     graph = circuit_to_graph(stripped_circ)
     print('splitting %d vertices %d edges graph into %d clusters. Max qubit = %d'%
     (graph.vertex_count, graph.edge_count,k,hw_max_qubit))
-    print('%d exhaustive searches'%math.factorial(graph.edge_count))
     start = timeit.default_timer()
     positions, hardness, K, d = min_cut(graph=graph, min_v=k, hw_max_qubit=hw_max_qubit)
     end = timeit.default_timer()
