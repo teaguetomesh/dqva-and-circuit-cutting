@@ -21,7 +21,6 @@ class Basic_Model(object):
         self.k = k
         self.hw_max_qubit = hw_max_qubit
         self.verbosity = verbosity
-        self.create_graph()
 
         self.model = Model('cut_searching')
         self.model.params.updatemode = 1
@@ -60,13 +59,13 @@ class Basic_Model(object):
             self.edge_vars.append(cluster_vars)
 
         # Indicate if a cluster contains an edge
-        self.has_edge = []
-        for i in range(k):
-            cluster_vars = []
-            for j in range(self.n_edges):
-                v = self.model.addVar(lb=0.0, ub=1.0, vtype=GRB.BINARY)
-                cluster_vars.append(v)
-            self.has_edge.append(cluster_vars)
+        # self.has_edge = []
+        # for i in range(k):
+        #     cluster_vars = []
+        #     for j in range(self.n_edges):
+        #         v = self.model.addVar(lb=0.0, ub=1.0, vtype=GRB.BINARY)
+        #         cluster_vars.append(v)
+        #     self.has_edge.append(cluster_vars)
         
         # constraint: each vertex in exactly one cluster
         print('adding vertex non-overlapping constraint')
@@ -82,22 +81,18 @@ class Basic_Model(object):
                 u, v = self.edges[e]
                 u_node_var = self.node_vars[i][u]
                 v_node_var = self.node_vars[i][v]
-                not_u_node_var = self.not_node_vars[i][u]
-                not_v_node_var = self.not_node_vars[i][v]
-                tmp1 = self.model.addVar(lb=0.0, ub=1.0, vtype=GRB.BINARY)
-                self.model.addConstr(tmp1 == and_(u_node_var, not_v_node_var))
-                tmp2 = self.model.addVar(lb=0.0, ub=1.0, vtype=GRB.BINARY)
-                self.model.addConstr(tmp2 == and_(not_u_node_var, v_node_var))
-                self.model.addConstr(self.edge_vars[i][e] == or_(tmp1, tmp2))
+                self.model.addConstr(self.edge_vars[i][e] <= u_node_var+v_node_var)
+                self.model.addConstr(self.edge_vars[i][e] >= u_node_var-v_node_var)
+                self.model.addConstr(self.edge_vars[i][e] >= v_node_var-u_node_var)
+                self.model.addConstr(self.edge_vars[i][e] <= 2-u_node_var-v_node_var)
+                # not_u_node_var = self.not_node_vars[i][u]
+                # not_v_node_var = self.not_node_vars[i][v]
+                # tmp1 = self.model.addVar(lb=0.0, ub=1.0, vtype=GRB.BINARY)
+                # self.model.addConstr(tmp1 == and_(u_node_var, not_v_node_var))
+                # tmp2 = self.model.addVar(lb=0.0, ub=1.0, vtype=GRB.BINARY)
+                # self.model.addConstr(tmp2 == and_(not_u_node_var, v_node_var))
+                # self.model.addConstr(self.edge_vars[i][e] == or_(tmp1, tmp2))
                 # self.model.addConstr(self.has_edge[i][e] == and_(u_node_var, v_node_var))
-        
-        # connectivity constraints:
-        # TODO: add BnC method?
-        # print('adding connectivity constraints')
-        # for cluster in range(k):
-        #     self.model.addConstr(
-        #     quicksum([self.node_vars[cluster][i] for i in range(self.n_vertices)])-1 == 
-        #     quicksum([self.has_edge[cluster][e] for e in range(self.n_edges)]))
 
         # symmetry-breaking constraints
         print('adding symmetry-breaking constraints')
@@ -112,7 +107,6 @@ class Basic_Model(object):
         obj_expr = LinExpr()
         for cluster in range(k):
             # FIXME: upper bound on variables should not be hardcoded
-            # FIXME: I think it is maximizing the objective function now
             cluster_K = self.model.addVar(lb=0.0, ub=10.0, vtype=GRB.INTEGER, name='cluster_K_%d'%cluster)
             self.model.addConstr(cluster_K == 
             quicksum([self.edge_vars[cluster][i] for i in range(self.n_edges)]))
@@ -137,7 +131,6 @@ class Basic_Model(object):
             self.model.addConstr(cluster_hardness_exponent == 3*cluster_K + cluster_d)
             self.model.setPWLObj(cluster_hardness_exponent, ptx, ptf)
 
-        # self.model.setObjective(obj_expr, GRB.MINIMIZE)
         self.model.update()
         self.model.params.OutputFlag = self.verbosity
 
@@ -162,17 +155,6 @@ class Basic_Model(object):
         for u, v in edges:
             assert(u < v)
             assert(u < n_vertices)
-    
-    def create_graph(self):
-        # Need the graph for connectivity checks
-        G = nx.Graph()
-        G.add_nodes_from(range(self.n_vertices))
-
-        for v1, v2 in self.edges:
-            G.add_edge(v1, v2)
-        self.graph = G
-        self.node_sets = set()
-        self.node_set_vars = dict()
     
     def solve(self):
         print('*'*200)
@@ -213,18 +195,23 @@ class Basic_Model(object):
     def print_stat(self):
         print('*'*200)
         print('MIQCP stats:')
-        [print('cluster %d\n'%i, x) for i, x in enumerate(self.clusters)]
-        print('edges to cut:')
-        print(self.cut_edges)
+        # [print('cluster %d\n'%i, x) for i, x in enumerate(self.clusters)]
+        # print('edges to cut:')
+        # print(self.cut_edges)
 
         # print('node count:', self.node_count)
         # print('mip gap:', self.mip_gap)
         print('objective value:', self.objective)
-        # print('runtime:', self.runtime)
+        print('runtime:', self.runtime)
 
-        for v in self.model.getVars():
-            if 'cluster' in v.VarName:
-                print('%s %g' % (v.VarName, v.X))
+        # for v in self.model.getVars():
+        #     if 'cluster' in v.VarName:
+        #         print('%s %g' % (v.VarName, v.X))
+
+        for i in range(self.k):
+            cluster_K = self.model.getVarByName('cluster_K_%d'%i)
+            cluster_d = self.model.getVarByName('cluster_d_%d'%i)
+            print('%s=%g, %s=%g' % (cluster_K.VarName, cluster_K.X,cluster_d.VarName, cluster_d.X))
 
         if (self.optimal):
             print('OPTIMAL')
@@ -306,20 +293,23 @@ if __name__ == '__main__':
     stripped_circ = r_s.circ_stripping(circ)
     dag_drawer(circuit_to_dag(stripped_circ),filename='dag.pdf')
     n_vertices, edges, node_ids, id_nodes = read_circ(stripped_circ)
+    k=4
+    hw_max_qubit=20
     kwargs = dict(n_vertices=n_vertices,
                   edges=edges,
                   node_ids=node_ids,
                   id_nodes=id_nodes,
-                  k=4,
-                  hw_max_qubit=20)
-    print('*'*200)
-    print('kwargs:')
-    [print(x, kwargs[x],'\n') for x in kwargs]
+                  k=k,
+                  hw_max_qubit=hw_max_qubit)
+    print('splitting %d vertices %d edges graph into %d clusters. Max qubit = %d'%
+    (n_vertices, len(edges),k,hw_max_qubit))
 
     m = Basic_Model(**kwargs)
     m.solve()
     m.print_stat()
+
+    print('verifying with cutter')
     positions = cuts_parser(m.cut_edges, circ)
-    print(positions)
+    print('cut positions:', positions)
     fragments, complete_path_map, K, d = cutter.cut_circuit(circ, positions)
     print('%d fragments, %d cuts'%(len(fragments),len(positions)),'K =', K, 'd =', d)
