@@ -211,7 +211,8 @@ class Basic_Model(object):
         for i in range(self.k):
             cluster_K = self.model.getVarByName('cluster_K_%d'%i)
             cluster_d = self.model.getVarByName('cluster_d_%d'%i)
-            print('%s=%g, %s=%g' % (cluster_K.VarName, cluster_K.X,cluster_d.VarName, cluster_d.X))
+            print('cluster %d, K = %d, d = %d' % 
+            (i,cluster_K.X,cluster_d.X))
 
         if (self.optimal):
             print('OPTIMAL')
@@ -289,10 +290,10 @@ def cuts_parser(cuts, circ):
     return positions
 
 if __name__ == '__main__':
-    circ = gen_supremacy(4,4,8,'71230456')
+    circ = gen_supremacy(2,3,8,'71230456')
     stripped_circ = r_s.circ_stripping(circ)
     n_vertices, edges, node_ids, id_nodes = read_circ(stripped_circ)
-    k=4
+    k=2
     hw_max_qubit=20
     kwargs = dict(n_vertices=n_vertices,
                   edges=edges,

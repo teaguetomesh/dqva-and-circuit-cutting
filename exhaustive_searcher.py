@@ -10,6 +10,8 @@ from datetime import datetime
 import sys
 import numpy as np
 from qcg.generators import gen_supremacy
+import itertools
+import timeit
 
 class Graph(object):
     def __init__(self, vlist):
@@ -143,10 +145,9 @@ def translate_idx(graph_edge, grouping, g):
                 # print('contracting edge', g.edges[g_contraction_idx], 'in g')
     return g_contraction_idx, grouping
 
-def contract(graph, min_v=2):
+def contract(graph, contraction_order, min_v=2):
     g = copy.deepcopy(graph)
     grouping = [[x] for x in g.verts]
-    contraction_order = random.sample(range(0,graph.edge_count), graph.edge_count)
     counter = 0
     while g.vertex_count > min_v:
         graph_edge_idx = contraction_order[counter]
@@ -213,14 +214,20 @@ def cluster_character(grouping, cut_edges, hw_max_qubit=24):
             cumulative_hardness += np.power(2,(group_d+3*group_K)/10)
     return K, d, cumulative_hardness
 
+def exhaustive_contraction_orders(n_edges):
+    l = range(0,n_edges)
+    perms = itertools.permutations(l, n_edges)
+    return perms
+
 def min_cut(graph, min_v=2, hw_max_qubit=20):
     min_hardness = float('inf')
     min_hardness_cuts = None
     min_hardness_K = None
     min_hardness_d = None
-    for trial in range(int(1e5)):
+    contraction_orders = exhaustive_contraction_orders(graph.edge_count)
+    for contraction_order in contraction_orders:
         random.seed(datetime.now())
-        g, grouping, cut_edges = contract(graph, min_v)
+        g, grouping, cut_edges = contract(graph, contraction_order, min_v)
         K, d, hardness = cluster_character(grouping, cut_edges, hw_max_qubit)
         if hardness<min_hardness:
             min_hardness = hardness
@@ -263,14 +270,22 @@ def positions_parser(stripped_circ_cuts, circ):
     return circ_cuts
 
 if __name__ == '__main__':
-    circ = gen_supremacy(7,7,8,'71230456')
+    k=2
+    hw_max_qubit=20
+    circ = gen_supremacy(2,3,8,'71230456')
     stripped_circ = circ_stripping(circ)
     graph = circuit_to_graph(stripped_circ)
-    positions, hardness, K, d = min_cut(graph=graph, min_v=4, hw_max_qubit=20)
+    print('splitting %d vertices %d edges graph into %d clusters. Max qubit = %d'%
+    (graph.vertex_count, graph.edge_count,k,hw_max_qubit))
+    print('%d exhaustive searches'%math.factorial(graph.edge_count))
+    start = timeit.default_timer()
+    positions, hardness, K, d = min_cut(graph=graph, min_v=k, hw_max_qubit=hw_max_qubit)
+    end = timeit.default_timer()
     if hardness == float('inf'):
         raise Exception('cannot find any cut')
     positions = positions_parser(positions, circ)
     print('%d cuts at:'%len(positions), positions)
     [print('cluster %d, K ='%i,K[i],'d =',d[i]) for i in range(len(K))]
     print('objective =', hardness)
+    print('runtime:', end-start)
     print('*'*100)
