@@ -75,7 +75,7 @@ A quadratic programming solver to solve the circuit clustering problem.
 - [x] Start with incumbent found by the randomized searcher. https://www.gurobi.com/documentation/8.1/refman/start.html. Task removed. Randomized searcher is too slow to find a solution.
 - [x] Implement auto number of cluster optimization
 - [x] Output parser (try the parsed output with cutter to verify K,d calculation)
-- [ ] Replace exponential objective with linear?
+- [x] Replace exponential objective with linear? Works for 2 clusters. Linear objective is equivalent to only minimizing number of cuts, and does not address cluster qubit requirements.
 ### Cut searcher benchmark
 Benchmarking the running speed of randomized cut searcher vs MIQCP solver. MIQCP solver is both much faster and offers better cuts.
 ## Cutter
@@ -108,7 +108,7 @@ Compares the operations on each qubit in the original uncut circuit and all the 
 
 - [x] Implement Karger auto cutter
 - [x] Sort output cuts in reverse topological order
-- [ ] Finish MIQCP formulation
+- [x] Finish MIQCP formulation
 
 #### Cutter
 
@@ -133,4 +133,4 @@ Compares the operations on each qubit in the original uncut circuit and all the 
  - [ ] Add a dependency installation file
 
 ## Future Directions
- - [ ] Weighted tensor network contraction, considering 'hardness' of each cluster.
+ - [x] Weighted tensor network contraction, considering 'hardness' of each cluster. Implemented in MIQCP solver.
