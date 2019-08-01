@@ -291,7 +291,6 @@ def cuts_parser(cuts, circ):
 if __name__ == '__main__':
     circ = gen_supremacy(4,4,8,'71230456')
     stripped_circ = r_s.circ_stripping(circ)
-    dag_drawer(circuit_to_dag(stripped_circ),filename='dag.pdf')
     n_vertices, edges, node_ids, id_nodes = read_circ(stripped_circ)
     k=4
     hw_max_qubit=20
