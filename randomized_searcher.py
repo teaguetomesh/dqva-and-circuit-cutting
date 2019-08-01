@@ -213,12 +213,12 @@ def cluster_character(grouping, cut_edges, hw_max_qubit=24):
             cumulative_hardness += np.power(2,(group_d+3*group_K)/10)
     return K, d, cumulative_hardness
 
-def min_cut(graph, min_v=2, hw_max_qubit=20):
+def min_cut(graph, min_v=2, hw_max_qubit=20, num_trials=int(1e4)):
     min_hardness = float('inf')
     min_hardness_cuts = None
     min_hardness_K = None
     min_hardness_d = None
-    for trial in range(int(1e5)):
+    for trial in range(num_trials):
         random.seed(datetime.now())
         g, grouping, cut_edges = contract(graph, min_v)
         K, d, hardness = cluster_character(grouping, cut_edges, hw_max_qubit)
@@ -261,6 +261,34 @@ def positions_parser(stripped_circ_cuts, circ):
                 else:
                     counter += 1
     return circ_cuts
+
+def find_cuts(circ, num_trials=int(1e4), hw_max_qubit=20):
+    ub=int(3*len(circ.qubits)/hw_max_qubit)
+    if ub<2:
+        min_objective = np.power(2,len(circ.qubits)/10)
+        best_positions = []
+        best_K = [0]
+        best_d = [len(circ.qubits)]
+        best_num_cluster=ub
+        return min_objective, best_positions, best_K, best_d, best_num_cluster
+    num_clusters = range(2,ub+1)
+    stripped_circ = circ_stripping(circ)
+    graph = circuit_to_graph(stripped_circ)
+    min_objective = float('inf')
+    best_positions = None
+    best_K = None
+    best_d = None
+    best_num_cluster = None
+    for num_cluster in num_clusters:
+        positions, hardness, K, d = min_cut(graph=graph, min_v=num_cluster, hw_max_qubit=20, num_trials=num_trials)
+        if hardness<min_objective:
+            min_objective = hardness
+            best_positions = positions = positions_parser(positions, circ)
+            best_K = K
+            best_d = d
+            best_num_cluster = num_cluster
+    return min_objective, best_positions, best_K, best_d, best_num_cluster
+
 
 if __name__ == '__main__':
     circ = gen_supremacy(7,7,8,'71230456')

@@ -10,6 +10,7 @@ python3 -m venv my_venv
 
 pip install qiskit
 pip install nxpd pydot
+pip install matplotlib
 ```
 Install Gurobi solver. Change your current directory to the Gurobi <installdir> (the directory that contains the file setup.py), and issue the following command:
 ```
@@ -63,14 +64,16 @@ num_clusters: list of numbers. Number of fragments to split into. Default and mi
 Cut positions that have the minimum cluster hardness metric across all iterations. Note that the solution does not guarantee optimality but will be a valid cut.
 ```
 - [x] Correct cluster_K calculation
-- [ ] Allow 1 cluster if qubits in original circuit does not exceed max allowed
-- [ ] Graph implementation using counter does not count edge directionality properly!!! Causing wrong cluster_d calculations.
+- [x] Implement auto number of cluster optimization
+- [x] Graph implementation using counter does not count edge directionality properly!!! Causing wrong cluster_d calculations.
+### Exhaustive Searcher
+- [ ] Unnecessary to repeat when the same starting contraction orders are enough to contract the graph
 ### Mixed Integer Quadratically Constrained Programming (MIQCP) Solver in Gurobi
 A quadratic programming solver to solve the circuit clustering problem.
 - [x] Implement exponential objectives as piecewise linear
-- [x] Enforce semi-connectedness constraint
+- [x] Enforce weakly-connectedness constraint (turns out not needed)
 - [ ] Start with incumbent found by the randomized searcher. https://www.gurobi.com/documentation/8.1/refman/start.html
-- [ ] Implement auto number of cluster optimization
+- [x] Implement auto number of cluster optimization
 - [x] Output parser (try the parsed output with cutter to verify K,d calculation)
 ### Cut searcher benchmark
 Benchmarking the running speed of cut searcher.

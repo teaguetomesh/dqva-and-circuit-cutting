@@ -178,7 +178,7 @@ def contract(graph, contraction_order, min_v=2):
     # print('cut_edges:', true_cut_edges)
     # print('grouping is:', grouping)
     # print('remaining edges in g:', g.edges)
-    return g, grouping, true_cut_edges
+    return g, grouping, true_cut_edges, counter
 
 def cluster_character(grouping, cut_edges, hw_max_qubit=24):
     d = []
@@ -227,16 +227,23 @@ def min_cut(graph, min_v=2, hw_max_qubit=20):
     min_hardness_cuts = None
     min_hardness_K = None
     min_hardness_d = None
+    num_edges_contracted = 0
+    incumbent_edges_contracted = None
     contraction_orders = exhaustive_contraction_orders(graph.edge_count)
     for counter, contraction_order in enumerate(contraction_orders):
-        if counter%int(1e4) == int(1e4)-1:
+        if counter%int(1e5) == int(1e5)-1:
             elapsed = timeit.default_timer()-start
             percent = (counter+1)/math.factorial(graph.edge_count)
             print('%d/%d searches' % (counter+1, math.factorial(graph.edge_count)))
             print('elapsed time =', str(timedelta(seconds=elapsed)),
             'estimated remaining time =',str(timedelta(seconds=elapsed/percent-elapsed)))
-        random.seed(datetime.now())
-        g, grouping, cut_edges = contract(graph, contraction_order, min_v)
+        if contraction_order[:num_edges_contracted] == incumbent_edges_contracted:
+            # print('skipping:')
+            # print(contraction_order)
+            # print(incumbent_edges_contracted)
+            continue
+        g, grouping, cut_edges, num_edges_contracted = contract(graph, contraction_order, min_v)
+        incumbent_edges_contracted = contraction_order[:num_edges_contracted]
         K, d, hardness = cluster_character(grouping, cut_edges, hw_max_qubit)
         if hardness<min_hardness:
             min_hardness = hardness
@@ -281,7 +288,7 @@ def positions_parser(stripped_circ_cuts, circ):
 if __name__ == '__main__':
     k=2
     hw_max_qubit=20
-    circ = gen_supremacy(2,2,8,'71230456')
+    circ = gen_supremacy(2,3,8,'71230456')
     stripped_circ = circ_stripping(circ)
     graph = circuit_to_graph(stripped_circ)
     print('splitting %d vertices %d edges graph into %d clusters. Max qubit = %d'%
