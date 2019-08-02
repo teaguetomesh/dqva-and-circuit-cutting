@@ -3,7 +3,7 @@ from qiskit.converters import circuit_to_dag, dag_to_circuit
 from qiskit.tools.visualization import dag_drawer
 from gurobipy import *
 import networkx as nx
-from qcg.generators import gen_supremacy
+from qcg.generators import gen_supremacy, gen_hwea
 import randomized_searcher as r_s
 import numpy as np
 import cutter
@@ -204,12 +204,10 @@ class Basic_Model(object):
         % (self.model.NumVars,self.model.NumConstrs, self.model.NumQConstrs, self.model.NumGenConstrs))
         # [print('cluster %d\n'%i, x) for i, x in enumerate(self.clusters)]
         # print('edges to cut:')
-        # print(self.cut_edges)
+        print('%d cuts, %d clusters'%(len(self.cut_edges),self.k))
 
         # print('node count:', self.node_count)
         # print('mip gap:', self.mip_gap)
-        print('objective value:', self.objective)
-        print('runtime:', self.runtime)
 
         # for v in self.model.getVars():
         #     if 'cluster' in v.VarName:
@@ -220,6 +218,9 @@ class Basic_Model(object):
             cluster_d = self.model.getVarByName('cluster_d_%d'%i)
             print('cluster %d, K = %d, d = %d' % 
             (i,cluster_K.X,cluster_d.X))
+
+        print('objective value:', self.objective)
+        # print('runtime:', self.runtime)
 
         if (self.optimal):
             print('OPTIMAL')
@@ -254,7 +255,7 @@ def read_circ(circ):
             node_ids[id(vertex)] = curr_node_id
             curr_node_id += 1
 
-    for u, v, attr in dag.edges():
+    for u, v, _ in dag.edges():
         if u.type == 'op' and v.type == 'op':
             u_id = node_ids[id(u)]
             v_id = node_ids[id(v)]
@@ -298,6 +299,7 @@ def cuts_parser(cuts, circ):
 
 def find_cuts(circ, hw_max_qubit=20, verbose=False):
     ub=int(3*len(circ.qubits)/hw_max_qubit)
+    lb = int((len(circ.qubits)-1)/(hw_max_qubit-1))+1
     if ub<2:
         min_objective = np.power(2,len(circ.qubits)/10)
         best_positions = []
@@ -305,7 +307,7 @@ def find_cuts(circ, hw_max_qubit=20, verbose=False):
         best_d = [len(circ.qubits)]
         best_num_cluster=ub
         return min_objective, best_positions, best_K, best_d, best_num_cluster
-    num_clusters = range(2,ub+1)
+    num_clusters = range(lb,ub+1)
     stripped_circ = r_s.circ_stripping(circ)
     n_vertices, edges, node_ids, id_nodes = read_circ(stripped_circ)
     min_objective = float('inf')
@@ -313,7 +315,9 @@ def find_cuts(circ, hw_max_qubit=20, verbose=False):
     best_K = None
     best_d = None
     best_num_cluster = None
+    best_model = None
     for num_cluster in num_clusters:
+        print('try splitting into %d clusters' % num_cluster)
         kwargs = dict(n_vertices=n_vertices,
                     edges=edges,
                     node_ids=node_ids,
@@ -335,35 +339,19 @@ def find_cuts(circ, hw_max_qubit=20, verbose=False):
             best_positions = cuts_parser(m.cut_edges, circ)
             best_K = []
             best_d = []
+            best_model = m
             for i in range(m.k):
                 cluster_K = m.model.getVarByName('cluster_K_%d'%i)
                 cluster_d = m.model.getVarByName('cluster_d_%d'%i)
                 best_K.append(cluster_K.X)
                 best_d.append(cluster_d.X)
 
-    return min_objective, best_positions, best_K, best_d, best_num_cluster
+    return min_objective, best_positions, best_K, best_d, best_num_cluster, best_model
 
 if __name__ == '__main__':
-    circ = gen_supremacy(2,3,8,'71230456')
-    stripped_circ = r_s.circ_stripping(circ)
-    n_vertices, edges, node_ids, id_nodes = read_circ(stripped_circ)
-    k=2
-    hw_max_qubit=20
-    kwargs = dict(n_vertices=n_vertices,
-                  edges=edges,
-                  node_ids=node_ids,
-                  id_nodes=id_nodes,
-                  k=k,
-                  hw_max_qubit=hw_max_qubit)
-    print('splitting %d vertices %d edges graph into %d clusters. Max qubit = %d'%
-    (n_vertices, len(edges),k,hw_max_qubit))
-
-    m = Basic_Model(**kwargs)
-    m.solve()
+    # circ = gen_supremacy(2,3,8,'71230456')
+    circ = gen_hwea(30,1, barriers=False)
+    hardness, positions, K, d, num_cluster, m = find_cuts(circ,hw_max_qubit=15)
+    # print('{} cuts, {} clusters, hardness = {}, K = {}, d = {}'
+    # .format(len(positions), num_cluster, hardness, K, d))
     m.print_stat()
-
-    print('verifying with cutter')
-    positions = cuts_parser(m.cut_edges, circ)
-    print('cut positions:', positions)
-    fragments, complete_path_map, K, d = cutter.cut_circuit(circ, positions)
-    print('%d fragments, %d cuts'%(len(fragments),len(positions)),'K =', K, 'd =', d)

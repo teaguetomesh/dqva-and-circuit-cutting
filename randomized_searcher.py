@@ -264,6 +264,7 @@ def positions_parser(stripped_circ_cuts, circ):
 
 def find_cuts(circ, num_trials=int(1e4), hw_max_qubit=20):
     ub=int(3*len(circ.qubits)/hw_max_qubit)
+    lb = int((len(circ.qubits)-1)/(hw_max_qubit-1))+1
     if ub<2:
         min_objective = np.power(2,len(circ.qubits)/10)
         best_positions = []
@@ -271,7 +272,7 @@ def find_cuts(circ, num_trials=int(1e4), hw_max_qubit=20):
         best_d = [len(circ.qubits)]
         best_num_cluster=ub
         return min_objective, best_positions, best_K, best_d, best_num_cluster
-    num_clusters = range(2,ub+1)
+    num_clusters = range(lb,ub+1)
     stripped_circ = circ_stripping(circ)
     graph = circuit_to_graph(stripped_circ)
     min_objective = float('inf')
