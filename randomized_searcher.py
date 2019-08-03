@@ -263,16 +263,7 @@ def positions_parser(stripped_circ_cuts, circ):
     return circ_cuts
 
 def find_cuts(circ, num_trials=int(1e4), hw_max_qubit=20):
-    ub=int(3*len(circ.qubits)/hw_max_qubit)
-    lb = int((len(circ.qubits)-1)/(hw_max_qubit-1))+1
-    if ub<2:
-        min_objective = np.power(2,len(circ.qubits)/10)
-        best_positions = []
-        best_K = [0]
-        best_d = [len(circ.qubits)]
-        best_num_cluster=ub
-        return min_objective, best_positions, best_K, best_d, best_num_cluster
-    num_clusters = range(lb,ub+1)
+    num_clusters = range(2,3)
     stripped_circ = circ_stripping(circ)
     graph = circuit_to_graph(stripped_circ)
     min_objective = float('inf')
@@ -281,24 +272,21 @@ def find_cuts(circ, num_trials=int(1e4), hw_max_qubit=20):
     best_d = None
     best_num_cluster = None
     for num_cluster in num_clusters:
-        positions, hardness, K, d = min_cut(graph=graph, min_v=num_cluster, hw_max_qubit=20, num_trials=num_trials)
+        print('contracting to %d clusters, max qubit = %d'%(num_cluster,hw_max_qubit))
+        positions, hardness, K, d = min_cut(graph=graph, min_v=num_cluster, hw_max_qubit=hw_max_qubit, num_trials=num_trials)
         if hardness<min_objective:
             min_objective = hardness
-            best_positions = positions = positions_parser(positions, circ)
+            best_positions = positions_parser(positions, circ)
             best_K = K
             best_d = d
             best_num_cluster = num_cluster
     return min_objective, best_positions, best_K, best_d, best_num_cluster
 
-
 if __name__ == '__main__':
-    circ = gen_supremacy(7,7,8,'71230456')
-    stripped_circ = circ_stripping(circ)
-    graph = circuit_to_graph(stripped_circ)
-    positions, hardness, K, d = min_cut(graph=graph, min_v=4, hw_max_qubit=20)
+    circ = gen_supremacy(4,4,8,'71230456')
+    hardness, positions, K, d, num_cluster = find_cuts(circ, hw_max_qubit=12)
     if hardness == float('inf'):
         raise Exception('cannot find any cut')
-    positions = positions_parser(positions, circ)
     print('%d cuts at:'%len(positions), positions)
     [print('cluster %d, K ='%i,K[i],'d =',d[i]) for i in range(len(K))]
     print('objective =', hardness)
