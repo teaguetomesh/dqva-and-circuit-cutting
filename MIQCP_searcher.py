@@ -9,10 +9,7 @@ import numpy as np
 import cutter
 
 class Basic_Model(object):
-    def __init__(self, n_vertices, edges, node_ids, id_nodes, k, hw_max_qubit, verbose=False):
-        if verbose:
-            print('*'*200)
-            print('Initializing MIP model')
+    def __init__(self, n_vertices, edges, node_ids, id_nodes, k, hw_max_qubit):
         self.check_graph(n_vertices, edges)
         self.n_vertices = n_vertices
         self.edges = edges
@@ -24,7 +21,7 @@ class Basic_Model(object):
         self.verbosity = 0
 
         self.model = Model('cut_searching')
-        self.model.params.updatemode = 1
+        self.model.params.OutputFlag = 0
 
         self.node_qubits = {}
         for node in self.node_ids:
@@ -58,27 +55,13 @@ class Basic_Model(object):
                 v = self.model.addVar(lb=0.0, ub=1.0, vtype=GRB.BINARY)
                 cluster_vars.append(v)
             self.edge_vars.append(cluster_vars)
-
-        # Indicate if a cluster contains an edge
-        # self.has_edge = []
-        # for i in range(k):
-        #     cluster_vars = []
-        #     for j in range(self.n_edges):
-        #         v = self.model.addVar(lb=0.0, ub=1.0, vtype=GRB.BINARY)
-        #         cluster_vars.append(v)
-        #     self.has_edge.append(cluster_vars)
         
         # constraint: each vertex in exactly one cluster
-        if verbose:
-            print('adding vertex non-overlapping constraint')
         for v in range(n_vertices):
             self.model.addConstr(quicksum([self.node_vars[i][v] for i in range(k)]), GRB.EQUAL, 1)
         
         # constraint: edge_var=1 indicates one and only one vertex of an edge is in cluster
         # edge_var[cluster][edge] = node_var[cluster][u] XOR node_var[cluster][v]
-        # has_edge[cluster][edge] = node_var[cluster][u] AND node_var[cluster][v]
-        if verbose:
-            print('adding edges and cluster constraint')
         for i in range(k):
             for e in range(self.n_edges):
                 u, v = self.edges[e]
@@ -88,18 +71,9 @@ class Basic_Model(object):
                 self.model.addConstr(self.edge_vars[i][e] >= u_node_var-v_node_var)
                 self.model.addConstr(self.edge_vars[i][e] >= v_node_var-u_node_var)
                 self.model.addConstr(self.edge_vars[i][e] <= 2-u_node_var-v_node_var)
-                # not_u_node_var = self.not_node_vars[i][u]
-                # not_v_node_var = self.not_node_vars[i][v]
-                # tmp1 = self.model.addVar(lb=0.0, ub=1.0, vtype=GRB.BINARY)
-                # self.model.addConstr(tmp1 == and_(u_node_var, not_v_node_var))
-                # tmp2 = self.model.addVar(lb=0.0, ub=1.0, vtype=GRB.BINARY)
-                # self.model.addConstr(tmp2 == and_(not_u_node_var, v_node_var))
-                # self.model.addConstr(self.edge_vars[i][e] == or_(tmp1, tmp2))
-                # self.model.addConstr(self.has_edge[i][e] == and_(u_node_var, v_node_var))
 
         # symmetry-breaking constraints
-        if verbose:
-            print('adding symmetry-breaking constraints')
+        # TODO: this does not break all the symmetries
         self.model.addConstr(self.node_vars[0][0], GRB.EQUAL, 1)
         for i in range(2, k):
             self.model.addConstr(quicksum([self.node_vars[i-1][j] for j in range(n_vertices)]),
@@ -107,9 +81,6 @@ class Basic_Model(object):
                             quicksum([self.node_vars[i][j] for j in range(n_vertices)]))
         
         # Objective function
-        if verbose:
-            print('adding objective')
-        obj_expr = LinExpr()
         for cluster in range(k):
             # FIXME: upper bound on variables should not be hardcoded
             cluster_K = self.model.addVar(lb=0, ub=10, vtype=GRB.INTEGER, name='cluster_K_%d'%cluster)
@@ -137,7 +108,6 @@ class Basic_Model(object):
             self.model.setPWLObj(cluster_hardness_exponent, ptx, ptf)
 
         self.model.update()
-        self.model.params.OutputFlag = self.verbosity
     
     def pwl_exp(self, base, lb, ub):
         ptx = []
@@ -159,6 +129,9 @@ class Basic_Model(object):
             assert(u < n_vertices)
     
     def solve(self):
+        print('solving for %d clusters'%self.k)
+        print('model has %d variables, %d linear constraints,%d quadratic constraints, %d general constraints'
+        % (self.model.NumVars,self.model.NumConstrs, self.model.NumQConstrs, self.model.NumGenConstrs))
         try:
             self.model.optimize()
         except GurobiError:
@@ -198,20 +171,10 @@ class Basic_Model(object):
     def print_stat(self):
         print('*'*200)
         print('MIQCP stats:')
-        print('splitting %d vertices %d edges graph into %d clusters. Max qubit = %d'%
-        (self.n_vertices, self.n_edges,self.k,self.hw_max_qubit))
-        print('model has %d variables, %d linear constraints,%d quadratic constraints, %d general constraints'
-        % (self.model.NumVars,self.model.NumConstrs, self.model.NumQConstrs, self.model.NumGenConstrs))
-        # [print('cluster %d\n'%i, x) for i, x in enumerate(self.clusters)]
-        # print('edges to cut:')
+        print('node count:', self.node_count)
+        print('%d vertices %d edges graph. Max qubit = %d'%
+        (self.n_vertices, self.n_edges, self.hw_max_qubit))
         print('%d cuts, %d clusters'%(len(self.cut_edges),self.k))
-
-        # print('node count:', self.node_count)
-        # print('mip gap:', self.mip_gap)
-
-        # for v in self.model.getVars():
-        #     if 'cluster' in v.VarName:
-        #         print('%s %g' % (v.VarName, v.X))
 
         for i in range(self.k):
             cluster_K = self.model.getVarByName('cluster_K_%d'%i)
@@ -220,6 +183,7 @@ class Basic_Model(object):
             (i,cluster_K.X,cluster_d.X))
 
         print('objective value:', self.objective)
+        print('mip gap:', self.mip_gap)
         # print('runtime:', self.runtime)
 
         if (self.optimal):
@@ -238,17 +202,14 @@ def read_circ(circ):
     qubit_gate_idx = {}
     for qubit in dag.qubits():
         qubit_gate_idx[qubit] = 0
-    # print('initial qubit_gate_idx:', qubit_gate_idx)
     for vertex in dag.topological_op_nodes():
         if len(vertex.qargs) != 2:
             raise Exception('vertex does not have 2 qargs!')
-        # print('qargs:', vertex.qargs)
         arg0, arg1 = vertex.qargs
         vertex_name = '%s[%d]%d %s[%d]%d' % (arg0[0].name, arg0[1],qubit_gate_idx[arg0],
                                                 arg1[0].name, arg1[1],qubit_gate_idx[arg1])
         qubit_gate_idx[arg0] += 1
         qubit_gate_idx[arg1] += 1
-        # print('vertex_name:', vertex_name)
         if vertex_name not in node_name_ids and id(vertex) not in node_ids:
             node_name_ids[vertex_name] = curr_node_id
             id_node_names[curr_node_id] = vertex_name
@@ -281,7 +242,7 @@ def cuts_parser(cuts, circ):
             if x[:len(x)-1] == qubit_cut[0]:
                 dest_idx = int(x[len(x)-1])
         multi_Q_gate_idx = max(source_idx, dest_idx)
-        # print('cut qubit:', qubit_cut[0], 'after %d multi qubit gate'% multi_Q_gate_idx)
+        
         wire = None
         for qubit in circ.qubits:
             if qubit[0].name == qubit_cut[0].split('[')[0] and qubit[1] == int(qubit_cut[0].split('[')[1].split(']')[0]):
@@ -297,8 +258,8 @@ def cuts_parser(cuts, circ):
     positions = sorted(positions, reverse=True, key=lambda cut: cut[1])
     return positions
 
-def find_cuts(circ, hw_max_qubit=20, verbose=False):
-    ub=int(3*len(circ.qubits)/hw_max_qubit)
+def find_cuts(circ, hw_max_qubit=20):
+    ub=int(2*len(circ.qubits)/hw_max_qubit)
     lb = int((len(circ.qubits)-1)/(hw_max_qubit-1))+1
     min_objective = float('inf')
     best_positions = None
@@ -318,21 +279,17 @@ def find_cuts(circ, hw_max_qubit=20, verbose=False):
         stripped_circ = r_s.circ_stripping(circ)
         n_vertices, edges, node_ids, id_nodes = read_circ(stripped_circ)
         for num_cluster in num_clusters:
-            print('try splitting into %d clusters' % num_cluster)
             kwargs = dict(n_vertices=n_vertices,
                         edges=edges,
                         node_ids=node_ids,
                         id_nodes=id_nodes,
                         k=num_cluster,
-                        hw_max_qubit=hw_max_qubit,
-                        verbose=verbose)
+                        hw_max_qubit=hw_max_qubit)
 
             m = Basic_Model(**kwargs)
             feasible = m.solve()
             if not feasible:
                 continue
-            if verbose:
-                m.print_stat()
             
             if m.objective < min_objective:
                 best_num_cluster = num_cluster
@@ -350,9 +307,7 @@ def find_cuts(circ, hw_max_qubit=20, verbose=False):
     return min_objective, best_positions, best_K, best_d, best_num_cluster, best_model
 
 if __name__ == '__main__':
-    circ = gen_supremacy(2,3,8,'71230456')
+    circ = gen_supremacy(5,5,8,'71230456')
     # circ = gen_hwea(30,1, barriers=False)
     hardness, positions, K, d, num_cluster, m = find_cuts(circ,hw_max_qubit=15)
-    # print('{} cuts, {} clusters, hardness = {}, K = {}, d = {}'
-    # .format(len(positions), num_cluster, hardness, K, d))
     m.print_stat()
