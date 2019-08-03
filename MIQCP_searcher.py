@@ -300,57 +300,58 @@ def cuts_parser(cuts, circ):
 def find_cuts(circ, hw_max_qubit=20, verbose=False):
     ub=int(3*len(circ.qubits)/hw_max_qubit)
     lb = int((len(circ.qubits)-1)/(hw_max_qubit-1))+1
-    if ub<2:
-        min_objective = np.power(2,len(circ.qubits)/10)
-        best_positions = []
-        best_K = [0]
-        best_d = [len(circ.qubits)]
-        best_num_cluster=ub
-        return min_objective, best_positions, best_K, best_d, best_num_cluster
-    num_clusters = range(lb,ub+1)
-    stripped_circ = r_s.circ_stripping(circ)
-    n_vertices, edges, node_ids, id_nodes = read_circ(stripped_circ)
     min_objective = float('inf')
     best_positions = None
     best_K = None
     best_d = None
     best_num_cluster = None
     best_model = None
-    for num_cluster in num_clusters:
-        print('try splitting into %d clusters' % num_cluster)
-        kwargs = dict(n_vertices=n_vertices,
-                    edges=edges,
-                    node_ids=node_ids,
-                    id_nodes=id_nodes,
-                    k=num_cluster,
-                    hw_max_qubit=hw_max_qubit,
-                    verbose=verbose)
+    if ub<2:
+        min_objective = np.power(2,len(circ.qubits)/10)
+        best_positions = []
+        best_K = [0]
+        best_d = [len(circ.qubits)]
+        best_num_cluster=ub
+        return min_objective, best_positions, best_K, best_d, best_num_cluster, best_model
+    else:
+        num_clusters = range(lb,ub+1)
+        stripped_circ = r_s.circ_stripping(circ)
+        n_vertices, edges, node_ids, id_nodes = read_circ(stripped_circ)
+        for num_cluster in num_clusters:
+            print('try splitting into %d clusters' % num_cluster)
+            kwargs = dict(n_vertices=n_vertices,
+                        edges=edges,
+                        node_ids=node_ids,
+                        id_nodes=id_nodes,
+                        k=num_cluster,
+                        hw_max_qubit=hw_max_qubit,
+                        verbose=verbose)
 
-        m = Basic_Model(**kwargs)
-        feasible = m.solve()
-        if not feasible:
-            continue
-        if verbose:
-            m.print_stat()
-        
-        if m.objective < min_objective:
-            best_num_cluster = num_cluster
-            min_objective = m.objective
-            best_positions = cuts_parser(m.cut_edges, circ)
-            best_K = []
-            best_d = []
-            best_model = m
-            for i in range(m.k):
-                cluster_K = m.model.getVarByName('cluster_K_%d'%i)
-                cluster_d = m.model.getVarByName('cluster_d_%d'%i)
-                best_K.append(cluster_K.X)
-                best_d.append(cluster_d.X)
+            m = Basic_Model(**kwargs)
+            feasible = m.solve()
+            if not feasible:
+                continue
+            if verbose:
+                m.print_stat()
+            
+            if m.objective < min_objective:
+                best_num_cluster = num_cluster
+                min_objective = m.objective
+                best_positions = cuts_parser(m.cut_edges, circ)
+                best_K = []
+                best_d = []
+                best_model = m
+                for i in range(m.k):
+                    cluster_K = m.model.getVarByName('cluster_K_%d'%i)
+                    cluster_d = m.model.getVarByName('cluster_d_%d'%i)
+                    best_K.append(cluster_K.X)
+                    best_d.append(cluster_d.X)
 
     return min_objective, best_positions, best_K, best_d, best_num_cluster, best_model
 
 if __name__ == '__main__':
-    # circ = gen_supremacy(2,3,8,'71230456')
-    circ = gen_hwea(30,1, barriers=False)
+    circ = gen_supremacy(2,3,8,'71230456')
+    # circ = gen_hwea(30,1, barriers=False)
     hardness, positions, K, d, num_cluster, m = find_cuts(circ,hw_max_qubit=15)
     # print('{} cuts, {} clusters, hardness = {}, K = {}, d = {}'
     # .format(len(positions), num_cluster, hardness, K, d))

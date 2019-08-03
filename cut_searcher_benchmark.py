@@ -17,7 +17,7 @@ MIQCP_runtime = []
 for dimension in dimensions:
     circ = gen_supremacy(dimension,dimension,8)
     start = timeit.default_timer()
-    hardness, positions, K, d, num_cluster = MIQCP_searcher.find_cuts(circ)
+    hardness, positions, K, d, num_cluster, model = MIQCP_searcher.find_cuts(circ)
     end = timeit.default_timer()
     MIQCP_runtime.append(end-start)
     if hardness != float('inf'):
@@ -28,7 +28,7 @@ for dimension in dimensions:
         MIQCP_hardness.append(-1)
         print('none of the clusters is feasible')
 
-num_trials = [int(1e2),int(1e3),int(1e4),int(1e5)]
+num_trials = [int(1e2),int(1e3),int(1e4)]
 r_s_hardness = {}
 r_s_runtime = {}
 for num in num_trials:
