@@ -34,18 +34,12 @@ class Basic_Model(object):
 
         # Indicate if a node is in some cluster
         self.node_vars = []
-        self.not_node_vars = []
         for i in range(k):
             cluster_vars = []
-            not_cluster_vars = []
             for j in range(n_vertices):
                 j_in_i = self.model.addVar(lb=0.0, ub=1.0, vtype=GRB.BINARY)
-                j_not_in_i = self.model.addVar(lb=0.0, ub=1.0, vtype=GRB.BINARY)
-                self.model.addConstr(j_not_in_i == 1-j_in_i)
                 cluster_vars.append(j_in_i)
-                not_cluster_vars.append(j_not_in_i)
             self.node_vars.append(cluster_vars)
-            self.not_node_vars.append(not_cluster_vars)
 
         # Indicate if an edge has one and only one vertex in some cluster
         self.edge_vars = []
@@ -82,17 +76,16 @@ class Basic_Model(object):
         
         # Objective function
         for cluster in range(k):
-            # FIXME: upper bound on variables should not be hardcoded
             cluster_K = self.model.addVar(lb=0, ub=10, vtype=GRB.INTEGER, name='cluster_K_%d'%cluster)
             self.model.addConstr(cluster_K == 
             quicksum([self.edge_vars[cluster][i] for i in range(self.n_edges)]))
             
-            cluster_original_qubit = self.model.addVar(lb=0, ub=100, vtype=GRB.INTEGER)
+            cluster_original_qubit = self.model.addVar(lb=0, ub=self.hw_max_qubit, vtype=GRB.INTEGER)
             self.model.addConstr(cluster_original_qubit ==
             quicksum([self.node_qubits[id_nodes[i]]*self.node_vars[cluster][i]
             for i in range(self.n_vertices)]))
             
-            cluster_cut_qubit = self.model.addVar(lb=0, ub=100, vtype=GRB.INTEGER)
+            cluster_cut_qubit = self.model.addVar(lb=0, ub=self.hw_max_qubit, vtype=GRB.INTEGER)
             self.model.addConstr(cluster_cut_qubit ==
             quicksum([self.edge_vars[cluster][i] * self.node_vars[cluster][self.edges[i][1]]
             for i in range(self.n_edges)]))
@@ -116,6 +109,8 @@ class Basic_Model(object):
         for i in range(lb,ub+1):
             ptx.append(i)
             ptf.append(np.power(base,(ptx[i-lb]/10)))
+        ptx.append(ub+1)
+        ptf.append(float('inf'))
         return ptx, ptf
     
     def check_graph(self, n_vertices, edges):
@@ -184,7 +179,7 @@ class Basic_Model(object):
 
         print('objective value:', self.objective)
         print('mip gap:', self.mip_gap)
-        # print('runtime:', self.runtime)
+        print('runtime:', self.runtime)
 
         if (self.optimal):
             print('OPTIMAL')
@@ -307,7 +302,7 @@ def find_cuts(circ, hw_max_qubit=20):
     return min_objective, best_positions, best_K, best_d, best_num_cluster, best_model
 
 if __name__ == '__main__':
-    circ = gen_supremacy(5,5,8,'71230456')
+    circ = gen_supremacy(6,6,8,'71230456')
     # circ = gen_hwea(30,1, barriers=False)
-    hardness, positions, K, d, num_cluster, m = find_cuts(circ,hw_max_qubit=15)
+    hardness, positions, K, d, num_cluster, m = find_cuts(circ,hw_max_qubit=20)
     m.print_stat()
