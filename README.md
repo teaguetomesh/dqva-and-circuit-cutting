@@ -14,21 +14,6 @@ Install Gurobi solver. Change your current directory to the Gurobi <installdir> 
 ```
 python setup.py install
 ```
-
-Modify the file at
-
-```
-my_venv/lib/python3.7/site-packages/qiskit/dagcircuit/dagnode.py
-```
-
-By adding the following text (not necessary anymore but keep it in the README for now):
-
-```
-@cargs.setter
-def cargs(self, new_cargs):
-    """Sets the cargs to be the given list of cargs"""
-    self.data_dict['cargs'] = new_cargs
-```
 ## Supremacy circuit generator
 To generate a Google quantum supremacy circuit:
 ```
