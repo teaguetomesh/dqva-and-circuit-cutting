@@ -76,6 +76,7 @@ class Basic_Model(object):
         
         # Objective function
         for cluster in range(k):
+            # FIXME: when ub is 10, calculation of cluster_K is wrong for 4,4,8 supremacy into 2 clusters
             cluster_K = self.model.addVar(lb=0, ub=50, vtype=GRB.INTEGER, name='cluster_K_%d'%cluster)
             self.model.addConstr(cluster_K == 
             quicksum([self.edge_vars[cluster][i] for i in range(self.n_edges)]))
@@ -260,7 +261,7 @@ def find_cuts(circ, hw_max_qubit=20):
     best_d = None
     best_num_cluster = None
     best_model = None
-    num_clusters = range(2,3)
+    num_clusters = range(2,6)
     stripped_circ = r_s.circ_stripping(circ)
     n_vertices, edges, node_ids, id_nodes = read_circ(stripped_circ)
     for num_cluster in num_clusters:

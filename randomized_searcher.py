@@ -263,7 +263,7 @@ def positions_parser(stripped_circ_cuts, circ):
     return circ_cuts
 
 def find_cuts(circ, num_trials=int(1e4), hw_max_qubit=20):
-    num_clusters = range(2,3)
+    num_clusters = range(2,6)
     stripped_circ = circ_stripping(circ)
     graph = circuit_to_graph(stripped_circ)
     min_objective = float('inf')
@@ -272,7 +272,7 @@ def find_cuts(circ, num_trials=int(1e4), hw_max_qubit=20):
     best_d = None
     best_num_cluster = None
     for num_cluster in num_clusters:
-        print('contracting to %d clusters, max qubit = %d'%(num_cluster,hw_max_qubit))
+        # print('contracting to %d clusters, max qubit = %d'%(num_cluster,hw_max_qubit))
         positions, hardness, K, d = min_cut(graph=graph, min_v=num_cluster, hw_max_qubit=hw_max_qubit, num_trials=num_trials)
         if hardness<min_objective:
             min_objective = hardness
