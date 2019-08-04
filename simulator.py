@@ -5,10 +5,8 @@ from qiskit import BasicAer, execute
 from qiskit.converters import circuit_to_dag, dag_to_circuit
 from qiskit.circuit.quantumregister import QuantumRegister
 from qiskit.tools.visualization import dag_drawer
-# from cutting_help_fun import *
-from qiskit.circuit import Measure
+# from qiskit.circuit import Measure
 from qiskit.extensions.standard import HGate, SGate, SdgGate, XGate
-import networkx as nx
 import os
 import pickle
 import random
@@ -16,7 +14,7 @@ import copy
 import timeit
 
 def simulate_fragments(sub_circs_no_bridge, complete_path_map):
-	fragment_all_s, all_s = fragment_all_s_calc(sub_circs_no_bridge, complete_path_map, random_sampling=False)
+	fragment_all_s, all_s, sub_circ_qubits = fragment_all_s_calc(sub_circs_no_bridge, complete_path_map, random_sampling=False)
 	fragment_all_s = coefficients_multiplier(fragment_all_s, complete_path_map)
 	return fragment_all_s
 
