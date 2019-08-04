@@ -106,7 +106,7 @@ Compares the operations on each qubit in the original uncut circuit and all the 
 ### Wei
 #### Auto Cut Finder
 
-- [x] Implement Karger auto cutter
+- [x] Implement Karger randomized cutter
 - [x] Sort output cuts in reverse topological order
 - [x] Finish MIQCP formulation
 
