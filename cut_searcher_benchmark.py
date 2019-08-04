@@ -9,7 +9,7 @@ from qiskit.tools.visualization import dag_drawer
 import timeit
 import matplotlib.pyplot as plt
 
-dimensions = range(2,7)
+dimensions = range(3,6)
 num_qubits = [x*x for x in dimensions]
 MIQCP_hardness = []
 MIQCP_runtime = []

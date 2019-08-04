@@ -8,9 +8,7 @@ After creating a python virtual environment and installing Qiskit,
 ```
 python3 -m venv my_venv
 
-pip install qiskit
-pip install nxpd pydot
-pip install matplotlib
+pip install qiskit nxpd pydot matplotlib
 ```
 Install Gurobi solver. Change your current directory to the Gurobi <installdir> (the directory that contains the file setup.py), and issue the following command:
 ```
