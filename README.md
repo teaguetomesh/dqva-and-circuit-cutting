@@ -59,6 +59,7 @@ A quadratic programming solver to solve the circuit clustering problem.
 - [x] Implement auto number of cluster optimization
 - [x] Output parser (try the parsed output with cutter to verify K,d calculation)
 - [x] Replace exponential objective with linear? Works for 2 clusters. Linear objective is equivalent to only minimizing number of cuts, and does not address cluster qubit requirements.
+- [ ] Factor in simulation runtime in objective function. Fewer qubits simulate faster.
 ### Cut searcher benchmark
 Benchmarking the running speed of randomized cut searcher vs MIQCP solver. MIQCP solver is both much faster and offers better cuts.
 ## Cutter

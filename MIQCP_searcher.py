@@ -261,7 +261,7 @@ def find_cuts(circ, hw_max_qubit=20):
     best_d = None
     best_num_cluster = None
     best_model = None
-    num_clusters = range(2,6)
+    num_clusters = range(4,7)
     stripped_circ = r_s.circ_stripping(circ)
     n_vertices, edges, node_ids, id_nodes = read_circ(stripped_circ)
     for num_cluster in num_clusters:
