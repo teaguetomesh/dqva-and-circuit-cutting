@@ -113,7 +113,7 @@ Compares the operations on each qubit in the original uncut circuit and all the 
 
 ### Misc
  - [x] Is modification to Qiskit source code still needed?
- - [x] Is Qiskit 0.11 going to crash the current codes?
+ - [x] Is Qiskit 0.11 going to crash the current codes? It won't.
  - [ ] Add a dependency installation file
 
 ## Future Directions
