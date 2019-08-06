@@ -78,8 +78,8 @@ def calculate_perms(cluster_circ, cluster_idx, complete_path_map):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='MPI simulator.')
-    parser.add_argument('--cluster-index', metavar='N', type=int,
-                        help='which cluster to run')
+    parser.add_argument('--cluster-file', metavar='S', type=str,
+                        help='which cluster pickle file to run')
     args = parser.parse_args()
 
     comm = MPI.COMM_WORLD
@@ -87,9 +87,10 @@ if __name__ == '__main__':
     size = comm.Get_size()
 
     complete_path_map = pickle.load( open( './data/cpm.p', 'rb' ) )
-    cluster_circ = pickle.load( open( './data/cluster_%d.p'%args.cluster_index, 'rb' ) )
+    cluster_circ = pickle.load( open( args.cluster_file, 'rb' ) )
+    cluster_idx = int(args.cluster_file.split('.p')[0].split('_')[1])
     perms, cut_edge_input_qubits, cut_edge_output_qubits = calculate_perms(
-        cluster_circ, args.cluster_index, complete_path_map)
+        cluster_circ, cluster_idx, complete_path_map)
 
     num_workers = size - 1
     count = int(len(perms)/num_workers)
