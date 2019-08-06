@@ -8,6 +8,7 @@ import copy
 import timeit
 import pickle
 from mpi4py import MPI
+import argparse
 
 def simulate_circ(circ, simulator='statevector_simulator'):
     backend = BasicAer.get_backend(simulator)
@@ -76,12 +77,17 @@ def calculate_perms(cluster_circ, cluster_idx, complete_path_map):
     return perms, cut_edge_input_qubits, cut_edge_output_qubits
 
 if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description='MPI simulator.')
+    parser.add_argument('--cluster-index', metavar='N', type=int,
+                        help='which cluster to run')
+    args = parser.parse_args()
+
     comm = MPI.COMM_WORLD
     rank = comm.Get_rank()
     size = comm.Get_size()
 
-    complete_path_map = pickle.load( open( "./data/cpm.p", "rb" ) )
-    cluster_circ = pickle.load( open( "./data/cluster_0.p", "rb" ) )
+    complete_path_map = pickle.load( open( './data/cpm.p', 'rb' ) )
+    cluster_circ = pickle.load( open( './data/cluster_%d.p'%args.cluster_index, 'rb' ) )
     perms, cut_edge_input_qubits, cut_edge_output_qubits = calculate_perms(
         cluster_circ, 0, complete_path_map)
 
@@ -92,38 +98,39 @@ if __name__ == '__main__':
     if rank == size-1:
         start = MPI.Wtime()
         for i in range(0,size-1):
-            req = comm.irecv(source=MPI.ANY_SOURCE)
-            runtime = req.wait()
-            print('rank %d runtime ='%i, runtime)
-        print('*'*100)
+            state = MPI.Status()
+            runtime = comm.recv(source=MPI.ANY_SOURCE,status=state)
+            # print('rank %d runtime ='%state.Get_source(), runtime)
+        # print('*'*100)
         end = MPI.Wtime()
         print('total runtime = ', end-start)
     elif rank < remainder:
         perms_start = rank * (count + 1)
         perms_stop = perms_start + count + 1
         rank_perms = perms[perms_start:perms_stop]
-        print('rank %d runs %d-%d, total %d instances' % 
-        (rank, perms_start, perms_stop-1, len(rank_perms)))
-        
-        start = timeit.default_timer()
-        cluster_instances_outputprob = simulate_cluster_instances(
-            cluster_circ, rank_perms, cut_edge_input_qubits, cut_edge_output_qubits)
-        end = timeit.default_timer()
-        
-        req = comm.isend(end-start, dest=size-1)
-        req.wait()
-    else:
-        perms_start = rank * count + remainder
-        perms_stop = perms_start + (count - 1) + 1
-        rank_perms = perms[perms_start:perms_stop]
-        print('rank %d runs %d-%d, total %d instances' % 
-        (rank, perms_start, perms_stop-1, len(rank_perms)))
+        # print('rank %d runs %d-%d, total %d instances' % 
+        # (rank, perms_start, perms_stop-1, len(rank_perms)))
         
         start = timeit.default_timer()
         cluster_instances_outputprob = simulate_cluster_instances(
             cluster_circ, rank_perms, cut_edge_input_qubits, cut_edge_output_qubits)
         end = timeit.default_timer()
 
+        # print('rank %d sends runtime ='%rank, end-start)
         
-        req = comm.isend(end-start, dest=size-1)
-        req.wait()
+        comm.send(end-start, dest=size-1)
+    else:
+        perms_start = rank * count + remainder
+        perms_stop = perms_start + (count - 1) + 1
+        rank_perms = perms[perms_start:perms_stop]
+        # print('rank %d runs %d-%d, total %d instances' % 
+        # (rank, perms_start, perms_stop-1, len(rank_perms)))
+        
+        start = timeit.default_timer()
+        cluster_instances_outputprob = simulate_cluster_instances(
+            cluster_circ, rank_perms, cut_edge_input_qubits, cut_edge_output_qubits)
+        end = timeit.default_timer()
+
+        # print('rank %d sends runtime ='%rank, end-start)
+
+        comm.send(end-start, dest=size-1)
