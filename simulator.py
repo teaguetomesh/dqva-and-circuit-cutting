@@ -89,7 +89,7 @@ if __name__ == '__main__':
     complete_path_map = pickle.load( open( './data/cpm.p', 'rb' ) )
     cluster_circ = pickle.load( open( './data/cluster_%d.p'%args.cluster_index, 'rb' ) )
     perms, cut_edge_input_qubits, cut_edge_output_qubits = calculate_perms(
-        cluster_circ, 0, complete_path_map)
+        cluster_circ, args.cluster_index, complete_path_map)
 
     num_workers = size - 1
     count = int(len(perms)/num_workers)
@@ -97,6 +97,9 @@ if __name__ == '__main__':
 
     if rank == size-1:
         start = MPI.Wtime()
+        num_qubits = len(cluster_circ.qubits)
+        num_cuts = len(perms[0])
+        print('Simulating %d qubit cluster circuit with %d cuts' % (num_qubits, num_cuts))
         for i in range(0,size-1):
             state = MPI.Status()
             runtime = comm.recv(source=MPI.ANY_SOURCE,status=state)
