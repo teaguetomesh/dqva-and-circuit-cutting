@@ -254,14 +254,13 @@ def cuts_parser(cuts, circ):
     positions = sorted(positions, reverse=True, key=lambda cut: cut[1])
     return positions
 
-def find_cuts(circ, hw_max_qubit=20):
+def find_cuts(circ, num_clusters = range(3,5), hw_max_qubit=20):
     min_objective = float('inf')
     best_positions = None
     best_K = None
     best_d = None
     best_num_cluster = None
     best_model = None
-    num_clusters = range(4,7)
     stripped_circ = r_s.circ_stripping(circ)
     n_vertices, edges, node_ids, id_nodes = read_circ(stripped_circ)
     for num_cluster in num_clusters:
