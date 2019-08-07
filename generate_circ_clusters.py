@@ -5,8 +5,8 @@ import simulator
 import numpy as np
 import pickle
 
-circ = gen_supremacy(3,3,8,'71230456')
-hardness, positions, K, d, num_cluster, m = searcher.find_cuts(circ,num_clusters=range(3,5),hw_max_qubit=5)
+circ = gen_supremacy(4,4,8,'71230456')
+hardness, positions, K, d, num_cluster, m = searcher.find_cuts(circ,num_clusters=range(2,5),hw_max_qubit=10)
 m.print_stat()
 clusters, complete_path_map, K, d = cutter.cut_circuit(circ, positions)
 print('Complete path map:')

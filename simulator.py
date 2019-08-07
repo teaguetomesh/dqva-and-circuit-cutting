@@ -24,18 +24,20 @@ def simulate_one_instance(s, cut_edge_input_qubits, cut_edge_output_qubits, circ
     circ_dag = circuit_to_dag(circ_copy)
     for idx, cut_s in enumerate(s[:meas_modifications]):
         qubit = cut_edge_output_qubits[idx]
-        if cut_s == 1 or cut_s == 2 or cut_s == 7 or cut_s == 8:
+        if cut_s == 1 or cut_s == 2:
             continue
         if cut_s == 3 or cut_s == 4:
             circ_dag.apply_operation_back(op=HGate(),qargs=[qubit])
         if cut_s == 5 or cut_s == 6:
             circ_dag.apply_operation_back(op=SdgGate(),qargs=[qubit])
             circ_dag.apply_operation_back(op=HGate(),qargs=[qubit])
+        else:
+            raise Exception ('Illegal cut_s value')
     for idx, cut_s in enumerate(s[meas_modifications:]):
         qubit = cut_edge_input_qubits[idx]
-        if cut_s == 1 or cut_s == 7:
+        if cut_s == 1:
             continue
-        if cut_s == 2 or cut_s == 8:
+        if cut_s == 2:
             circ_dag.apply_operation_front(op=XGate(),qargs=[qubit],cargs=[])
         if cut_s == 3:
             circ_dag.apply_operation_front(op=HGate(),qargs=[qubit],cargs=[])
@@ -49,12 +51,15 @@ def simulate_one_instance(s, cut_edge_input_qubits, cut_edge_output_qubits, circ
             circ_dag.apply_operation_front(op=SGate(),qargs=[qubit],cargs=[])
             circ_dag.apply_operation_front(op=HGate(),qargs=[qubit],cargs=[])
             circ_dag.apply_operation_front(op=XGate(),qargs=[qubit],cargs=[])
+        else:
+            raise Exception ('Illegal cut_s value')
     instance_outputprob = simulate_circ(dag_to_circuit(circ_dag))
     return instance_outputprob
 
 def simulate_cluster_instances(cluster_circ, perms, cut_edge_input_qubits, cut_edge_output_qubits):
     cluster_instances_outputprob = {}
     for s in perms:
+        # TODO: replace Qiskit simulation of s[:meas_modifications] by classical processing
         instance_outputprob = simulate_one_instance(s, cut_edge_input_qubits, cut_edge_output_qubits, cluster_circ)
         cluster_instances_outputprob[s] = instance_outputprob
     return cluster_instances_outputprob
@@ -97,17 +102,23 @@ if __name__ == '__main__':
     remainder = len(perms) % num_workers
 
     if rank == size-1:
+        # FIXME: MPI runtime calculation is wrong
         start = MPI.Wtime()
         num_qubits = len(cluster_circ.qubits)
         num_cuts = len(perms[0])
+        cluster_idx = int(args.cluster_file.split('_')[1].split('.')[0])
         print('Simulating %d qubit cluster circuit with %d cuts' % (num_qubits, num_cuts))
+        cluster_output_prob = {}
         for i in range(0,size-1):
             state = MPI.Status()
-            runtime = comm.recv(source=MPI.ANY_SOURCE,status=state)
-            # print('rank %d runtime ='%state.Get_source(), runtime)
-        # print('*'*100)
+            cluster_instances_outputprob = comm.recv(source=MPI.ANY_SOURCE,status=state)
+            cluster_output_prob.update(cluster_instances_outputprob)
+            # print('rank %d received ='%state.Get_source(), len(cluster_instances_outputprob))
         end = MPI.Wtime()
         print('total runtime = ', end-start)
+        print('*'*100)
+        pickle.dump( cluster_output_prob, open( './data/cluster_%d_measurement.p'%cluster_idx, 'wb' ) )
+        # [print('cluster output prob:', x, cluster_output_prob[x]) for x in list(cluster_output_prob.keys())[:1]]
     elif rank < remainder:
         perms_start = rank * (count + 1)
         perms_stop = perms_start + count + 1
@@ -122,7 +133,7 @@ if __name__ == '__main__':
 
         # print('rank %d sends runtime ='%rank, end-start)
         
-        comm.send(end-start, dest=size-1)
+        comm.send(cluster_instances_outputprob, dest=size-1)
     else:
         perms_start = rank * count + remainder
         perms_stop = perms_start + (count - 1) + 1
@@ -137,4 +148,4 @@ if __name__ == '__main__':
 
         # print('rank %d sends runtime ='%rank, end-start)
 
-        comm.send(end-start, dest=size-1)
+        comm.send(cluster_instances_outputprob, dest=size-1)
