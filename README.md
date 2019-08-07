@@ -103,12 +103,12 @@ Compares the operations on each qubit in the original uncut circuit and all the 
 - [x] Need to address one qubit entering a fragment more than once
 
 #### Simulator
-- [x] MPI Qiskit simulator
+- [ ] MPI for intra-cluster parallelism. Multiple job submission for inter-cluster parallelism
 - [ ] Replace output measurement basis with classical post processing
 - [ ] Implement simulator in Intel QS
 
 #### Uniter
-- [ ] Implement uniter in MPI
+- [ ] Implement uniter in MPI/MKL
 
 ### Misc
 - [x] Is modification to Qiskit source code still needed?
