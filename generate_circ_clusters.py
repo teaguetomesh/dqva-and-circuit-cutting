@@ -5,8 +5,8 @@ import simulator
 import numpy as np
 import pickle
 
-circ = gen_supremacy(4,4,8,'71230456')
-hardness, positions, K, d, num_cluster, m = searcher.find_cuts(circ,num_clusters=range(2,5),hw_max_qubit=10)
+circ = gen_supremacy(5,5,8)
+hardness, positions, K, d, num_cluster, m = searcher.find_cuts(circ,num_clusters=range(2,5),hw_max_qubit=15)
 m.print_stat()
 clusters, complete_path_map, K, d = cutter.cut_circuit(circ, positions)
 print('Complete path map:')
@@ -15,4 +15,4 @@ print('*'*200)
 
 pickle.dump( complete_path_map, open( './data/cpm.p', 'wb' ) )
 for i, cluster in enumerate(clusters):
-    pickle.dump( cluster, open( './data/cluster_%d.p'%i, 'wb' ) )
+    pickle.dump( cluster, open( './data/cluster_%d_circ.p'%i, 'wb' ) )
