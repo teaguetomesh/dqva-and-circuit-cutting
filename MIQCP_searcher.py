@@ -98,7 +98,7 @@ class Basic_Model(object):
             ub = 3*10+self.hw_max_qubit
             ptx, ptf = self.pwl_exp(2,lb,ub)
             cluster_hardness_exponent = self.model.addVar(lb=lb,ub=ub,vtype=GRB.INTEGER)
-            self.model.addConstr(cluster_hardness_exponent == 3*cluster_K + cluster_d)
+            self.model.addConstr(cluster_hardness_exponent == np.log2(6)*cluster_K + cluster_d)
             self.model.setPWLObj(cluster_hardness_exponent, ptx, ptf)
 
         self.model.update()
