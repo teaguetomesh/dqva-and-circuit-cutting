@@ -102,7 +102,7 @@ if __name__ == '__main__':
             cluster_meas.update(worker_result)
             # print('rank %d received ='%state.Get_source(), len(cluster_instances_outputprob))
         print('*'*100)
-        pickle.dump( cluster_meas, open( './data/cluster_%d_measurement_sv.p'%cluster_idx, 'wb' ) )
+        pickle.dump( (cluster_meas,cut_edge_input_qubits), open( './data/cluster_%d_measurement_sv.p'%cluster_idx, 'wb' ) )
         # [print('cluster output prob:', x, cluster_output_prob[x]) for x in list(cluster_output_prob.keys())[:1]]
     elif rank < remainder:
         perms_start = rank * (count + 1)
