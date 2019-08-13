@@ -1,14 +1,11 @@
 import itertools
 import numpy as np
 
-def reverseBits(n) : 
-    rev = 0
-    while (n > 0):
-        rev = rev << 1
-        if (n & 1 == 1):
-            rev = rev ^ 1
-        n = n >> 1
-    return rev
+def measure_basis(l):
+    if len(l)==1:
+        return l[0]
+    else:
+        return np.kron(l[0], measure_basis(l[1:]))
 
 def find_all_s(complete_path_map):
     num_cuts = 0
@@ -54,8 +51,8 @@ def modify_output_meas(cluster_meas_wt_init, cluster_meas_s_map, cluster_circs):
         cluster_idx, cluster_qubit = key
         cluster_qubit_idx = cluster_circs[cluster_idx].qubits.index(cluster_qubit)
         cluster_meas_basis_wt_neg[cluster_idx][cluster_qubit_idx] = cluster_meas_s_map[key]
-        print(key, cluster_meas_s_map[key])
-        print(cluster_qubit_idx)
+        # print(key, cluster_meas_s_map[key])
+        # print(cluster_qubit_idx)
         # print(cluster_circs[cluster_idx].qubits)
     cluster_meas_basis = []
     for l in cluster_meas_basis_wt_neg:
@@ -69,20 +66,28 @@ def modify_output_meas(cluster_meas_wt_init, cluster_meas_s_map, cluster_circs):
 
     change_basis_post_processing_l = []
     for cluster_idx, basis in enumerate(cluster_meas_basis):
-        cluster_change_basis_post_processing_l = ['Id' for x in basis]
+        cluster_change_basis_post_processing_l = [Id for x in basis]
         for i, item in enumerate(basis):
-            rev_i = reverseBits(i)
-            print('cluster %d, position %d basis item ='%(cluster_idx,i), item)
+            rev_i = len(basis) - 1 - i
+            # print('cluster %d, position %d basis item ='%(cluster_idx,i), item)
             if item == 1 or item == 2:
-                print('position %d use Id'%rev_i)
+                # print('position %d use Id'%rev_i)
                 continue
             elif item == 3 or item == 4:
-                print('position %d use H'%rev_i)
-                cluster_change_basis_post_processing_l[rev_i] = 'H'
+                # print('position %d use H'%rev_i)
+                # cluster_change_basis_post_processing_l[rev_i] = 'H'
+                cluster_change_basis_post_processing_l[rev_i] = H
             elif item == 5 or item == 6:
-                print('position %d use H_sDagger'%rev_i)
-                # cluster_change_basis_post_processing_l[rev_i] = np.matmul(H,sDagger)
-                cluster_change_basis_post_processing_l[rev_i] = 'H_sDagger'
+                # print('position %d use H_sDagger'%rev_i)
+                # cluster_change_basis_post_processing_l[rev_i] = 'H_sDagger'
+                cluster_change_basis_post_processing_l[rev_i] = np.matmul(H,sDagger)
         change_basis_post_processing_l.append(cluster_change_basis_post_processing_l)
     
-    return change_basis_post_processing_l
+    cluster_meas_wt_init_basis = []
+    for cluster_idx, cluster_change_basis_post_processing_l in enumerate(change_basis_post_processing_l):
+        cluster_meas = cluster_meas_wt_init[cluster_idx]
+        meas_basis_matrix = measure_basis(cluster_change_basis_post_processing_l)
+        cluster_meas = np.matmul(meas_basis_matrix, cluster_meas)
+        cluster_meas_wt_init_basis.append(cluster_meas)
+
+    return cluster_meas_wt_init_basis

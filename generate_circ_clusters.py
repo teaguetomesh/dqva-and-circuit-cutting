@@ -1,8 +1,6 @@
 from qcg.generators import gen_supremacy, gen_hwea
 import MIQCP_searcher as searcher
 import cutter
-import simulator
-import numpy as np
 import pickle
 
 circ = gen_supremacy(4,4,8)
