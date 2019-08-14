@@ -2,92 +2,107 @@ import itertools
 import numpy as np
 
 def measure_basis(l):
-    if len(l)==1:
-        return l[0]
-    else:
-        return np.kron(l[0], measure_basis(l[1:]))
-
-def find_all_s(complete_path_map):
-    num_cuts = 0
-    for input_qubit in complete_path_map:
-        num_cuts += len(complete_path_map[input_qubit]) - 1
-    return list(itertools.product(range(1,9),repeat=num_cuts))
-
-def find_cluster_init_s(all_cluster_cut_in_qubits, s, complete_path_map, cluster_measurements):
-    print('sampling for s =',s)
-    cluster_init_s_map = {}
-    cluster_meas_s_map = {}
-    for idx, cluster_cut_in_qubits in enumerate(all_cluster_cut_in_qubits):
-        cluster_init_s_map[idx] = (-1,) * len(cluster_cut_in_qubits)
-
-    s_idx = 0
-    for input_qubit in complete_path_map:
-        path = complete_path_map[input_qubit]
-        for cut_idx in range(len(path)-1):
-            O_qubit_cluster_idx, O_qubit = path[cut_idx]
-            rho_qubit_cluster_idx, rho_qubit = path[cut_idx+1]
-            cluster_cut_in_qubits = all_cluster_cut_in_qubits[rho_qubit_cluster_idx]
-            cluster_s_idx = cluster_cut_in_qubits.index(rho_qubit)
-            cluster_s = 1 if s[s_idx]==7 else 2 if s[s_idx]==8 else s[s_idx]
-            cluster_meas_s_map[(O_qubit_cluster_idx, O_qubit)] = cluster_s
-            s_idx += 1
-            l = list(cluster_init_s_map[rho_qubit_cluster_idx])
-            l[cluster_s_idx] = cluster_s
-            cluster_init_s_map[rho_qubit_cluster_idx] = tuple(l)
-    
-    print('cluster init s =',cluster_init_s_map)
-    print('clusters meas s =',cluster_meas_s_map)
-    cluster_meas_wt_init = []
-    for cluster_idx in cluster_init_s_map:
-        cluster_init_s = cluster_init_s_map[cluster_idx]
-        cluster_meas_wt_init.append(cluster_measurements[cluster_idx][cluster_init_s])
-    return cluster_meas_wt_init, cluster_meas_s_map
-
-def modify_output_meas(cluster_meas_wt_init, cluster_meas_s_map, cluster_circs):
-    cluster_meas_basis_wt_neg = [[] for x in cluster_circs]
-    for cluster_idx, cluster_circ in enumerate(cluster_circs):
-        cluster_meas_basis_wt_neg[cluster_idx] = [-1 for x in cluster_circ.qubits]
-    for key in cluster_meas_s_map:
-        cluster_idx, cluster_qubit = key
-        cluster_qubit_idx = cluster_circs[cluster_idx].qubits.index(cluster_qubit)
-        cluster_meas_basis_wt_neg[cluster_idx][cluster_qubit_idx] = cluster_meas_s_map[key]
-        # print(key, cluster_meas_s_map[key])
-        # print(cluster_qubit_idx)
-        # print(cluster_circs[cluster_idx].qubits)
-    cluster_meas_basis = []
-    for l in cluster_meas_basis_wt_neg:
-        l = [x if x!=-1 else 1 for x in l]
-        cluster_meas_basis.append(l)
-    
-    print('cluster meas basis:', cluster_meas_basis)
     H = [[1,1],[1,-1]]/np.sqrt(2)
     sDagger = [[1,0],[0,-1j]]
     Id = [[1,0],[0,1]]
+    if len(l)==1:
+        if l[0] == 1 or l[0] == 2 or l[0] == 7 or l[0] == 8:
+            return Id
+        elif l[0] == 3 or l[0] == 4:
+            return H
+        elif l[0] == 5 or l[0] == 6:
+            return np.matmul(H,sDagger)
+        else:
+            raise Exception('Illegal change basis')
+    else:
+        return np.kron(measure_basis([l[0]]), measure_basis(l[1:]))
 
-    change_basis_post_processing_l = []
-    for cluster_idx, basis in enumerate(cluster_meas_basis):
-        cluster_change_basis_post_processing_l = [Id for x in basis]
-        for i, item in enumerate(basis):
-            rev_i = len(basis) - 1 - i
-            # print('cluster %d, position %d basis item ='%(cluster_idx,i), item)
-            if item == 1 or item == 2:
-                # print('position %d use Id'%rev_i)
-                continue
-            elif item == 3 or item == 4:
-                # print('position %d use H'%rev_i)
-                # cluster_change_basis_post_processing_l[rev_i] = 'H'
-                cluster_change_basis_post_processing_l[rev_i] = H
-            elif item == 5 or item == 6:
-                # print('position %d use H_sDagger'%rev_i)
-                # cluster_change_basis_post_processing_l[rev_i] = 'H_sDagger'
-                cluster_change_basis_post_processing_l[rev_i] = np.matmul(H,sDagger)
-        change_basis_post_processing_l.append(cluster_change_basis_post_processing_l)
-    
-    cluster_meas_wt_init_basis = []
-    for cluster_idx, cluster_change_basis_post_processing_l in enumerate(change_basis_post_processing_l):
-        cluster_meas = cluster_meas_wt_init[cluster_idx]
-        meas_basis_matrix = measure_basis(cluster_change_basis_post_processing_l)
-        cluster_meas = np.matmul(meas_basis_matrix, cluster_meas)
-        cluster_meas_wt_init_basis.append(cluster_meas)
+def find_cuts_pairs(complete_path_map):
+    O_rho_pairs = []
+    for input_qubit in complete_path_map:
+        path = complete_path_map[input_qubit]
+        if len(path)>1:
+            for path_ctr, item in enumerate(path[:-1]):
+                O_qubit_tuple = item
+                rho_qubit_tuple = path[path_ctr+1]
+                O_rho_pairs.append((O_qubit_tuple, rho_qubit_tuple))
+    return O_rho_pairs
 
-    return cluster_meas_wt_init_basis
+def find_inits_meas(init_perm, cluster_circs, O_rho_pairs):
+    cluster_inits = [[1 for qubit in cluster.qubits] for cluster in cluster_circs]
+    cluster_meas = [[1 for qubit in cluster.qubits] for cluster in cluster_circs]
+    for cut_idx, s in enumerate(init_perm):
+        O_qubit_tuple, rho_qubit_tuple = O_rho_pairs[cut_idx]
+        rho_qubit_cluster_idx, rho_qubit = rho_qubit_tuple
+        cluster_idx = rho_qubit_cluster_idx
+        cluster_circ = cluster_circs[cluster_idx]
+        cluster_qubit_idx = cluster_circ.qubits.index(rho_qubit)
+        cluster_inits[cluster_idx][cluster_qubit_idx] = 2 if s == 8 else 1 if s == 7 else s
+
+        O_qubit_cluster_idx, O_qubit = O_qubit_tuple
+        cluster_idx = O_qubit_cluster_idx
+        cluster_circ = cluster_circs[cluster_idx]
+        cluster_qubit_idx = cluster_circ.qubits.index(O_qubit)
+        cluster_meas[cluster_idx][cluster_qubit_idx] = s
+
+    return cluster_inits, cluster_meas
+
+def modify_meas(cluster_meas_init,cluster_inits, cluster_meas):
+    modified_cluster_meas = []
+    for idx in range(len(cluster_inits)):
+        init_key = cluster_inits[idx]
+        meas_key = cluster_meas[idx]
+        unmodified_meas = cluster_meas_init[idx][tuple(init_key)]
+        if measured_in_I(meas_key):
+            modified_cluster_meas.append(unmodified_meas)
+        else:
+            # ATTN: Qiskit measures qubits in reverse order
+            change_basis_matrix = measure_basis(meas_key[::-1])
+            modified_meas = np.matmul(change_basis_matrix, unmodified_meas)
+            modified_cluster_meas.append(modified_meas)
+    return modified_cluster_meas
+
+def measured_in_I(meas_key):
+    for basis in meas_key:
+        if basis != 1 and basis != 2 and basis != 7 and basis != 8:
+            return False
+    return True
+
+def multiply_sigma(modified_cluster_meas, O_rho_pairs, cluster_circs):
+    sigma_cluster_meas = []
+    pauli_meas_qubit_indices = [[] for x in modified_cluster_meas]
+    for pair in O_rho_pairs:
+        O_qubit_tuple, _ = pair
+        O_qubit_cluster_idx, O_qubit = O_qubit_tuple
+        cluster_qubits = cluster_circs[O_qubit_cluster_idx].qubits
+        cluster_qubit_idx = len(cluster_qubits)-1-cluster_qubits.index(O_qubit)
+        pauli_meas_qubit_indices[O_qubit_cluster_idx].append(cluster_qubit_idx)
+    for cluster_index, cluster_meas in enumerate(modified_cluster_meas):
+        num_qubits = len(cluster_circs[cluster_index].qubits)
+        # print('cluster %d has %d qubits'%(cluster_index,num_qubits))
+        O_qubit_positions = pauli_meas_qubit_indices[cluster_index]
+        # print('O_qubit_positions :',O_qubit_positions)
+        for state, prob in enumerate(cluster_meas):
+            bin_state = bin(state)[2:].zfill(num_qubits)
+            remainder = sum([int(bin_state[i]) for i in O_qubit_positions]) % 2
+            if remainder == 1:
+                # print('state %d, bin_state ='%state,bin_state, 'multiplied by -1')
+                cluster_meas[state] = prob * (-1)
+        # print('-'*100)
+        sigma_cluster_meas.append(cluster_meas)
+    return sigma_cluster_meas
+
+def recombine(sigma_cluster_meas, complete_path_map, cluster_circs):
+    total_num_qubits = len(complete_path_map)
+    for final_state in range(np.power(2, total_num_qubits)):
+        bin_final_state = bin(final_state)[2:].zfill(total_num_qubits)
+
+def sampler(cluster_circs, complete_path_map, cluster_meas_init, s):
+    O_rho_pairs = find_cuts_pairs(complete_path_map)
+    cluster_inits, cluster_meas = find_inits_meas(s, cluster_circs, O_rho_pairs)
+    modified_cluster_meas = modify_meas(cluster_meas_init,cluster_inits, cluster_meas)
+    # Convert to probabilities
+    for cluster_idx, cluster_meas in enumerate(modified_cluster_meas):
+        modified_cluster_meas[cluster_idx] = [np.power(abs(x),2) for x in cluster_meas]
+    sigma_cluster_meas = multiply_sigma(modified_cluster_meas, O_rho_pairs, cluster_circs)
+    return sigma_cluster_meas
