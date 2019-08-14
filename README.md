@@ -103,8 +103,9 @@ Compares the operations on each qubit in the original uncut circuit and all the 
 - [x] Need to address one qubit entering a fragment more than once
 
 #### Simulator
-- [ ] MPI for intra-cluster parallelism. Multiple job submission for inter-cluster parallelism
-- [ ] Replace output measurement basis with classical post processing
+- [x] MPI for intra-cluster parallelism
+- [ ] Multiple job submission for inter-cluster parallelism
+- [x] Replace output measurement basis with classical post processing
 - [ ] Implement simulator in Intel QS
 
 #### Uniter

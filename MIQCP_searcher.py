@@ -95,10 +95,10 @@ class Basic_Model(object):
             self.model.addConstr(cluster_d == cluster_original_qubit + cluster_cut_qubit)
             
             lb = 1
-            ub = 3*10+self.hw_max_qubit
+            ub = 10.0+self.hw_max_qubit
             ptx, ptf = self.pwl_exp(2,lb,ub)
-            cluster_hardness_exponent = self.model.addVar(lb=lb,ub=ub,vtype=GRB.INTEGER)
-            self.model.addConstr(cluster_hardness_exponent == 3*cluster_K + cluster_d)
+            cluster_hardness_exponent = self.model.addVar(lb=lb,ub=ub,vtype=GRB.CONTINUOUS)
+            self.model.addConstr(cluster_hardness_exponent == (np.log2(6)*cluster_cut_qubit + cluster_d))
             self.model.setPWLObj(cluster_hardness_exponent, ptx, ptf)
 
         self.model.update()
@@ -107,11 +107,15 @@ class Basic_Model(object):
         ptx = []
         ptf = []
 
-        for i in range(lb,ub+1):
-            ptx.append(i)
-            ptf.append(np.power(base,(ptx[i-lb]/10)))
-        ptx.append(ub+1)
-        ptf.append(float('inf'))
+        num_pt = 200
+
+        for i in range(num_pt):
+            x = (ub-lb)/(num_pt-1)*i+lb
+            y = np.power(base,x)
+            ptx.append(x)
+            ptf.append(y)
+        # ptx.append(ub+1)
+        # ptf.append(float('inf'))
         return ptx, ptf
     
     def check_graph(self, n_vertices, edges):
@@ -294,5 +298,5 @@ def find_cuts(circ, num_clusters = range(3,5), hw_max_qubit=20):
 if __name__ == '__main__':
     circ = gen_supremacy(4,4,8,'71230456')
     # circ = gen_hwea(30,1, barriers=False)
-    hardness, positions, K, d, num_cluster, m = find_cuts(circ,hw_max_qubit=12)
+    hardness, positions, K, d, num_cluster, m = find_cuts(circ,num_clusters=[1,2,3,4,5],hw_max_qubit=20)
     m.print_stat()
