@@ -68,12 +68,12 @@ class Basic_Model(object):
 
         # symmetry-breaking constraints
         # TODO: this does not break all the symmetries
-        # FIXME: this causes bugs in cluster qubit calculations
-        # self.model.addConstr(self.node_vars[0][0], GRB.EQUAL, 1)
-        # for i in range(2, k):
-        #     self.model.addConstr(quicksum([self.node_vars[i-1][j] for j in range(n_vertices)]),
-        #                     GRB.LESS_EQUAL,
-        #                     quicksum([self.node_vars[i][j] for j in range(n_vertices)]))
+        # TODO: is this necessary?
+        self.model.addConstr(self.node_vars[0][0], GRB.EQUAL, 1)
+        for i in range(2, k):
+            self.model.addConstr(quicksum([self.node_vars[i-1][j] for j in range(n_vertices)]),
+                            GRB.LESS_EQUAL,
+                            quicksum([self.node_vars[i][j] for j in range(n_vertices)]))
         
         # Objective function
         for cluster in range(k):
@@ -86,6 +86,7 @@ class Basic_Model(object):
             self.model.addConstr(cluster_original_qubit ==
             quicksum([self.node_qubits[id_nodes[i]]*self.node_vars[cluster][i]
             for i in range(self.n_vertices)]))
+            # self.model.addConstr(cluster_original_qubit >= 0.1)
             
             cluster_ancilla = self.model.addVar(lb=0, ub=self.hw_max_qubit, vtype=GRB.INTEGER, name='cluster_ancilla_%d'%cluster)
             self.model.addConstr(cluster_ancilla ==
@@ -177,15 +178,18 @@ class Basic_Model(object):
         (self.n_vertices, self.n_edges, self.hw_max_qubit))
         print('%d cuts, %d clusters'%(len(self.cut_edges),self.k))
 
+        objective_verify = 0
         for i in range(self.k):
             cluster_input = self.model.getVarByName('cluster_input_%d'%i)
             cluster_ancilla = self.model.getVarByName('cluster_ancilla_%d'%i)
             cluster_d = self.model.getVarByName('cluster_d_%d'%i)
             cluster_hardness_exponent = self.model.getVarByName('cluster_hardness_exponent_%d'%i)
-            print('cluster %d: original input = %d, ancilla = %d, d = %d, hardness exponent = %.3f' % 
+            objective_verify += np.power(6,cluster_ancilla.X)*np.power(2,cluster_d.X)
+            print('cluster %d: original input = %.2f, ancilla = %.2f, d = %.2f, hardness exponent = %.3f' % 
             (i,cluster_input.X,cluster_ancilla.X,cluster_d.X,cluster_hardness_exponent.X))
 
         print('objective value:', self.objective)
+        print('manually calculated objective value:', objective_verify)
         print('mip gap:', self.mip_gap)
         print('runtime:', self.runtime)
 
@@ -305,5 +309,6 @@ if __name__ == '__main__':
     hardness, positions, K, d, num_cluster, m = find_cuts(circ,num_clusters=[1,2,3,4],hw_max_qubit=15)
     m.print_stat()
     fragments, complete_path_map, K, d = cutter.cut_circuit(circ, positions)
+    print('Testing in cutter:')
     [print(x, complete_path_map[x]) for x in complete_path_map]
     print(d)
