@@ -1,6 +1,18 @@
 # quantum-circuit-generator
 Python package for automated generation of various quantum circuits.
 
+Link to repo:
+
+https://github.com/teaguetomesh/quantum_circuit_generator
+
+## Supported Circuits
+ - Google quantum supremacy
+ - Hardware-efficient ansatz for QAOA
+ - UCCSD ansatz for VQE
+ - QFT and inverse QFT
+
+More information on each of these circuits can be found within each of their respective files, including links to the relevant papers which describe their specification.
+
 ## Getting Started
 
 ### Prerequisites
@@ -17,13 +29,13 @@ To generate circuits using the scripts in this package, first place the entire q
 ```
 your_project_folder/
     your.py
-    script.py
+    scripts.py
     here.py
     quantum_circuit_generator/
 ```
 
 You can then generate circuits in your scripts.
-As an example, inside script.py you can generate a 4x4x8 supremacy circuit with the following lines
+As an example, inside scripts.py you can generate a 4x4x8 supremacy circuit with the following lines
 
 ```
 # within script.py
@@ -36,5 +48,6 @@ print(circ)
 ## TODO
 
  - [ ] implement quantum dynamics circuit generation
- - [ ] include more types of ansatzes beyond HWEA
+ - [x] include more UCCSD ansatz
+ - [x] include QFT circuit
  - [ ] add entanglement score function to utils
