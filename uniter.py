@@ -92,10 +92,20 @@ def multiply_sigma(modified_cluster_meas, O_rho_pairs, cluster_circs):
         sigma_cluster_meas.append(cluster_meas)
     return sigma_cluster_meas
 
-def recombine(sigma_cluster_meas, complete_path_map, cluster_circs):
-    total_num_qubits = len(complete_path_map)
-    for final_state in range(np.power(2, total_num_qubits)):
-        bin_final_state = bin(final_state)[2:].zfill(total_num_qubits)
+def qubit_reorder(complete_path_map, cluster_circs):
+    ordering = [[-1 for x in cluster.qubits] for cluster in cluster_circs]
+    input_qubit_ctr = 0
+    for input_qubit in complete_path_map:
+        path = complete_path_map[input_qubit]
+        output_cluster_idx, output_qubit = path[len(path)-1]
+        output_cluster_qubits = cluster_circs[output_cluster_idx].qubits
+        output_qubit_idx = len(output_cluster_qubits)-1-output_cluster_qubits.index(output_qubit)
+        ordering[output_cluster_idx][output_qubit_idx] = input_qubit_ctr
+        input_qubit_ctr += 1
+    return ordering
+
+def recombine(sigma_cluster_meas, ordering):
+    output = itertools.product(*sigma_cluster_meas)
 
 def sampler(cluster_circs, complete_path_map, cluster_meas_init, s):
     O_rho_pairs = find_cuts_pairs(complete_path_map)
