@@ -68,6 +68,7 @@ class Basic_Model(object):
 
         # symmetry-breaking constraints
         # TODO: this does not break all the symmetries
+        # FIXME: this causes bugs in cluster qubit calculations
         # self.model.addConstr(self.node_vars[0][0], GRB.EQUAL, 1)
         # for i in range(2, k):
         #     self.model.addConstr(quicksum([self.node_vars[i-1][j] for j in range(n_vertices)]),

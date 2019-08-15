@@ -110,6 +110,7 @@ Compares the operations on each qubit in the original uncut circuit and all the 
 
 #### Uniter
 - [ ] Implement uniter in MPI/MKL
+- [ ] Use sparse matrix. https://rushter.com/blog/scipy-sparse-matrices/
 
 ### Misc
 - [x] Is modification to Qiskit source code still needed?
