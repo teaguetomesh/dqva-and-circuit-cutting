@@ -107,24 +107,66 @@ def qubit_reorder(complete_path_map, cluster_circs):
         ordering += cluster_order
     return ordering
 
-def recombine(sigma_cluster_meas, ordering):
+def convert_idx(ordering,idx):
+    total_digits = len(ordering)
+    bin_idx = bin(idx)[2:].zfill(total_digits)
+    converted = ['0' for x in range(total_digits)]
+    for idx, digit in enumerate(bin_idx):
+        if ordering[idx]!=-1:
+            converted[ordering[idx]] = digit
+    converted = "".join(converted)
+    converted = int(converted,2)
+    return converted
+
+def calculate_ts(sigma_cluster_meas, ordering):
+    t_s = [0 for state in range(num_reconstructed_states)]
     output = list(itertools.product(*sigma_cluster_meas))
     for i, l in enumerate(output):
         prob = 1
         for x in l:
             prob *= x
-        output[i] = prob
-    return output
+        # reconstructed_idx = convert_idx(ordering, i)
+        # t_s[reconstructed_idx] += prob
+    return t_s
 
-def sampler(cluster_circs, complete_path_map, cluster_meas_init, s):
-    O_rho_pairs = find_cuts_pairs(complete_path_map)
+def sample_s(cluster_circs, cluster_meas_init, O_rho_pairs, ordering, s):
+    # TODO: modify to be done only once
     cluster_inits, cluster_meas = find_inits_meas(s, cluster_circs, O_rho_pairs)
     modified_cluster_meas = modify_meas(cluster_meas_init,cluster_inits, cluster_meas)
     # Convert to probabilities
     for cluster_idx, cluster_meas in enumerate(modified_cluster_meas):
         modified_cluster_meas[cluster_idx] = [np.power(abs(x),2) for x in cluster_meas]
     sigma_cluster_meas = multiply_sigma(modified_cluster_meas, O_rho_pairs, cluster_circs)
+    t_s = calculate_ts(sigma_cluster_meas,ordering)
+    return t_s
+
+def reconstruct(cluster_circs, cluster_meas_init, complete_path_map):
+    O_rho_pairs = find_cuts_pairs(complete_path_map)
+    print('O_rho_pairs:')
+    [print(x) for x in O_rho_pairs]
     ordering = qubit_reorder(complete_path_map, cluster_circs)
     print('ordering:', ordering)
-    output = recombine(sigma_cluster_meas,ordering)
-    return output
+    num_reconstructed_states = np.power(2,len(complete_path_map))
+    print('full circ has %d states'%num_reconstructed_states)
+    digit_index_mapping = {}
+    for state in range(np.power(2,len(ordering))):
+        converted_idx = convert_idx(ordering,state)
+        if converted_idx in digit_index_mapping:
+            digit_index_mapping[converted_idx].append(state)
+        else:
+            digit_index_mapping[converted_idx] = [state]
+    # all_s = list(itertools.product(range(1,9),repeat=len(O_rho_pairs)))
+    # reconstructed = [0 for x in range(np.power(2,len(complete_path_map)))]
+    # for s in all_s[23435:23436]:
+    #     print('sampling for s =', s)
+    #     c_s = 1
+    #     for e_s in s:
+    #         if e_s == 4 or e_s == 6 or e_s == 8:
+    #             c_s *= -1/2
+    #         else:
+    #             c_s *= 1/2
+    #     print('c_s =', c_s)
+    #     sample = [c_s*x for x in sample_s(cluster_circs, cluster_meas_init, O_rho_pairs, ordering, s)]
+    #     reconstructed += sample
+    #     break
+    return digit_index_mapping
