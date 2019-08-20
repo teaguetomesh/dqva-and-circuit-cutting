@@ -8,11 +8,17 @@ After creating a python virtual environment and installing Qiskit,
 ```
 python3 -m venv my_venv
 
-pip install qiskit nxpd pydot matplotlib
+pip install qiskit nxpd pydot matplotlib jupyterlan
 ```
-Install Gurobi solver. Change your current directory to the Gurobi <installdir> (the directory that contains the file setup.py), and issue the following command:
+Install Gurobi solver. Change your current directory to the Gurobi installdir (the directory that contains the file setup.py), and issue the following command:
 ```
 python setup.py install
+```
+
+Install MPICH. Follow instructions at mpich.org.
+Install mpi4py
+```
+pip install mpi4py
 ```
 ## Supremacy circuit generator
 To generate a Google quantum supremacy circuit:
@@ -107,10 +113,10 @@ Compares the operations on each qubit in the original uncut circuit and all the 
 - [ ] Multiple job submission for inter-cluster parallelism
 - [x] Replace output measurement basis with classical post processing
 - [ ] Implement simulator in Intel QS
+- [ ] Small clusters (<=9 qubits>) use np.matmul to modify measurement basis. Others use direct simulation.
 
 #### Uniter
 - [ ] Implement uniter in MPI/MKL
-- [ ] Use sparse matrix. https://rushter.com/blog/scipy-sparse-matrices/
 
 ### Misc
 - [x] Is modification to Qiskit source code still needed?

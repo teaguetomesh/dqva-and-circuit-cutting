@@ -93,6 +93,7 @@ def calculate_perms(cluster_idx, cluster_circ, complete_path_map):
                     rho_qubits.append(path_qubit_idx)
     rho_perms = list(itertools.product(range(1,7),repeat=len(rho_qubits)))
     O_perms = list(itertools.product(range(1,7),repeat=len(O_qubits)))
+    
     total_qubits = len(cluster_circ.qubits)
     for idx in range(len(rho_perms)):
         rho_perm = [1 for i in range(total_qubits)]
