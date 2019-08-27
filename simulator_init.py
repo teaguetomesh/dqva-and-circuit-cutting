@@ -14,7 +14,7 @@ def simulate_circ(circ, simulator='statevector_simulator'):
     job = execute(circ, backend=backend)
     result = job.result()
     outputstate = result.get_statevector(circ)
-    # outputprob = [np.power(abs(x),2) for x in outputstate]
+    outputprob = [np.power(abs(x),2) for x in outputstate]
     return outputstate
 
 def simulate_one_instance(init, circ):
@@ -90,6 +90,7 @@ def simulate_cluster_instances(cluster_circ, rho_perms, O_perms):
         for meas_basis in O_perms:
             # print('measurement basis:', meas_basis)
             modified_instance = modify_meas(instance_init, meas_basis)
+            modified_instance = [np.power(abs(x),2) for x in modified_instance]
             cluster_meas[(tuple(init),tuple(meas_basis))] = modified_instance
     return cluster_meas
 

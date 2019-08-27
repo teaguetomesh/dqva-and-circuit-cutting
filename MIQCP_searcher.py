@@ -4,7 +4,6 @@ from qiskit.tools.visualization import dag_drawer
 from gurobipy import *
 import networkx as nx
 from qcg.generators import gen_supremacy, gen_hwea
-import randomized_searcher as r_s
 import numpy as np
 import cutter
 
@@ -265,6 +264,16 @@ def cuts_parser(cuts, circ):
     positions = sorted(positions, reverse=True, key=lambda cut: cut[1])
     return positions
 
+def circ_stripping(circ):
+    # Remove all single qubit gates in the circuit
+    dag = circuit_to_dag(circ)
+    stripped_dag = DAGCircuit()
+    [stripped_dag.add_qreg(x) for x in circ.qregs]
+    for vertex in dag.topological_op_nodes():
+        if len(vertex.qargs) >= 2:
+            stripped_dag.apply_operation_back(op=vertex.op, qargs=vertex.qargs)
+    return dag_to_circuit(stripped_dag)
+
 def find_cuts(circ, num_clusters = range(1,5), hw_max_qubit=20):
     min_objective = float('inf')
     best_positions = None
@@ -272,7 +281,7 @@ def find_cuts(circ, num_clusters = range(1,5), hw_max_qubit=20):
     best_d = None
     best_num_cluster = None
     best_model = None
-    stripped_circ = r_s.circ_stripping(circ)
+    stripped_circ = circ_stripping(circ)
     n_vertices, edges, node_ids, id_nodes = read_circ(stripped_circ)
     for num_cluster in num_clusters:
         kwargs = dict(n_vertices=n_vertices,

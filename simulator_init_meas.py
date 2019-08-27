@@ -14,8 +14,8 @@ def simulate_circ(circ, simulator='statevector_simulator'):
     job = execute(circ, backend=backend)
     result = job.result()
     outputstate = result.get_statevector(circ)
-    # outputprob = [np.power(abs(x),2) for x in outputstate]
-    return outputstate
+    outputprob = [np.power(abs(x),2) for x in outputstate]
+    return outputprob
 
 def simulate_one_instance(s, circ):
     rho_s, O_s = s

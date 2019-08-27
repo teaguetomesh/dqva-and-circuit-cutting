@@ -8,19 +8,30 @@ from qiskit.dagcircuit.dagnode import DAGNode
 from qiskit.circuit import Measure
 from qiskit.circuit.quantumregister import QuantumRegister
 from qiskit.circuit.classicalregister import ClassicalRegister
+from qiskit.tools.visualization import dag_drawer
 
 def find_io_node(dag, wire):
     in_node = None
     out_node = None
 
-    for node in dag.nodes():
-        if node.type == 'in' and node.name == '%s[%d]' % (wire[0].name,wire[1]):
-            in_node = node
-        if node.type == 'out' and node.name == '%s[%d]' % (wire[0].name,wire[1]):
-            out_node = node
-    if in_node == None or out_node == None:
-        raise Exception('did not find {}, in_node = {}, out_node = {}'.format(wire, in_node, out_node))
+    # for node in dag.nodes():
+    #     if node.type == 'in' and node.name == '%s[%d]' % (wire[0].name,wire[1]):
+    #         in_node = node
+    #     if node.type == 'out' and node.name == '%s[%d]' % (wire[0].name,wire[1]):
+    #         out_node = node
+    # if in_node == None or out_node == None:
+    #     raise Exception('did not find {}, in_node = {}, out_node = {}'.format(wire, in_node, out_node))
+    in_node = dag.input_map[wire]
+    out_node = dag.output_map[wire]
     return in_node, out_node
+
+def find_edge_key(G, u, v, wire):
+    wires = nx.get_edge_attributes(G,'wire')
+    for edge in wires:
+        edge_u, edge_v, edge_key = edge
+        if edge_u == u and edge_v == v and wires[edge] == wire:
+            return edge_key
+    return None
             
 def cut_edges(original_dag, positions):
     '''Cut multiple edges in the original_dag.
@@ -48,6 +59,7 @@ def cut_edges(original_dag, positions):
         
         nodes_before_cut = list(cut_dag.nodes_on_wire(wire=wire, only_ops=True))[:source_node_idx+1]
         nodes_after_cut = list(cut_dag.nodes_on_wire(wire=wire, only_ops=True))[source_node_idx+1:]
+
         cut_qubit = cutQ_register[cutQ_idx]
         path_map[wire].append(cut_qubit)
         
@@ -60,9 +72,15 @@ def cut_edges(original_dag, positions):
         name="%s[%s]" % (cut_qubit[0].name, cut_qubit[1]), wire=cut_qubit)
         cut_dag._multi_graph.add_edge(nodes_after_cut[len(nodes_after_cut)-1], cut_out_node,
         name="%s[%s]" % (cut_qubit[0].name, cut_qubit[1]), wire=cut_qubit)
-        cut_dag._multi_graph.remove_edge(nodes_after_cut[len(nodes_after_cut)-1], original_out_node)
-        cut_dag._multi_graph.remove_edge(nodes_before_cut[len(nodes_before_cut)-1], nodes_after_cut[0])
-        cut_dag._multi_graph.remove_edge(cut_in_node, cut_out_node)
+        
+        edge_key = find_edge_key(cut_dag._multi_graph, nodes_after_cut[len(nodes_after_cut)-1], original_out_node, wire)
+        cut_dag._multi_graph.remove_edge(nodes_after_cut[len(nodes_after_cut)-1], original_out_node, key=edge_key)
+
+        edge_key = find_edge_key(cut_dag._multi_graph, nodes_before_cut[len(nodes_before_cut)-1], nodes_after_cut[0], wire)
+        cut_dag._multi_graph.remove_edge(nodes_before_cut[len(nodes_before_cut)-1], nodes_after_cut[0], key=edge_key)
+
+        edge_key = find_edge_key(cut_dag._multi_graph, cut_in_node, cut_out_node, wire)
+        cut_dag._multi_graph.remove_edge(cut_in_node, cut_out_node, key=edge_key)
 
         for idx, node in enumerate(nodes_after_cut):
             updated_qargs = []
@@ -73,7 +91,8 @@ def cut_edges(original_dag, positions):
                     updated_qargs.append(qarg)
             node.qargs = updated_qargs
             if idx<len(nodes_after_cut)-1:
-                cut_dag._multi_graph.remove_edge(nodes_after_cut[idx], nodes_after_cut[idx+1])
+                edge_key = find_edge_key(cut_dag._multi_graph, nodes_after_cut[idx], nodes_after_cut[idx+1], wire)
+                cut_dag._multi_graph.remove_edge(nodes_after_cut[idx], nodes_after_cut[idx+1], key=edge_key)
                 cut_dag._multi_graph.add_edge(nodes_after_cut[idx], nodes_after_cut[idx+1],
                 name="%s[%s]" % (cut_qubit[0].name, cut_qubit[1]), wire=cut_qubit)
     for input_qubit in path_map:
