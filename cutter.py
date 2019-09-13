@@ -125,7 +125,7 @@ def clusters_generator(cut_dag, path_map):
                 component_qubits.append(node.wire)
                 relative_positions.append(relative_position)
                 # print(node.wire,'relative position in component:',relative_position)
-        relative_positions, component_qubits = (list(t) for t in zip(*sorted(zip(relative_positions, component_qubits))))
+        relative_positions, component_qubits = (list(t) for t in zip(*sorted(zip(relative_positions, component_qubits),key=lambda ele:ele[0])))
         cluster_qubits.append(component_qubits)
         component_qreg = QuantumRegister(len(component_qubits),'q')
         cluster_circ = QuantumCircuit(component_qreg)
