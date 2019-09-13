@@ -105,71 +105,62 @@ def cut_edges(original_dag, positions):
         raise Exception('Not a split, cut_dag only has %d component' % num_components)
     return cut_dag, path_map
 
-def fragments_generator(cut_dag, path_map):
+def find_uncut_in_node(wire, path_map):
+    for in_node in path_map:
+        if wire in path_map[in_node]:
+            return in_node
+    return None
+
+def clusters_generator(cut_dag, path_map):
     components = list(nx.weakly_connected_components(cut_dag._multi_graph))
-    fragments = []
-    fragment_qubits = []
+    cluster_circs = []
+    cluster_qubits = []
     for component_idx, component in enumerate(components):
-        print('component %d' % component_idx)
-        component_qregs = {}
-        component_qubits = {}
+        component_qubits = []
+        relative_positions = []
         for node in component:
             if node.type == 'in':
-                print(node.type, node.name, node.wire[0].name)
-                if node.wire[0].name in component_qregs:
-                    old_register = component_qregs[node.wire[0].name]
-                    new_register = QuantumRegister(old_register.size+1, old_register.name)
-                    component_qregs[node.wire[0].name] = new_register
-                    component_qubits[node.wire] = (new_register.name, new_register.size-1)
-                    print('has {}, changed from {} to {}'.format(node.wire[0].name,old_register,new_register))
-                else:
-                    new_register = QuantumRegister(1, node.wire[0].name)
-                    component_qregs[node.wire[0].name] = new_register
-                    component_qubits[node.wire] = (new_register.name, new_register.size-1)
-                    print('does not have {}, add {}'.format(node.wire[0].name,new_register))
-        for qubit in component_qubits:
-            qubit_register = component_qregs[component_qubits[qubit][0]]
-            qubit_register_idx = component_qubits[qubit][1]
-            component_qubits[qubit] = qubit_register[qubit_register_idx]
-        print('registers:', component_qregs)
-        print('qubits:', component_qubits)
-        fragment = QuantumCircuit()
-        for qreg in component_qregs.values():
-            fragment.add_register(qreg)
+                in_node = find_uncut_in_node(node.wire, path_map)
+                relative_position = list(path_map.keys()).index(in_node)
+                component_qubits.append(node.wire)
+                relative_positions.append(relative_position)
+                # print(node.wire,'relative position in component:',relative_position)
+        relative_positions, component_qubits = (list(t) for t in zip(*sorted(zip(relative_positions, component_qubits))))
+        cluster_qubits.append(component_qubits)
+        component_qreg = QuantumRegister(len(component_qubits),'q')
+        cluster_circ = QuantumCircuit(component_qreg)
         for node in cut_dag.topological_op_nodes():
             if node in component:
                 translated_qargs = []
                 for qarg in node.qargs:
-                    translated_qarg = component_qubits[qarg]
+                    translated_qarg = component_qreg[component_qubits.index(qarg)]
                     translated_qargs.append(translated_qarg)
-                fragment.append(instruction=node.op, qargs=translated_qargs)
-        fragments.append(fragment)
-        fragment_qubits.append(component_qubits)
-        print(fragment)
-        print('*'*100)
+                cluster_circ.append(instruction=node.op, qargs=translated_qargs)
+        cluster_circs.append(cluster_circ)
 
-    return fragments, fragment_qubits
+    return cluster_circs, cluster_qubits
 
-def complete_path_map_generator(path_map, fragment_qubits):
+def complete_path_map_generator(path_map, cluster_qubits):
     complete_path_map = copy.deepcopy(path_map)
     for qubit in complete_path_map:
         for path_qubit_idx, path_qubit in enumerate(complete_path_map[qubit]):
-            for fragment_idx, fragment in enumerate(fragment_qubits):
-                if path_qubit in fragment:
-                    sub_circ_idx = fragment_idx
-                    translated_path_qubit = fragment[path_qubit]
-                    complete_path_map[qubit][path_qubit_idx] = (sub_circ_idx, translated_path_qubit)
+            for cluster_idx, cluster in enumerate(cluster_qubits):
+                if path_qubit in cluster:
+                    sub_circ_idx = cluster_idx
+                    cluster_qubit_idx = cluster.index(path_qubit)
+                    complete_path_map[qubit][path_qubit_idx] = (sub_circ_idx, cluster_qubit_idx)
+                    break
     return complete_path_map
 
 def cut_circuit(circ, positions):
     original_dag = circuit_to_dag(circ)
     cut_dag, path_map = cut_edges(original_dag=original_dag, positions=positions)
-    fragments, fragment_qubits = fragments_generator(cut_dag, path_map)
-    complete_path_map = complete_path_map_generator(path_map, fragment_qubits)
+    cluster_circs, cluster_qubits = clusters_generator(cut_dag, path_map)
+    complete_path_map = complete_path_map_generator(path_map, cluster_qubits)
     K = len(positions)
     d = []
-    for x in fragment_qubits:
+    for x in cluster_qubits:
         # d = max(d, len(x))
         d.append(len(x))
 
-    return fragments, complete_path_map, K, d
+    return cluster_circs, complete_path_map, K, d
