@@ -1,42 +1,37 @@
-import supremacy_generator as suprem_gen
-import cut_searcher as cut_searcher
+from qcg.generators import gen_supremacy, gen_hwea
+import MIQCP_searcher as searcher
 import cutter
 import random
 from qiskit.tools.visualization import dag_drawer
 from qiskit.converters import circuit_to_dag, dag_to_circuit
 
-def find_ops(fragments, fragment_idx, qubit):
+def find_ops(cluster_circs, cluster_idx, cluster_qubit_idx, complete_path_map):
     ops = []
-    circ = fragments[fragment_idx]
+    circ = cluster_circs[cluster_idx]
+    cluster_qubit = circ.qubits[cluster_qubit_idx]
     for node in circuit_to_dag(circ).topological_op_nodes():
-        if qubit in node.qargs:
+        if cluster_qubit in node.qargs:
             translated_qargs = []
             for qarg in node.qargs:
-                original_qubit = find_original_qubit(fragment_idx, qarg)
+                cluster_qarg_idx = circ.qubits.index(qarg)
+                original_qubit = find_original_qubit(cluster_idx, cluster_qarg_idx, complete_path_map)
                 translated_qargs.append(original_qubit)
             ops.append((node.name, translated_qargs))
     return ops
 
-def find_original_qubit(fragment_idx, qubit):
+def find_original_qubit(cluster_idx, cluster_qubit_idx, complete_path_map):
     for original_qubit in complete_path_map:
-        if (fragment_idx, qubit) in complete_path_map[original_qubit]:
+        if (cluster_idx, cluster_qubit_idx) in complete_path_map[original_qubit]:
             return original_qubit
     return None  
 
-circ = suprem_gen.circuit_generator([5,5,8], random_order = True)
+circ = gen_supremacy(4,4,8)
+hardness, positions, ancilla, d, num_cluster, m = searcher.find_cuts(circ,num_clusters=range(2,5),hw_max_qubit=9)
 
-pareto_K_d = cut_searcher.find_pareto_solutions(circ=circ, num_clusters=3)
-keys = list(pareto_K_d.keys())
-key = random.choice(keys)
-pareto_cuts, pareto_grouping = pareto_K_d[key]
-
-fragments, complete_path_map, K, d = cutter.cut_circuit(circ, pareto_cuts)
-print('a random pareto solution:')
-print(key, pareto_cuts)
-# [print(x) for x in pareto_grouping]
+cluster_circs, complete_path_map, K, d = cutter.cut_circuit(circ, positions)
 print('Complete Path Map:')
 [print(x, complete_path_map[x]) for x in complete_path_map]
-print('K=%d, d=%d' % (K,d))
+print('K={}, d={}'.format(K,d))
 print('*'*100)
 
 wrong_cutter = False
@@ -45,8 +40,8 @@ for input_qubit in complete_path_map:
     path = complete_path_map[input_qubit]
     fragment_ops = []
     for p in path:
-        fragment_idx, fragment_qubit = p
-        fragment_ops += find_ops(fragments, fragment_idx, fragment_qubit)
+        cluster_idx, cluster_qubit_idx = p
+        fragment_ops += find_ops(cluster_circs, cluster_idx, cluster_qubit_idx, complete_path_map)
     
     original_ops = []
     for node in circuit_to_dag(circ).topological_op_nodes():
@@ -60,4 +55,6 @@ for input_qubit in complete_path_map:
         print('*'*100)
 
 if not wrong_cutter:
-    print('cutter is correct')
+    print('cutter is CORRECT')
+else:
+    print('cutter is WRONG')
