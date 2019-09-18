@@ -24,6 +24,13 @@ def find_cluster_cut_qubit(complete_path_map,cluster_idx):
                     ancilla_indices.append(cut_qubit[1])
     return ancilla_indices
 
+def init_key(init,ancilla_indices,num_qubits):
+    key = [0 for i in range(num_qubits)]
+    for i, idx in enumerate(ancilla_indices):
+        key[idx] = init[i]
+    key = tuple(key)
+    return key
+
 if __name__ == '__main__':
     dirname = './data'
     complete_path_map = pickle.load(open( '%s/cpm.p'%dirname, 'rb' ))
@@ -49,6 +56,8 @@ if __name__ == '__main__':
             cluster_circ = dag_to_circuit(cluster_dag)
             # print(cluster_circ)
             sv = simulate_circ(cluster_circ)
+            init = init_key(init,ancilla_indices,len(cluster_circ.qubits))
+            print('saved as:',init)
             cluster_sv[init] = sv
         pickle.dump(cluster_sv, open('%s/cluster_%d_sv.p'%(dirname,cluster_idx), 'wb' ))
-        # print('-'*100)
+        print('-'*100)
