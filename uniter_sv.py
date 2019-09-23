@@ -4,12 +4,6 @@ import itertools
 import numpy as np
 import math
 
-def reverseBits(num,bitSize): 
-    binary = bin(num) 
-    reverse = binary[-1:1:-1] 
-    reverse = reverse + (bitSize - len(reverse))*'0'
-    return int(reverse,2)
-
 def find_O_rho_pairs(complete_path_map,all_cluster_qubits):
     all_cluster_idx_digits = [math.ceil(math.log(x,2)) for x in all_cluster_qubits]
     print(all_cluster_idx_digits)
@@ -18,10 +12,9 @@ def find_O_rho_pairs(complete_path_map,all_cluster_qubits):
         path = complete_path_map[input_qubit]
         for idx, rho_qubit in enumerate(path[1:]):
             O_qubit = path[idx]
-            O_qubit_reverse_idx = reverseBits(O_qubit[1],all_cluster_idx_digits[O_qubit[0]])
-            rho_qubit_reverse_idx = reverseBits(rho_qubit[1],all_cluster_idx_digits[rho_qubit[0]])
-            O_qubit = tuple([O_qubit[0],O_qubit[1],O_qubit_reverse_idx])
-            rho_qubit = tuple([rho_qubit[0],rho_qubit[1],rho_qubit_reverse_idx])
+            # O_qubit_reverse_idx = all_cluster_qubits[O_qubit[0]]-1-O_qubit[1]
+            O_qubit = tuple([O_qubit[0],O_qubit[1]])
+            rho_qubit = tuple([rho_qubit[0],rho_qubit[1]])
             O_rho_pairs.append([O_qubit,rho_qubit])
     return O_rho_pairs
 
@@ -45,19 +38,50 @@ def read_sv_files(dirname):
 
 def project_sv(cluster_sv,projection):
     projected = []
-    meas = list(itertools.product(range(0,2),repeat=projection.count('x')))
-    for m in meas:
-        m_i = 0
-        full_m = [-1 for p in projection]
-        for i,p in enumerate(projection):
-            if p!='x':
-                full_m[i] = p
-            else:
-                full_m[i] = m[m_i]
-                m_i += 1
-        res = int("".join(str(x) for x in full_m), 2)
-        projected.append(cluster_sv[res])
+    for i, sv in enumerate(cluster_sv):
+        bin_i = bin(i)[2:].zfill(len(projection))
+        pattern_match = True
+        for b, p in zip(bin_i, projection):
+            b = int(b)
+            if b!=p and p!='x':
+                pattern_match = False
+                break
+        if pattern_match:
+            projected.append(sv)
     return projected
+
+def reconstructed_reorder(unordered,complete_path_map):
+    print('ordering reconstructed sv')
+    ordered  = [0 for sv in unordered]
+    cluster_out_qubits = {}
+    for input_qubit in complete_path_map:
+        path = complete_path_map[input_qubit]
+        output_qubit = path[-1]
+        # print('output qubit = ', output_qubit)
+        if output_qubit[0] in cluster_out_qubits:
+            cluster_out_qubits[output_qubit[0]].append((output_qubit[1],input_qubit[1]))
+        else:
+            cluster_out_qubits[output_qubit[0]] = [(output_qubit[1],input_qubit[1])]
+    print(cluster_out_qubits)
+    for cluster_idx in cluster_out_qubits:
+        cluster_out_qubits[cluster_idx].sort()
+        cluster_out_qubits[cluster_idx] = [x[1] for x in cluster_out_qubits[cluster_idx]]
+    print(cluster_out_qubits)
+    unordered_qubit_idx = []
+    for cluster_idx in sorted(cluster_out_qubits.keys()):
+        unordered_qubit_idx += cluster_out_qubits[cluster_idx]
+    print(unordered_qubit_idx)
+    for idx, sv in enumerate(unordered):
+        bin_idx = bin(idx)[2:].zfill(len(unordered_qubit_idx))
+        print('sv bin_idx=',bin_idx)
+        ordered_idx = [0 for i in unordered_qubit_idx]
+        for jdx, i in enumerate(bin_idx):
+            ordered_idx[unordered_qubit_idx[jdx]] = i
+        print(ordered_idx)
+        ordered_idx = int("".join(str(x) for x in ordered_idx), 2)
+        ordered[ordered_idx] = sv
+        print('unordered %d --> ordered %d'%(idx,ordered_idx),'sv=',sv)
+    return ordered
 
 if __name__ == '__main__':
     dirname = './data'
@@ -65,7 +89,6 @@ if __name__ == '__main__':
     full_circ = pickle.load(open( '%s/full_circ.p'%dirname, 'rb' ))
     [print(x, complete_path_map[x]) for x in complete_path_map]
     all_cluster_sv, all_cluster_qubits = read_sv_files(dirname)
-
     O_rho_pairs= find_O_rho_pairs(complete_path_map,all_cluster_qubits)
     combinations = find_combinations(O_rho_pairs)
     
@@ -73,6 +96,8 @@ if __name__ == '__main__':
     print('start reconstruction')
     reconstructed = [0 for i in range(np.power(2,len(full_circ.qubits)))]
     for combination in combinations:
+        print('combination:', combination)
+        # Initialize initializations and projections
         all_cluster_projections = []
         all_cluster_inits = []
         for num_qubits in all_cluster_qubits:
@@ -80,26 +105,29 @@ if __name__ == '__main__':
             all_cluster_projections.append(projection)
             init = [0 for i in range(num_qubits)]
             all_cluster_inits.append(init)
-        print('combination:', combination)
         for idx, c in enumerate(combination):
             O_qubit, rho_qubit = O_rho_pairs[idx]
-            all_cluster_projections[O_qubit[0]][O_qubit[2]] = c
+            all_cluster_projections[O_qubit[0]][O_qubit[1]] = c
             all_cluster_inits[rho_qubit[0]][rho_qubit[1]] = c
         summation_term = [1]
-        for i in range(len(all_cluster_sv)):
-            print('cluster %d'%i)
-            init = all_cluster_inits[i]
-            projection = all_cluster_projections[i]
+        for cluster_idx in range(len(all_cluster_sv)):
+            print('cluster %d'%cluster_idx)
+            init = all_cluster_inits[cluster_idx]
+            projection = all_cluster_projections[cluster_idx]
             print('init:', init)
             print('projection:',projection)
-            cluster_sv = all_cluster_sv[i][tuple(init)]
+            cluster_sv = all_cluster_sv[cluster_idx][tuple(init)]
             print('original len =',len(cluster_sv))
             cluster_sv = project_sv(cluster_sv,projection)
             print('projected len =',len(cluster_sv))
             print()
             summation_term = np.kron(summation_term,cluster_sv)
+        # print('summation term =', summation_term)
         reconstructed += summation_term
         print('-'*100)
-    print(reconstructed)
+    # TODO: reordering required here
+    # print('unordered reconstruction:\n',reconstructed)
+    reconstructed = reconstructed_reorder(reconstructed,complete_path_map)
+    # print(reconstructed)
     print('reconstruction len = ', len(reconstructed))
-    pickle.dump(reconstructed, open('%s/reconstructed.p'%dirname, 'wb' ))
+    pickle.dump(reconstructed, open('%s/reconstructed.p'%dirname, 'wb'))
