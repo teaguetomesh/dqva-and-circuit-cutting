@@ -54,17 +54,6 @@ def find_cluster_cut_qubit(complete_path_map):
                 pairs.append((O_qubit,rho_qubit))
     return pairs
 
-def find_projections(complete_path_map,combination):
-    pairs = find_cluster_cut_qubit(complete_path_map)
-    cluster_qubit_counts = {}
-    for input_qubit in complete_path_map:
-        path = complete_path_map[input_qubit]
-        for q in path:
-            if q[0] not in cluster_qubit_counts:
-                cluster_qubit_counts[q[0]] = 1
-            else:
-                cluster_qubit_counts[q[0]] += 1
-
 def reconstructed_reorder(unordered,complete_path_map):
     print('ordering reconstructed sv')
     ordered  = [0 for sv in unordered]

@@ -46,7 +46,7 @@ def find_cluster_O_rho_qubits(complete_path_map,cluster_idx):
     return O_qubits, rho_qubits
 
 def find_all_simulation_combinations(O_qubits, rho_qubits, num_qubits):
-    print('Rho qubits:',rho_qubits)
+    # print('Rho qubits:',rho_qubits)
     all_inits = list(itertools.product(init_states,repeat=len(rho_qubits)))
     complete_inits = []
     for init in all_inits:
@@ -54,9 +54,9 @@ def find_all_simulation_combinations(O_qubits, rho_qubits, num_qubits):
         for i in range(len(init)):
             complete_init[rho_qubits[i][1]] = init[i]
         complete_inits.append(complete_init)
-    print('initializations:',complete_inits)
+    # print('initializations:',complete_inits)
 
-    print('O qubits:',O_qubits)
+    # print('O qubits:',O_qubits)
     all_meas = list(itertools.product(measurement_basis,repeat=len(O_qubits)))
     complete_meas = []
     for meas in all_meas:
@@ -64,10 +64,10 @@ def find_all_simulation_combinations(O_qubits, rho_qubits, num_qubits):
         for i in range(len(meas)):
             complete_m[O_qubits[i][1]] = meas[i]
         complete_meas.append(complete_m)
-    print('measurement basis:',complete_meas)
+    # print('measurement basis:',complete_meas)
 
     combinations = list(itertools.product(complete_inits,complete_meas))
-    print(len(combinations))
+    return combinations
 
 
 if __name__ == '__main__':
@@ -79,11 +79,51 @@ if __name__ == '__main__':
     [print(x, complete_path_map[x]) for x in complete_path_map]
 
     cluster_circ_files = [f for f in glob.glob(dirname+'/cluster_*_circ.p')]
+    all_cluster_prob = []
     for cluster_idx in range(len(cluster_circ_files)):
         print('cluster %d'%cluster_idx)
         cluster_prob = {}
-        cluster_circ = pickle.load(open(('%s/cluster_%d_circ.p'%(dirname,cluster_idx)), 'rb' ))
-        print(cluster_circ)
+        cluster_circ = pickle.load(open(('%s/cluster_%d_circ.p'%(dirname,cluster_idx)), 'rb'))
         O_qubits, rho_qubits = find_cluster_O_rho_qubits(complete_path_map,cluster_idx)
-        find_all_simulation_combinations(O_qubits, rho_qubits, len(cluster_circ.qubits))
+        combinations = find_all_simulation_combinations(O_qubits, rho_qubits, len(cluster_circ.qubits))
+        for combination in combinations:
+            cluster_dag = circuit_to_dag(cluster_circ)
+            inits, meas = combination
+            # print('combination = ',type(combination),combination)
+            # print('initializations = ',type(inits),inits)
+            # print('measurement basis = ',type(meas),meas)
+            for i,x in enumerate(inits):
+                q = cluster_circ.qubits[i]
+                if x == 'zero':
+                    continue
+                elif x == 'one':
+                    cluster_dag.apply_operation_front(op=XGate(),qargs=[q],cargs=[])
+                elif x == 'plus':
+                    cluster_dag.apply_operation_front(op=HGate(),qargs=[q],cargs=[])
+                elif x == 'minus':
+                    cluster_dag.apply_operation_front(op=HGate(),qargs=[q],cargs=[])
+                    cluster_dag.apply_operation_front(op=XGate(),qargs=[q],cargs=[])
+                elif x == 'plus_i':
+                    cluster_dag.apply_operation_front(op=SGate(),qargs=[q],cargs=[])
+                    cluster_dag.apply_operation_front(op=HGate(),qargs=[q],cargs=[])
+                elif x == 'minus_i':
+                    cluster_dag.apply_operation_front(op=SGate(),qargs=[q],cargs=[])
+                    cluster_dag.apply_operation_front(op=HGate(),qargs=[q],cargs=[])
+                    cluster_dag.apply_operation_front(op=XGate(),qargs=[q],cargs=[])
+            for i,x in enumerate(meas):
+                q = cluster_circ.qubits[i]
+                if x == 'I':
+                    continue
+                elif x == 'X':
+                    cluster_dag.apply_operation_back(op=HGate(),qargs=[q],cargs=[])
+                elif x == 'Y':
+                    cluster_dag.apply_operation_back(op=SdgGate(),qargs=[q],cargs=[])
+                    cluster_dag.apply_operation_back(op=HGate(),qargs=[q],cargs=[])
+            cluster_circ_inst = dag_to_circuit(cluster_dag)
+            # print(cluster_circ_inst)
+            cluster_inst_prob = simulate_circ(cluster_circ_inst, 'prob')
+            cluster_prob[(tuple(inits),tuple(meas))] = cluster_inst_prob
+        print(cluster_prob.keys())
+        all_cluster_prob.append(cluster_prob)
         print('-'*100)
+    # pickle.dump(all_cluster_prob, open('%s/cluster_sim_prob.p'%dirname, 'wb' ))
