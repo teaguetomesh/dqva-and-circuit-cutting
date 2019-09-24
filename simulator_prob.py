@@ -126,4 +126,4 @@ if __name__ == '__main__':
         print(cluster_prob.keys())
         all_cluster_prob.append(cluster_prob)
         print('-'*100)
-    # pickle.dump(all_cluster_prob, open('%s/cluster_sim_prob.p'%dirname, 'wb' ))
+    pickle.dump(all_cluster_prob, open('%s/cluster_sim_prob.p'%dirname, 'wb' ))
