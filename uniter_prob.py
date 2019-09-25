@@ -81,7 +81,7 @@ def multiply_sigma(cluster_prob,O_rho_pairs,cluster_idx,s):
     effective_states = itertools.product(range(2),repeat=effective_num_qubits)
     insertions = list(itertools.product(range(2),repeat=len(cluster_O_qubits)))
     for state in effective_states:
-        effective_state_index = int("".join(str(x) for x in state), 2)
+        # effective_state_index = int("".join(str(x) for x in state), 2)
         effective_state_prob = 0
         # print('effective state {}, index {}'.format(state,effective_state_index))
         # print('insertions = ',list(insertions))
@@ -93,6 +93,7 @@ def multiply_sigma(cluster_prob,O_rho_pairs,cluster_idx,s):
             full_state_index = int("".join(str(x) for x in full_state), 2)
             sigma = 1
             for s_i,i in zip(cluster_s,insertion):
+                # TODO: s=1,2 not considered for sigma multiplications, I don't know why
                 if s_i>2 and i==1:
                     sigma *= -1
             contributing_term = sigma*cluster_prob[full_state_index]
@@ -115,35 +116,34 @@ def reconstructed_reorder(unordered,complete_path_map):
             cluster_out_qubits[output_qubit[0]].append((output_qubit[1],input_qubit[1]))
         else:
             cluster_out_qubits[output_qubit[0]] = [(output_qubit[1],input_qubit[1])]
-    print(cluster_out_qubits)
+    # print(cluster_out_qubits)
     for cluster_idx in cluster_out_qubits:
         cluster_out_qubits[cluster_idx].sort()
         cluster_out_qubits[cluster_idx] = [x[1] for x in cluster_out_qubits[cluster_idx]]
-    print(cluster_out_qubits)
+    # print(cluster_out_qubits)
     unordered_qubit_idx = []
     for cluster_idx in sorted(cluster_out_qubits.keys()):
         unordered_qubit_idx += cluster_out_qubits[cluster_idx]
-    print(unordered_qubit_idx)
+    # print(unordered_qubit_idx)
     for idx, sv in enumerate(unordered):
         bin_idx = bin(idx)[2:].zfill(len(unordered_qubit_idx))
-        print('sv bin_idx=',bin_idx)
+        # print('sv bin_idx=',bin_idx)
         ordered_idx = [0 for i in unordered_qubit_idx]
         for jdx, i in enumerate(bin_idx):
             ordered_idx[unordered_qubit_idx[jdx]] = i
-        print(ordered_idx)
+        # print(ordered_idx)
         ordered_idx = int("".join(str(x) for x in ordered_idx), 2)
         ordered[ordered_idx] = sv
         print('unordered %d --> ordered %d'%(idx,ordered_idx),'sv=',sv)
     return ordered
 
-if __name__ == '__main__':
-    measurement_basis = ['I','X','Y']
-    init_states = ['zero','one','plus','minus','plus_i','minus_i']
-    dirname = './data'
-    complete_path_map, full_circ, cluster_circs, cluster_sim_probs = read_pickle_files(dirname)
+def reconstruct(complete_path_map, full_circ, cluster_circs, cluster_sim_probs):
+    print('Complete path map:')
     [print(x, complete_path_map[x]) for x in complete_path_map]
+
     O_rho_pairs = find_cuts_pairs(complete_path_map)
     print('O rho qubits pairs:',O_rho_pairs)
+
     combinations = list(itertools.product(range(1,9),repeat=len(O_rho_pairs)))
     reconstructed_prob = [0 for i in range(np.power(2,len(full_circ.qubits)))]
     for s in combinations:
@@ -161,9 +161,16 @@ if __name__ == '__main__':
             cluster_prob = cluster_prob[init_meas]
             print('cluster {} selects init = {}, meas = {}'.format(cluster_idx,init_meas[0],init_meas[1]))
             cluster_prob = multiply_sigma(cluster_prob,O_rho_pairs,cluster_idx,s)
+            # TODO: bottleneck here
             t_s = np.kron(t_s,cluster_prob)
         reconstructed_prob += c_s*t_s
         print('-'*100)
-    # reconstructed_prob = reconstructed_reorder(reconstructed_prob,complete_path_map)
+    reconstructed_prob = reconstructed_reorder(reconstructed_prob,complete_path_map)
     print('reconstruction len = ', len(reconstructed_prob),sum(reconstructed_prob))
+    return reconstructed_prob
+
+if __name__ == '__main__':
+    dirname = './data'
+    complete_path_map, full_circ, cluster_circs, cluster_sim_probs = read_pickle_files(dirname)
+    reconstructed_prob = reconstruct(complete_path_map, full_circ, cluster_circs, cluster_sim_probs)
     pickle.dump(reconstructed_prob, open('%s/reconstructed_prob.p'%dirname, 'wb'))
