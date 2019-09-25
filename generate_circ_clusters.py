@@ -5,10 +5,10 @@ import cutter
 import pickle
 import os
 
-circ = gen_supremacy(2,2,8,order='75601234')
+circ = gen_supremacy(4,4,8,order='75601234')
 print(circ)
 
-hardness, positions, ancilla, d, num_cluster, m = searcher.find_cuts(circ,num_clusters=range(2,3),hw_max_qubit=12)
+hardness, positions, ancilla, d, num_cluster, m = searcher.find_cuts(circ,num_clusters=range(2,4),hw_max_qubit=12)
 m.print_stat()
 clusters, complete_path_map, K, d = cutter.cut_circuit(circ, positions)
 print('Complete path map:')

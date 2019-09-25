@@ -236,5 +236,6 @@ for combination in combinations:
     prob_reconstruction += summation_term
     print('-'*100)
 print('First element comparison:', uncut_prob[0], prob_reconstruction[0])
+print('sum of probabilities = ',sum(prob_reconstruction))
 prob_reconstruction = reconstructed_reorder(prob_reconstruction,complete_path_map)
 print('probability reconstruction distance:',wasserstein_distance(uncut_prob,prob_reconstruction))
