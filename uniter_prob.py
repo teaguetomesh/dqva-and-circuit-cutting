@@ -3,6 +3,33 @@ import numpy as np
 import pickle
 import glob
 
+def effective_full_state_corresppndence(O_rho_pairs,cluster_circs):
+    correspondence_map = {}
+    for cluster_idx,circ in enumerate(cluster_circs):
+        cluster_O_qubits = []
+        total_num_qubits = len(circ.qubits)
+        for pair in O_rho_pairs:
+            O_qubit, _ = pair
+            if O_qubit[0] == cluster_idx:
+                cluster_O_qubits.append(O_qubit[1])
+        effective_num_qubits = total_num_qubits - len(cluster_O_qubits)
+        effective_states = itertools.product(range(2),repeat=effective_num_qubits)
+        O_qubit_states = list(itertools.product(range(2),repeat=len(cluster_O_qubits)))
+        cluster_correspondence = {}
+        for effective_state in effective_states:
+            effective_state_index = int("".join(str(x) for x in effective_state), 2)
+            corresponding_full_states = []
+            for O_qubit_state in O_qubit_states:
+                full_state = list(effective_state)
+                for p,i in zip(cluster_O_qubits,O_qubit_state):
+                    full_state.insert(p,i)
+                full_state_index = int("".join(str(x) for x in full_state), 2)
+                corresponding_full_states.append(full_state_index)
+            cluster_correspondence[effective_state_index] = corresponding_full_states
+        correspondence_map[cluster_idx] = cluster_correspondence
+    [print(cluster_idx,correspondence_map[cluster_idx],'\n') for cluster_idx in correspondence_map]
+    return correspondence_map
+
 def read_pickle_files(dirname):
     cluster_circ_files = [f for f in glob.glob('%s/cluster_*_circ.p'%dirname)]
     all_cluster_circ = []
@@ -63,54 +90,34 @@ def find_inits_meas(cluster_circs, O_rho_pairs, s):
     # print(clusters_init_meas)
     return clusters_init_meas
 
-def effective_full_state_corresppndence(O_rho_pairs,cluster_circs):
-    correspondence_map = {}
-    for cluster_idx,circ in enumerate(cluster_circs):
-        cluster_O_qubits = []
-        total_num_qubits = len(circ.qubits)
-        for pair in O_rho_pairs:
-            O_qubit, _ = pair
-            if O_qubit[0] == cluster_idx:
-                cluster_O_qubits.append(O_qubit[1])
-        effective_num_qubits = total_num_qubits - len(cluster_O_qubits)
-        effective_states = itertools.product(range(2),repeat=effective_num_qubits)
-        O_qubit_states = list(itertools.product(range(2),repeat=len(cluster_O_qubits)))
-        cluster_correspondence = {}
-        for effective_state in effective_states:
-            effective_state_index = int("".join(str(x) for x in effective_state), 2)
-            corresponding_full_states = []
-            for O_qubit_state in O_qubit_states:
-                full_state = list(effective_state)
-                for p,i in zip(cluster_O_qubits,O_qubit_state):
-                    full_state.insert(p,i)
-                full_state_index = int("".join(str(x) for x in full_state), 2)
-                corresponding_full_states.append(full_state_index)
-            cluster_correspondence[effective_state_index] = corresponding_full_states
-        correspondence_map[cluster_idx] = cluster_correspondence
-    [print(cluster_idx,correspondence_map[cluster_idx],'\n') for cluster_idx in correspondence_map]
-    return correspondence_map
-
-def multiply_sigma(cluster_prob,O_qubits_indices,s,cluster_correspondence):
+def multiply_sigma(cluster_prob,O_rho_pairs,cluster_idx,s):
+    total_num_qubits = int(np.log2(len(cluster_prob)))
+    cluster_O_qubits = []
     cluster_s = []
     for s_i, pair in zip(s,O_rho_pairs):
         O_qubit, _ = pair
         if O_qubit[0] == cluster_idx:
+            cluster_O_qubits.append(O_qubit[1])
             cluster_s.append(s_i)
+    if len(cluster_O_qubits) == 0:
+        return cluster_prob
     # print('cluster %d O qubits:'%cluster_idx,cluster_O_qubits)
     # print('assigned s:',cluster_s)
-    total_num_qubits = int(np.log2(len(cluster_prob)))
-    effective_num_qubits = total_num_qubits - len(cluster_s)
-    effective_states = itertools.product(range(2),repeat=effective_num_qubits)
-    O_qubit_states = list(itertools.product(range(2),repeat=len(cluster_s)))
     effective_cluster_prob = []
+    effective_num_qubits = total_num_qubits - len(cluster_O_qubits)
+    effective_states = itertools.product(range(2),repeat=effective_num_qubits)
+    insertions = list(itertools.product(range(2),repeat=len(cluster_O_qubits)))
     for state in effective_states:
-        effective_state_index = int("".join(str(x) for x in state), 2)
+        # effective_state_index = int("".join(str(x) for x in state), 2)
         effective_state_prob = 0
         # print('effective state {}, index {}'.format(state,effective_state_index))
         # print('insertions = ',list(insertions))
-        full_states_indices = cluster_correspondence[effective_state_index]
-        for full_state_index in full_states_indices:
-            
+        for insertion in insertions:
+            effective_state = list(state)
+            for p,i in zip(cluster_O_qubits,insertion):
+                effective_state.insert(p,i)
+            full_state = effective_state
+            full_state_index = int("".join(str(x) for x in full_state), 2)
             sigma = 1
             for s_i,i in zip(cluster_s,insertion):
                 # TODO: s=1,2 not considered for sigma multiplications, I don't know why
@@ -164,33 +171,23 @@ def reconstruct(complete_path_map, full_circ, cluster_circs, cluster_sim_probs):
     O_rho_pairs = find_cuts_pairs(complete_path_map)
     print('O rho qubits pairs:',O_rho_pairs)
 
-    correspondence_map = effective_full_state_corresppndence(O_rho_pairs,cluster_circs)
-    cluster_O_qubits = []
-    for cluster_idx in range(len(cluster_circs)):
-        O_qubits = []
-        for pair in O_rho_pairs:
-            O_qubit, _ = pair
-            if O_qubit[0] == cluster_idx:
-                O_qubits.append(O_qubit)
-        cluster_O_qubits.append(O_qubit_idx)
-
     combinations = list(itertools.product(range(1,9),repeat=len(O_rho_pairs)))
     reconstructed_prob = [0 for i in range(np.power(2,len(full_circ.qubits)))]
     for s in combinations:
         print('s = ',s)
         clusters_init_meas = find_inits_meas(cluster_circs, O_rho_pairs, s)
+        t_s = [1]
         c_s = 1
         for s_i in s:
             if s_i == 4 or s_i == 6 or s_i == 8:
                 c_s *= -1/2
             else:
                 c_s *= 1/2
-        t_s = [1]
         for cluster_idx, cluster_prob in enumerate(cluster_sim_probs):
             init_meas = clusters_init_meas[cluster_idx]
             cluster_prob = cluster_prob[init_meas]
             print('cluster {} selects init = {}, meas = {}'.format(cluster_idx,init_meas[0],init_meas[1]))
-            cluster_prob = multiply_sigma(cluster_prob,cluster_O_qubits[cluster_idx],s,correspondence_map[cluster_idx])
+            cluster_prob = multiply_sigma(cluster_prob,O_rho_pairs,cluster_idx,s)
             # TODO: bottleneck here
             t_s = np.kron(t_s,cluster_prob)
         reconstructed_prob += c_s*t_s
@@ -202,7 +199,5 @@ def reconstruct(complete_path_map, full_circ, cluster_circs, cluster_sim_probs):
 if __name__ == '__main__':
     dirname = './data'
     complete_path_map, full_circ, cluster_circs, cluster_sim_probs = read_pickle_files(dirname)
-    # reconstructed_prob = reconstruct(complete_path_map, full_circ, cluster_circs, cluster_sim_probs)
-    # pickle.dump(reconstructed_prob, open('%s/reconstructed_prob.p'%dirname, 'wb'))
-    O_rho_pairs = find_cuts_pairs(complete_path_map)
-    effective_full_state_corresppndence(O_rho_pairs,cluster_circs)
+    reconstructed_prob = reconstruct(complete_path_map, full_circ, cluster_circs, cluster_sim_probs)
+    pickle.dump(reconstructed_prob, open('%s/reconstructed_prob.p'%dirname, 'wb'))
