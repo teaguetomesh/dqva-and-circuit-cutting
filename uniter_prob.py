@@ -2,6 +2,8 @@ import itertools
 import numpy as np
 import pickle
 import glob
+from time import time
+from scipy.stats import wasserstein_distance
 
 def effective_full_state_corresppndence(O_rho_pairs,cluster_circs):
     correspondence_map = {}
@@ -39,7 +41,8 @@ def read_pickle_files(dirname):
     complete_path_map = pickle.load(open( '%s/cpm.p'%dirname, 'rb' ))
     full_circ = pickle.load(open( '%s/full_circ.p'%dirname, 'rb' ))
     cluster_sim_prob = pickle.load(open( '%s/cluster_sim_prob.p'%dirname, 'rb' ))
-    return complete_path_map, full_circ, all_cluster_circ, cluster_sim_prob
+    full_circ_sim_prob = pickle.load(open( '%s/full_circ_sim_prob.p'%dirname, 'rb' ))
+    return complete_path_map, full_circ, all_cluster_circ, cluster_sim_prob,full_circ_sim_prob
 
 def find_cuts_pairs(complete_path_map):
     O_rho_pairs = []
@@ -197,7 +200,12 @@ def reconstruct(complete_path_map, full_circ, cluster_circs, cluster_sim_probs):
     return reconstructed_prob
 
 if __name__ == '__main__':
+    begin = time()
     dirname = './data'
-    complete_path_map, full_circ, cluster_circs, cluster_sim_probs = read_pickle_files(dirname)
+    complete_path_map, full_circ, cluster_circs, cluster_sim_probs,full_circ_sim_prob = read_pickle_files(dirname)
     reconstructed_prob = reconstruct(complete_path_map, full_circ, cluster_circs, cluster_sim_probs)
-    pickle.dump(reconstructed_prob, open('%s/reconstructed_prob.p'%dirname, 'wb'))
+    # pickle.dump(reconstructed_prob, open('%s/reconstructed_prob.p'%dirname, 'wb'))
+    print('Python time elapsed = %f seconds'%(time()-begin))
+    distance = wasserstein_distance(full_circ_sim_prob,reconstructed_prob)
+    print('probability reconstruction distance = ',distance)
+    print('first element comparison:',full_circ_sim_prob[0],reconstructed_prob[0])
