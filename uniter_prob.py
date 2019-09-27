@@ -3,6 +3,7 @@ import numpy as np
 import pickle
 import glob
 from time import time
+from scipy.stats import wasserstein_distance
 
 def read_pickle_files(dirname):
     cluster_circ_files = [f for f in glob.glob('%s/cluster_*_circ.p'%dirname)]
@@ -13,7 +14,8 @@ def read_pickle_files(dirname):
     complete_path_map = pickle.load(open( '%s/cpm.p'%dirname, 'rb' ))
     full_circ = pickle.load(open( '%s/full_circ.p'%dirname, 'rb' ))
     cluster_sim_prob = pickle.load(open( '%s/cluster_sim_prob.p'%dirname, 'rb' ))
-    return complete_path_map, full_circ, all_cluster_circ, cluster_sim_prob
+    full_circ_sim_prob = pickle.load(open( '%s/full_circ_sim_prob.p'%dirname, 'rb' ))
+    return complete_path_map, full_circ, all_cluster_circ, cluster_sim_prob,full_circ_sim_prob
 
 def find_cuts_pairs(complete_path_map):
     O_rho_pairs = []
@@ -65,10 +67,10 @@ def find_inits_meas(cluster_circs, O_rho_pairs, s):
     return clusters_init_meas
 
 def multiply_sigma(full_cluster_prob,cluster_s,cluster_O_qubit_positions,effective_state_tranlsation):
+    # print('cluster O qubits:',cluster_O_qubit_positions)
+    # print('assigned s:',cluster_s)
     if len(cluster_O_qubit_positions) == 0:
         return full_cluster_prob
-    print('cluster O qubits:',cluster_O_qubit_positions)
-    print('assigned s:',cluster_s)
     total_num_qubits = int(np.log2(len(full_cluster_prob)))
     effective_cluster_prob = []
     for effective_state in effective_state_tranlsation:
@@ -78,13 +80,15 @@ def multiply_sigma(full_cluster_prob,cluster_s,cluster_O_qubit_positions,effecti
         # print('effective state {}, index {}'.format(state,effective_state_index))
         # print('insertions = ',list(insertions))
         for full_state in full_states:
-            bin_full_state = bin(full_state)[:2].zfill(total_num_qubits)
+            bin_full_state = bin(full_state)[2:].zfill(total_num_qubits)
             sigma = 1
             for s_i,position in zip(cluster_s,cluster_O_qubit_positions):
                 O_measurement = bin_full_state[position]
+                # print('s = type {} {}, O measurement = type {} {}'.format(type(s_i),s_i,type(O_measurement),O_measurement))
                 # TODO: s=1,2 not considered for sigma multiplications, I don't know why
-                if s_i>2 and O_measurement==1:
+                if s_i>2 and O_measurement=='1':
                     sigma *= -1
+            # print('full state {}, binary {}, sigma = {}'.format(full_state,bin_full_state,sigma))
             contributing_term = sigma*full_cluster_prob[full_state]
             effective_state_prob += contributing_term
             # print('O qubit state {}, full state {}, sigma = {}, index = {}'.format(insertion,full_state,sigma,full_state_index))
@@ -93,7 +97,7 @@ def multiply_sigma(full_cluster_prob,cluster_s,cluster_O_qubit_positions,effecti
         effective_cluster_prob.append(effective_state_prob)
     return effective_cluster_prob
 
-def find_cluster_s(s, O_rho_pairs):
+def find_cluster_s(s, O_rho_pairs, cluster_circs):
     cluster_s = {}
     cluster_O_qubit_positions = {}
     for s_i, pair in zip(s,O_rho_pairs):
@@ -105,6 +109,10 @@ def find_cluster_s(s, O_rho_pairs):
         else:
             cluster_s[cluster_idx].append(s_i)
             cluster_O_qubit_positions[cluster_idx].append(O_qubit_idx)
+    for cluster_idx in range(len(cluster_circs)):
+        if cluster_idx not in cluster_s:
+            cluster_s[cluster_idx] = []
+            cluster_O_qubit_positions[cluster_idx] = []
     return cluster_s, cluster_O_qubit_positions
 
 def effective_full_state_corresppndence(O_rho_pairs,cluster_circs):
@@ -131,7 +139,6 @@ def effective_full_state_corresppndence(O_rho_pairs,cluster_circs):
                 corresponding_full_states.append(full_state_index)
             cluster_correspondence[effective_state_index] = corresponding_full_states
         correspondence_map[cluster_idx] = cluster_correspondence
-    [print(cluster_idx,correspondence_map[cluster_idx],'\n') for cluster_idx in correspondence_map]
     return correspondence_map
 
 def reconstructed_reorder(unordered,complete_path_map):
@@ -177,10 +184,12 @@ def reconstruct(complete_path_map, full_circ, cluster_circs, cluster_sim_probs):
     combinations = list(itertools.product(range(1,9),repeat=len(O_rho_pairs)))
     reconstructed_prob = [0 for i in range(np.power(2,len(full_circ.qubits)))]
     correspondence_map = effective_full_state_corresppndence(O_rho_pairs,cluster_circs)
+    print('Effective states, full states correspondence map:')
+    # [print('cluster %d' % cluster_idx,correspondence_map[cluster_idx],'\n') for cluster_idx in correspondence_map]
     for s in combinations:
-        # print('s = ',s)
+        print('s = ',s)
         clusters_init_meas = find_inits_meas(cluster_circs, O_rho_pairs, s)
-        cluster_s, cluster_O_qubit_positions = find_cluster_s(s, O_rho_pairs)
+        cluster_s, cluster_O_qubit_positions = find_cluster_s(s, O_rho_pairs, cluster_circs)
         t_s = [1]
         c_s = 1
         for s_i in s:
@@ -191,12 +200,11 @@ def reconstruct(complete_path_map, full_circ, cluster_circs, cluster_sim_probs):
         for cluster_idx, cluster_prob in enumerate(cluster_sim_probs):
             init_meas = clusters_init_meas[cluster_idx]
             full_cluster_prob = cluster_prob[init_meas]
-            # print('cluster {} selects init = {}, meas = {}'.format(cluster_idx,init_meas[0],init_meas[1]))
-            # TODO: bottleneck here
-            effective_cluster_prob = multiply_sigma(full_cluster_prob,cluster_s,cluster_O_qubit_positions,correspondence_map[cluster_idx])
+            print('cluster {} selects init = {}, meas = {}'.format(cluster_idx,init_meas[0],init_meas[1]))
+            effective_cluster_prob = multiply_sigma(full_cluster_prob,cluster_s[cluster_idx],cluster_O_qubit_positions[cluster_idx],correspondence_map[cluster_idx])
             t_s = np.kron(t_s,effective_cluster_prob)
         reconstructed_prob += c_s*t_s
-        # print('-'*100)
+        print('-'*100)
     reconstructed_prob = reconstructed_reorder(reconstructed_prob,complete_path_map)
     print('reconstruction len = ', len(reconstructed_prob),sum(reconstructed_prob))
     return reconstructed_prob
@@ -204,7 +212,10 @@ def reconstruct(complete_path_map, full_circ, cluster_circs, cluster_sim_probs):
 if __name__ == '__main__':
     begin = time()
     dirname = './data'
-    complete_path_map, full_circ, cluster_circs, cluster_sim_probs = read_pickle_files(dirname)
+    complete_path_map, full_circ, cluster_circs, cluster_sim_probs,full_circ_sim_prob = read_pickle_files(dirname)
     reconstructed_prob = reconstruct(complete_path_map, full_circ, cluster_circs, cluster_sim_probs)
-    pickle.dump(reconstructed_prob, open('%s/reconstructed_prob.p'%dirname, 'wb'))
+    # pickle.dump(reconstructed_prob, open('%s/reconstructed_prob.p'%dirname, 'wb'))
     print('Python time elapsed = %f seconds'%(time()-begin))
+    distance = wasserstein_distance(full_circ_sim_prob,reconstructed_prob)
+    print('probability reconstruction distance = ',distance)
+    print('first element comparison:',full_circ_sim_prob[0],reconstructed_prob[0])

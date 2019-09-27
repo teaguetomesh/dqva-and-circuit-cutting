@@ -127,3 +127,7 @@ if __name__ == '__main__':
         all_cluster_prob.append(cluster_prob)
         print('-'*100)
     pickle.dump(all_cluster_prob, open('%s/cluster_sim_prob.p'%dirname, 'wb' ))
+
+    full_circ = pickle.load(open(('%s/full_circ.p'%dirname), 'rb'))
+    full_circ_sim_prob = simulate_circ(full_circ,'prob')
+    pickle.dump(full_circ_sim_prob, open('%s/full_circ_sim_prob.p'%dirname, 'wb' ))
