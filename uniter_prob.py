@@ -4,6 +4,7 @@ import pickle
 import glob
 from time import time
 from scipy.stats import wasserstein_distance
+import progressbar as pb
 
 def read_pickle_files(dirname):
     cluster_circ_files = [f for f in glob.glob('%s/cluster_*_circ.p'%dirname)]
@@ -97,23 +98,33 @@ def multiply_sigma(full_cluster_prob,cluster_s,cluster_O_qubit_positions,effecti
         effective_cluster_prob.append(effective_state_prob)
     return effective_cluster_prob
 
+def find_cluster_O_qubit_positions(O_rho_pairs, cluster_circs):
+    cluster_O_qubit_positions = {}
+    for pair in O_rho_pairs:
+        O_qubit, _ = pair
+        cluster_idx, O_qubit_idx = O_qubit
+        if cluster_idx not in cluster_O_qubit_positions:
+            cluster_O_qubit_positions[cluster_idx] = [O_qubit_idx]
+        else:
+            cluster_O_qubit_positions[cluster_idx].append(O_qubit_idx)
+    for cluster_idx in range(len(cluster_circs)):
+        if cluster_idx not in cluster_O_qubit_positions:
+            cluster_O_qubit_positions[cluster_idx] = []
+    return cluster_O_qubit_positions
+
 def find_cluster_s(s, O_rho_pairs, cluster_circs):
     cluster_s = {}
-    cluster_O_qubit_positions = {}
     for s_i, pair in zip(s,O_rho_pairs):
         O_qubit, _ = pair
         cluster_idx, O_qubit_idx = O_qubit
         if cluster_idx not in cluster_s:
             cluster_s[cluster_idx] = [s_i]
-            cluster_O_qubit_positions[cluster_idx] = [O_qubit_idx]
         else:
             cluster_s[cluster_idx].append(s_i)
-            cluster_O_qubit_positions[cluster_idx].append(O_qubit_idx)
     for cluster_idx in range(len(cluster_circs)):
         if cluster_idx not in cluster_s:
             cluster_s[cluster_idx] = []
-            cluster_O_qubit_positions[cluster_idx] = []
-    return cluster_s, cluster_O_qubit_positions
+    return cluster_s
 
 def effective_full_state_corresppndence(O_rho_pairs,cluster_circs):
     correspondence_map = {}
@@ -186,10 +197,14 @@ def reconstruct(complete_path_map, full_circ, cluster_circs, cluster_sim_probs):
     correspondence_map = effective_full_state_corresppndence(O_rho_pairs,cluster_circs)
     print('Effective states, full states correspondence map:')
     # [print('cluster %d' % cluster_idx,correspondence_map[cluster_idx],'\n') for cluster_idx in correspondence_map]
-    for s in combinations:
-        print('s = ',s)
+    cluster_O_qubit_positions = find_cluster_O_qubit_positions(O_rho_pairs, cluster_circs)
+    collapsed_cluster_prob = [{} for c in cluster_circs]
+
+    bar = pb.ProgressBar(max_value=len(combinations))
+    for i,s in enumerate(combinations):
+        # print('s = ',s)
         clusters_init_meas = find_inits_meas(cluster_circs, O_rho_pairs, s)
-        cluster_s, cluster_O_qubit_positions = find_cluster_s(s, O_rho_pairs, cluster_circs)
+        cluster_s = find_cluster_s(s, O_rho_pairs, cluster_circs)
         t_s = [1]
         c_s = 1
         for s_i in s:
@@ -200,13 +215,20 @@ def reconstruct(complete_path_map, full_circ, cluster_circs, cluster_sim_probs):
         for cluster_idx, cluster_prob in enumerate(cluster_sim_probs):
             init_meas = clusters_init_meas[cluster_idx]
             full_cluster_prob = cluster_prob[init_meas]
-            print('cluster {} selects init = {}, meas = {}'.format(cluster_idx,init_meas[0],init_meas[1]))
-            effective_cluster_prob = multiply_sigma(full_cluster_prob,cluster_s[cluster_idx],cluster_O_qubit_positions[cluster_idx],correspondence_map[cluster_idx])
+            # print('cluster {} selects init = {}, meas = {}'.format(cluster_idx,init_meas[0],init_meas[1]))
+            sigma_key = (*init_meas,tuple(cluster_s[cluster_idx]))
+            if sigma_key not in collapsed_cluster_prob[cluster_idx]:
+                effective_cluster_prob = multiply_sigma(full_cluster_prob,cluster_s[cluster_idx],cluster_O_qubit_positions[cluster_idx],correspondence_map[cluster_idx])
+                collapsed_cluster_prob[cluster_idx][sigma_key] = effective_cluster_prob
+            else:
+                effective_cluster_prob = collapsed_cluster_prob[cluster_idx][sigma_key]
             t_s = np.kron(t_s,effective_cluster_prob)
         reconstructed_prob += c_s*t_s
-        print('-'*100)
+        bar.update(i)
+        # print('-'*100)
+    print()
     reconstructed_prob = reconstructed_reorder(reconstructed_prob,complete_path_map)
-    print('reconstruction len = ', len(reconstructed_prob),sum(reconstructed_prob))
+    print('reconstruction len = ', len(reconstructed_prob),'probabilities sum = ', sum(reconstructed_prob))
     return reconstructed_prob
 
 if __name__ == '__main__':
