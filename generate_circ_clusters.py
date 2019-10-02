@@ -5,7 +5,7 @@ import cutter
 import pickle
 import os
 
-circ = gen_supremacy(3,4,8,order='75601234')
+circ = gen_supremacy(4,4,8,order='75601234')
 print(circ)
 
 hardness, positions, ancilla, d, num_cluster, m = searcher.find_cuts(circ,num_clusters=range(2,4),hw_max_qubit=12)

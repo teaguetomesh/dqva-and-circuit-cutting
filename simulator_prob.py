@@ -7,6 +7,8 @@ import itertools
 import copy
 import os
 import numpy as np
+import progressbar as pb
+from time import time
 
 def reverseBits(num,bitSize): 
     binary = bin(num)
@@ -71,6 +73,7 @@ def find_all_simulation_combinations(O_qubits, rho_qubits, num_qubits):
 
 
 if __name__ == '__main__':
+    begin = time()
     measurement_basis = ['I','X','Y']
     init_states = ['zero','one','plus','minus','plus_i','minus_i']
     dirname = './data'
@@ -86,7 +89,8 @@ if __name__ == '__main__':
         cluster_circ = pickle.load(open(('%s/cluster_%d_circ.p'%(dirname,cluster_idx)), 'rb'))
         O_qubits, rho_qubits = find_cluster_O_rho_qubits(complete_path_map,cluster_idx)
         combinations = find_all_simulation_combinations(O_qubits, rho_qubits, len(cluster_circ.qubits))
-        for combination in combinations:
+        bar = pb.ProgressBar(max_value=len(combinations))
+        for counter, combination in enumerate(combinations):
             cluster_dag = circuit_to_dag(cluster_circ)
             inits, meas = combination
             # print('combination = ',type(combination),combination)
@@ -110,6 +114,8 @@ if __name__ == '__main__':
                     cluster_dag.apply_operation_front(op=SGate(),qargs=[q],cargs=[])
                     cluster_dag.apply_operation_front(op=HGate(),qargs=[q],cargs=[])
                     cluster_dag.apply_operation_front(op=XGate(),qargs=[q],cargs=[])
+                else:
+                    raise Exception('Illegal initialization : ',x)
             for i,x in enumerate(meas):
                 q = cluster_circ.qubits[i]
                 if x == 'I':
@@ -119,15 +125,20 @@ if __name__ == '__main__':
                 elif x == 'Y':
                     cluster_dag.apply_operation_back(op=SdgGate(),qargs=[q],cargs=[])
                     cluster_dag.apply_operation_back(op=HGate(),qargs=[q],cargs=[])
+                else:
+                    raise Exception('Illegal measurement basis:',x)
             cluster_circ_inst = dag_to_circuit(cluster_dag)
             # print(cluster_circ_inst)
             cluster_inst_prob = simulate_circ(cluster_circ_inst, 'prob')
             cluster_prob[(tuple(inits),tuple(meas))] = cluster_inst_prob
-        print(cluster_prob.keys())
+            bar.update(counter)
+        # print(cluster_prob.keys())
         all_cluster_prob.append(cluster_prob)
-        print('-'*100)
+        # print('-'*100)
     pickle.dump(all_cluster_prob, open('%s/cluster_sim_prob.p'%dirname, 'wb' ))
+    print()
 
     full_circ = pickle.load(open(('%s/full_circ.p'%dirname), 'rb'))
     full_circ_sim_prob = simulate_circ(full_circ,'prob')
     pickle.dump(full_circ_sim_prob, open('%s/full_circ_sim_prob.p'%dirname, 'wb' ))
+    print('Python time elapsed = %f seconds'%(time()-begin))
