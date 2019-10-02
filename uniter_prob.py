@@ -243,7 +243,7 @@ def reconstruct(complete_path_map, full_circ, cluster_circs, cluster_sim_probs):
         reconstructed_prob += summation_term
         bar.update(i)
         # print('-'*100)
-    # print()
+    print()
     reconstructed_prob = [x/scaling_factor for x in reconstructed_prob]
     reconstructed_prob = reconstructed_reorder(reconstructed_prob,complete_path_map)
     print('reconstruction len = ', len(reconstructed_prob),'probabilities sum = ', sum(reconstructed_prob))
