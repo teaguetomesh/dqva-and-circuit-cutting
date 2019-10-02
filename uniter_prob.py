@@ -154,7 +154,7 @@ def reconstructed_reorder(unordered,complete_path_map):
         # print('unordered %d --> ordered %d'%(idx,ordered_idx),'sv=',sv)
     return ordered
 
-def calculate_cluster(cluster_probs,init_meas,O_qubit_positions,effective_state_tranlsation):
+def calculate_cluster(cluster_idx,cluster_probs,init_meas,O_qubit_positions,effective_state_tranlsation,collapsed_cluster_prob):
     # print('O qubit positions:',O_qubit_positions)
     initilizations, measurement = init_meas
     num_effective_states = np.power(2,len(measurement)-len(O_qubit_positions))
@@ -195,20 +195,24 @@ def calculate_cluster(cluster_probs,init_meas,O_qubit_positions,effective_state_
         init = tuple(init)
         # print(init,measurement)
         
-        term = multiply_sigma(full_cluster_prob=cluster_probs[(init,meas)],
-        cluster_s=[measurement[i] for i in O_qubit_positions],
-        cluster_O_qubit_positions=O_qubit_positions,
-        effective_state_tranlsation=effective_state_tranlsation)
-        if sign == 1:
-            kronecker_term = [kronecker_term[i]+term[i] for i in range(len(term))]
+        sigma_key = (init,meas,tuple([measurement[i] for i in O_qubit_positions]))
+        if sigma_key not in collapsed_cluster_prob[cluster_idx]:
+            effective_cluster_prob = multiply_sigma(full_cluster_prob=cluster_probs[(init,meas)],
+            cluster_s=[measurement[i] for i in O_qubit_positions],
+            cluster_O_qubit_positions=O_qubit_positions,
+            effective_state_tranlsation=effective_state_tranlsation)
+            collapsed_cluster_prob[cluster_idx][sigma_key] = effective_cluster_prob
         else:
-            kronecker_term = [kronecker_term[i]-term[i] for i in range(len(term))]
+            effective_cluster_prob = collapsed_cluster_prob[cluster_idx][sigma_key]
+        
+        if sign == 1:
+            kronecker_term = [kronecker_term[i]+effective_cluster_prob[i] for i in range(len(effective_cluster_prob))]
+        else:
+            kronecker_term = [kronecker_term[i]-effective_cluster_prob[i] for i in range(len(effective_cluster_prob))]
     
     # print('length of effective cluster prob:',len(kronecker_term))
     
     return kronecker_term
-
-
 
 def reconstruct(complete_path_map, full_circ, cluster_circs, cluster_sim_probs):
     print('Complete path map:')
@@ -229,16 +233,19 @@ def reconstruct(complete_path_map, full_circ, cluster_circs, cluster_sim_probs):
     cluster_O_qubit_positions = find_cluster_O_qubit_positions(O_rho_pairs, cluster_circs)
 
     bar = pb.ProgressBar(max_value=len(combinations))
+    collapsed_cluster_prob = [{} for c in cluster_circs]
     for i,s in enumerate(combinations):
         # print('s_{} = {}'.format(i,s))
         clusters_init_meas = find_inits_meas(cluster_circs, O_rho_pairs, s)
         summation_term = [1]
         for cluster_idx in range(len(cluster_circs)):
             # print('Cluster {} inits meas = {}'.format(cluster_idx,clusters_init_meas[cluster_idx]))
-            kronecker_term = calculate_cluster(cluster_probs=cluster_sim_probs[cluster_idx],
+            kronecker_term = calculate_cluster(cluster_idx=cluster_idx,
+            cluster_probs=cluster_sim_probs[cluster_idx],
             init_meas=clusters_init_meas[cluster_idx],
             O_qubit_positions=cluster_O_qubit_positions[cluster_idx],
-            effective_state_tranlsation=correspondence_map[cluster_idx])
+            effective_state_tranlsation=correspondence_map[cluster_idx],
+            collapsed_cluster_prob=collapsed_cluster_prob)
             summation_term = np.kron(summation_term,kronecker_term)
         reconstructed_prob += summation_term
         bar.update(i)
