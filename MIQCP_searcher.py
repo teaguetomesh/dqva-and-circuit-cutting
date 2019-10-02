@@ -76,7 +76,6 @@ class Basic_Model(object):
         
         # Objective function
         for cluster in range(k):
-            # FIXME: when ub is 10, calculation of cluster_K is wrong for 4,4,8 supremacy into 2 clusters
             # cluster_K = self.model.addVar(lb=0, ub=50, vtype=GRB.INTEGER, name='cluster_K_%d'%cluster)
             # self.model.addConstr(cluster_K == 
             # quicksum([self.edge_vars[cluster][i] for i in range(self.n_edges)]))
@@ -98,6 +97,7 @@ class Basic_Model(object):
             lb = 1
             ub = 10.0+self.hw_max_qubit
             ptx, ptf = self.pwl_exp(2,lb,ub)
+            # TODO: change uniter cost to 4^total number of cuts, simulator cost to simulation time approximation
             cluster_hardness_exponent = self.model.addVar(lb=lb,ub=ub,vtype=GRB.CONTINUOUS, name='cluster_hardness_exponent_%d'%cluster)
             self.model.addConstr(cluster_hardness_exponent == (np.log2(6)*cluster_ancilla + cluster_d))
             self.model.setPWLObj(cluster_hardness_exponent, ptx, ptf)

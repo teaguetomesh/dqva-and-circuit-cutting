@@ -29,42 +29,26 @@ def find_cuts_pairs(complete_path_map):
                 O_rho_pairs.append((O_qubit_tuple, rho_qubit_tuple))
     return O_rho_pairs
 
-def update_init_meas(clusters_init_meas, O_qubit, rho_qubit, meas, init):
-    _, updated_meas = clusters_init_meas[O_qubit[0]]
-    updated_meas[O_qubit[1]] = meas
-    clusters_init_meas[O_qubit[0]] = (clusters_init_meas[O_qubit[0]][0],updated_meas)
-    updated_init, _ = clusters_init_meas[rho_qubit[0]]
-    updated_init[rho_qubit[1]] = init
-    clusters_init_meas[rho_qubit[0]] = (updated_init,clusters_init_meas[rho_qubit[0]][1])
-    return clusters_init_meas
-
 def find_inits_meas(cluster_circs, O_rho_pairs, s):
     # print('find initializations, measurement basis for:',s)
-    clusters_init_meas = {}
-    for cluster_idx, circ in enumerate(cluster_circs):
+    clean_inits = []
+    clean_meas = []
+    for circ in cluster_circs:
         cluster_init = ['zero' for q in circ.qubits]
         cluster_meas = ['I' for q in circ.qubits]
-        clusters_init_meas[cluster_idx] = (cluster_init, cluster_meas)
-    # print(clusters_init_meas)
+        clean_inits.append(cluster_init)
+        clean_meas.append(cluster_meas)
+    
+    clusters_init_meas = []
+    cluster_meas = clean_meas
+    cluster_inits = clean_inits
     for pair, s_i in zip(O_rho_pairs,s):
         O_qubit, rho_qubit = pair
-        if s_i == 1 or s_i == 7:
-            clusters_init_meas = update_init_meas(clusters_init_meas, O_qubit, rho_qubit, 'I', 'zero')
-        elif s_i == 2 or s_i == 8:
-            clusters_init_meas = update_init_meas(clusters_init_meas, O_qubit, rho_qubit, 'I', 'one')
-        elif s_i == 3:
-            clusters_init_meas = update_init_meas(clusters_init_meas, O_qubit, rho_qubit, 'X', 'plus')
-        elif s_i == 4:
-            clusters_init_meas = update_init_meas(clusters_init_meas, O_qubit, rho_qubit, 'X', 'minus')
-        elif s_i == 5:
-            clusters_init_meas = update_init_meas(clusters_init_meas, O_qubit, rho_qubit, 'Y', 'plus_i')
-        elif s_i == 6:
-            clusters_init_meas = update_init_meas(clusters_init_meas, O_qubit, rho_qubit, 'Y', 'minus_i')
-        else:
-            raise Exception('Illegal s = %d'%s_i)
-    for cluster_idx in clusters_init_meas:
-        clusters_init_meas[cluster_idx] = (tuple(clusters_init_meas[cluster_idx][0]),tuple(clusters_init_meas[cluster_idx][1]))
-    # print(clusters_init_meas)
+        cluster_meas[O_qubit[0]][O_qubit[1]] = s_i
+        cluster_inits[rho_qubit[0]][rho_qubit[1]] = s_i
+    # print('inits:',cluster_inits)c
+    for i,m in zip(cluster_inits,cluster_meas):
+        clusters_init_meas.append((i,m))
     return clusters_init_meas
 
 def multiply_sigma(full_cluster_prob,cluster_s,cluster_O_qubit_positions,effective_state_tranlsation):
@@ -79,7 +63,6 @@ def multiply_sigma(full_cluster_prob,cluster_s,cluster_O_qubit_positions,effecti
         effective_state_prob = 0
         full_states = effective_state_tranlsation[effective_state]
         # print('effective state {}, index {}'.format(state,effective_state_index))
-        # print('insertions = ',list(insertions))
         for full_state in full_states:
             bin_full_state = bin(full_state)[2:].zfill(total_num_qubits)
             sigma = 1
@@ -87,7 +70,7 @@ def multiply_sigma(full_cluster_prob,cluster_s,cluster_O_qubit_positions,effecti
                 O_measurement = bin_full_state[position]
                 # print('s = type {} {}, O measurement = type {} {}'.format(type(s_i),s_i,type(O_measurement),O_measurement))
                 # TODO: s=1,2 not considered for sigma multiplications, I don't know why
-                if s_i>2 and O_measurement=='1':
+                if s_i!='I' and O_measurement=='1':
                     sigma *= -1
             # print('full state {}, binary {}, sigma = {}'.format(full_state,bin_full_state,sigma))
             contributing_term = sigma*full_cluster_prob[full_state]
@@ -111,20 +94,6 @@ def find_cluster_O_qubit_positions(O_rho_pairs, cluster_circs):
         if cluster_idx not in cluster_O_qubit_positions:
             cluster_O_qubit_positions[cluster_idx] = []
     return cluster_O_qubit_positions
-
-def find_cluster_s(s, O_rho_pairs, cluster_circs):
-    cluster_s = {}
-    for s_i, pair in zip(s,O_rho_pairs):
-        O_qubit, _ = pair
-        cluster_idx, O_qubit_idx = O_qubit
-        if cluster_idx not in cluster_s:
-            cluster_s[cluster_idx] = [s_i]
-        else:
-            cluster_s[cluster_idx].append(s_i)
-    for cluster_idx in range(len(cluster_circs)):
-        if cluster_idx not in cluster_s:
-            cluster_s[cluster_idx] = []
-    return cluster_s
 
 def effective_full_state_corresppndence(O_rho_pairs,cluster_circs):
     correspondence_map = {}
@@ -185,48 +154,104 @@ def reconstructed_reorder(unordered,complete_path_map):
         # print('unordered %d --> ordered %d'%(idx,ordered_idx),'sv=',sv)
     return ordered
 
+def calculate_cluster(cluster_idx,cluster_probs,init_meas,O_qubit_positions,effective_state_tranlsation,collapsed_cluster_prob):
+    # print('O qubit positions:',O_qubit_positions)
+    initilizations, measurement = init_meas
+    num_effective_states = np.power(2,len(measurement)-len(O_qubit_positions))
+    kronecker_term = [0 for i in range(num_effective_states)]
+    meas = tuple([x if x!='Z' else 'I' for x in measurement])
+    measurement = tuple(measurement)
+
+    initilizations = [[x] if x == 'zero' else [x+'+',x+'-'] for x in initilizations]
+    initilizations = list(itertools.product(*initilizations))
+    for init in initilizations:
+        # print(init,'initialized to',end=' ')
+        sign = 1
+        init = list(init)
+        for idx,i in enumerate(init):
+            if i == 'I+':
+                init[idx] = 'zero'
+            elif i == 'I-':
+                init[idx] = 'one'
+            elif i == 'X+':
+                init[idx] = 'plus'
+            elif i == 'X-':
+                init[idx] = 'minus'
+                sign *= -1
+            elif i == 'Y+':
+                init[idx] = 'plus_i'
+            elif i == 'Y-':
+                init[idx] = 'minus_i'
+                sign *= -1
+            elif i == 'Z+':
+                init[idx] = 'zero'
+            elif i == 'Z-':
+                init[idx] = 'one'
+                sign *= -1
+            elif i == 'zero':
+                continue
+            else:
+                raise Exception('Illegal initilization symbol :',i)
+        init = tuple(init)
+        # print(init,measurement)
+        
+        sigma_key = (init,meas,tuple([measurement[i] for i in O_qubit_positions]))
+        if sigma_key not in collapsed_cluster_prob[cluster_idx]:
+            effective_cluster_prob = multiply_sigma(full_cluster_prob=cluster_probs[(init,meas)],
+            cluster_s=[measurement[i] for i in O_qubit_positions],
+            cluster_O_qubit_positions=O_qubit_positions,
+            effective_state_tranlsation=effective_state_tranlsation)
+            collapsed_cluster_prob[cluster_idx][sigma_key] = effective_cluster_prob
+        else:
+            effective_cluster_prob = collapsed_cluster_prob[cluster_idx][sigma_key]
+        
+        if sign == 1:
+            kronecker_term = [kronecker_term[i]+effective_cluster_prob[i] for i in range(len(effective_cluster_prob))]
+        else:
+            kronecker_term = [kronecker_term[i]-effective_cluster_prob[i] for i in range(len(effective_cluster_prob))]
+    
+    # print('length of effective cluster prob:',len(kronecker_term))
+    
+    return kronecker_term, collapsed_cluster_prob
+
 def reconstruct(complete_path_map, full_circ, cluster_circs, cluster_sim_probs):
     print('Complete path map:')
     [print(x, complete_path_map[x]) for x in complete_path_map]
 
     O_rho_pairs = find_cuts_pairs(complete_path_map)
+    num_cuts = len(O_rho_pairs)
+    scaling_factor = np.power(2,num_cuts)
     print('O rho qubits pairs:',O_rho_pairs)
 
-    combinations = list(itertools.product(range(1,9),repeat=len(O_rho_pairs)))
+    basis = ['I','X','Y','Z']
+
+    combinations = list(itertools.product(basis,repeat=len(O_rho_pairs)))
     reconstructed_prob = [0 for i in range(np.power(2,len(full_circ.qubits)))]
     correspondence_map = effective_full_state_corresppndence(O_rho_pairs,cluster_circs)
-    print('Effective states, full states correspondence map:')
+    # print('Effective states, full states correspondence map:')
     # [print('cluster %d' % cluster_idx,correspondence_map[cluster_idx],'\n') for cluster_idx in correspondence_map]
     cluster_O_qubit_positions = find_cluster_O_qubit_positions(O_rho_pairs, cluster_circs)
-    collapsed_cluster_prob = [{} for c in cluster_circs]
 
     bar = pb.ProgressBar(max_value=len(combinations))
+    collapsed_cluster_prob = [{} for c in cluster_circs]
     for i,s in enumerate(combinations):
-        # print('s = ',s)
+        # print('s_{} = {}'.format(i,s))
         clusters_init_meas = find_inits_meas(cluster_circs, O_rho_pairs, s)
-        cluster_s = find_cluster_s(s, O_rho_pairs, cluster_circs)
-        t_s = [1]
-        c_s = 1
-        for s_i in s:
-            if s_i == 4 or s_i == 6 or s_i == 8:
-                c_s *= -1/2
-            else:
-                c_s *= 1/2
-        for cluster_idx, cluster_prob in enumerate(cluster_sim_probs):
-            init_meas = clusters_init_meas[cluster_idx]
-            full_cluster_prob = cluster_prob[init_meas]
-            # print('cluster {} selects init = {}, meas = {}'.format(cluster_idx,init_meas[0],init_meas[1]))
-            sigma_key = (*init_meas,tuple(cluster_s[cluster_idx]))
-            if sigma_key not in collapsed_cluster_prob[cluster_idx]:
-                effective_cluster_prob = multiply_sigma(full_cluster_prob,cluster_s[cluster_idx],cluster_O_qubit_positions[cluster_idx],correspondence_map[cluster_idx])
-                collapsed_cluster_prob[cluster_idx][sigma_key] = effective_cluster_prob
-            else:
-                effective_cluster_prob = collapsed_cluster_prob[cluster_idx][sigma_key]
-            t_s = np.kron(t_s,effective_cluster_prob)
-        reconstructed_prob += c_s*t_s
+        summation_term = [1]
+        for cluster_idx in range(len(cluster_circs)):
+            # print('Cluster {} inits meas = {}'.format(cluster_idx,clusters_init_meas[cluster_idx]))
+            kronecker_term, collapsed_cluster_prob = calculate_cluster(cluster_idx=cluster_idx,
+            cluster_probs=cluster_sim_probs[cluster_idx],
+            init_meas=clusters_init_meas[cluster_idx],
+            O_qubit_positions=cluster_O_qubit_positions[cluster_idx],
+            effective_state_tranlsation=correspondence_map[cluster_idx],
+            collapsed_cluster_prob=collapsed_cluster_prob)
+            summation_term = np.kron(summation_term,kronecker_term)
+        reconstructed_prob += summation_term
         bar.update(i)
         # print('-'*100)
     print()
+    reconstructed_prob = [x/scaling_factor for x in reconstructed_prob]
     reconstructed_prob = reconstructed_reorder(reconstructed_prob,complete_path_map)
     print('reconstruction len = ', len(reconstructed_prob),'probabilities sum = ', sum(reconstructed_prob))
     return reconstructed_prob
@@ -240,4 +265,4 @@ if __name__ == '__main__':
     print('Python time elapsed = %f seconds'%(time()-begin))
     distance = wasserstein_distance(full_circ_sim_prob,reconstructed_prob)
     print('probability reconstruction distance = ',distance)
-    print('first element comparison:',full_circ_sim_prob[0],reconstructed_prob[0])
+    print('first element comparison: full_circ = ',full_circ_sim_prob[0],'reconstructed = ',reconstructed_prob[0])
