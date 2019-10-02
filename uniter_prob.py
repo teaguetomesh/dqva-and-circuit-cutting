@@ -212,7 +212,7 @@ def calculate_cluster(cluster_idx,cluster_probs,init_meas,O_qubit_positions,effe
     
     # print('length of effective cluster prob:',len(kronecker_term))
     
-    return kronecker_term
+    return kronecker_term, collapsed_cluster_prob
 
 def reconstruct(complete_path_map, full_circ, cluster_circs, cluster_sim_probs):
     print('Complete path map:')
@@ -240,7 +240,7 @@ def reconstruct(complete_path_map, full_circ, cluster_circs, cluster_sim_probs):
         summation_term = [1]
         for cluster_idx in range(len(cluster_circs)):
             # print('Cluster {} inits meas = {}'.format(cluster_idx,clusters_init_meas[cluster_idx]))
-            kronecker_term = calculate_cluster(cluster_idx=cluster_idx,
+            kronecker_term, collapsed_cluster_prob = calculate_cluster(cluster_idx=cluster_idx,
             cluster_probs=cluster_sim_probs[cluster_idx],
             init_meas=clusters_init_meas[cluster_idx],
             O_qubit_positions=cluster_O_qubit_positions[cluster_idx],
@@ -265,4 +265,4 @@ if __name__ == '__main__':
     print('Python time elapsed = %f seconds'%(time()-begin))
     distance = wasserstein_distance(full_circ_sim_prob,reconstructed_prob)
     print('probability reconstruction distance = ',distance)
-    print('first element comparison:',full_circ_sim_prob[0],reconstructed_prob[0])
+    print('first element comparison: full_circ = ',full_circ_sim_prob[0],'reconstructed = ',reconstructed_prob[0])

@@ -1,5 +1,7 @@
 from qiskit.converters import circuit_to_dag, dag_to_circuit
 from qiskit.extensions.standard import HGate, SGate, SdgGate, XGate
+from qiskit.circuit.classicalregister import ClassicalRegister
+from qiskit import QuantumCircuit
 from qiskit import BasicAer, execute
 import pickle
 import glob
@@ -16,22 +18,40 @@ def reverseBits(num,bitSize):
     reverse = reverse + (bitSize - len(reverse))*'0'
     return int(reverse,2)
 
-def simulate_circ(circ, simulator):
-    backend = BasicAer.get_backend('statevector_simulator')
-    job = execute(circ, backend=backend)
-    result = job.result()
-    outputstate = result.get_statevector(circ)
-    outputstate_ordered = [0 for sv in outputstate]
-    for i, sv in enumerate(outputstate):
-        reverse_i = reverseBits(i,len(circ.qubits))
-        outputstate_ordered[reverse_i] = sv
-    if simulator == 'sv':
-        return outputstate_ordered
-    elif simulator == 'prob':
-        output_prob = [np.power(np.absolute(x),2) for x in outputstate_ordered]
-        return output_prob
+def simulate_circ(circ, simulator, output_format, num_shots=1024):
+    if simulator == 'statevector_simulator':
+        backend = BasicAer.get_backend(simulator)
+        job = execute(circ, backend=backend)
+        result = job.result()
+        outputstate = result.get_statevector(circ)
+        outputstate_ordered = [0 for sv in outputstate]
+        for i, sv in enumerate(outputstate):
+            reverse_i = reverseBits(i,len(circ.qubits))
+            outputstate_ordered[reverse_i] = sv
+        if output_format == 'sv':
+            return outputstate_ordered
+        elif output_format == 'prob':
+            output_prob = [np.power(np.absolute(x),2) for x in outputstate_ordered]
+            return output_prob
+        else:
+            raise Exception('Illegal output format = ',output_format)
+    elif simulator == 'qasm_simulator':
+        c = ClassicalRegister(len(circ.qubits), 'c')
+        meas = QuantumCircuit(circ.qregs[0], c)
+        meas.barrier(circ.qubits)
+        meas.measure(circ.qubits,c)
+        qc = circ+meas
+        backend = BasicAer.get_backend(simulator)
+        job_sim = execute(qc, backend, shots=num_shots)
+        result_sim = job_sim.result()
+        counts = result_sim.get_counts(qc)
+        prob_ordered = [0 for x in range(np.power(2,len(circ.qubits)))]
+        for state in counts:
+            reversed_state = reverseBits(int(state,2),len(circ.qubits))
+            prob_ordered[reversed_state] = counts[state]/num_shots
+        return prob_ordered
     else:
-        raise Exception('Illegal simulator')
+        raise Exception('Illegal simulator:',simulator)
 
 def find_cluster_O_rho_qubits(complete_path_map,cluster_idx):
     O_qubits = []
@@ -129,7 +149,10 @@ if __name__ == '__main__':
                     raise Exception('Illegal measurement basis:',x)
             cluster_circ_inst = dag_to_circuit(cluster_dag)
             # print(cluster_circ_inst)
-            cluster_inst_prob = simulate_circ(cluster_circ_inst, 'prob')
+            cluster_inst_prob = simulate_circ(circ=cluster_circ_inst,
+            simulator='qasm_simulator',
+            output_format='prob',
+            num_shots=int(3e4))
             cluster_prob[(tuple(inits),tuple(meas))] = cluster_inst_prob
             bar.update(counter)
         # print(cluster_prob.keys())
@@ -139,6 +162,9 @@ if __name__ == '__main__':
     print()
 
     full_circ = pickle.load(open(('%s/full_circ.p'%dirname), 'rb'))
-    full_circ_sim_prob = simulate_circ(full_circ,'prob')
+    full_circ_sim_prob = simulate_circ(circ=full_circ,
+            simulator='qasm_simulator',
+            output_format='prob',
+            num_shots=int(1e5))
     pickle.dump(full_circ_sim_prob, open('%s/full_circ_sim_prob.p'%dirname, 'wb' ))
     print('Python time elapsed = %f seconds'%(time()-begin))
