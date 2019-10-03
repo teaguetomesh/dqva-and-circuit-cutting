@@ -106,6 +106,7 @@ def effective_full_state_corresppndence(O_rho_pairs,cluster_circs):
                 cluster_O_qubits.append(O_qubit[1])
         effective_num_qubits = total_num_qubits - len(cluster_O_qubits)
         effective_states = itertools.product(range(2),repeat=effective_num_qubits)
+        # print('effective states:',list(effective_states))
         O_qubit_states = list(itertools.product(range(2),repeat=len(cluster_O_qubits)))
         cluster_correspondence = {}
         for effective_state in effective_states:
@@ -119,10 +120,11 @@ def effective_full_state_corresppndence(O_rho_pairs,cluster_circs):
                 corresponding_full_states.append(full_state_index)
             cluster_correspondence[effective_state_index] = corresponding_full_states
         correspondence_map[cluster_idx] = cluster_correspondence
+    # print(correspondence_map)
     return correspondence_map
 
 def reconstructed_reorder(unordered,complete_path_map):
-    print('ordering reconstructed sv')
+    # print('ordering reconstructed sv')
     ordered  = [0 for sv in unordered]
     cluster_out_qubits = {}
     for input_qubit in complete_path_map:
@@ -215,13 +217,12 @@ def calculate_cluster(cluster_idx,cluster_probs,init_meas,O_qubit_positions,effe
     return kronecker_term, collapsed_cluster_prob
 
 def reconstruct(complete_path_map, full_circ, cluster_circs, cluster_sim_probs):
-    print('Complete path map:')
-    [print(x, complete_path_map[x]) for x in complete_path_map]
+    print('Reconstructing')
 
     O_rho_pairs = find_cuts_pairs(complete_path_map)
     num_cuts = len(O_rho_pairs)
     scaling_factor = np.power(2,num_cuts)
-    print('O rho qubits pairs:',O_rho_pairs)
+    # print('O rho qubits pairs:',O_rho_pairs)
 
     basis = ['I','X','Y','Z']
 

@@ -18,7 +18,7 @@ def reverseBits(num,bitSize):
     reverse = reverse + (bitSize - len(reverse))*'0'
     return int(reverse,2)
 
-def simulate_circ(circ, simulator, output_format, num_shots=1024):
+def simulate_circ(circ, simulator, output_format='prob', num_shots=1024):
     if simulator == 'statevector_simulator':
         backend = BasicAer.get_backend(simulator)
         job = execute(circ, backend=backend)
@@ -68,6 +68,8 @@ def find_cluster_O_rho_qubits(complete_path_map,cluster_idx):
     return O_qubits, rho_qubits
 
 def find_all_simulation_combinations(O_qubits, rho_qubits, num_qubits):
+    measurement_basis = ['I','X','Y']
+    init_states = ['zero','one','plus','minus','plus_i','minus_i']
     # print('Rho qubits:',rho_qubits)
     all_inits = list(itertools.product(init_states,repeat=len(rho_qubits)))
     complete_inits = []
@@ -91,31 +93,18 @@ def find_all_simulation_combinations(O_qubits, rho_qubits, num_qubits):
     combinations = list(itertools.product(complete_inits,complete_meas))
     return combinations
 
-
-if __name__ == '__main__':
-    begin = time()
-    measurement_basis = ['I','X','Y']
-    init_states = ['zero','one','plus','minus','plus_i','minus_i']
-    dirname = './data'
-    complete_path_map = pickle.load(open( '%s/cpm.p'%dirname, 'rb' ))
-
-    [print(x, complete_path_map[x]) for x in complete_path_map]
-
-    cluster_circ_files = [f for f in glob.glob(dirname+'/cluster_*_circ.p')]
+def simulate_clusters(complete_path_map, clusters, simulator_backend='statevector_simulator'):
     all_cluster_prob = []
-    for cluster_idx in range(len(cluster_circ_files)):
-        print('cluster %d'%cluster_idx)
+
+    for cluster_idx, cluster_circ in enumerate(clusters):
+        print('Simulating cluster %d'%cluster_idx)
         cluster_prob = {}
-        cluster_circ = pickle.load(open(('%s/cluster_%d_circ.p'%(dirname,cluster_idx)), 'rb'))
         O_qubits, rho_qubits = find_cluster_O_rho_qubits(complete_path_map,cluster_idx)
         combinations = find_all_simulation_combinations(O_qubits, rho_qubits, len(cluster_circ.qubits))
         bar = pb.ProgressBar(max_value=len(combinations))
         for counter, combination in enumerate(combinations):
             cluster_dag = circuit_to_dag(cluster_circ)
             inits, meas = combination
-            # print('combination = ',type(combination),combination)
-            # print('initializations = ',type(inits),inits)
-            # print('measurement basis = ',type(meas),meas)
             for i,x in enumerate(inits):
                 q = cluster_circ.qubits[i]
                 if x == 'zero':
@@ -148,23 +137,34 @@ if __name__ == '__main__':
                 else:
                     raise Exception('Illegal measurement basis:',x)
             cluster_circ_inst = dag_to_circuit(cluster_dag)
-            # print(cluster_circ_inst)
             cluster_inst_prob = simulate_circ(circ=cluster_circ_inst,
-            simulator='statevector_simulator',
+            simulator=simulator_backend,
             output_format='prob',
-            num_shots=int(5e4))
+            num_shots=int(1e4))
             cluster_prob[(tuple(inits),tuple(meas))] = cluster_inst_prob
             bar.update(counter)
-        # print(cluster_prob.keys())
         all_cluster_prob.append(cluster_prob)
-        # print('-'*100)
+    return all_cluster_prob
+
+if __name__ == '__main__':
+    begin = time()
+    dirname = './data'
+    complete_path_map = pickle.load(open( '%s/cpm.p'%dirname, 'rb' ))
+
+    [print(x, complete_path_map[x]) for x in complete_path_map]
+
+    cluster_circ_files = [f for f in glob.glob(dirname+'/cluster_*_circ.p')]
+    clusters = []
+    all_cluster_prob = []
+    for cluster_idx in range(len(cluster_circ_files)):
+        cluster_circ = pickle.load(open(('%s/cluster_%d_circ.p'%(dirname,cluster_idx)), 'rb'))
+        clusters.append(cluster_circ)
+    all_cluster_prob = simulate_clusters(complete_path_map, clusters)
     pickle.dump(all_cluster_prob, open('%s/cluster_sim_prob.p'%dirname, 'wb' ))
-    print()
 
     full_circ = pickle.load(open(('%s/full_circ.p'%dirname), 'rb'))
     full_circ_sim_prob = simulate_circ(circ=full_circ,
             simulator='statevector_simulator',
-            output_format='prob',
-            num_shots=int(1e5))
+            output_format='prob')
     pickle.dump(full_circ_sim_prob, open('%s/full_circ_sim_prob.p'%dirname, 'wb' ))
     print('Python time elapsed = %f seconds'%(time()-begin))
