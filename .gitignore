@@ -6,3 +6,5 @@ gurobi.log
 data
 .DS_Store
 *.pdf
+*.png
+*.p

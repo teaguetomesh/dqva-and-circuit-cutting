@@ -1,5 +1,5 @@
+import pickle
 from time import time
-import matplotlib.pyplot as plt
 from qcg.generators import gen_supremacy, gen_hwea
 import MIQCP_searcher as searcher
 import cutter
@@ -11,7 +11,7 @@ times = {'searcher':[],'simulator':[],'uniter':[]}
 num_qubits = []
 reconstruction_distance = []
 max_qubit = 10
-for dimension in [[3,4],[3,5],[4,4],[4,5]]:
+for dimension in [[3,4],[3,5],[4,4],[4,5],[4,6]]:
     i,j = dimension
     if i*j<=24 and i*j not in num_qubits and i*j>=max_qubit:
         print('-'*200)
@@ -59,20 +59,4 @@ print(times)
 print('num qubits:',num_qubits)
 print('reconstruction distance:',reconstruction_distance)
 
-plt.figure(figsize=(10,15))
-plt.subplot(221)
-plt.plot(num_qubits,times['searcher'],'ro',label='cut searcher')
-plt.plot(num_qubits,times['uniter'],'bo',label='uniter')
-plt.xlabel('supremacy circuit # qubits')
-plt.ylabel('runtime (s)')
-plt.legend()
-plt.subplot(222)
-plt.plot(num_qubits,times['simulator'],'yo',label='cluster simulator')
-plt.xlabel('supremacy circuit # qubits')
-plt.legend()
-plt.subplot(223)
-plt.plot(num_qubits,reconstruction_distance,'*',label='reconstruction distance')
-plt.xlabel('supremacy circuit # qubits')
-plt.ylabel('wasserstein_distance')
-plt.suptitle('Circuit Cutting Full Stack Runtime Benchmark')
-plt.savefig('benchmark.pdf')
+pickle.dump([num_qubits,times,reconstruction_distance], open( 'full_stack_benchmark.p','wb'))
