@@ -75,6 +75,15 @@ class Basic_Model(object):
                             quicksum([self.node_vars[i][j] for j in range(n_vertices)]))
         
         # Objective function
+        total_num_cuts = self.model.addVar(lb=0, ub=self.hw_max_qubit, vtype=GRB.INTEGER, name='total_num_cuts')
+        self.model.addConstr(total_num_cuts == 
+        quicksum(
+            [self.edge_vars[cluster][i] for i in range(self.n_edges) for cluster in range(k)]
+            ))
+        lb = 1
+        ub = 10.0+self.hw_max_qubit
+        ptx, ptf = self.pwl_exp(4,lb,ub)
+        self.model.setPWLObj(total_num_cuts, ptx, ptf)
         for cluster in range(k):
             # cluster_K = self.model.addVar(lb=0, ub=50, vtype=GRB.INTEGER, name='cluster_K_%d'%cluster)
             # self.model.addConstr(cluster_K == 
@@ -100,7 +109,7 @@ class Basic_Model(object):
             # TODO: change uniter cost to 4^total number of cuts, simulator cost to simulation time approximation
             cluster_hardness_exponent = self.model.addVar(lb=lb,ub=ub,vtype=GRB.CONTINUOUS, name='cluster_hardness_exponent_%d'%cluster)
             self.model.addConstr(cluster_hardness_exponent == (np.log2(6)*cluster_ancilla + cluster_d))
-            self.model.setPWLObj(cluster_hardness_exponent, ptx, ptf)
+            # self.model.setPWLObj(cluster_hardness_exponent, ptx, ptf)
 
         self.model.update()
     
@@ -112,7 +121,7 @@ class Basic_Model(object):
 
         for i in range(num_pt):
             x = (ub-lb)/(num_pt-1)*i+lb
-            y = np.power(base,x)
+            y = np.power(base,x/2)
             ptx.append(x)
             ptf.append(y)
         # ptx.append(ub+1)
@@ -177,16 +186,17 @@ class Basic_Model(object):
         (self.n_vertices, self.n_edges, self.hw_max_qubit))
         print('%d cuts, %d clusters'%(len(self.cut_edges),self.k))
 
-        objective_verify = 0
+        # objective_verify = 0
         for i in range(self.k):
             cluster_input = self.model.getVarByName('cluster_input_%d'%i)
             cluster_ancilla = self.model.getVarByName('cluster_ancilla_%d'%i)
             cluster_d = self.model.getVarByName('cluster_d_%d'%i)
             cluster_hardness_exponent = self.model.getVarByName('cluster_hardness_exponent_%d'%i)
-            objective_verify += np.power(6,cluster_ancilla.X)*np.power(2,cluster_d.X)
+        #     objective_verify += np.power(6,cluster_ancilla.X)*np.power(2,cluster_d.X)
             print('cluster %d: original input = %.2f, ancilla = %.2f, d = %.2f, hardness exponent = %.3f' % 
             (i,cluster_input.X,cluster_ancilla.X,cluster_d.X,cluster_hardness_exponent.X))
 
+        objective_verify = np.power(4,self.model.getVarByName('total_num_cuts').X/2)
         print('objective value:', self.objective)
         print('manually calculated objective value:', objective_verify)
         print('mip gap:', self.mip_gap)
