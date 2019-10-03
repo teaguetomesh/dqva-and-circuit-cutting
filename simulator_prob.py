@@ -150,9 +150,9 @@ if __name__ == '__main__':
             cluster_circ_inst = dag_to_circuit(cluster_dag)
             # print(cluster_circ_inst)
             cluster_inst_prob = simulate_circ(circ=cluster_circ_inst,
-            simulator='qasm_simulator',
+            simulator='statevector_simulator',
             output_format='prob',
-            num_shots=int(3e4))
+            num_shots=int(5e4))
             cluster_prob[(tuple(inits),tuple(meas))] = cluster_inst_prob
             bar.update(counter)
         # print(cluster_prob.keys())
@@ -163,7 +163,7 @@ if __name__ == '__main__':
 
     full_circ = pickle.load(open(('%s/full_circ.p'%dirname), 'rb'))
     full_circ_sim_prob = simulate_circ(circ=full_circ,
-            simulator='qasm_simulator',
+            simulator='statevector_simulator',
             output_format='prob',
             num_shots=int(1e5))
     pickle.dump(full_circ_sim_prob, open('%s/full_circ_sim_prob.p'%dirname, 'wb' ))
