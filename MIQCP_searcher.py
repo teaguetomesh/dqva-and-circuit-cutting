@@ -120,7 +120,7 @@ class Basic_Model(object):
 
         self.model.update()
     
-    def pwl_exp(self, base, lb, ub, alpha=1):
+    def pwl_exp(self, base, lb, ub, coefficient=1):
         ptx = []
         ptf = []
 
@@ -128,7 +128,7 @@ class Basic_Model(object):
 
         for i in range(num_pt):
             x = (ub-lb)/(num_pt-1)*i+lb
-            y = np.power(base,x)*alpha
+            y = np.power(base,x)*coefficient
             ptx.append(x)
             ptf.append(y)
         # ptx.append(ub+1)
