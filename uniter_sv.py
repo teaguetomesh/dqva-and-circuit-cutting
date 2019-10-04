@@ -125,7 +125,6 @@ if __name__ == '__main__':
         # print('summation term =', summation_term)
         reconstructed += summation_term
         print('-'*100)
-    # TODO: reordering required here
     # print('unordered reconstruction:\n',reconstructed)
     reconstructed = reconstructed_reorder(reconstructed,complete_path_map)
     # print(reconstructed)

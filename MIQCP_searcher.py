@@ -8,7 +8,7 @@ import numpy as np
 import cutter
 
 class Basic_Model(object):
-    def __init__(self, n_vertices, edges, node_ids, id_nodes, k, hw_max_qubit):
+    def __init__(self, n_vertices, edges, node_ids, id_nodes, k, hw_max_qubit, alpha):
         self.check_graph(n_vertices, edges)
         self.n_vertices = n_vertices
         self.edges = edges
@@ -17,6 +17,7 @@ class Basic_Model(object):
         self.id_nodes = id_nodes
         self.k = k
         self.hw_max_qubit = hw_max_qubit
+        self.alpha = alpha
         self.verbosity = 0
 
         self.model = Model('cut_searching')
@@ -68,18 +69,28 @@ class Basic_Model(object):
         # symmetry-breaking constraints
         # TODO: this does not break all the symmetries
         # TODO: is this necessary?
-        self.model.addConstr(self.node_vars[0][0], GRB.EQUAL, 1)
-        for i in range(2, k):
-            self.model.addConstr(quicksum([self.node_vars[i-1][j] for j in range(n_vertices)]),
-                            GRB.LESS_EQUAL,
-                            quicksum([self.node_vars[i][j] for j in range(n_vertices)]))
+        # self.model.addConstr(self.node_vars[0][0], GRB.EQUAL, 1)
+        # for i in range(2, k):
+        #     self.model.addConstr(quicksum([self.node_vars[i-1][j] for j in range(n_vertices)]),
+        #                     GRB.LESS_EQUAL,
+        #                     quicksum([self.node_vars[i][j] for j in range(n_vertices)]))
         
         # Objective function
+        # TODO: change uniter cost to 4^total number of cuts, simulator cost to simulation time approximation
+        lb = 1
+        ub = 20
+        total_num_cuts = self.model.addVar(lb=lb, ub=ub, vtype=GRB.INTEGER, name='total_num_cuts')
+        self.model.addConstr(total_num_cuts == 
+        quicksum(
+            [self.edge_vars[cluster][i] for i in range(self.n_edges) for cluster in range(k)]
+            ))
+        ptx, ptf = self.pwl_exp(2,lb,ub,1-self.alpha)
+        self.model.setPWLObj(total_num_cuts, ptx, ptf)
+
         for cluster in range(k):
-            # FIXME: when ub is 10, calculation of cluster_K is wrong for 4,4,8 supremacy into 2 clusters
-            # cluster_K = self.model.addVar(lb=0, ub=50, vtype=GRB.INTEGER, name='cluster_K_%d'%cluster)
-            # self.model.addConstr(cluster_K == 
-            # quicksum([self.edge_vars[cluster][i] for i in range(self.n_edges)]))
+            cluster_K = self.model.addVar(lb=0, ub=50, vtype=GRB.INTEGER, name='cluster_K_%d'%cluster)
+            self.model.addConstr(cluster_K == 
+            quicksum([self.edge_vars[cluster][i] for i in range(self.n_edges)]))
             
             cluster_original_qubit = self.model.addVar(lb=0, ub=self.hw_max_qubit, vtype=GRB.INTEGER, name='cluster_input_%d'%cluster)
             self.model.addConstr(cluster_original_qubit ==
@@ -87,24 +98,29 @@ class Basic_Model(object):
             for i in range(self.n_vertices)]))
             # self.model.addConstr(cluster_original_qubit >= 0.1)
             
-            cluster_ancilla = self.model.addVar(lb=0, ub=self.hw_max_qubit, vtype=GRB.INTEGER, name='cluster_ancilla_%d'%cluster)
-            self.model.addConstr(cluster_ancilla ==
+            cluster_rho_qubits = self.model.addVar(lb=0, ub=self.hw_max_qubit, vtype=GRB.INTEGER, name='cluster_rho_qubits_%d'%cluster)
+            self.model.addConstr(cluster_rho_qubits ==
             quicksum([self.edge_vars[cluster][i] * self.node_vars[cluster][self.edges[i][1]]
             for i in range(self.n_edges)]))
 
+            cluster_O_qubits = self.model.addVar(lb=0, ub=self.hw_max_qubit, vtype=GRB.INTEGER, name='cluster_O_qubits_%d'%cluster)
+            self.model.addConstr(cluster_O_qubits ==
+            quicksum([self.edge_vars[cluster][i] * self.node_vars[cluster][self.edges[i][0]]
+            for i in range(self.n_edges)]))
+
             cluster_d = self.model.addVar(lb=0, ub=self.hw_max_qubit, vtype=GRB.INTEGER, name='cluster_d_%d'%cluster)
-            self.model.addConstr(cluster_d == cluster_original_qubit + cluster_ancilla)
+            self.model.addConstr(cluster_d == cluster_original_qubit + cluster_rho_qubits)
             
             lb = 1
             ub = 10.0+self.hw_max_qubit
-            ptx, ptf = self.pwl_exp(2,lb,ub)
-            cluster_hardness_exponent = self.model.addVar(lb=lb,ub=ub,vtype=GRB.CONTINUOUS, name='cluster_hardness_exponent_%d'%cluster)
-            self.model.addConstr(cluster_hardness_exponent == (np.log2(6)*cluster_ancilla + cluster_d))
-            self.model.setPWLObj(cluster_hardness_exponent, ptx, ptf)
+            ptx, ptf = self.pwl_exp(2,lb,ub,self.alpha)
+            simulator_hardness_exponent = self.model.addVar(lb=lb,ub=ub,vtype=GRB.CONTINUOUS, name='cluster_hardness_exponent_%d'%cluster)
+            self.model.addConstr(simulator_hardness_exponent == (np.log2(6)*cluster_rho_qubits + np.log2(3)*cluster_O_qubits))
+            self.model.setPWLObj(simulator_hardness_exponent, ptx, ptf)
 
         self.model.update()
     
-    def pwl_exp(self, base, lb, ub):
+    def pwl_exp(self, base, lb, ub, coefficient=1):
         ptx = []
         ptf = []
 
@@ -112,7 +128,7 @@ class Basic_Model(object):
 
         for i in range(num_pt):
             x = (ub-lb)/(num_pt-1)*i+lb
-            y = np.power(base,x)
+            y = np.power(base,x)*coefficient
             ptx.append(x)
             ptf.append(y)
         # ptx.append(ub+1)
@@ -131,8 +147,8 @@ class Basic_Model(object):
     
     def solve(self):
         print('solving for %d clusters'%self.k)
-        print('model has %d variables, %d linear constraints,%d quadratic constraints, %d general constraints'
-        % (self.model.NumVars,self.model.NumConstrs, self.model.NumQConstrs, self.model.NumGenConstrs))
+        # print('model has %d variables, %d linear constraints,%d quadratic constraints, %d general constraints'
+        # % (self.model.NumVars,self.model.NumConstrs, self.model.NumQConstrs, self.model.NumGenConstrs))
         try:
             self.model.optimize()
         except GurobiError:
@@ -170,25 +186,26 @@ class Basic_Model(object):
             return False
     
     def print_stat(self):
-        print('*'*200)
         print('MIQCP stats:')
         print('node count:', self.node_count)
         print('%d vertices %d edges graph. Max qubit = %d'%
         (self.n_vertices, self.n_edges, self.hw_max_qubit))
         print('%d cuts, %d clusters'%(len(self.cut_edges),self.k))
 
-        objective_verify = 0
+        simulator_cost_verify = 0
         for i in range(self.k):
             cluster_input = self.model.getVarByName('cluster_input_%d'%i)
-            cluster_ancilla = self.model.getVarByName('cluster_ancilla_%d'%i)
+            cluster_rho_qubits = self.model.getVarByName('cluster_rho_qubits_%d'%i)
+            cluster_O_qubits = self.model.getVarByName('cluster_O_qubits_%d'%i)
             cluster_d = self.model.getVarByName('cluster_d_%d'%i)
-            cluster_hardness_exponent = self.model.getVarByName('cluster_hardness_exponent_%d'%i)
-            objective_verify += np.power(6,cluster_ancilla.X)*np.power(2,cluster_d.X)
-            print('cluster %d: original input = %.2f, ancilla = %.2f, d = %.2f, hardness exponent = %.3f' % 
-            (i,cluster_input.X,cluster_ancilla.X,cluster_d.X,cluster_hardness_exponent.X))
+            cluster_K = self.model.getVarByName('cluster_K_%d'%i)
+            simulator_cost_verify += np.power(6,cluster_rho_qubits.X)*np.power(3,cluster_O_qubits.X)
+            print('cluster %d: original input = %.2f, rho qubits = %.2f, O qubits = %.2f, d = %.2f, K = %.2f' % 
+            (i,cluster_input.X,cluster_rho_qubits.X,cluster_O_qubits.X,cluster_d.X,cluster_K.X))
 
+        uniter_cost_verify = np.power(4,len(self.cut_edges))
         print('objective value:', self.objective)
-        print('manually calculated objective value:', objective_verify)
+        print('manually calculated objective value:', self.alpha*simulator_cost_verify+(1-self.alpha)*uniter_cost_verify)
         print('mip gap:', self.mip_gap)
         print('runtime:', self.runtime)
 
@@ -196,7 +213,6 @@ class Basic_Model(object):
             print('OPTIMAL')
         else:
             print('NOT OPTIMAL')
-        print('*'*200)
 
 def read_circ(circ):
     dag = circuit_to_dag(circ)
@@ -274,7 +290,7 @@ def circ_stripping(circ):
             stripped_dag.apply_operation_back(op=vertex.op, qargs=vertex.qargs)
     return dag_to_circuit(stripped_dag)
 
-def find_cuts(circ, num_clusters = range(1,5), hw_max_qubit=20):
+def find_cuts(circ, num_clusters = range(1,5), hw_max_qubit=20,alpha=1):
     min_objective = float('inf')
     best_positions = None
     best_ancilla = None
@@ -283,13 +299,15 @@ def find_cuts(circ, num_clusters = range(1,5), hw_max_qubit=20):
     best_model = None
     stripped_circ = circ_stripping(circ)
     n_vertices, edges, node_ids, id_nodes = read_circ(stripped_circ)
+
     for num_cluster in num_clusters:
         kwargs = dict(n_vertices=n_vertices,
                     edges=edges,
                     node_ids=node_ids,
                     id_nodes=id_nodes,
                     k=num_cluster,
-                    hw_max_qubit=hw_max_qubit)
+                    hw_max_qubit=hw_max_qubit,
+                    alpha=alpha)
 
         m = Basic_Model(**kwargs)
         feasible = m.solve()
@@ -304,17 +322,15 @@ def find_cuts(circ, num_clusters = range(1,5), hw_max_qubit=20):
             best_d = []
             best_model = m
             for i in range(m.k):
-                cluster_ancilla = m.model.getVarByName('cluster_ancilla_%d'%i)
+                cluster_rho_qubits = m.model.getVarByName('cluster_rho_qubits_%d'%i)
                 cluster_d = m.model.getVarByName('cluster_d_%d'%i)
-                best_ancilla.append(cluster_ancilla.X)
+                best_ancilla.append(cluster_rho_qubits.X)
                 best_d.append(cluster_d.X)
 
     return min_objective, best_positions, best_ancilla, best_d, best_num_cluster, best_model
 
 if __name__ == '__main__':
-    # circ = gen_supremacy(4,4,8,'71230456')
     circ = gen_supremacy(4,4,8)
-    # circ = gen_hwea(30,1, barriers=False)
     hardness, positions, K, d, num_cluster, m = find_cuts(circ,num_clusters=[1,2,3,4],hw_max_qubit=15)
     m.print_stat()
     fragments, complete_path_map, K, d = cutter.cut_circuit(circ, positions)
