@@ -10,10 +10,10 @@ from scipy.stats import wasserstein_distance
 times = {'searcher':[],'simulator':[],'uniter':[]}
 num_qubits = []
 reconstruction_distance = []
-max_qubit = 10
-for dimension in [[3,4],[3,5],[4,4],[4,5],[4,6]]:
+max_qubit = 16
+for dimension in [[3,3],[3,4],[3,5],[4,4]]:
     i,j = dimension
-    if i*j<=24 and i*j not in num_qubits and i*j>=max_qubit:
+    if i*j<=24 and i*j not in num_qubits:
         print('-'*200)
         print('%d * %d supremacy circuit'%(i,j))
 
@@ -23,7 +23,7 @@ for dimension in [[3,4],[3,5],[4,4],[4,5],[4,6]]:
 
         # Looking for a cut
         searcher_begin = time()
-        hardness, positions, ancilla, d, num_cluster, m = searcher.find_cuts(circ,num_clusters=range(2,4),hw_max_qubit=max_qubit)
+        hardness, positions, ancilla, d, num_cluster, m = searcher.find_cuts(circ,num_clusters=range(1,5),hw_max_qubit=max_qubit,alpha=0)
         searcher_end = time()
         m.print_stat()
 
@@ -51,8 +51,8 @@ for dimension in [[3,4],[3,5],[4,4],[4,5],[4,6]]:
         num_qubits.append(i*j)
         # print('probability reconstruction distance = ',distance)
         # print('searcher time = %.3f seconds'%(searcher_end-searcher_begin))
-        # print('simulator time = %.3f seconds'%(simulator_end-simulator_begin))
-        # print('uniter time = %.3f seconds'%(uniter_end-uniter_begin))
+        print('simulator time = %.3f seconds'%(simulator_end-simulator_begin))
+        print('uniter time = %.3f seconds'%(uniter_end-uniter_begin))
         print('-'*200)
 print('*'*200)
 print(times)
