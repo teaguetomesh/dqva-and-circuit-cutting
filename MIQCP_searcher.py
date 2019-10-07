@@ -290,6 +290,8 @@ def circ_stripping(circ):
             stripped_dag.apply_operation_back(op=vertex.op, qargs=vertex.qargs)
     return dag_to_circuit(stripped_dag)
 
+
+# alpha is the coefficient for evaluator cost
 def find_cuts(circ, num_clusters = range(1,5), hw_max_qubit=20,alpha=1):
     min_objective = float('inf')
     best_positions = None
