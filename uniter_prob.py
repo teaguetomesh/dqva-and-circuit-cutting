@@ -56,7 +56,20 @@ def multiply_sigma(full_cluster_prob,cluster_s,cluster_O_qubit_positions,effecti
     # print('assigned s:',cluster_s)
     if len(cluster_O_qubit_positions) == 0:
         return full_cluster_prob
+    
     total_num_qubits = int(np.log2(len(full_cluster_prob)))
+    if effective_state_tranlsation == None:
+        contracted_prob = 0
+        for full_state, prob in enumerate(full_cluster_prob):
+            sigma = 1
+            bin_full_state = bin(full_state)[2:].zfill(total_num_qubits)
+            for s_i,position in zip(cluster_s,cluster_O_qubit_positions):
+                O_measurement = bin_full_state[position]
+                if s_i!='I' and O_measurement=='1':
+                    sigma *= -1
+            contributing_term = sigma*full_cluster_prob[full_state]
+            contracted_prob += contributing_term
+        return [contracted_prob]
     effective_cluster_prob = []
     for effective_state in effective_state_tranlsation:
         # effective_state_index = int("".join(str(x) for x in state), 2)
@@ -105,21 +118,24 @@ def effective_full_state_corresppndence(O_rho_pairs,cluster_circs):
             if O_qubit[0] == cluster_idx:
                 cluster_O_qubits.append(O_qubit[1])
         effective_num_qubits = total_num_qubits - len(cluster_O_qubits)
-        effective_states = itertools.product(range(2),repeat=effective_num_qubits)
-        # print('effective states:',list(effective_states))
-        O_qubit_states = list(itertools.product(range(2),repeat=len(cluster_O_qubits)))
-        cluster_correspondence = {}
-        for effective_state in effective_states:
-            effective_state_index = int("".join(str(x) for x in effective_state), 2)
-            corresponding_full_states = []
-            for O_qubit_state in O_qubit_states:
-                full_state = list(effective_state)
-                for p,i in zip(cluster_O_qubits,O_qubit_state):
-                    full_state.insert(p,i)
-                full_state_index = int("".join(str(x) for x in full_state), 2)
-                corresponding_full_states.append(full_state_index)
-            cluster_correspondence[effective_state_index] = corresponding_full_states
-        correspondence_map[cluster_idx] = cluster_correspondence
+        if effective_num_qubits>0:
+            effective_states = itertools.product(range(2),repeat=effective_num_qubits)
+            # print('effective states:',list(effective_states))
+            O_qubit_states = list(itertools.product(range(2),repeat=len(cluster_O_qubits)))
+            cluster_correspondence = {}
+            for effective_state in effective_states:
+                effective_state_index = int("".join(str(x) for x in effective_state), 2)
+                corresponding_full_states = []
+                for O_qubit_state in O_qubit_states:
+                    full_state = list(effective_state)
+                    for p,i in zip(cluster_O_qubits,O_qubit_state):
+                        full_state.insert(p,i)
+                    full_state_index = int("".join(str(x) for x in full_state), 2)
+                    corresponding_full_states.append(full_state_index)
+                cluster_correspondence[effective_state_index] = corresponding_full_states
+            correspondence_map[cluster_idx] = cluster_correspondence
+        else:
+            correspondence_map[cluster_idx] = None
     # print(correspondence_map)
     return correspondence_map
 
@@ -161,6 +177,7 @@ def calculate_cluster(cluster_idx,cluster_probs,init_meas,O_qubit_positions,effe
     initilizations, measurement = init_meas
     num_effective_states = np.power(2,len(measurement)-len(O_qubit_positions))
     kronecker_term = [0 for i in range(num_effective_states)]
+    # print('Cluster %d has %d effective states'%(cluster_idx,num_effective_states))
     meas = tuple([x if x!='Z' else 'I' for x in measurement])
     measurement = tuple(measurement)
 
@@ -198,6 +215,7 @@ def calculate_cluster(cluster_idx,cluster_probs,init_meas,O_qubit_positions,effe
         # print(init,measurement)
         
         sigma_key = (init,meas,tuple([measurement[i] for i in O_qubit_positions]))
+        # print('sigma key = ',sigma_key)
         if sigma_key not in collapsed_cluster_prob[cluster_idx]:
             effective_cluster_prob = multiply_sigma(full_cluster_prob=cluster_probs[(init,meas)],
             cluster_s=[measurement[i] for i in O_qubit_positions],
