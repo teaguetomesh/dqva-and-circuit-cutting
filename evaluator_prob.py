@@ -12,6 +12,7 @@ import os
 import numpy as np
 import progressbar as pb
 from time import time
+from mpi4py import MPI
 
 def reverseBits(num,bitSize): 
     binary = bin(num)
@@ -130,7 +131,7 @@ def find_all_simulation_combinations(O_qubits, rho_qubits, num_qubits):
     combinations = list(itertools.product(complete_inits,complete_meas))
     return combinations
 
-def simulate_clusters(complete_path_map, clusters, provider_info=None, simulator_backend='statevector_simulator',noisy=False):
+def evaluate_clusters(complete_path_map, clusters, provider_info=None, simulator_backend='statevector_simulator',noisy=False):
     all_cluster_prob = []
 
     for cluster_idx, cluster_circ in enumerate(clusters):
@@ -199,7 +200,7 @@ if __name__ == '__main__':
     for cluster_idx in range(len(cluster_circ_files)):
         cluster_circ = pickle.load(open(('%s/cluster_%d_circ.p'%(dirname,cluster_idx)), 'rb'))
         clusters.append(cluster_circ)
-    all_cluster_prob = simulate_clusters(complete_path_map, clusters)
+    all_cluster_prob = evaluate_clusters(complete_path_map, clusters)
     pickle.dump(all_cluster_prob, open('%s/cluster_sim_prob.p'%dirname, 'wb' ))
 
     full_circ = pickle.load(open(('%s/full_circ.p'%dirname), 'rb'))

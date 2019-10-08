@@ -55,7 +55,7 @@ for dimension in [[3,4]]:
 
         # Simulate the clusters
         evaluator_begin = time()
-        all_cluster_prob = evaluator.simulate_clusters(complete_path_map=complete_path_map,
+        all_cluster_prob = evaluator.evaluate_clusters(complete_path_map=complete_path_map,
         clusters=clusters,
         provider_info=provider_info,
         simulator_backend='ibmq_qasm_simulator',noisy=True)
