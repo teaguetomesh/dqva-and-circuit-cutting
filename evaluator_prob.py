@@ -19,7 +19,17 @@ def reverseBits(num,bitSize):
     reverse = reverse + (bitSize - len(reverse))*'0'
     return int(reverse,2)
 
-def simulate_circ(circ, simulator, provider_info=None, output_format='prob', num_shots=1024):
+def simulate_circ(circ, simulator, noisy=False, provider_info=None, output_format='prob', num_shots=1024):
+    if noisy:
+        if output_format!='prob':
+            raise Exception('Illegal noisy evaluation method, output_format has to be prob')
+        if provider_info==None:
+            raise Exception('Provider info is required for noisy evaluation')
+        if simulator!='qasm_simulator' and simulator!='ibmq_qasm_simulator':
+            raise Exception('Noisy evaluation cannot use {} evaluator'.format(simulator))
+    else:
+        if provider_info!=None:
+            raise Exception('Noiseless evaluation does not require provider info')
     if simulator == 'statevector_simulator':
         backend = Aer.get_backend(simulator)
         job = execute(circ, backend=backend)
@@ -43,9 +53,17 @@ def simulate_circ(circ, simulator, provider_info=None, output_format='prob', num
         meas.measure(circ.qubits,c)
         qc = circ+meas
         backend = Aer.get_backend(simulator)
-        job_sim = execute(qc, backend, shots=num_shots)
-        result_sim = job_sim.result()
-        counts = result_sim.get_counts(qc)
+        if not noisy:
+            job_sim = execute(qc, backend, shots=num_shots)
+            result = job_sim.result()
+            counts = result.get_counts(qc)
+        else:
+            provider, noise_model, coupling_map, basis_gates = provider_info
+            result = execute(qc, backend,
+                       noise_model=noise_model,
+                       coupling_map=coupling_map,
+                       basis_gates=basis_gates,shots=num_shots).result()
+            counts = result.get_counts(qc)
         prob_ordered = [0 for x in range(np.power(2,len(circ.qubits)))]
         for state in counts:
             reversed_state = reverseBits(int(state,2),len(circ.qubits))
@@ -112,28 +130,12 @@ def find_all_simulation_combinations(O_qubits, rho_qubits, num_qubits):
     combinations = list(itertools.product(complete_inits,complete_meas))
     return combinations
 
-def simulate_clusters(complete_path_map, clusters, simulator_backend='statevector_simulator'):
-    provider = IBMQ.load_account()
-    device = provider.get_backend('ibmq_16_melbourne')
-    properties = device.properties()
-    coupling_map = device.configuration().coupling_map
-
-    gate_times = [
-    ('u1', None, 0), ('u2', None, 100), ('u3', None, 200),
-    ('cx', [1, 0], 678), ('cx', [1, 2], 547), ('cx', [2, 3], 721),
-    ('cx', [4, 3], 733), ('cx', [4, 10], 721), ('cx', [5, 4], 800),
-    ('cx', [5, 6], 800), ('cx', [5, 9], 895), ('cx', [6, 8], 895),
-    ('cx', [7, 8], 640), ('cx', [9, 8], 895), ('cx', [9, 10], 800),
-    ('cx', [11, 10], 721), ('cx', [11, 3], 634), ('cx', [12, 2], 773),
-    ('cx', [13, 1], 2286), ('cx', [13, 12], 1504), ('cx', [], 800)]
-
-    noise_model = noise.device.basic_device_noise_model(properties, gate_times=gate_times)
-    basis_gates = noise_model.basis_gates
-
+def simulate_clusters(complete_path_map, clusters, provider_info=None, simulator_backend='statevector_simulator',noisy=False):
     all_cluster_prob = []
 
     for cluster_idx, cluster_circ in enumerate(clusters):
         print('Simulating cluster %d'%cluster_idx)
+        print(cluster_circ)
         cluster_prob = {}
         O_qubits, rho_qubits = find_cluster_O_rho_qubits(complete_path_map,cluster_idx)
         combinations = find_all_simulation_combinations(O_qubits, rho_qubits, len(cluster_circ.qubits))
@@ -175,7 +177,8 @@ def simulate_clusters(complete_path_map, clusters, simulator_backend='statevecto
             cluster_circ_inst = dag_to_circuit(cluster_dag)
             cluster_inst_prob = simulate_circ(circ=cluster_circ_inst,
             simulator=simulator_backend,
-            provider_info=(provider,noise_model,coupling_map,basis_gates),
+            noisy=noisy,
+            provider_info=provider_info,
             output_format='prob',
             num_shots=1024)
             cluster_prob[(tuple(inits),tuple(meas))] = cluster_inst_prob
