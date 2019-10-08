@@ -31,7 +31,7 @@ times = {'searcher':[],'evaluator':[],'uniter':[]}
 num_qubits = []
 noiseless_reconstruction_distance = []
 noisy_reconstruction_distance = []
-max_qubit = 8
+max_qubit = 12
 
 for dimension in [[3,4]]:
     i,j = dimension
@@ -45,26 +45,33 @@ for dimension in [[3,4]]:
 
         # Looking for a cut
         searcher_begin = time()
-        hardness, positions, ancilla, d, num_cluster, m = searcher.find_cuts(circ,num_clusters=range(1,5),hw_max_qubit=max_qubit,alpha=1)
-        searcher_end = time()
+        hardness, positions, ancilla, d, num_cluster, m = searcher.find_cuts(circ,num_clusters=range(1,5),hw_max_qubit=max_qubit,alpha=0)
+        searcher_time = time() - searcher_begin
         m.print_stat()
 
-        clusters, complete_path_map, K, d = cutter.cut_circuit(circ, positions)
-        print('Complete path map:')
-        [print(x,complete_path_map[x]) for x in complete_path_map]
+        if len(positions)>0:
 
-        # Simulate the clusters
-        evaluator_begin = time()
-        all_cluster_prob = evaluator.evaluate_clusters(complete_path_map=complete_path_map,
-        clusters=clusters,
-        provider_info=provider_info,
-        simulator_backend='ibmq_qasm_simulator',noisy=True)
-        evaluator_end = time()
+            clusters, complete_path_map, K, d = cutter.cut_circuit(circ, positions)
+            print('Complete path map:')
+            [print(x,complete_path_map[x]) for x in complete_path_map]
 
-        # Reconstruct the circuit
-        uniter_begin = time()
-        reconstructed_prob = uniter.reconstruct(complete_path_map, circ, clusters, all_cluster_prob)
-        uniter_end = time()
+            # Simulate the clusters
+            evaluator_begin = time()
+            all_cluster_prob = evaluator.evaluate_clusters(complete_path_map=complete_path_map,
+            clusters=clusters,
+            provider_info=provider_info,
+            simulator_backend='ibmq_qasm_simulator',noisy=True)
+            evaluator_time = time()-evaluator_begin
+
+            # Reconstruct the circuit
+            uniter_begin = time()
+            reconstructed_prob = uniter.reconstruct(complete_path_map, circ, clusters, all_cluster_prob)
+            uniter_time = time()-uniter_begin
+        
+        else:
+            reconstructed_prob = evaluator.simulate_circ(circ=circ, simulator='ibmq_qasm_simulator', noisy=True, provider_info=provider_info, output_format='prob',num_shots=1024)
+            evaluator_time = 0
+            uniter_time = 0
 
         full_circ_noiseless_prob = evaluator.simulate_circ(circ=circ,simulator='statevector_simulator',output_format='prob')
         noiseless_distance = wasserstein_distance(full_circ_noiseless_prob,reconstructed_prob)
@@ -73,15 +80,15 @@ for dimension in [[3,4]]:
         
         noiseless_reconstruction_distance.append(noiseless_distance)
         noisy_reconstruction_distance.append(noisy_distance)
-        times['searcher'].append(searcher_end-searcher_begin)
-        times['evaluator'].append(evaluator_end-evaluator_begin)
-        times['uniter'].append(uniter_end-uniter_begin)
+        times['searcher'].append(searcher_time)
+        times['evaluator'].append(evaluator_time)
+        times['uniter'].append(uniter_time)
         num_qubits.append(i*j)
-        print('noiseless probability reconstruction distance = ',noiseless_distance)
-        print('noisy probability reconstruction distance = ',noisy_distance)
+        print('probability reconstruction distance to noiseless full circ = ',noiseless_distance)
+        print('probability reconstruction distance to noisy full circ = ',noisy_distance)
         # print('searcher time = %.3f seconds'%(searcher_end-searcher_begin))
-        print('evaluator time = %.3f seconds'%(evaluator_end-evaluator_begin))
-        print('uniter time = %.3f seconds'%(uniter_end-uniter_begin))
+        print('evaluator time = %.3f seconds'%evaluator_time)
+        print('uniter time = %.3f seconds'%uniter_time)
         print('-'*200)
 print('*'*200)
 print(times)

@@ -12,7 +12,6 @@ import os
 import numpy as np
 import progressbar as pb
 from time import time
-from mpi4py import MPI
 
 def reverseBits(num,bitSize): 
     binary = bin(num)
