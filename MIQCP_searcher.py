@@ -77,8 +77,8 @@ class Basic_Model(object):
         
         # Objective function
         # TODO: change uniter cost to 4^total number of cuts, simulator cost to simulation time approximation
-        lb = 1
-        ub = 20
+        lb = 0
+        ub = 30
         total_num_cuts = self.model.addVar(lb=lb, ub=ub, vtype=GRB.INTEGER, name='total_num_cuts')
         self.model.addConstr(total_num_cuts == 
         quicksum(
@@ -88,7 +88,7 @@ class Basic_Model(object):
         self.model.setPWLObj(total_num_cuts, ptx, ptf)
 
         for cluster in range(k):
-            cluster_K = self.model.addVar(lb=0, ub=50, vtype=GRB.INTEGER, name='cluster_K_%d'%cluster)
+            cluster_K = self.model.addVar(lb=0, ub=30, vtype=GRB.INTEGER, name='cluster_K_%d'%cluster)
             self.model.addConstr(cluster_K == 
             quicksum([self.edge_vars[cluster][i] for i in range(self.n_edges)]))
             
@@ -111,8 +111,8 @@ class Basic_Model(object):
             cluster_d = self.model.addVar(lb=0, ub=self.hw_max_qubit, vtype=GRB.INTEGER, name='cluster_d_%d'%cluster)
             self.model.addConstr(cluster_d == cluster_original_qubit + cluster_rho_qubits)
             
-            lb = 1
-            ub = 10.0+self.hw_max_qubit
+            lb = 0
+            ub = 30
             ptx, ptf = self.pwl_exp(2,lb,ub,self.alpha)
             simulator_hardness_exponent = self.model.addVar(lb=lb,ub=ub,vtype=GRB.CONTINUOUS, name='cluster_hardness_exponent_%d'%cluster)
             self.model.addConstr(simulator_hardness_exponent == (np.log2(6)*cluster_rho_qubits + np.log2(3)*cluster_O_qubits))
@@ -183,6 +183,7 @@ class Basic_Model(object):
             self.cut_edges = cut_edges
             return True
         else:
+            print('Infeasible')
             return False
     
     def print_stat(self):
