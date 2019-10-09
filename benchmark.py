@@ -33,7 +33,7 @@ noiseless_reconstruction_distance = []
 noisy_reconstruction_distance = []
 max_qubit = 12
 
-for dimension in [[4,5]]:
+for dimension in [[3,4]]:
     i,j = dimension
     if i*j<=24 and i*j not in num_qubits:
         print('-'*200)
@@ -45,19 +45,14 @@ for dimension in [[4,5]]:
 
         # Looking for a cut
         searcher_begin = time()
-        hardness, positions, ancilla, d, num_cluster, m = searcher.find_cuts(circ,num_clusters=range(1,5),hw_max_qubit=max_qubit,alpha=0)
+        hardness, positions, ancilla, d, num_cluster, m = searcher.find_cuts(circ,num_clusters=range(1,4),hw_max_qubit=max_qubit,alpha=0)
         searcher_time = time() - searcher_begin
         m.print_stat()
 
         if len(positions)>0:
-
-            # Simulate the clusters
-            evaluator_begin = time()
-            all_cluster_prob = evaluator.simulate_clusters(complete_path_map=complete_path_map,
-            clusters=clusters,
-            provider_info=provider_info,
-            simulator_backend='statevector_simulator',noisy=False)
-            evaluator_end = time()
+            clusters, complete_path_map, K, d = cutter.cut_circuit(circ, positions)
+            print('Complete path map:')
+            [print(x,complete_path_map[x]) for x in complete_path_map]
 
             # Simulate the clusters
             evaluator_begin = time()
