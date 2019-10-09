@@ -22,7 +22,8 @@ class Basic_Model(object):
 
         self.model = Model('cut_searching')
         self.model.params.OutputFlag = 0
-        self.model.params.NodeLimit = 200
+        # self.model.params.NodeLimit = 50
+        # self.model.params.MIPGap = 0.5
 
         self.node_qubits = {}
         for node in self.node_ids:
@@ -213,7 +214,7 @@ class Basic_Model(object):
             (i,cluster_input.X,cluster_rho_qubits.X,cluster_O_qubits.X,cluster_d.X,cluster_K.X))
             if i>0:
                 uniter_cost_exponent = self.model.getVarByName('uniter_cost_exponent_%d'%i)
-                print('uniter cost exponent = ',uniter_cost_exponent.X)
+                # print('uniter cost exponent = ',uniter_cost_exponent.X)
                 uniter_cost_verify += np.power(2,uniter_cost_exponent.X)
 
         print('objective value:', self.objective)

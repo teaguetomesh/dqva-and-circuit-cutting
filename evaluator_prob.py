@@ -175,7 +175,7 @@ def evaluate_cluster(complete_path_map, cluster, combinations, provider_info=Non
         noisy=noisy,
         provider_info=provider_info,
         output_format='prob',
-        num_shots=int(2*np.power(2,len(cluster_circ_inst.qubits))))
+        num_shots=max(1024,int(2*np.power(2,len(cluster_circ_inst.qubits)))))
         cluster_prob[(tuple(inits),tuple(meas))] = cluster_inst_prob
     return cluster_prob
 
@@ -220,7 +220,7 @@ if __name__ == '__main__':
         cluster=cluster_circ,
         combinations=rank_combinations,
         provider_info=provider_info,
-        simulator_backend=args.backend,noisy=False)
+        simulator_backend=args.backend,noisy=True)
         comm.send(cluster_prob, dest=size-1)
     else:
         combinations_start = rank * count + remainder
@@ -231,5 +231,5 @@ if __name__ == '__main__':
         cluster=cluster_circ,
         combinations=rank_combinations,
         provider_info=provider_info,
-        simulator_backend=args.backend,noisy=False)
+        simulator_backend=args.backend,noisy=True)
         comm.send(cluster_prob, dest=size-1)
