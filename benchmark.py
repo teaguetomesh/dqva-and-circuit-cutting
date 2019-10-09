@@ -57,7 +57,6 @@ for dimension in [[3,4],[2,7],[4,4],[3,6],[4,5]]:
         m.print_stat()
 
         if len(positions)>0:
-
             clusters, complete_path_map, K, d = cutter.cut_circuit(circ, positions)
             print('Complete path map:')
             [print(x,complete_path_map[x]) for x in complete_path_map]
