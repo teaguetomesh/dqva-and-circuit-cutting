@@ -40,7 +40,7 @@ dirname = './data'
 if not os.path.exists(dirname):
     os.mkdir(dirname)
 
-for dimension in [[4,5]]:
+for dimension in [[3,4],[2,7],[4,4],[3,6],[4,5]]:
     i,j = dimension
     if i*j<=24 and i*j not in num_qubits:
         print('-'*200)
@@ -52,7 +52,7 @@ for dimension in [[4,5]]:
 
         # Looking for a cut
         searcher_begin = time()
-        hardness, positions, ancilla, d, num_cluster, m = searcher.find_cuts(circ,num_clusters=range(1,4),hw_max_qubit=max_qubit,alpha=0)
+        hardness, positions, ancilla, d, num_cluster, m = searcher.find_cuts(circ,num_clusters=range(1,4),hw_max_qubit=max_qubit,evaluator_weight=0)
         searcher_time = time() - searcher_begin
         m.print_stat()
 
@@ -112,4 +112,4 @@ print('wasserstein distance to noiseless full circ :',noiseless_reconstruction_d
 print('wasserstein distance to noisy full circ :',noisy_reconstruction_distance)
 print('wasserstein distance between noisy and noiseless full circ = ',full_circ_noisy_noisless_distance)
 
-# pickle.dump([num_qubits,times,noiseless_reconstruction_distance,noisy_reconstruction_distance,full_circ_noisy_noisless_distance], open( '%s/full_stack_benchmark.p'%dirname,'wb'))
+pickle.dump([num_qubits,times,noiseless_reconstruction_distance,noisy_reconstruction_distance,full_circ_noisy_noisless_distance], open( '%s/full_stack_benchmark.p'%dirname,'wb'))
