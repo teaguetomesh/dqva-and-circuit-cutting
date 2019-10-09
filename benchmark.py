@@ -39,15 +39,15 @@ dirname = './data'
 if not os.path.exists(dirname):
     os.mkdir(dirname)
 
-for dimension in [[2,3],[2,4],[3,3],[2,5]]:
+# for dimension in [[2,3],[2,4],[3,3],[2,5]]:
 # for dimension in [[3,6]]:
 # for dimension in [[4,5]]:
+for dimension in [[2,4]]:
     i,j = dimension
     if i*j<=24 and i*j not in num_qubits:
         print('-'*200)
-        print('%d * %d supremacy circuit'%(i,j))
-
-        num_shots = max(1024,int(2*np.power(2,i*j)))
+        num_shots = max(int(1e6),int(30*np.power(2,i*j)))
+        print('%d * %d supremacy circuit, %d shots'%(i,j,num_shots))
 
         # Generate a circuit
         circ = gen_supremacy(i,j,8,order='75601234')
@@ -90,8 +90,10 @@ for dimension in [[2,3],[2,4],[3,3],[2,5]]:
             uniter_time = 0
 
         print('Running full circuit')
-        full_circ_noiseless_prob = evaluator.simulate_circ(circ=circ,simulator='statevector_simulator',output_format='prob')
+        full_circ_ground_truth = evaluator.simulate_circ(circ=circ,simulator='statevector_simulator',output_format='prob')
+        full_circ_noiseless_prob = evaluator.simulate_circ(circ=circ, simulator='qasm_simulator', noisy=False, provider_info=provider_info, output_format='prob', num_shots=num_shots)
         full_circ_noisy_prob = evaluator.simulate_circ(circ=circ, simulator='qasm_simulator', noisy=True, provider_info=provider_info, output_format='prob', num_shots=num_shots)
+        qasm_sv_distance = wasserstein_distance(full_circ_ground_truth,full_circ_noiseless_prob)
         cutting_distance = wasserstein_distance(full_circ_noiseless_prob,reconstructed_prob)
         no_cutting_distance = wasserstein_distance(full_circ_noiseless_prob,full_circ_noisy_prob)
         
@@ -101,8 +103,9 @@ for dimension in [[2,3],[2,4],[3,3],[2,5]]:
         times['evaluator'].append(evaluator_time)
         times['uniter'].append(uniter_time)
         num_qubits.append(i*j)
-        print('cutting distance to noiseless full circ = ',cutting_distance)
-        print('NO cutting distance to noiseless full circ = ',no_cutting_distance)
+        print('noisy cutting distance to noiseless QASM full circ = ',cutting_distance)
+        print('noisy NO cutting distance to noiseless QASM full circ = ',no_cutting_distance)
+        print('Noiseless QASM distance to sv full circ = ',qasm_sv_distance)
         print('searcher time = %.3f seconds'%searcher_time)
         print('evaluator time = %.3f seconds'%evaluator_time)
         print('uniter time = %.3f seconds'%uniter_time)
@@ -113,4 +116,4 @@ print('num qubits:',num_qubits)
 print('cutting distance to noiseless full circ :',cutting_distances)
 print('NO cutting distance to noiseless full circ :',no_cutting_distances)
 
-pickle.dump([num_qubits,times,cutting_distances,no_cutting_distances], open('%s/fidelity_benchmark.p'%dirname,'wb'))
+# pickle.dump([num_qubits,times,cutting_distances,no_cutting_distances], open('%s/fidelity_benchmark.p'%dirname,'wb'))

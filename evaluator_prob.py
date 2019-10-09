@@ -56,6 +56,7 @@ def simulate_circ(circ, simulator, noisy=False, provider_info=None, output_forma
         qc = circ+meas
         backend = Aer.get_backend(simulator)
         if not noisy:
+            # print('noiseless qasm with %d shots'%num_shots)
             job_sim = execute(qc, backend, shots=num_shots)
             result = job_sim.result()
             counts = result.get_counts(qc)
@@ -175,7 +176,7 @@ def evaluate_cluster(complete_path_map, cluster, combinations, provider_info=Non
         noisy=noisy,
         provider_info=provider_info,
         output_format='prob',
-        num_shots=max(1024,int(2*np.power(2,len(cluster_circ_inst.qubits)))))
+        num_shots=max(1024,int(10*np.power(2,len(cluster_circ_inst.qubits)))))
         cluster_prob[(tuple(inits),tuple(meas))] = cluster_inst_prob
     return cluster_prob
 
