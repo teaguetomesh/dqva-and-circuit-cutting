@@ -12,6 +12,8 @@ import os
 import numpy as np
 import progressbar as pb
 from time import time
+from mpi4py import MPI
+import argparse
 
 def reverseBits(num,bitSize): 
     binary = bin(num)
@@ -28,8 +30,8 @@ def simulate_circ(circ, simulator, noisy=False, provider_info=None, output_forma
         if simulator!='qasm_simulator' and simulator!='ibmq_qasm_simulator':
             raise Exception('Noisy evaluation cannot use {} evaluator'.format(simulator))
     else:
-        if provider_info!=None:
-            raise Exception('Noiseless evaluation does not require provider info')
+        if simulator == 'ibmq_qasm_simulator':
+            raise Exception('Noiseless evaluation cannot use ibmq_qasm_simulator')
     if simulator == 'statevector_simulator':
         backend = Aer.get_backend(simulator)
         job = execute(circ, backend=backend)
@@ -80,7 +82,8 @@ def simulate_circ(circ, simulator, noisy=False, provider_info=None, output_forma
         result_noise = execute(qc, backend, 
                        noise_model=noise_model,
                        coupling_map=coupling_map,
-                       basis_gates=basis_gates,shots=num_shots).result()
+                       basis_gates=basis_gates,
+                       shots=num_shots).result()
         counts_noise = result_noise.get_counts(qc)
         prob_ordered = [0 for x in range(np.power(2,len(circ.qubits)))]
         for state in counts_noise:
@@ -130,81 +133,103 @@ def find_all_simulation_combinations(O_qubits, rho_qubits, num_qubits):
     combinations = list(itertools.product(complete_inits,complete_meas))
     return combinations
 
-def evaluate_clusters(complete_path_map, clusters, provider_info=None, simulator_backend='statevector_simulator',noisy=False):
-    all_cluster_prob = []
-
-    for cluster_idx, cluster_circ in enumerate(clusters):
-        print('Simulating cluster %d'%cluster_idx)
-        print(cluster_circ)
-        cluster_prob = {}
-        O_qubits, rho_qubits = find_cluster_O_rho_qubits(complete_path_map,cluster_idx)
-        combinations = find_all_simulation_combinations(O_qubits, rho_qubits, len(cluster_circ.qubits))
-        bar = pb.ProgressBar(max_value=len(combinations))
-        for counter, combination in enumerate(combinations):
-            cluster_dag = circuit_to_dag(cluster_circ)
-            inits, meas = combination
-            for i,x in enumerate(inits):
-                q = cluster_circ.qubits[i]
-                if x == 'zero':
-                    continue
-                elif x == 'one':
-                    cluster_dag.apply_operation_front(op=XGate(),qargs=[q],cargs=[])
-                elif x == 'plus':
-                    cluster_dag.apply_operation_front(op=HGate(),qargs=[q],cargs=[])
-                elif x == 'minus':
-                    cluster_dag.apply_operation_front(op=HGate(),qargs=[q],cargs=[])
-                    cluster_dag.apply_operation_front(op=XGate(),qargs=[q],cargs=[])
-                elif x == 'plus_i':
-                    cluster_dag.apply_operation_front(op=SGate(),qargs=[q],cargs=[])
-                    cluster_dag.apply_operation_front(op=HGate(),qargs=[q],cargs=[])
-                elif x == 'minus_i':
-                    cluster_dag.apply_operation_front(op=SGate(),qargs=[q],cargs=[])
-                    cluster_dag.apply_operation_front(op=HGate(),qargs=[q],cargs=[])
-                    cluster_dag.apply_operation_front(op=XGate(),qargs=[q],cargs=[])
-                else:
-                    raise Exception('Illegal initialization : ',x)
-            for i,x in enumerate(meas):
-                q = cluster_circ.qubits[i]
-                if x == 'I':
-                    continue
-                elif x == 'X':
-                    cluster_dag.apply_operation_back(op=HGate(),qargs=[q],cargs=[])
-                elif x == 'Y':
-                    cluster_dag.apply_operation_back(op=SdgGate(),qargs=[q],cargs=[])
-                    cluster_dag.apply_operation_back(op=HGate(),qargs=[q],cargs=[])
-                else:
-                    raise Exception('Illegal measurement basis:',x)
-            cluster_circ_inst = dag_to_circuit(cluster_dag)
-            cluster_inst_prob = simulate_circ(circ=cluster_circ_inst,
-            simulator=simulator_backend,
-            noisy=noisy,
-            provider_info=provider_info,
-            output_format='prob',
-            num_shots=1024)
-            cluster_prob[(tuple(inits),tuple(meas))] = cluster_inst_prob
-            bar.update(counter)
-        all_cluster_prob.append(cluster_prob)
-    return all_cluster_prob
+def evaluate_cluster(complete_path_map, cluster, combinations, provider_info=None, simulator_backend='statevector_simulator',noisy=False):
+    cluster_prob = {}
+    for counter, combination in enumerate(combinations):
+        cluster_dag = circuit_to_dag(cluster_circ)
+        inits, meas = combination
+        for i,x in enumerate(inits):
+            q = cluster_circ.qubits[i]
+            if x == 'zero':
+                continue
+            elif x == 'one':
+                cluster_dag.apply_operation_front(op=XGate(),qargs=[q],cargs=[])
+            elif x == 'plus':
+                cluster_dag.apply_operation_front(op=HGate(),qargs=[q],cargs=[])
+            elif x == 'minus':
+                cluster_dag.apply_operation_front(op=HGate(),qargs=[q],cargs=[])
+                cluster_dag.apply_operation_front(op=XGate(),qargs=[q],cargs=[])
+            elif x == 'plus_i':
+                cluster_dag.apply_operation_front(op=SGate(),qargs=[q],cargs=[])
+                cluster_dag.apply_operation_front(op=HGate(),qargs=[q],cargs=[])
+            elif x == 'minus_i':
+                cluster_dag.apply_operation_front(op=SGate(),qargs=[q],cargs=[])
+                cluster_dag.apply_operation_front(op=HGate(),qargs=[q],cargs=[])
+                cluster_dag.apply_operation_front(op=XGate(),qargs=[q],cargs=[])
+            else:
+                raise Exception('Illegal initialization : ',x)
+        for i,x in enumerate(meas):
+            q = cluster_circ.qubits[i]
+            if x == 'I':
+                continue
+            elif x == 'X':
+                cluster_dag.apply_operation_back(op=HGate(),qargs=[q],cargs=[])
+            elif x == 'Y':
+                cluster_dag.apply_operation_back(op=SdgGate(),qargs=[q],cargs=[])
+                cluster_dag.apply_operation_back(op=HGate(),qargs=[q],cargs=[])
+            else:
+                raise Exception('Illegal measurement basis:',x)
+        cluster_circ_inst = dag_to_circuit(cluster_dag)
+        cluster_inst_prob = simulate_circ(circ=cluster_circ_inst,
+        simulator=simulator_backend,
+        noisy=noisy,
+        provider_info=provider_info,
+        output_format='prob',
+        num_shots=int(2*np.power(2,len(cluster_circ_inst.qubits))))
+        cluster_prob[(tuple(inits),tuple(meas))] = cluster_inst_prob
+    return cluster_prob
 
 if __name__ == '__main__':
-    begin = time()
+    parser = argparse.ArgumentParser(description='MPI evaluator.')
+    parser.add_argument('--cluster-idx', metavar='N', type=int,help='which cluster pickle file to run')
+    parser.add_argument('--backend', metavar='S', type=str,help='which Qiskit backend')
+    args = parser.parse_args()
+
+    comm = MPI.COMM_WORLD
+    rank = comm.Get_rank()
+    size = comm.Get_size()
+
+    num_workers = size - 1
+
     dirname = './data'
-    complete_path_map = pickle.load(open( '%s/cpm.p'%dirname, 'rb' ))
+    clusters, complete_path_map, provider_info = pickle.load( open( '%s/evaluator_input.p'%dirname, 'rb' ) )
 
-    [print(x, complete_path_map[x]) for x in complete_path_map]
+    cluster_circ = clusters[args.cluster_idx]
+    O_qubits, rho_qubits = find_cluster_O_rho_qubits(complete_path_map,args.cluster_idx)
+    combinations = find_all_simulation_combinations(O_qubits, rho_qubits, len(cluster_circ.qubits))
 
-    cluster_circ_files = [f for f in glob.glob(dirname+'/cluster_*_circ.p')]
-    clusters = []
-    all_cluster_prob = []
-    for cluster_idx in range(len(cluster_circ_files)):
-        cluster_circ = pickle.load(open(('%s/cluster_%d_circ.p'%(dirname,cluster_idx)), 'rb'))
-        clusters.append(cluster_circ)
-    all_cluster_prob = evaluate_clusters(complete_path_map, clusters)
-    pickle.dump(all_cluster_prob, open('%s/cluster_sim_prob.p'%dirname, 'wb' ))
+    count = int(len(combinations)/num_workers)
+    remainder = len(combinations) % num_workers
 
-    full_circ = pickle.load(open(('%s/full_circ.p'%dirname), 'rb'))
-    full_circ_sim_prob = simulate_circ(circ=full_circ,
-            simulator='statevector_simulator',
-            output_format='prob')
-    pickle.dump(full_circ_sim_prob, open('%s/full_circ_sim_prob.p'%dirname, 'wb' ))
-    print('Python time elapsed = %f seconds'%(time()-begin))
+    if rank == size-1:
+        print('Evaluator master rank')
+        cluster_prob = {}
+        # bar = pb.ProgressBar(max_value=num_workers)
+        for i in range(num_workers):
+            state = MPI.Status()
+            rank_cluster_prob = comm.recv(source=MPI.ANY_SOURCE,status=state)
+            cluster_prob.update(rank_cluster_prob)
+            # bar.update(i)
+        pickle.dump(cluster_prob, open( '%s/cluster_%d_prob.p'%(dirname,args.cluster_idx), 'wb' ))
+    elif rank<remainder:
+        combinations_start = rank * (count + 1)
+        combinations_stop = combinations_start + count + 1
+        rank_combinations = combinations[combinations_start:combinations_stop]
+        print('rank %d runs %d combinations for cluster %d'%(rank,len(rank_combinations),args.cluster_idx))
+        cluster_prob = evaluate_cluster(complete_path_map=complete_path_map,
+        cluster=cluster_circ,
+        combinations=rank_combinations,
+        provider_info=provider_info,
+        simulator_backend=args.backend,noisy=False)
+        comm.send(cluster_prob, dest=size-1)
+    else:
+        combinations_start = rank * count + remainder
+        combinations_stop = combinations_start + (count - 1) + 1
+        rank_combinations = combinations[combinations_start:combinations_stop]
+        print('rank %d runs %d combinations for cluster %d'%(rank,len(rank_combinations),args.cluster_idx))
+        cluster_prob = evaluate_cluster(complete_path_map=complete_path_map,
+        cluster=cluster_circ,
+        combinations=rank_combinations,
+        provider_info=provider_info,
+        simulator_backend=args.backend,noisy=False)
+        comm.send(cluster_prob, dest=size-1)

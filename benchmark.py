@@ -1,5 +1,8 @@
 import pickle
+import os
+import subprocess
 from time import time
+import numpy as np
 from qcg.generators import gen_supremacy, gen_hwea
 import MIQCP_searcher as searcher
 import cutter
@@ -31,9 +34,13 @@ times = {'searcher':[],'evaluator':[],'uniter':[]}
 num_qubits = []
 noiseless_reconstruction_distance = []
 noisy_reconstruction_distance = []
-max_qubit = 12
+full_circ_noisy_noisless_distance = []
+max_qubit = 10
+dirname = './data'
+if not os.path.exists(dirname):
+    os.mkdir(dirname)
 
-for dimension in [[3,4]]:
+for dimension in [[4,5]]:
     i,j = dimension
     if i*j<=24 and i*j not in num_qubits:
         print('-'*200)
@@ -45,7 +52,7 @@ for dimension in [[3,4]]:
 
         # Looking for a cut
         searcher_begin = time()
-        hardness, positions, ancilla, d, num_cluster, m = searcher.find_cuts(circ,num_clusters=range(1,5),hw_max_qubit=max_qubit,alpha=0)
+        hardness, positions, ancilla, d, num_cluster, m = searcher.find_cuts(circ,num_clusters=range(1,4),hw_max_qubit=max_qubit,alpha=0)
         searcher_time = time() - searcher_begin
         m.print_stat()
 
@@ -55,13 +62,19 @@ for dimension in [[3,4]]:
             print('Complete path map:')
             [print(x,complete_path_map[x]) for x in complete_path_map]
 
+            pickle.dump([clusters,complete_path_map,provider_info], open('%s/evaluator_input.p'%dirname,'wb'))
+
             # Simulate the clusters
             evaluator_begin = time()
-            all_cluster_prob = evaluator.evaluate_clusters(complete_path_map=complete_path_map,
-            clusters=clusters,
-            provider_info=provider_info,
-            simulator_backend='ibmq_qasm_simulator',noisy=True)
+            for cluster_idx in range(len(clusters)):
+                print('MPI evaluator on cluster %d'%cluster_idx)
+                subprocess.call(['mpiexec','-n','5','python','evaluator_prob.py','--cluster-idx','%d'%cluster_idx,'--backend','statevector_simulator'])
             evaluator_time = time()-evaluator_begin
+
+            all_cluster_prob = []
+            for cluster_idx in range(len(clusters)):
+                cluster_prob = pickle.load( open('%s/cluster_%d_prob.p'%(dirname,cluster_idx), 'rb' ))
+                all_cluster_prob.append(cluster_prob)
 
             # Reconstruct the circuit
             uniter_begin = time()
@@ -69,30 +82,35 @@ for dimension in [[3,4]]:
             uniter_time = time()-uniter_begin
         
         else:
-            reconstructed_prob = evaluator.simulate_circ(circ=circ, simulator='ibmq_qasm_simulator', noisy=True, provider_info=provider_info, output_format='prob',num_shots=1024)
+            reconstructed_prob = evaluator.simulate_circ(circ=circ, simulator='qasm_simulator', noisy=True, provider_info=provider_info, output_format='prob',num_shots=int(2*np.power(2,i*j)))
             evaluator_time = 0
             uniter_time = 0
 
         full_circ_noiseless_prob = evaluator.simulate_circ(circ=circ,simulator='statevector_simulator',output_format='prob')
         noiseless_distance = wasserstein_distance(full_circ_noiseless_prob,reconstructed_prob)
-        full_circ_noisy_prob = evaluator.simulate_circ(circ=circ, simulator='ibmq_qasm_simulator', noisy=True, provider_info=provider_info, output_format='prob', num_shots=1024)
-        noisy_distance = wasserstein_distance(full_circ_noisy_prob,reconstructed_prob)
+        # full_circ_noisy_prob = evaluator.simulate_circ(circ=circ, simulator='qasm_simulator', noisy=True, provider_info=provider_info, output_format='prob', num_shots=int(2*np.power(2,i*j)))
+        # noisy_distance = wasserstein_distance(full_circ_noisy_prob,reconstructed_prob)
+        # full_circ_distance = wasserstein_distance(full_circ_noisy_prob,full_circ_noiseless_prob)
         
         noiseless_reconstruction_distance.append(noiseless_distance)
-        noisy_reconstruction_distance.append(noisy_distance)
+        # noisy_reconstruction_distance.append(noisy_distance)
+        # full_circ_noisy_noisless_distance.append(full_circ_distance)
         times['searcher'].append(searcher_time)
         times['evaluator'].append(evaluator_time)
         times['uniter'].append(uniter_time)
         num_qubits.append(i*j)
-        print('probability reconstruction distance to noiseless full circ = ',noiseless_distance)
-        print('probability reconstruction distance to noisy full circ = ',noisy_distance)
-        # print('searcher time = %.3f seconds'%(searcher_end-searcher_begin))
+        print('wasserstein distance to noiseless full circ = ',noiseless_distance)
+        # print('wasserstein distance to noisy full circ = ',noisy_distance)
+        # print('wasserstein distance between noisy and noiseless full circ = ',full_circ_distance)
+        print('searcher time = %.3f seconds'%searcher_time)
         print('evaluator time = %.3f seconds'%evaluator_time)
         print('uniter time = %.3f seconds'%uniter_time)
         print('-'*200)
 print('*'*200)
 print(times)
 print('num qubits:',num_qubits)
-print('noiseless reconstruction distance:',noiseless_reconstruction_distance)
+print('wasserstein distance to noiseless full circ :',noiseless_reconstruction_distance)
+print('wasserstein distance to noisy full circ :',noisy_reconstruction_distance)
+print('wasserstein distance between noisy and noiseless full circ = ',full_circ_noisy_noisless_distance)
 
-pickle.dump([num_qubits,times,noiseless_reconstruction_distance,noisy_reconstruction_distance], open( 'full_stack_benchmark.p','wb'))
+# pickle.dump([num_qubits,times,noiseless_reconstruction_distance,noisy_reconstruction_distance,full_circ_noisy_noisless_distance], open( '%s/full_stack_benchmark.p'%dirname,'wb'))
