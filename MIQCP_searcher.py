@@ -22,6 +22,7 @@ class Basic_Model(object):
 
         self.model = Model('cut_searching')
         self.model.params.OutputFlag = 0
+        self.model.params.NodeLimit = 200
 
         self.node_qubits = {}
         for node in self.node_ids:
