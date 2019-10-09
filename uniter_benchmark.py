@@ -31,9 +31,9 @@ times = {'searcher':[],'evaluator':[],'uniter':[]}
 num_qubits = []
 noiseless_reconstruction_distance = []
 noisy_reconstruction_distance = []
-max_qubit = 8
+max_qubit = 10
 
-for dimension in [[3,4]]:
+for dimension in [[4,5]]:
     i,j = dimension
     if i*j<=24 and i*j not in num_qubits:
         print('-'*200)
@@ -45,7 +45,7 @@ for dimension in [[3,4]]:
 
         # Looking for a cut
         searcher_begin = time()
-        hardness, positions, ancilla, d, num_cluster, m = searcher.find_cuts(circ,num_clusters=range(1,5),hw_max_qubit=max_qubit,alpha=1)
+        hardness, positions, ancilla, d, num_cluster, m = searcher.find_cuts(circ,num_clusters=range(1,4),hw_max_qubit=max_qubit,alpha=1)
         searcher_end = time()
         m.print_stat()
 
@@ -58,7 +58,7 @@ for dimension in [[3,4]]:
         all_cluster_prob = evaluator.simulate_clusters(complete_path_map=complete_path_map,
         clusters=clusters,
         provider_info=provider_info,
-        simulator_backend='ibmq_qasm_simulator',noisy=True)
+        simulator_backend='statevector_simulator',noisy=False)
         evaluator_end = time()
 
         # Reconstruct the circuit

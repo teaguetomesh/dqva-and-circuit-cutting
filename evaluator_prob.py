@@ -27,9 +27,6 @@ def simulate_circ(circ, simulator, noisy=False, provider_info=None, output_forma
             raise Exception('Provider info is required for noisy evaluation')
         if simulator!='qasm_simulator' and simulator!='ibmq_qasm_simulator':
             raise Exception('Noisy evaluation cannot use {} evaluator'.format(simulator))
-    else:
-        if provider_info!=None:
-            raise Exception('Noiseless evaluation does not require provider info')
     if simulator == 'statevector_simulator':
         backend = Aer.get_backend(simulator)
         job = execute(circ, backend=backend)
