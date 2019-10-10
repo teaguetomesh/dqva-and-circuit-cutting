@@ -9,6 +9,7 @@ import cutter
 import evaluator_prob as evaluator
 import uniter_prob as uniter
 from scipy.stats import wasserstein_distance
+from qiskit.quantum_info.states.measures import state_fidelity
 from qiskit import Aer, IBMQ, execute
 from qiskit.providers.aer import noise
 
@@ -40,7 +41,7 @@ dirname = './data'
 if not os.path.exists(dirname):
     os.mkdir(dirname)
 
-for dimension in [[3,4],[2,7],[3,5],[4,4],[3,6],[4,5]]:
+for dimension in [[3,4]]:
     i,j = dimension
     if i*j<=24 and i*j not in num_qubits:
         print('-'*200)
@@ -69,7 +70,7 @@ for dimension in [[3,4],[2,7],[3,5],[4,4],[3,6],[4,5]]:
             for cluster_idx in range(len(clusters)):
                 print('MPI evaluator on cluster %d'%cluster_idx)
                 # print(clusters[cluster_idx])
-                subprocess.call(['mpiexec','-n','5','python','evaluator_prob.py','--cluster-idx','%d'%cluster_idx,'--backend','qasm_simulator'])
+                subprocess.call(['mpiexec','-n','5','python','evaluator_prob.py','--cluster-idx','%d'%cluster_idx,'--backend','statevector_simulator'])
             evaluator_time = time()-evaluator_begin
 
             all_cluster_prob = []
@@ -88,12 +89,13 @@ for dimension in [[3,4],[2,7],[3,5],[4,4],[3,6],[4,5]]:
             uniter_time = 0
 
         print('Running full circuit')
-        sv_fc_noiseless = evaluator.simulate_circ(circ=circ,simulator='statevector_simulator',output_format='prob')
+        sv_fc_noiseless = evaluator.simulate_circ(circ=circ,simulator='statevector_simulator',output_format='sv')
         qasm_fc_noiseless = evaluator.simulate_circ(circ=circ, simulator='qasm_simulator', noisy=False, provider_info=provider_info, output_format='prob', num_shots=num_shots)
         # qasm_fc_noisy = evaluator.simulate_circ(circ=circ, simulator='qasm_simulator', noisy=True, provider_info=provider_info, output_format='prob', num_shots=num_shots)
         
         qasm_distance = wasserstein_distance(sv_fc_noiseless,qasm_fc_noiseless)
         qasm_cutting_distance = wasserstein_distance(sv_fc_noiseless,qasm_cutting_noiseless)
+        qasm_cutting_fidelity = state_fidelity(sv_fc_noiseless,qasm_cutting_noiseless)
         # no_cutting_distance = wasserstein_distance(qasm_fc_noiseless,qasm_fc_noisy)
         
         qasm_distances.append(qasm_distance)
@@ -104,7 +106,7 @@ for dimension in [[3,4],[2,7],[3,5],[4,4],[3,6],[4,5]]:
         times['uniter'].append(uniter_time)
         num_qubits.append(i*j)
         print('distance due to qasm = ',qasm_distance)
-        print('distance due to qasm, cutting = ',qasm_cutting_distance)
+        print('distance due to qasm+cutting =',qasm_cutting_distance,'fidelity =',qasm_cutting_fidelity)
         print('searcher time = %.3f seconds'%searcher_time)
         print('evaluator time = %.3f seconds'%evaluator_time)
         print('uniter time = %.3f seconds'%uniter_time)
@@ -115,4 +117,4 @@ print('num qubits:',num_qubits)
 print('distances due to qasm :',qasm_distances)
 print('distances due to qasm, cutting :',qasm_cutting_distances)
 
-pickle.dump([num_qubits,times,qasm_distances,qasm_cutting_distances], open('%s/noiseless_fidelity_benchmark.p'%dirname,'wb'))
+# pickle.dump([num_qubits,times,qasm_distances,qasm_cutting_distances], open('%s/noiseless_fidelity_benchmark.p'%dirname,'wb'))
