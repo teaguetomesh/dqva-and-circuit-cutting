@@ -21,17 +21,11 @@ def reverseBits(num,bitSize):
     reverse = reverse + (bitSize - len(reverse))*'0'
     return int(reverse,2)
 
-def simulate_circ(circ, simulator, noisy=False, provider_info=None, num_shots=1024,initial_layout=None):
-    if noisy:
-        if provider_info==None:
-            raise Exception('Provider info is required for noisy evaluation')
-        if simulator!='qasm_simulator' and simulator!='ibmq_qasm_simulator':
-            raise Exception('Noisy evaluation cannot use {} evaluator'.format(simulator))
-    else:
-        if simulator == 'ibmq_qasm_simulator':
-            raise Exception('Noiseless evaluation cannot use ibmq_qasm_simulator')
-    if simulator == 'statevector_simulator':
-        backend = Aer.get_backend(simulator)
+def simulate_circ(circ, backend, noisy=False,qasm_info=None):
+    if backend == 'statevector_simulator':
+        if noisy:
+            raise Exception('statevector simulator does not run noisy evaluations')
+        backend = Aer.get_backend('statevector_simulator')
         job = execute(circ, backend=backend)
         result = job.result()
         outputstate = result.get_statevector(circ)
@@ -41,51 +35,40 @@ def simulate_circ(circ, simulator, noisy=False, provider_info=None, num_shots=10
             outputstate_ordered[reverse_i] = sv
         output_prob = [np.power(np.absolute(x),2) for x in outputstate_ordered]
         return output_prob
-    elif simulator == 'qasm_simulator':
+    elif backend == 'qasm_simulator':
         c = ClassicalRegister(len(circ.qubits), 'c')
         meas = QuantumCircuit(circ.qregs[0], c)
         meas.barrier(circ.qubits)
         meas.measure(circ.qubits,c)
         qc = circ+meas
-        backend = Aer.get_backend(simulator)
-        if not noisy:
-            # print('noiseless qasm with %d shots'%num_shots)
+        backend = Aer.get_backend('qasm_simulator')
+        if noisy:
+            noise_model,coupling_map,basis_gates,num_shots,initial_layout = qasm_info
+            na_result = execute(experiments=qc,
+            backend=backend,
+            noise_model=noise_model,
+            coupling_map=coupling_map,
+            basis_gates=basis_gates,
+            shots=num_shots,
+            initial_layout=initial_layout).result()
+            na_counts = na_result.get_counts(qc)
+            na_prob = [0 for x in range(np.power(2,len(circ.qubits)))]
+            for state in na_counts:
+                reversed_state = reverseBits(int(state,2),len(circ.qubits))
+                na_prob[reversed_state] = na_counts[state]/num_shots
+            return na_prob
+        else:
+            _,_,_,num_shots,_ = qasm_info
             job_sim = execute(qc, backend, shots=num_shots)
             result = job_sim.result()
-            counts = result.get_counts(qc)
-        else:
-            provider, noise_model, coupling_map, basis_gates = provider_info
-            result = execute(qc, backend,
-                       noise_model=noise_model,
-                       coupling_map=coupling_map,
-                       basis_gates=basis_gates,shots=num_shots,initial_layout=initial_layout).result()
-            counts = result.get_counts(qc)
-        prob_ordered = [0 for x in range(np.power(2,len(circ.qubits)))]
-        for state in counts:
-            reversed_state = reverseBits(int(state,2),len(circ.qubits))
-            prob_ordered[reversed_state] = counts[state]/num_shots
-        return prob_ordered
-    elif simulator == 'ibmq_qasm_simulator':
-        provider, noise_model, coupling_map, basis_gates = provider_info
-        c = ClassicalRegister(len(circ.qubits), 'c')
-        meas = QuantumCircuit(circ.qregs[0], c)
-        meas.barrier(circ.qubits)
-        meas.measure(circ.qubits,c)
-        qc = circ+meas
-        backend = provider.get_backend('ibmq_qasm_simulator')
-        result_noise = execute(qc, backend, 
-                       noise_model=noise_model,
-                       coupling_map=coupling_map,
-                       basis_gates=basis_gates,
-                       shots=num_shots).result()
-        counts_noise = result_noise.get_counts(qc)
-        prob_ordered = [0 for x in range(np.power(2,len(circ.qubits)))]
-        for state in counts_noise:
-            reversed_state = reverseBits(int(state,2),len(circ.qubits))
-            prob_ordered[reversed_state] = counts_noise[state]/num_shots
-        return prob_ordered
+            noiseless_counts = result.get_counts(qc)
+            noiseless_prob = [0 for x in range(np.power(2,len(circ.qubits)))]
+            for state in noiseless_counts:
+                reversed_state = reverseBits(int(state,2),len(circ.qubits))
+                noiseless_prob[reversed_state] = noiseless_counts[state]/num_shots
+            return noiseless_prob
     else:
-        raise Exception('Illegal simulator:',simulator)
+        raise Exception('Illegal simulator:',backend)
 
 def find_cluster_O_rho_qubits(complete_path_map,cluster_idx):
     O_qubits = []
