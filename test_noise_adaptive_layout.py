@@ -22,6 +22,7 @@ from qiskit import QuantumRegister, QuantumCircuit
 from qiskit.test import QiskitTestCase
 from qiskit.providers.models import BackendProperties
 from qiskit.providers.models.backendproperties import Nduv, Gate
+from qiskit.compiler import transpile
 
 
 def make_qubit_with_error(readout_error):
@@ -69,9 +70,10 @@ class TestNoiseAdaptiveLayout(QiskitTestCase):
         qr = QuantumRegister(2, name='q')
         circuit = QuantumCircuit(qr)
         circuit.cx(qr[0], qr[1])
+        # print(circuit)
         dag = circuit_to_dag(circuit)
         qubit_list = []
-        ro_errors = [0.01, 0.01, 0.8]
+        ro_errors = [0.08, 0.01, 0.01]
         for ro_error in ro_errors:
             qubit_list.append(make_qubit_with_error(ro_error))
         p01 = [Nduv(date=calib_time, name='gate_error', unit='', value=0.1)]
@@ -85,8 +87,11 @@ class TestNoiseAdaptiveLayout(QiskitTestCase):
         nalayout = NoiseAdaptiveLayout(bprop)
         nalayout.run(dag)
         initial_layout = nalayout.property_set['layout']
-        self.assertNotEqual(initial_layout[qr[0]], 2)
-        self.assertNotEqual(initial_layout[qr[1]], 2)
+        # results = transpile(circuit, initial_layout=initial_layout)
+        print(initial_layout)
+        # print(results)
+        self.assertNotEqual(initial_layout[qr[0]], 0)
+        self.assertNotEqual(initial_layout[qr[1]], 0)
 
     def test_grid_layout(self):
         """
@@ -126,6 +131,7 @@ class TestNoiseAdaptiveLayout(QiskitTestCase):
         nalayout = NoiseAdaptiveLayout(bprop)
         nalayout.run(dag)
         initial_layout = nalayout.property_set['layout']
+        # print(initial_layout)
         for qid in range(4):
             for qloc in [0, 2]:
                 self.assertNotEqual(initial_layout[qr[qid]], qloc)

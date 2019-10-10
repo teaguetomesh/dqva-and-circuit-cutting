@@ -31,11 +31,12 @@ dirname = './data'
 if not os.path.exists(dirname):
     os.mkdir(dirname)
 
-for dimension in [[2,3],[2,4],[3,3],[2,5]]:
+# for dimension in [[2,3],[2,4],[3,3],[2,5]]:
+for dimension in [[2,3]]:
     i,j = dimension
     if i*j<=24 and i*j not in num_qubits:
         print('-'*200)
-        num_shots = int(1e4)
+        num_shots = int(1e5)
         print('%d * %d supremacy circuit, %d shots'%(i,j,num_shots))
 
         # Generate a circuit
@@ -59,8 +60,7 @@ for dimension in [[2,3],[2,4],[3,3],[2,5]]:
             evaluator_begin = time()
             for cluster_idx in range(len(clusters)):
                 print('MPI evaluator on cluster %d'%cluster_idx)
-                # print(clusters[cluster_idx])
-                subprocess.call(['mpiexec','-n','5','python','evaluator_prob.py','--cluster-idx','%d'%cluster_idx,'--backend','qasm_simulator','--noisy'])
+                subprocess.call(['mpiexec','-n','5','python','evaluator_prob.py','--cluster-idx','%d'%cluster_idx,'--backend','qasm_simulator','--noisy','--shots','%d'%num_shots])
             evaluator_time = time()-evaluator_begin
 
             all_cluster_prob = []
@@ -74,14 +74,14 @@ for dimension in [[2,3],[2,4],[3,3],[2,5]]:
             uniter_time = time()-uniter_begin
         
         else:
-            qasm_cutting_noisy = evaluator.simulate_circ(circ=circ, simulator='qasm_simulator', noisy=True, provider_info=provider_info, output_format='prob',num_shots=num_shots)
+            qasm_cutting_noisy = evaluator.simulate_circ(circ=circ, simulator='qasm_simulator', noisy=True, provider_info=provider_info, num_shots=num_shots)
             evaluator_time = 0
             uniter_time = 0
 
         print('Running full circuit')
-        sv_fc_noiseless = evaluator.simulate_circ(circ=circ,simulator='statevector_simulator',output_format='prob')
-        qasm_fc_noiseless = evaluator.simulate_circ(circ=circ, simulator='qasm_simulator', noisy=False, provider_info=provider_info, output_format='prob', num_shots=num_shots)
-        qasm_fc_noisy = evaluator.simulate_circ(circ=circ, simulator='qasm_simulator', noisy=True, provider_info=provider_info, output_format='prob', num_shots=num_shots)
+        sv_fc_noiseless = evaluator.simulate_circ(circ=circ,simulator='statevector_simulator',noisy=False, provider_info=None, num_shots=None)
+        qasm_fc_noiseless = evaluator.simulate_circ(circ=circ, simulator='qasm_simulator', noisy=False, provider_info=None, num_shots=num_shots)
+        qasm_fc_noisy = evaluator.simulate_circ(circ=circ, simulator='qasm_simulator', noisy=True, provider_info=provider_info, num_shots=num_shots)
         
         qasm_distance = wasserstein_distance(sv_fc_noiseless,qasm_fc_noiseless)
         qasm_noise_distance = wasserstein_distance(sv_fc_noiseless,qasm_fc_noisy)
@@ -95,9 +95,9 @@ for dimension in [[2,3],[2,4],[3,3],[2,5]]:
         times['evaluator'].append(evaluator_time)
         times['uniter'].append(uniter_time)
         num_qubits.append(i*j)
-        print('distance due to qasm = ',qasm_distance)
-        print('distance due to qasm, noise = ',qasm_noise_distance)
-        print('distance due to qasm, noise, cutting = ',qasm_noise_cutting_distance)
+        print('distance due to qasm = %.3e'%qasm_distance)
+        print('distance due to qasm, noise = %.3e'%qasm_noise_distance)
+        print('distance due to qasm, noise, cutting = %.3e'%qasm_noise_cutting_distance)
         print('searcher time = %.3f seconds'%searcher_time)
         print('evaluator time = %.3f seconds'%evaluator_time)
         print('uniter time = %.3f seconds'%uniter_time)
