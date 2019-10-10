@@ -10,7 +10,7 @@ brew install graphviz
 
 python3 -m venv venv
 
-pip install qiskit nxpd pydot matplotlib jupyterlab
+pip install qiskit=0.11 nxpd pydot matplotlib jupyterlab progressbar
 ```
 Install Gurobi solver. Change your current directory to the Gurobi installdir (the directory that contains the file setup.py), and issue the following command:
 ```

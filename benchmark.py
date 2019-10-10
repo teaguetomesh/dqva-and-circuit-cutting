@@ -26,27 +26,28 @@ gate_times = [
 ('cx', [11, 10], 721), ('cx', [11, 3], 634), ('cx', [12, 2], 773),
 ('cx', [13, 1], 2286), ('cx', [13, 12], 1504), ('cx', [], 800)]
 
-noise_model = noise.device.basic_device_noise_model(properties, gate_times=gate_times)
+# noise_model = noise.device.basic_device_noise_model(properties, gate_times=gate_times)
+noise_model = noise.device.basic_device_noise_model(properties)
 basis_gates = noise_model.basis_gates
 provider_info=(provider,noise_model,coupling_map,basis_gates)
 
 times = {'searcher':[],'evaluator':[],'uniter':[]}
 num_qubits = []
-cutting_distances = []
-no_cutting_distances = []
-max_qubit = 5
+qasm_distances = []
+qasm_cutting_distances = []
+max_qubit = 10
 dirname = './data'
 if not os.path.exists(dirname):
     os.mkdir(dirname)
 
-# for dimension in [[2,3],[2,4],[3,3],[2,5]]:
+for dimension in [[3,4],[2,7],[3,5],[4,4],[3,6],[4,5]]:
 # for dimension in [[3,6]]:
 # for dimension in [[4,5]]:
-for dimension in [[2,4]]:
+# for dimension in [[2,4]]:
     i,j = dimension
     if i*j<=24 and i*j not in num_qubits:
         print('-'*200)
-        num_shots = max(int(1e6),int(30*np.power(2,i*j)))
+        num_shots = int(1e4)
         print('%d * %d supremacy circuit, %d shots'%(i,j,num_shots))
 
         # Generate a circuit
@@ -55,7 +56,7 @@ for dimension in [[2,4]]:
 
         # Looking for a cut
         searcher_begin = time()
-        hardness, positions, ancilla, d, num_cluster, m = searcher.find_cuts(circ,num_clusters=range(1,10),hw_max_qubit=max_qubit,evaluator_weight=0)
+        hardness, positions, ancilla, d, num_cluster, m = searcher.find_cuts(circ,num_clusters=range(1,4),hw_max_qubit=max_qubit,evaluator_weight=1)
         searcher_time = time() - searcher_begin
         m.print_stat()
 
@@ -81,31 +82,32 @@ for dimension in [[2,4]]:
 
             # Reconstruct the circuit
             uniter_begin = time()
-            reconstructed_prob = uniter.reconstruct(complete_path_map, circ, clusters, all_cluster_prob)
+            qasm_cutting_noiseless = uniter.reconstruct(complete_path_map, circ, clusters, all_cluster_prob)
             uniter_time = time()-uniter_begin
         
         else:
-            reconstructed_prob = evaluator.simulate_circ(circ=circ, simulator='qasm_simulator', noisy=True, provider_info=provider_info, output_format='prob',num_shots=num_shots)
+            qasm_cutting_noiseless = evaluator.simulate_circ(circ=circ, simulator='qasm_simulator', noisy=False, provider_info=provider_info, output_format='prob',num_shots=num_shots)
             evaluator_time = 0
             uniter_time = 0
 
         print('Running full circuit')
-        full_circ_ground_truth = evaluator.simulate_circ(circ=circ,simulator='statevector_simulator',output_format='prob')
-        full_circ_noiseless_prob = evaluator.simulate_circ(circ=circ, simulator='qasm_simulator', noisy=False, provider_info=provider_info, output_format='prob', num_shots=num_shots)
-        full_circ_noisy_prob = evaluator.simulate_circ(circ=circ, simulator='qasm_simulator', noisy=True, provider_info=provider_info, output_format='prob', num_shots=num_shots)
-        qasm_sv_distance = wasserstein_distance(full_circ_ground_truth,full_circ_noiseless_prob)
-        cutting_distance = wasserstein_distance(full_circ_noiseless_prob,reconstructed_prob)
-        no_cutting_distance = wasserstein_distance(full_circ_noiseless_prob,full_circ_noisy_prob)
+        sv_fc_noiseless = evaluator.simulate_circ(circ=circ,simulator='statevector_simulator',output_format='prob')
+        qasm_fc_noiseless = evaluator.simulate_circ(circ=circ, simulator='qasm_simulator', noisy=False, provider_info=provider_info, output_format='prob', num_shots=num_shots)
+        # qasm_fc_noisy = evaluator.simulate_circ(circ=circ, simulator='qasm_simulator', noisy=True, provider_info=provider_info, output_format='prob', num_shots=num_shots)
         
-        cutting_distances.append(cutting_distance)
-        no_cutting_distances.append(no_cutting_distance)
+        qasm_distance = wasserstein_distance(sv_fc_noiseless,qasm_fc_noiseless)
+        qasm_cutting_distance = wasserstein_distance(sv_fc_noiseless,qasm_cutting_noiseless)
+        # no_cutting_distance = wasserstein_distance(qasm_fc_noiseless,qasm_fc_noisy)
+        
+        qasm_distances.append(qasm_distance)
+        qasm_cutting_distances.append(qasm_cutting_distance)
+        
         times['searcher'].append(searcher_time)
         times['evaluator'].append(evaluator_time)
         times['uniter'].append(uniter_time)
         num_qubits.append(i*j)
-        print('noisy cutting distance to noiseless QASM full circ = ',cutting_distance)
-        print('noisy NO cutting distance to noiseless QASM full circ = ',no_cutting_distance)
-        print('Noiseless QASM distance to sv full circ = ',qasm_sv_distance)
+        print('distance due to qasm = ',qasm_distance)
+        print('distance due to qasm, cutting = ',qasm_cutting_distance)
         print('searcher time = %.3f seconds'%searcher_time)
         print('evaluator time = %.3f seconds'%evaluator_time)
         print('uniter time = %.3f seconds'%uniter_time)
@@ -113,7 +115,7 @@ for dimension in [[2,4]]:
 print('*'*200)
 print(times)
 print('num qubits:',num_qubits)
-print('cutting distance to noiseless full circ :',cutting_distances)
-print('NO cutting distance to noiseless full circ :',no_cutting_distances)
+print('distances due to qasm :',qasm_distances)
+print('distances due to qasm, cutting :',qasm_cutting_distances)
 
-# pickle.dump([num_qubits,times,cutting_distances,no_cutting_distances], open('%s/fidelity_benchmark.p'%dirname,'wb'))
+pickle.dump([num_qubits,times,qasm_distances,qasm_cutting_distances], open('%s/noiseless_fidelity_benchmark.p'%dirname,'wb'))

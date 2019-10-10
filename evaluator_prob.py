@@ -136,6 +136,8 @@ def find_all_simulation_combinations(O_qubits, rho_qubits, num_qubits):
 
 def evaluate_cluster(complete_path_map, cluster, combinations, provider_info=None, simulator_backend='statevector_simulator',noisy=False):
     cluster_prob = {}
+    # num_shots = max(int(1e5),int(30*np.power(2,len(cluster.qubits))))
+    num_shots = int(1e5)
     for counter, combination in enumerate(combinations):
         cluster_dag = circuit_to_dag(cluster_circ)
         inits, meas = combination
@@ -176,7 +178,7 @@ def evaluate_cluster(complete_path_map, cluster, combinations, provider_info=Non
         noisy=noisy,
         provider_info=provider_info,
         output_format='prob',
-        num_shots=max(1024,int(10*np.power(2,len(cluster_circ_inst.qubits)))))
+        num_shots=num_shots)
         cluster_prob[(tuple(inits),tuple(meas))] = cluster_inst_prob
     return cluster_prob
 
@@ -221,7 +223,7 @@ if __name__ == '__main__':
         cluster=cluster_circ,
         combinations=rank_combinations,
         provider_info=provider_info,
-        simulator_backend=args.backend,noisy=True)
+        simulator_backend=args.backend,noisy=False)
         comm.send(cluster_prob, dest=size-1)
     else:
         combinations_start = rank * count + remainder
@@ -232,5 +234,5 @@ if __name__ == '__main__':
         cluster=cluster_circ,
         combinations=rank_combinations,
         provider_info=provider_info,
-        simulator_backend=args.backend,noisy=True)
+        simulator_backend=args.backend,noisy=False)
         comm.send(cluster_prob, dest=size-1)
