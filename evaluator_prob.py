@@ -72,25 +72,25 @@ def simulate_circ(circ, simulator, noisy=False, provider_info=None, output_forma
             reversed_state = reverseBits(int(state,2),len(circ.qubits))
             prob_ordered[reversed_state] = counts[state]/num_shots
         return prob_ordered
-    elif simulator == 'ibmq_qasm_simulator':
-        provider, noise_model, coupling_map, basis_gates = provider_info
-        c = ClassicalRegister(len(circ.qubits), 'c')
-        meas = QuantumCircuit(circ.qregs[0], c)
-        meas.barrier(circ.qubits)
-        meas.measure(circ.qubits,c)
-        qc = circ+meas
-        backend = provider.get_backend('ibmq_qasm_simulator')
-        result_noise = execute(qc, backend, 
-                       noise_model=noise_model,
-                       coupling_map=coupling_map,
-                       basis_gates=basis_gates,
-                       shots=num_shots).result()
-        counts_noise = result_noise.get_counts(qc)
-        prob_ordered = [0 for x in range(np.power(2,len(circ.qubits)))]
-        for state in counts_noise:
-            reversed_state = reverseBits(int(state,2),len(circ.qubits))
-            prob_ordered[reversed_state] = counts_noise[state]/num_shots
-        return prob_ordered
+    # elif simulator == 'ibmq_qasm_simulator':
+    #     provider, noise_model, coupling_map, basis_gates = provider_info
+    #     c = ClassicalRegister(len(circ.qubits), 'c')
+    #     meas = QuantumCircuit(circ.qregs[0], c)
+    #     meas.barrier(circ.qubits)
+    #     meas.measure(circ.qubits,c)
+    #     qc = circ+meas
+    #     backend = provider.get_backend('ibmq_qasm_simulator')
+    #     result_noise = execute(qc, backend, 
+    #                    noise_model=noise_model,
+    #                    coupling_map=coupling_map,
+    #                    basis_gates=basis_gates,
+    #                    shots=num_shots).result()
+    #     counts_noise = result_noise.get_counts(qc)
+    #     prob_ordered = [0 for x in range(np.power(2,len(circ.qubits)))]
+    #     for state in counts_noise:
+    #         reversed_state = reverseBits(int(state,2),len(circ.qubits))
+    #         prob_ordered[reversed_state] = counts_noise[state]/num_shots
+    #     return prob_ordered
     else:
         raise Exception('Illegal simulator:',simulator)
 
@@ -177,7 +177,7 @@ def evaluate_cluster(complete_path_map, cluster, combinations, provider_info=Non
         simulator=simulator_backend,
         noisy=noisy,
         provider_info=provider_info,
-        output_format='prob',
+        output_format='sv',
         num_shots=num_shots)
         cluster_prob[(tuple(inits),tuple(meas))] = cluster_inst_prob
     return cluster_prob
@@ -186,6 +186,8 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='MPI evaluator.')
     parser.add_argument('--cluster-idx', metavar='N', type=int,help='which cluster pickle file to run')
     parser.add_argument('--backend', metavar='S', type=str,help='which Qiskit backend')
+    parser.add_argument('--noisy', action='store_true',help='noisy evaluation?')
+    parser.add_argument('--dirname', metavar='S', type=str,default='./data',help='which directory?')
     args = parser.parse_args()
 
     comm = MPI.COMM_WORLD
@@ -194,7 +196,7 @@ if __name__ == '__main__':
 
     num_workers = size - 1
 
-    dirname = './data'
+    dirname = args.dirname
     clusters, complete_path_map, provider_info = pickle.load( open( '%s/evaluator_input.p'%dirname, 'rb' ) )
 
     cluster_circ = clusters[args.cluster_idx]
@@ -223,7 +225,7 @@ if __name__ == '__main__':
         cluster=cluster_circ,
         combinations=rank_combinations,
         provider_info=provider_info,
-        simulator_backend=args.backend,noisy=False)
+        simulator_backend=args.backend,noisy=args.noisy)
         comm.send(cluster_prob, dest=size-1)
     else:
         combinations_start = rank * count + remainder
@@ -234,5 +236,5 @@ if __name__ == '__main__':
         cluster=cluster_circ,
         combinations=rank_combinations,
         provider_info=provider_info,
-        simulator_backend=args.backend,noisy=False)
+        simulator_backend=args.backend,noisy=args.noisy)
         comm.send(cluster_prob, dest=size-1)

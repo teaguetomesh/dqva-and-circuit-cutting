@@ -5,18 +5,18 @@ import glob
 from time import time
 from scipy.stats import wasserstein_distance
 import progressbar as pb
+import evaluator_prob as evaluator
+from qiskit.quantum_info.states.measures import state_fidelity
 
 def read_pickle_files(dirname):
-    cluster_circ_files = [f for f in glob.glob('%s/cluster_*_circ.p'%dirname)]
-    all_cluster_circ = []
-    for cluster_idx in range(len(cluster_circ_files)):
-        cluster_circ = pickle.load(open('%s/cluster_%d_circ.p'%(dirname,cluster_idx), 'rb' ))
-        all_cluster_circ.append(cluster_circ)
-    complete_path_map = pickle.load(open( '%s/cpm.p'%dirname, 'rb' ))
+    all_cluster_circ, complete_path_map, _ = pickle.load(open('%s/evaluator_input.p'%(dirname), 'rb' ))
+    cluster_evals = [f for f in glob.glob('%s/cluster_*_prob.p'%dirname)]
+    cluster_sim_probs = []
+    for i in range(len(cluster_evals)):
+        prob = pickle.load(open('%s/cluster_%d_prob.p'%(dirname,i), 'rb' ))
+        cluster_sim_probs.append(prob)
     full_circ = pickle.load(open( '%s/full_circ.p'%dirname, 'rb' ))
-    cluster_sim_prob = pickle.load(open( '%s/cluster_sim_prob.p'%dirname, 'rb' ))
-    full_circ_sim_prob = pickle.load(open( '%s/full_circ_sim_prob.p'%dirname, 'rb' ))
-    return complete_path_map, full_circ, all_cluster_circ, cluster_sim_prob,full_circ_sim_prob
+    return complete_path_map, full_circ, all_cluster_circ, cluster_sim_probs
 
 def find_cuts_pairs(complete_path_map):
     O_rho_pairs = []
@@ -278,10 +278,9 @@ def reconstruct(complete_path_map, full_circ, cluster_circs, cluster_sim_probs):
 if __name__ == '__main__':
     begin = time()
     dirname = './data'
-    complete_path_map, full_circ, cluster_circs, cluster_sim_probs,full_circ_sim_prob = read_pickle_files(dirname)
+    complete_path_map, full_circ, cluster_circs, cluster_sim_probs = read_pickle_files(dirname)
     reconstructed_prob = reconstruct(complete_path_map, full_circ, cluster_circs, cluster_sim_probs)
+    sv_fc_noiseless = evaluator.simulate_circ(circ=full_circ,simulator='statevector_simulator',output_format='sv')
     # pickle.dump(reconstructed_prob, open('%s/reconstructed_prob.p'%dirname, 'wb'))
     print('Python time elapsed = %f seconds'%(time()-begin))
-    distance = wasserstein_distance(full_circ_sim_prob,reconstructed_prob)
-    print('probability reconstruction distance = ',distance)
-    print('first element comparison: full_circ = ',full_circ_sim_prob[0],'reconstructed = ',reconstructed_prob[0])
+    print('fidelity = ',state_fidelity(reconstructed_prob,sv_fc_noiseless))
