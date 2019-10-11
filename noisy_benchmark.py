@@ -15,7 +15,7 @@ from qiskit.providers.aer import noise
 from qiskit.converters import circuit_to_dag, dag_to_circuit
 from qiskit.transpiler.passes import NoiseAdaptiveLayout
 
-num_shots = int(1e5)
+num_shots = int(1e4)
 provider = IBMQ.load_account()
 device = provider.get_backend('ibmq_16_melbourne')
 properties = device.properties()
@@ -25,17 +25,20 @@ basis_gates = noise_model.basis_gates
 
 times = {'searcher':[],'evaluator':[],'uniter':[]}
 num_qubits = []
-max_qubit = 4
-qasm_distances = []
-qasm_noise_distances = []
-qasm_noise_na_distances = []
-qasm_noise_na_cutting_distances = []
+max_qubit = 5
+
+sv_noiseless_fc_l = []
+qasm_noiseless_fc_l = []
+qasm_noisy_fc_l = []
+qasm_noisy_na_fc_l = []
+qasm_noisy_na_cutting_l = []
 
 dirname = './data'
 if not os.path.exists(dirname):
     os.mkdir(dirname)
 
-for dimension in [[2,3],[2,4],[3,3],[2,5],[3,4],[2,7]]:
+# for dimension in [[2,3],[2,4],[3,3],[2,5],[3,4],[2,7]]:
+for dimension in [[2,3],[2,4]]:
     i,j = dimension
     print('-'*100)
     print('%d * %d supremacy circuit'%(i,j))
@@ -64,7 +67,7 @@ for dimension in [[2,3],[2,4],[3,3],[2,5],[3,4],[2,7]]:
 
     # Looking for a cut
     searcher_begin = time()
-    hardness, positions, ancilla, d, num_cluster, m = searcher.find_cuts(circ,num_clusters=range(2,5),hw_max_qubit=max_qubit,evaluator_weight=1)
+    hardness, positions, ancilla, d, num_cluster, m = searcher.find_cuts(circ,num_clusters=range(2,7),hw_max_qubit=max_qubit,evaluator_weight=1)
     searcher_time = time() - searcher_begin
     m.print_stat()
 
@@ -95,18 +98,20 @@ for dimension in [[2,3],[2,4],[3,3],[2,5],[3,4],[2,7]]:
     uniter_time = time()-uniter_begin
     
     qasm_distance = wasserstein_distance(sv_noiseless_fc,qasm_noiseless_fc)
-    qasm_noise_distance = wasserstein_distance(qasm_noiseless_fc,qasm_noisy_fc)
-    qasm_noise_na_distance = wasserstein_distance(qasm_noiseless_fc,qasm_noisy_na_fc)
-    qasm_noise_na_cutting_distance = wasserstein_distance(qasm_noiseless_fc,qasm_noisy_na_cutting)
-    rand_int = random.randint(0, len(qasm_noiseless_fc))
-    percent_diff = abs(qasm_noiseless_fc[rand_int]-qasm_noisy_na_cutting[rand_int])/qasm_noiseless_fc[rand_int]
+    qasm_noise_distance = wasserstein_distance(sv_noiseless_fc,qasm_noisy_fc)
+    qasm_noise_na_distance = wasserstein_distance(sv_noiseless_fc,qasm_noisy_na_fc)
+    qasm_noise_na_cutting_distance = wasserstein_distance(sv_noiseless_fc,qasm_noisy_na_cutting)
+    rand_int = random.randint(0, len(sv_noiseless_fc))
+    percent_diff = abs(sv_noiseless_fc[rand_int]-qasm_noisy_na_cutting[rand_int])/sv_noiseless_fc[rand_int]
     print('checking random index {} percentage difference {}'.format(rand_int,percent_diff))
     # assert percent_diff<0.1
     
-    qasm_distances.append(qasm_distance)
-    qasm_noise_distances.append(qasm_noise_distance)
-    qasm_noise_na_distances.append(qasm_noise_na_distance)
-    qasm_noise_na_cutting_distances.append(qasm_noise_na_cutting_distance)
+    sv_noiseless_fc_l.append(sv_noiseless_fc)
+    qasm_noiseless_fc_l.append(qasm_noiseless_fc)
+    qasm_noisy_fc_l.append(qasm_noisy_fc)
+    qasm_noisy_na_fc_l.append(qasm_noisy_na_fc)
+    qasm_noisy_na_cutting_l.append(qasm_noisy_na_cutting)
+
     times['searcher'].append(searcher_time)
     times['evaluator'].append(evaluator_time)
     times['uniter'].append(uniter_time)
@@ -121,9 +126,5 @@ for dimension in [[2,3],[2,4],[3,3],[2,5],[3,4],[2,7]]:
     print('-'*100)
 
 print('*'*200)
-print('distance due to qasm = ',qasm_distances)
-print('distance due to qasm + noise = ',qasm_noise_distances)
-print('distance due to qasm + noise + noise-adaptive = ',qasm_noise_na_distances)
-print('distance due to qasm + noise + noise-adaptive + cutting = ',qasm_noise_na_cutting_distances)
-pickle.dump([num_qubits,times,qasm_distances,qasm_noise_distances,qasm_noise_na_distances,qasm_noise_na_cutting_distances],
-open('%s/noisy_benchmark.p'%dirname,'wb'))
+pickle.dump([num_qubits,times,sv_noiseless_fc_l,qasm_noiseless_fc_l,qasm_noisy_fc_l,qasm_noisy_na_fc_l,qasm_noisy_na_cutting_l],
+open('%s/noisy_benchmark_%d_shots_%d_qubits.p'%(dirname,num_shots,max_qubit),'wb'))
