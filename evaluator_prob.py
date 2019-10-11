@@ -119,11 +119,6 @@ def evaluate_cluster(complete_path_map, cluster_circ, combinations, backend='sta
     coupling_map = device.configuration().coupling_map
     noise_model = noise.device.basic_device_noise_model(properties)
     basis_gates = noise_model.basis_gates
-    dag = circuit_to_dag(cluster_circ)
-    noise_mapper = NoiseAdaptiveLayout(properties)
-    noise_mapper.run(dag)
-    initial_layout = noise_mapper.property_set['layout']
-    qasm_info = [noise_model,coupling_map,basis_gates,num_shots,initial_layout]
 
     cluster_prob = {}
     for _, combination in enumerate(combinations):
@@ -161,6 +156,11 @@ def evaluate_cluster(complete_path_map, cluster_circ, combinations, backend='sta
             else:
                 raise Exception('Illegal measurement basis:',x)
         cluster_circ_inst = dag_to_circuit(cluster_dag)
+        noise_mapper = NoiseAdaptiveLayout(properties)
+        noise_mapper.run(cluster_dag)
+        initial_layout = noise_mapper.property_set['layout']
+        # print(initial_layout)
+        qasm_info = [noise_model,coupling_map,basis_gates,num_shots,initial_layout]
         cluster_inst_prob = simulate_circ(circ=cluster_circ_inst,
         backend=backend,
         noisy=noisy,qasm_info=qasm_info)
