@@ -1,6 +1,7 @@
 from qiskit.converters import circuit_to_dag, dag_to_circuit
 from qiskit.extensions.standard import HGate, SGate, SdgGate, XGate
 from qiskit.circuit.classicalregister import ClassicalRegister
+from qiskit.transpiler.passes import NoiseAdaptiveLayout
 from qiskit import QuantumCircuit
 from qiskit import Aer, IBMQ, execute
 from qiskit.providers.aer import noise
@@ -110,9 +111,22 @@ def find_all_simulation_combinations(O_qubits, rho_qubits, num_qubits):
     combinations = list(itertools.product(complete_inits,complete_meas))
     return combinations
 
-def evaluate_cluster(complete_path_map, cluster, combinations, provider_info=None, simulator_backend='statevector_simulator',noisy=False,num_shots=int(1e5)):
+def evaluate_cluster(complete_path_map, cluster_circ, combinations, backend='statevector_simulator',noisy=False):
+    num_shots = int(1e5)
+    provider = IBMQ.load_account()
+    device = provider.get_backend('ibmq_16_melbourne')
+    properties = device.properties()
+    coupling_map = device.configuration().coupling_map
+    noise_model = noise.device.basic_device_noise_model(properties)
+    basis_gates = noise_model.basis_gates
+    dag = circuit_to_dag(cluster_circ)
+    noise_mapper = NoiseAdaptiveLayout(properties)
+    noise_mapper.run(dag)
+    initial_layout = noise_mapper.property_set['layout']
+    qasm_info = [noise_model,coupling_map,basis_gates,num_shots,initial_layout]
+
     cluster_prob = {}
-    for counter, combination in enumerate(combinations):
+    for _, combination in enumerate(combinations):
         cluster_dag = circuit_to_dag(cluster_circ)
         inits, meas = combination
         for i,x in enumerate(inits):
@@ -148,10 +162,8 @@ def evaluate_cluster(complete_path_map, cluster, combinations, provider_info=Non
                 raise Exception('Illegal measurement basis:',x)
         cluster_circ_inst = dag_to_circuit(cluster_dag)
         cluster_inst_prob = simulate_circ(circ=cluster_circ_inst,
-        simulator=simulator_backend,
-        noisy=noisy,
-        provider_info=provider_info,
-        num_shots=num_shots)
+        backend=backend,
+        noisy=noisy,qasm_info=qasm_info)
         cluster_prob[(tuple(inits),tuple(meas))] = cluster_inst_prob
     return cluster_prob
 
@@ -161,7 +173,6 @@ if __name__ == '__main__':
     parser.add_argument('--backend', metavar='S', type=str,help='which Qiskit backend')
     parser.add_argument('--noisy', action='store_true',help='noisy evaluation?')
     parser.add_argument('--dirname', metavar='S', type=str,default='./data',help='which directory?')
-    parser.add_argument('--shots', metavar='N', type=int,default=int(1e5),help='number of shots')
     args = parser.parse_args()
 
     comm = MPI.COMM_WORLD
@@ -171,7 +182,7 @@ if __name__ == '__main__':
     num_workers = size - 1
 
     dirname = args.dirname
-    clusters, complete_path_map, provider_info = pickle.load( open( '%s/evaluator_input.p'%dirname, 'rb' ) )
+    clusters, complete_path_map, qasm_info = pickle.load( open( '%s/evaluator_input.p'%dirname, 'rb' ) )
 
     cluster_circ = clusters[args.cluster_idx]
     O_qubits, rho_qubits = find_cluster_O_rho_qubits(complete_path_map,args.cluster_idx)
@@ -196,10 +207,9 @@ if __name__ == '__main__':
         rank_combinations = combinations[combinations_start:combinations_stop]
         print('rank %d runs %d combinations for cluster %d'%(rank,len(rank_combinations),args.cluster_idx))
         cluster_prob = evaluate_cluster(complete_path_map=complete_path_map,
-        cluster=cluster_circ,
+        cluster_circ=cluster_circ,
         combinations=rank_combinations,
-        provider_info=provider_info,
-        simulator_backend=args.backend,noisy=args.noisy,num_shots=args.shots)
+        backend=args.backend,noisy=args.noisy)
         comm.send(cluster_prob, dest=size-1)
     else:
         combinations_start = rank * count + remainder
@@ -207,8 +217,7 @@ if __name__ == '__main__':
         rank_combinations = combinations[combinations_start:combinations_stop]
         print('rank %d runs %d combinations for cluster %d'%(rank,len(rank_combinations),args.cluster_idx))
         cluster_prob = evaluate_cluster(complete_path_map=complete_path_map,
-        cluster=cluster_circ,
+        cluster_circ=cluster_circ,
         combinations=rank_combinations,
-        provider_info=provider_info,
-        simulator_backend=args.backend,noisy=args.noisy,num_shots=args.shots)
+        backend=args.backend,noisy=args.noisy)
         comm.send(cluster_prob, dest=size-1)
