@@ -24,6 +24,7 @@ def reverseBits(num,bitSize):
 
 def simulate_circ(circ, backend, noisy=False,qasm_info=None):
     if backend == 'statevector_simulator':
+        # print('using statevector simulator')
         if noisy:
             raise Exception('statevector simulator does not run noisy evaluations')
         backend = Aer.get_backend('statevector_simulator')
@@ -46,6 +47,7 @@ def simulate_circ(circ, backend, noisy=False,qasm_info=None):
         backend = Aer.get_backend('qasm_simulator')
         if noisy:
             noise_model,coupling_map,basis_gates,num_shots,initial_layout = qasm_info
+            # print('using noisy qasm simulator {} shots, NA = {}'.format(num_shots,initial_layout!=None))
             na_result = execute(experiments=qc,
             backend=backend,
             noise_model=noise_model,
@@ -61,6 +63,7 @@ def simulate_circ(circ, backend, noisy=False,qasm_info=None):
             return na_prob
         else:
             _,_,_,num_shots,_ = qasm_info
+            # print('using noiseless qasm simulator %d shots'%num_shots)
             job_sim = execute(qc, backend, shots=num_shots)
             result = job_sim.result()
             noiseless_counts = result.get_counts(qc)
@@ -112,8 +115,7 @@ def find_all_simulation_combinations(O_qubits, rho_qubits, num_qubits):
     combinations = list(itertools.product(complete_inits,complete_meas))
     return combinations
 
-def evaluate_cluster(complete_path_map, cluster_circ, combinations, backend='statevector_simulator',noisy=False):
-    num_shots = int(1e5)
+def evaluate_cluster(complete_path_map, cluster_circ, combinations, backend='statevector_simulator',noisy=False,num_shots=1024):
     provider = IBMQ.load_account()
     device = provider.get_backend('ibmq_16_melbourne')
     properties = device.properties()
@@ -174,6 +176,7 @@ if __name__ == '__main__':
     parser.add_argument('--cluster-idx', metavar='N', type=int,help='which cluster pickle file to run')
     parser.add_argument('--backend', metavar='S', type=str,help='which Qiskit backend')
     parser.add_argument('--noisy', action='store_true',help='noisy evaluation?')
+    parser.add_argument('--num-shots', metavar='N',help='number of shots')
     parser.add_argument('--dirname', metavar='S', type=str,default='./data',help='which directory?')
     args = parser.parse_args()
 
@@ -184,7 +187,7 @@ if __name__ == '__main__':
     num_workers = size - 1
 
     dirname = args.dirname
-    clusters, complete_path_map, qasm_info = pickle.load( open( '%s/evaluator_input.p'%dirname, 'rb' ) )
+    clusters, complete_path_map, qasm_info = pickle.load(open( '%s/evaluator_input.p'%dirname, 'rb' ) )
 
     cluster_circ = clusters[args.cluster_idx]
     O_qubits, rho_qubits = find_cluster_O_rho_qubits(complete_path_map,args.cluster_idx)
@@ -211,7 +214,7 @@ if __name__ == '__main__':
         cluster_prob = evaluate_cluster(complete_path_map=complete_path_map,
         cluster_circ=cluster_circ,
         combinations=rank_combinations,
-        backend=args.backend,noisy=args.noisy)
+        backend=args.backend,noisy=args.noisy,num_shots=int(args.num_shots))
         comm.send(cluster_prob, dest=size-1)
     else:
         combinations_start = rank * count + remainder
@@ -221,5 +224,5 @@ if __name__ == '__main__':
         cluster_prob = evaluate_cluster(complete_path_map=complete_path_map,
         cluster_circ=cluster_circ,
         combinations=rank_combinations,
-        backend=args.backend,noisy=args.noisy)
+        backend=args.backend,noisy=args.noisy,num_shots=int(args.num_shots))
         comm.send(cluster_prob, dest=size-1)

@@ -46,8 +46,7 @@ dirname = './noisy_benchmark_data'
 if not os.path.exists(dirname):
     os.mkdir(dirname)
 
-# for dimension in [[2,3],[2,4],[3,3],[2,5],[3,4]]:
-for dimension in [[2,3]]:
+for dimension in [[2,3],[2,4],[3,3]]:
     i,j = dimension
     print('-'*100)
     print('%d * %d supremacy circuit'%(i,j))
@@ -93,14 +92,14 @@ for dimension in [[2,3]]:
         print('MPI evaluator on cluster %d'%cluster_idx)
         subprocess.call(['mpiexec','-n','2','python','evaluator_prob.py',
         '--cluster-idx','%d'%cluster_idx,
-        '--backend','qasm_simulator','--noisy','--dirname','%s'%dirname])
-    evaluator_time = time()-evaluator_begin
+        '--backend','qasm_simulator','--noisy','--num-shots','%d'%num_shots,'--dirname','%s'%dirname])
 
     all_cluster_prob = []
     for cluster_idx in range(len(clusters)):
         cluster_prob = pickle.load( open('%s/cluster_%d_prob.p'%(dirname,cluster_idx), 'rb' ))
         all_cluster_prob.append(cluster_prob)
         os.remove('%s/cluster_%d_prob.p'%(dirname,cluster_idx))
+    evaluator_time = time()-evaluator_begin
 
     # Reconstruct the circuit
     uniter_begin = time()
@@ -129,7 +128,7 @@ for dimension in [[2,3]]:
     times['evaluator'].append(evaluator_time)
     times['uniter'].append(uniter_time)
     num_qubits.append(i*j)
-    print('qasm = %.3e'%qasm_distance)
+    print('qasm = %.3e , %.3e'%(qasm_distance,qasm_ce))
     print('qasm + noise = %.3e , %.3e'%(qasm_noise_distance,qasm_noise_ce))
     print('qasm + noise + noise-adaptive = %.3e , %.3e'%(qasm_noise_na_distance,qasm_noise_na_ce))
     print('qasm + noise + noise-adaptive + cutting = %.3e , %.3e'%(qasm_noise_na_cutting_distance,qasm_noise_na_cutting_ce))
