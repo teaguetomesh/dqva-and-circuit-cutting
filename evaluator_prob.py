@@ -36,6 +36,7 @@ def simulate_circ(circ, backend, noisy=False,qasm_info=None):
             outputstate_ordered[reverse_i] = sv
         output_prob = [np.power(np.absolute(x),2) for x in outputstate_ordered]
         return output_prob
+        # return outputstate_ordered
     elif backend == 'qasm_simulator':
         c = ClassicalRegister(len(circ.qubits), 'c')
         meas = QuantumCircuit(circ.qregs[0], c)
@@ -156,10 +157,11 @@ def evaluate_cluster(complete_path_map, cluster_circ, combinations, backend='sta
             else:
                 raise Exception('Illegal measurement basis:',x)
         cluster_circ_inst = dag_to_circuit(cluster_dag)
+        # print(inits, meas)
+        # print(cluster_circ_inst)
         noise_mapper = NoiseAdaptiveLayout(properties)
         noise_mapper.run(cluster_dag)
         initial_layout = noise_mapper.property_set['layout']
-        # print(initial_layout)
         qasm_info = [noise_model,coupling_map,basis_gates,num_shots,initial_layout]
         cluster_inst_prob = simulate_circ(circ=cluster_circ_inst,
         backend=backend,
@@ -192,7 +194,7 @@ if __name__ == '__main__':
     remainder = len(combinations) % num_workers
 
     if rank == size-1:
-        print('Evaluator master rank')
+        # print('MPI evaluator on cluster %d'%args.cluster_idx)
         cluster_prob = {}
         # bar = pb.ProgressBar(max_value=num_workers)
         for i in range(num_workers):
