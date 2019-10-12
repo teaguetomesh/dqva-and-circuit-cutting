@@ -23,7 +23,7 @@ def cross_entropy(d1,d2):
             h+= -p*np.log(q)
     return h
 
-num_shots = int(1e4)
+num_shots = int(100)
 provider = IBMQ.load_account()
 device = provider.get_backend('ibmq_16_melbourne')
 properties = device.properties()
