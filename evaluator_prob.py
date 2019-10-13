@@ -1,11 +1,11 @@
 from qiskit.converters import circuit_to_dag, dag_to_circuit
 from qiskit.extensions.standard import HGate, SGate, SdgGate, XGate
 from qiskit.circuit.classicalregister import ClassicalRegister
+from qiskit.transpiler.passes import NoiseAdaptiveLayout
 from qiskit import QuantumCircuit
 from qiskit import Aer, IBMQ, execute
 from qiskit.providers.aer import noise
 import pickle
-import glob
 import itertools
 import copy
 import os
@@ -21,19 +21,12 @@ def reverseBits(num,bitSize):
     reverse = reverse + (bitSize - len(reverse))*'0'
     return int(reverse,2)
 
-def simulate_circ(circ, simulator, noisy=False, provider_info=None, output_format='prob', num_shots=1024):
-    if noisy:
-        if output_format!='prob':
-            raise Exception('Illegal noisy evaluation method, output_format has to be prob')
-        if provider_info==None:
-            raise Exception('Provider info is required for noisy evaluation')
-        if simulator!='qasm_simulator' and simulator!='ibmq_qasm_simulator':
-            raise Exception('Noisy evaluation cannot use {} evaluator'.format(simulator))
-    else:
-        if simulator == 'ibmq_qasm_simulator':
-            raise Exception('Noiseless evaluation cannot use ibmq_qasm_simulator')
-    if simulator == 'statevector_simulator':
-        backend = Aer.get_backend(simulator)
+def simulate_circ(circ, backend, noisy=False,qasm_info=None):
+    if backend == 'statevector_simulator':
+        # print('using statevector simulator')
+        if noisy:
+            raise Exception('statevector simulator does not run noisy evaluations')
+        backend = Aer.get_backend('statevector_simulator')
         job = execute(circ, backend=backend)
         result = job.result()
         outputstate = result.get_statevector(circ)
@@ -41,58 +34,45 @@ def simulate_circ(circ, simulator, noisy=False, provider_info=None, output_forma
         for i, sv in enumerate(outputstate):
             reverse_i = reverseBits(i,len(circ.qubits))
             outputstate_ordered[reverse_i] = sv
-        if output_format == 'sv':
-            return outputstate_ordered
-        elif output_format == 'prob':
-            output_prob = [np.power(np.absolute(x),2) for x in outputstate_ordered]
-            return output_prob
-        else:
-            raise Exception('Illegal output format = ',output_format)
-    elif simulator == 'qasm_simulator':
+        output_prob = [np.power(np.absolute(x),2) for x in outputstate_ordered]
+        return output_prob
+        # return outputstate_ordered
+    elif backend == 'qasm_simulator':
         c = ClassicalRegister(len(circ.qubits), 'c')
         meas = QuantumCircuit(circ.qregs[0], c)
         meas.barrier(circ.qubits)
         meas.measure(circ.qubits,c)
         qc = circ+meas
-        backend = Aer.get_backend(simulator)
-        if not noisy:
-            # print('noiseless qasm with %d shots'%num_shots)
+        backend = Aer.get_backend('qasm_simulator')
+        if noisy:
+            noise_model,coupling_map,basis_gates,num_shots,initial_layout = qasm_info
+            # print('using noisy qasm simulator {} shots, NA = {}'.format(num_shots,initial_layout!=None))
+            na_result = execute(experiments=qc,
+            backend=backend,
+            noise_model=noise_model,
+            coupling_map=coupling_map,
+            basis_gates=basis_gates,
+            shots=num_shots,
+            initial_layout=initial_layout).result()
+            na_counts = na_result.get_counts(qc)
+            na_prob = [0 for x in range(np.power(2,len(circ.qubits)))]
+            for state in na_counts:
+                reversed_state = reverseBits(int(state,2),len(circ.qubits))
+                na_prob[reversed_state] = na_counts[state]/num_shots
+            return na_prob
+        else:
+            _,_,_,num_shots,_ = qasm_info
+            # print('using noiseless qasm simulator %d shots'%num_shots)
             job_sim = execute(qc, backend, shots=num_shots)
             result = job_sim.result()
-            counts = result.get_counts(qc)
-        else:
-            provider, noise_model, coupling_map, basis_gates = provider_info
-            result = execute(qc, backend,
-                       noise_model=noise_model,
-                       coupling_map=coupling_map,
-                       basis_gates=basis_gates,shots=num_shots).result()
-            counts = result.get_counts(qc)
-        prob_ordered = [0 for x in range(np.power(2,len(circ.qubits)))]
-        for state in counts:
-            reversed_state = reverseBits(int(state,2),len(circ.qubits))
-            prob_ordered[reversed_state] = counts[state]/num_shots
-        return prob_ordered
-    elif simulator == 'ibmq_qasm_simulator':
-        provider, noise_model, coupling_map, basis_gates = provider_info
-        c = ClassicalRegister(len(circ.qubits), 'c')
-        meas = QuantumCircuit(circ.qregs[0], c)
-        meas.barrier(circ.qubits)
-        meas.measure(circ.qubits,c)
-        qc = circ+meas
-        backend = provider.get_backend('ibmq_qasm_simulator')
-        result_noise = execute(qc, backend, 
-                       noise_model=noise_model,
-                       coupling_map=coupling_map,
-                       basis_gates=basis_gates,
-                       shots=num_shots).result()
-        counts_noise = result_noise.get_counts(qc)
-        prob_ordered = [0 for x in range(np.power(2,len(circ.qubits)))]
-        for state in counts_noise:
-            reversed_state = reverseBits(int(state,2),len(circ.qubits))
-            prob_ordered[reversed_state] = counts_noise[state]/num_shots
-        return prob_ordered
+            noiseless_counts = result.get_counts(qc)
+            noiseless_prob = [0 for x in range(np.power(2,len(circ.qubits)))]
+            for state in noiseless_counts:
+                reversed_state = reverseBits(int(state,2),len(circ.qubits))
+                noiseless_prob[reversed_state] = noiseless_counts[state]/num_shots
+            return noiseless_prob
     else:
-        raise Exception('Illegal simulator:',simulator)
+        raise Exception('Illegal simulator:',backend)
 
 def find_cluster_O_rho_qubits(complete_path_map,cluster_idx):
     O_qubits = []
@@ -134,11 +114,16 @@ def find_all_simulation_combinations(O_qubits, rho_qubits, num_qubits):
     combinations = list(itertools.product(complete_inits,complete_meas))
     return combinations
 
-def evaluate_cluster(complete_path_map, cluster, combinations, provider_info=None, simulator_backend='statevector_simulator',noisy=False):
+def evaluate_cluster(complete_path_map, cluster_circ, combinations, backend='statevector_simulator',noisy=False,num_shots=1024):
+    provider = IBMQ.load_account()
+    device = provider.get_backend('ibmq_16_melbourne')
+    properties = device.properties()
+    coupling_map = device.configuration().coupling_map
+    noise_model = noise.device.basic_device_noise_model(properties)
+    basis_gates = noise_model.basis_gates
+
     cluster_prob = {}
-    # num_shots = max(int(1e5),int(30*np.power(2,len(cluster.qubits))))
-    num_shots = int(1e5)
-    for counter, combination in enumerate(combinations):
+    for _, combination in enumerate(combinations):
         cluster_dag = circuit_to_dag(cluster_circ)
         inits, meas = combination
         for i,x in enumerate(inits):
@@ -173,12 +158,15 @@ def evaluate_cluster(complete_path_map, cluster, combinations, provider_info=Non
             else:
                 raise Exception('Illegal measurement basis:',x)
         cluster_circ_inst = dag_to_circuit(cluster_dag)
+        # print(inits, meas)
+        # print(cluster_circ_inst)
+        noise_mapper = NoiseAdaptiveLayout(properties)
+        noise_mapper.run(cluster_dag)
+        initial_layout = noise_mapper.property_set['layout']
+        qasm_info = [noise_model,coupling_map,basis_gates,num_shots,initial_layout]
         cluster_inst_prob = simulate_circ(circ=cluster_circ_inst,
-        simulator=simulator_backend,
-        noisy=noisy,
-        provider_info=provider_info,
-        output_format='prob',
-        num_shots=num_shots)
+        backend=backend,
+        noisy=noisy,qasm_info=qasm_info)
         cluster_prob[(tuple(inits),tuple(meas))] = cluster_inst_prob
     return cluster_prob
 
@@ -186,6 +174,9 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='MPI evaluator.')
     parser.add_argument('--cluster-idx', metavar='N', type=int,help='which cluster pickle file to run')
     parser.add_argument('--backend', metavar='S', type=str,help='which Qiskit backend')
+    parser.add_argument('--noisy', action='store_true',help='noisy evaluation?')
+    parser.add_argument('--num-shots', metavar='N',help='number of shots')
+    parser.add_argument('--dirname', metavar='S', type=str,default='./data',help='which directory?')
     args = parser.parse_args()
 
     comm = MPI.COMM_WORLD
@@ -194,8 +185,8 @@ if __name__ == '__main__':
 
     num_workers = size - 1
 
-    dirname = './data'
-    clusters, complete_path_map, provider_info = pickle.load( open( '%s/evaluator_input.p'%dirname, 'rb' ) )
+    dirname = args.dirname
+    clusters, complete_path_map, qasm_info = pickle.load(open( '%s/evaluator_input.p'%dirname, 'rb' ) )
 
     cluster_circ = clusters[args.cluster_idx]
     O_qubits, rho_qubits = find_cluster_O_rho_qubits(complete_path_map,args.cluster_idx)
@@ -205,7 +196,7 @@ if __name__ == '__main__':
     remainder = len(combinations) % num_workers
 
     if rank == size-1:
-        print('Evaluator master rank')
+        # print('MPI evaluator on cluster %d'%args.cluster_idx)
         cluster_prob = {}
         # bar = pb.ProgressBar(max_value=num_workers)
         for i in range(num_workers):
@@ -220,10 +211,9 @@ if __name__ == '__main__':
         rank_combinations = combinations[combinations_start:combinations_stop]
         print('rank %d runs %d combinations for cluster %d'%(rank,len(rank_combinations),args.cluster_idx))
         cluster_prob = evaluate_cluster(complete_path_map=complete_path_map,
-        cluster=cluster_circ,
+        cluster_circ=cluster_circ,
         combinations=rank_combinations,
-        provider_info=provider_info,
-        simulator_backend=args.backend,noisy=False)
+        backend=args.backend,noisy=args.noisy,num_shots=int(args.num_shots))
         comm.send(cluster_prob, dest=size-1)
     else:
         combinations_start = rank * count + remainder
@@ -231,8 +221,7 @@ if __name__ == '__main__':
         rank_combinations = combinations[combinations_start:combinations_stop]
         print('rank %d runs %d combinations for cluster %d'%(rank,len(rank_combinations),args.cluster_idx))
         cluster_prob = evaluate_cluster(complete_path_map=complete_path_map,
-        cluster=cluster_circ,
+        cluster_circ=cluster_circ,
         combinations=rank_combinations,
-        provider_info=provider_info,
-        simulator_backend=args.backend,noisy=False)
+        backend=args.backend,noisy=args.noisy,num_shots=int(args.num_shots))
         comm.send(cluster_prob, dest=size-1)
