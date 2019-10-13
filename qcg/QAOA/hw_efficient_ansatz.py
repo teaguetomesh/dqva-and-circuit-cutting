@@ -74,7 +74,7 @@ class HWEA:
         Set the parameters to the optimal value which solves the community
         detection problem.
 
-        This method returns a vector of length 4*n_qubits. 
+        This method returns a vector of length (1 + d)*2nq
         The first gate on the first qubit is a pi/2 rotation (Hadamard)
         After the entangler block, the first half of the qubits (round down for
         odd n_qubits) receive a pi rotation (X gate)
@@ -87,10 +87,10 @@ class HWEA:
         Returns
         -------
         list
-            vector of length 4*nb_qubits
+            vector of length 2*nq * (1+d)
         """
 
-        theta = np.zeros(self.nq * 4)
+        theta = np.zeros(2 * self.nq * (1+self.d))
         theta[0] = np.pi/2
         theta[2 * self.nq : 2 * self.nq + math.floor(self.nq / 2)] = np.pi
 
@@ -137,12 +137,17 @@ class HWEA:
         try:
             # INITIAL PARAMETERIZER
             # layer 1
+            #theta = np.arange(len(theta))
+            #print(len(theta))
+            p_idx = 0
             for i in range(self.nq):
-                self.circ.u3(theta[i], 0, 0, self.qr[i])
+                self.circ.u3(theta[i + p_idx], 0, 0, self.qr[i])
+            p_idx += self.nq
 
             # layer 2
             for i in range(self.nq):
-                self.circ.u3(0, 0, theta[i+self.nq], self.qr[i])
+                self.circ.u3(0, 0, theta[i + p_idx], self.qr[i])
+            p_idx += self.nq
 
             if self.barriers:
                 self.circ.barrier()
@@ -161,11 +166,13 @@ class HWEA:
                 # PARAMETERIZER
                 # layer 1
                 for i in range(self.nq):
-                    self.circ.u3(theta[i+2*self.nq], 0, 0, self.qr[i])
+                    self.circ.u3(theta[i + p_idx], 0, 0, self.qr[i])
+                p_idx += self.nq
 
                 # layer 2
                 for i in range(self.nq):
-                    self.circ.u3(0, 0, theta[i+3*self.nq], self.qr[i])
+                    self.circ.u3(0, 0, theta[i + p_idx], self.qr[i])
+                p_idx += self.nq
 
             # place measurements on the end of the circuit
             if self.measure:
