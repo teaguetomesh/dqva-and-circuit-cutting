@@ -5,18 +5,18 @@ import glob
 from time import time
 from scipy.stats import wasserstein_distance
 import progressbar as pb
+import evaluator_prob as evaluator
+from qiskit.quantum_info.states.measures import state_fidelity
 
 def read_pickle_files(dirname):
-    cluster_circ_files = [f for f in glob.glob('%s/cluster_*_circ.p'%dirname)]
-    all_cluster_circ = []
-    for cluster_idx in range(len(cluster_circ_files)):
-        cluster_circ = pickle.load(open('%s/cluster_%d_circ.p'%(dirname,cluster_idx), 'rb' ))
-        all_cluster_circ.append(cluster_circ)
-    complete_path_map = pickle.load(open( '%s/cpm.p'%dirname, 'rb' ))
+    all_cluster_circ, complete_path_map, _ = pickle.load(open('%s/evaluator_input.p'%(dirname), 'rb' ))
+    cluster_evals = [f for f in glob.glob('%s/cluster_*_prob.p'%dirname)]
+    cluster_sim_probs = []
+    for i in range(len(cluster_evals)):
+        prob = pickle.load(open('%s/cluster_%d_prob.p'%(dirname,i), 'rb' ))
+        cluster_sim_probs.append(prob)
     full_circ = pickle.load(open( '%s/full_circ.p'%dirname, 'rb' ))
-    cluster_sim_prob = pickle.load(open( '%s/cluster_sim_prob.p'%dirname, 'rb' ))
-    full_circ_sim_prob = pickle.load(open( '%s/full_circ_sim_prob.p'%dirname, 'rb' ))
-    return complete_path_map, full_circ, all_cluster_circ, cluster_sim_prob,full_circ_sim_prob
+    return complete_path_map, full_circ, all_cluster_circ, cluster_sim_probs
 
 def find_cuts_pairs(complete_path_map):
     O_rho_pairs = []
@@ -52,12 +52,15 @@ def find_inits_meas(cluster_circs, O_rho_pairs, s):
     return clusters_init_meas
 
 def multiply_sigma(full_cluster_prob,cluster_s,cluster_O_qubit_positions,effective_state_tranlsation):
+    # print('full cluster instance prob len = ',len(full_cluster_prob))
     # print('cluster O qubits:',cluster_O_qubit_positions)
     # print('assigned s:',cluster_s)
     if len(cluster_O_qubit_positions) == 0:
+        # print('no need to collapse')
         return full_cluster_prob
     
     total_num_qubits = int(np.log2(len(full_cluster_prob)))
+    effective_num_qubits = total_num_qubits - len(cluster_O_qubit_positions)
     if effective_state_tranlsation == None:
         contracted_prob = 0
         for full_state, prob in enumerate(full_cluster_prob):
@@ -66,33 +69,36 @@ def multiply_sigma(full_cluster_prob,cluster_s,cluster_O_qubit_positions,effecti
             for s_i,position in zip(cluster_s,cluster_O_qubit_positions):
                 O_measurement = bin_full_state[position]
                 if s_i!='I' and O_measurement=='1':
+                # if O_measurement=='1':
                     sigma *= -1
             contributing_term = sigma*full_cluster_prob[full_state]
             contracted_prob += contributing_term
         return [contracted_prob]
-    effective_cluster_prob = []
-    for effective_state in effective_state_tranlsation:
-        # effective_state_index = int("".join(str(x) for x in state), 2)
-        effective_state_prob = 0
-        full_states = effective_state_tranlsation[effective_state]
-        # print('effective state {}, index {}'.format(state,effective_state_index))
-        for full_state in full_states:
-            bin_full_state = bin(full_state)[2:].zfill(total_num_qubits)
-            sigma = 1
-            for s_i,position in zip(cluster_s,cluster_O_qubit_positions):
-                O_measurement = bin_full_state[position]
-                # print('s = type {} {}, O measurement = type {} {}'.format(type(s_i),s_i,type(O_measurement),O_measurement))
-                # TODO: s=1,2 not considered for sigma multiplications, I don't know why
-                if s_i!='I' and O_measurement=='1':
-                    sigma *= -1
-            # print('full state {}, binary {}, sigma = {}'.format(full_state,bin_full_state,sigma))
-            contributing_term = sigma*full_cluster_prob[full_state]
-            effective_state_prob += contributing_term
-            # print('O qubit state {}, full state {}, sigma = {}, index = {}'.format(insertion,full_state,sigma,full_state_index))
-            # print(contributing_term)
-        # print('effective state prob = ',effective_state_prob)
-        effective_cluster_prob.append(effective_state_prob)
-    return effective_cluster_prob
+    else:
+        effective_cluster_prob = []
+        for effective_state in effective_state_tranlsation:
+            bin_effective_state = bin(effective_state)[2:].zfill(effective_num_qubits)
+            effective_state_prob = 0
+            full_states = effective_state_tranlsation[effective_state]
+            # print('effective state {}, binary {} = '.format(effective_state,bin_effective_state))
+            for full_state in full_states:
+                bin_full_state = bin(full_state)[2:].zfill(total_num_qubits)
+                sigma = 1
+                for s_i,position in zip(cluster_s,cluster_O_qubit_positions):
+                    O_measurement = bin_full_state[position]
+                    # print('s = type {} {}, O measurement = type {} {}'.format(type(s_i),s_i,type(O_measurement),O_measurement))
+                    # TODO: s=1,2 not considered for sigma multiplications, I don't know why
+                    if s_i!='I' and O_measurement=='1':
+                        sigma *= -1
+                contributing_term = sigma*full_cluster_prob[full_state]
+                effective_state_prob += contributing_term
+                # print('full state {}, binary {}, {} * {} = {}'.format(full_state,bin_full_state,full_cluster_prob[full_state],sigma,contributing_term))
+                # print('O qubit state {}, full state {}, sigma = {}, index = {}'.format(insertion,full_state,sigma,full_state_index))
+                # print(contributing_term)
+            # print(' =',effective_state_prob)
+            effective_cluster_prob.append(effective_state_prob)
+        # print('effective cluster inst prob len = ', len(effective_cluster_prob))
+        return effective_cluster_prob
 
 def find_cluster_O_qubit_positions(O_rho_pairs, cluster_circs):
     cluster_O_qubit_positions = {}
@@ -212,7 +218,7 @@ def calculate_cluster(cluster_idx,cluster_probs,init_meas,O_qubit_positions,effe
             else:
                 raise Exception('Illegal initilization symbol :',i)
         init = tuple(init)
-        # print(init,measurement)
+        # print('Cluster %d Evaluate'%cluster_idx,init,measurement)
         
         sigma_key = (init,meas,tuple([measurement[i] for i in O_qubit_positions]))
         # print('sigma key = ',sigma_key)
@@ -227,8 +233,10 @@ def calculate_cluster(cluster_idx,cluster_probs,init_meas,O_qubit_positions,effe
         
         if sign == 1:
             kronecker_term = [kronecker_term[i]+effective_cluster_prob[i] for i in range(len(effective_cluster_prob))]
+            # print(effective_cluster_prob)
         else:
             kronecker_term = [kronecker_term[i]-effective_cluster_prob[i] for i in range(len(effective_cluster_prob))]
+            # print('-1*',effective_cluster_prob)
     
     # print('length of effective cluster prob:',len(kronecker_term))
     
@@ -251,7 +259,7 @@ def reconstruct(complete_path_map, full_circ, cluster_circs, cluster_sim_probs):
     # [print('cluster %d' % cluster_idx,correspondence_map[cluster_idx],'\n') for cluster_idx in correspondence_map]
     cluster_O_qubit_positions = find_cluster_O_qubit_positions(O_rho_pairs, cluster_circs)
 
-    bar = pb.ProgressBar(max_value=len(combinations))
+    # bar = pb.ProgressBar(max_value=len(combinations))
     collapsed_cluster_prob = [{} for c in cluster_circs]
     for i,s in enumerate(combinations):
         # print('s_{} = {}'.format(i,s))
@@ -265,23 +273,23 @@ def reconstruct(complete_path_map, full_circ, cluster_circs, cluster_sim_probs):
             O_qubit_positions=cluster_O_qubit_positions[cluster_idx],
             effective_state_tranlsation=correspondence_map[cluster_idx],
             collapsed_cluster_prob=collapsed_cluster_prob)
+            # print('cluster %d collapsed = '%cluster_idx,kronecker_term)
             summation_term = np.kron(summation_term,kronecker_term)
         reconstructed_prob += summation_term
-        bar.update(i)
+        # bar.update(i)
         # print('-'*100)
-    print()
+    # print()
     reconstructed_prob = [x/scaling_factor for x in reconstructed_prob]
     reconstructed_prob = reconstructed_reorder(reconstructed_prob,complete_path_map)
-    print('reconstruction len = ', len(reconstructed_prob),'probabilities sum = ', sum(reconstructed_prob))
+    # print('reconstruction len = ', len(reconstructed_prob),'probabilities sum = ', sum(reconstructed_prob))
     return reconstructed_prob
 
 if __name__ == '__main__':
     begin = time()
     dirname = './data'
-    complete_path_map, full_circ, cluster_circs, cluster_sim_probs,full_circ_sim_prob = read_pickle_files(dirname)
+    complete_path_map, full_circ, cluster_circs, cluster_sim_probs = read_pickle_files(dirname)
     reconstructed_prob = reconstruct(complete_path_map, full_circ, cluster_circs, cluster_sim_probs)
+    sv_fc_noiseless = evaluator.simulate_circ(circ=full_circ,simulator='statevector_simulator',output_format='sv')
     # pickle.dump(reconstructed_prob, open('%s/reconstructed_prob.p'%dirname, 'wb'))
     print('Python time elapsed = %f seconds'%(time()-begin))
-    distance = wasserstein_distance(full_circ_sim_prob,reconstructed_prob)
-    print('probability reconstruction distance = ',distance)
-    print('first element comparison: full_circ = ',full_circ_sim_prob[0],'reconstructed = ',reconstructed_prob[0])
+    print('fidelity = ',state_fidelity(reconstructed_prob,sv_fc_noiseless))

@@ -3,8 +3,9 @@ __pycache__
 .vscode
 .ipynb_checkpoints
 gurobi.log
-data
+*data
 .DS_Store
 *.pdf
 *.png
 *.p
+plots

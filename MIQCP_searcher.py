@@ -68,6 +68,7 @@ class Basic_Model(object):
                 self.model.addConstr(self.edge_vars[i][e] >= v_node_var-u_node_var)
                 self.model.addConstr(self.edge_vars[i][e] <= 2-u_node_var-v_node_var)
 
+        # FIXME: cluster is allowed to have 0 qubits
         # symmetry-breaking constraints
         # TODO: this does not break all the symmetries
         # TODO: is this necessary?
