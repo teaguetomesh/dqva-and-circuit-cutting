@@ -23,7 +23,7 @@ def reverseBits(num,bitSize):
 
 def simulate_circ(circ, backend, noisy=False,qasm_info=None):
     if backend == 'statevector_simulator':
-        print('using statevector simulator')
+        # print('using statevector simulator')
         if noisy:
             raise Exception('statevector simulator does not run noisy evaluations')
         backend = Aer.get_backend('statevector_simulator')
@@ -46,7 +46,7 @@ def simulate_circ(circ, backend, noisy=False,qasm_info=None):
         backend = Aer.get_backend('qasm_simulator')
         if noisy:
             noise_model,coupling_map,basis_gates,num_shots,initial_layout = qasm_info
-            print('using noisy qasm simulator {} shots, NA = {}'.format(num_shots,initial_layout!=None))
+            # print('using noisy qasm simulator {} shots, NA = {}'.format(num_shots,initial_layout!=None))
             na_result = execute(experiments=qc,
             backend=backend,
             noise_model=noise_model,
@@ -62,7 +62,7 @@ def simulate_circ(circ, backend, noisy=False,qasm_info=None):
             return na_prob
         else:
             _,_,_,num_shots,_ = qasm_info
-            print('using noiseless qasm simulator %d shots'%num_shots)
+            # print('using noiseless qasm simulator %d shots'%num_shots)
             job_sim = execute(qc, backend, shots=num_shots)
             result = job_sim.result()
             noiseless_counts = result.get_counts(qc)
