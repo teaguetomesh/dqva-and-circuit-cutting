@@ -1,4 +1,4 @@
-import sys
+import sys, math
 import numpy as np
 from qiskit import QuantumCircuit, ClassicalRegister, QuantumRegister, QiskitError
 
@@ -71,12 +71,13 @@ class HWEA:
 
     def get_noiseless_theta(self):
         """
-        Get the value of the optimal parameter for the noiseless case
+        Set the parameters to the optimal value which solves the community
+        detection problem.
 
-        This method returns a vector of length 4*n if n is the number of 
-        qubits in the circuit. It consists of a first Rotation of pi/2 
-        on the first qubit then linear entangler and finally rotations 
-        of pi on the first half of the qubits
+        This method returns a vector of length 4*n_qubits. 
+        The first gate on the first qubit is a pi/2 rotation (Hadamard)
+        After the entangler block, the first half of the qubits (round down for
+        odd n_qubits) receive a pi rotation (X gate)
 
         Parameters
         ----------
@@ -89,7 +90,9 @@ class HWEA:
             vector of length 4*nb_qubits
         """
 
-        theta = [np.pi/2] + [0]*(2*self.nq-1) + [np.pi]*int(self.nq/2) + [0]*int(1.5*self.nq)
+        theta = np.zeros(self.nq * 4)
+        theta[0] = np.pi/2
+        theta[2 * self.nq : 2 * self.nq + math.floor(self.nq / 2)] = np.pi
 
         return theta
 
@@ -111,14 +114,14 @@ class HWEA:
         """
         Create a circuit for the QAOA RyRz ansatz
 
-        This methods generates a circuit which consists of 2 parameterized 
-        rotation columns, linear entanglement of all the qubits and finally 
-        2 parameterized rotation columns.
+        This methods generates a circuit with repeated layers of an entangler
+        block sandwiched between parameterized rotation columns
 
         Returns
         -------
         QuantumCircuit
-            QuantumCircuit of size nb_qubits with no ClassicalRegister and no measurements
+            QuantumCircuit of size nb_qubits with no ClassicalRegister
+            and no measurements
 
         QiskitError
             Prints the error in the circuit
@@ -132,8 +135,6 @@ class HWEA:
             raise Exception('Unknown parameter option: {}'.format(self.parameters))
 
         try:
-            # print('Using initial_circuit of the RyRz QAOA')
-
             # INITIAL PARAMETERIZER
             # layer 1
             for i in range(self.nq):
