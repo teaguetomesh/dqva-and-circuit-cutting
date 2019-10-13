@@ -16,6 +16,7 @@ from qiskit.transpiler.passes import NoiseAdaptiveLayout
 
 def cross_entropy(target,obs):
     assert len(target)==len(obs)
+    # TODO: is this a good value to use?
     alpha = 1e-4
     if 0 in obs:
         obs = [(x+alpha)/(1+alpha*len(obs)) for x in obs]
@@ -96,6 +97,7 @@ for dimension in [[2,4],[3,3],[2,5],[3,4],[2,7]]:
     pickle.dump([clusters,complete_path_map,qasm_info], open('%s/evaluator_input.p'%dirname,'wb'))
 
     # Evaluate the clusters
+    # TODO: separate quantum and classical evaluator cost
     evaluator_begin = time()
     for cluster_idx in range(len(clusters)):
         if cluster_idx < int(len(clusters)/2):

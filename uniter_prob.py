@@ -60,7 +60,7 @@ def multiply_sigma(full_cluster_prob,cluster_s,cluster_O_qubit_positions,effecti
         return full_cluster_prob
     
     total_num_qubits = int(np.log2(len(full_cluster_prob)))
-    effective_num_qubits = total_num_qubits - len(cluster_O_qubit_positions)
+    # effective_num_qubits = total_num_qubits - len(cluster_O_qubit_positions)
     if effective_state_tranlsation == None:
         contracted_prob = 0
         for full_state, prob in enumerate(full_cluster_prob):
@@ -71,13 +71,15 @@ def multiply_sigma(full_cluster_prob,cluster_s,cluster_O_qubit_positions,effecti
                 if s_i!='I' and O_measurement=='1':
                 # if O_measurement=='1':
                     sigma *= -1
-            contributing_term = sigma*full_cluster_prob[full_state]
+            # TODO: made a change here
+            # contributing_term = sigma*full_cluster_prob[full_state]
+            contributing_term = sigma*prob
             contracted_prob += contributing_term
         return [contracted_prob]
     else:
         effective_cluster_prob = []
         for effective_state in effective_state_tranlsation:
-            bin_effective_state = bin(effective_state)[2:].zfill(effective_num_qubits)
+            # bin_effective_state = bin(effective_state)[2:].zfill(effective_num_qubits)
             effective_state_prob = 0
             full_states = effective_state_tranlsation[effective_state]
             # print('effective state {}, binary {} = '.format(effective_state,bin_effective_state))
@@ -242,6 +244,7 @@ def calculate_cluster(cluster_idx,cluster_probs,init_meas,O_qubit_positions,effe
     
     return kronecker_term, collapsed_cluster_prob
 
+# FIXME: optimize this
 def reconstruct(complete_path_map, full_circ, cluster_circs, cluster_sim_probs):
     print('Reconstructing')
 
