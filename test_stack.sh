@@ -1,12 +1,12 @@
 python generate_evaluator_input.py
 
-for i in {1..2};
+for i in {1..5};
 do
     EVALUATOR_FILES=./noisy_benchmark_data/evaluator_input_*.p
     for f in $EVALUATOR_FILES;
     do
         echo $f
-        mpiexec -n 3 python evaluator_prob.py --input-file $f --shots 1000
+        mpiexec -n 5 python evaluator_prob.py --input-file $f --shots 10000
     done
 
     UNITER_FILES=./noisy_benchmark_data/uniter_input_*.p

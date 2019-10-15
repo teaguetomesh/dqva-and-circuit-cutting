@@ -220,7 +220,7 @@ if __name__ == '__main__':
         quantum_time = 0
         for cluster_idx,cluster_combination in enumerate(rank_combinations):
             # if cluster_idx < int(len(clusters)/2):
-            if True:
+            if False:
                 print('rank %d runs %d combinations for cluster %d in classical evaluator'%(rank,len(cluster_combination),cluster_idx))
                 classical_evaluator_begin = time()
                 cluster_prob = evaluate_cluster(complete_path_map=complete_path_map,
