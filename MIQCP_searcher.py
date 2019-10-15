@@ -108,7 +108,7 @@ class Basic_Model(object):
             quicksum([self.edge_vars[cluster][i] * self.node_vars[cluster][self.edges[i][0]]
             for i in range(self.n_edges)]))
 
-            cluster_d = self.model.addVar(lb=0, ub=self.hw_max_qubit, vtype=GRB.INTEGER, name='cluster_d_%d'%cluster)
+            cluster_d = self.model.addVar(lb=1, ub=self.hw_max_qubit, vtype=GRB.INTEGER, name='cluster_d_%d'%cluster)
             self.model.addConstr(cluster_d == cluster_original_qubit + cluster_rho_qubits)
             list_of_cluster_d.append(cluster_d)
             
