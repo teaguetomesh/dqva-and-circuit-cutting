@@ -239,5 +239,4 @@ if __name__ == '__main__':
                 backend='qasm_simulator',noisy=True,num_shots=int(args.shots))
                 quantum_time += time()-quantum_evaluator_begin
                 rank_results[cluster_idx] = cluster_prob
-        
         comm.send((rank_results,classical_time,quantum_time), dest=size-1)

@@ -6,7 +6,7 @@ do
     for f in $EVALUATOR_FILES;
     do
         echo $f
-        mpiexec -n 5 python evaluator_prob.py --input-file $f --shots 1000
+        mpiexec -n 5 python evaluator_prob.py --input-file $f --shots 10000
     done
 
     UNITER_FILES=./noisy_benchmark_data/uniter_input_*.p

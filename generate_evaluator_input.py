@@ -58,14 +58,18 @@ for dimension in dimension_l:
     qasm_info = [noise_model,coupling_map,basis_gates,num_shots,None]
     qasm_noisy_fc = evaluator.simulate_circ(circ=circ,backend='qasm_simulator',noisy=True,qasm_info=qasm_info)
 
-    print('Evaluating qasm + noise + NA')
-    qasm_info = [noise_model,coupling_map,basis_gates,num_shots,initial_layout]
-    qasm_noisy_na_fc = evaluator.simulate_circ(circ=circ,backend='qasm_simulator',noisy=True,qasm_info=qasm_info)
-
     fc_evaluations = {'sv_noiseless':sv_noiseless_fc,
     'qasm':qasm_noiseless_fc,
-    'qasm+noise':qasm_noisy_fc,
-    'qasm+noise+na':qasm_noisy_na_fc}
+    'qasm+noise':qasm_noisy_fc}
+
+    # print('Evaluating qasm + noise + NA')
+    # qasm_info = [noise_model,coupling_map,basis_gates,num_shots,initial_layout]
+    # qasm_noisy_na_fc = evaluator.simulate_circ(circ=circ,backend='qasm_simulator',noisy=True,qasm_info=qasm_info)
+
+    # fc_evaluations = {'sv_noiseless':sv_noiseless_fc,
+    # 'qasm':qasm_noiseless_fc,
+    # 'qasm+noise':qasm_noisy_fc,
+    # 'qasm+noise+na':qasm_noisy_na_fc}
 
     # Looking for a cut
     searcher_begin = time()

@@ -10,16 +10,6 @@ from qiskit.quantum_info.states.measures import state_fidelity
 from scipy.stats import wasserstein_distance
 import argparse
 
-def read_pickle_files(dirname):
-    all_cluster_circ, complete_path_map, _ = pickle.load(open('%s/evaluator_input.p'%(dirname), 'rb' ))
-    cluster_evals = [f for f in glob.glob('%s/cluster_*_prob.p'%dirname)]
-    cluster_sim_probs = []
-    for i in range(len(cluster_evals)):
-        prob = pickle.load(open('%s/cluster_%d_prob.p'%(dirname,i), 'rb' ))
-        cluster_sim_probs.append(prob)
-    full_circ = pickle.load(open( '%s/full_circ.p'%dirname, 'rb' ))
-    return complete_path_map, full_circ, all_cluster_circ, cluster_sim_probs
-
 def find_cuts_pairs(complete_path_map):
     O_rho_pairs = []
     for input_qubit in complete_path_map:
@@ -301,7 +291,7 @@ if __name__ == '__main__':
     print(wasserstein_distance(fc_evaluations['sv_noiseless'],reconstructed_prob))
     
     evaluations = fc_evaluations
-    evaluations['qasm+noise+na+cutting'] = reconstructed_prob
+    evaluations['qasm+noise+cutting'] = reconstructed_prob
     filename = args.input_file.replace('uniter_input','uniter_output')
     pickle.dump([circ, evaluations, searcher_time, classical_time, quantum_time, uniter_time], open('%s'%filename,'wb'))
     os.remove(args.input_file)
