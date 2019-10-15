@@ -24,7 +24,7 @@ def cross_entropy(target,obs):
             h += -p*np.log(q)
     return h
 
-all_files = glob.glob('./noisy_benchmark_data/plotter_input_*.p')
+all_files = glob.glob('./noisy_benchmark_data/*_plotter_input_*.p')
 for filename in all_files:
     f = open(filename, 'rb' )
     benchmarks = []
@@ -35,16 +35,17 @@ for filename in all_files:
             break
     filename = filename.split('/')[-1].split('.')[0]
     print('plotting',filename)
-    max_qubit = int(filename.split('_')[2])
-    max_clusters = int(filename.split('_')[4])
-    num_shots = int(filename.split('_')[6])
+    max_qubit = int(filename.split('_')[3])
+    max_clusters = int(filename.split('_')[5])
+    num_shots = int(filename.split('_')[7])
+    cluster_shots = int(filename.split('_')[8])
     repetitions = len(benchmarks)
     num_pts = len(benchmarks[0])
 
     ce_metric_l = []
     times_l = []
     for i, benchmark in enumerate(benchmarks):
-        print('repetition %d'%i)
+        # print('repetition %d'%i)
         ce_metric = {}
         for entry in ['sv_noiseless','qasm','qasm+noise','qasm+noise+cutting','reduction']:
             ce_metric[entry] = []
@@ -68,11 +69,11 @@ for filename in all_files:
             ce_reduction = 100*(ce_metric['qasm+noise'][-1]-ce_metric['qasm+noise+cutting'][-1])/(ce_metric['qasm+noise'][-1]-ce_metric['sv_noiseless'][-1])
             ce_metric['reduction'].append(ce_reduction)
             # print(ce_reduction)
-        print(ce_metric)
+        # print(ce_metric)
         # print(times)
         ce_metric_l.append(ce_metric)
         times_l.append(times)
-        print('-'*50)
+        # print('-'*50)
 
     ce_metric_avg = {}
     ce_metric_err = {}
@@ -87,20 +88,20 @@ for filename in all_files:
         times_err[component] = [0 for i in range(num_pts)]
 
     for evaluation_method in ce_metric_avg:
-        print(evaluation_method)
+        # print(evaluation_method)
         for i in range(num_pts):
             ce_list = []
             for ce_metric in ce_metric_l:
                 ce_list.append(ce_metric[evaluation_method][i])
             avg = np.mean(ce_list)
             std = np.std(ce_list)
-            print('%dth term:'%i,ce_list,avg,std)
+            # print('%dth term:'%i,ce_list,avg,std)
             ce_metric_avg[evaluation_method][i] = avg
             ce_metric_err[evaluation_method][i] = std
-        print('-'*100)
+        # print('-'*100)
 
-    print('ce avg:', ce_metric_avg)
-    print('ce err:', ce_metric_err)
+    # print('ce avg:', ce_metric_avg)
+    # print('ce err:', ce_metric_err)
 
     for component in times_avg:
         # print(component)
@@ -155,19 +156,19 @@ for filename in all_files:
     plt.subplot(235)
     axes = plt.gca()
     axes.set_ylim([0,100])
-    plt.errorbar(num_qubits,ce_metric_avg['reduction'],fmt='*',yerr=ce_metric_err['reduction'],label='cross entropy')
+    plt.errorbar(num_qubits,ce_metric_avg['reduction'],fmt='o',yerr=ce_metric_err['reduction'],label='cross entropy')
     plt.xlabel('supremacy circuit # qubits')
     plt.ylabel('% Reduction')
     plt.legend()
 
     if quantum and classical:
-        plt.suptitle('Hybrid Benchmark, max qubit = %d, max clusters = %d, %.0e shots'%(max_qubit,max_clusters,num_shots))
-        plt.savefig('./plots/hybrid_%d_qubit_%d_clusters_%d_shots.png'%(max_qubit,max_clusters,num_shots))
+        plt.suptitle('Hybrid Benchmark, max qubit = %d, max clusters = %d, %.0e fc shots, %.0e cluster shots'%(max_qubit,max_clusters,num_shots,cluster_shots))
+        plt.savefig('./plots/hybrid_%d_qubit_%d_clusters_%d_%d_shots.png'%(max_qubit,max_clusters,num_shots,cluster_shots))
     elif quantum and not classical:
-        plt.suptitle('Quantum Benchmark, max qubit = %d, max clusters = %d, %.0e shots'%(max_qubit,max_clusters,num_shots))
-        plt.savefig('./plots/quantum_%d_qubit_%d_clusters_%d_shots.png'%(max_qubit,max_clusters,num_shots))
+        plt.suptitle('Quantum Benchmark, max qubit = %d, max clusters = %d, %.0e fc shots, %.0e cluster shots'%(max_qubit,max_clusters,num_shots,cluster_shots))
+        plt.savefig('./plots/quantum_%d_qubit_%d_clusters_%d_%d_shots.png'%(max_qubit,max_clusters,num_shots,cluster_shots))
     elif classical and not quantum:
-        plt.suptitle('Classical Benchmark, max qubit = %d, max clusters = %d, %.0e shots'%(max_qubit,max_clusters,num_shots))
-        plt.savefig('./plots/classical_%d_qubit_%d_clusters_%d_shots.png'%(max_qubit,max_clusters,num_shots))
+        plt.suptitle('Classical Benchmark, max qubit = %d, max clusters = %d, %.0e shots, %.0e cluster shots'%(max_qubit,max_clusters,num_shots,cluster_shots))
+        plt.savefig('./plots/classical_%d_qubit_%d_clusters_%d_%d_shots.png'%(max_qubit,max_clusters,num_shots,cluster_shots))
     else:
         raise Exception('evaluator time was not recorded properly')

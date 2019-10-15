@@ -294,4 +294,3 @@ if __name__ == '__main__':
     evaluations['qasm+noise+cutting'] = reconstructed_prob
     filename = args.input_file.replace('uniter_input','uniter_output')
     pickle.dump([circ, evaluations, searcher_time, classical_time, quantum_time, uniter_time], open('%s'%filename,'wb'))
-    os.remove(args.input_file)
