@@ -2,11 +2,13 @@ import itertools
 import numpy as np
 import pickle
 import glob
+import os
 from time import time
-from scipy.stats import wasserstein_distance
 import progressbar as pb
 import evaluator_prob as evaluator
 from qiskit.quantum_info.states.measures import state_fidelity
+from scipy.stats import wasserstein_distance
+import argparse
 
 def read_pickle_files(dirname):
     all_cluster_circ, complete_path_map, _ = pickle.load(open('%s/evaluator_input.p'%(dirname), 'rb' ))
@@ -60,7 +62,7 @@ def multiply_sigma(full_cluster_prob,cluster_s,cluster_O_qubit_positions,effecti
         return full_cluster_prob
     
     total_num_qubits = int(np.log2(len(full_cluster_prob)))
-    effective_num_qubits = total_num_qubits - len(cluster_O_qubit_positions)
+    # effective_num_qubits = total_num_qubits - len(cluster_O_qubit_positions)
     if effective_state_tranlsation == None:
         contracted_prob = 0
         for full_state, prob in enumerate(full_cluster_prob):
@@ -71,13 +73,15 @@ def multiply_sigma(full_cluster_prob,cluster_s,cluster_O_qubit_positions,effecti
                 if s_i!='I' and O_measurement=='1':
                 # if O_measurement=='1':
                     sigma *= -1
-            contributing_term = sigma*full_cluster_prob[full_state]
+            # TODO: made a change here
+            # contributing_term = sigma*full_cluster_prob[full_state]
+            contributing_term = sigma*prob
             contracted_prob += contributing_term
         return [contracted_prob]
     else:
         effective_cluster_prob = []
         for effective_state in effective_state_tranlsation:
-            bin_effective_state = bin(effective_state)[2:].zfill(effective_num_qubits)
+            # bin_effective_state = bin(effective_state)[2:].zfill(effective_num_qubits)
             effective_state_prob = 0
             full_states = effective_state_tranlsation[effective_state]
             # print('effective state {}, binary {} = '.format(effective_state,bin_effective_state))
@@ -242,6 +246,7 @@ def calculate_cluster(cluster_idx,cluster_probs,init_meas,O_qubit_positions,effe
     
     return kronecker_term, collapsed_cluster_prob
 
+# FIXME: optimize this
 def reconstruct(complete_path_map, full_circ, cluster_circs, cluster_sim_probs):
     print('Reconstructing')
 
@@ -285,11 +290,18 @@ def reconstruct(complete_path_map, full_circ, cluster_circs, cluster_sim_probs):
     return reconstructed_prob
 
 if __name__ == '__main__':
-    begin = time()
-    dirname = './data'
-    complete_path_map, full_circ, cluster_circs, cluster_sim_probs = read_pickle_files(dirname)
-    reconstructed_prob = reconstruct(complete_path_map, full_circ, cluster_circs, cluster_sim_probs)
-    sv_fc_noiseless = evaluator.simulate_circ(circ=full_circ,simulator='statevector_simulator',output_format='sv')
-    # pickle.dump(reconstructed_prob, open('%s/reconstructed_prob.p'%dirname, 'wb'))
-    print('Python time elapsed = %f seconds'%(time()-begin))
-    print('fidelity = ',state_fidelity(reconstructed_prob,sv_fc_noiseless))
+    parser = argparse.ArgumentParser(description='Uniter')
+    parser.add_argument('--input-file', metavar='S', type=str,help='which evaluator output file to run')
+    args = parser.parse_args()
+
+    complete_path_map, circ, clusters, all_cluster_prob, fc_evaluations, searcher_time, classical_time, quantum_time = pickle.load(open(args.input_file, 'rb' ) )
+    uniter_begin = time()
+    reconstructed_prob = reconstruct(complete_path_map=complete_path_map, full_circ=circ, cluster_circs=clusters, cluster_sim_probs=all_cluster_prob)
+    uniter_time = time()-uniter_begin
+    print(wasserstein_distance(fc_evaluations['sv_noiseless'],reconstructed_prob))
+    
+    evaluations = fc_evaluations
+    evaluations['qasm+noise+na+cutting'] = reconstructed_prob
+    filename = args.input_file.replace('uniter_input','uniter_output')
+    pickle.dump([circ, evaluations, searcher_time, classical_time, quantum_time, uniter_time], open('%s'%filename,'wb'))
+    os.remove(args.input_file)

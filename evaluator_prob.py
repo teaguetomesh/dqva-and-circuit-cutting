@@ -21,7 +21,7 @@ def reverseBits(num,bitSize):
     reverse = reverse + (bitSize - len(reverse))*'0'
     return int(reverse,2)
 
-def simulate_circ(circ, backend, noisy=False,qasm_info=None):
+def simulate_circ(circ, backend, noisy, qasm_info):
     if backend == 'statevector_simulator':
         # print('using statevector simulator')
         if noisy:
@@ -114,7 +114,7 @@ def find_all_simulation_combinations(O_qubits, rho_qubits, num_qubits):
     combinations = list(itertools.product(complete_inits,complete_meas))
     return combinations
 
-def evaluate_cluster(complete_path_map, cluster_circ, combinations, backend='statevector_simulator',noisy=False,num_shots=1024):
+def evaluate_cluster(complete_path_map, cluster_circ, combinations, backend, noisy, num_shots):
     provider = IBMQ.load_account()
     device = provider.get_backend('ibmq_16_melbourne')
     properties = device.properties()
@@ -163,20 +163,34 @@ def evaluate_cluster(complete_path_map, cluster_circ, combinations, backend='sta
         noise_mapper = NoiseAdaptiveLayout(properties)
         noise_mapper.run(cluster_dag)
         initial_layout = noise_mapper.property_set['layout']
-        qasm_info = [noise_model,coupling_map,basis_gates,num_shots,initial_layout]
+        qasm_info = [noise_model,coupling_map,basis_gates,num_shots,initial_layout] if backend=='qasm_simulator' else None
         cluster_inst_prob = simulate_circ(circ=cluster_circ_inst,
         backend=backend,
         noisy=noisy,qasm_info=qasm_info)
         cluster_prob[(tuple(inits),tuple(meas))] = cluster_inst_prob
     return cluster_prob
 
+def find_rank_combinations(clusters,complete_path_map,rank,size):
+    rank_combinations = []
+    num_workers = size - 1
+    for cluster_idx, cluster_circ in enumerate(clusters):
+        O_qubits, rho_qubits = find_cluster_O_rho_qubits(complete_path_map,cluster_idx)
+        combinations = find_all_simulation_combinations(O_qubits, rho_qubits, len(cluster_circ.qubits))
+        count = int(len(combinations)/num_workers)
+        remainder = len(combinations) % num_workers
+        if rank<remainder:
+            combinations_start = rank * (count + 1)
+            combinations_stop = combinations_start + count + 1
+        else:
+            combinations_start = rank * count + remainder
+            combinations_stop = combinations_start + (count - 1) + 1
+        rank_combinations.append(combinations[combinations_start:combinations_stop])
+    return rank_combinations
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='MPI evaluator.')
-    parser.add_argument('--cluster-idx', metavar='N', type=int,help='which cluster pickle file to run')
-    parser.add_argument('--backend', metavar='S', type=str,help='which Qiskit backend')
-    parser.add_argument('--noisy', action='store_true',help='noisy evaluation?')
-    parser.add_argument('--num-shots', metavar='N',help='number of shots')
-    parser.add_argument('--dirname', metavar='S', type=str,default='./data',help='which directory?')
+    parser.add_argument('--input-file', metavar='S', type=str,help='which evaluator input file to run')
+    parser.add_argument('--shots', metavar='N', type=str,help='number of shots of quantum evaluator')
     args = parser.parse_args()
 
     comm = MPI.COMM_WORLD
@@ -185,43 +199,45 @@ if __name__ == '__main__':
 
     num_workers = size - 1
 
-    dirname = args.dirname
-    clusters, complete_path_map, qasm_info = pickle.load(open( '%s/evaluator_input.p'%dirname, 'rb' ) )
-
-    cluster_circ = clusters[args.cluster_idx]
-    O_qubits, rho_qubits = find_cluster_O_rho_qubits(complete_path_map,args.cluster_idx)
-    combinations = find_all_simulation_combinations(O_qubits, rho_qubits, len(cluster_circ.qubits))
-
-    count = int(len(combinations)/num_workers)
-    remainder = len(combinations) % num_workers
+    _,searcher_time,circ,fc_evaluations,clusters,complete_path_map = pickle.load(open(args.input_file, 'rb' ) )
 
     if rank == size-1:
         # print('MPI evaluator on cluster %d'%args.cluster_idx)
-        cluster_prob = {}
-        # bar = pb.ProgressBar(max_value=num_workers)
+        all_cluster_prob = {}
+        for cluster_idx,x in enumerate(clusters):
+            all_cluster_prob[cluster_idx] = {}
         for i in range(num_workers):
             state = MPI.Status()
-            rank_cluster_prob = comm.recv(source=MPI.ANY_SOURCE,status=state)
-            cluster_prob.update(rank_cluster_prob)
-            # bar.update(i)
-        pickle.dump(cluster_prob, open( '%s/cluster_%d_prob.p'%(dirname,args.cluster_idx), 'wb' ))
-    elif rank<remainder:
-        combinations_start = rank * (count + 1)
-        combinations_stop = combinations_start + count + 1
-        rank_combinations = combinations[combinations_start:combinations_stop]
-        print('rank %d runs %d combinations for cluster %d'%(rank,len(rank_combinations),args.cluster_idx))
-        cluster_prob = evaluate_cluster(complete_path_map=complete_path_map,
-        cluster_circ=cluster_circ,
-        combinations=rank_combinations,
-        backend=args.backend,noisy=args.noisy,num_shots=int(args.num_shots))
-        comm.send(cluster_prob, dest=size-1)
+            rank_results,classical_time,quantum_time = comm.recv(source=MPI.ANY_SOURCE,status=state)
+            for cluster_idx in range(len(all_cluster_prob)):
+                all_cluster_prob[cluster_idx].update(rank_results[cluster_idx])
+        filename = args.input_file.replace('evaluator_input','uniter_input')
+        pickle.dump([complete_path_map, circ, clusters, all_cluster_prob, fc_evaluations, searcher_time, classical_time, quantum_time], open('%s'%filename,'wb'))
     else:
-        combinations_start = rank * count + remainder
-        combinations_stop = combinations_start + (count - 1) + 1
-        rank_combinations = combinations[combinations_start:combinations_stop]
-        print('rank %d runs %d combinations for cluster %d'%(rank,len(rank_combinations),args.cluster_idx))
-        cluster_prob = evaluate_cluster(complete_path_map=complete_path_map,
-        cluster_circ=cluster_circ,
-        combinations=rank_combinations,
-        backend=args.backend,noisy=args.noisy,num_shots=int(args.num_shots))
-        comm.send(cluster_prob, dest=size-1)
+        rank_combinations = find_rank_combinations(clusters,complete_path_map,rank,size)
+        rank_results = {}
+        classical_time = 0
+        quantum_time = 0
+        for cluster_idx,cluster_combination in enumerate(rank_combinations):
+            # if cluster_idx < int(len(clusters)/2):
+            # if True:
+            if False:
+                print('rank %d runs %d combinations for cluster %d in classical evaluator'%(rank,len(cluster_combination),cluster_idx))
+                classical_evaluator_begin = time()
+                cluster_prob = evaluate_cluster(complete_path_map=complete_path_map,
+                cluster_circ=clusters[cluster_idx],
+                combinations=cluster_combination,
+                backend='statevector_simulator',noisy=False,num_shots=None)
+                classical_time += time()-classical_evaluator_begin
+                rank_results[cluster_idx] = cluster_prob
+            else:
+                print('rank %d runs %d combinations for cluster %d in quantum evaluator'%(rank,len(cluster_combination),cluster_idx))
+                quantum_evaluator_begin = time()
+                cluster_prob = evaluate_cluster(complete_path_map=complete_path_map,
+                cluster_circ=clusters[cluster_idx],
+                combinations=cluster_combination,
+                backend='qasm_simulator',noisy=True,num_shots=int(args.shots))
+                quantum_time += time()-quantum_evaluator_begin
+                rank_results[cluster_idx] = cluster_prob
+        
+        comm.send((rank_results,classical_time,quantum_time), dest=size-1)
