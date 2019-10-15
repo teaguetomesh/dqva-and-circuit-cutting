@@ -6,7 +6,6 @@ benchmark_l = []
 
 for filename in glob.glob("./noisy_benchmark_data/uniter_output_*.p"):
     noisy_benchmark = pickle.load(open(filename, 'rb' ))
-    circ, evaluations, searcher_time, classical_time, quantum_time, uniter_time = noisy_benchmark
     benchmark_l.append(noisy_benchmark)
     os.remove(filename)
 
@@ -15,4 +14,5 @@ for filename in glob.glob("./noisy_benchmark_data/uniter_output_*.p"):
     max_clusters = int(filename.split('_')[4])
     num_shots = int(filename.split('_')[6])
 
-pickle.dump(benchmark_l, open('./noisy_benchmark_data/plotter_input_%d_qubits_%d_clusters_%d_shots.p'%(max_qubit,max_clusters,num_shots),'wb'))
+pickle.dump(benchmark_l,
+open('./noisy_benchmark_data/plotter_input_%d_qubits_%d_clusters_%d_shots.p'%(max_qubit,max_clusters,num_shots),'ab'))

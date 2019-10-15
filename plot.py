@@ -31,13 +31,20 @@ times = {'searcher':[],'classical_evaluator':[],'quantum_evaluator':[],'uniter':
 num_qubits = []
 
 filename = './noisy_benchmark_data/plotter_input_6_qubits_6_clusters_10000_shots.p'
-benchmark_l = pickle.load(open(filename, 'rb' ))
+f = open(filename, 'rb' )
+benchmarks = []
+while 1:
+    try:
+        benchmarks.append(pickle.load(f))
+    except EOFError:
+        break
 filename = filename.split('/')[-1].split('.')[0]
 max_qubit = int(filename.split('_')[2])
 max_clusters = int(filename.split('_')[4])
 num_shots = int(filename.split('_')[6])
 
-for noisy_benchmark in benchmark_l:
+for noisy_benchmark in benchmarks[1]:
+    print(type(noisy_benchmark))
     circ, evaluations, searcher_time, classical_time, quantum_time, uniter_time = noisy_benchmark
     times['searcher'].append(searcher_time)
     times['classical_evaluator'].append(classical_time)
