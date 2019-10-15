@@ -47,13 +47,14 @@ def simulate_circ(circ, backend, noisy, qasm_info):
         if noisy:
             noise_model,coupling_map,basis_gates,num_shots,initial_layout = qasm_info
             # print('using noisy qasm simulator {} shots, NA = {}'.format(num_shots,initial_layout!=None))
+            # FIXME: noise adaptive layout disabled for now, need further debugging
             na_result = execute(experiments=qc,
             backend=backend,
             noise_model=noise_model,
             coupling_map=coupling_map,
             basis_gates=basis_gates,
             shots=num_shots,
-            initial_layout=initial_layout).result()
+            initial_layout=None).result()
             na_counts = na_result.get_counts(qc)
             na_prob = [0 for x in range(np.power(2,len(circ.qubits)))]
             for state in na_counts:
