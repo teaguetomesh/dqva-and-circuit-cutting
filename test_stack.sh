@@ -4,12 +4,13 @@ python generate_evaluator_input.py --max-qubit 6 --max-clusters 6
 EVALUATOR_FILES=./benchmark_data/evaluator_input_*.p
 
 # NOTE: toggle here to change number of repetitions
-for i in {1..3};
+for i in {1..1};
 do
     for f in $EVALUATOR_FILES;
     do
         echo $f
         # uniter_input.p
+        # mpiexec -n 5 python evaluator_prob.py --input-file $f --saturated-shots
         mpiexec -n 5 python evaluator_prob.py --input-file $f
     done
 

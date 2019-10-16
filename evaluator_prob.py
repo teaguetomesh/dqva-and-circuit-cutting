@@ -189,6 +189,7 @@ def find_rank_combinations(clusters,complete_path_map,rank,size):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='MPI evaluator.')
     parser.add_argument('--input-file', metavar='S', type=str,help='which evaluator input file to run')
+    parser.add_argument('--saturated-shots',action="store_true",help='run saturated number of cluster shots')
     args = parser.parse_args()
 
     comm = MPI.COMM_WORLD
@@ -221,6 +222,10 @@ if __name__ == '__main__':
             filename = args.input_file.replace('evaluator_input','classical_uniter_input')
         else:
             raise Exception('evaluator time not recorded properly')
+        if args.saturated_shots:
+            filename = filename[:-2]+'_saturated.p'
+        else:
+            filename = filename[:-2]+'_sametotal.p'
         pickle.dump([num_shots,searcher_time,circ,fc_evaluations,clusters,complete_path_map,all_cluster_prob,total_classical_time,total_quantum_time], open('%s'%filename,'wb'))
     else:
         rank_combinations = find_rank_combinations(clusters,complete_path_map,rank,size)
@@ -242,8 +247,10 @@ if __name__ == '__main__':
                 rank_results[cluster_idx] = cluster_prob
             else:
                 # NOTE: toggle here to change cluster shots
-                # rank_shots = int(num_shots/len(cluster_combination)/num_workers)+1
-                rank_shots = int(num_shots/10)
+                if args.saturated_shots:
+                    rank_shots = int(num_shots/10)
+                else:
+                    rank_shots = int(num_shots/len(cluster_combination)/num_workers)+1
                 print('rank %d runs %d combinations for cluster %d in quantum evaluator, %d shots'%
                 (rank,len(cluster_combination),cluster_idx,rank_shots))
                 quantum_evaluator_begin = time()

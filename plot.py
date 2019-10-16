@@ -34,7 +34,10 @@ if __name__ == '__main__':
                 benchmarks.append(pickle.load(f))
             except EOFError:
                 break
-        print('plotting',filename)
+        evaluator_type = filename.split('/')[-1].split('_')[0]
+        figname = './plots/'+filename.split('/')[-1].replace('_plotter_input','').replace('.p','.png')
+        saturated = 'saturated' in figname
+        print('plotting',figname)
         filename = filename.split('/')[-1].split('.p')[0]
         max_qubit = int(filename.split('_')[3])
         max_clusters = int(filename.split('_')[5])
@@ -44,6 +47,7 @@ if __name__ == '__main__':
         ce_metric_l = []
         times_l = []
         for i, benchmark in enumerate(benchmarks):
+            num_shots_l = []
             # print('repetition %d'%i)
             ce_metric = {}
             for entry in ['sv_noiseless','qasm','qasm+noise','qasm+noise+cutting','reduction']:
@@ -52,6 +56,7 @@ if __name__ == '__main__':
             num_qubits = []
             for data in benchmark:
                 num_shots,searcher_time,circ,evaluations,classical_time,quantum_time,uniter_time = data
+                num_shots_l.append(num_shots)
                 times['searcher'].append(searcher_time)
                 times['classical_evaluator'].append(classical_time)
                 times['quantum_evaluator'].append(quantum_time)
@@ -119,7 +124,8 @@ if __name__ == '__main__':
         quantum = sum(times_avg['quantum_evaluator'])>0
         classical = sum(times_avg['classical_evaluator'])>0
 
-        plt.figure(figsize=(15,10))
+        figsize_scale = 4.5
+        plt.figure(figsize=(3*figsize_scale,2*figsize_scale))
         plt.subplot(231)
         plt.plot(num_qubits,times_avg['searcher'],'^',label='cut searcher')
         # optimizedParameters, pcov = opt.curve_fit(func, np.array(num_qubits), np.array(times['searcher']))
@@ -160,14 +166,8 @@ if __name__ == '__main__':
         plt.ylabel('% Reduction')
         plt.legend()
 
-        if quantum and classical:
-            plt.suptitle('Hybrid Benchmark, max qubit = %d, max clusters = %d, %.0e fc shots'%(max_qubit,max_clusters,num_shots))
-            plt.savefig('./plots/hybrid_%d_qubit_%d_clusters.png'%(max_qubit,max_clusters))
-        elif quantum and not classical:
-            plt.suptitle('Quantum Benchmark, max qubit = %d, max clusters = %d, %.0e fc shots'%(max_qubit,max_clusters,num_shots))
-            plt.savefig('./plots/quantum_%d_qubit_%d_clusters.png'%(max_qubit,max_clusters))
-        elif classical and not quantum:
-            plt.suptitle('Classical Benchmark, max qubit = %d, max clusters = %d, %.0e fc shots'%(max_qubit,max_clusters,num_shots))
-            plt.savefig('./plots/classical_%d_qubit_%d_clusters.png'%(max_qubit,max_clusters))
+        if saturated:
+            plt.suptitle('%s Benchmark, max qubit = %d, max clusters = %d, %.2e fc shots, saturated'%(evaluator_type,max_qubit,max_clusters,max(num_shots_l)))
         else:
-            raise Exception('evaluator time was not recorded properly')
+            plt.suptitle('%s Benchmark, max qubit = %d, max clusters = %d, %.2e fc shots, same total'%(evaluator_type,max_qubit,max_clusters,max(num_shots_l)))
+        plt.savefig('%s'%figname)

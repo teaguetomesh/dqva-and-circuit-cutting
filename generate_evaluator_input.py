@@ -47,7 +47,8 @@ if __name__ == '__main__':
     max_qubit = args.max_qubit
     max_clusters = args.max_clusters
 
-    dimension_l = [[3,3],[2,5],[3,4]]
+    # NOTE: toggle circuits to benchmark
+    dimension_l = [[3,3]]
 
     dirname = './benchmark_data'
     if not os.path.exists(dirname):
@@ -82,8 +83,8 @@ if __name__ == '__main__':
             if abs(cross_entropy(target=sv_noiseless_fc,obs=qasm_noiseless_fc)-identical_dist_ce)/identical_dist_ce < 1e-2:
                 break
             else:
-                num_shots *= 10
-        print('requires %.0e shots'%num_shots)
+                num_shots *= 5
+        print('requires %.3e shots'%num_shots)
 
         print('Evaluating qasm + noise')
         qasm_info = [noise_model,coupling_map,basis_gates,num_shots,None]
