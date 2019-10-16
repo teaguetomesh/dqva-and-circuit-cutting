@@ -53,7 +53,7 @@ def simulate_circ(circ, backend, noisy, qasm_info):
             coupling_map=coupling_map,
             basis_gates=basis_gates,
             shots=num_shots,
-            initial_layout=None).result()
+            initial_layout=initial_layout).result()
             na_counts = na_result.get_counts(qc)
             na_prob = [0 for x in range(np.power(2,len(circ.qubits)))]
             for state in na_counts:
@@ -230,7 +230,7 @@ if __name__ == '__main__':
         for cluster_idx,cluster_combination in enumerate(rank_combinations):
             # NOTE: toggle here to control classical vs quantum evaluators
             # if True:
-            # if len(clusters[cluster_idx].qubits)<=3:
+            # if len(clusters[cluster_idx].qubits)<=5:
             if False:
                 print('rank %d runs %d combinations for cluster %d in classical evaluator'%(rank,len(cluster_combination),cluster_idx))
                 classical_evaluator_begin = time()

@@ -31,14 +31,9 @@ properties = device.properties()
 coupling_map = device.configuration().coupling_map
 noise_model = noise.device.basic_device_noise_model(properties)
 basis_gates = noise_model.basis_gates
-num_shots = int(1e4)
+num_shots = int(1e5)
 
-circ = gen_supremacy(3,3,8)
-dag = circuit_to_dag(circ)
-noise_mapper = NoiseAdaptiveLayout(properties)
-noise_mapper.run(dag)
-initial_layout = noise_mapper.property_set['layout']
-new_circuit = transpile(circ, backend=device, basis_gates=basis_gates,coupling_map=coupling_map,backend_properties=properties,initial_layout=initial_layout)
+circ = gen_supremacy(2,3,4)
 
 # Ground truth
 backend = Aer.get_backend('statevector_simulator')
@@ -68,7 +63,6 @@ print(qc)
 print('qasm:',sum(qasm_prob),len(qasm_prob))
 print('-'*100)
 
-
 # qasm + noise
 c = ClassicalRegister(len(circ.qubits), 'c')
 meas = QuantumCircuit(circ.qregs[0], c)
@@ -92,17 +86,24 @@ print('qasm+noise:',sum(qasm_noise_prob),len(qasm_noise_prob))
 print('-'*100)
 
 # Noise adaptive
+dag = circuit_to_dag(circ)
+noise_mapper = NoiseAdaptiveLayout(properties)
+noise_mapper.run(dag)
+initial_layout = noise_mapper.property_set['layout']
+# new_circuit = transpile(circ, backend=device, basis_gates=basis_gates,coupling_map=coupling_map,backend_properties=properties,initial_layout=initial_layout)
+new_circuit = circ
 layout = initial_layout.get_physical_bits()
 print(layout)
 c = ClassicalRegister(len(circ.qubits), 'c')
 meas = QuantumCircuit(new_circuit.qregs[0], c)
 meas.barrier(new_circuit.qubits)
-# meas.measure(new_circuit.qubits,c)
-for physical_q in layout:
-    virtual_q = initial_layout[physical_q]
-    if 'ancilla' not in virtual_q[0].name:
-        meas.measure(new_circuit.qubits[physical_q],c[virtual_q[1]])
+meas.measure(new_circuit.qubits,c)
+# for physical_q in layout:
+#     virtual_q = layout[physical_q]
+#     if 'ancilla' not in virtual_q[0].name:
+#         meas.measure(new_circuit.qubits[physical_q],c[virtual_q[1]])
 qc = new_circuit+meas
+print(qc)
 backend = Aer.get_backend('qasm_simulator')
 result = execute(experiments=qc,
 backend=backend,
@@ -110,18 +111,17 @@ noise_model=noise_model,
 coupling_map=coupling_map,
 basis_gates=basis_gates,
 shots=num_shots,
-initial_layout=None).result()
+initial_layout=initial_layout).result()
 counts = result.get_counts(qc)
 qasm_noise_na_prob = [0 for i in range(np.power(2,len(circ.qubits)))]
 for i in counts:
     qasm_noise_na_prob[int(i,2)] = counts[i]/num_shots
-print(qc)
 print('qasm+noise+na:',sum(qasm_noise_na_prob),len(qasm_noise_na_prob))
 print('-'*100)
 
 if len(circ.qubits)<=8:
     # Plot
-    x = np.arange(1,len(ground_truth)+1)
+    x = np.arange(0,len(ground_truth))
     plt.figure(figsize=(24,8))
     plt.subplot(221)
     plt.bar(x,height=ground_truth,label='ground truth')
