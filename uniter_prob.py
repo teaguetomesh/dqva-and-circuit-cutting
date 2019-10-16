@@ -284,7 +284,7 @@ if __name__ == '__main__':
     parser.add_argument('--input-file', metavar='S', type=str,help='which evaluator output file to run')
     args = parser.parse_args()
 
-    complete_path_map, circ, clusters, all_cluster_prob, fc_evaluations, searcher_time, classical_time, quantum_time = pickle.load(open(args.input_file, 'rb' ) )
+    num_shots,searcher_time,circ,fc_evaluations,clusters,complete_path_map,all_cluster_prob,total_classical_time,total_quantum_time = pickle.load(open(args.input_file, 'rb' ) )
     uniter_begin = time()
     reconstructed_prob = reconstruct(complete_path_map=complete_path_map, full_circ=circ, cluster_circs=clusters, cluster_sim_probs=all_cluster_prob)
     uniter_time = time()-uniter_begin
@@ -293,4 +293,4 @@ if __name__ == '__main__':
     evaluations = fc_evaluations
     evaluations['qasm+noise+cutting'] = reconstructed_prob
     filename = args.input_file.replace('uniter_input','uniter_output')
-    pickle.dump([circ, evaluations, searcher_time, classical_time, quantum_time, uniter_time], open('%s'%filename,'wb'))
+    pickle.dump([num_shots,searcher_time,circ,evaluations,total_classical_time,total_quantum_time,uniter_time], open('%s'%filename,'wb'))

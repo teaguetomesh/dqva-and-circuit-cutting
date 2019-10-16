@@ -88,11 +88,11 @@ class Basic_Model(object):
             ))
         list_of_cluster_d = []
         for cluster in range(k):
-            cluster_K = self.model.addVar(lb=0, ub=30, vtype=GRB.INTEGER, name='cluster_K_%d'%cluster)
+            cluster_K = self.model.addVar(lb=1, ub=30, vtype=GRB.INTEGER, name='cluster_K_%d'%cluster)
             self.model.addConstr(cluster_K == 
             quicksum([self.edge_vars[cluster][i] for i in range(self.n_edges)]))
             
-            cluster_original_qubit = self.model.addVar(lb=0, ub=self.hw_max_qubit, vtype=GRB.INTEGER, name='cluster_input_%d'%cluster)
+            cluster_original_qubit = self.model.addVar(lb=1, ub=self.hw_max_qubit, vtype=GRB.INTEGER, name='cluster_input_%d'%cluster)
             self.model.addConstr(cluster_original_qubit ==
             quicksum([self.node_qubits[id_nodes[i]]*self.node_vars[cluster][i]
             for i in range(self.n_vertices)]))
