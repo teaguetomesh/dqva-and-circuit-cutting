@@ -8,7 +8,6 @@ from qiskit.providers.aer import noise
 import pickle
 import itertools
 import copy
-import os
 import numpy as np
 import progressbar as pb
 from time import time
@@ -47,13 +46,14 @@ def simulate_circ(circ, backend, noisy, qasm_info):
         if noisy:
             noise_model,coupling_map,basis_gates,num_shots,initial_layout = qasm_info
             # print('using noisy qasm simulator {} shots, NA = {}'.format(num_shots,initial_layout!=None))
+            # FIXME: noise adaptive layout disabled for now, need further debugging
             na_result = execute(experiments=qc,
             backend=backend,
             noise_model=noise_model,
             coupling_map=coupling_map,
             basis_gates=basis_gates,
             shots=num_shots,
-            initial_layout=initial_layout).result()
+            initial_layout=None).result()
             na_counts = na_result.get_counts(qc)
             na_prob = [0 for x in range(np.power(2,len(circ.qubits)))]
             for state in na_counts:
@@ -114,8 +114,7 @@ def find_all_simulation_combinations(O_qubits, rho_qubits, num_qubits):
     combinations = list(itertools.product(complete_inits,complete_meas))
     return combinations
 
-def evaluate_cluster(complete_path_map, cluster_circ, combinations, backend, noisy, num_shots):
-    provider = IBMQ.load_account()
+def evaluate_cluster(complete_path_map, cluster_circ, combinations, backend, noisy, num_shots, provider):
     device = provider.get_backend('ibmq_16_melbourne')
     properties = device.properties()
     coupling_map = device.configuration().coupling_map
@@ -190,7 +189,6 @@ def find_rank_combinations(clusters,complete_path_map,rank,size):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='MPI evaluator.')
     parser.add_argument('--input-file', metavar='S', type=str,help='which evaluator input file to run')
-    parser.add_argument('--shots', metavar='N', type=str,help='number of shots of quantum evaluator')
     args = parser.parse_args()
 
     comm = MPI.COMM_WORLD
@@ -199,44 +197,60 @@ if __name__ == '__main__':
 
     num_workers = size - 1
 
-    _,searcher_time,circ,fc_evaluations,clusters,complete_path_map = pickle.load(open(args.input_file, 'rb' ) )
+    dimension,num_shots,searcher_time,circ,fc_evaluations,clusters,complete_path_map = pickle.load(open(args.input_file, 'rb' ))
+    provider = IBMQ.load_account()
 
     if rank == size-1:
-        # print('MPI evaluator on cluster %d'%args.cluster_idx)
+        total_classical_time = 0
+        total_quantum_time = 0
         all_cluster_prob = {}
         for cluster_idx,x in enumerate(clusters):
             all_cluster_prob[cluster_idx] = {}
         for i in range(num_workers):
             state = MPI.Status()
             rank_results,classical_time,quantum_time = comm.recv(source=MPI.ANY_SOURCE,status=state)
+            total_classical_time += classical_time
+            total_quantum_time += quantum_time
             for cluster_idx in range(len(all_cluster_prob)):
                 all_cluster_prob[cluster_idx].update(rank_results[cluster_idx])
-        filename = args.input_file.replace('evaluator_input','uniter_input')
-        pickle.dump([complete_path_map, circ, clusters, all_cluster_prob, fc_evaluations, searcher_time, classical_time, quantum_time], open('%s'%filename,'wb'))
+        if total_classical_time>0 and total_quantum_time>0:
+            filename = args.input_file.replace('evaluator_input','hybrid_uniter_input')
+        elif total_classical_time == 0 and total_quantum_time >0:
+            filename = args.input_file.replace('evaluator_input','quantum_uniter_input')
+        elif total_classical_time >0 and total_quantum_time == 0:
+            filename = args.input_file.replace('evaluator_input','classical_uniter_input')
+        else:
+            raise Exception('evaluator time not recorded properly')
+        pickle.dump([num_shots,searcher_time,circ,fc_evaluations,clusters,complete_path_map,all_cluster_prob,total_classical_time,total_quantum_time], open('%s'%filename,'wb'))
     else:
         rank_combinations = find_rank_combinations(clusters,complete_path_map,rank,size)
         rank_results = {}
         classical_time = 0
         quantum_time = 0
         for cluster_idx,cluster_combination in enumerate(rank_combinations):
-            # if cluster_idx < int(len(clusters)/2):
+            # NOTE: toggle here to control classical vs quantum evaluators
+            # if True:
+            # if len(clusters[cluster_idx].qubits)<=3:
             if False:
                 print('rank %d runs %d combinations for cluster %d in classical evaluator'%(rank,len(cluster_combination),cluster_idx))
                 classical_evaluator_begin = time()
                 cluster_prob = evaluate_cluster(complete_path_map=complete_path_map,
                 cluster_circ=clusters[cluster_idx],
                 combinations=cluster_combination,
-                backend='statevector_simulator',noisy=False,num_shots=None)
+                backend='statevector_simulator',noisy=False,num_shots=None,provider=provider)
                 classical_time += time()-classical_evaluator_begin
                 rank_results[cluster_idx] = cluster_prob
             else:
-                print('rank %d runs %d combinations for cluster %d in quantum evaluator'%(rank,len(cluster_combination),cluster_idx))
+                # NOTE: toggle here to change cluster shots
+                # rank_shots = int(num_shots/len(cluster_combination)/num_workers)+1
+                rank_shots = int(num_shots/10)
+                print('rank %d runs %d combinations for cluster %d in quantum evaluator, %d shots'%
+                (rank,len(cluster_combination),cluster_idx,rank_shots))
                 quantum_evaluator_begin = time()
                 cluster_prob = evaluate_cluster(complete_path_map=complete_path_map,
                 cluster_circ=clusters[cluster_idx],
                 combinations=cluster_combination,
-                backend='qasm_simulator',noisy=True,num_shots=int(args.shots))
+                backend='qasm_simulator',noisy=True,num_shots=rank_shots,provider=provider)
                 quantum_time += time()-quantum_evaluator_begin
                 rank_results[cluster_idx] = cluster_prob
-        
         comm.send((rank_results,classical_time,quantum_time), dest=size-1)

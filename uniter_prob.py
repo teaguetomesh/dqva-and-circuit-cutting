@@ -10,16 +10,6 @@ from qiskit.quantum_info.states.measures import state_fidelity
 from scipy.stats import wasserstein_distance
 import argparse
 
-def read_pickle_files(dirname):
-    all_cluster_circ, complete_path_map, _ = pickle.load(open('%s/evaluator_input.p'%(dirname), 'rb' ))
-    cluster_evals = [f for f in glob.glob('%s/cluster_*_prob.p'%dirname)]
-    cluster_sim_probs = []
-    for i in range(len(cluster_evals)):
-        prob = pickle.load(open('%s/cluster_%d_prob.p'%(dirname,i), 'rb' ))
-        cluster_sim_probs.append(prob)
-    full_circ = pickle.load(open( '%s/full_circ.p'%dirname, 'rb' ))
-    return complete_path_map, full_circ, all_cluster_circ, cluster_sim_probs
-
 def find_cuts_pairs(complete_path_map):
     O_rho_pairs = []
     for input_qubit in complete_path_map:
@@ -294,14 +284,13 @@ if __name__ == '__main__':
     parser.add_argument('--input-file', metavar='S', type=str,help='which evaluator output file to run')
     args = parser.parse_args()
 
-    complete_path_map, circ, clusters, all_cluster_prob, fc_evaluations, searcher_time, classical_time, quantum_time = pickle.load(open(args.input_file, 'rb' ) )
+    num_shots,searcher_time,circ,fc_evaluations,clusters,complete_path_map,all_cluster_prob,total_classical_time,total_quantum_time = pickle.load(open(args.input_file, 'rb' ) )
     uniter_begin = time()
     reconstructed_prob = reconstruct(complete_path_map=complete_path_map, full_circ=circ, cluster_circs=clusters, cluster_sim_probs=all_cluster_prob)
     uniter_time = time()-uniter_begin
     print(wasserstein_distance(fc_evaluations['sv_noiseless'],reconstructed_prob))
     
     evaluations = fc_evaluations
-    evaluations['qasm+noise+na+cutting'] = reconstructed_prob
+    evaluations['qasm+noise+cutting'] = reconstructed_prob
     filename = args.input_file.replace('uniter_input','uniter_output')
-    pickle.dump([circ, evaluations, searcher_time, classical_time, quantum_time, uniter_time], open('%s'%filename,'wb'))
-    os.remove(args.input_file)
+    pickle.dump([num_shots,searcher_time,circ,evaluations,total_classical_time,total_quantum_time,uniter_time], open('%s'%filename,'wb'))
