@@ -48,7 +48,7 @@ if __name__ == '__main__':
     max_clusters = args.max_clusters
 
     # NOTE: toggle circuits to benchmark
-    dimension_l = [[3,3]]
+    dimension_l = [[3,3],[2,5],[3,4]]
 
     dirname = './benchmark_data'
     if not os.path.exists(dirname):

@@ -11,10 +11,14 @@ def func(x, a, b):
 
 def cross_entropy(target,obs):
     assert len(target)==len(obs)
-    alpha = 1e-15
+    obs = [x if x>=0 else 0 for x in obs]
+    # print(sum(obs))
+    # assert abs(sum(obs)-1)<1e-2
+    alpha = 1e-16
     if 0 in obs:
         obs = [(x+alpha)/(1+alpha*len(obs)) for x in obs]
-    assert abs(sum(obs)-1)<1e-2
+        # print('scaled:', sum(obs))
+    # assert abs(sum(obs)-1)<1e-2
     h = 0
     for p,q in zip(target,obs):
         if p==0:
@@ -65,7 +69,9 @@ if __name__ == '__main__':
                 qubit_count = len(circ.qubits)
 
                 target = evaluations['sv_noiseless']
+                # print(len(circ.qubits))
                 for evaluation_method in ['sv_noiseless','qasm','qasm+noise','qasm+noise+cutting']:
+                    # print(evaluation_method)
                     ce = cross_entropy(target=target,obs=evaluations[evaluation_method])
                     ce_metric[evaluation_method].append(ce)
 
@@ -167,7 +173,7 @@ if __name__ == '__main__':
         plt.legend()
 
         if saturated:
-            plt.suptitle('%s Benchmark, max qubit = %d, max clusters = %d, %.2e fc shots, saturated'%(evaluator_type,max_qubit,max_clusters,max(num_shots_l)))
+            plt.suptitle('%s Benchmark, max qubit = %d, max clusters = %d, max %.2e fc shots, saturated'%(evaluator_type,max_qubit,max_clusters,max(num_shots_l)))
         else:
-            plt.suptitle('%s Benchmark, max qubit = %d, max clusters = %d, %.2e fc shots, same total'%(evaluator_type,max_qubit,max_clusters,max(num_shots_l)))
+            plt.suptitle('%s Benchmark, max qubit = %d, max clusters = %d, max %.2e fc shots, same total'%(evaluator_type,max_qubit,max_clusters,max(num_shots_l)))
         plt.savefig('%s'%figname)

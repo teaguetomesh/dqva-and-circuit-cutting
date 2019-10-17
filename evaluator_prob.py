@@ -46,7 +46,7 @@ def simulate_circ(circ, backend, noisy, qasm_info):
         if noisy:
             noise_model,coupling_map,basis_gates,num_shots,initial_layout = qasm_info
             # print('using noisy qasm simulator {} shots, NA = {}'.format(num_shots,initial_layout!=None))
-            # FIXME: noise adaptive layout disabled for now, need further debugging
+            # FIXME: noise adaptive layout enabled for now, need further debugging
             na_result = execute(experiments=qc,
             backend=backend,
             noise_model=noise_model,
@@ -235,8 +235,8 @@ if __name__ == '__main__':
         for cluster_idx,cluster_combination in enumerate(rank_combinations):
             # NOTE: toggle here to control classical vs quantum evaluators
             # if True:
-            # if len(clusters[cluster_idx].qubits)<=5:
-            if False:
+            if len(clusters[cluster_idx].qubits)<=5:
+            # if False:
                 print('rank %d runs %d combinations for cluster %d in classical evaluator'%(rank,len(cluster_combination),cluster_idx))
                 classical_evaluator_begin = time()
                 cluster_prob = evaluate_cluster(complete_path_map=complete_path_map,
@@ -246,11 +246,10 @@ if __name__ == '__main__':
                 classical_time += time()-classical_evaluator_begin
                 rank_results[cluster_idx] = cluster_prob
             else:
-                # NOTE: toggle here to change cluster shots
                 if args.saturated_shots:
                     rank_shots = int(num_shots/10)
                 else:
-                    rank_shots = int(num_shots/len(cluster_combination)/num_workers)+1
+                    rank_shots = max(int(num_shots/len(cluster_combination)/num_workers)+1,500)
                 print('rank %d runs %d combinations for cluster %d in quantum evaluator, %d shots'%
                 (rank,len(cluster_combination),cluster_idx,rank_shots))
                 quantum_evaluator_begin = time()
