@@ -236,7 +236,7 @@ def calculate_cluster(cluster_idx,cluster_probs,init_meas,O_qubit_positions,effe
     
     return kronecker_term, collapsed_cluster_prob
 
-# FIXME: optimize this
+# TODO: optimize this
 def reconstruct(complete_path_map, full_circ, cluster_circs, cluster_sim_probs):
     print('Reconstructing')
 

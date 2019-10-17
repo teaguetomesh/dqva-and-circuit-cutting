@@ -9,20 +9,19 @@ do
     for f in $EVALUATOR_FILES;
     do
         echo $f
-        # uniter_input.p
-        mpiexec -n 5 python evaluator_prob.py --input-file $f
+        # NOTE: toggle here to change cluster shots
+        mpiexec -n 5 python evaluator_prob.py --input-file $f --saturated-shots
+        # mpiexec -n 5 python evaluator_prob.py --input-file $f
     done
 
     UNITER_INPUT_FILES=./benchmark_data/*_uniter_input_*.p
     for f in $UNITER_INPUT_FILES;
     do
         echo $f
-        # uniter_output.p
         python uniter_prob.py --input-file $f
         rm $f
     done
 
-    # plotter_input.p
     python data_combiner.py
     
     UNITER_OUTPUT_FILES=./benchmark_data/*_uniter_output_*.p

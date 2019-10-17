@@ -46,14 +46,14 @@ def simulate_circ(circ, backend, noisy, qasm_info):
         if noisy:
             noise_model,coupling_map,basis_gates,num_shots,initial_layout = qasm_info
             # print('using noisy qasm simulator {} shots, NA = {}'.format(num_shots,initial_layout!=None))
-            # FIXME: noise adaptive layout disabled for now, need further debugging
+            # FIXME: noise adaptive layout enabled for now, need further debugging
             na_result = execute(experiments=qc,
             backend=backend,
             noise_model=noise_model,
             coupling_map=coupling_map,
             basis_gates=basis_gates,
             shots=num_shots,
-            initial_layout=None).result()
+            initial_layout=initial_layout).result()
             na_counts = na_result.get_counts(qc)
             na_prob = [0 for x in range(np.power(2,len(circ.qubits)))]
             for state in na_counts:
@@ -189,6 +189,7 @@ def find_rank_combinations(clusters,complete_path_map,rank,size):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='MPI evaluator.')
     parser.add_argument('--input-file', metavar='S', type=str,help='which evaluator input file to run')
+    parser.add_argument('--saturated-shots',action="store_true",help='run saturated number of cluster shots')
     args = parser.parse_args()
 
     comm = MPI.COMM_WORLD
@@ -221,6 +222,10 @@ if __name__ == '__main__':
             filename = args.input_file.replace('evaluator_input','classical_uniter_input')
         else:
             raise Exception('evaluator time not recorded properly')
+        if args.saturated_shots:
+            filename = filename[:-2]+'_saturated.p'
+        else:
+            filename = filename[:-2]+'_sametotal.p'
         pickle.dump([num_shots,searcher_time,circ,fc_evaluations,clusters,complete_path_map,all_cluster_prob,total_classical_time,total_quantum_time], open('%s'%filename,'wb'))
     else:
         rank_combinations = find_rank_combinations(clusters,complete_path_map,rank,size)
@@ -230,8 +235,8 @@ if __name__ == '__main__':
         for cluster_idx,cluster_combination in enumerate(rank_combinations):
             # NOTE: toggle here to control classical vs quantum evaluators
             # if True:
-            # if len(clusters[cluster_idx].qubits)<=3:
-            if False:
+            if len(clusters[cluster_idx].qubits)<=5:
+            # if False:
                 print('rank %d runs %d combinations for cluster %d in classical evaluator'%(rank,len(cluster_combination),cluster_idx))
                 classical_evaluator_begin = time()
                 cluster_prob = evaluate_cluster(complete_path_map=complete_path_map,
@@ -241,9 +246,10 @@ if __name__ == '__main__':
                 classical_time += time()-classical_evaluator_begin
                 rank_results[cluster_idx] = cluster_prob
             else:
-                # NOTE: toggle here to change cluster shots
-                # rank_shots = int(num_shots/len(cluster_combination)/num_workers)+1
-                rank_shots = int(num_shots/10)
+                if args.saturated_shots:
+                    rank_shots = int(num_shots/10)
+                else:
+                    rank_shots = max(int(num_shots/len(cluster_combination)/num_workers)+1,500)
                 print('rank %d runs %d combinations for cluster %d in quantum evaluator, %d shots'%
                 (rank,len(cluster_combination),cluster_idx,rank_shots))
                 quantum_evaluator_begin = time()
