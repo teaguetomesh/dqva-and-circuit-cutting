@@ -158,13 +158,29 @@ if __name__ == '__main__':
         plt.errorbar(num_qubits,ce_metric_avg['sv_noiseless'],fmt='*',yerr=ce_metric_err['sv_noiseless'],label='Identical Distributions',markersize=12)
         plt.errorbar(num_qubits,ce_metric_avg['qasm'],fmt='o',yerr=ce_metric_err['qasm'],label='qasm')
         plt.errorbar(num_qubits,ce_metric_avg['qasm+noise'],fmt='o',yerr=ce_metric_err['qasm+noise'],label='qasm+noise')
-        # plt.errorbar(num_qubits,ce_metric_avg['qasm+noise+na'],fmt='o',yerr=ce_metric_err['qasm+noise+na'],label='qasm+noise+na')
-        plt.errorbar(num_qubits,ce_metric_avg['qasm+noise+cutting'],fmt='X',yerr=ce_metric_err['qasm+noise+cutting'],label='qasm+noise+cutting')
+        if evaluator_type == 'classical':
+            plt.errorbar(num_qubits,ce_metric_avg['qasm+noise+cutting'],fmt='X',yerr=ce_metric_err['qasm+noise+cutting'],label='qasm+cutting')
+        else:
+            plt.errorbar(num_qubits,ce_metric_avg['qasm+noise+cutting'],fmt='X',yerr=ce_metric_err['qasm+noise+cutting'],label='qasm+noise+cutting')
         # plt.yscale('log')
         plt.xlabel('supremacy circuit # qubits')
         plt.ylabel('Cross Entropy')
         plt.legend()
         plt.subplot(235)
+        width = 0.35
+        plt.bar(x=np.array(num_qubits),
+        height=[x-y for x,y in zip(ce_metric_avg['qasm+noise'],ce_metric_avg['sv_noiseless'])],
+        yerr=[np.sqrt(x*x+y*y) for x,y in zip(ce_metric_err['qasm+noise'],ce_metric_err['sv_noiseless'])],
+        width=width, color='r',label='qasm+noise')
+        plt.bar(x=np.array(num_qubits)+width,
+        height=[x-y for x,y in zip(ce_metric_avg['qasm+noise+cutting'],ce_metric_avg['sv_noiseless'])],
+        yerr=[np.sqrt(x*x+y*y) for x,y in zip(ce_metric_err['qasm+noise+cutting'],ce_metric_err['sv_noiseless'])],
+        width=width, color='b',label='qasm+noise+cutting')
+        plt.xticks(np.array(num_qubits) + width / 2,np.array(num_qubits))
+        plt.xlabel('supremacy circuit # qubits')
+        plt.ylabel('Cross Entropy Loss')
+        plt.legend()
+        plt.subplot(236)
         axes = plt.gca()
         axes.set_ylim([0,100])
         plt.errorbar(num_qubits,ce_metric_avg['reduction'],fmt='o',yerr=ce_metric_err['reduction'],label='cross entropy')
