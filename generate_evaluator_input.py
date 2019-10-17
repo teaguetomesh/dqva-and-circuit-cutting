@@ -77,7 +77,7 @@ if __name__ == '__main__':
         # Deciding how many shots is needed, minimum is 1000
         num_shots = 1000
         while 1:
-            qasm_info = [None,None,None,num_shots,None]
+            qasm_info = [None,None,None,None,None,num_shots]
             qasm_noiseless_fc = evaluator.simulate_circ(circ=circ,backend='qasm_simulator',noisy=False,qasm_info=qasm_info)
             # NOTE: toggle here to control cross entropy accuracy
             if abs(cross_entropy(target=sv_noiseless_fc,obs=qasm_noiseless_fc)-identical_dist_ce)/identical_dist_ce < 1e-2:
@@ -87,7 +87,7 @@ if __name__ == '__main__':
         print('requires %.3e shots'%num_shots)
 
         print('Evaluating qasm + noise')
-        qasm_info = [noise_model,coupling_map,basis_gates,num_shots,None]
+        qasm_info = [device, properties,coupling_map,noise_model,basis_gates,num_shots]
         qasm_noisy_fc = evaluator.simulate_circ(circ=circ,backend='qasm_simulator',noisy=True,qasm_info=qasm_info)
 
         fc_evaluations = {'sv_noiseless':sv_noiseless_fc,

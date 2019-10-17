@@ -4,6 +4,7 @@ from qiskit.circuit.classicalregister import ClassicalRegister
 from qiskit.transpiler.passes import NoiseAdaptiveLayout
 from qiskit import QuantumCircuit
 from qiskit import Aer, IBMQ, execute
+from qiskit.compiler import transpile
 from qiskit.providers.aer import noise
 import pickle
 import itertools
@@ -37,31 +38,36 @@ def simulate_circ(circ, backend, noisy, qasm_info):
         return output_prob
         # return outputstate_ordered
     elif backend == 'qasm_simulator':
+        backend = Aer.get_backend('qasm_simulator')
         c = ClassicalRegister(len(circ.qubits), 'c')
         meas = QuantumCircuit(circ.qregs[0], c)
         meas.barrier(circ.qubits)
         meas.measure(circ.qubits,c)
         qc = circ+meas
-        backend = Aer.get_backend('qasm_simulator')
         if noisy:
-            noise_model,coupling_map,basis_gates,num_shots,initial_layout = qasm_info
+            device, properties,coupling_map,noise_model,basis_gates,num_shots = qasm_info
+            dag = circuit_to_dag(qc)
+            noise_mapper = NoiseAdaptiveLayout(properties)
+            noise_mapper.run(dag)
+            initial_layout = noise_mapper.property_set['layout']
+            new_circuit = transpile(qc, backend=device, basis_gates=basis_gates,coupling_map=coupling_map,backend_properties=properties,initial_layout=initial_layout)
             # print('using noisy qasm simulator {} shots, NA = {}'.format(num_shots,initial_layout!=None))
-            # FIXME: noise adaptive layout enabled for now, need further debugging
-            na_result = execute(experiments=qc,
+            # FIXME: check noise adaptive layout
+            # TODO: add saturated shots
+            na_result = execute(experiments=new_circuit,
             backend=backend,
             noise_model=noise_model,
             coupling_map=coupling_map,
             basis_gates=basis_gates,
-            shots=num_shots,
-            initial_layout=initial_layout).result()
-            na_counts = na_result.get_counts(qc)
+            shots=num_shots).result()
+            na_counts = na_result.get_counts(new_circuit)
             na_prob = [0 for x in range(np.power(2,len(circ.qubits)))]
             for state in na_counts:
                 reversed_state = reverseBits(int(state,2),len(circ.qubits))
                 na_prob[reversed_state] = na_counts[state]/num_shots
             return na_prob
         else:
-            _,_,_,num_shots,_ = qasm_info
+            _,_,_,_,_,num_shots = qasm_info
             # print('using noiseless qasm simulator %d shots'%num_shots)
             job_sim = execute(qc, backend, shots=num_shots)
             result = job_sim.result()
@@ -159,10 +165,10 @@ def evaluate_cluster(complete_path_map, cluster_circ, combinations, backend, noi
         cluster_circ_inst = dag_to_circuit(cluster_dag)
         # print(inits, meas)
         # print(cluster_circ_inst)
-        noise_mapper = NoiseAdaptiveLayout(properties)
-        noise_mapper.run(cluster_dag)
-        initial_layout = noise_mapper.property_set['layout']
-        qasm_info = [noise_model,coupling_map,basis_gates,num_shots,initial_layout] if backend=='qasm_simulator' else None
+        # noise_mapper = NoiseAdaptiveLayout(properties)
+        # noise_mapper.run(cluster_dag)
+        # initial_layout = noise_mapper.property_set['layout']
+        qasm_info = [device,properties,coupling_map,noise_model,basis_gates,num_shots] if backend=='qasm_simulator' else None
         cluster_inst_prob = simulate_circ(circ=cluster_circ_inst,
         backend=backend,
         noisy=noisy,qasm_info=qasm_info)
@@ -234,8 +240,8 @@ if __name__ == '__main__':
         quantum_time = 0
         for cluster_idx,cluster_combination in enumerate(rank_combinations):
             # NOTE: toggle here to control classical vs quantum evaluators
-            # if True:
-            if len(clusters[cluster_idx].qubits)<=5:
+            if True:
+            # if len(clusters[cluster_idx].qubits)<=5:
             # if False:
                 print('rank %d runs %d combinations for cluster %d in classical evaluator'%(rank,len(cluster_combination),cluster_idx))
                 classical_evaluator_begin = time()
