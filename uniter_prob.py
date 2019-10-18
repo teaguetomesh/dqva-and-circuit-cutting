@@ -63,7 +63,6 @@ def multiply_sigma(full_cluster_prob,cluster_s,cluster_O_qubit_positions,effecti
                 if s_i!='I' and O_measurement=='1':
                 # if O_measurement=='1':
                     sigma *= -1
-            # TODO: made a change here
             # contributing_term = sigma*full_cluster_prob[full_state]
             contributing_term = sigma*prob
             contracted_prob += contributing_term

@@ -68,10 +68,8 @@ class Basic_Model(object):
                 self.model.addConstr(self.edge_vars[i][e] >= v_node_var-u_node_var)
                 self.model.addConstr(self.edge_vars[i][e] <= 2-u_node_var-v_node_var)
 
-        # FIXME: cluster is allowed to have 0 qubits
         # symmetry-breaking constraints
-        # TODO: this does not break all the symmetries
-        # TODO: is this necessary?
+        # TODO: this does not break all the symmetries, is this necessary?
         # self.model.addConstr(self.node_vars[0][0], GRB.EQUAL, 1)
         # for i in range(2, k):
         #     self.model.addConstr(quicksum([self.node_vars[i-1][j] for j in range(n_vertices)]),
