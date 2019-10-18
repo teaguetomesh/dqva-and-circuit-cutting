@@ -14,71 +14,7 @@ import progressbar as pb
 from time import time
 from mpi4py import MPI
 import argparse
-
-def reverseBits(num,bitSize): 
-    binary = bin(num)
-    reverse = binary[-1:1:-1] 
-    reverse = reverse + (bitSize - len(reverse))*'0'
-    return int(reverse,2)
-
-def simulate_circ(circ, backend, noisy, qasm_info):
-    if backend == 'statevector_simulator':
-        # print('using statevector simulator')
-        if noisy:
-            raise Exception('statevector simulator does not run noisy evaluations')
-        backend = Aer.get_backend('statevector_simulator')
-        job = execute(circ, backend=backend)
-        result = job.result()
-        outputstate = result.get_statevector(circ)
-        outputstate_ordered = [0 for sv in outputstate]
-        for i, sv in enumerate(outputstate):
-            reverse_i = reverseBits(i,len(circ.qubits))
-            outputstate_ordered[reverse_i] = sv
-        output_prob = [np.power(np.absolute(x),2) for x in outputstate_ordered]
-        return output_prob
-        # return outputstate_ordered
-    elif backend == 'qasm_simulator':
-        backend = Aer.get_backend('qasm_simulator')
-        c = ClassicalRegister(len(circ.qubits), 'c')
-        meas = QuantumCircuit(circ.qregs[0], c)
-        meas.barrier(circ.qubits)
-        meas.measure(circ.qubits,c)
-        qc = circ+meas
-        if noisy:
-            device, properties,coupling_map,noise_model,basis_gates,num_shots = qasm_info
-            dag = circuit_to_dag(qc)
-            noise_mapper = NoiseAdaptiveLayout(properties)
-            noise_mapper.run(dag)
-            initial_layout = noise_mapper.property_set['layout']
-            new_circuit = transpile(qc, backend=device, basis_gates=basis_gates,coupling_map=coupling_map,backend_properties=properties,initial_layout=initial_layout)
-            # print('using noisy qasm simulator {} shots, NA = {}'.format(num_shots,initial_layout!=None))
-            # FIXME: check noise adaptive layout
-            # TODO: add saturated shots
-            na_result = execute(experiments=new_circuit,
-            backend=backend,
-            noise_model=noise_model,
-            coupling_map=coupling_map,
-            basis_gates=basis_gates,
-            shots=num_shots).result()
-            na_counts = na_result.get_counts(new_circuit)
-            na_prob = [0 for x in range(np.power(2,len(circ.qubits)))]
-            for state in na_counts:
-                reversed_state = reverseBits(int(state,2),len(circ.qubits))
-                na_prob[reversed_state] = na_counts[state]/num_shots
-            return na_prob
-        else:
-            _,_,_,_,_,num_shots = qasm_info
-            # print('using noiseless qasm simulator %d shots'%num_shots)
-            job_sim = execute(qc, backend, shots=num_shots)
-            result = job_sim.result()
-            noiseless_counts = result.get_counts(qc)
-            noiseless_prob = [0 for x in range(np.power(2,len(circ.qubits)))]
-            for state in noiseless_counts:
-                reversed_state = reverseBits(int(state,2),len(circ.qubits))
-                noiseless_prob[reversed_state] = noiseless_counts[state]/num_shots
-            return noiseless_prob
-    else:
-        raise Exception('Illegal simulator:',backend)
+from helper_fun import simulate_circ, find_saturated_shots
 
 def find_cluster_O_rho_qubits(complete_path_map,cluster_idx):
     O_qubits = []
@@ -120,13 +56,7 @@ def find_all_simulation_combinations(O_qubits, rho_qubits, num_qubits):
     combinations = list(itertools.product(complete_inits,complete_meas))
     return combinations
 
-def evaluate_cluster(complete_path_map, cluster_circ, combinations, backend, noisy, num_shots, provider):
-    device = provider.get_backend('ibmq_16_melbourne')
-    properties = device.properties()
-    coupling_map = device.configuration().coupling_map
-    noise_model = noise.device.basic_device_noise_model(properties)
-    basis_gates = noise_model.basis_gates
-
+def evaluate_cluster(complete_path_map, cluster_circ, combinations, backend, num_shots=None, provider=None):
     cluster_prob = {}
     for _, combination in enumerate(combinations):
         cluster_dag = circuit_to_dag(cluster_circ)
@@ -165,13 +95,16 @@ def evaluate_cluster(complete_path_map, cluster_circ, combinations, backend, noi
         cluster_circ_inst = dag_to_circuit(cluster_dag)
         # print(inits, meas)
         # print(cluster_circ_inst)
-        # noise_mapper = NoiseAdaptiveLayout(properties)
-        # noise_mapper.run(cluster_dag)
-        # initial_layout = noise_mapper.property_set['layout']
-        qasm_info = [device,properties,coupling_map,noise_model,basis_gates,num_shots] if backend=='qasm_simulator' else None
-        cluster_inst_prob = simulate_circ(circ=cluster_circ_inst,
-        backend=backend,
-        noisy=noisy,qasm_info=qasm_info)
+        if backend!='statevector_simulator':
+            device = provider.get_backend('ibmq_16_melbourne')
+            properties = device.properties()
+            coupling_map = device.configuration().coupling_map
+            noise_model = noise.device.basic_device_noise_model(properties)
+            basis_gates = noise_model.basis_gates
+            qasm_info = [device,properties,coupling_map,noise_model,basis_gates,num_shots]
+            cluster_inst_prob = simulate_circ(circ=cluster_circ_inst,backend=backend,qasm_info=qasm_info)
+        else:
+            cluster_inst_prob = simulate_circ(circ=cluster_circ_inst,backend=backend,qasm_info=None)
         cluster_prob[(tuple(inits),tuple(meas))] = cluster_inst_prob
     return cluster_prob
 
@@ -240,29 +173,33 @@ if __name__ == '__main__':
         quantum_time = 0
         for cluster_idx,cluster_combination in enumerate(rank_combinations):
             # NOTE: toggle here to control classical vs quantum evaluators
-            if True:
+            # if True:
             # if len(clusters[cluster_idx].qubits)<=5:
-            # if False:
+            if False:
                 print('rank %d runs %d combinations for cluster %d in classical evaluator'%(rank,len(cluster_combination),cluster_idx))
                 classical_evaluator_begin = time()
                 cluster_prob = evaluate_cluster(complete_path_map=complete_path_map,
                 cluster_circ=clusters[cluster_idx],
                 combinations=cluster_combination,
-                backend='statevector_simulator',noisy=False,num_shots=None,provider=provider)
+                backend='statevector_simulator')
                 classical_time += time()-classical_evaluator_begin
                 rank_results[cluster_idx] = cluster_prob
             else:
+                quantum_evaluator_begin = time()
                 if args.saturated_shots:
-                    rank_shots = int(num_shots/10)
+                    rank_shots = find_saturated_shots(clusters[cluster_idx])
+                    cluster_prob = evaluate_cluster(complete_path_map=complete_path_map,
+                    cluster_circ=clusters[cluster_idx],
+                    combinations=cluster_combination,
+                    backend='noisy_qasm_simulator',num_shots=rank_shots,provider=provider)
                 else:
                     rank_shots = max(int(num_shots/len(cluster_combination)/num_workers)+1,500)
+                    cluster_prob = evaluate_cluster(complete_path_map=complete_path_map,
+                    cluster_circ=clusters[cluster_idx],
+                    combinations=cluster_combination,
+                    backend='noisy_qasm_simulator',num_shots=rank_shots,provider=provider)
                 print('rank %d runs %d combinations for cluster %d in quantum evaluator, %d shots'%
                 (rank,len(cluster_combination),cluster_idx,rank_shots))
-                quantum_evaluator_begin = time()
-                cluster_prob = evaluate_cluster(complete_path_map=complete_path_map,
-                cluster_circ=clusters[cluster_idx],
-                combinations=cluster_combination,
-                backend='qasm_simulator',noisy=True,num_shots=rank_shots,provider=provider)
                 quantum_time += time()-quantum_evaluator_begin
                 rank_results[cluster_idx] = cluster_prob
         comm.send((rank_results,classical_time,quantum_time), dest=size-1)

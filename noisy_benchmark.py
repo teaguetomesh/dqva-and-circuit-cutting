@@ -100,7 +100,7 @@ for dimension in [[2,2],[2,3],[2,4],[3,3],[2,5],[3,4],[2,7]]:
     classical_evaluator_time = 0
     quantum_evaluator_time = 0
     for cluster_idx in range(len(clusters)):
-        # FIXME: what should be the deciding criterion for when to run classical kernel?
+        # TODO: what should be the deciding criterion for when to run classical kernel?
         # if cluster_idx < int(len(clusters)/2):
         if False:
             classical_evaluator = True

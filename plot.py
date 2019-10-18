@@ -5,28 +5,10 @@ import scipy.optimize as opt
 import numpy as np
 from scipy.stats import chisquare
 from scipy.stats import wasserstein_distance
+from helper_fun import cross_entropy
 
 def func(x, a, b):
     return np.exp(a*x)+b
-
-def cross_entropy(target,obs):
-    assert len(target)==len(obs)
-    obs = [x if x>=0 else 0 for x in obs]
-    # print(sum(obs))
-    # assert abs(sum(obs)-1)<1e-2
-    alpha = 1e-16
-    if 0 in obs:
-        obs = [(x+alpha)/(1+alpha*len(obs)) for x in obs]
-        # print('scaled:', sum(obs))
-    # assert abs(sum(obs)-1)<1e-2
-    h = 0
-    for p,q in zip(target,obs):
-        if p==0:
-            h += 0
-        else:
-            assert q>=0
-            h += -p*np.log(q)
-    return h
 
 if __name__ == '__main__':
     all_files = glob.glob('./benchmark_data/*_plotter_input_*.p')
