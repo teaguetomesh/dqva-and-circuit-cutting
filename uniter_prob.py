@@ -139,6 +139,7 @@ def effective_full_state_corresppndence(O_rho_pairs,cluster_circs):
     return correspondence_map
 
 def reconstructed_reorder(unordered,complete_path_map):
+    # print(complete_path_map)
     # print('ordering reconstructed sv')
     ordered  = [0 for sv in unordered]
     cluster_out_qubits = {}
@@ -147,9 +148,9 @@ def reconstructed_reorder(unordered,complete_path_map):
         output_qubit = path[-1]
         # print('output qubit = ', output_qubit)
         if output_qubit[0] in cluster_out_qubits:
-            cluster_out_qubits[output_qubit[0]].append((output_qubit[1],input_qubit[1]))
+            cluster_out_qubits[output_qubit[0]].append((output_qubit[1],input_qubit.index))
         else:
-            cluster_out_qubits[output_qubit[0]] = [(output_qubit[1],input_qubit[1])]
+            cluster_out_qubits[output_qubit[0]] = [(output_qubit[1],input_qubit.index)]
     # print(cluster_out_qubits)
     for cluster_idx in cluster_out_qubits:
         cluster_out_qubits[cluster_idx].sort()

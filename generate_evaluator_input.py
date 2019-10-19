@@ -14,6 +14,7 @@ from qiskit.providers.aer import noise
 from qiskit.converters import circuit_to_dag, dag_to_circuit
 from qiskit.transpiler.passes import NoiseAdaptiveLayout
 import argparse
+import datetime as dt
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='generate evaluator inputs')
@@ -23,7 +24,7 @@ if __name__ == '__main__':
 
     provider = IBMQ.load_account()
     device = provider.get_backend('ibmq_16_melbourne')
-    properties = device.properties()
+    properties = device.properties(dt.datetime(day=16, month=10, year=2019, hour=20))
     coupling_map = device.configuration().coupling_map
     noise_model = noise.device.basic_device_noise_model(properties)
     basis_gates = noise_model.basis_gates

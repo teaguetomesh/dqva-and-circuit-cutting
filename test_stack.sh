@@ -10,8 +10,8 @@ do
     do
         echo $f
         # NOTE: toggle here to change cluster shots
-        # mpiexec -n 2 python evaluator_prob.py --input-file $f --saturated-shots
-        mpiexec -n 2 python evaluator_prob.py --input-file $f
+        # mpiexec -n 5 python evaluator_prob.py --input-file $f --saturated-shots
+        mpiexec -n 5 python evaluator_prob.py --input-file $f
     done
 
     UNITER_INPUT_FILES=./benchmark_data/*_uniter_input_*.p

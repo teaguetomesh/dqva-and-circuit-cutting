@@ -15,6 +15,7 @@ from time import time
 from mpi4py import MPI
 import argparse
 from helper_fun import simulate_circ, find_saturated_shots
+import datetime as dt
 
 def find_cluster_O_rho_qubits(complete_path_map,cluster_idx):
     O_qubits = []
@@ -97,7 +98,7 @@ def evaluate_cluster(complete_path_map, cluster_circ, combinations, backend, num
         # print(cluster_circ_inst)
         if backend!='statevector_simulator':
             device = provider.get_backend('ibmq_16_melbourne')
-            properties = device.properties()
+            properties = device.properties(dt.datetime(day=16, month=10, year=2019, hour=20))
             coupling_map = device.configuration().coupling_map
             noise_model = noise.device.basic_device_noise_model(properties)
             basis_gates = noise_model.basis_gates
@@ -173,9 +174,9 @@ if __name__ == '__main__':
         quantum_time = 0
         for cluster_idx,cluster_combination in enumerate(rank_combinations):
             # NOTE: toggle here to control classical vs quantum evaluators
-            # if True:
+            if True:
             # if len(clusters[cluster_idx].qubits)<=5:
-            if False:
+            # if False:
                 print('rank %d runs %d combinations for cluster %d in classical evaluator'%(rank,len(cluster_combination),cluster_idx))
                 classical_evaluator_begin = time()
                 cluster_prob = evaluate_cluster(complete_path_map=complete_path_map,
