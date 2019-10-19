@@ -28,10 +28,10 @@ def find_saturated_shots(circ):
     while 1:
         qasm = simulate_circ(circ=circ,backend='noiseless_qasm_simulator',qasm_info=(None,None,None,None,None,num_shots))
         # NOTE: toggle here to control cross entropy accuracy
-        if abs(cross_entropy(target=ground_truth,obs=qasm)-min_ce)/min_ce<1e-2:
+        if abs(cross_entropy(target=ground_truth,obs=qasm)-min_ce)/min_ce<1e-3:
             return num_shots
         else:
-            num_shots *= 5
+            num_shots *= 2
 
 def reverseBits(num,bitSize): 
     binary = bin(num)
