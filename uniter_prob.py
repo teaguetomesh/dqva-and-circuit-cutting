@@ -139,6 +139,7 @@ def effective_full_state_corresppndence(O_rho_pairs,cluster_circs):
     return correspondence_map
 
 def reconstructed_reorder(unordered,complete_path_map):
+    # print(complete_path_map)
     # print('ordering reconstructed sv')
     ordered  = [0 for sv in unordered]
     cluster_out_qubits = {}
@@ -147,9 +148,9 @@ def reconstructed_reorder(unordered,complete_path_map):
         output_qubit = path[-1]
         # print('output qubit = ', output_qubit)
         if output_qubit[0] in cluster_out_qubits:
-            cluster_out_qubits[output_qubit[0]].append((output_qubit[1],input_qubit[1]))
+            cluster_out_qubits[output_qubit[0]].append((output_qubit[1],input_qubit.index))
         else:
-            cluster_out_qubits[output_qubit[0]] = [(output_qubit[1],input_qubit[1])]
+            cluster_out_qubits[output_qubit[0]] = [(output_qubit[1],input_qubit.index)]
     # print(cluster_out_qubits)
     for cluster_idx in cluster_out_qubits:
         cluster_out_qubits[cluster_idx].sort()
@@ -237,8 +238,6 @@ def calculate_cluster(cluster_idx,cluster_probs,init_meas,O_qubit_positions,effe
 
 # TODO: optimize this
 def reconstruct(complete_path_map, full_circ, cluster_circs, cluster_sim_probs):
-    print('Reconstructing')
-
     O_rho_pairs = find_cuts_pairs(complete_path_map)
     num_cuts = len(O_rho_pairs)
     scaling_factor = np.power(2,num_cuts)
@@ -283,13 +282,33 @@ if __name__ == '__main__':
     parser.add_argument('--input-file', metavar='S', type=str,help='which evaluator output file to run')
     args = parser.parse_args()
 
-    num_shots,searcher_time,circ,fc_evaluations,clusters,complete_path_map,all_cluster_prob,total_classical_time,total_quantum_time = pickle.load(open(args.input_file, 'rb' ) )
-    uniter_begin = time()
-    reconstructed_prob = reconstruct(complete_path_map=complete_path_map, full_circ=circ, cluster_circs=clusters, cluster_sim_probs=all_cluster_prob)
-    uniter_time = time()-uniter_begin
-    print(wasserstein_distance(fc_evaluations['sv_noiseless'],reconstructed_prob))
+    uniter_output = {}
+
+    evaluator_output = pickle.load(open(args.input_file, 'rb' ) )
+    for case in evaluator_output:
+        uniter_output[case] = {}
+        num_shots = evaluator_output[case]['num_shots']
+        searcher_time = evaluator_output[case]['searcher_time']
+        circ = evaluator_output[case]['circ']
+        fc_evaluations = evaluator_output[case]['fc_evaluations']
+        clusters = evaluator_output[case]['clusters']
+        complete_path_map = evaluator_output[case]['complete_path_map']
+        all_cluster_prob = evaluator_output[case]['all_cluster_prob']
+        
+        uniter_begin = time()
+        reconstructed_prob = reconstruct(complete_path_map=complete_path_map, full_circ=circ, cluster_circs=clusters, cluster_sim_probs=all_cluster_prob)
+        uniter_time = time()-uniter_begin
+        print('case {} reconstruction distance ='.format(case),wasserstein_distance(fc_evaluations['sv_noiseless'],reconstructed_prob))
     
-    evaluations = fc_evaluations
-    evaluations['qasm+noise+cutting'] = reconstructed_prob
-    filename = args.input_file.replace('uniter_input','uniter_output')
-    pickle.dump([num_shots,searcher_time,circ,evaluations,total_classical_time,total_quantum_time,uniter_time], open('%s'%filename,'wb'))
+        evaluations = fc_evaluations
+        evaluations['qasm+noise+cutting'] = reconstructed_prob
+
+        uniter_output[case]['num_shots'] = num_shots
+        uniter_output[case]['circ'] = circ
+        uniter_output[case]['evaluations'] = evaluations
+        uniter_output[case]['searcher_time'] = searcher_time
+        uniter_output[case]['classical_time'] = evaluator_output[case]['classical_time']
+        uniter_output[case]['quantum_time'] = evaluator_output[case]['quantum_time']
+        uniter_output[case]['uniter_time'] = uniter_time
+    filename = args.input_file.replace('uniter_input','plotter_input')
+    pickle.dump(uniter_output, open('%s'%filename,'wb'))

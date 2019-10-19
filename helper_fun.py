@@ -9,20 +9,15 @@ import numpy as np
 
 def cross_entropy(target,obs):
     assert len(target)==len(obs)
-    obs = [x if x>=0 else 0 for x in obs]
-    # print(sum(obs))
-    # assert abs(sum(obs)-1)<1e-2
-    alpha = 1e-16
+    # obs = [x if x>=0 else 0 for x in obs]
+    alpha = 1e-14
     if 0 in obs:
         obs = [(x+alpha)/(1+alpha*len(obs)) for x in obs]
-        # print('scaled:', sum(obs))
-    # assert abs(sum(obs)-1)<1e-2
     h = 0
     for p,q in zip(target,obs):
         if p==0:
             h += 0
         else:
-            assert q>=0
             h += -p*np.log(q)
     return h
 
@@ -33,7 +28,7 @@ def find_saturated_shots(circ):
     while 1:
         qasm = simulate_circ(circ=circ,backend='noiseless_qasm_simulator',qasm_info=(None,None,None,None,None,num_shots))
         # NOTE: toggle here to control cross entropy accuracy
-        if abs(cross_entropy(target=ground_truth,obs=qasm)-min_ce)/min_ce<1e-2:
+        if abs(cross_entropy(target=ground_truth,obs=qasm)-min_ce)/min_ce<1e-3:
             return num_shots
         else:
             num_shots *= 2

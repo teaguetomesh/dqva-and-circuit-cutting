@@ -1,6 +1,6 @@
-from helper_fun import find_saturated_shots
-from qcg.generators import gen_supremacy, gen_hwea
+import pickle
+import matplotlib.pyplot as plt
 
-circ = gen_supremacy(3,3,8,order='75601234')
-saturated_shots = find_saturated_shots(circ)
-print(saturated_shots)
+f = open('./plots/classical_sametotal.p', 'rb')
+fig = pickle.load(f)
+plt.show()
