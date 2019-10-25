@@ -1,3 +1,4 @@
+from qiskit import IBMQ
 from qiskit.converters import circuit_to_dag, dag_to_circuit
 from qiskit.circuit.classicalregister import ClassicalRegister
 from qiskit.transpiler.passes import NoiseAdaptiveLayout
@@ -6,6 +7,18 @@ from qiskit import Aer, IBMQ, execute
 from qiskit.compiler import transpile
 from qiskit.providers.aer import noise
 import numpy as np
+
+def load_IBMQ():
+    token = '9056ff772ff2e0f19de847fc8980b6e0121b561832de7dfb72bb23b085c1dc4a62cde82392f7d74e655465a9d997dd970858a568434f1b97038e70bf44b6c8a6'
+    if len(IBMQ.stored_account()) == 0:
+        IBMQ.save_account(token)
+        IBMQ.load_account()
+        provider = IBMQ.get_provider(hub='ibm-q-ornl', group='bes-qis', project='argonne')
+        return provider
+    else:
+        IBMQ.load_account()
+        provider = IBMQ.get_provider(hub='ibm-q-ornl', group='bes-qis', project='argonne')
+        return provider
 
 def cross_entropy(target,obs):
     assert len(target)==len(obs)
@@ -85,7 +98,6 @@ def simulate_circ(circ, backend, qasm_info):
         noise_mapper.run(dag)
         initial_layout = noise_mapper.property_set['layout']
         new_circuit = transpile(qc, backend=device, basis_gates=basis_gates,coupling_map=coupling_map,backend_properties=properties,initial_layout=initial_layout)
-        # FIXME: Do I need to pass initial_layout?
         na_result = execute(experiments=new_circuit,
         backend=backend,
         noise_model=noise_model,

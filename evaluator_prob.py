@@ -14,7 +14,7 @@ import progressbar as pb
 from time import time
 from mpi4py import MPI
 import argparse
-from helper_fun import simulate_circ, find_saturated_shots
+from helper_fun import simulate_circ, find_saturated_shots, load_IBMQ
 import datetime as dt
 
 def find_cluster_O_rho_qubits(complete_path_map,cluster_idx):
@@ -142,7 +142,7 @@ if __name__ == '__main__':
     num_workers = size - 1
 
     evaluator_input = pickle.load(open(args.input_file, 'rb' ))
-    provider = IBMQ.load_account()
+    provider = load_IBMQ()
 
     if rank == size-1:
         evaluator_output = {}
