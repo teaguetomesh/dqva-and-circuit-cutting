@@ -1,6 +1,6 @@
 # evaluator_input.p
 # NOTE: toggle here to change max qc size, max clusters
-python generate_evaluator_input.py --min-qubit 3 --max-qubit 6 --max-clusters 6
+python generate_evaluator_input.py --min-qubit 5 --max-qubit 6 --max-clusters 6
 EVALUATOR_FILES=./benchmark_data/evaluator_input.p
 
 # NOTE: toggle here to change cluster shots
