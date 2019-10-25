@@ -311,4 +311,4 @@ if __name__ == '__main__':
         uniter_output[case]['quantum_time'] = evaluator_output[case]['quantum_time']
         uniter_output[case]['uniter_time'] = uniter_time
     filename = args.input_file.replace('uniter_input','plotter_input')
-    pickle.dump(uniter_output, open('%s'%filename,'wb'))
+    pickle.dump(uniter_output, open('%s'%filename,'ab'))
