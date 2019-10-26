@@ -11,6 +11,7 @@ from datetime import datetime
 from qiskit.providers.models import BackendProperties
 from qiskit.ignis.mitigation.measurement import (complete_meas_cal, tensored_meas_cal,CompleteMeasFitter, TensoredMeasFitter)
 from qiskit.circuit.quantumregister import QuantumRegister
+import datetime as dt
 
 def load_IBMQ():
     token = '9056ff772ff2e0f19de847fc8980b6e0121b561832de7dfb72bb23b085c1dc4a62cde82392f7d74e655465a9d997dd970858a568434f1b97038e70bf44b6c8a6'
@@ -45,7 +46,7 @@ def find_saturated_shots(circ):
     while 1:
         qasm = simulate_circ(circ=circ,backend='noiseless_qasm_simulator',qasm_info=(None,None,None,None,None,num_shots,None))
         # NOTE: toggle here to control cross entropy accuracy
-        if abs(cross_entropy(target=ground_truth,obs=qasm)-min_ce)/min_ce<1e-3:
+        if abs(cross_entropy(target=ground_truth,obs=qasm)-min_ce)/min_ce<1e-2:
             return num_shots
         else:
             num_shots += 1000
@@ -137,11 +138,19 @@ def get_bprop():
     bprop_noise_model = noise.device.basic_device_noise_model(bprop)
     return bprop_noise_model
 
-def calibration_matrix(circ,qasm_info):
-    _,_,coupling_map,noise_model,basis_gates,num_shots = qasm_info
+def calibration_matrix(device='ibmq_16_melbourne'):
+    provider = load_IBMQ()
+    device = provider.get_backend(device)
+    properties = device.properties(dt.datetime(day=16, month=10, year=2019, hour=20))
+    coupling_map = device.configuration().coupling_map
+    noise_model = noise.device.basic_device_noise_model(properties)
+    basis_gates = noise_model.basis_gates
+    num_qubits = int(len(properties.qubits)/2)
+    num_shots = np.power(2,num_qubits)*10
+
     # Generate the calibration circuits
-    qr = QuantumRegister(len(circ.qubits))
-    qubit_list = [i for i in range(len(circ.qubits))]
+    qr = QuantumRegister(num_qubits)
+    qubit_list = [i for i in range(num_qubits)]
     meas_calibs, state_labels = complete_meas_cal(qubit_list=qubit_list, qr=qr, circlabel='mcal')
 
     # Execute the calibration circuits without noise
@@ -151,7 +160,7 @@ def calibration_matrix(circ,qasm_info):
         noise_model=noise_model,
         coupling_map=coupling_map,
         basis_gates=basis_gates,
-        shots=num_shots*10).result()
+        shots=num_shots).result()
     meas_fitter = CompleteMeasFitter(cal_results, state_labels, qubit_list=qubit_list, circlabel='mcal')
     meas_filter = meas_fitter.filter
     return meas_filter
