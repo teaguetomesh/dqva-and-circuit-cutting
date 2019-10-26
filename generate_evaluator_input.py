@@ -6,7 +6,7 @@ import numpy as np
 from qcg.generators import gen_supremacy, gen_hwea
 import MIQCP_searcher as searcher
 import cutter
-from helper_fun import simulate_circ, cross_entropy, find_saturated_shots
+from helper_fun import simulate_circ, cross_entropy, find_saturated_shots, calibration_matrix
 import uniter_prob as uniter
 from scipy.stats import wasserstein_distance
 from qiskit import Aer, IBMQ, execute
@@ -72,12 +72,14 @@ if __name__ == '__main__':
 
             print('Evaluating qasm')
             num_shots = find_saturated_shots(circ)
-            qasm_info = [None,None,None,None,None,num_shots]
+            qasm_info = [None,None,None,None,None,num_shots,None]
             qasm_noiseless_fc = simulate_circ(circ=circ,backend='noiseless_qasm_simulator',qasm_info=qasm_info)
             print('requires %.3e shots'%num_shots)
 
             print('Evaluating qasm + noise')
             qasm_info = [device, properties,coupling_map,noise_model,basis_gates,num_shots]
+            meas_filter = calibration_matrix(circ,qasm_info)
+            qasm_info = [device, properties,coupling_map,noise_model,basis_gates,num_shots,meas_filter]
             qasm_noisy_fc = simulate_circ(circ=circ,backend='noisy_qasm_simulator',qasm_info=qasm_info)
 
             fc_evaluations = {'sv_noiseless':sv_noiseless_fc,

@@ -9,6 +9,8 @@ from qiskit.providers.aer import noise
 import numpy as np
 from datetime import datetime
 from qiskit.providers.models import BackendProperties
+from qiskit.ignis.mitigation.measurement import (complete_meas_cal, tensored_meas_cal,CompleteMeasFitter, TensoredMeasFitter)
+from qiskit.circuit.quantumregister import QuantumRegister
 
 def load_IBMQ():
     token = '9056ff772ff2e0f19de847fc8980b6e0121b561832de7dfb72bb23b085c1dc4a62cde82392f7d74e655465a9d997dd970858a568434f1b97038e70bf44b6c8a6'
@@ -41,7 +43,7 @@ def find_saturated_shots(circ):
     min_ce = cross_entropy(target=ground_truth,obs=ground_truth)
     num_shots = 1000
     while 1:
-        qasm = simulate_circ(circ=circ,backend='noiseless_qasm_simulator',qasm_info=(None,None,None,None,None,num_shots))
+        qasm = simulate_circ(circ=circ,backend='noiseless_qasm_simulator',qasm_info=(None,None,None,None,None,num_shots,None))
         # NOTE: toggle here to control cross entropy accuracy
         if abs(cross_entropy(target=ground_truth,obs=qasm)-min_ce)/min_ce<1e-3:
             return num_shots
@@ -76,7 +78,7 @@ def simulate_circ(circ, backend, qasm_info):
         meas.measure(circ.qubits,c)
         qc = circ+meas
 
-        _,_,_,_,_,num_shots = qasm_info
+        _,_,_,_,_,num_shots,_ = qasm_info
         job_sim = execute(qc, backend, shots=num_shots)
         result = job_sim.result()
         noiseless_counts = result.get_counts(qc)
@@ -93,24 +95,26 @@ def simulate_circ(circ, backend, qasm_info):
         meas.barrier(circ.qubits)
         meas.measure(circ.qubits,c)
         qc = circ+meas
-        device,properties,coupling_map,noise_model,basis_gates,num_shots = qasm_info
+        device,properties,coupling_map,noise_model,basis_gates,num_shots,meas_filter = qasm_info
         dag = circuit_to_dag(qc)
         noise_mapper = NoiseAdaptiveLayout(properties)
         noise_mapper.run(dag)
         initial_layout = noise_mapper.property_set['layout']
         new_circuit = transpile(qc, backend=device, basis_gates=basis_gates,coupling_map=coupling_map,backend_properties=properties,initial_layout=initial_layout)
-        bprob_noise_model = get_bprop()
+        # bprob_noise_model = get_bprop()
         na_result = execute(experiments=new_circuit,
         backend=backend,
         noise_model=noise_model,
         coupling_map=coupling_map,
         basis_gates=basis_gates,
         shots=num_shots).result()
-        na_counts = na_result.get_counts(new_circuit)
+        mitigated_results = meas_filter.apply(na_result)
+        mitigated_counts = mitigated_results.get_counts(0)
+        # na_counts = na_result.get_counts(new_circuit)
         na_prob = [0 for x in range(np.power(2,len(circ.qubits)))]
-        for state in na_counts:
+        for state in mitigated_counts:
             reversed_state = reverseBits(int(state,2),len(circ.qubits))
-            na_prob[reversed_state] = na_counts[state]/num_shots
+            na_prob[reversed_state] = mitigated_counts[state]/num_shots
         return na_prob
     else:
         raise Exception('Illegal backend:',backend)
@@ -132,3 +136,22 @@ def get_bprop():
     bprop = BackendProperties(last_update_date=calib_time, backend_name="no_readout_error", qubits=qubit_list, backend_version="1.0.0", gates=prop.gates, general=[])
     bprop_noise_model = noise.device.basic_device_noise_model(bprop)
     return bprop_noise_model
+
+def calibration_matrix(circ,qasm_info):
+    _,_,coupling_map,noise_model,basis_gates,num_shots = qasm_info
+    # Generate the calibration circuits
+    qr = QuantumRegister(len(circ.qubits))
+    qubit_list = [i for i in range(len(circ.qubits))]
+    meas_calibs, state_labels = complete_meas_cal(qubit_list=qubit_list, qr=qr, circlabel='mcal')
+
+    # Execute the calibration circuits without noise
+    backend = Aer.get_backend('qasm_simulator')
+    cal_results = execute(experiments=meas_calibs,
+        backend=backend,
+        noise_model=noise_model,
+        coupling_map=coupling_map,
+        basis_gates=basis_gates,
+        shots=num_shots*10).result()
+    meas_fitter = CompleteMeasFitter(cal_results, state_labels, qubit_list=qubit_list, circlabel='mcal')
+    meas_filter = meas_fitter.filter
+    return meas_filter

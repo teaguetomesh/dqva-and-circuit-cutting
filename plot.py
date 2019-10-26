@@ -23,8 +23,8 @@ if __name__ == '__main__':
 
         # [print(case, plotter_input[case]['searcher_time']) for case in plotter_input]
 
-        hw_qubits = [case[0]-0.1 for case in plotter_inputs[0]]
-        fc_qubits = [case[1]-0.1 for case in plotter_inputs[0]]
+        hw_qubits = [case[0] for case in plotter_inputs[0]]
+        fc_qubits = [case[1] for case in plotter_inputs[0]]
         dx = [0.2 for x in plotter_inputs[0]]
         dy = [0.2 for x in plotter_inputs[0]]
 
@@ -75,6 +75,33 @@ if __name__ == '__main__':
         qasm_noise_avg /= len(plotter_inputs)
         qasm_noise_cutting_avg /= len(plotter_inputs)
         percent_change_avg /= len(plotter_inputs)
+        best_cc = {}
+        for i in range(len(plotter_inputs[0])):
+            percent = percent_change_avg[i]
+            hw = hw_qubits[i]
+            fc = fc_qubits[i]
+            if (fc in best_cc and percent>best_cc[fc][1]) or (fc not in best_cc):
+                best_cc[fc] = (uniter_time_avg[i],percent)
+        print(best_cc)
+
+        # Create some mock data
+        fig, ax1 = plt.subplots()
+
+        color = 'tab:blue'
+        ax1.set_xlabel('Number of qubits')
+        ax1.set_ylabel('Cross entropy reduction (%)', color=color)  # we already handled the x-label with ax1
+        ax1.plot([fc for fc in best_cc], [best_cc[fc][1] for fc in best_cc], 'X',color=color)
+        ax1.tick_params(axis='y', labelcolor=color)
+
+        ax2 = ax1.twinx()  # instantiate a second axes that shares the same x-axis
+
+        color = 'tab:red'
+        ax2.set_ylabel('Reconstruction time (s)', color=color)
+        ax2.plot([fc for fc in best_cc], [best_cc[fc][0] for fc in best_cc], '*',color=color)
+        ax2.tick_params(axis='y', labelcolor=color)
+
+        fig.tight_layout()  # otherwise the right y-label is slightly clipped
+        plt.savefig('%s_tradeoff.png'%figname[:-2])
 
         print('plotting %s, %d times average'%(figname,len(plotter_inputs)))
 
@@ -104,9 +131,9 @@ if __name__ == '__main__':
         ax1.set_zlabel('reconstructor time (seconds)')
         ax1 = fig.add_subplot(235, projection='3d')
         ax1.bar3d(hw_qubits, fc_qubits, np.zeros(len(plotter_input)), dx, dy, percent_change_avg)
-        ax1.set_zlim3d(1.2*min(percent_change_avg), 1.2*max(percent_change_avg))
+        ax1.set_zlim3d(min(0,1.2*min(percent_change_avg)), 1.2*max(percent_change_avg))
         ax1.set_xlabel('hardware qubits')
         ax1.set_ylabel('full circuit qubits')
         ax1.set_zlabel('cross entropy gap reduction due to cutting (%)')
         # pickle.dump(fig,open('%s'%figname, 'wb'))
-        plt.savefig('%s_1.png'%figname[:-2])
+        plt.savefig('%s.png'%figname[:-2])

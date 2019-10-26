@@ -14,7 +14,7 @@ import progressbar as pb
 from time import time
 from mpi4py import MPI
 import argparse
-from helper_fun import simulate_circ, find_saturated_shots, load_IBMQ
+from helper_fun import simulate_circ, find_saturated_shots, load_IBMQ, calibration_matrix
 import datetime as dt
 
 def find_cluster_O_rho_qubits(complete_path_map,cluster_idx):
@@ -58,6 +58,15 @@ def find_all_simulation_combinations(O_qubits, rho_qubits, num_qubits):
     return combinations
 
 def evaluate_cluster(complete_path_map, cluster_circ, combinations, backend, num_shots=None, provider=None):
+    device = provider.get_backend('ibmq_16_melbourne')
+    properties = device.properties(dt.datetime(day=16, month=10, year=2019, hour=20))
+    coupling_map = device.configuration().coupling_map
+    noise_model = noise.device.basic_device_noise_model(properties)
+    basis_gates = noise_model.basis_gates
+    qasm_info = [device,properties,coupling_map,noise_model,basis_gates,num_shots]
+    # TODO: pre compute calibration matrices
+    meas_filter = calibration_matrix(cluster_circ,qasm_info)
+    qasm_info = [device,properties,coupling_map,noise_model,basis_gates,num_shots,meas_filter]
     cluster_prob = {}
     for _, combination in enumerate(combinations):
         cluster_dag = circuit_to_dag(cluster_circ)
@@ -97,12 +106,6 @@ def evaluate_cluster(complete_path_map, cluster_circ, combinations, backend, num
         # print(inits, meas)
         # print(cluster_circ_inst)
         if backend!='statevector_simulator':
-            device = provider.get_backend('ibmq_16_melbourne')
-            properties = device.properties(dt.datetime(day=16, month=10, year=2019, hour=20))
-            coupling_map = device.configuration().coupling_map
-            noise_model = noise.device.basic_device_noise_model(properties)
-            basis_gates = noise_model.basis_gates
-            qasm_info = [device,properties,coupling_map,noise_model,basis_gates,num_shots]
             cluster_inst_prob = simulate_circ(circ=cluster_circ_inst,backend=backend,qasm_info=qasm_info)
         else:
             cluster_inst_prob = simulate_circ(circ=cluster_circ_inst,backend=backend,qasm_info=None)
