@@ -14,7 +14,7 @@ import progressbar as pb
 from time import time
 from mpi4py import MPI
 import argparse
-from helper_fun import simulate_circ, find_saturated_shots, load_IBMQ
+from helper_fun import simulate_circ, find_saturated_shots, load_IBMQ, readout_mitigation
 import datetime as dt
 
 def find_cluster_O_rho_qubits(complete_path_map,cluster_idx):
@@ -58,6 +58,26 @@ def find_all_simulation_combinations(O_qubits, rho_qubits, num_qubits):
     return combinations
 
 def evaluate_cluster(complete_path_map, cluster_circ, combinations, backend, num_shots=None, provider=None):
+    if 'noisy' in backend:
+        device = provider.get_backend('ibmq_16_melbourne')
+        properties = device.properties(dt.datetime(day=16, month=10, year=2019, hour=20))
+        coupling_map = device.configuration().coupling_map
+        noise_model = noise.device.basic_device_noise_model(properties)
+        basis_gates = noise_model.basis_gates
+        # dag = circuit_to_dag(cluster_circ)
+        # noise_mapper = NoiseAdaptiveLayout(properties)
+        # noise_mapper.run(dag)
+        # initial_layout = noise_mapper.property_set['layout']
+        meas_filter = readout_mitigation(circ=cluster_circ,num_shots=num_shots)
+        qasm_info = {'device':device,
+        'properties':properties,
+        'coupling_map':coupling_map,
+        'noise_model':noise_model,
+        'basis_gates':basis_gates,
+        'num_shots':num_shots,
+        'meas_filter':meas_filter}
+    elif 'qasm' in backend:
+        qasm_info = {'num_shots':num_shots}
     cluster_prob = {}
     for _, combination in enumerate(combinations):
         cluster_dag = circuit_to_dag(cluster_circ)
@@ -97,12 +117,6 @@ def evaluate_cluster(complete_path_map, cluster_circ, combinations, backend, num
         # print(inits, meas)
         # print(cluster_circ_inst)
         if backend!='statevector_simulator':
-            device = provider.get_backend('ibmq_16_melbourne')
-            properties = device.properties(dt.datetime(day=16, month=10, year=2019, hour=20))
-            coupling_map = device.configuration().coupling_map
-            noise_model = noise.device.basic_device_noise_model(properties)
-            basis_gates = noise_model.basis_gates
-            qasm_info = [device,properties,coupling_map,noise_model,basis_gates,num_shots]
             cluster_inst_prob = simulate_circ(circ=cluster_circ_inst,backend=backend,qasm_info=qasm_info)
         else:
             cluster_inst_prob = simulate_circ(circ=cluster_circ_inst,backend=backend,qasm_info=None)
@@ -164,7 +178,6 @@ if __name__ == '__main__':
             for key in evaluator_output:
                 evaluator_output[key]['classical_time'] += rank_classical_time[key]
                 evaluator_output[key]['quantum_time'] += rank_quantum_time[key]
-                # TODO: seems wrong
                 if evaluator_output[key]['all_cluster_prob'] == {}:
                     evaluator_output[key]['all_cluster_prob'].update(rank_results[key])
                 else:
