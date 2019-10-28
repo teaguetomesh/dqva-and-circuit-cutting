@@ -150,6 +150,7 @@ def readout_mitigation(circ,num_shots,device_name='ibmq_16_melbourne'):
     dag = circuit_to_dag(circ)
     noise_mapper = NoiseAdaptiveLayout(properties)
     noise_mapper.run(dag)
+    # FIXME: initia_layout not mapping properly
     initial_layout = noise_mapper.property_set['layout']
     num_qubits = len(circ.qubits)
 
