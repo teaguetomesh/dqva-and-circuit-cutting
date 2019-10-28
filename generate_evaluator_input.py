@@ -48,8 +48,10 @@ if __name__ == '__main__':
             print('-'*100)
             
             # Generate a circuit
-            print('%d * %d supremacy circuit'%(i,j))
-            circ = gen_supremacy(i,j,8,order='75601234')
+            # print('%d * %d supremacy circuit'%(i,j))
+            # circ = gen_supremacy(i,j,8,order='75601234')
+            print('%d * %d HWEA circuit'%(i,j))
+            circ = gen_hwea(i*j,2)
             
             # Looking for a cut
             searcher_begin = time()

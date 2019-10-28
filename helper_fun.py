@@ -67,8 +67,8 @@ def simulate_circ(circ, backend, qasm_info):
         for i, sv in enumerate(outputstate):
             reverse_i = reverseBits(i,len(circ.qubits))
             outputstate_ordered[reverse_i] = sv
-        output_prob = [np.power(np.absolute(x),2) for x in outputstate_ordered]
-        return output_prob
+        sv_prob = [np.power(np.absolute(x),2) for x in outputstate_ordered]
+        return sv_prob
     elif backend == 'noiseless_qasm_simulator':
         # print('using noiseless qasm simulator %d shots'%num_shots)
         backend = Aer.get_backend('qasm_simulator')
@@ -88,7 +88,7 @@ def simulate_circ(circ, backend, qasm_info):
             noiseless_prob[reversed_state] = noiseless_counts[state]/num_shots
         return noiseless_prob
     elif backend == 'noisy_qasm_simulator':
-        # print('using noisy qasm simulator {} shots, NA = {}'.format(num_shots,initial_layout!=None))
+        # print('using noisy qasm simulator {} shots'.format(num_shots))
         backend = Aer.get_backend('qasm_simulator')
         c = ClassicalRegister(len(circ.qubits), 'c')
         meas = QuantumCircuit(circ.qregs[0], c)
@@ -102,23 +102,26 @@ def simulate_circ(circ, backend, qasm_info):
         basis_gates = qasm_info['basis_gates']
         num_shots = qasm_info['num_shots']
         meas_filter = qasm_info['meas_filter']
-        initial_layout = qasm_info['initial_layout']
+        dag = circuit_to_dag(qc)
+        noise_mapper = NoiseAdaptiveLayout(properties)
+        noise_mapper.run(dag)
+        initial_layout = noise_mapper.property_set['layout']
         new_circuit = transpile(qc, backend=device, basis_gates=basis_gates,coupling_map=coupling_map,backend_properties=properties,initial_layout=initial_layout)
         # bprob_noise_model = get_bprop()
-        na_result = execute(experiments=new_circuit,
+        noisy_result = execute(experiments=new_circuit,
         backend=backend,
         noise_model=noise_model,
         coupling_map=coupling_map,
         basis_gates=basis_gates,
         shots=num_shots).result()
-        mitigated_results = meas_filter.apply(na_result)
-        mitigated_counts = mitigated_results.get_counts(0)
-        # na_counts = na_result.get_counts(new_circuit)
-        na_prob = [0 for x in range(np.power(2,len(circ.qubits)))]
-        for state in mitigated_counts:
+        # mitigated_results = meas_filter.apply(noisy_result)
+        # noisy_counts = mitigated_results.get_counts(0)
+        noisy_counts = noisy_result.get_counts(new_circuit)
+        noisy_prob = [0 for x in range(np.power(2,len(circ.qubits)))]
+        for state in noisy_counts:
             reversed_state = reverseBits(int(state,2),len(circ.qubits))
-            na_prob[reversed_state] = mitigated_counts[state]/num_shots
-        return na_prob
+            noisy_prob[reversed_state] = noisy_counts[state]/num_shots
+        return noisy_prob
     else:
         raise Exception('Illegal backend:',backend)
 
@@ -150,19 +153,18 @@ def readout_mitigation(circ,num_shots,device_name='ibmq_16_melbourne'):
     dag = circuit_to_dag(circ)
     noise_mapper = NoiseAdaptiveLayout(properties)
     noise_mapper.run(dag)
-    # FIXME: initia_layout not mapping properly
     initial_layout = noise_mapper.property_set['layout']
-    num_qubits = len(circ.qubits)
+    num_qubits = len(properties.qubits)
 
     # Generate the calibration circuits
     qr = QuantumRegister(num_qubits)
     qubit_list = []
-    print(initial_layout)
+    # print(initial_layout)
     initial_layout = initial_layout.get_physical_bits()
     for q in initial_layout:
         if 'ancilla' not in initial_layout[q].register.name:
             qubit_list.append(q)
-    print(qubit_list)
+    # print(qubit_list)
     meas_calibs, state_labels = complete_meas_cal(qubit_list=qubit_list, qr=qr, circlabel='mcal')
 
     # Execute the calibration circuits without noise

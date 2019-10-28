@@ -64,19 +64,18 @@ def evaluate_cluster(complete_path_map, cluster_circ, combinations, backend, num
         coupling_map = device.configuration().coupling_map
         noise_model = noise.device.basic_device_noise_model(properties)
         basis_gates = noise_model.basis_gates
-        dag = circuit_to_dag(cluster_circ)
-        noise_mapper = NoiseAdaptiveLayout(properties)
-        noise_mapper.run(dag)
-        initial_layout = noise_mapper.property_set['layout']
-        meas_filter = readout_mitigation(circ=cluster_circ,initial_layout=initial_layout,num_shots=num_shots)
+        # dag = circuit_to_dag(cluster_circ)
+        # noise_mapper = NoiseAdaptiveLayout(properties)
+        # noise_mapper.run(dag)
+        # initial_layout = noise_mapper.property_set['layout']
+        meas_filter = readout_mitigation(circ=cluster_circ,num_shots=num_shots)
         qasm_info = {'device':device,
         'properties':properties,
         'coupling_map':coupling_map,
         'noise_model':noise_model,
         'basis_gates':basis_gates,
         'num_shots':num_shots,
-        'meas_filter':meas_filter,
-        'initial_layout':initial_layout}
+        'meas_filter':meas_filter}
     elif 'qasm' in backend:
         qasm_info = {'num_shots':num_shots}
     cluster_prob = {}
