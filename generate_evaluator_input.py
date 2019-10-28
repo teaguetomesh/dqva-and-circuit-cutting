@@ -32,7 +32,7 @@ if __name__ == '__main__':
     basis_gates = noise_model.basis_gates
 
     # NOTE: toggle circuits to benchmark
-    dimension_l = [[2,2],[2,3]]
+    dimension_l = [[2,2],[2,3],[2,4],[3,3]]
 
     dirname = './benchmark_data'
     if not os.path.exists(dirname):
@@ -51,7 +51,7 @@ if __name__ == '__main__':
             # print('%d * %d supremacy circuit'%(i,j))
             # circ = gen_supremacy(i,j,8,order='75601234')
             print('%d * %d HWEA circuit'%(i,j))
-            circ = gen_hwea(i*j,2)
+            circ = gen_hwea(i*j,1)
             
             # Looking for a cut
             searcher_begin = time()

@@ -38,6 +38,7 @@ def cross_entropy(target,obs):
             h += -p*np.log(q)
     return h
 
+# TODO: for easy to simulate circuits, this shots may be too low when introducing noise 
 def find_saturated_shots(circ):
     ground_truth = simulate_circ(circ=circ,backend='statevector_simulator',qasm_info=None)
     min_ce = cross_entropy(target=ground_truth,obs=ground_truth)
@@ -114,9 +115,9 @@ def simulate_circ(circ, backend, qasm_info):
         coupling_map=coupling_map,
         basis_gates=basis_gates,
         shots=num_shots).result()
-        # mitigated_results = meas_filter.apply(noisy_result)
-        # noisy_counts = mitigated_results.get_counts(0)
-        noisy_counts = noisy_result.get_counts(new_circuit)
+        mitigated_results = meas_filter.apply(noisy_result)
+        noisy_counts = mitigated_results.get_counts(0)
+        # noisy_counts = noisy_result.get_counts(new_circuit)
         noisy_prob = [0 for x in range(np.power(2,len(circ.qubits)))]
         for state in noisy_counts:
             reversed_state = reverseBits(int(state,2),len(circ.qubits))

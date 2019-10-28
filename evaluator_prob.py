@@ -209,40 +209,43 @@ if __name__ == '__main__':
             rank_classical_time[key] = 0
             dimension,num_shots,searcher_time,circ,fc_evaluations,clusters,complete_path_map = evaluator_input[key]
             for cluster_idx in range(len(rank_combinations[key])):
-                # NOTE: toggle here for which evaluator to use
-                # if True:
-                if False:
-                    print('rank {} runs case {}, cluster_{} * {} on CLASSICAL'.format(
-                        rank,key,cluster_idx,
-                        len(rank_combinations[key][cluster_idx])))
-                    classical_evaluator_begin = time()
-                    cluster_prob = evaluate_cluster(complete_path_map=complete_path_map,
-                    cluster_circ=clusters[cluster_idx],
-                    combinations=rank_combinations[key][cluster_idx],
-                    backend='statevector_simulator')
-                    rank_classical_time[key] += time()-classical_evaluator_begin
-                elif args.saturated_shots:
-                    quantum_evaluator_begin = time()
-                    rank_shots = find_saturated_shots(clusters[cluster_idx])
-                    print('rank {} runs case {}, cluster_{} * {} on QUANTUM, saturated shots = {}'.format(
-                        rank,key,cluster_idx,
-                        len(rank_combinations[key][cluster_idx]),rank_shots))
-                    cluster_prob = evaluate_cluster(complete_path_map=complete_path_map,
-                    cluster_circ=clusters[cluster_idx],
-                    combinations=rank_combinations[key][cluster_idx],
-                    backend='noisy_qasm_simulator',num_shots=rank_shots,provider=provider)
-                    rank_quantum_time[key] += time()-quantum_evaluator_begin
+                if len(rank_combinations[key][cluster_idx]) > 0:
+                    # NOTE: toggle here for which evaluator to use
+                    # if True:
+                    if False:
+                        print('rank {} runs case {}, cluster_{} * {} on CLASSICAL'.format(
+                            rank,key,cluster_idx,
+                            len(rank_combinations[key][cluster_idx])))
+                        classical_evaluator_begin = time()
+                        cluster_prob = evaluate_cluster(complete_path_map=complete_path_map,
+                        cluster_circ=clusters[cluster_idx],
+                        combinations=rank_combinations[key][cluster_idx],
+                        backend='statevector_simulator')
+                        rank_classical_time[key] += time()-classical_evaluator_begin
+                    elif args.saturated_shots:
+                        quantum_evaluator_begin = time()
+                        rank_shots = find_saturated_shots(clusters[cluster_idx])
+                        print('rank {} runs case {}, cluster_{} * {} on QUANTUM, saturated shots = {}'.format(
+                            rank,key,cluster_idx,
+                            len(rank_combinations[key][cluster_idx]),rank_shots))
+                        cluster_prob = evaluate_cluster(complete_path_map=complete_path_map,
+                        cluster_circ=clusters[cluster_idx],
+                        combinations=rank_combinations[key][cluster_idx],
+                        backend='noisy_qasm_simulator',num_shots=rank_shots,provider=provider)
+                        rank_quantum_time[key] += time()-quantum_evaluator_begin
+                    else:
+                        quantum_evaluator_begin = time()
+                        rank_shots = max(int(num_shots/len(rank_combinations[key][cluster_idx])/num_workers)+1,1000)
+                        print('rank {} runs case {}, cluster_{} {}_qubits * {}_instances on QUANTUM, sameTotal shots = {}'.format(
+                            rank,key,cluster_idx,len(clusters[cluster_idx].qubits),
+                            len(rank_combinations[key][cluster_idx]),rank_shots))
+                        cluster_prob = evaluate_cluster(complete_path_map=complete_path_map,
+                        cluster_circ=clusters[cluster_idx],
+                        combinations=rank_combinations[key][cluster_idx],
+                        backend='noisy_qasm_simulator',num_shots=rank_shots,provider=provider)
+                        rank_quantum_time[key] += time()-quantum_evaluator_begin
+                    rank_results[key][cluster_idx] = cluster_prob
+                    print('classical time = ',rank_classical_time[key], 'quantum time = ',rank_quantum_time[key])
                 else:
-                    quantum_evaluator_begin = time()
-                    rank_shots = max(int(num_shots/len(rank_combinations[key][cluster_idx])/num_workers)+1,500)
-                    print('rank {} runs case {}, cluster_{} * {} on QUANTUM, sameTotal shots = {}'.format(
-                        rank,key,cluster_idx,
-                        len(rank_combinations[key][cluster_idx]),rank_shots))
-                    cluster_prob = evaluate_cluster(complete_path_map=complete_path_map,
-                    cluster_circ=clusters[cluster_idx],
-                    combinations=rank_combinations[key][cluster_idx],
-                    backend='noisy_qasm_simulator',num_shots=rank_shots,provider=provider)
-                    rank_quantum_time[key] += time()-quantum_evaluator_begin
-                rank_results[key][cluster_idx] = cluster_prob
-            print('classical time = ',rank_classical_time[key], 'quantum time = ',rank_quantum_time[key])
+                    rank_results[key][cluster_idx] = {}
         comm.send((rank_results,rank_classical_time,rank_quantum_time), dest=size-1)
