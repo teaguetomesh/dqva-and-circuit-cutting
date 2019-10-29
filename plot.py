@@ -101,7 +101,7 @@ if __name__ == '__main__':
         ax2.tick_params(axis='y', labelcolor=color)
 
         fig.tight_layout()  # otherwise the right y-label is slightly clipped
-        plt.savefig('%s_tradeoff.png'%figname[:-2])
+        plt.savefig('%s_tradeoff.png'%figname[:-2],dpi=400,transparent=True)
 
         print('plotting %s, %d times average'%(figname,len(plotter_inputs)))
 
@@ -136,4 +136,4 @@ if __name__ == '__main__':
         ax1.set_ylabel('full circuit qubits')
         ax1.set_zlabel('cross entropy gap reduction due to cutting (%)')
         # pickle.dump(fig,open('%s'%figname, 'wb'))
-        plt.savefig('%s.png'%figname[:-2])
+        plt.savefig('%s.png'%figname[:-2],dpi=400,transparent=True)
