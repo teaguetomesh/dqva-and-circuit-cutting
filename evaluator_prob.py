@@ -1,7 +1,6 @@
 from qiskit.converters import circuit_to_dag, dag_to_circuit
 from qiskit.extensions.standard import HGate, SGate, SdgGate, XGate
 from qiskit.circuit.classicalregister import ClassicalRegister
-from qiskit.transpiler.passes import NoiseAdaptiveLayout
 from qiskit import QuantumCircuit
 from qiskit import Aer, IBMQ, execute
 from qiskit.compiler import transpile
@@ -68,14 +67,15 @@ def evaluate_cluster(complete_path_map, cluster_circ, combinations, backend, num
         # noise_mapper = NoiseAdaptiveLayout(properties)
         # noise_mapper.run(dag)
         # initial_layout = noise_mapper.property_set['layout']
-        meas_filter = readout_mitigation(circ=cluster_circ,num_shots=num_shots)
+        meas_filter, initial_layout = readout_mitigation(circ=cluster_circ,num_shots=num_shots)
         qasm_info = {'device':device,
         'properties':properties,
         'coupling_map':coupling_map,
         'noise_model':noise_model,
         'basis_gates':basis_gates,
         'num_shots':num_shots,
-        'meas_filter':meas_filter}
+        'meas_filter':meas_filter,
+        'initial_layout':initial_layout}
     elif 'qasm' in backend:
         qasm_info = {'num_shots':num_shots}
     cluster_prob = {}

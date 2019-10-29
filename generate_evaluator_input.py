@@ -12,7 +12,6 @@ from scipy.stats import wasserstein_distance
 from qiskit import Aer, IBMQ, execute
 from qiskit.providers.aer import noise
 from qiskit.converters import circuit_to_dag, dag_to_circuit
-from qiskit.transpiler.passes import NoiseAdaptiveLayout
 import argparse
 import datetime as dt
 
@@ -32,7 +31,7 @@ if __name__ == '__main__':
     basis_gates = noise_model.basis_gates
 
     # NOTE: toggle circuits to benchmark
-    dimension_l = [[2,2],[2,3],[2,4],[3,3]]
+    dimension_l = [[2,2],[1,5],[2,3]]
 
     dirname = './benchmark_data'
     if not os.path.exists(dirname):
@@ -76,14 +75,15 @@ if __name__ == '__main__':
             print('requires %.3e shots'%num_shots)
 
             print('Evaluating qasm + noise')
-            meas_filter = readout_mitigation(circ=circ,num_shots=num_shots)
+            meas_filter, initial_layout = readout_mitigation(circ=circ,num_shots=num_shots)
             qasm_info = {'device':device,
             'properties':properties,
             'coupling_map':coupling_map,
             'noise_model':noise_model,
             'basis_gates':basis_gates,
             'num_shots':num_shots,
-            'meas_filter':meas_filter}
+            'meas_filter':meas_filter,
+            'initial_layout':initial_layout}
             qasm_noisy_fc = simulate_circ(circ=circ,backend='noisy_qasm_simulator',qasm_info=qasm_info)
 
             fc_evaluations = {'sv_noiseless':sv_noiseless_fc,

@@ -103,10 +103,11 @@ def simulate_circ(circ, backend, qasm_info):
         basis_gates = qasm_info['basis_gates']
         num_shots = qasm_info['num_shots']
         meas_filter = qasm_info['meas_filter']
-        dag = circuit_to_dag(qc)
-        noise_mapper = NoiseAdaptiveLayout(properties)
-        noise_mapper.run(dag)
-        initial_layout = noise_mapper.property_set['layout']
+        initial_layout = qasm_info['initial_layout']
+        # dag = circuit_to_dag(qc)
+        # noise_mapper = NoiseAdaptiveLayout(properties)
+        # noise_mapper.run(dag)
+        # initial_layout = noise_mapper.property_set['layout']
         new_circuit = transpile(qc, backend=device, basis_gates=basis_gates,coupling_map=coupling_map,backend_properties=properties,initial_layout=initial_layout)
         # bprob_noise_model = get_bprop()
         noisy_result = execute(experiments=new_circuit,
@@ -161,14 +162,14 @@ def readout_mitigation(circ,num_shots,device_name='ibmq_16_melbourne'):
     qr = QuantumRegister(num_qubits)
     qubit_list = []
     # print(initial_layout)
-    initial_layout = initial_layout.get_physical_bits()
-    for q in initial_layout:
-        if 'ancilla' not in initial_layout[q].register.name:
+    _initial_layout = initial_layout.get_physical_bits()
+    for q in _initial_layout:
+        if 'ancilla' not in _initial_layout[q].register.name:
             qubit_list.append(q)
-    # print(qubit_list)
+    # print(qubit_list, 'calibration circuit has %d qubits'%num_qubits)
     meas_calibs, state_labels = complete_meas_cal(qubit_list=qubit_list, qr=qr, circlabel='mcal')
 
-    # Execute the calibration circuits without noise
+    # Execute the calibration circuits
     backend = Aer.get_backend('qasm_simulator')
     cal_results = execute(experiments=meas_calibs,
         backend=backend,
@@ -178,4 +179,4 @@ def readout_mitigation(circ,num_shots,device_name='ibmq_16_melbourne'):
         shots=num_shots).result()
     meas_fitter = CompleteMeasFitter(cal_results, state_labels, qubit_list=qubit_list, circlabel='mcal')
     meas_filter = meas_fitter.filter
-    return meas_filter
+    return meas_filter, initial_layout
