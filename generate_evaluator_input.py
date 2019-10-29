@@ -31,7 +31,7 @@ if __name__ == '__main__':
     basis_gates = noise_model.basis_gates
 
     # NOTE: toggle circuits to benchmark
-    dimension_l = [[2,2],[1,5],[2,3]]
+    dimension_l = [[2,2],[1,5],[2,3],[1,7],[2,4]]
 
     dirname = './benchmark_data'
     if not os.path.exists(dirname):
