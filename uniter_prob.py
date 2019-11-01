@@ -5,7 +5,6 @@ import glob
 import os
 from time import time
 import progressbar as pb
-import evaluator_prob as evaluator
 from qiskit.quantum_info.states.measures import state_fidelity
 from scipy.stats import wasserstein_distance
 import argparse

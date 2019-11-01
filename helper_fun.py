@@ -12,6 +12,7 @@ from qiskit.providers.models import BackendProperties
 from qiskit.ignis.mitigation.measurement import (complete_meas_cal, tensored_meas_cal,CompleteMeasFitter, TensoredMeasFitter)
 import datetime as dt
 import pickle
+import copy
 
 def load_IBMQ():
     token = '9056ff772ff2e0f19de847fc8980b6e0121b561832de7dfb72bb23b085c1dc4a62cde82392f7d74e655465a9d997dd970858a568434f1b97038e70bf44b6c8a6'
@@ -37,26 +38,31 @@ def cross_entropy(target,obs):
             h += -p*np.log(q)
     return h
 
-def find_saturated_shots(circ,qasm_info):
-    ground_truth = evaluate_circ(circ=circ,backend='statevector_simulator',qasm_info=None)
+def find_saturated_shots(circ,device,basis_gates,coupling_map,properties,initial_layout,noise_model):
+    ground_truth = evaluate_circ(circ=circ,backend='statevector_simulator',evaluator_info=None)
     noisy_prob = [0 for i in ground_truth]
-    shots_increment = 1000
-    qasm_info['num_shots'] = shots_increment
+    shots_increment = 1024
+    evaluator_info = {}
+    evaluator_info['num_shots'] = shots_increment
+    evaluator_info['device'] = device
+    evaluator_info['basis_gates'] = basis_gates
+    evaluator_info['coupling_map'] = coupling_map
+    evaluator_info['properties'] = properties
+    evaluator_info['initial_layout'] = initial_layout
+    evaluator_info['noise_model'] = noise_model
     counter = 0.0
     ce_list = []
     while 1:
         counter += 1.0
-        noisy_prob_batch = evaluate_circ(circ=circ,backend='noisy_qasm_simulator',qasm_info=qasm_info)
+        noisy_prob_batch = evaluate_circ(circ=circ,backend='noisy_qasm_simulator',evaluator_info=evaluator_info)
         noisy_prob = [(x*(counter-1)+y)/counter for x,y in zip(noisy_prob,noisy_prob_batch)]
         ce = cross_entropy(target=ground_truth,obs=noisy_prob)
         ce_list.append(ce)
-        print(ce_list,sum(noisy_prob))
         if len(ce_list)>1:
             change = abs((ce_list[-1]-ce_list[-2])/ce_list[-2])
             # NOTE: toggle here to change saturated shots termination condition
             if change <= 1e-3:
                 return int(counter*shots_increment)
-
 
 def reverseBits(num,bitSize): 
     binary = bin(num)
@@ -64,7 +70,7 @@ def reverseBits(num,bitSize):
     reverse = reverse + (bitSize - len(reverse))*'0'
     return int(reverse,2)
 
-def evaluate_circ(circ, backend, qasm_info):
+def evaluate_circ(circ, backend, evaluator_info):
     if backend == 'statevector_simulator':
         # print('using statevector simulator')
         backend = Aer.get_backend('statevector_simulator')
@@ -86,7 +92,7 @@ def evaluate_circ(circ, backend, qasm_info):
         meas.measure(circ.qubits,c)
         qc = circ+meas
 
-        num_shots = qasm_info['num_shots']
+        num_shots = evaluator_info['num_shots']
         noiseless_qasm_result = execute(qc, backend, shots=num_shots).result()
         noiseless_counts = noiseless_qasm_result.get_counts(qc)
         noiseless_prob = [0 for x in range(np.power(2,len(circ.qubits)))]
@@ -102,28 +108,25 @@ def evaluate_circ(circ, backend, qasm_info):
         meas.barrier(circ.qubits)
         meas.measure(circ.qubits,c)
         qc = circ+meas
-        device = qasm_info['device']
-        properties = qasm_info['properties']
-        coupling_map = qasm_info['coupling_map']
-        noise_model = qasm_info['noise_model']
-        basis_gates = qasm_info['basis_gates']
-        num_shots = qasm_info['num_shots']
-        meas_filter = qasm_info['meas_filter']
-        initial_layout = qasm_info['initial_layout']
-        mapped_circuit = transpile(qc, backend=device, basis_gates=basis_gates,coupling_map=coupling_map,backend_properties=properties,initial_layout=initial_layout)
-        # bprob_noise_model = get_bprop()
+        mapped_circuit = transpile(qc,
+        backend=evaluator_info['device'], basis_gates=evaluator_info['basis_gates'], 
+        coupling_map=evaluator_info['coupling_map'],backend_properties=evaluator_info['properties'],
+        initial_layout=evaluator_info['initial_layout'])
         noisy_qasm_result = execute(experiments=mapped_circuit,
         backend=backend,
-        noise_model=noise_model,
-        coupling_map=coupling_map,
-        basis_gates=basis_gates,
-        shots=num_shots).result()
-        mitigated_results = meas_filter.apply(noisy_qasm_result)
-        noisy_counts = mitigated_results.get_counts(0)
+        noise_model=evaluator_info['noise_model'],
+        coupling_map=evaluator_info['coupling_map'],
+        basis_gates=evaluator_info['basis_gates'],
+        shots=evaluator_info['num_shots']).result()
+        if 'meas_filter' in evaluator_info:
+            mitigated_results = evaluator_info['meas_filter'].apply(noisy_qasm_result)
+            noisy_counts = mitigated_results.get_counts(0)
+        else:
+            noisy_counts = noisy_qasm_result.get_counts(qc)
         noisy_prob = [0 for x in range(np.power(2,len(circ.qubits)))]
         for state in noisy_counts:
             reversed_state = reverseBits(int(state,2),len(circ.qubits))
-            noisy_prob[reversed_state] = noisy_counts[state]/num_shots
+            noisy_prob[reversed_state] = noisy_counts[state]/evaluator_info['num_shots']
         return noisy_prob
     elif backend == 'hardware':
         c = ClassicalRegister(len(circ.qubits), 'c')
@@ -132,13 +135,13 @@ def evaluate_circ(circ, backend, qasm_info):
         meas.measure(circ.qubits,c)
         qc = circ+meas
 
-        device = qasm_info['device']
-        properties = qasm_info['properties']
-        coupling_map = qasm_info['coupling_map']
-        basis_gates = qasm_info['basis_gates']
-        num_shots = qasm_info['num_shots']
-        meas_filter = qasm_info['meas_filter']
-        initial_layout = qasm_info['initial_layout']
+        device = evaluator_info['device']
+        properties = evaluator_info['properties']
+        coupling_map = evaluator_info['coupling_map']
+        basis_gates = evaluator_info['basis_gates']
+        num_shots = evaluator_info['num_shots']
+        meas_filter = evaluator_info['meas_filter']
+        initial_layout = evaluator_info['initial_layout']
 
         new_circuit = transpile(qc, backend=device, basis_gates=basis_gates,coupling_map=coupling_map,backend_properties=properties,initial_layout=initial_layout)
         qobj = assemble(new_circuit, backend=device, shots=num_shots)
@@ -176,23 +179,12 @@ def get_bprop():
     bprop_noise_model = noise.device.basic_device_noise_model(bprop)
     return bprop_noise_model
 
-def readout_mitigation(circ,num_shots,device_name):
-    provider = load_IBMQ()
-    device = provider.get_backend(device_name)
-    properties = device.properties(dt.datetime(day=16, month=10, year=2019, hour=20))
-    coupling_map = device.configuration().coupling_map
-    noise_model = noise.device.basic_device_noise_model(properties)
-    basis_gates = noise_model.basis_gates
-    dag = circuit_to_dag(circ)
-    noise_mapper = NoiseAdaptiveLayout(properties)
-    noise_mapper.run(dag)
-    initial_layout = noise_mapper.property_set['layout']
+def readout_mitigation(circ,num_shots,device,properties,coupling_map,noise_model,basis_gates,initial_layout):
     num_qubits = len(properties.qubits)
 
     # Generate the calibration circuits
     qr = QuantumRegister(num_qubits)
     qubit_list = []
-    # print(initial_layout)
     _initial_layout = initial_layout.get_physical_bits()
     for q in _initial_layout:
         if 'ancilla' not in _initial_layout[q].register.name:
@@ -210,4 +202,38 @@ def readout_mitigation(circ,num_shots,device_name):
         shots=num_shots).result()
     meas_fitter = CompleteMeasFitter(cal_results, state_labels, qubit_list=qubit_list, circlabel='mcal')
     meas_filter = meas_fitter.filter
-    return meas_filter, initial_layout
+    return meas_filter
+
+def get_evaluator_info(circ,device_name,fields):
+    provider = load_IBMQ()
+    device = provider.get_backend(device_name)
+    properties = device.properties()
+    coupling_map = device.configuration().coupling_map
+    noise_model = noise.device.basic_device_noise_model(properties)
+    basis_gates = noise_model.basis_gates
+    dag = circuit_to_dag(circ)
+    noise_mapper = NoiseAdaptiveLayout(properties)
+    noise_mapper.run(dag)
+    initial_layout = noise_mapper.property_set['layout']
+    
+    evaluator_info = {'device':device,
+    'properties':properties,
+    'coupling_map':coupling_map,
+    'noise_model':noise_model,
+    'basis_gates':basis_gates,
+    'initial_layout':initial_layout}
+
+    if 'meas_filter' in fields:
+        num_shots = find_saturated_shots(circ,device,basis_gates,coupling_map,properties,initial_layout,noise_model)
+        meas_filter = readout_mitigation(circ,num_shots,device,properties,coupling_map,noise_model,basis_gates,initial_layout)
+        evaluator_info['meas_filter'] = meas_filter
+        evaluator_info['num_shots'] = num_shots
+    elif 'num_shots' in fields:
+        num_shots = find_saturated_shots(circ,device,basis_gates,coupling_map,properties,initial_layout,noise_model)
+        evaluator_info['num_shots'] = num_shots
+
+    _evaluator_info = {}
+    for field in fields:
+        _evaluator_info[field] = evaluator_info[field]
+    
+    return _evaluator_info
