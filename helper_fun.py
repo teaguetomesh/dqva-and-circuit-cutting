@@ -1,16 +1,15 @@
-from qiskit import IBMQ
 from qiskit.converters import circuit_to_dag, dag_to_circuit
 from qiskit.circuit.classicalregister import ClassicalRegister
+from qiskit.circuit.quantumregister import QuantumRegister
 from qiskit.transpiler.passes import NoiseAdaptiveLayout
 from qiskit import QuantumCircuit
 from qiskit import Aer, IBMQ, execute
-from qiskit.compiler import transpile
+from qiskit.compiler import transpile, assemble
 from qiskit.providers.aer import noise
 import numpy as np
 from datetime import datetime
 from qiskit.providers.models import BackendProperties
 from qiskit.ignis.mitigation.measurement import (complete_meas_cal, tensored_meas_cal,CompleteMeasFitter, TensoredMeasFitter)
-from qiskit.circuit.quantumregister import QuantumRegister
 import datetime as dt
 import pickle
 
@@ -38,18 +37,25 @@ def cross_entropy(target,obs):
             h += -p*np.log(q)
     return h
 
-# TODO: for easy to simulate circuits, this shots may be too low when introducing noise 
-def find_saturated_shots(circ):
-    ground_truth = simulate_circ(circ=circ,backend='statevector_simulator',qasm_info=None)
-    min_ce = cross_entropy(target=ground_truth,obs=ground_truth)
-    num_shots = 1000
+def find_saturated_shots(circ,qasm_info):
+    ground_truth = evaluate_circ(circ=circ,backend='statevector_simulator',qasm_info=None)
+    noisy_prob = [0 for i in ground_truth]
+    shots_increment = 1000
+    qasm_info['num_shots'] = shots_increment
+    counter = 0.0
+    ce_list = []
     while 1:
-        qasm = simulate_circ(circ=circ,backend='noiseless_qasm_simulator',qasm_info={'num_shots':num_shots})
-        # NOTE: toggle here to control cross entropy accuracy
-        if abs(cross_entropy(target=ground_truth,obs=qasm)-min_ce)/min_ce<1e-2:
-            return num_shots
-        else:
-            num_shots += 1000
+        counter += 1.0
+        noisy_prob_batch = evaluate_circ(circ=circ,backend='noisy_qasm_simulator',qasm_info=qasm_info)
+        noisy_prob = [(x*(counter-1)+y)/counter for x,y in zip(noisy_prob,noisy_prob_batch)]
+        ce = cross_entropy(target=ground_truth,obs=noisy_prob)
+        ce_list.append(ce)
+        print(ce_list,sum(noisy_prob))
+        if len(ce_list)>1:
+            change = abs((ce_list[-1]-ce_list[-2])/ce_list[-2])
+            if change <= 1e-3:
+                return int(counter*shots_increment)
+
 
 def reverseBits(num,bitSize): 
     binary = bin(num)
@@ -57,7 +63,7 @@ def reverseBits(num,bitSize):
     reverse = reverse + (bitSize - len(reverse))*'0'
     return int(reverse,2)
 
-def simulate_circ(circ, backend, qasm_info):
+def evaluate_circ(circ, backend, qasm_info):
     if backend == 'statevector_simulator':
         # print('using statevector simulator')
         backend = Aer.get_backend('statevector_simulator')
@@ -80,9 +86,8 @@ def simulate_circ(circ, backend, qasm_info):
         qc = circ+meas
 
         num_shots = qasm_info['num_shots']
-        job_sim = execute(qc, backend, shots=num_shots)
-        result = job_sim.result()
-        noiseless_counts = result.get_counts(qc)
+        noiseless_qasm_result = execute(qc, backend, shots=num_shots).result()
+        noiseless_counts = noiseless_qasm_result.get_counts(qc)
         noiseless_prob = [0 for x in range(np.power(2,len(circ.qubits)))]
         for state in noiseless_counts:
             reversed_state = reverseBits(int(state,2),len(circ.qubits))
@@ -104,28 +109,53 @@ def simulate_circ(circ, backend, qasm_info):
         num_shots = qasm_info['num_shots']
         meas_filter = qasm_info['meas_filter']
         initial_layout = qasm_info['initial_layout']
-        # dag = circuit_to_dag(qc)
-        # noise_mapper = NoiseAdaptiveLayout(properties)
-        # noise_mapper.run(dag)
-        # initial_layout = noise_mapper.property_set['layout']
-        new_circuit = transpile(qc, backend=device, basis_gates=basis_gates,coupling_map=coupling_map,backend_properties=properties,initial_layout=initial_layout)
+        mapped_circuit = transpile(qc, backend=device, basis_gates=basis_gates,coupling_map=coupling_map,backend_properties=properties,initial_layout=initial_layout)
         # bprob_noise_model = get_bprop()
-        noisy_result = execute(experiments=new_circuit,
+        noisy_qasm_result = execute(experiments=mapped_circuit,
         backend=backend,
         noise_model=noise_model,
         coupling_map=coupling_map,
         basis_gates=basis_gates,
         shots=num_shots).result()
-        mitigated_results = meas_filter.apply(noisy_result)
+        mitigated_results = meas_filter.apply(noisy_qasm_result)
         noisy_counts = mitigated_results.get_counts(0)
-        # noisy_counts = noisy_result.get_counts(new_circuit)
         noisy_prob = [0 for x in range(np.power(2,len(circ.qubits)))]
         for state in noisy_counts:
             reversed_state = reverseBits(int(state,2),len(circ.qubits))
             noisy_prob[reversed_state] = noisy_counts[state]/num_shots
         return noisy_prob
+    elif backend == 'hardware':
+        c = ClassicalRegister(len(circ.qubits), 'c')
+        meas = QuantumCircuit(circ.qregs[0], c)
+        meas.barrier(circ.qubits)
+        meas.measure(circ.qubits,c)
+        qc = circ+meas
+
+        device = qasm_info['device']
+        properties = qasm_info['properties']
+        coupling_map = qasm_info['coupling_map']
+        basis_gates = qasm_info['basis_gates']
+        num_shots = qasm_info['num_shots']
+        meas_filter = qasm_info['meas_filter']
+        initial_layout = qasm_info['initial_layout']
+
+        new_circuit = transpile(qc, backend=device, basis_gates=basis_gates,coupling_map=coupling_map,backend_properties=properties,initial_layout=initial_layout)
+        qobj = assemble(new_circuit, backend=device, shots=num_shots)
+        job = device.run(qobj)
+
+        print('waiting for hardware',end=', ')
+        hw_result = job.result()
+        print('returned')
+        mitigated_results = meas_filter.apply(hw_result)
+        hw_counts = mitigated_results.get_counts(0)
+        hw_prob = [0 for x in range(np.power(2,len(circ.qubits)))]
+        for state in hw_counts:
+            reversed_state = reverseBits(int(state,2),len(circ.qubits))
+            hw_prob[reversed_state] = hw_counts[state]/num_shots
+        return hw_prob
     else:
-        raise Exception('Illegal backend:',backend)
+        raise Exception('Illegal backend :',backend)
+
 
 def get_bprop():
     public_provider = IBMQ.get_provider('ibm-q')
@@ -145,7 +175,7 @@ def get_bprop():
     bprop_noise_model = noise.device.basic_device_noise_model(bprop)
     return bprop_noise_model
 
-def readout_mitigation(circ,num_shots,device_name='ibmq_16_melbourne'):
+def readout_mitigation(circ,num_shots,device_name):
     provider = load_IBMQ()
     device = provider.get_backend(device_name)
     properties = device.properties(dt.datetime(day=16, month=10, year=2019, hour=20))

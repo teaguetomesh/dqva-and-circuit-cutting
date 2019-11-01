@@ -20,10 +20,11 @@ if __name__ == '__main__':
     parser.add_argument('--min-qubit', metavar='N', type=int,help='Benchmark minimum number of HW qubits')
     parser.add_argument('--max-qubit', metavar='N', type=int,help='Benchmark maximum number of HW qubits')
     parser.add_argument('--max-clusters', metavar='N', type=int,help='max number of clusters to split into')
+    parser.add_argument('--device-name', metavar='S',type=str,help='IBM device')
     args = parser.parse_args()
 
     provider = load_IBMQ()
-    device_name = 'ibmq_16_melbourne'
+    device_name = args.device_name
     device = provider.get_backend(device_name)
     properties = device.properties(dt.datetime(day=16, month=10, year=2019, hour=20))
     coupling_map = device.configuration().coupling_map
@@ -31,7 +32,7 @@ if __name__ == '__main__':
     basis_gates = noise_model.basis_gates
 
     # NOTE: toggle circuits to benchmark
-    dimension_l = [[1,5]]
+    dimension_l = [[2,2],[3,3]]
 
     dirname = './benchmark_data'
     if not os.path.exists(dirname):

@@ -56,8 +56,9 @@ def find_all_simulation_combinations(O_qubits, rho_qubits, num_qubits):
     combinations = list(itertools.product(complete_inits,complete_meas))
     return combinations
 
-def evaluate_cluster(complete_path_map, cluster_circ, combinations, backend, num_shots=None, provider=None):
+def evaluate_cluster(complete_path_map, cluster_circ, combinations, backend, num_shots=None):
     if 'noisy' in backend:
+        provider = load_IBMQ()
         device = provider.get_backend('ibmq_16_melbourne')
         properties = device.properties(dt.datetime(day=16, month=10, year=2019, hour=20))
         coupling_map = device.configuration().coupling_map
@@ -156,7 +157,7 @@ if __name__ == '__main__':
     num_workers = size - 1
 
     evaluator_input = pickle.load(open(args.input_file, 'rb' ))
-    provider = load_IBMQ()
+    # provider = load_IBMQ()
 
     if rank == size-1:
         evaluator_output = {}
@@ -231,7 +232,7 @@ if __name__ == '__main__':
                         cluster_prob = evaluate_cluster(complete_path_map=complete_path_map,
                         cluster_circ=clusters[cluster_idx],
                         combinations=rank_combinations[key][cluster_idx],
-                        backend='noisy_qasm_simulator',num_shots=rank_shots,provider=provider)
+                        backend='noisy_qasm_simulator',num_shots=rank_shots)
                         rank_quantum_time[key] += time()-quantum_evaluator_begin
                     else:
                         quantum_evaluator_begin = time()
@@ -239,7 +240,7 @@ if __name__ == '__main__':
                         cluster_prob = evaluate_cluster(complete_path_map=complete_path_map,
                         cluster_circ=clusters[cluster_idx],
                         combinations=rank_combinations[key][cluster_idx],
-                        backend='noisy_qasm_simulator',num_shots=rank_shots,provider=provider)
+                        backend='noisy_qasm_simulator',num_shots=rank_shots)
                         rank_quantum_time[key] += time()-quantum_evaluator_begin
                     rank_results[key][cluster_idx] = cluster_prob
                     print('rank {} runs case {}, cluster_{} {}_qubits * {}_instances on QUANTUM, sameTotal shots = {}\nclassical time = {}, quantum time  = {}'.format(
