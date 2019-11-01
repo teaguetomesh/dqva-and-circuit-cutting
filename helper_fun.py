@@ -53,6 +53,7 @@ def find_saturated_shots(circ,qasm_info):
         print(ce_list,sum(noisy_prob))
         if len(ce_list)>1:
             change = abs((ce_list[-1]-ce_list[-2])/ce_list[-2])
+            # NOTE: toggle here to change saturated shots termination condition
             if change <= 1e-3:
                 return int(counter*shots_increment)
 
