@@ -100,7 +100,6 @@ if __name__ == '__main__':
         ax2.tick_params(axis='y', labelcolor=color)
 
         fig.tight_layout()  # otherwise the right y-label is slightly clipped
-        plt.title('')
         plt.savefig('%s_tradeoff.png'%figname[:-2],dpi=400,transparent=True)
 
         print('plotting %s, %d times average'%(figname,len(plotter_inputs)))

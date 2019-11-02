@@ -343,7 +343,7 @@ def find_cuts(circ, num_clusters = range(1,5), hw_max_qubit=20,evaluator_weight=
 
 if __name__ == '__main__':
     circ = gen_supremacy(4,4,8)
-    hardness, positions, K, d, num_cluster, m = find_cuts(circ,num_clusters=[1,2,3,4],hw_max_qubit=15)
+    hardness, positions, K, d, num_cluster, m = find_cuts(circ,num_clusters=[1],hw_max_qubit=16)
     m.print_stat()
     fragments, complete_path_map, K, d = cutter.cut_circuit(circ, positions)
     print('Testing in cutter:')
