@@ -1,17 +1,11 @@
 import pickle
 import os
-import subprocess
 from time import time
 import numpy as np
 from qcg.generators import gen_supremacy, gen_hwea
 import MIQCP_searcher as searcher
 import cutter
-from helper_fun import evaluate_circ, cross_entropy, get_evaluator_info
-import uniter_prob as uniter
-from scipy.stats import wasserstein_distance
-from qiskit import Aer, IBMQ, execute
-from qiskit.providers.aer import noise
-from qiskit.converters import circuit_to_dag, dag_to_circuit
+from helper_fun import evaluate_circ, get_evaluator_info
 import argparse
 
 if __name__ == '__main__':
@@ -25,7 +19,7 @@ if __name__ == '__main__':
     device_name = args.device_name
 
     # NOTE: toggle circuits to benchmark
-    dimension_l = [[2,2]]
+    dimension_l = [[2,2],[2,3]]
 
     dirname = './benchmark_data'
     if not os.path.exists(dirname):
@@ -61,14 +55,13 @@ if __name__ == '__main__':
             # Evaluate full circuit
             print('Evaluating sv noiseless fc')
             sv_noiseless_fc = evaluate_circ(circ=circ,backend='statevector_simulator',evaluator_info=None)
-            identical_dist_ce = cross_entropy(target=sv_noiseless_fc,obs=sv_noiseless_fc)
 
             print('Evaluating qasm')
             evaluator_info = {}
             evaluator_info = get_evaluator_info(circ=circ,device_name=device_name,fields=['num_shots'])
             print(evaluator_info.keys())
             qasm_noiseless_fc = evaluate_circ(circ=circ,backend='noiseless_qasm_simulator',evaluator_info=evaluator_info)
-            print('Saturated  = %.3e shots'%evaluator_info['num_shots'])
+            print('Saturated = %.3e shots'%evaluator_info['num_shots'])
 
             print('Evaluating qasm + noise')
             evaluator_info = {}
@@ -77,10 +70,11 @@ if __name__ == '__main__':
             print(evaluator_info.keys())
             qasm_noisy_fc = evaluate_circ(circ=circ,backend='noisy_qasm_simulator',evaluator_info=evaluator_info)
 
-            print('Evaluating on hardware')
-            del evaluator_info['noise_model']
-            print(evaluator_info.keys())
-            hw_fc = evaluate_circ(circ=circ,backend='hardware',evaluator_info=evaluator_info)
+            # print('Evaluating on hardware')
+            # del evaluator_info['noise_model']
+            # print(evaluator_info.keys())
+            # hw_fc = evaluate_circ(circ=circ,backend='hardware',evaluator_info=evaluator_info)
+            hw_fc = None
 
             fc_evaluations = {'sv_noiseless':sv_noiseless_fc,
             'qasm':qasm_noiseless_fc,
