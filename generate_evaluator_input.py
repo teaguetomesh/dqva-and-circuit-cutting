@@ -52,7 +52,7 @@ if __name__ == '__main__':
             searcher_time = time() - searcher_begin
             if m == None:
                 continue
-            # m.print_stat()
+            m.print_stat()
 
             clusters, complete_path_map, K, d = cutter.cut_circuit(circ, positions)
             print('Complete path map:')
@@ -64,22 +64,30 @@ if __name__ == '__main__':
             identical_dist_ce = cross_entropy(target=sv_noiseless_fc,obs=sv_noiseless_fc)
 
             print('Evaluating qasm')
+            evaluator_info = {}
             evaluator_info = get_evaluator_info(circ=circ,device_name=device_name,fields=['num_shots'])
             print(evaluator_info.keys())
             qasm_noiseless_fc = evaluate_circ(circ=circ,backend='noiseless_qasm_simulator',evaluator_info=evaluator_info)
             print('Saturated  = %.3e shots'%evaluator_info['num_shots'])
 
             print('Evaluating qasm + noise')
+            evaluator_info = {}
             evaluator_info = get_evaluator_info(circ=circ,device_name=device_name,
             fields=['device','basis_gates','coupling_map','properties','initial_layout','noise_model','num_shots','meas_filter'])
             print(evaluator_info.keys())
             qasm_noisy_fc = evaluate_circ(circ=circ,backend='noisy_qasm_simulator',evaluator_info=evaluator_info)
 
-    #         fc_evaluations = {'sv_noiseless':sv_noiseless_fc,
-    #         'qasm':qasm_noiseless_fc,
-    #         'qasm+noise':qasm_noisy_fc}
+            print('Evaluating on hardware')
+            del evaluator_info['noise_model']
+            print(evaluator_info.keys())
+            hw_fc = evaluate_circ(circ=circ,backend='hardware',evaluator_info=evaluator_info)
 
-    #         evaluator_input[(hw_max_qubit,i*j)] = dimension,num_shots,searcher_time,circ,fc_evaluations,clusters,complete_path_map
+            fc_evaluations = {'sv_noiseless':sv_noiseless_fc,
+            'qasm':qasm_noiseless_fc,
+            'qasm+noise':qasm_noisy_fc,
+            'hw':hw_fc}
 
-    #         print('-'*100)
-    # pickle.dump(evaluator_input,open('{}/evaluator_input.p'.format(dirname),'wb'))
+            evaluator_input[(hw_max_qubit,i*j)] = dimension,evaluator_info['num_shots'],searcher_time,circ,fc_evaluations,clusters,complete_path_map
+
+            print('-'*100)
+    pickle.dump(evaluator_input,open('{}/evaluator_input_{}.p'.format(dirname,device_name),'wb'))

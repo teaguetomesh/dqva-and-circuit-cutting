@@ -135,31 +135,25 @@ def evaluate_circ(circ, backend, evaluator_info):
         meas.measure(circ.qubits,c)
         qc = circ+meas
 
-        device = evaluator_info['device']
-        properties = evaluator_info['properties']
-        coupling_map = evaluator_info['coupling_map']
-        basis_gates = evaluator_info['basis_gates']
-        num_shots = evaluator_info['num_shots']
-        meas_filter = evaluator_info['meas_filter']
-        initial_layout = evaluator_info['initial_layout']
-
-        new_circuit = transpile(qc, backend=device, basis_gates=basis_gates,coupling_map=coupling_map,backend_properties=properties,initial_layout=initial_layout)
-        qobj = assemble(new_circuit, backend=device, shots=num_shots)
-        job = device.run(qobj)
-
-        print('waiting for hardware',end=', ')
+        new_circuit = transpile(qc,
+        backend=evaluator_info['device'], basis_gates=evaluator_info['basis_gates'],
+        coupling_map=evaluator_info['coupling_map'],backend_properties=evaluator_info['properties'],
+        initial_layout=evaluator_info['initial_layout'])
+        qobj = assemble(new_circuit, backend=evaluator_info['device'], shots=evaluator_info['num_shots'])
+        job = evaluator_info['device'].run(qobj)
         hw_result = job.result()
-        print('returned')
-        mitigated_results = meas_filter.apply(hw_result)
-        hw_counts = mitigated_results.get_counts(0)
+        if 'meas_filter' in evaluator_info:
+            mitigated_results = evaluator_info['meas_filter'].apply(hw_result)
+            hw_counts = mitigated_results.get_counts(0)
+        else:
+            hw_counts = hw_result.get_counts(qc)
         hw_prob = [0 for x in range(np.power(2,len(circ.qubits)))]
         for state in hw_counts:
             reversed_state = reverseBits(int(state,2),len(circ.qubits))
-            hw_prob[reversed_state] = hw_counts[state]/num_shots
+            hw_prob[reversed_state] = hw_counts[state]/evaluator_info['num_shots']
         return hw_prob
     else:
         raise Exception('Illegal backend :',backend)
-
 
 def get_bprop():
     public_provider = IBMQ.get_provider('ibm-q')
