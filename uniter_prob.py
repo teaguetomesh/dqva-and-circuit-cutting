@@ -5,7 +5,6 @@ import glob
 import os
 from time import time
 import progressbar as pb
-import evaluator_prob as evaluator
 from qiskit.quantum_info.states.measures import state_fidelity
 from scipy.stats import wasserstein_distance
 import argparse
@@ -281,6 +280,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Uniter')
     parser.add_argument('--input-file', metavar='S', type=str,help='which evaluator output file to run')
     args = parser.parse_args()
+    print('Reconstructing %s'%args.input_file)
 
     uniter_output = {}
 
@@ -290,6 +290,7 @@ if __name__ == '__main__':
         num_shots = evaluator_output[case]['num_shots']
         searcher_time = evaluator_output[case]['searcher_time']
         circ = evaluator_output[case]['circ']
+        clusters = evaluator_output[case]['clusters']
         fc_evaluations = evaluator_output[case]['fc_evaluations']
         clusters = evaluator_output[case]['clusters']
         complete_path_map = evaluator_output[case]['complete_path_map']
@@ -305,6 +306,7 @@ if __name__ == '__main__':
 
         uniter_output[case]['num_shots'] = num_shots
         uniter_output[case]['circ'] = circ
+        uniter_output[case]['clusters'] = clusters
         uniter_output[case]['evaluations'] = evaluations
         uniter_output[case]['searcher_time'] = searcher_time
         uniter_output[case]['classical_time'] = evaluator_output[case]['classical_time']

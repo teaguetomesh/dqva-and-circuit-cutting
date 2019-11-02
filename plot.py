@@ -84,7 +84,6 @@ if __name__ == '__main__':
                 best_cc[fc] = (uniter_time_avg[i],percent)
         print(best_cc)
 
-        # Create some mock data
         fig, ax1 = plt.subplots()
 
         color = 'tab:blue'
@@ -131,7 +130,7 @@ if __name__ == '__main__':
         ax1.set_zlabel('reconstructor time (seconds)')
         ax1 = fig.add_subplot(235, projection='3d')
         ax1.bar3d(hw_qubits, fc_qubits, np.zeros(len(plotter_input)), dx, dy, percent_change_avg)
-        ax1.set_zlim3d(min(0,1.2*min(percent_change_avg)), 1.2*max(percent_change_avg))
+        ax1.set_zlim3d(min(0,1.2*min(percent_change_avg)), max(0,1.2*max(percent_change_avg)))
         ax1.set_xlabel('hardware qubits')
         ax1.set_ylabel('full circuit qubits')
         ax1.set_zlabel('cross entropy gap reduction due to cutting (%)')
