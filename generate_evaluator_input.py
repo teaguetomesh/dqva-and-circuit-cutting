@@ -19,7 +19,7 @@ if __name__ == '__main__':
     device_name = args.device_name
 
     # NOTE: toggle circuits to benchmark
-    dimension_l = [[2,2],[2,3]]
+    dimension_l = [[2,2],[2,3],[2,4],[3,3],[2,5],[3,4],[2,7],[4,4]]
 
     dirname = './benchmark_data'
     if not os.path.exists(dirname):

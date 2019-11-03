@@ -61,8 +61,10 @@ def find_saturated_shots(circ,device,basis_gates,coupling_map,properties,initial
         if len(ce_list)>1:
             change = abs((ce_list[-1]-ce_list[-2])/ce_list[-2])
             # NOTE: toggle here to change saturated shots termination condition
-            if change <= 1e-3:
+            if change <= 1e-2:
                 return int(counter*shots_increment)
+        if counter%10==9:
+            print('Accumulated %d shots'%(int(counter*shots_increment)))
 
 def reverseBits(num,bitSize): 
     binary = bin(num)
@@ -210,6 +212,7 @@ def readout_mitigation(circ,num_shots,properties,coupling_map,noise_model,basis_
         if 'ancilla' not in _initial_layout[q].register.name:
             mit_pattern.append([q])
     meas_calibs, state_labels = tensored_meas_cal(mit_pattern=mit_pattern, qr=qr, circlabel='mcal')
+    print('%d calibration circuits * %.3e shots'%(len(meas_calibs),num_shots))
 
     # Execute the calibration circuits
     backend = Aer.get_backend('qasm_simulator')
