@@ -39,10 +39,10 @@ if __name__ == '__main__':
             # Generate a circuit
             print('%d * %d supremacy circuit'%(i,j))
             circ = gen_supremacy(i,j,8,order='75601234')
-            print('%d * %d HWEA circuit'%(i,j))
-            circ = gen_hwea(i*j,1)
+            # print('%d * %d HWEA circuit'%(i,j))
+            # circ = gen_hwea(i*j,1)
             
-            Looking for a cut
+            # Looking for a cut
             searcher_begin = time()
             hardness, positions, ancilla, d, num_cluster, m = searcher.find_cuts(circ,num_clusters=range(2,args.max_clusters+1),hw_max_qubit=hw_max_qubit,evaluator_weight=1)
             searcher_time = time() - searcher_begin

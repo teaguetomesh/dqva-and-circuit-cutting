@@ -122,11 +122,11 @@ def evaluate_circ(circ, backend, evaluator_info):
         basis_gates=evaluator_info['basis_gates'],
         shots=evaluator_info['num_shots']).result()
         if 'meas_filter' in evaluator_info:
-            print('Apply mitigation',end=' ')
+            # print('Apply mitigation',end=' ')
             mitigation_begin = time()
             mitigated_results = evaluator_info['meas_filter'].apply(noisy_qasm_result)
             noisy_counts = mitigated_results.get_counts(0)
-            print('%.3e seconds'%(time()-mitigation_begin))
+            # print('%.3e seconds'%(time()-mitigation_begin))
         else:
             noisy_counts = noisy_qasm_result.get_counts(qc)
         noisy_prob = [0 for x in range(np.power(2,len(circ.qubits)))]
@@ -181,6 +181,7 @@ def get_bprop():
 
 # Entangled readout mitigation
 def readout_mitigation(circ,num_shots,device,initial_layout):
+    filter_begin = time()
     properties = device.properties()
     num_qubits = len(properties.qubits)
 
@@ -192,7 +193,6 @@ def readout_mitigation(circ,num_shots,device,initial_layout):
         if 'ancilla' not in _initial_layout[q].register.name:
             qubit_list.append(q)
     meas_calibs, state_labels = complete_meas_cal(qubit_list=qubit_list, qr=qr, circlabel='mcal')
-    print('Calculating measurement filter, %d %d-qubit calibration circuits * %.3e shots'%(len(meas_calibs),len(meas_calibs[0].qubits),num_shots))
 
     # Execute the calibration circuits
     qobj = assemble(meas_calibs, backend=device, shots=num_shots)
@@ -201,6 +201,8 @@ def readout_mitigation(circ,num_shots,device,initial_layout):
 
     meas_fitter = CompleteMeasFitter(cal_results, state_labels, qubit_list=qubit_list, circlabel='mcal')
     meas_filter = meas_fitter.filter
+    filter_time = time() - filter_begin
+    print('Calculating measurement filter, %d-qubit calibration circuits * %d * %.3e shots. %.3e seconds'%(len(meas_calibs[0].qubits),len(meas_calibs),num_shots,filter_time))
     return meas_filter
 
 # Tensored readout mitigation
@@ -217,7 +219,6 @@ def tensored_readout_mitigation(circ,num_shots,device,initial_layout):
         if 'ancilla' not in _initial_layout[q].register.name:
             mit_pattern.append([q])
     meas_calibs, state_labels = tensored_meas_cal(mit_pattern=mit_pattern, qr=qr, circlabel='mcal')
-    print('Calculating measurement filter, %d-qubit calibration circuits * %d * %.3e shots'%(len(meas_calibs[0].qubits),len(meas_calibs),num_shots),end=', ')
 
     # Execute the calibration circuits
     qobj = assemble(meas_calibs, backend=device, shots=num_shots)
@@ -225,7 +226,8 @@ def tensored_readout_mitigation(circ,num_shots,device,initial_layout):
     cal_results = job.result()
     meas_fitter = TensoredMeasFitter(cal_results, mit_pattern=mit_pattern)
     meas_filter = meas_fitter.filter
-    print('%.3e seconds'%(time()-filter_begin))
+    filter_time = time() - filter_begin
+    print('Calculating measurement filter, %d-qubit calibration circuits * %d * %.3e shots. %.3e seconds'%(len(meas_calibs[0].qubits),len(meas_calibs),num_shots,filter_time))
     return meas_filter
 
 def get_evaluator_info(circ,device_name,fields):
