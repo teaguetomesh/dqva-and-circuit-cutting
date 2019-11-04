@@ -64,6 +64,8 @@ def find_saturated_shots(circ,device,basis_gates,coupling_map,properties,initial
             # NOTE: toggle here to change saturated shots termination condition
             if change <= 1e-2:
                 return int(counter*shots_increment)
+        if counter%10==9:
+            print('Accumulated %d shots'%(int(counter*shots_increment)))
 
 def reverseBits(num,bitSize): 
     binary = bin(num)
