@@ -129,6 +129,7 @@ def evaluate_circ(circ, backend, evaluator_info):
             noisy_prob[reversed_state] = noisy_counts[state]/evaluator_info['num_shots']
         return noisy_prob
     elif backend == 'hardware':
+        # FIXME: manually divide shots in case of exceeding max shots
         c = ClassicalRegister(len(circ.qubits), 'c')
         meas = QuantumCircuit(circ.qregs[0], c)
         meas.barrier(circ.qubits)
@@ -175,6 +176,7 @@ def get_bprop():
 
 # Entangled readout mitigation
 def readout_mitigation(num_shots,device,initial_layout):
+    # FIXME: manually divide shots in case of exceeding max shots
     assert num_shots<=device.configuration().max_shots
     filter_begin = time()
     properties = device.properties()
@@ -193,8 +195,10 @@ def readout_mitigation(num_shots,device,initial_layout):
     print('Calculating measurement filter, %d-qubit calibration circuits * %d * %.3e shots.'%(len(meas_calibs[0].qubits),len(meas_calibs),num_shots),end=' ')
 
     # Execute the calibration circuits
-    qobj = assemble(meas_calibs, backend=device, shots=num_shots)
-    job = device.run(qobj)
+    job = execute(meas_calibs, backend=device, shots=num_shots)
+    print(job.job_id())
+    # qobj = assemble(meas_calibs, backend=device, shots=num_shots)
+    # job = device.run(qobj)
     cal_results = job.result()
 
     meas_fitter = CompleteMeasFitter(cal_results, state_labels, qubit_list=qubit_list, circlabel='mcal')
@@ -205,6 +209,7 @@ def readout_mitigation(num_shots,device,initial_layout):
 
 # Tensored readout mitigation
 def tensored_readout_mitigation(num_shots,device,initial_layout):
+    # FIXME: manually divide shots in case of exceeding max shots
     assert num_shots<=device.configuration().max_shots
     filter_begin = time()
     properties = device.properties()
@@ -219,10 +224,15 @@ def tensored_readout_mitigation(num_shots,device,initial_layout):
             mit_pattern.append([q])
     meas_calibs, state_labels = tensored_meas_cal(mit_pattern=mit_pattern, qr=qr, circlabel='mcal')
     print(meas_calibs[0])
+    print(meas_calibs[1])
     print('Calculating measurement filter, %d-qubit calibration circuits * %d * %.3e shots.'%(len(meas_calibs[0].qubits),len(meas_calibs),num_shots),end=' ')
 
     # Execute the calibration circuits
-    qobj = assemble(meas_calibs, backend=device, shots=num_shots)
+    # job = execute(meas_calibs, backend=device, shots=num_shots)
+    # print(job.job_id())
+    meas_calibs_transpiled = transpile(meas_calibs, backend=device)
+    qobj = assemble(meas_calibs_transpiled, backend=device, shots=1024)
+    print(qobj)
     job = device.run(qobj)
     cal_results = job.result()
 
@@ -253,7 +263,7 @@ def get_evaluator_info(circ,device_name,fields):
 
     if 'meas_filter' in fields:
         num_shots = find_saturated_shots(circ)
-        meas_filter = readout_mitigation(num_shots,device,initial_layout)
+        meas_filter = tensored_readout_mitigation(num_shots,device,initial_layout)
         evaluator_info['meas_filter'] = meas_filter
         evaluator_info['num_shots'] = num_shots
     elif 'num_shots' in fields:

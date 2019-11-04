@@ -21,7 +21,7 @@ def evaluate_full_circ(circ, device_name):
 
     print('Evaluating qasm + noise')
     evaluator_info = get_evaluator_info(circ=circ,device_name=device_name,
-    fields=['device','basis_gates','coupling_map','properties','initial_layout','noise_model','num_shots'])
+    fields=['device','basis_gates','coupling_map','properties','initial_layout','noise_model','num_shots','meas_filter'])
     print('evaluator fields:',evaluator_info.keys(),'Saturated = %.3e shots'%evaluator_info['num_shots'])
     print('Execute noisy qasm simulator',end=' ')
     execute_begin = time()
