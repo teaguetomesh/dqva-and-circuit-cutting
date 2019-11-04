@@ -39,30 +39,24 @@ def cross_entropy(target,obs):
             h += -p*np.log(q)
     return h
 
-def find_saturated_shots(circ,device,basis_gates,coupling_map,properties,initial_layout,noise_model):
+def find_saturated_shots(circ):
     ground_truth = evaluate_circ(circ=circ,backend='statevector_simulator',evaluator_info=None)
-    noisy_prob = [0 for i in ground_truth]
+    qasm_prob = [0 for i in ground_truth]
     shots_increment = 1024
     evaluator_info = {}
     evaluator_info['num_shots'] = shots_increment
-    evaluator_info['device'] = device
-    evaluator_info['basis_gates'] = basis_gates
-    evaluator_info['coupling_map'] = coupling_map
-    evaluator_info['properties'] = properties
-    evaluator_info['initial_layout'] = initial_layout
-    evaluator_info['noise_model'] = noise_model
     counter = 0.0
     ce_list = []
     while 1:
         counter += 1.0
-        noisy_prob_batch = evaluate_circ(circ=circ,backend='noisy_qasm_simulator',evaluator_info=evaluator_info)
-        noisy_prob = [(x*(counter-1)+y)/counter for x,y in zip(noisy_prob,noisy_prob_batch)]
-        ce = cross_entropy(target=ground_truth,obs=noisy_prob)
+        qasm_prob_batch = evaluate_circ(circ=circ,backend='noiseless_qasm_simulator',evaluator_info=evaluator_info)
+        qasm_prob = [(x*(counter-1)+y)/counter for x,y in zip(qasm_prob,qasm_prob_batch)]
+        ce = cross_entropy(target=ground_truth,obs=qasm_prob)
         ce_list.append(ce)
         if len(ce_list)>1:
             change = abs((ce_list[-1]-ce_list[-2])/ce_list[-2])
             # NOTE: toggle here to change saturated shots termination condition
-            if change <= 1e-2:
+            if change <= 1e-3:
                 return int(counter*shots_increment)
         if counter%10==9:
             print('Accumulated %d shots'%(int(counter*shots_increment)))
@@ -250,12 +244,12 @@ def get_evaluator_info(circ,device_name,fields):
     'initial_layout':initial_layout}
 
     if 'meas_filter' in fields:
-        num_shots = find_saturated_shots(circ,device,basis_gates,coupling_map,properties,initial_layout,noise_model)
+        num_shots = find_saturated_shots(circ)
         meas_filter = readout_mitigation(circ,num_shots,device,initial_layout)
         evaluator_info['meas_filter'] = meas_filter
         evaluator_info['num_shots'] = num_shots
     elif 'num_shots' in fields:
-        num_shots = find_saturated_shots(circ,device,basis_gates,coupling_map,properties,initial_layout,noise_model)
+        num_shots = find_saturated_shots(circ)
         evaluator_info['num_shots'] = num_shots
 
     _evaluator_info = {}
