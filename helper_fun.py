@@ -13,6 +13,7 @@ from qiskit.ignis.mitigation.measurement import (complete_meas_cal, tensored_mea
 import datetime as dt
 import pickle
 import copy
+from time import time
 
 def load_IBMQ():
     token = '9056ff772ff2e0f19de847fc8980b6e0121b561832de7dfb72bb23b085c1dc4a62cde82392f7d74e655465a9d997dd970858a568434f1b97038e70bf44b6c8a6'
@@ -121,8 +122,11 @@ def evaluate_circ(circ, backend, evaluator_info):
         basis_gates=evaluator_info['basis_gates'],
         shots=evaluator_info['num_shots']).result()
         if 'meas_filter' in evaluator_info:
+            print('Apply mitigation',end=' ')
+            mitigation_begin = time()
             mitigated_results = evaluator_info['meas_filter'].apply(noisy_qasm_result)
             noisy_counts = mitigated_results.get_counts(0)
+            print('%.3e seconds'%(time()-mitigation_begin))
         else:
             noisy_counts = noisy_qasm_result.get_counts(qc)
         noisy_prob = [0 for x in range(np.power(2,len(circ.qubits)))]
@@ -175,33 +179,34 @@ def get_bprop():
     bprop_noise_model = noise.device.basic_device_noise_model(bprop)
     return bprop_noise_model
 
-# FIXME: need more efficient readout mitigation method
-# def readout_mitigation(circ,num_shots,properties,coupling_map,noise_model,basis_gates,initial_layout):
-#     num_qubits = len(properties.qubits)
+# Entangled readout mitigation
+def readout_mitigation(circ,num_shots,device,initial_layout):
+    properties = device.properties()
+    num_qubits = len(properties.qubits)
 
-#     # Generate the calibration circuits
-#     qr = QuantumRegister(num_qubits)
-#     qubit_list = []
-#     _initial_layout = initial_layout.get_physical_bits()
-#     for q in _initial_layout:
-#         if 'ancilla' not in _initial_layout[q].register.name:
-#             qubit_list.append(q)
-#     # print(qubit_list, 'calibration circuit has %d qubits'%num_qubits)
-#     meas_calibs, state_labels = complete_meas_cal(qubit_list=qubit_list, qr=qr, circlabel='mcal')
+    # Generate the calibration circuits
+    qr = QuantumRegister(num_qubits)
+    qubit_list = []
+    _initial_layout = initial_layout.get_physical_bits()
+    for q in _initial_layout:
+        if 'ancilla' not in _initial_layout[q].register.name:
+            qubit_list.append(q)
+    meas_calibs, state_labels = complete_meas_cal(qubit_list=qubit_list, qr=qr, circlabel='mcal')
+    print('Calculating measurement filter, %d %d-qubit calibration circuits * %.3e shots'%(len(meas_calibs),len(meas_calibs[0].qubits),num_shots))
 
-#     # Execute the calibration circuits
-#     backend = Aer.get_backend('qasm_simulator')
-#     cal_results = execute(experiments=meas_calibs,
-#         backend=backend,
-#         noise_model=noise_model,
-#         coupling_map=coupling_map,
-#         basis_gates=basis_gates,
-#         shots=num_shots).result()
-#     meas_fitter = CompleteMeasFitter(cal_results, state_labels, qubit_list=qubit_list, circlabel='mcal')
-#     meas_filter = meas_fitter.filter
-#     return meas_filter
+    # Execute the calibration circuits
+    qobj = assemble(meas_calibs, backend=device, shots=num_shots)
+    job = device.run(qobj)
+    cal_results = job.result()
 
-def readout_mitigation(circ,num_shots,properties,coupling_map,noise_model,basis_gates,initial_layout):
+    meas_fitter = CompleteMeasFitter(cal_results, state_labels, qubit_list=qubit_list, circlabel='mcal')
+    meas_filter = meas_fitter.filter
+    return meas_filter
+
+# Tensored readout mitigation
+def tensored_readout_mitigation(circ,num_shots,device,initial_layout):
+    filter_begin = time()
+    properties = device.properties()
     num_qubits = len(properties.qubits)
 
     # Generate the calibration circuits
@@ -212,18 +217,15 @@ def readout_mitigation(circ,num_shots,properties,coupling_map,noise_model,basis_
         if 'ancilla' not in _initial_layout[q].register.name:
             mit_pattern.append([q])
     meas_calibs, state_labels = tensored_meas_cal(mit_pattern=mit_pattern, qr=qr, circlabel='mcal')
-    print('%d calibration circuits * %.3e shots'%(len(meas_calibs),num_shots))
+    print('Calculating measurement filter, %d-qubit calibration circuits * %d * %.3e shots'%(len(meas_calibs[0].qubits),len(meas_calibs),num_shots),end=', ')
 
     # Execute the calibration circuits
-    backend = Aer.get_backend('qasm_simulator')
-    cal_results = execute(experiments=meas_calibs,
-        backend=backend,
-        noise_model=noise_model,
-        coupling_map=coupling_map,
-        basis_gates=basis_gates,
-        shots=num_shots).result()
+    qobj = assemble(meas_calibs, backend=device, shots=num_shots)
+    job = device.run(qobj)
+    cal_results = job.result()
     meas_fitter = TensoredMeasFitter(cal_results, mit_pattern=mit_pattern)
     meas_filter = meas_fitter.filter
+    print('%.3e seconds'%(time()-filter_begin))
     return meas_filter
 
 def get_evaluator_info(circ,device_name,fields):
@@ -247,7 +249,7 @@ def get_evaluator_info(circ,device_name,fields):
 
     if 'meas_filter' in fields:
         num_shots = find_saturated_shots(circ,device,basis_gates,coupling_map,properties,initial_layout,noise_model)
-        meas_filter = readout_mitigation(circ,num_shots,properties,coupling_map,noise_model,basis_gates,initial_layout)
+        meas_filter = readout_mitigation(circ,num_shots,device,initial_layout)
         evaluator_info['meas_filter'] = meas_filter
         evaluator_info['num_shots'] = num_shots
     elif 'num_shots' in fields:
