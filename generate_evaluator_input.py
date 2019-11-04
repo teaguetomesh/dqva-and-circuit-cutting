@@ -32,27 +32,27 @@ if __name__ == '__main__':
     for hw_max_qubit in range(args.min_qubit,args.max_qubit+1):
         for dimension in dimension_l:
             i,j = dimension
-            # if i*j<=hw_max_qubit or hw_max_qubit<i*j/2:
-            #     continue
+            if i*j<=hw_max_qubit or hw_max_qubit<i*j/2:
+                continue
             print('-'*100)
             
             # Generate a circuit
             print('%d * %d supremacy circuit'%(i,j))
             circ = gen_supremacy(i,j,8,order='75601234')
-            # print('%d * %d HWEA circuit'%(i,j))
-            # circ = gen_hwea(i*j,1)
+            print('%d * %d HWEA circuit'%(i,j))
+            circ = gen_hwea(i*j,1)
             
-            # Looking for a cut
-            # searcher_begin = time()
-            # hardness, positions, ancilla, d, num_cluster, m = searcher.find_cuts(circ,num_clusters=range(2,args.max_clusters+1),hw_max_qubit=hw_max_qubit,evaluator_weight=1)
-            # searcher_time = time() - searcher_begin
-            # if m == None:
-            #     continue
-            # m.print_stat()
+            Looking for a cut
+            searcher_begin = time()
+            hardness, positions, ancilla, d, num_cluster, m = searcher.find_cuts(circ,num_clusters=range(2,args.max_clusters+1),hw_max_qubit=hw_max_qubit,evaluator_weight=1)
+            searcher_time = time() - searcher_begin
+            if m == None:
+                continue
+            m.print_stat()
 
-            # clusters, complete_path_map, K, d = cutter.cut_circuit(circ, positions)
-            # print('Complete path map:')
-            # [print(x,complete_path_map[x]) for x in complete_path_map]
+            clusters, complete_path_map, K, d = cutter.cut_circuit(circ, positions)
+            print('Complete path map:')
+            [print(x,complete_path_map[x]) for x in complete_path_map]
             
             # Evaluate full circuit
             print('Evaluating sv noiseless fc')
@@ -74,18 +74,17 @@ if __name__ == '__main__':
             qasm_noisy_fc = evaluate_circ(circ=circ,backend='noisy_qasm_simulator',evaluator_info=evaluator_info)
             print('%.3e seconds'%(time()-execute_begin))
 
-            # print('Evaluating on hardware')
-            # del evaluator_info['noise_model']
-            # print('evaluator fields:',evaluator_info.keys(),'Saturated = %.3e shots'%evaluator_info['num_shots'])
-            # hw_fc = evaluate_circ(circ=circ,backend='hardware',evaluator_info=evaluator_info)
-            hw_fc = None
+            print('Evaluating on hardware')
+            del evaluator_info['noise_model']
+            print('evaluator fields:',evaluator_info.keys(),'Saturated = %.3e shots'%evaluator_info['num_shots'])
+            hw_fc = evaluate_circ(circ=circ,backend='hardware',evaluator_info=evaluator_info)
 
             fc_evaluations = {'sv_noiseless':sv_noiseless_fc,
             'qasm':qasm_noiseless_fc,
             'qasm+noise':qasm_noisy_fc,
             'hw':hw_fc}
 
-    #         evaluator_input[(hw_max_qubit,i*j)] = dimension,evaluator_info['num_shots'],searcher_time,circ,fc_evaluations,clusters,complete_path_map
+            evaluator_input[(hw_max_qubit,i*j)] = dimension,evaluator_info['num_shots'],searcher_time,circ,fc_evaluations,clusters,complete_path_map
 
-    #         print('-'*100)
-    # pickle.dump(evaluator_input,open('{}/evaluator_input_{}.p'.format(dirname,device_name),'wb'))
+            print('-'*100)
+    pickle.dump(evaluator_input,open('{}/evaluator_input_{}.p'.format(dirname,device_name),'wb'))
