@@ -7,6 +7,7 @@ import MIQCP_searcher as searcher
 import cutter
 from helper_fun import evaluate_circ, get_evaluator_info
 import argparse
+from qiskit import IBMQ
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='generate evaluator inputs')
@@ -16,10 +17,11 @@ if __name__ == '__main__':
     parser.add_argument('--device-name', metavar='S',type=str,help='IBM device')
     args = parser.parse_args()
 
+    IBMQ.delete_account()
     device_name = args.device_name
 
     # NOTE: toggle circuits to benchmark
-    dimension_l = [[2,2]]
+    dimension_l = [[2,2],[1,5],[2,3]]
 
     dirname = './benchmark_data'
     if not os.path.exists(dirname):
@@ -30,8 +32,8 @@ if __name__ == '__main__':
     for hw_max_qubit in range(args.min_qubit,args.max_qubit+1):
         for dimension in dimension_l:
             i,j = dimension
-            if i*j<=hw_max_qubit or hw_max_qubit<i*j/2:
-                continue
+            # if i*j<=hw_max_qubit or hw_max_qubit<i*j/2:
+            #     continue
             print('-'*100)
             
             # Generate a circuit
@@ -41,16 +43,16 @@ if __name__ == '__main__':
             # circ = gen_hwea(i*j,1)
             
             # Looking for a cut
-            searcher_begin = time()
-            hardness, positions, ancilla, d, num_cluster, m = searcher.find_cuts(circ,num_clusters=range(2,args.max_clusters+1),hw_max_qubit=hw_max_qubit,evaluator_weight=1)
-            searcher_time = time() - searcher_begin
-            if m == None:
-                continue
-            m.print_stat()
+            # searcher_begin = time()
+            # hardness, positions, ancilla, d, num_cluster, m = searcher.find_cuts(circ,num_clusters=range(2,args.max_clusters+1),hw_max_qubit=hw_max_qubit,evaluator_weight=1)
+            # searcher_time = time() - searcher_begin
+            # if m == None:
+            #     continue
+            # m.print_stat()
 
-            clusters, complete_path_map, K, d = cutter.cut_circuit(circ, positions)
-            print('Complete path map:')
-            [print(x,complete_path_map[x]) for x in complete_path_map]
+            # clusters, complete_path_map, K, d = cutter.cut_circuit(circ, positions)
+            # print('Complete path map:')
+            # [print(x,complete_path_map[x]) for x in complete_path_map]
             
             # Evaluate full circuit
             print('Evaluating sv noiseless fc')
@@ -83,7 +85,7 @@ if __name__ == '__main__':
             'qasm+noise':qasm_noisy_fc,
             'hw':hw_fc}
 
-            evaluator_input[(hw_max_qubit,i*j)] = dimension,evaluator_info['num_shots'],searcher_time,circ,fc_evaluations,clusters,complete_path_map
+    #         evaluator_input[(hw_max_qubit,i*j)] = dimension,evaluator_info['num_shots'],searcher_time,circ,fc_evaluations,clusters,complete_path_map
 
-            print('-'*100)
-    pickle.dump(evaluator_input,open('{}/evaluator_input_{}.p'.format(dirname,device_name),'wb'))
+    #         print('-'*100)
+    # pickle.dump(evaluator_input,open('{}/evaluator_input_{}.p'.format(dirname,device_name),'wb'))
