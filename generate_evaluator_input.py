@@ -19,14 +19,14 @@ def evaluate_full_circ(circ, device_name):
     print('evaluator fields:',evaluator_info.keys(),'Saturated = %.3e shots'%evaluator_info['num_shots'])
     qasm_noiseless_fc = evaluate_circ(circ=circ,backend='noiseless_qasm_simulator',evaluator_info=evaluator_info)
 
-    # print('Evaluating qasm + noise')
-    # evaluator_info = get_evaluator_info(circ=circ,device_name=device_name,
-    # fields=['device','basis_gates','coupling_map','properties','initial_layout','noise_model','num_shots','meas_filter'])
-    # print('evaluator fields:',evaluator_info.keys(),'Saturated = %.3e shots'%evaluator_info['num_shots'])
-    # print('Execute noisy qasm simulator',end=' ')
-    # execute_begin = time()
-    # qasm_noisy_fc = evaluate_circ(circ=circ,backend='noisy_qasm_simulator',evaluator_info=evaluator_info)
-    # print('%.3e seconds'%(time()-execute_begin))
+    print('Evaluating qasm + noise')
+    evaluator_info = get_evaluator_info(circ=circ,device_name=device_name,
+    fields=['device','basis_gates','coupling_map','properties','initial_layout','noise_model','num_shots'])
+    print('evaluator fields:',evaluator_info.keys(),'Saturated = %.3e shots'%evaluator_info['num_shots'])
+    print('Execute noisy qasm simulator',end=' ')
+    execute_begin = time()
+    qasm_noisy_fc = evaluate_circ(circ=circ,backend='noisy_qasm_simulator',evaluator_info=evaluator_info)
+    print('%.3e seconds'%(time()-execute_begin))
     qasm_noisy_fc = None
 
     # print('Evaluating on hardware')
