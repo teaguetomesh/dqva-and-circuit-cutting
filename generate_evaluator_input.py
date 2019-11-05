@@ -72,7 +72,7 @@ if __name__ == '__main__':
                 circ, fc_evaluations, num_shots = full_circs[(i*j)]
             else:
                 print('%d * %d supremacy circuit'%(i,j))
-                circ = gen_supremacy(i,j,8,order='75601234')
+                circ = gen_supremacy(i,j,8)
                 # print('%d * %d HWEA circuit'%(i,j))
                 # circ = gen_hwea(i*j,1)
                 fc_evaluations, num_shots = evaluate_full_circ(circ,device_name)
