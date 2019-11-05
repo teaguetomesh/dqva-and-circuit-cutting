@@ -194,11 +194,12 @@ class Basic_Model(object):
             return False
     
     def print_stat(self):
+        print('*'*20)
         print('MIQCP stats:')
-        print('node count:', self.node_count)
-        print('%d vertices %d edges graph. Max qubit = %d'%
-        (self.n_vertices, self.n_edges, self.hw_max_qubit))
-        print('%d cuts, %d clusters'%(len(self.cut_edges),self.k))
+        # print('node count:', self.node_count)
+        # print('%d vertices %d edges graph. Max qubit = %d'%
+        # (self.n_vertices, self.n_edges, self.hw_max_qubit))
+        print('%d cuts, %d clusters, max qubit = %d'%(len(self.cut_edges),self.k,self.hw_max_qubit))
 
         evaluator_cost_verify = 0
         uniter_cost_verify = 0
@@ -216,15 +217,16 @@ class Basic_Model(object):
                 # print('uniter cost exponent = ',uniter_cost_exponent.X)
                 uniter_cost_verify += np.power(2,uniter_cost_exponent.X)
 
-        print('objective value:', self.objective)
-        print('manually calculated objective value:', self.evaluator_weight*evaluator_cost_verify+(1-self.evaluator_weight)*uniter_cost_verify)
-        print('mip gap:', self.mip_gap)
-        print('runtime:', self.runtime)
+        # print('objective value:', self.objective)
+        # print('manually calculated objective value:', self.evaluator_weight*evaluator_cost_verify+(1-self.evaluator_weight)*uniter_cost_verify)
+        # print('mip gap:', self.mip_gap)
+        # print('runtime:', self.runtime)
 
         if (self.optimal):
             print('OPTIMAL')
         else:
             print('NOT OPTIMAL')
+        print('*'*20)
 
 def read_circ(circ):
     dag = circuit_to_dag(circ)
