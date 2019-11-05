@@ -256,12 +256,12 @@ def get_evaluator_info(circ,device_name,fields):
     'initial_layout':initial_layout}
 
     if 'meas_filter' in fields:
-        num_shots = find_saturated_shots(circ,device,basis_gates,coupling_map,properties,initial_layout,noise_model)
-        meas_filter = readout_mitigation(circ,num_shots,device,initial_layout)
+        num_shots = find_saturated_shots(circ)
+        meas_filter = tensored_readout_mitigation(num_shots,device,initial_layout)
         _evaluator_info['meas_filter'] = meas_filter
         _evaluator_info['num_shots'] = num_shots
     elif 'num_shots' in fields:
-        num_shots = find_saturated_shots(circ,device,basis_gates,coupling_map,properties,initial_layout,noise_model)
+        num_shots = find_saturated_shots(circ)
         _evaluator_info['num_shots'] = num_shots
 
     evaluator_info = {}

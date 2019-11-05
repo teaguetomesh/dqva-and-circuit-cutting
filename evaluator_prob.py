@@ -214,7 +214,7 @@ if __name__ == '__main__':
                             len(rank_combinations[key][cluster_idx]),elapsed_time))
                     elif args.evaluation_method == 'noisy_qasm_simulator':
                         evaluator_info = get_evaluator_info(circ=clusters[cluster_idx],device_name=device_name,
-                        fields=['device','basis_gates','coupling_map','properties','initial_layout','noise_model','num_shots','meas_filter'])
+                        fields=['device','basis_gates','coupling_map','properties','initial_layout','noise_model','num_shots'])
                         quantum_evaluator_begin = time()
                         if not args.saturated_shots:
                             rank_shots = max(int(num_shots/len(rank_combinations[key][cluster_idx])/num_workers)+1,1000)
