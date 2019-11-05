@@ -185,20 +185,18 @@ def readout_mitigation(num_shots,device,initial_layout):
     # Generate the calibration circuits
     qr = QuantumRegister(num_qubits)
     qubit_list = []
-    print(initial_layout)
     _initial_layout = initial_layout.get_physical_bits()
     for q in _initial_layout:
         if 'ancilla' not in _initial_layout[q].register.name:
             qubit_list.append(q)
     meas_calibs, state_labels = complete_meas_cal(qubit_list=qubit_list, qr=qr, circlabel='mcal')
-    print(qubit_list)
     print('Calculating measurement filter, %d-qubit calibration circuits * %d * %.3e shots.'%(len(meas_calibs[0].qubits),len(meas_calibs),num_shots),end=' ')
 
     # Execute the calibration circuits
-    job = execute(meas_calibs, backend=device, shots=num_shots)
-    print(job.job_id())
-    # qobj = assemble(meas_calibs, backend=device, shots=num_shots)
-    # job = device.run(qobj)
+    meas_calibs_transpiled = transpile(meas_calibs, backend=device)
+    qobj = assemble(meas_calibs_transpiled, backend=device, shots=num_shots)
+    job = device.run(qobj)
+    # print(job.job_id())
     cal_results = job.result()
 
     meas_fitter = CompleteMeasFitter(cal_results, state_labels, qubit_list=qubit_list, circlabel='mcal')
@@ -223,17 +221,13 @@ def tensored_readout_mitigation(num_shots,device,initial_layout):
         if 'ancilla' not in _initial_layout[q].register.name:
             mit_pattern.append([q])
     meas_calibs, state_labels = tensored_meas_cal(mit_pattern=mit_pattern, qr=qr, circlabel='mcal')
-    print(meas_calibs[0])
-    print(meas_calibs[1])
     print('Calculating measurement filter, %d-qubit calibration circuits * %d * %.3e shots.'%(len(meas_calibs[0].qubits),len(meas_calibs),num_shots),end=' ')
 
     # Execute the calibration circuits
-    # job = execute(meas_calibs, backend=device, shots=num_shots)
-    # print(job.job_id())
     meas_calibs_transpiled = transpile(meas_calibs, backend=device)
-    qobj = assemble(meas_calibs_transpiled, backend=device, shots=1024)
-    print(qobj)
+    qobj = assemble(meas_calibs_transpiled, backend=device, shots=num_shots)
     job = device.run(qobj)
+    # print(job.job_id())
     cal_results = job.result()
 
     meas_fitter = TensoredMeasFitter(cal_results, mit_pattern=mit_pattern)
