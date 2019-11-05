@@ -248,7 +248,7 @@ def get_evaluator_info(circ,device_name,fields):
     noise_mapper.run(dag)
     initial_layout = noise_mapper.property_set['layout']
     
-    evaluator_info = {'device':device,
+    _evaluator_info = {'device':device,
     'properties':properties,
     'coupling_map':coupling_map,
     'noise_model':noise_model,
@@ -256,16 +256,16 @@ def get_evaluator_info(circ,device_name,fields):
     'initial_layout':initial_layout}
 
     if 'meas_filter' in fields:
-        num_shots = find_saturated_shots(circ)
-        meas_filter = tensored_readout_mitigation(num_shots,device,initial_layout)
-        evaluator_info['meas_filter'] = meas_filter
-        evaluator_info['num_shots'] = num_shots
+        num_shots = find_saturated_shots(circ,device,basis_gates,coupling_map,properties,initial_layout,noise_model)
+        meas_filter = readout_mitigation(circ,num_shots,device,initial_layout)
+        _evaluator_info['meas_filter'] = meas_filter
+        _evaluator_info['num_shots'] = num_shots
     elif 'num_shots' in fields:
-        num_shots = find_saturated_shots(circ)
-        evaluator_info['num_shots'] = num_shots
+        num_shots = find_saturated_shots(circ,device,basis_gates,coupling_map,properties,initial_layout,noise_model)
+        _evaluator_info['num_shots'] = num_shots
 
-    _evaluator_info = {}
+    evaluator_info = {}
     for field in fields:
-        _evaluator_info[field] = evaluator_info[field]
+        evaluator_info[field] = _evaluator_info[field]
     
-    return _evaluator_info
+    return evaluator_info
