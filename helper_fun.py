@@ -39,25 +39,19 @@ def cross_entropy(target,obs):
             h += -p*np.log(q)
     return h
 
-def find_saturated_shots(circ,device,basis_gates,coupling_map,properties,initial_layout,noise_model):
+def find_saturated_shots(circ):
     ground_truth = evaluate_circ(circ=circ,backend='statevector_simulator',evaluator_info=None)
-    noisy_prob = [0 for i in ground_truth]
+    qasm_prob = [0 for i in ground_truth]
     shots_increment = 1024
     evaluator_info = {}
     evaluator_info['num_shots'] = shots_increment
-    evaluator_info['device'] = device
-    evaluator_info['basis_gates'] = basis_gates
-    evaluator_info['coupling_map'] = coupling_map
-    evaluator_info['properties'] = properties
-    evaluator_info['initial_layout'] = initial_layout
-    evaluator_info['noise_model'] = noise_model
     counter = 0.0
     ce_list = []
     while 1:
         counter += 1.0
-        noisy_prob_batch = evaluate_circ(circ=circ,backend='noisy_qasm_simulator',evaluator_info=evaluator_info)
-        noisy_prob = [(x*(counter-1)+y)/counter for x,y in zip(noisy_prob,noisy_prob_batch)]
-        ce = cross_entropy(target=ground_truth,obs=noisy_prob)
+        qasm_prob_batch = evaluate_circ(circ=circ,backend='noiseless_qasm_simulator',evaluator_info=evaluator_info)
+        qasm_prob = [(x*(counter-1)+y)/counter for x,y in zip(qasm_prob,qasm_prob_batch)]
+        ce = cross_entropy(target=ground_truth,obs=qasm_prob)
         ce_list.append(ce)
         if len(ce_list)>1:
             change = abs((ce_list[-1]-ce_list[-2])/ce_list[-2])
@@ -135,6 +129,7 @@ def evaluate_circ(circ, backend, evaluator_info):
             noisy_prob[reversed_state] = noisy_counts[state]/evaluator_info['num_shots']
         return noisy_prob
     elif backend == 'hardware':
+        # FIXME: manually divide shots in case of exceeding max shots
         c = ClassicalRegister(len(circ.qubits), 'c')
         meas = QuantumCircuit(circ.qregs[0], c)
         meas.barrier(circ.qubits)
@@ -180,7 +175,9 @@ def get_bprop():
     return bprop_noise_model
 
 # Entangled readout mitigation
-def readout_mitigation(circ,num_shots,device,initial_layout):
+def readout_mitigation(num_shots,device,initial_layout):
+    # FIXME: manually divide shots in case of exceeding max shots
+    assert num_shots<=device.configuration().max_shots
     filter_begin = time()
     properties = device.properties()
     num_qubits = len(properties.qubits)
@@ -193,20 +190,25 @@ def readout_mitigation(circ,num_shots,device,initial_layout):
         if 'ancilla' not in _initial_layout[q].register.name:
             qubit_list.append(q)
     meas_calibs, state_labels = complete_meas_cal(qubit_list=qubit_list, qr=qr, circlabel='mcal')
+    print('Calculating measurement filter, %d-qubit calibration circuits * %d * %.3e shots.'%(len(meas_calibs[0].qubits),len(meas_calibs),num_shots),end=' ')
 
     # Execute the calibration circuits
-    qobj = assemble(meas_calibs, backend=device, shots=num_shots)
+    meas_calibs_transpiled = transpile(meas_calibs, backend=device)
+    qobj = assemble(meas_calibs_transpiled, backend=device, shots=num_shots)
     job = device.run(qobj)
+    # print(job.job_id())
     cal_results = job.result()
 
     meas_fitter = CompleteMeasFitter(cal_results, state_labels, qubit_list=qubit_list, circlabel='mcal')
     meas_filter = meas_fitter.filter
     filter_time = time() - filter_begin
-    print('Calculating measurement filter, %d-qubit calibration circuits * %d * %.3e shots. %.3e seconds'%(len(meas_calibs[0].qubits),len(meas_calibs),num_shots,filter_time))
+    print('%.3e seconds'%filter_time)
     return meas_filter
 
 # Tensored readout mitigation
-def tensored_readout_mitigation(circ,num_shots,device,initial_layout):
+def tensored_readout_mitigation(num_shots,device,initial_layout):
+    # FIXME: manually divide shots in case of exceeding max shots
+    assert num_shots<=device.configuration().max_shots
     filter_begin = time()
     properties = device.properties()
     num_qubits = len(properties.qubits)
@@ -219,15 +221,19 @@ def tensored_readout_mitigation(circ,num_shots,device,initial_layout):
         if 'ancilla' not in _initial_layout[q].register.name:
             mit_pattern.append([q])
     meas_calibs, state_labels = tensored_meas_cal(mit_pattern=mit_pattern, qr=qr, circlabel='mcal')
+    print('Calculating measurement filter, %d-qubit calibration circuits * %d * %.3e shots.'%(len(meas_calibs[0].qubits),len(meas_calibs),num_shots),end=' ')
 
     # Execute the calibration circuits
-    qobj = assemble(meas_calibs, backend=device, shots=num_shots)
+    meas_calibs_transpiled = transpile(meas_calibs, backend=device)
+    qobj = assemble(meas_calibs_transpiled, backend=device, shots=num_shots)
     job = device.run(qobj)
+    # print(job.job_id())
     cal_results = job.result()
+
     meas_fitter = TensoredMeasFitter(cal_results, mit_pattern=mit_pattern)
     meas_filter = meas_fitter.filter
     filter_time = time() - filter_begin
-    print('Calculating measurement filter, %d-qubit calibration circuits * %d * %.3e shots. %.3e seconds'%(len(meas_calibs[0].qubits),len(meas_calibs),num_shots,filter_time))
+    print('%.3e seconds'%filter_time)
     return meas_filter
 
 def get_evaluator_info(circ,device_name,fields):
@@ -250,12 +256,12 @@ def get_evaluator_info(circ,device_name,fields):
     'initial_layout':initial_layout}
 
     if 'meas_filter' in fields:
-        num_shots = find_saturated_shots(circ,device,basis_gates,coupling_map,properties,initial_layout,noise_model)
-        meas_filter = readout_mitigation(circ,num_shots,device,initial_layout)
+        num_shots = find_saturated_shots(circ)
+        meas_filter = tensored_readout_mitigation(num_shots,device,initial_layout)
         evaluator_info['meas_filter'] = meas_filter
         evaluator_info['num_shots'] = num_shots
     elif 'num_shots' in fields:
-        num_shots = find_saturated_shots(circ,device,basis_gates,coupling_map,properties,initial_layout,noise_model)
+        num_shots = find_saturated_shots(circ)
         evaluator_info['num_shots'] = num_shots
 
     _evaluator_info = {}
