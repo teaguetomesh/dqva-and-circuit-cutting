@@ -115,14 +115,8 @@ def evaluate_circ(circ, backend, evaluator_info):
         coupling_map=evaluator_info['coupling_map'],
         basis_gates=evaluator_info['basis_gates'],
         shots=evaluator_info['num_shots']).result()
-        if 'meas_filter' in evaluator_info:
-            # print('Apply mitigation',end=' ')
-            mitigation_begin = time()
-            mitigated_results = evaluator_info['meas_filter'].apply(noisy_qasm_result)
-            noisy_counts = mitigated_results.get_counts(0)
-            # print('%.3e seconds'%(time()-mitigation_begin))
-        else:
-            noisy_counts = noisy_qasm_result.get_counts(qc)
+        assert 'meas_filter' not in evaluator_info
+        noisy_counts = noisy_qasm_result.get_counts(qc)
         noisy_prob = [0 for x in range(np.power(2,len(circ.qubits)))]
         for state in noisy_counts:
             reversed_state = reverseBits(int(state,2),len(circ.qubits))
@@ -258,7 +252,7 @@ def get_evaluator_info(circ,device_name,fields):
 
     if 'meas_filter' in fields:
         num_shots = find_saturated_shots(circ)
-        meas_filter = tensored_readout_mitigation(num_shots,device,initial_layout)
+        meas_filter = readout_mitigation(num_shots,device,initial_layout)
         _evaluator_info['meas_filter'] = meas_filter
         _evaluator_info['num_shots'] = num_shots
     elif 'num_shots' in fields:

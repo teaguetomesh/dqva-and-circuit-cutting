@@ -21,8 +21,6 @@ if __name__ == '__main__':
         evaluator_type = filename.split('/')[-1].split('_')[0]
         figname = './plots/'+filename.split('/')[-1].replace('_plotter_input','')
 
-        # [print(case, plotter_input[case]['searcher_time']) for case in plotter_input]
-
         hw_qubits = [case[0] for case in plotter_inputs[0]]
         fc_qubits = [case[1] for case in plotter_inputs[0]]
         dx = [0.2 for x in plotter_inputs[0]]
@@ -35,7 +33,7 @@ if __name__ == '__main__':
         ground_truth_avg = np.array([0.0 for case in plotter_inputs[0]])
         qasm_avg = np.array([0.0 for case in plotter_inputs[0]])
         qasm_noise_avg = np.array([0.0 for case in plotter_inputs[0]])
-        qasm_noise_cutting_avg = np.array([0.0 for case in plotter_inputs[0]])
+        cutting_avg = np.array([0.0 for case in plotter_inputs[0]])
         percent_change_avg = np.array([0.0 for case in plotter_inputs[0]])
 
         for plotter_input in plotter_inputs:
@@ -52,10 +50,13 @@ if __name__ == '__main__':
             qasm_noise = np.array([
                 cross_entropy(target=plotter_input[case]['evaluations']['sv_noiseless'],
                 obs= plotter_input[case]['evaluations']['qasm+noise'])for case in plotter_input])
-            qasm_noise_cutting = np.array([
+            hw_fc = np.array([
+                cross_entropy(target=plotter_input[case]['evaluations']['sv_noiseless'],
+                obs= plotter_input[case]['evaluations']['hw'])for case in plotter_input])
+            cutting = np.array([
                 cross_entropy(target=plotter_input[case]['evaluations']['sv_noiseless'],
                 obs= plotter_input[case]['evaluations']['cutting'])for case in plotter_input])
-            percent_change = np.array([100*(qasm_noise[i] - qasm_noise_cutting[i])/(qasm_noise[i] - ground_truth[i]) for i in range(len(plotter_input))])
+            percent_change = np.array([100*(hw_fc[i] - cutting[i])/(hw_fc[i] - ground_truth[i]) for i in range(len(plotter_input))])
             searcher_time_avg += searcher_time
             classical_time_avg += classical_time
             quantum_time_avg += quantum_time
@@ -63,7 +64,7 @@ if __name__ == '__main__':
             ground_truth_avg += ground_truth
             qasm_avg += qasm
             qasm_noise_avg += qasm_noise
-            qasm_noise_cutting_avg += qasm_noise_cutting
+            cutting_avg += cutting
             percent_change_avg += percent_change
         
         searcher_time_avg /= len(plotter_inputs)
@@ -73,7 +74,7 @@ if __name__ == '__main__':
         ground_truth_avg /= len(plotter_inputs)
         qasm_avg /= len(plotter_inputs)
         qasm_noise_avg /= len(plotter_inputs)
-        qasm_noise_cutting_avg /= len(plotter_inputs)
+        cutting_avg /= len(plotter_inputs)
         percent_change_avg /= len(plotter_inputs)
         best_cc = {}
         for i in range(len(plotter_inputs[0])):
@@ -100,7 +101,7 @@ if __name__ == '__main__':
         ax2.tick_params(axis='y', labelcolor=color)
 
         fig.tight_layout()  # otherwise the right y-label is slightly clipped
-        plt.savefig('%s_tradeoff.png'%figname[:-2],dpi=400,transparent=True)
+        plt.savefig('%s_tradeoff.png'%figname[:-2],dpi=400)
 
         print('plotting %s, %d times average'%(figname,len(plotter_inputs)))
 
@@ -135,5 +136,5 @@ if __name__ == '__main__':
         ax1.set_ylabel('full circuit qubits')
         ax1.set_zlabel('cross entropy gap reduction due to cutting (%)')
         # pickle.dump(fig,open('%s'%figname, 'wb'))
-        plt.savefig('%s.png'%figname[:-2],dpi=400,transparent=True)
+        plt.savefig('%s.png'%figname[:-2],dpi=400)
         print('-'*100)

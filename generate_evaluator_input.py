@@ -27,14 +27,15 @@ def evaluate_full_circ(circ, device_name):
     execute_begin = time()
     qasm_noisy_fc = evaluate_circ(circ=circ,backend='noisy_qasm_simulator',evaluator_info=evaluator_info)
     print('%.3e seconds'%(time()-execute_begin))
-    # qasm_noisy_fc = None
 
-    # print('Evaluating on hardware')
-    # evaluator_info = get_evaluator_info(circ=circ,device_name=device_name,
-    # fields=['device','basis_gates','coupling_map','properties','initial_layout','num_shots','meas_filter'])
-    # print('evaluator fields:',evaluator_info.keys(),'Saturated = %.3e shots'%evaluator_info['num_shots'])
-    # hw_fc = evaluate_circ(circ=circ,backend='hardware',evaluator_info=evaluator_info)
-    hw_fc = None
+    print('Evaluating on hardware')
+    evaluator_info = get_evaluator_info(circ=circ,device_name=device_name,
+    fields=['device','basis_gates','coupling_map','properties','initial_layout','num_shots','meas_filter'])
+    print('evaluator fields:',evaluator_info.keys(),'Saturated = %.3e shots'%evaluator_info['num_shots'])
+    print('Execute on hardware',end=' ')
+    execute_begin = time()
+    hw_fc = evaluate_circ(circ=circ,backend='hardware',evaluator_info=evaluator_info)
+    print('%.3e seconds'%(time()-execute_begin))
 
     fc_evaluations = {'sv_noiseless':sv_noiseless_fc,
     'qasm':qasm_noiseless_fc,
