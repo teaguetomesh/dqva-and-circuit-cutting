@@ -61,17 +61,13 @@ def find_saturated_shots(circ):
         if counter%10==9:
             print('Accumulated %d shots'%(int(counter*shots_increment)))
 
-def apply_readout_transpile(circ,evaluator_info):
+def apply_measurement(circ):
     c = ClassicalRegister(len(circ.qubits), 'c')
     meas = QuantumCircuit(circ.qregs[0], c)
     meas.barrier(circ.qubits)
     meas.measure(circ.qubits,c)
     qc = circ+meas
-    mapped_circuit = transpile(qc,
-    backend=evaluator_info['device'], basis_gates=evaluator_info['basis_gates'], 
-    coupling_map=evaluator_info['coupling_map'],backend_properties=evaluator_info['properties'],
-    initial_layout=evaluator_info['initial_layout'])
-    return mapped_circuit
+    return qc
 
 def reverseBits(num,bitSize): 
     binary = bin(num)
@@ -95,11 +91,7 @@ def evaluate_circ(circ, backend, evaluator_info):
     elif backend == 'noiseless_qasm_simulator':
         # print('using noiseless qasm simulator %d shots'%num_shots)
         backend = Aer.get_backend('qasm_simulator')
-        c = ClassicalRegister(len(circ.qubits), 'c')
-        meas = QuantumCircuit(circ.qregs[0], c)
-        meas.barrier(circ.qubits)
-        meas.measure(circ.qubits,c)
-        qc = circ+meas
+        qc = apply_measurement(circ)
 
         num_shots = evaluator_info['num_shots']
         noiseless_qasm_result = execute(qc, backend, shots=num_shots).result()
@@ -112,11 +104,7 @@ def evaluate_circ(circ, backend, evaluator_info):
     elif backend == 'noisy_qasm_simulator':
         # print('using noisy qasm simulator {} shots'.format(num_shots))
         backend = Aer.get_backend('qasm_simulator')
-        c = ClassicalRegister(len(circ.qubits), 'c')
-        meas = QuantumCircuit(circ.qregs[0], c)
-        meas.barrier(circ.qubits)
-        meas.measure(circ.qubits,c)
-        qc = circ+meas
+        qc=apply_measurement(circ)
         mapped_circuit = transpile(qc,
         backend=evaluator_info['device'], basis_gates=evaluator_info['basis_gates'], 
         coupling_map=evaluator_info['coupling_map'],backend_properties=evaluator_info['properties'],
@@ -142,17 +130,13 @@ def evaluate_circ(circ, backend, evaluator_info):
         return noisy_prob
     elif backend == 'hardware':
         # FIXME: manually divide shots in case of exceeding max shots
-        c = ClassicalRegister(len(circ.qubits), 'c')
-        meas = QuantumCircuit(circ.qregs[0], c)
-        meas.barrier(circ.qubits)
-        meas.measure(circ.qubits,c)
-        qc = circ+meas
+        qc=apply_measurement(circ)
 
-        new_circuit = transpile(qc,
+        mapped_circuit = transpile(qc,
         backend=evaluator_info['device'], basis_gates=evaluator_info['basis_gates'],
         coupling_map=evaluator_info['coupling_map'],backend_properties=evaluator_info['properties'],
         initial_layout=evaluator_info['initial_layout'])
-        qobj = assemble(new_circuit, backend=evaluator_info['device'], shots=evaluator_info['num_shots'])
+        qobj = assemble(mapped_circuit, backend=evaluator_info['device'], shots=evaluator_info['num_shots'])
         job = evaluator_info['device'].run(qobj)
         hw_result = job.result()
         if 'meas_filter' in evaluator_info:

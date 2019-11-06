@@ -54,7 +54,7 @@ if __name__ == '__main__':
                 obs= plotter_input[case]['evaluations']['qasm+noise'])for case in plotter_input])
             qasm_noise_cutting = np.array([
                 cross_entropy(target=plotter_input[case]['evaluations']['sv_noiseless'],
-                obs= plotter_input[case]['evaluations']['qasm+noise+cutting'])for case in plotter_input])
+                obs= plotter_input[case]['evaluations']['cutting'])for case in plotter_input])
             percent_change = np.array([100*(qasm_noise[i] - qasm_noise_cutting[i])/(qasm_noise[i] - ground_truth[i]) for i in range(len(plotter_input))])
             searcher_time_avg += searcher_time
             classical_time_avg += classical_time
@@ -136,3 +136,4 @@ if __name__ == '__main__':
         ax1.set_zlabel('cross entropy gap reduction due to cutting (%)')
         # pickle.dump(fig,open('%s'%figname, 'wb'))
         plt.savefig('%s.png'%figname[:-2],dpi=400,transparent=True)
+        print('-'*100)

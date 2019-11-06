@@ -302,7 +302,7 @@ if __name__ == '__main__':
         print('case {} reconstruction distance ='.format(case),wasserstein_distance(fc_evaluations['sv_noiseless'],reconstructed_prob))
     
         evaluations = fc_evaluations
-        evaluations['qasm+noise+cutting'] = reconstructed_prob
+        evaluations['cutting'] = reconstructed_prob
 
         uniter_output[case]['num_shots'] = num_shots
         uniter_output[case]['circ'] = circ
@@ -312,5 +312,6 @@ if __name__ == '__main__':
         uniter_output[case]['classical_time'] = evaluator_output[case]['classical_time']
         uniter_output[case]['quantum_time'] = evaluator_output[case]['quantum_time']
         uniter_output[case]['uniter_time'] = uniter_time
+        print('-'*100)
     filename = args.input_file.replace('uniter_input','plotter_input')
     pickle.dump(uniter_output, open('%s'%filename,'ab'))

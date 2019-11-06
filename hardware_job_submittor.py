@@ -1,6 +1,6 @@
 import pickle
 import argparse
-from helper_fun import get_evaluator_info, evaluate_circ, apply_readout_transpile
+from helper_fun import get_evaluator_info, evaluate_circ, apply_measurement
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='MPI evaluator.')
@@ -25,10 +25,10 @@ if __name__ == '__main__':
             print('Cluster %d has %d instances'%(cluster_idx,len(cluster_instances)))
             for key in cluster_instances:
                 # FIXME: debug here
-                transpiled_circ = apply_readout_transpile(cluster_instances[key],evaluator_info)
-                hw_fc = evaluate_circ(circ=transpiled_circ,backend='noisy_qasm_simulator',evaluator_info=evaluator_info)
+                # qc = apply_measurement(cluster_instances[key])
+                hw_fc = evaluate_circ(circ=cluster_instances[key],backend='noisy_qasm_simulator',evaluator_info=evaluator_info)
                 cluster_instances[key] = hw_fc
 
             job_submittor_input[case]['all_cluster_prob'][cluster_idx] = cluster_instances
     filename = args.input_file.replace('job_submittor_input','hardware_uniter_input')
-    # pickle.dump(job_submittor_input, open('%s'%filename,'wb'))
+    pickle.dump(job_submittor_input, open('%s'%filename,'wb'))

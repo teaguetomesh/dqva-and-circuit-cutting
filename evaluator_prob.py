@@ -194,6 +194,7 @@ if __name__ == '__main__':
         # classical_eval = sum([evaluator_output[key]['classical_time'] for key in evaluator_output])>0
         filename = get_filename(input_file=args.input_file,saturated_shots=args.saturated_shots,evaluation_method=args.evaluation_method)
         pickle.dump(evaluator_output, open('%s'%filename,'wb'))
+        print('-'*100)
     else:
         rank_combinations = find_rank_combinations(evaluator_input,rank,size)
         rank_results = {}
