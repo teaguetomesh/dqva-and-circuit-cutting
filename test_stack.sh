@@ -25,4 +25,4 @@ done
 
 rm $EVALUATOR_FILE
 
-python plot.py
+# python plot.py

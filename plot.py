@@ -84,12 +84,14 @@ if __name__ == '__main__':
                 best_cc[fc] = (uniter_time_avg[i],percent)
         print(best_cc)
 
+        best_percent = [best_cc[fc][1] for fc in best_cc]
         fig, ax1 = plt.subplots()
 
         color = 'tab:blue'
         ax1.set_xlabel('Number of qubits')
         ax1.set_ylabel('Cross entropy reduction (%)', color=color)  # we already handled the x-label with ax1
-        ax1.plot([fc for fc in best_cc], [best_cc[fc][1] for fc in best_cc], 'X',color=color)
+        ax1.plot([fc for fc in best_cc], best_percent, 'X',color=color)
+        ax1.set_ylim(min(0,1.2*min(best_percent)), max(0,min(100,1.2*max(best_percent))))
         ax1.tick_params(axis='y', labelcolor=color)
 
         ax2 = ax1.twinx()  # instantiate a second axes that shares the same x-axis
@@ -130,7 +132,7 @@ if __name__ == '__main__':
         ax1.set_zlabel('reconstructor time (seconds)')
         ax1 = fig.add_subplot(235, projection='3d')
         ax1.bar3d(hw_qubits, fc_qubits, np.zeros(len(plotter_input)), dx, dy, percent_change_avg)
-        ax1.set_zlim3d(min(0,1.2*min(percent_change_avg)), max(0,1.2*max(percent_change_avg)))
+        ax1.set_zlim3d(min(0,1.2*min(percent_change_avg)), max(0,min(100,1.2*max(percent_change_avg))))
         ax1.set_xlabel('hardware qubits')
         ax1.set_ylabel('full circuit qubits')
         ax1.set_zlabel('cross entropy gap reduction due to cutting (%)')

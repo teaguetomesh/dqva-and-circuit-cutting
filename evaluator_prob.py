@@ -235,9 +235,8 @@ if __name__ == '__main__':
                                 rank,key,cluster_idx,len(clusters[cluster_idx].qubits),
                                 len(rank_combinations[key][cluster_idx]),device_name,'saturated' if args.saturated_shots else 'same_total',evaluator_info['num_shots'], elapsed_time))
                     elif args.evaluation_method == 'hardware':
-                        evaluator_info = get_evaluator_info(circ=circ,device_name=device_name,
-                        fields=['device','basis_gates','coupling_map','properties','initial_layout','noise_model','num_shots'])
-                        del evaluator_info['noise_model']
+                        evaluator_info = get_evaluator_info(circ=clusters[cluster_idx],device_name=device_name,
+                        fields=['device','basis_gates','coupling_map','properties','initial_layout','num_shots'])
                         quantum_evaluator_begin = time()
                         if not args.saturated_shots:
                             rank_shots = max(int(num_shots/len(rank_combinations[key][cluster_idx])/num_workers)+1,1000)

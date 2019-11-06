@@ -77,7 +77,7 @@ class Basic_Model(object):
         #                     quicksum([self.node_vars[i][j] for j in range(n_vertices)]))
         
         # Objective function
-        lb = 0
+        lb = 1
         ub = 50
         total_num_cuts = self.model.addVar(lb=lb, ub=ub, vtype=GRB.INTEGER, name='total_num_cuts')
         self.model.addConstr(total_num_cuts == 
