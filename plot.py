@@ -138,3 +138,4 @@ if __name__ == '__main__':
         ax1.set_zlabel('cross entropy gap reduction due to cutting (%)')
         # pickle.dump(fig,open('%s'%figname, 'wb'))
         plt.savefig('%s.png'%figname[:-2],dpi=400,transparent=True)
+        print('-'*100)

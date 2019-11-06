@@ -61,17 +61,13 @@ def find_saturated_shots(circ):
         if counter%10==9:
             print('Accumulated %d shots'%(int(counter*shots_increment)))
 
-def apply_readout_transpile(circ,evaluator_info):
+def apply_measurement(circ):
     c = ClassicalRegister(len(circ.qubits), 'c')
     meas = QuantumCircuit(circ.qregs[0], c)
     meas.barrier(circ.qubits)
     meas.measure(circ.qubits,c)
     qc = circ+meas
-    mapped_circuit = transpile(qc,
-    backend=evaluator_info['device'], basis_gates=evaluator_info['basis_gates'], 
-    coupling_map=evaluator_info['coupling_map'],backend_properties=evaluator_info['properties'],
-    initial_layout=evaluator_info['initial_layout'])
-    return mapped_circuit
+    return qc
 
 def reverseBits(num,bitSize): 
     binary = bin(num)
@@ -95,11 +91,7 @@ def evaluate_circ(circ, backend, evaluator_info):
     elif backend == 'noiseless_qasm_simulator':
         # print('using noiseless qasm simulator %d shots'%num_shots)
         backend = Aer.get_backend('qasm_simulator')
-        c = ClassicalRegister(len(circ.qubits), 'c')
-        meas = QuantumCircuit(circ.qregs[0], c)
-        meas.barrier(circ.qubits)
-        meas.measure(circ.qubits,c)
-        qc = circ+meas
+        qc = apply_measurement(circ)
 
         num_shots = evaluator_info['num_shots']
         noiseless_qasm_result = execute(qc, backend, shots=num_shots).result()
@@ -112,7 +104,12 @@ def evaluate_circ(circ, backend, evaluator_info):
     elif backend == 'noisy_qasm_simulator':
         # print('using noisy qasm simulator {} shots'.format(num_shots))
         backend = Aer.get_backend('qasm_simulator')
-        noisy_qasm_result = execute(experiments=circ,
+        qc=apply_measurement(circ)
+        mapped_circuit = transpile(qc,
+        backend=evaluator_info['device'], basis_gates=evaluator_info['basis_gates'], 
+        coupling_map=evaluator_info['coupling_map'],backend_properties=evaluator_info['properties'],
+        initial_layout=evaluator_info['initial_layout'])
+        noisy_qasm_result = execute(experiments=mapped_circuit,
         backend=backend,
         noise_model=evaluator_info['noise_model'],
         coupling_map=evaluator_info['coupling_map'],
@@ -125,9 +122,16 @@ def evaluate_circ(circ, backend, evaluator_info):
             noisy_prob[reversed_state] = noisy_counts[state]/evaluator_info['num_shots']
         return noisy_prob
     elif backend == 'hardware':
-        # FIXME: manually divide shots in case of exceeding max shots
-        evaluator_info['num_shots'] = min(evaluator_info['num_shots'],evaluator_info['device'].configuration().max_shots)
-        qobj = assemble(circ, backend=evaluator_info['device'], shots=evaluator_info['num_shots'])
+        if evaluator_info['num_shots']>evaluator_info['device'].configuration().max_shots:
+            print('During circuit evaluation on hardware, num_shots %.3e exceeded hardware max'%evaluator_info['num_shots'])
+            evaluator_info['num_shots'] = evaluator_info['device'].configuration().max_shots
+        qc=apply_measurement(circ)
+
+        mapped_circuit = transpile(qc,
+        backend=evaluator_info['device'], basis_gates=evaluator_info['basis_gates'],
+        coupling_map=evaluator_info['coupling_map'],backend_properties=evaluator_info['properties'],
+        initial_layout=evaluator_info['initial_layout'])
+        qobj = assemble(mapped_circuit, backend=evaluator_info['device'], shots=evaluator_info['num_shots'])
         job = evaluator_info['device'].run(qobj)
         hw_result = job.result()
         if 'meas_filter' in evaluator_info:
@@ -166,8 +170,9 @@ def get_bprop():
 
 # Entangled readout mitigation
 def readout_mitigation(num_shots,device,initial_layout):
-    # FIXME: manually divide shots in case of exceeding max shots
-    num_shots = min(num_shots,device.configuration().max_shots)
+    if num_shots>device.configuration().max_shots:
+        print('During readout mitigation, num_shots %.3e exceeded hardware max'%num_shots)
+        num_shots = device.configuration().max_shots
     filter_begin = time()
     properties = device.properties()
     num_qubits = len(properties.qubits)
@@ -181,6 +186,7 @@ def readout_mitigation(num_shots,device,initial_layout):
             qubit_list.append(q)
     meas_calibs, state_labels = complete_meas_cal(qubit_list=qubit_list, qr=qr, circlabel='mcal')
     print('Calculating measurement filter, %d-qubit calibration circuits * %d * %.3e shots.'%(len(meas_calibs[0].qubits),len(meas_calibs),num_shots),end=' ')
+    assert len(meas_calibs)<=500
 
     # Execute the calibration circuits
     meas_calibs_transpiled = transpile(meas_calibs, backend=device)
@@ -197,8 +203,9 @@ def readout_mitigation(num_shots,device,initial_layout):
 
 # Tensored readout mitigation
 def tensored_readout_mitigation(num_shots,device,initial_layout):
-    # FIXME: manually divide shots in case of exceeding max shots
-    num_shots = min(num_shots,device.configuration().max_shots)
+    if num_shots>device.configuration().max_shots:
+        print('During tensored readout mitigation, num_shots %.3e exceeded hardware max'%num_shots)
+        num_shots = device.configuration().max_shots
     filter_begin = time()
     properties = device.properties()
     num_qubits = len(properties.qubits)

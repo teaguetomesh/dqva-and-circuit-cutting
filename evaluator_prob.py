@@ -13,7 +13,7 @@ import progressbar as pb
 from time import time
 from mpi4py import MPI
 import argparse
-from helper_fun import evaluate_circ, get_evaluator_info, apply_readout_transpile
+from helper_fun import evaluate_circ, get_evaluator_info
 import datetime as dt
 
 def find_cluster_O_rho_qubits(complete_path_map,cluster_idx):
@@ -99,11 +99,9 @@ def evaluate_cluster(complete_path_map, cluster_circ, combinations, backend, eva
             cluster_inst_prob = evaluate_circ(circ=cluster_circ_inst,backend=backend,evaluator_info=None)
             cluster_prob[(tuple(inits),tuple(meas))] = cluster_inst_prob
         elif backend=='noisy_qasm_simulator':
-            cluster_circ_inst = apply_readout_transpile(cluster_circ_inst,evaluator_info)
             cluster_inst_prob = evaluate_circ(circ=cluster_circ_inst,backend=backend,evaluator_info=evaluator_info)
             cluster_prob[(tuple(inits),tuple(meas))] = cluster_inst_prob
-        elif backend == 'hardware':
-            # cluster_circ_inst = apply_readout_transpile(cluster_circ_inst,evaluator_info)
+        elif backend=='hardware':
             cluster_prob[(tuple(inits),tuple(meas))] = cluster_circ_inst
         else:
             raise Exception('Illegal backend:',backend)
@@ -136,7 +134,7 @@ def get_filename(input_file,saturated_shots,evaluation_method):
     elif evaluation_method == 'noisy_qasm_simulator':
         filename = input_file.replace('evaluator_input','quantum_uniter_input')
     elif evaluation_method == 'hardware':
-        filename = input_file.replace('evaluator_input','hardware_job_input')
+        filename = input_file.replace('evaluator_input','job_submittor_input')
     else:
         raise Exception('Illegal evaluation method :',evaluation_method)
     if evaluation_method != 'statevector_simulator' and saturated_shots:
@@ -196,6 +194,7 @@ if __name__ == '__main__':
         # classical_eval = sum([evaluator_output[key]['classical_time'] for key in evaluator_output])>0
         filename = get_filename(input_file=args.input_file,saturated_shots=args.saturated_shots,evaluation_method=args.evaluation_method)
         pickle.dump(evaluator_output, open('%s'%filename,'wb'))
+        print('-'*100)
     else:
         rank_combinations = find_rank_combinations(evaluator_input,rank,size)
         rank_results = {}
