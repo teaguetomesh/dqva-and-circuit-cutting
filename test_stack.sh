@@ -7,7 +7,9 @@ do
     for f in $EVALUATOR_FILES;
     do
         # NOTE: toggle here to change cluster shots
+        # mpiexec -n 5 python evaluator_prob.py --input-file $f --saturated-shots --evaluation-method statevector_simulator
         mpiexec -n 5 python evaluator_prob.py --input-file $f --saturated-shots --evaluation-method noisy_qasm_simulator
+        # mpiexec -n 5 python evaluator_prob.py --input-file $f --saturated-shots --evaluation-method hardware
 
         UNITER_INPUT_FILE=./benchmark_data/*_uniter_input_*.p
         python uniter_prob.py --input-file $UNITER_INPUT_FILE

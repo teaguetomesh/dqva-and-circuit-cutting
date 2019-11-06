@@ -97,9 +97,14 @@ def evaluate_cluster(complete_path_map, cluster_circ, combinations, backend, eva
         # print(cluster_circ_inst)
         if backend=='statevector_simulator':
             cluster_inst_prob = evaluate_circ(circ=cluster_circ_inst,backend=backend,evaluator_info=None)
-        else:
+            cluster_prob[(tuple(inits),tuple(meas))] = cluster_inst_prob
+        elif backend=='noisy_qasm_simulator':
             cluster_inst_prob = evaluate_circ(circ=cluster_circ_inst,backend=backend,evaluator_info=evaluator_info)
-        cluster_prob[(tuple(inits),tuple(meas))] = cluster_inst_prob
+            cluster_prob[(tuple(inits),tuple(meas))] = cluster_inst_prob
+        elif backend=='hardware':
+            cluster_prob[(tuple(inits),tuple(meas))] = cluster_circ_inst
+        else:
+            raise Exception('Illegal backend:',backend)
     return cluster_prob
 
 def find_rank_combinations(evaluator_input,rank,size):
@@ -230,7 +235,7 @@ if __name__ == '__main__':
                                 len(rank_combinations[key][cluster_idx]),device_name,'saturated' if args.saturated_shots else 'same_total',evaluator_info['num_shots'], elapsed_time))
                     elif args.evaluation_method == 'hardware':
                         evaluator_info = get_evaluator_info(circ=circ,device_name=device_name,
-                        fields=['device','basis_gates','coupling_map','properties','initial_layout','noise_model','num_shots','meas_filter'])
+                        fields=['device','basis_gates','coupling_map','properties','initial_layout','noise_model','num_shots'])
                         del evaluator_info['noise_model']
                         quantum_evaluator_begin = time()
                         if not args.saturated_shots:
