@@ -302,7 +302,7 @@ if __name__ == '__main__':
         print('case {} reconstruction distance ='.format(case),wasserstein_distance(fc_evaluations['sv_noiseless'],reconstructed_prob))
     
         evaluations = fc_evaluations
-        evaluations['qasm+noise+cutting'] = reconstructed_prob
+        evaluations['cutting'] = reconstructed_prob
 
         uniter_output[case]['num_shots'] = num_shots
         uniter_output[case]['circ'] = circ

@@ -1,8 +1,8 @@
 # NOTE: toggle here to change max qc size, max clusters
-python generate_evaluator_input.py --min-qubit 4 --max-qubit 4 --max-clusters 5 --device-name ibmq_boeblingen
+python generate_evaluator_input.py --min-qubit 4 --max-qubit 4 --max-clusters 3 --device-name ibmq_boeblingen
 EVALUATOR_FILES=./benchmark_data/evaluator_input_*.p
 
-for i in {1..2};
+for i in {1..1};
 do
     for f in $EVALUATOR_FILES;
     do
