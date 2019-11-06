@@ -7,15 +7,15 @@ for i in {1..1};
 do
     # NOTE: toggle here to change cluster shots
     echo "Running evaluator"
-    mpiexec -n 5 python evaluator_prob.py --input-file $EVALUATOR_FILE --saturated-shots --evaluation-method statevector_simulator
+    # mpiexec -n 5 python evaluator_prob.py --input-file $EVALUATOR_FILE --saturated-shots --evaluation-method statevector_simulator
     
     # mpiexec -n 5 python evaluator_prob.py --input-file $EVALUATOR_FILE --saturated-shots --evaluation-method noisy_qasm_simulator
     
-    # mpiexec -n 2 python evaluator_prob.py --input-file $EVALUATOR_FILE --saturated-shots --evaluation-method hardware
-    # echo "Running job submittor"
-    # JOB_SUBMITTOR_FILE=./benchmark_data/job_submittor_input_*.p
-    # python hardware_job_submittor.py --input-file $JOB_SUBMITTOR_FILE --saturated-shots
-    # rm $JOB_SUBMITTOR_FILE
+    mpiexec -n 2 python evaluator_prob.py --input-file $EVALUATOR_FILE --saturated-shots --evaluation-method hardware
+    echo "Running job submittor"
+    JOB_SUBMITTOR_FILE=./benchmark_data/job_submittor_input_*.p
+    python hardware_job_submittor.py --input-file $JOB_SUBMITTOR_FILE --saturated-shots
+    rm $JOB_SUBMITTOR_FILE
 
     echo "Running reconstruction"
     UNITER_INPUT_FILE=./benchmark_data/*_uniter_input_*.p
@@ -25,4 +25,4 @@ done
 
 rm $EVALUATOR_FILE
 
-# python plot.py
+python plot.py

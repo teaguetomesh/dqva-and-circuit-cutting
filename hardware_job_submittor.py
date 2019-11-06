@@ -60,12 +60,11 @@ if __name__ == '__main__':
 
     for case in job_submittor_input:
         print('Case ',case)
-        print(job_submittor_input[case].keys())
         for cluster_idx, cluster_circ in enumerate(job_submittor_input[case]['clusters']):
-            evaluator_info = get_evaluator_info(circ=cluster_circ,device_name=device_name,
-            fields=['device','basis_gates','coupling_map','properties','initial_layout','noise_model','num_shots','meas_filter'])
             cluster_instances = job_submittor_input[case]['all_cluster_prob'][cluster_idx]
             print('Cluster %d has %d instances'%(cluster_idx,len(cluster_instances)))
+            evaluator_info = get_evaluator_info(circ=cluster_circ,device_name=device_name,
+            fields=['device','basis_gates','coupling_map','properties','initial_layout','noise_model','num_shots','meas_filter'])
             hw_probs = submit_hardware_jobs(cluster_instances=cluster_instances,evaluator_info=evaluator_info)
             job_submittor_input[case]['all_cluster_prob'][cluster_idx] = hw_probs
     filename = args.input_file.replace('job_submittor_input','hardware_uniter_input')
