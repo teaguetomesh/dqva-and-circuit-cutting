@@ -5,38 +5,41 @@ import numpy as np
 from qcg.generators import gen_supremacy, gen_hwea
 import MIQCP_searcher as searcher
 import cutter
-from helper_fun import evaluate_circ, get_evaluator_info, apply_readout_transpile
+from helper_fun import evaluate_circs, get_evaluator_info, measure_circs, transpile_circs
 import argparse
 from qiskit import IBMQ
 
 def evaluate_full_circ(circ, device_name):
     # Evaluate full circuit
     print('Evaluating sv noiseless fc')
-    sv_noiseless_fc = evaluate_circ(circ=circ,backend='statevector_simulator',evaluator_info=None)
+    sv_noiseless_fc = evaluate_circs(circs=circ,backend='statevector_simulator',evaluator_info=None)[0]
 
     print('Evaluating qasm')
-    evaluator_info = get_evaluator_info(circ=circ,device_name=device_name,fields=['num_shots'])
-    print('evaluator fields:',evaluator_info.keys(),'Saturated = %.3e shots'%evaluator_info['num_shots'])
-    qasm_noiseless_fc = evaluate_circ(circ=circ,backend='noiseless_qasm_simulator',evaluator_info=evaluator_info)
+    evaluator_infos = get_evaluator_info(circs=circ,device_name=device_name,fields=['num_shots'])
+    print('evaluator fields:',evaluator_infos[0].keys())
+    [print('Saturated = %.3e shots'%evaluator_info['num_shots']) for evaluator_info in evaluator_infos]
+    qasm_noiseless_fc = evaluate_circs(circs=circ,backend='noiseless_qasm_simulator',evaluator_info=evaluator_infos)[0]
 
     print('Evaluating qasm + noise')
-    evaluator_info = get_evaluator_info(circ=circ,device_name=device_name,
+    evaluator_infos = get_evaluator_info(circs=circ,device_name=device_name,
     fields=['device','basis_gates','coupling_map','properties','initial_layout','noise_model','num_shots'])
-    print('evaluator fields:',evaluator_info.keys(),'Saturated = %.3e shots'%evaluator_info['num_shots'])
+    print('evaluator fields:',evaluator_infos[0].keys())
+    [print('Saturated = %.3e shots'%evaluator_info['num_shots']) for evaluator_info in evaluator_infos]
     print('Execute noisy qasm simulator',end=' ')
     execute_begin = time()
-    transpiled_circ = apply_readout_transpile(circ,evaluator_info)
-    qasm_noisy_fc = evaluate_circ(circ=transpiled_circ,backend='noisy_qasm_simulator',evaluator_info=evaluator_info)
+    transpiled_circ = measure_circs(circ)
+    transpiled_circ = transpile_circs(circ,evaluator_infos)
+    qasm_noisy_fc = evaluate_circs(circs=transpiled_circ,backend='noisy_qasm_simulator',evaluator_info=evaluator_infos)[0]
     print('%.3e seconds'%(time()-execute_begin))
     # qasm_noisy_fc = None
 
-    print('Evaluating on hardware')
-    evaluator_info = get_evaluator_info(circ=circ,device_name=device_name,
-    fields=['device','basis_gates','coupling_map','properties','initial_layout','num_shots','meas_filter'])
-    print('evaluator fields:',evaluator_info.keys(),'Saturated = %.3e shots'%evaluator_info['num_shots'])
-    transpiled_circ = apply_readout_transpile(circ,evaluator_info)
-    hw_fc = evaluate_circ(circ=transpiled_circ,backend='hardware',evaluator_info=evaluator_info)
-    # hw_fc = None
+    # print('Evaluating on hardware')
+    # evaluator_info = get_evaluator_info(circ=circ,device_name=device_name,
+    # fields=['device','basis_gates','coupling_map','properties','initial_layout','num_shots','meas_filter'])
+    # print('evaluator fields:',evaluator_info.keys(),'Saturated = %.3e shots'%evaluator_info['num_shots'])
+    # transpiled_circ = apply_readout_transpile(circ,evaluator_info)
+    # hw_fc = evaluate_circs(circ=transpiled_circ,backend='hardware',evaluator_info=evaluator_info)
+    hw_fc = None
 
     fc_evaluations = {'sv_noiseless':sv_noiseless_fc,
     'qasm':qasm_noiseless_fc,
