@@ -61,6 +61,18 @@ def find_saturated_shots(circ):
         if counter%10==9:
             print('Accumulated %d shots'%(int(counter*shots_increment)))
 
+def apply_readout_transpile(circ,evaluator_info):
+    c = ClassicalRegister(len(circ.qubits), 'c')
+    meas = QuantumCircuit(circ.qregs[0], c)
+    meas.barrier(circ.qubits)
+    meas.measure(circ.qubits,c)
+    qc = circ+meas
+    mapped_circuit = transpile(qc,
+    backend=evaluator_info['device'], basis_gates=evaluator_info['basis_gates'], 
+    coupling_map=evaluator_info['coupling_map'],backend_properties=evaluator_info['properties'],
+    initial_layout=evaluator_info['initial_layout'])
+    return mapped_circuit
+
 def reverseBits(num,bitSize): 
     binary = bin(num)
     reverse = binary[-1:1:-1] 
