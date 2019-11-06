@@ -27,7 +27,7 @@ def evaluate_full_circ(circ, device_name):
     execute_begin = time()
     qasm_noisy_fc = evaluate_circ(circ=circ,backend='noisy_qasm_simulator',evaluator_info=evaluator_info)
     print('%.3e seconds'%(time()-execute_begin))
-    qasm_noisy_fc = None
+    # qasm_noisy_fc = None
 
     # print('Evaluating on hardware')
     # evaluator_info = get_evaluator_info(circ=circ,device_name=device_name,
@@ -54,7 +54,7 @@ if __name__ == '__main__':
     device_name = args.device_name
 
     # NOTE: toggle circuits to benchmark
-    dimension_l = [[2,2],[2,3]]
+    dimension_l = [[2,3]]
     dirname = './benchmark_data'
     if not os.path.exists(dirname):
         os.mkdir(dirname)
