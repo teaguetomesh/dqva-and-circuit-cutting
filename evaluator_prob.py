@@ -103,7 +103,7 @@ def evaluate_cluster(complete_path_map, cluster_circ, combinations, backend, eva
             cluster_inst_prob = evaluate_circ(circ=cluster_circ_inst,backend=backend,evaluator_info=evaluator_info)
             cluster_prob[(tuple(inits),tuple(meas))] = cluster_inst_prob
         elif backend == 'hardware':
-            cluster_circ_inst = apply_readout_transpile(cluster_circ_inst,evaluator_info)
+            # cluster_circ_inst = apply_readout_transpile(cluster_circ_inst,evaluator_info)
             cluster_prob[(tuple(inits),tuple(meas))] = cluster_circ_inst
         else:
             raise Exception('Illegal backend:',backend)

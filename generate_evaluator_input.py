@@ -30,13 +30,13 @@ def evaluate_full_circ(circ, device_name):
     print('%.3e seconds'%(time()-execute_begin))
     # qasm_noisy_fc = None
 
-    print('Evaluating on hardware')
-    evaluator_info = get_evaluator_info(circ=circ,device_name=device_name,
-    fields=['device','basis_gates','coupling_map','properties','initial_layout','num_shots','meas_filter'])
-    print('evaluator fields:',evaluator_info.keys(),'Saturated = %.3e shots'%evaluator_info['num_shots'])
-    transpiled_circ = apply_readout_transpile(circ,evaluator_info)
-    hw_fc = evaluate_circ(circ=transpiled_circ,backend='hardware',evaluator_info=evaluator_info)
-    # hw_fc = None
+    # print('Evaluating on hardware')
+    # evaluator_info = get_evaluator_info(circ=circ,device_name=device_name,
+    # fields=['device','basis_gates','coupling_map','properties','initial_layout','num_shots','meas_filter'])
+    # print('evaluator fields:',evaluator_info.keys(),'Saturated = %.3e shots'%evaluator_info['num_shots'])
+    # transpiled_circ = apply_readout_transpile(circ,evaluator_info)
+    # hw_fc = evaluate_circ(circ=transpiled_circ,backend='hardware',evaluator_info=evaluator_info)
+    hw_fc = None
 
     fc_evaluations = {'sv_noiseless':sv_noiseless_fc,
     'qasm':qasm_noiseless_fc,
@@ -86,8 +86,6 @@ if __name__ == '__main__':
                     m.print_stat()
                     print('Use existing full circ evaluations')
                     clusters, complete_path_map, K, d = cutter.cut_circuit(circ, positions)
-                    # print('Complete path map:')
-                    # [print(x,complete_path_map[x]) for x in complete_path_map]
                     evaluator_input[(hw_max_qubit,i*j)] = dimension,num_shots,searcher_time,circ,fc_evaluations,clusters,complete_path_map
                     print('-'*100)
             else:
@@ -102,6 +100,8 @@ if __name__ == '__main__':
                 else:
                     m.print_stat()
                     clusters, complete_path_map, K, d = cutter.cut_circuit(circ, positions)
+                    print('Complete path map:')
+                    [print(x,complete_path_map[x]) for x in complete_path_map]
                     fc_evaluations, num_shots = evaluate_full_circ(circ,device_name)
                     full_circs[(i*j)] = circ, fc_evaluations, num_shots
                     evaluator_input[(hw_max_qubit,i*j)] = dimension,num_shots,searcher_time,circ,fc_evaluations,clusters,complete_path_map
