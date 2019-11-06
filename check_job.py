@@ -15,5 +15,5 @@ for x in provider.backends():
         print('%s: %d-qubit, max %d jobs * %d shots'%(x,num_qubits,x.configuration().max_experiments,x.configuration().max_shots))
         for job in x.jobs():
             print(job.creation_date(),job.queue_position(),job.status(),job.job_id())
-            if job.status() == JobStatus['RUNNING']:
-                job.cancel()
+            # if job.status() == JobStatus['RUNNING']:
+            #     job.cancel()

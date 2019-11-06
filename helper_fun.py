@@ -129,7 +129,9 @@ def evaluate_circ(circ, backend, evaluator_info):
             noisy_prob[reversed_state] = noisy_counts[state]/evaluator_info['num_shots']
         return noisy_prob
     elif backend == 'hardware':
-        # FIXME: manually divide shots in case of exceeding max shots
+        if evaluator_info['num_shots']>evaluator_info['device'].configuration().max_shots:
+            print('During circuit evaluation on hardware, num_shots %.3e exceeded hardware max'%evaluator_info['num_shots'])
+            evaluator_info['num_shots'] = evaluator_info['device'].configuration().max_shots
         qc=apply_measurement(circ)
 
         mapped_circuit = transpile(qc,
@@ -172,8 +174,9 @@ def get_bprop():
 
 # Entangled readout mitigation
 def readout_mitigation(num_shots,device,initial_layout):
-    # FIXME: manually divide shots in case of exceeding max shots
-    assert num_shots<=device.configuration().max_shots
+    if num_shots>device.configuration().max_shots:
+        print('During readout mitigation, num_shots %.3e exceeded hardware max'%num_shots)
+        num_shots = device.configuration().max_shots
     filter_begin = time()
     properties = device.properties()
     num_qubits = len(properties.qubits)
@@ -187,6 +190,7 @@ def readout_mitigation(num_shots,device,initial_layout):
             qubit_list.append(q)
     meas_calibs, state_labels = complete_meas_cal(qubit_list=qubit_list, qr=qr, circlabel='mcal')
     print('Calculating measurement filter, %d-qubit calibration circuits * %d * %.3e shots.'%(len(meas_calibs[0].qubits),len(meas_calibs),num_shots),end=' ')
+    assert len(meas_calibs)<=500
 
     # Execute the calibration circuits
     meas_calibs_transpiled = transpile(meas_calibs, backend=device)
@@ -203,8 +207,9 @@ def readout_mitigation(num_shots,device,initial_layout):
 
 # Tensored readout mitigation
 def tensored_readout_mitigation(num_shots,device,initial_layout):
-    # FIXME: manually divide shots in case of exceeding max shots
-    assert num_shots<=device.configuration().max_shots
+    if num_shots>device.configuration().max_shots:
+        print('During tensored readout mitigation, num_shots %.3e exceeded hardware max'%num_shots)
+        num_shots = device.configuration().max_shots
     filter_begin = time()
     properties = device.properties()
     num_qubits = len(properties.qubits)
