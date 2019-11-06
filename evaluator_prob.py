@@ -134,7 +134,7 @@ def get_filename(input_file,saturated_shots,evaluation_method):
     elif evaluation_method == 'noisy_qasm_simulator':
         filename = input_file.replace('evaluator_input','quantum_uniter_input')
     elif evaluation_method == 'hardware':
-        filename = input_file.replace('evaluator_input','hardware_uniter_input')
+        filename = input_file.replace('evaluator_input','job_submittor_input')
     else:
         raise Exception('Illegal evaluation method :',evaluation_method)
     if evaluation_method != 'statevector_simulator' and saturated_shots:
