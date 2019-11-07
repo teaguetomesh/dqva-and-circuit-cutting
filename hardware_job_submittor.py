@@ -3,6 +3,7 @@ import pickle
 import argparse
 from qiskit.compiler import transpile, assemble
 from helper_fun import get_evaluator_info, evaluate_circ, apply_measurement, reverseBits
+from time import time
 
 def submit_hardware_jobs(cluster_instances, evaluator_info):
     if evaluator_info['num_shots']>evaluator_info['device'].configuration().max_shots:
@@ -65,7 +66,12 @@ if __name__ == '__main__':
             print('Cluster %d has %d instances'%(cluster_idx,len(cluster_instances)))
             evaluator_info = get_evaluator_info(circ=cluster_circ,device_name=device_name,
             fields=['device','basis_gates','coupling_map','properties','initial_layout','noise_model','num_shots','meas_filter'])
+            hw_begin = time()
             hw_probs = submit_hardware_jobs(cluster_instances=cluster_instances,evaluator_info=evaluator_info)
+            hw_elapsed = time()-hw_begin
+            print('Hardware queue time = %.3e seconds'%hw_elapsed)
             job_submittor_input[case]['all_cluster_prob'][cluster_idx] = hw_probs
+        print('*'*50)
+    print('-'*100)
     filename = args.input_file.replace('job_submittor_input','hardware_uniter_input')
     pickle.dump(job_submittor_input, open('%s'%filename,'wb'))

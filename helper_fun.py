@@ -184,7 +184,7 @@ def readout_mitigation(num_shots,device,initial_layout):
             qubit_list.append(q)
     meas_calibs, state_labels = complete_meas_cal(qubit_list=qubit_list, qr=qr, circlabel='mcal')
     print('Calculating measurement filter, %d-qubit calibration circuits * %d * %.3e shots.'%(len(meas_calibs[0].qubits),len(meas_calibs),num_shots),end=' ')
-    assert len(meas_calibs)<=500
+    assert len(meas_calibs)<=device.configuration().max_experiments/2
 
     # Execute the calibration circuits
     meas_calibs_transpiled = transpile(meas_calibs, backend=device)
@@ -199,8 +199,8 @@ def readout_mitigation(num_shots,device,initial_layout):
     print('%.3e seconds'%filter_time)
     return meas_filter
 
-# Tensored readout mitigation
-def tensored_readout_mitigation(num_shots,device,initial_layout):
+# Fully local readout mitigation
+def fully_local_readout_mitigation(num_shots,device,initial_layout):
     if num_shots>device.configuration().max_shots:
         print('During tensored readout mitigation, num_shots %.3e exceeded hardware max'%num_shots)
         num_shots = device.configuration().max_shots
@@ -215,6 +215,45 @@ def tensored_readout_mitigation(num_shots,device,initial_layout):
     for q in _initial_layout:
         if 'ancilla' not in _initial_layout[q].register.name:
             mit_pattern.append([q])
+    meas_calibs, state_labels = tensored_meas_cal(mit_pattern=mit_pattern, qr=qr, circlabel='mcal')
+    print('Calculating measurement filter, %d-qubit calibration circuits * %d * %.3e shots.'%(len(meas_calibs[0].qubits),len(meas_calibs),num_shots),end=' ')
+
+    # Execute the calibration circuits
+    meas_calibs_transpiled = transpile(meas_calibs, backend=device)
+    qobj = assemble(meas_calibs_transpiled, backend=device, shots=num_shots)
+    job = device.run(qobj)
+    # print(job.job_id())
+    cal_results = job.result()
+
+    meas_fitter = TensoredMeasFitter(cal_results, mit_pattern=mit_pattern)
+    meas_filter = meas_fitter.filter
+    filter_time = time() - filter_begin
+    print('%.3e seconds'%filter_time)
+    return meas_filter
+
+# Tensored readout mitigation
+def tensored_readout_mitigation(num_shots,device,initial_layout):
+    if num_shots>device.configuration().max_shots:
+        print('During tensored readout mitigation, num_shots %.3e exceeded hardware max'%num_shots)
+        num_shots = device.configuration().max_shots
+    filter_begin = time()
+    properties = device.properties()
+    max_group_len = int(np.log2(device.configuration().max_experiments/2))
+
+    # Generate the calibration circuits
+    num_qubits = len(properties.qubits)
+    qr = QuantumRegister(num_qubits)
+    mit_pattern = []
+    _initial_layout = initial_layout.get_physical_bits()
+    group = []
+    for q in _initial_layout:
+        if 'ancilla' not in _initial_layout[q].register.name:
+            if len(group) == max_group_len:
+                mit_pattern.append(group)
+                group = [q]
+            else:
+                group.append(q)
+    mit_pattern.append(group)
     meas_calibs, state_labels = tensored_meas_cal(mit_pattern=mit_pattern, qr=qr, circlabel='mcal')
     print('Calculating measurement filter, %d-qubit calibration circuits * %d * %.3e shots.'%(len(meas_calibs[0].qubits),len(meas_calibs),num_shots),end=' ')
 
@@ -252,7 +291,7 @@ def get_evaluator_info(circ,device_name,fields):
 
     if 'meas_filter' in fields:
         num_shots = find_saturated_shots(circ)
-        meas_filter = readout_mitigation(num_shots,device,initial_layout)
+        meas_filter = tensored_readout_mitigation(num_shots,device,initial_layout)
         _evaluator_info['meas_filter'] = meas_filter
         _evaluator_info['num_shots'] = num_shots
     elif 'num_shots' in fields:
