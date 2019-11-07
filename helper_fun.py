@@ -202,7 +202,7 @@ def readout_mitigation(num_shots,device,initial_layout):
 # Fully local readout mitigation
 def fully_local_readout_mitigation(num_shots,device,initial_layout):
     if num_shots>device.configuration().max_shots:
-        print('During tensored readout mitigation, num_shots %.3e exceeded hardware max'%num_shots)
+        print('During fully local readout mitigation, num_shots %.3e exceeded hardware max'%num_shots)
         num_shots = device.configuration().max_shots
     filter_begin = time()
     properties = device.properties()

@@ -217,8 +217,8 @@ class Basic_Model(object):
                 # print('uniter cost exponent = ',uniter_cost_exponent.X)
                 uniter_cost_verify += np.power(2,uniter_cost_exponent.X)
 
-        # print('objective value:', self.objective)
-        # print('manually calculated objective value:', self.evaluator_weight*evaluator_cost_verify+(1-self.evaluator_weight)*uniter_cost_verify)
+        print('objective value:', self.objective)
+        print('manually calculated objective value:', self.evaluator_weight*evaluator_cost_verify+(1-self.evaluator_weight)*uniter_cost_verify)
         # print('mip gap:', self.mip_gap)
         # print('runtime:', self.runtime)
 

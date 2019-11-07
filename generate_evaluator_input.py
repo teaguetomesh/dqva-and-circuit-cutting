@@ -19,14 +19,15 @@ def evaluate_full_circ(circ, device_name):
     print('evaluator fields:',evaluator_info.keys(),'Saturated = %.3e shots'%evaluator_info['num_shots'])
     qasm_noiseless_fc = evaluate_circ(circ=circ,backend='noiseless_qasm_simulator',evaluator_info=evaluator_info)
 
-    print('Evaluating qasm + noise')
-    evaluator_info = get_evaluator_info(circ=circ,device_name=device_name,
-    fields=['device','basis_gates','coupling_map','properties','initial_layout','noise_model','num_shots'])
-    print('evaluator fields:',evaluator_info.keys(),'Saturated = %.3e shots'%evaluator_info['num_shots'])
-    print('Execute noisy qasm simulator',end=' ')
-    execute_begin = time()
-    qasm_noisy_fc = evaluate_circ(circ=circ,backend='noisy_qasm_simulator',evaluator_info=evaluator_info)
-    print('%.3e seconds'%(time()-execute_begin))
+    # print('Evaluating qasm + noise')
+    # evaluator_info = get_evaluator_info(circ=circ,device_name=device_name,
+    # fields=['device','basis_gates','coupling_map','properties','initial_layout','noise_model','num_shots'])
+    # print('evaluator fields:',evaluator_info.keys(),'Saturated = %.3e shots'%evaluator_info['num_shots'])
+    # print('Execute noisy qasm simulator',end=' ')
+    # execute_begin = time()
+    # qasm_noisy_fc = evaluate_circ(circ=circ,backend='noisy_qasm_simulator',evaluator_info=evaluator_info)
+    # print('%.3e seconds'%(time()-execute_begin))
+    qasm_noisy_fc = [0 for i in sv_noiseless_fc]
 
     print('Evaluating on hardware')
     evaluator_info = get_evaluator_info(circ=circ,device_name=device_name,
@@ -55,7 +56,7 @@ if __name__ == '__main__':
     device_name = args.device_name
 
     # NOTE: toggle circuits to benchmark
-    dimension_l = [[2,3]]
+    dimension_l = [[4,4]]
     dirname = './benchmark_data'
     if not os.path.exists(dirname):
         os.mkdir(dirname)
@@ -65,7 +66,7 @@ if __name__ == '__main__':
     for hw_max_qubit in range(args.min_qubit,args.max_qubit+1):
         for dimension in dimension_l:
             i,j = dimension
-            if i*j<=hw_max_qubit or hw_max_qubit<i*j/2:
+            if i*j<=hw_max_qubit or hw_max_qubit<i*j/4:
                 continue
             
             print('-'*100)
