@@ -10,6 +10,7 @@ def submit_hardware_jobs(cluster_instances, evaluator_info):
         print('During circuit evaluation on hardware, num_shots %.3e exceeded hardware max'%evaluator_info['num_shots'])
         evaluator_info['num_shots'] = evaluator_info['device'].configuration().max_shots
     
+    print('Submitted %d circuits to hardware'%len(cluster_instances))
     mapped_circuits = {}
     for init_meas in cluster_instances:
         circ = cluster_instances[init_meas]

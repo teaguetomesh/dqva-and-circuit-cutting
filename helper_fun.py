@@ -58,8 +58,8 @@ def find_saturated_shots(circ):
             # NOTE: toggle here to change saturated shots termination condition
             if change <= 1e-2:
                 return int(counter*shots_increment)
-        if counter%10==9:
-            print('Accumulated %d shots'%(int(counter*shots_increment)))
+        # if counter%10==9:
+        #     print('Accumulated %d shots'%(int(counter*shots_increment)))
 
 def apply_measurement(circ):
     c = ClassicalRegister(len(circ.qubits), 'c')
@@ -136,8 +136,10 @@ def evaluate_circ(circ, backend, evaluator_info):
         job = evaluator_info['device'].run(qobj)
         hw_result = job.result()
         if 'meas_filter' in evaluator_info:
+            mitigation_begin = time()
             mitigated_results = evaluator_info['meas_filter'].apply(hw_result)
             hw_counts = mitigated_results.get_counts(0)
+            print('Mitigation for %d qubit circuit took %.3e seconds'%(len(circ.qubits),time()-mitigation_begin))
         else:
             hw_counts = hw_result.get_counts(qc)
         hw_prob = [0 for x in range(np.power(2,len(circ.qubits)))]
@@ -184,7 +186,7 @@ def readout_mitigation(num_shots,device,initial_layout):
             qubit_list.append(q)
     meas_calibs, state_labels = complete_meas_cal(qubit_list=qubit_list, qr=qr, circlabel='mcal')
     print('Calculating measurement filter, %d-qubit calibration circuits * %d * %.3e shots.'%(len(meas_calibs[0].qubits),len(meas_calibs),num_shots),end=' ')
-    assert len(meas_calibs)<=device.configuration().max_experiments/2
+    assert len(meas_calibs)<=device.configuration().max_experiments/3*2
 
     # Execute the calibration circuits
     meas_calibs_transpiled = transpile(meas_calibs, backend=device)
@@ -238,7 +240,7 @@ def tensored_readout_mitigation(num_shots,device,initial_layout):
         num_shots = device.configuration().max_shots
     filter_begin = time()
     properties = device.properties()
-    max_group_len = int(np.log2(device.configuration().max_experiments/2))
+    max_group_len = int(np.log2(device.configuration().max_experiments/3*2))
 
     # Generate the calibration circuits
     num_qubits = len(properties.qubits)

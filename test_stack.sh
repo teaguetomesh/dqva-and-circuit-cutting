@@ -1,9 +1,9 @@
 # NOTE: toggle here to change max qc size, max clusters
 echo "Generate evaluator input"
-python generate_evaluator_input.py --min-qubit 10 --max-qubit 10 --max-clusters 3 --device-name ibmq_boeblingen
+python generate_evaluator_input.py --min-qubit 6 --max-qubit 10 --max-clusters 3 --device-name ibmq_boeblingen
 EVALUATOR_FILE=./benchmark_data/evaluator_input_*.p
 
-for i in {1..1};
+for i in {1..2};
 do
     # NOTE: toggle here to change cluster shots
     echo "Running evaluator"
@@ -25,4 +25,4 @@ done
 
 rm $EVALUATOR_FILE
 
-python plot.py
+# python plot.py
