@@ -67,16 +67,9 @@ class Basic_Model(object):
                 self.model.addConstr(self.edge_vars[i][e] >= u_node_var-v_node_var)
                 self.model.addConstr(self.edge_vars[i][e] >= v_node_var-u_node_var)
                 self.model.addConstr(self.edge_vars[i][e] <= 2-u_node_var-v_node_var)
-
-        # symmetry-breaking constraints
-        # TODO: this does not break all the symmetries, is this necessary?
-        # self.model.addConstr(self.node_vars[0][0], GRB.EQUAL, 1)
-        # for i in range(2, k):
-        #     self.model.addConstr(quicksum([self.node_vars[i-1][j] for j in range(n_vertices)]),
-        #                     GRB.LESS_EQUAL,
-        #                     quicksum([self.node_vars[i][j] for j in range(n_vertices)]))
         
         # Objective function
+        # TODO: design an objective function to optimize fidelity directly
         lb = 0
         ub = 50
         total_num_cuts = self.model.addVar(lb=lb, ub=ub, vtype=GRB.INTEGER, name='total_num_cuts')

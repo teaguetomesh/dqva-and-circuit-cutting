@@ -31,7 +31,10 @@ def evaluate_full_circ(circ, device_name):
 
     print('Evaluating on hardware')
     evaluator_info = get_evaluator_info(circ=circ,device_name=device_name,
-    fields=['device','basis_gates','coupling_map','properties','initial_layout','num_shots','meas_filter'])
+    fields=['device','basis_gates','coupling_map','properties','initial_layout','num_shots'])
+    if np.power(2,len(circ.qubits))<evaluator_info['device'].configuration().max_experiments/3*2:
+        _evaluator_info = get_evaluator_info(circ=circ,device_name=device_name,fields=['meas_filter'])
+        evaluator_info.update(_evaluator_info)
     print('evaluator fields:',evaluator_info.keys(),'Saturated = %.3e shots'%evaluator_info['num_shots'])
     print('Execute on hardware',end=' ')
     execute_begin = time()
@@ -57,7 +60,8 @@ if __name__ == '__main__':
     device_name = args.device_name
 
     # NOTE: toggle circuits to benchmark
-    dimension_l = [[3,3]]
+    # dimension_l = [[2,2],[2,3],[3,3],[2,5],[3,4],[4,4]]
+    dimension_l = [[2,5],[3,4],[4,4]]
     dirname = './benchmark_data'
     if not os.path.exists(dirname):
         os.mkdir(dirname)
@@ -67,7 +71,7 @@ if __name__ == '__main__':
     for hw_max_qubit in range(args.min_qubit,args.max_qubit+1):
         for dimension in dimension_l:
             i,j = dimension
-            if i*j<=hw_max_qubit or hw_max_qubit<i*j/4:
+            if i*j<=hw_max_qubit:
                 continue
             
             print('-'*100)
@@ -90,7 +94,6 @@ if __name__ == '__main__':
                     # print('Complete path map:')
                     # [print(x,complete_path_map[x]) for x in complete_path_map]
                     evaluator_input[(hw_max_qubit,i*j)] = dimension,num_shots,searcher_time,circ,fc_evaluations,clusters,complete_path_map
-                    print('-'*100)
             else:
                 circ = gen_supremacy(i,j,8)
                 searcher_begin = time()
@@ -106,5 +109,6 @@ if __name__ == '__main__':
                     fc_evaluations, num_shots = evaluate_full_circ(circ,device_name)
                     full_circs[(i*j)] = circ, fc_evaluations, num_shots
                     evaluator_input[(hw_max_qubit,i*j)] = dimension,num_shots,searcher_time,circ,fc_evaluations,clusters,complete_path_map
-                    print('-'*100)
-    pickle.dump(evaluator_input,open('{}/evaluator_input_{}.p'.format(dirname,device_name),'wb'))
+            pickle.dump(evaluator_input,open('{}/evaluator_input_{}.p'.format(dirname,device_name),'wb'))
+            print('Evaluator input cases:',evaluator_input.keys())
+            print('-'*100)

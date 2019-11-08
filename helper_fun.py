@@ -123,6 +123,7 @@ def evaluate_circ(circ, backend, evaluator_info):
             noisy_prob[reversed_state] = noisy_counts[state]/evaluator_info['num_shots']
         return noisy_prob
     elif backend == 'hardware':
+        # TODO: split up shots here
         if evaluator_info['num_shots']>evaluator_info['device'].configuration().max_shots:
             print('During circuit evaluation on hardware, num_shots %.3e exceeded hardware max'%evaluator_info['num_shots'])
             evaluator_info['num_shots'] = evaluator_info['device'].configuration().max_shots
@@ -136,6 +137,7 @@ def evaluate_circ(circ, backend, evaluator_info):
         job = evaluator_info['device'].run(qobj)
         hw_result = job.result()
         if 'meas_filter' in evaluator_info:
+            print('Mitigation for %d qubit circuit'%(len(circ.qubits)))
             mitigation_begin = time()
             mitigated_results = evaluator_info['meas_filter'].apply(hw_result)
             hw_counts = mitigated_results.get_counts(0)
@@ -190,9 +192,9 @@ def readout_mitigation(num_shots,device,initial_layout):
 
     # Execute the calibration circuits
     meas_calibs_transpiled = transpile(meas_calibs, backend=device)
+    # TODO: split up experiments here
     qobj = assemble(meas_calibs_transpiled, backend=device, shots=num_shots)
     job = device.run(qobj)
-    # print(job.job_id())
     cal_results = job.result()
 
     meas_fitter = CompleteMeasFitter(cal_results, state_labels, qubit_list=qubit_list, circlabel='mcal')
@@ -293,7 +295,7 @@ def get_evaluator_info(circ,device_name,fields):
 
     if 'meas_filter' in fields:
         num_shots = find_saturated_shots(circ)
-        meas_filter = tensored_readout_mitigation(num_shots,device,initial_layout)
+        meas_filter = readout_mitigation(num_shots,device,initial_layout)
         _evaluator_info['meas_filter'] = meas_filter
         _evaluator_info['num_shots'] = num_shots
     elif 'num_shots' in fields:
