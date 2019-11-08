@@ -9,11 +9,13 @@ circ = gen_supremacy(2,2,8)
 provider = load_IBMQ()
 
 for x in provider.backends():
-    if 'qasm' not in str(x) and str(x) == 'ibmq_boeblingen':
+    # if 'qasm' not in str(x) and str(x) == 'ibmq_boeblingen':
+    if 'qasm' not in str(x):
         evaluator_info = get_evaluator_info(circ=circ,device_name=str(x),fields=['properties'])
         num_qubits = len(evaluator_info['properties'].qubits)
         print('%s: %d-qubit, max %d jobs * %d shots'%(x,num_qubits,x.configuration().max_experiments,x.configuration().max_shots))
-        for job in x.jobs():
-            print(job.creation_date(),job.status(),job.job_id())
-            # if job.status() == JobStatus['RUNNING']:
-            #     job.cancel()
+        if str(x) == 'ibmq_boeblingen':
+            for job in x.jobs():
+                print(job.creation_date(),job.status(),job.job_id())
+                # if job.status() == JobStatus['RUNNING']:
+                #     job.cancel()

@@ -60,7 +60,7 @@ if __name__ == '__main__':
     device_name = args.device_name
 
     # NOTE: toggle circuits to benchmark
-    dimension_l = [[2,2],[2,3],[3,3],[2,5],[3,4]]
+    dimension_l = [[2,2],[2,3],[3,3],[2,5],[3,4],[4,4]]
     dirname = './benchmark_data'
     if not os.path.exists(dirname):
         os.mkdir(dirname)
@@ -70,7 +70,7 @@ if __name__ == '__main__':
     for hw_max_qubit in range(args.min_qubit,args.max_qubit+1):
         for dimension in dimension_l:
             i,j = dimension
-            if i*j<=hw_max_qubit or hw_max_qubit<i*j/4:
+            if i*j<=hw_max_qubit:
                 continue
             
             print('-'*100)

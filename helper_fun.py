@@ -123,6 +123,7 @@ def evaluate_circ(circ, backend, evaluator_info):
             noisy_prob[reversed_state] = noisy_counts[state]/evaluator_info['num_shots']
         return noisy_prob
     elif backend == 'hardware':
+        # TODO: split up shots here
         if evaluator_info['num_shots']>evaluator_info['device'].configuration().max_shots:
             print('During circuit evaluation on hardware, num_shots %.3e exceeded hardware max'%evaluator_info['num_shots'])
             evaluator_info['num_shots'] = evaluator_info['device'].configuration().max_shots
@@ -191,9 +192,9 @@ def readout_mitigation(num_shots,device,initial_layout):
 
     # Execute the calibration circuits
     meas_calibs_transpiled = transpile(meas_calibs, backend=device)
+    # TODO: split up experiments here
     qobj = assemble(meas_calibs_transpiled, backend=device, shots=num_shots)
     job = device.run(qobj)
-    # print(job.job_id())
     cal_results = job.result()
 
     meas_fitter = CompleteMeasFitter(cal_results, state_labels, qubit_list=qubit_list, circlabel='mcal')

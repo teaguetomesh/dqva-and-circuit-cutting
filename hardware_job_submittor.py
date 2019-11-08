@@ -6,6 +6,7 @@ from helper_fun import get_evaluator_info, evaluate_circ, apply_measurement, rev
 from time import time
 
 def submit_hardware_jobs(cluster_instances, evaluator_info):
+    # FIXME: split up hardware shots
     if evaluator_info['num_shots']>evaluator_info['device'].configuration().max_shots:
         print('During circuit evaluation on hardware, num_shots %.3e exceeded hardware max'%evaluator_info['num_shots'])
         evaluator_info['num_shots'] = evaluator_info['device'].configuration().max_shots
