@@ -31,7 +31,10 @@ def evaluate_full_circ(circ, device_name):
 
     print('Evaluating on hardware')
     evaluator_info = get_evaluator_info(circ=circ,device_name=device_name,
-    fields=['device','basis_gates','coupling_map','properties','initial_layout','num_shots','meas_filter'])
+    fields=['device','basis_gates','coupling_map','properties','initial_layout','num_shots'])
+    if np.power(2,len(circ.qubits))<evaluator_info['device'].configuration().max_experiments/3*2:
+        _evaluator_info = get_evaluator_info(circ=circ,device_name=device_name,fields=['meas_filter'])
+        evaluator_info.update(_evaluator_info)
     print('evaluator fields:',evaluator_info.keys(),'Saturated = %.3e shots'%evaluator_info['num_shots'])
     print('Execute on hardware',end=' ')
     execute_begin = time()

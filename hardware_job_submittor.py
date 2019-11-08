@@ -67,7 +67,7 @@ if __name__ == '__main__':
             print('Cluster %d has %d instances'%(cluster_idx,len(cluster_instances)))
             evaluator_info = get_evaluator_info(circ=cluster_circ,device_name=device_name,
             fields=['device','basis_gates','coupling_map','properties','initial_layout','noise_model','num_shots','meas_filter'])
-            max_experiments = int(evaluator_info['device'].configuration().max_experiments/2)
+            max_experiments = int(evaluator_info['device'].configuration().max_experiments/3*2)
             hw_begin = time()
             hw_probs = {}
             cluster_instances_batch = {}

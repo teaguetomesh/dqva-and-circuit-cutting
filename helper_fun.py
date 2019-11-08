@@ -136,6 +136,7 @@ def evaluate_circ(circ, backend, evaluator_info):
         job = evaluator_info['device'].run(qobj)
         hw_result = job.result()
         if 'meas_filter' in evaluator_info:
+            print('Mitigation for %d qubit circuit'%(len(circ.qubits)))
             mitigation_begin = time()
             mitigated_results = evaluator_info['meas_filter'].apply(hw_result)
             hw_counts = mitigated_results.get_counts(0)
@@ -293,7 +294,7 @@ def get_evaluator_info(circ,device_name,fields):
 
     if 'meas_filter' in fields:
         num_shots = find_saturated_shots(circ)
-        meas_filter = tensored_readout_mitigation(num_shots,device,initial_layout)
+        meas_filter = readout_mitigation(num_shots,device,initial_layout)
         _evaluator_info['meas_filter'] = meas_filter
         _evaluator_info['num_shots'] = num_shots
     elif 'num_shots' in fields:
