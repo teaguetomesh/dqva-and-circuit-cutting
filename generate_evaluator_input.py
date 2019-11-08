@@ -94,7 +94,6 @@ if __name__ == '__main__':
                     # print('Complete path map:')
                     # [print(x,complete_path_map[x]) for x in complete_path_map]
                     evaluator_input[(hw_max_qubit,i*j)] = dimension,num_shots,searcher_time,circ,fc_evaluations,clusters,complete_path_map
-                    print('-'*100)
             else:
                 circ = gen_supremacy(i,j,8)
                 searcher_begin = time()
@@ -110,5 +109,6 @@ if __name__ == '__main__':
                     fc_evaluations, num_shots = evaluate_full_circ(circ,device_name)
                     full_circs[(i*j)] = circ, fc_evaluations, num_shots
                     evaluator_input[(hw_max_qubit,i*j)] = dimension,num_shots,searcher_time,circ,fc_evaluations,clusters,complete_path_map
-                    print('-'*100)
-    pickle.dump(evaluator_input,open('{}/evaluator_input_{}.p'.format(dirname,device_name),'wb'))
+            pickle.dump(evaluator_input,open('{}/evaluator_input_{}.p'.format(dirname,device_name),'wb'))
+            print('Evaluator input cases:',evaluator_input.keys())
+            print('-'*100)

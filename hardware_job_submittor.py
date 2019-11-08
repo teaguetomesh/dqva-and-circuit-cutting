@@ -28,7 +28,11 @@ def submit_hardware_jobs(cluster_instances, evaluator_info):
 
     hw_counts = {}
     if 'meas_filter' in evaluator_info:
+        print('Mitigation for %d * %d-qubit circuit'%(len(cluster_instances),len(circ.qubits)))
+        mitigation_begin = time()
         mitigated_results = evaluator_info['meas_filter'].apply(hw_results)
+        mitigation_time = time() - mitigation_begin
+        print('Mitigation for %d * %d-qubit circuit took %.3e seconds'%(len(cluster_instances),len(circ.qubits),mitigation_time))
         for init_meas in mapped_circuits:
             hw_count = mitigated_results.get_counts(mapped_circuits[init_meas])
             hw_counts[init_meas] = hw_count
@@ -60,9 +64,12 @@ if __name__ == '__main__':
     print(device_name)
 
     job_submittor_input = pickle.load(open(args.input_file, 'rb' ))
+    job_submittor_output = {}
+    filename = args.input_file.replace('job_submittor_input','hardware_uniter_input')
 
     for case in job_submittor_input:
         print('Case ',case)
+        job_submittor_output[case] = job_submittor_input[case]
         for cluster_idx, cluster_circ in enumerate(job_submittor_input[case]['clusters']):
             cluster_instances = job_submittor_input[case]['all_cluster_prob'][cluster_idx]
             print('Cluster %d has %d instances'%(cluster_idx,len(cluster_instances)))
@@ -84,8 +91,8 @@ if __name__ == '__main__':
             hw_probs.update(hw_probs_batch)
             hw_elapsed = time()-hw_begin
             print('Hardware queue time = %.3e seconds'%hw_elapsed)
-            job_submittor_input[case]['all_cluster_prob'][cluster_idx] = hw_probs
+            job_submittor_output[case]['all_cluster_prob'][cluster_idx] = hw_probs
+        pickle.dump(job_submittor_output, open('%s'%filename,'wb'))
+        print('Job submittor output has %d cases'%len(job_submittor_output))
         print('*'*50)
     print('-'*100)
-    filename = args.input_file.replace('job_submittor_input','hardware_uniter_input')
-    pickle.dump(job_submittor_input, open('%s'%filename,'wb'))
