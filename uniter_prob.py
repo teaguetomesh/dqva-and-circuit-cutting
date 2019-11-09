@@ -283,6 +283,7 @@ if __name__ == '__main__':
     print('Reconstructing %s'%args.input_file)
 
     uniter_output = {}
+    filename = args.input_file.replace('uniter_input','plotter_input')
 
     evaluator_output = pickle.load(open(args.input_file, 'rb' ) )
     for case in evaluator_output:
@@ -313,6 +314,6 @@ if __name__ == '__main__':
         uniter_output[case]['classical_time'] = evaluator_output[case]['classical_time']
         uniter_output[case]['quantum_time'] = evaluator_output[case]['quantum_time']
         uniter_output[case]['uniter_time'] = uniter_time
+        print('Reconstruction output has %d cases'%(len(uniter_output)))
+        pickle.dump(uniter_output, open('%s'%filename,'wb'))
         print('-'*100)
-    filename = args.input_file.replace('uniter_input','plotter_input')
-    pickle.dump(uniter_output, open('%s'%filename,'ab'))
