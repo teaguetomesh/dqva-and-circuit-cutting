@@ -133,17 +133,30 @@ def evaluate_circ(circ, backend, evaluator_info):
         backend=evaluator_info['device'], basis_gates=evaluator_info['basis_gates'],
         coupling_map=evaluator_info['coupling_map'],backend_properties=evaluator_info['properties'],
         initial_layout=evaluator_info['initial_layout'])
-        qobj = assemble(mapped_circuit, backend=evaluator_info['device'], shots=evaluator_info['num_shots'])
-        job = evaluator_info['device'].run(qobj)
-        hw_result = job.result()
-        if 'meas_filter' in evaluator_info:
-            print('Mitigation for %d qubit circuit'%(len(circ.qubits)))
-            mitigation_begin = time()
-            mitigated_results = evaluator_info['meas_filter'].apply(hw_result)
-            hw_counts = mitigated_results.get_counts(0)
-            print('Mitigation for %d qubit circuit took %.3e seconds'%(len(circ.qubits),time()-mitigation_begin))
-        else:
-            hw_counts = hw_result.get_counts(qc)
+
+        device_max_shots = evaluator_info['device'].configuration().max_shots
+        remaining_shots = evaluator_info['num_shots']
+        hw_counts = {}
+        while remaining_shots>0:
+            batch_shots = min(remaining_shots,device_max_shots)
+            qobj = assemble(mapped_circuit, backend=evaluator_info['device'], shots=batch_shots)
+            job = evaluator_info['device'].run(qobj)
+            hw_result = job.result()
+            if 'meas_filter' in evaluator_info:
+                print('Mitigation for %d qubit circuit'%(len(circ.qubits)))
+                mitigation_begin = time()
+                mitigated_results = evaluator_info['meas_filter'].apply(hw_result)
+                hw_counts_batch = mitigated_results.get_counts(0)
+                print('Mitigation for %d qubit circuit took %.3e seconds'%(len(circ.qubits),time()-mitigation_begin))
+            else:
+                hw_counts_batch = hw_result.get_counts(qc)
+            for state in hw_counts_batch:
+                if state not in hw_counts:
+                    hw_counts[state] = hw_counts_batch[state]
+                else:
+                    hw_counts[state] += hw_counts_batch[state]
+            remaining_shots -= batch_shots
+        
         hw_prob = [0 for x in range(np.power(2,len(circ.qubits)))]
         for state in hw_counts:
             reversed_state = reverseBits(int(state,2),len(circ.qubits))

@@ -22,8 +22,7 @@ def submit_hardware_jobs(cluster_instances, evaluator_info):
     
     # FIXME: split up hardware shots
     device_max_shots = evaluator_info['device'].configuration().max_shots
-    num_shots = evaluator_info['num_shots']
-    remaining_shots = num_shots
+    remaining_shots = evaluator_info['num_shots']
     while remaining_shots>0:
         batch_shots = min(remaining_shots,device_max_shots)
         print('Submitted %d circuits to hardware, %d shots'%(len(cluster_instances),batch_shots))
@@ -53,7 +52,7 @@ def submit_hardware_jobs(cluster_instances, evaluator_info):
         hw_prob = [0 for x in range(np.power(2,len(circ.qubits)))]
         for state in hw_count:
             reversed_state = reverseBits(int(state,2),len(circ.qubits))
-            hw_prob[reversed_state] = hw_count[state]/num_shots
+            hw_prob[reversed_state] = hw_count[state]/evaluator_info['num_shots']
         hw_probs[init_meas] = hw_prob
     return hw_probs
 
