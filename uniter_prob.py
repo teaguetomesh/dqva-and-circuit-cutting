@@ -286,6 +286,7 @@ if __name__ == '__main__':
 
     evaluator_output = pickle.load(open(args.input_file, 'rb' ) )
     for case in evaluator_output:
+        print('case {}'.format(case))
         uniter_output[case] = {}
         num_shots = evaluator_output[case]['num_shots']
         searcher_time = evaluator_output[case]['searcher_time']
@@ -299,7 +300,7 @@ if __name__ == '__main__':
         uniter_begin = time()
         reconstructed_prob = reconstruct(complete_path_map=complete_path_map, full_circ=circ, cluster_circs=clusters, cluster_sim_probs=all_cluster_prob)
         uniter_time = time()-uniter_begin
-        print('case {} reconstruction distance ='.format(case),wasserstein_distance(fc_evaluations['sv_noiseless'],reconstructed_prob))
+        print('reconstruction distance = {}, time = {:.3e}'.format(wasserstein_distance(fc_evaluations['sv_noiseless'],reconstructed_prob),uniter_time))
     
         evaluations = fc_evaluations
         evaluations['cutting'] = reconstructed_prob
