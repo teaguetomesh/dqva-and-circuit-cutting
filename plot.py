@@ -66,7 +66,7 @@ if __name__ == '__main__':
 
                 # FIXME: percent change calculations are wrong
                 case_percent_change = 100*(case_hw_fc - case_cutting)/(case_hw_fc - case_ground_truth)
-                print('case {}: plotted calculated: {}, uniter calculated: {}, reconstruction time: {}'.format(case,
+                print('case {}: plotter calculated: {}, uniter calculated: {}, reconstruction time: {:.3e}'.format(case,
                 case_percent_change,plotter_input[case]['percent_reduction'],plotter_input[case]['uniter_time']))
                 
                 ground_truth_avg[case] += case_ground_truth

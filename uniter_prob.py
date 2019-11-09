@@ -9,6 +9,7 @@ from qiskit.quantum_info.states.measures import state_fidelity
 from scipy.stats import wasserstein_distance
 import argparse
 from helper_fun import cross_entropy
+import copy
 
 def find_cuts_pairs(complete_path_map):
     O_rho_pairs = []
@@ -303,6 +304,7 @@ if __name__ == '__main__':
         reconstructed_prob = reconstruct(complete_path_map=complete_path_map, full_circ=circ, cluster_circs=clusters, cluster_sim_probs=all_cluster_prob)
         uniter_time = time()-uniter_begin
         evaluations['cutting'] = reconstructed_prob
+        
         ground_truth_ce = cross_entropy(target=evaluations['sv_noiseless'],obs=evaluations['sv_noiseless'])
         fc_ce = cross_entropy(target=evaluations['sv_noiseless'],obs=evaluations['hw'])
         cutting_ce = cross_entropy(target=evaluations['sv_noiseless'],obs=evaluations['cutting'])
@@ -313,12 +315,14 @@ if __name__ == '__main__':
         uniter_output[case]['num_shots'] = num_shots
         uniter_output[case]['circ'] = circ
         uniter_output[case]['clusters'] = clusters
-        uniter_output[case]['evaluations'] = evaluations
+        uniter_output[case]['evaluations'] = copy.deepcopy(evaluations)
         uniter_output[case]['searcher_time'] = searcher_time
         uniter_output[case]['classical_time'] = evaluator_output[case]['classical_time']
         uniter_output[case]['quantum_time'] = evaluator_output[case]['quantum_time']
         uniter_output[case]['uniter_time'] = uniter_time
         uniter_output[case]['percent_reduction'] = percent_change
-        print('Reconstruction output has %d cases'%(len(uniter_output)))
         pickle.dump(uniter_output, open('%s'%filename,'wb'))
+        print('Reconstruction output has %d cases'%(len(uniter_output)))
         print('-'*100)
+        if len(uniter_output) == 2:
+            break
