@@ -63,7 +63,7 @@ if __name__ == '__main__':
 
     # NOTE: toggle circuits to benchmark
     # dimension_l = [[2,2],[2,3],[3,3],[2,5],[3,4],[4,4]]
-    dimension_l = [[2,5],[3,4],[4,4]]
+    dimension_l = [[4,4]]
     dirname = './benchmark_data'
     if not os.path.exists(dirname):
         os.mkdir(dirname)
