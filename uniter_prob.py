@@ -312,15 +312,15 @@ if __name__ == '__main__':
         distance = wasserstein_distance(evaluations['sv_noiseless'],evaluations['cutting'])
         print('reconstruction distance = {}, percent reduction = {}, time = {:.3e}'.format(distance,percent_change,uniter_time))
 
-        uniter_output[case]['num_shots'] = num_shots
-        uniter_output[case]['circ'] = circ
-        uniter_output[case]['clusters'] = clusters
+        uniter_output[case]['num_shots'] = copy.deepcopy(num_shots)
+        uniter_output[case]['circ'] = copy.deepcopy(circ)
+        uniter_output[case]['clusters'] = copy.deepcopy(clusters)
         uniter_output[case]['evaluations'] = copy.deepcopy(evaluations)
-        uniter_output[case]['searcher_time'] = searcher_time
-        uniter_output[case]['classical_time'] = evaluator_output[case]['classical_time']
-        uniter_output[case]['quantum_time'] = evaluator_output[case]['quantum_time']
-        uniter_output[case]['uniter_time'] = uniter_time
-        uniter_output[case]['percent_reduction'] = percent_change
+        uniter_output[case]['searcher_time'] = copy.deepcopy(searcher_time)
+        uniter_output[case]['classical_time'] = copy.deepcopy(evaluator_output[case]['classical_time'])
+        uniter_output[case]['quantum_time'] = copy.deepcopy(evaluator_output[case]['quantum_time'])
+        uniter_output[case]['uniter_time'] = copy.deepcopy(uniter_time)
+        uniter_output[case]['percent_reduction'] = copy.deepcopy(percent_change)
         pickle.dump(uniter_output, open('%s'%filename,'wb'))
         print('Reconstruction output has %d cases'%(len(uniter_output)))
         print('-'*100)

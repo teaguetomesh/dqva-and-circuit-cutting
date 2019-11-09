@@ -4,6 +4,7 @@ import argparse
 from qiskit.compiler import transpile, assemble
 from helper_fun import get_evaluator_info, apply_measurement, reverseBits
 from time import time
+import copy
 
 def submit_hardware_jobs(cluster_instances, evaluator_info):
     mapped_circuits = {}
@@ -73,7 +74,7 @@ if __name__ == '__main__':
 
     for case in job_submittor_input:
         print('Case ',case)
-        job_submittor_output[case] = job_submittor_input[case]
+        job_submittor_output[case] = copy.deepcopy(job_submittor_input[case])
         for cluster_idx, cluster_circ in enumerate(job_submittor_input[case]['clusters']):
             cluster_instances = job_submittor_input[case]['all_cluster_prob'][cluster_idx]
             print('Cluster %d has %d instances'%(cluster_idx,len(cluster_instances)))
@@ -86,16 +87,18 @@ if __name__ == '__main__':
             for init_meas in cluster_instances:
                 if len(cluster_instances_batch)==max_experiments:
                     hw_probs_batch = submit_hardware_jobs(cluster_instances=cluster_instances_batch,evaluator_info=evaluator_info)
-                    hw_probs.update(hw_probs_batch)
+                    hw_probs_batch_copy = copy.deepcopy(hw_probs_batch)
+                    hw_probs.update(hw_probs_batch_copy)
                     cluster_instances_batch = {}
                     cluster_instances_batch[init_meas] = cluster_instances[init_meas]
                 else:
                     cluster_instances_batch[init_meas] = cluster_instances[init_meas]
             hw_probs_batch = submit_hardware_jobs(cluster_instances=cluster_instances_batch,evaluator_info=evaluator_info)
-            hw_probs.update(hw_probs_batch)
+            hw_probs_batch_copy = copy.deepcopy(hw_probs_batch)
+            hw_probs.update(hw_probs_batch_copy)
             hw_elapsed = time()-hw_begin
             print('Hardware queue time = %.3e seconds'%hw_elapsed)
-            job_submittor_output[case]['all_cluster_prob'][cluster_idx] = hw_probs
+            job_submittor_output[case]['all_cluster_prob'][cluster_idx] = copy.deepcopy(hw_probs)
         pickle.dump(job_submittor_output, open('%s'%filename,'wb'))
         print('Job submittor output has %d cases'%len(job_submittor_output))
         print('*'*50)
