@@ -11,6 +11,7 @@ do
     
     # mpiexec -n 5 python evaluator_prob.py --input-file $EVALUATOR_FILE --saturated-shots --evaluation-method noisy_qasm_simulator
     
+    # TODO: add more exact file destinations
     mpiexec -n 2 python evaluator_prob.py --input-file $EVALUATOR_FILE --saturated-shots --evaluation-method hardware
     echo "Running job submittor"
     JOB_SUBMITTOR_FILE=./benchmark_data/job_submittor_input_*.p

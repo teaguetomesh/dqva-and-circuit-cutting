@@ -58,6 +58,8 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     device_name = args.device_name
+    device_properties = get_evaluator_info(circ=None,device_name=device_name,fields=['properties'])
+    device_size = len(device_properties['properties'].qubits)
 
     # NOTE: toggle circuits to benchmark
     # dimension_l = [[2,2],[2,3],[3,3],[2,5],[3,4],[4,4]]
@@ -71,7 +73,7 @@ if __name__ == '__main__':
     for hw_max_qubit in range(args.min_qubit,args.max_qubit+1):
         for dimension in dimension_l:
             i,j = dimension
-            if i*j<=hw_max_qubit:
+            if i*j<=hw_max_qubit or i*j>device_size:
                 continue
             
             print('-'*100)

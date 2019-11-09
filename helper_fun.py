@@ -280,17 +280,18 @@ def get_evaluator_info(circ,device_name,fields):
     coupling_map = device.configuration().coupling_map
     noise_model = noise.device.basic_device_noise_model(properties)
     basis_gates = noise_model.basis_gates
-    dag = circuit_to_dag(circ)
-    noise_mapper = NoiseAdaptiveLayout(properties)
-    noise_mapper.run(dag)
-    initial_layout = noise_mapper.property_set['layout']
-    
     _evaluator_info = {'device':device,
     'properties':properties,
     'coupling_map':coupling_map,
     'noise_model':noise_model,
-    'basis_gates':basis_gates,
-    'initial_layout':initial_layout}
+    'basis_gates':basis_gates}
+    
+    if 'initial_layout' in fields:
+        dag = circuit_to_dag(circ)
+        noise_mapper = NoiseAdaptiveLayout(properties)
+        noise_mapper.run(dag)
+        initial_layout = noise_mapper.property_set['layout']
+        _evaluator_info['initial_layout'] = initial_layout
 
     if 'meas_filter' in fields:
         num_shots = find_saturated_shots(circ)
