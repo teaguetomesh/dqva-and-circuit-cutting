@@ -294,7 +294,7 @@ if __name__ == '__main__':
         searcher_time = evaluator_output[case]['searcher_time']
         circ = evaluator_output[case]['circ']
         clusters = evaluator_output[case]['clusters']
-        fc_evaluations = evaluator_output[case]['fc_evaluations']
+        evaluations = evaluator_output[case]['fc_evaluations']
         clusters = evaluator_output[case]['clusters']
         complete_path_map = evaluator_output[case]['complete_path_map']
         all_cluster_prob = evaluator_output[case]['all_cluster_prob']
@@ -302,15 +302,13 @@ if __name__ == '__main__':
         uniter_begin = time()
         reconstructed_prob = reconstruct(complete_path_map=complete_path_map, full_circ=circ, cluster_circs=clusters, cluster_sim_probs=all_cluster_prob)
         uniter_time = time()-uniter_begin
-        ground_truth_ce = cross_entropy(target=fc_evaluations['sv_noiseless'],obs=fc_evaluations['sv_noiseless'])
-        fc_ce = cross_entropy(target=fc_evaluations['sv_noiseless'],obs=fc_evaluations['hw'])
-        cutting_ce = cross_entropy(target=fc_evaluations['sv_noiseless'],obs=reconstructed_prob)
-        percent_change = 100*(fc_ce-cutting_ce)/(fc_ce-ground_truth_ce)
-        distance = wasserstein_distance(fc_evaluations['sv_noiseless'],reconstructed_prob)
-        print('reconstruction distance = {}, percent reduction = {}, time = {:.3e}'.format(distance,percent_change,uniter_time))
-    
-        evaluations = fc_evaluations
         evaluations['cutting'] = reconstructed_prob
+        ground_truth_ce = cross_entropy(target=evaluations['sv_noiseless'],obs=evaluations['sv_noiseless'])
+        fc_ce = cross_entropy(target=evaluations['sv_noiseless'],obs=evaluations['hw'])
+        cutting_ce = cross_entropy(target=evaluations['sv_noiseless'],obs=evaluations['cutting'])
+        percent_change = 100*(fc_ce-cutting_ce)/(fc_ce-ground_truth_ce)
+        distance = wasserstein_distance(evaluations['sv_noiseless'],evaluations['cutting'])
+        print('reconstruction distance = {}, percent reduction = {}, time = {:.3e}'.format(distance,percent_change,uniter_time))
 
         uniter_output[case]['num_shots'] = num_shots
         uniter_output[case]['circ'] = circ
