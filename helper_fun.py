@@ -192,7 +192,6 @@ def readout_mitigation(num_shots,device,initial_layout):
 
     # Execute the calibration circuits
     meas_calibs_transpiled = transpile(meas_calibs, backend=device)
-    # TODO: split up experiments here
     qobj = assemble(meas_calibs_transpiled, backend=device, shots=num_shots)
     job = device.run(qobj)
     cal_results = job.result()

@@ -2,7 +2,7 @@ import numpy as np
 import pickle
 import argparse
 from qiskit.compiler import transpile, assemble
-from helper_fun import get_evaluator_info, evaluate_circ, apply_measurement, reverseBits
+from helper_fun import get_evaluator_info, apply_measurement, reverseBits
 from time import time
 
 def submit_hardware_jobs(cluster_instances, evaluator_info):
