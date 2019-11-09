@@ -40,7 +40,8 @@ if __name__ == '__main__':
         cutting_avg = initialize_dict(plotter_inputs[0].keys())
         percent_change_avg = initialize_dict(plotter_inputs[0].keys())
 
-        for plotter_input in plotter_inputs:
+        for i, plotter_input in enumerate(plotter_inputs):
+            print('repetition ',i)
             # Iterate over repetitions
             for case in plotter_input:
                 searcher_time_avg[case] += plotter_input[case]['searcher_time']
@@ -63,7 +64,9 @@ if __name__ == '__main__':
                 case_cutting = cross_entropy(target=plotter_input[case]['evaluations']['sv_noiseless'],
                 obs= plotter_input[case]['evaluations']['cutting'])
 
+                # FIXME: percent change calculations are wrong
                 case_percent_change = 100*(case_hw_fc - case_cutting)/(case_hw_fc - case_ground_truth)
+                print('case',case,'plotter calculated:',case_percent_change,'uniter calculated:',plotter_input[case]['percent_reduction'])
                 
                 ground_truth_avg[case] += case_ground_truth
                 qasm_avg[case] += case_qasm
@@ -71,6 +74,9 @@ if __name__ == '__main__':
                 hw_fc_avg[case] += case_hw_fc
                 cutting_avg[case] += case_cutting
                 percent_change_avg[case] += case_percent_change
+
+                # print('case {} reduction:{},time:{}'.format(case,case_percent_change,plotter_input[case]['uniter_time']))
+            print('*'*50)
         
         num_repetitions = len(plotter_inputs)
         for dictionary in (searcher_time_avg,classical_time_avg,quantum_time_avg,uniter_time_avg,ground_truth_avg,qasm_avg,qasm_noise_avg,hw_fc_avg,cutting_avg,percent_change_avg):

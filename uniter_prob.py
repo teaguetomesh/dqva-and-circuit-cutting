@@ -8,6 +8,7 @@ import progressbar as pb
 from qiskit.quantum_info.states.measures import state_fidelity
 from scipy.stats import wasserstein_distance
 import argparse
+from helper_fun import cross_entropy
 
 def find_cuts_pairs(complete_path_map):
     O_rho_pairs = []
@@ -301,7 +302,12 @@ if __name__ == '__main__':
         uniter_begin = time()
         reconstructed_prob = reconstruct(complete_path_map=complete_path_map, full_circ=circ, cluster_circs=clusters, cluster_sim_probs=all_cluster_prob)
         uniter_time = time()-uniter_begin
-        print('reconstruction distance = {}, time = {:.3e}'.format(wasserstein_distance(fc_evaluations['sv_noiseless'],reconstructed_prob),uniter_time))
+        ground_truth_ce = cross_entropy(target=fc_evaluations['sv_noiseless'],obs=fc_evaluations['sv_noiseless'])
+        fc_ce = cross_entropy(target=fc_evaluations['sv_noiseless'],obs=fc_evaluations['hw'])
+        cutting_ce = cross_entropy(target=fc_evaluations['sv_noiseless'],obs=reconstructed_prob)
+        percent_change = 100*(fc_ce-cutting_ce)/(fc_ce-ground_truth_ce)
+        distance = wasserstein_distance(fc_evaluations['sv_noiseless'],reconstructed_prob)
+        print('reconstruction distance = {}, percent reduction = {}, time = {:.3e}'.format(distance,percent_change,uniter_time))
     
         evaluations = fc_evaluations
         evaluations['cutting'] = reconstructed_prob
@@ -314,6 +320,7 @@ if __name__ == '__main__':
         uniter_output[case]['classical_time'] = evaluator_output[case]['classical_time']
         uniter_output[case]['quantum_time'] = evaluator_output[case]['quantum_time']
         uniter_output[case]['uniter_time'] = uniter_time
+        uniter_output[case]['percent_reduction'] = percent_change
         print('Reconstruction output has %d cases'%(len(uniter_output)))
         pickle.dump(uniter_output, open('%s'%filename,'wb'))
         print('-'*100)
