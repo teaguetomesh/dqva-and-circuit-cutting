@@ -6,12 +6,6 @@ from helper_fun import get_evaluator_info, apply_measurement, reverseBits
 from time import time
 
 def submit_hardware_jobs(cluster_instances, evaluator_info):
-    # FIXME: split up hardware shots
-    if evaluator_info['num_shots']>evaluator_info['device'].configuration().max_shots:
-        print('During circuit evaluation on hardware, num_shots %.3e exceeded hardware max'%evaluator_info['num_shots'])
-        evaluator_info['num_shots'] = evaluator_info['device'].configuration().max_shots
-    
-    print('Submitted %d circuits to hardware'%len(cluster_instances))
     mapped_circuits = {}
     for init_meas in cluster_instances:
         circ = cluster_instances[init_meas]
@@ -22,24 +16,35 @@ def submit_hardware_jobs(cluster_instances, evaluator_info):
         initial_layout=evaluator_info['initial_layout'])
         mapped_circuits[init_meas] = mapped_circuit
 
-    qobj = assemble(list(mapped_circuits.values()), backend=evaluator_info['device'], shots=evaluator_info['num_shots'])
-    job = evaluator_info['device'].run(qobj)
-    hw_results = job.result()
-
     hw_counts = {}
-    if 'meas_filter' in evaluator_info:
-        print('Mitigation for %d * %d-qubit circuit'%(len(cluster_instances),len(circ.qubits)))
-        mitigation_begin = time()
-        mitigated_results = evaluator_info['meas_filter'].apply(hw_results)
-        mitigation_time = time() - mitigation_begin
-        print('Mitigation for %d * %d-qubit circuit took %.3e seconds'%(len(cluster_instances),len(circ.qubits),mitigation_time))
-        for init_meas in mapped_circuits:
-            hw_count = mitigated_results.get_counts(mapped_circuits[init_meas])
-            hw_counts[init_meas] = hw_count
-    else:
-        for init_meas in mapped_circuits:
-            hw_count = hw_results.get_counts(mapped_circuits[init_meas])
-            hw_counts[init_meas] = hw_count
+    for init_meas in mapped_circuits:
+        hw_counts[init_meas] = np.array([0 for i in range(np.power(2,len(circ.qubits)))])
+    
+    # FIXME: split up hardware shots
+    device_max_shots = evaluator_info['device'].configuration().max_shots
+    num_shots = evaluator_info['num_shots']
+    remaining_shots = num_shots
+    while remaining_shots>0:
+        batch_shots = min(remaining_shots,device_max_shots)
+        print('Submitted %d circuits to hardware, %d shots'%(len(cluster_instances),batch_shots))
+        qobj = assemble(list(mapped_circuits.values()), backend=evaluator_info['device'], shots=batch_shots)
+        job = evaluator_info['device'].run(qobj)
+        hw_results = job.result()
+
+        if 'meas_filter' in evaluator_info:
+            print('Mitigation for %d * %d-qubit circuit'%(len(cluster_instances),len(circ.qubits)))
+            mitigation_begin = time()
+            mitigated_results = evaluator_info['meas_filter'].apply(hw_results)
+            mitigation_time = time() - mitigation_begin
+            print('Mitigation for %d * %d-qubit circuit took %.3e seconds'%(len(cluster_instances),len(circ.qubits),mitigation_time))
+            for init_meas in mapped_circuits:
+                hw_count = mitigated_results.get_counts(mapped_circuits[init_meas])
+                hw_counts[init_meas] += hw_count
+        else:
+            for init_meas in mapped_circuits:
+                hw_count = hw_results.get_counts(mapped_circuits[init_meas])
+                hw_counts[init_meas] += hw_count
+        remaining_shots -= batch_shots
     
     hw_probs = {}
     for init_meas in hw_counts:
@@ -48,7 +53,7 @@ def submit_hardware_jobs(cluster_instances, evaluator_info):
         hw_prob = [0 for x in range(np.power(2,len(circ.qubits)))]
         for state in hw_count:
             reversed_state = reverseBits(int(state,2),len(circ.qubits))
-            hw_prob[reversed_state] = hw_count[state]/evaluator_info['num_shots']
+            hw_prob[reversed_state] = hw_count[state]/num_shots
         hw_probs[init_meas] = hw_prob
     return hw_probs
 
