@@ -1,6 +1,6 @@
 # NOTE: toggle here to change max qc size, max clusters
 echo "Generate evaluator input"
-python generate_evaluator_input.py --min-qubit 6 --max-qubit 6 --max-clusters 5 --device-name ibmq_boeblingen
+python generate_evaluator_input.py --min-qubit 3 --max-qubit 9 --max-clusters 5 --device-name ibmq_boeblingen
 
 # NOTE: toggle here to change cluster shots
 echo "Running evaluator"
