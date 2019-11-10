@@ -62,8 +62,8 @@ if __name__ == '__main__':
     device_size = len(device_properties['properties'].qubits)
 
     # NOTE: toggle circuits to benchmark
-    # dimension_l = [[2,2],[2,3],[3,3],[2,5],[3,4],[4,4]]
-    dimension_l = [[4,4]]
+    # dimension_l = [[2,2],[2,3],[3,3],[2,5],[3,4],[4,4],[4,5]]
+    dimension_l = [[2,4]]
     dirname = './benchmark_data'
     if not os.path.exists(dirname):
         os.mkdir(dirname)

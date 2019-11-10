@@ -21,6 +21,8 @@ if __name__ == '__main__':
                 for job in x.jobs():
                     if job.status() != JobStatus['RUNNING']:
                         print(job.creation_date(),job.status(),job.error_message(),job.job_id())
-                    if job.status() == JobStatus['RUNNING'] and args.cancel_jobs:
-                        # job.cancel()
-                        print('cancelled')
+                    else:
+                        print(job.creation_date(),job.status(),job.job_id())
+                        if args.cancel_jobs:
+                            job.cancel()
+                            print('cancelled')

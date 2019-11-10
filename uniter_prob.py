@@ -278,16 +278,39 @@ def reconstruct(complete_path_map, full_circ, cluster_circs, cluster_sim_probs):
     # print('reconstruction len = ', len(reconstructed_prob),'probabilities sum = ', sum(reconstructed_prob))
     return reconstructed_prob
 
+def get_filename(device_name,saturated_shots,evaluation_method):
+    filename = None
+    if evaluation_method == 'hardware':
+        filename = './benchmark_data/hardware_uniter_input_{}'.format(device_name)
+        if saturated_shots:
+            filename = filename + '_saturated.p'
+        else:
+            filename = filename + '.p'
+    elif evaluation_method == 'statevector_simulator':
+        filename = './benchmark_data/classical_uniter_input_{}.p'.format(device_name)
+    elif evaluation_method == 'noisy_qasm_simulator':
+        filename = './benchmark_data/quantum_uniter_input_{}'.format(device_name)
+        if saturated_shots:
+            filename = filename + '_saturated.p'
+        else:
+            filename = filename + '.p'
+    else:
+        raise Exception('Illegal evaluation method:',evaluation_method)
+    return filename
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Uniter')
-    parser.add_argument('--input-file', metavar='S', type=str,help='which evaluator output file to run')
+    parser.add_argument('--device-name', metavar='S', type=str,help='which evaluator device output file to reconstruct')
+    parser.add_argument('--evaluation-method', metavar='S', type=str,help='which evaluator backend file to reconstruct')
+    parser.add_argument('--saturated-shots',action="store_true",help='run saturated number of cluster shots')
     args = parser.parse_args()
-    print('Reconstructing %s'%args.input_file)
+
+    input_file = get_filename(args.device_name,args.saturated_shots,args.evaluation_method)
+    filename = input_file.replace('uniter_input','plotter_input')
+    print('Reconstructing %s'%input_file)
 
     uniter_output = {}
-    filename = args.input_file.replace('uniter_input','plotter_input')
-
-    evaluator_output = pickle.load(open(args.input_file, 'rb' ) )
+    evaluator_output = pickle.load(open(input_file, 'rb' ) )
     for case in evaluator_output:
         print('case {}'.format(case))
         uniter_output[case] = {}

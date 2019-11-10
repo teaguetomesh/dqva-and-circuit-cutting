@@ -59,18 +59,21 @@ def submit_hardware_jobs(cluster_instances, evaluator_info):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='MPI evaluator.')
-    parser.add_argument('--input-file', metavar='S', type=str,help='which evaluator input file to run')
-    parser.add_argument('--saturated-shots',action="store_true",help='run saturated number of cluster shots')
+    parser.add_argument('--device-name', metavar='S', type=str,help='which device to submit jobs to')
+    parser.add_argument('--saturated-shots',action="store_true",help='run saturated number of cluster shots?')
     args = parser.parse_args()
 
-    s = '_'
-    device_name = args.input_file.split('job_submittor_input_')[1].split('.p')[0].split('_')[:-1]
-    device_name = s.join(device_name)
+    device_name = args.device_name
     print(device_name)
+    input_file = './benchmark_data/job_submittor_input_{}'.format(device_name)
+    if args.saturated_shots:
+        input_file = input_file+'_saturated.p'
+    else:
+        input_file = input_file+'.p'
 
-    job_submittor_input = pickle.load(open(args.input_file, 'rb' ))
+    job_submittor_input = pickle.load(open(input_file, 'rb' ))
     job_submittor_output = {}
-    filename = args.input_file.replace('job_submittor_input','hardware_uniter_input')
+    filename = input_file.replace('job_submittor_input','hardware_uniter_input')
 
     for case in job_submittor_input:
         print('Case ',case)

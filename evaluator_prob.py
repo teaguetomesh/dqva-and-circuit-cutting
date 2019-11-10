@@ -150,7 +150,7 @@ def get_filename(input_file,saturated_shots,evaluation_method):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='MPI evaluator.')
-    parser.add_argument('--input-file', metavar='S', type=str,help='which evaluator input file to run')
+    parser.add_argument('--device-name', metavar='S', type=str,help='which evaluator device input file to run')
     parser.add_argument('--saturated-shots',action="store_true",help='run saturated number of cluster shots')
     parser.add_argument('--evaluation-method', metavar='S', type=str,help='which evaluator backend to use')
     args = parser.parse_args()
@@ -161,8 +161,9 @@ if __name__ == '__main__':
 
     num_workers = size - 1
 
-    evaluator_input = pickle.load(open(args.input_file, 'rb' ))
-    device_name = args.input_file.split('evaluator_input_')[1].split('.p')[0]
+    input_file = './benchmark_data/evaluator_input_{}.p'.format(args.device_name)
+    evaluator_input = pickle.load(open(input_file, 'rb' ))
+    device_name = args.device_name
 
     if rank == size-1:
         evaluator_output = {}
@@ -190,9 +191,7 @@ if __name__ == '__main__':
                 else:
                     for cluster_idx in evaluator_output[key]['all_cluster_prob']:
                         evaluator_output[key]['all_cluster_prob'][cluster_idx].update(rank_results[key][cluster_idx])
-        # quantum_eval = sum([evaluator_output[key]['quantum_time'] for key in evaluator_output])>0
-        # classical_eval = sum([evaluator_output[key]['classical_time'] for key in evaluator_output])>0
-        filename = get_filename(input_file=args.input_file,saturated_shots=args.saturated_shots,evaluation_method=args.evaluation_method)
+        filename = get_filename(input_file=input_file,saturated_shots=args.saturated_shots,evaluation_method=args.evaluation_method)
         pickle.dump(evaluator_output, open('%s'%filename,'wb'))
         print('-'*100)
     else:

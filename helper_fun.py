@@ -307,6 +307,11 @@ def get_evaluator_info(circ,device_name,fields):
         _evaluator_info['initial_layout'] = initial_layout
 
     if 'meas_filter' in fields:
+        dag = circuit_to_dag(circ)
+        noise_mapper = NoiseAdaptiveLayout(properties)
+        noise_mapper.run(dag)
+        initial_layout = noise_mapper.property_set['layout']
+        _evaluator_info['initial_layout'] = initial_layout
         num_shots = find_saturated_shots(circ)
         meas_filter = readout_mitigation(num_shots,device,initial_layout)
         _evaluator_info['meas_filter'] = meas_filter
