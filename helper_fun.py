@@ -124,9 +124,6 @@ def evaluate_circ(circ, backend, evaluator_info):
         return noisy_prob
     elif backend == 'hardware':
         # TODO: split up shots here
-        if evaluator_info['num_shots']>evaluator_info['device'].configuration().max_shots:
-            print('During circuit evaluation on hardware, num_shots %.3e exceeded hardware max'%evaluator_info['num_shots'])
-            evaluator_info['num_shots'] = evaluator_info['device'].configuration().max_shots
         qc=apply_measurement(circ)
 
         mapped_circuit = transpile(qc,

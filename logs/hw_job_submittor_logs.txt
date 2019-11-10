@@ -1,0 +1,94 @@
+ibmq_boeblingen
+Case  (3, 4)
+Cluster 0 has 18 instances
+Calculating measurement filter, 20-qubit calibration circuits * 8 * 2.048e+03 shots. 1.171e+02 seconds
+Submitted 18 circuits to hardware, 2048 shots
+Mitigation for 18 * 3-qubit circuit
+Mitigation for 18 * 3-qubit circuit took 3.564e-01 seconds
+Hardware queue time = 6.877e+01 seconds
+Cluster 1 has 18 instances
+Calculating measurement filter, 20-qubit calibration circuits * 8 * 2.048e+03 shots. 1.029e+02 seconds
+Submitted 18 circuits to hardware, 2048 shots
+Mitigation for 18 * 3-qubit circuit
+Mitigation for 18 * 3-qubit circuit took 3.527e-01 seconds
+Hardware queue time = 6.810e+01 seconds
+Job submittor output has 1 cases
+**************************************************
+Case  (3, 6)
+Cluster 0 has 9 instances
+Calculating measurement filter, 20-qubit calibration circuits * 4 * 2.048e+03 shots. 5.303e+01 seconds
+Submitted 9 circuits to hardware, 2048 shots
+Mitigation for 9 * 2-qubit circuit
+Mitigation for 9 * 2-qubit circuit took 3.614e-01 seconds
+Hardware queue time = 5.812e+01 seconds
+Cluster 1 has 108 instances
+Calculating measurement filter, 20-qubit calibration circuits * 8 * 2.048e+03 shots. 5.671e+01 seconds
+Submitted 108 circuits to hardware, 2048 shots
+Mitigation for 108 * 3-qubit circuit
+Mitigation for 108 * 3-qubit circuit took 9.078e-01 seconds
+Hardware queue time = 1.694e+02 seconds
+Cluster 2 has 18 instances
+Calculating measurement filter, 20-qubit calibration circuits * 8 * 2.048e+03 shots. 5.567e+01 seconds
+Submitted 18 circuits to hardware, 2048 shots
+Mitigation for 18 * 3-qubit circuit
+Mitigation for 18 * 3-qubit circuit took 3.420e-01 seconds
+Hardware queue time = 6.917e+01 seconds
+Cluster 3 has 108 instances
+Calculating measurement filter, 20-qubit calibration circuits * 8 * 2.048e+03 shots. 5.683e+01 seconds
+Submitted 108 circuits to hardware, 2048 shots
+Mitigation for 108 * 3-qubit circuit
+Mitigation for 108 * 3-qubit circuit took 9.101e-01 seconds
+Hardware queue time = 1.669e+02 seconds
+Job submittor output has 2 cases
+**************************************************
+Case  (4, 6)
+Cluster 0 has 9 instances
+Calculating measurement filter, 20-qubit calibration circuits * 16 * 2.048e+03 shots. 6.592e+01 seconds
+Submitted 9 circuits to hardware, 2048 shots
+Mitigation for 9 * 4-qubit circuit
+Mitigation for 9 * 4-qubit circuit took 3.532e-01 seconds
+Hardware queue time = 5.881e+01 seconds
+Cluster 1 has 36 instances
+Calculating measurement filter, 20-qubit calibration circuits * 16 * 2.048e+03 shots. 6.411e+01 seconds
+Submitted 36 circuits to hardware, 2048 shots
+Mitigation for 36 * 4-qubit circuit
+Mitigation for 36 * 4-qubit circuit took 4.707e-01 seconds
+Hardware queue time = 8.845e+01 seconds
+Job submittor output has 3 cases
+**************************************************
+Case  (4, 9)
+Cluster 0 has 54 instances
+Calculating measurement filter, 20-qubit calibration circuits * 16 * 2.048e+03 shots. 6.700e+01 seconds
+Submitted 54 circuits to hardware, 2048 shots
+Mitigation for 54 * 4-qubit circuit
+Mitigation for 54 * 4-qubit circuit took 5.858e-01 seconds
+Hardware queue time = 1.088e+02 seconds
+Cluster 1 has 216 instances
+Calculating measurement filter, 20-qubit calibration circuits * 16 * 2.048e+03 shots. 6.680e+01 seconds
+Submitted 216 circuits to hardware, 2048 shots
+Mitigation for 216 * 4-qubit circuit
+Mitigation for 216 * 4-qubit circuit took 2.787e+00 seconds
+Hardware queue time = 5.649e+02 seconds
+Cluster 2 has 108 instances
+Calculating measurement filter, 20-qubit calibration circuits * 8 * 2.048e+03 shots. 5.142e+01 seconds
+Submitted 108 circuits to hardware, 2048 shots
+Mitigation for 108 * 3-qubit circuit
+Mitigation for 108 * 3-qubit circuit took 9.000e-01 seconds
+Hardware queue time = 1.694e+02 seconds
+Cluster 3 has 27 instances
+Calculating measurement filter, 20-qubit calibration circuits * 16 * 2.048e+03 shots. 6.682e+01 seconds
+Submitted 27 circuits to hardware, 2048 shots
+Mitigation for 27 * 4-qubit circuit
+Mitigation for 27 * 4-qubit circuit took 4.580e-01 seconds
+Hardware queue time = 7.775e+01 seconds
+Job submittor output has 4 cases
+**************************************************
+Case  (4, 10)
+Cluster 0 has 54 instances
+Calculating measurement filter, 20-qubit calibration circuits * 16 * 2.048e+03 shots. 6.614e+01 seconds
+Submitted 54 circuits to hardware, 2048 shots
+Mitigation for 54 * 4-qubit circuit
+Mitigation for 54 * 4-qubit circuit took 5.680e-01 seconds
+Hardware queue time = 1.087e+02 seconds
+Cluster 1 has 162 instances
+Calculating measurement filter, 20-qubit calibration circuits * 16 * 2.048e+03 shots. 
