@@ -5,6 +5,15 @@ from qiskit.compiler import transpile, assemble
 from helper_fun import get_evaluator_info, apply_measurement, reverseBits
 from time import time
 import copy
+from qiskit import Aer
+
+def update_counts(cumulated, batch):
+    for state in batch:
+        if state not in cumulated:
+            cumulated[state] = batch[state]
+        else:
+            cumulated[state] = cumulated[state] + batch[state]
+    return cumulated
 
 def submit_hardware_jobs(cluster_instances, evaluator_info):
     mapped_circuits = {}
@@ -19,7 +28,7 @@ def submit_hardware_jobs(cluster_instances, evaluator_info):
 
     hw_counts = {}
     for init_meas in mapped_circuits:
-        hw_counts[init_meas] = np.array([0 for i in range(np.power(2,len(circ.qubits)))])
+        hw_counts[init_meas] = {}
     
     # FIXME: split up hardware shots
     device_max_shots = evaluator_info['device'].configuration().max_shots
@@ -39,11 +48,13 @@ def submit_hardware_jobs(cluster_instances, evaluator_info):
             print('Mitigation for %d * %d-qubit circuit took %.3e seconds'%(len(cluster_instances),len(circ.qubits),mitigation_time))
             for init_meas in mapped_circuits:
                 hw_count = mitigated_results.get_counts(mapped_circuits[init_meas])
-                hw_counts[init_meas] += hw_count
+                hw_counts[init_meas] = update_counts(cumulated=hw_counts[init_meas], batch=hw_count)
         else:
             for init_meas in mapped_circuits:
                 hw_count = hw_results.get_counts(mapped_circuits[init_meas])
-                hw_counts[init_meas] += hw_count
+                # print('batch {} counts:'.format(init_meas),hw_count)
+                # print('cumulative {} counts:'.format(init_meas),hw_counts[init_meas])
+                hw_counts[init_meas] = update_counts(cumulated=hw_counts[init_meas], batch=hw_count)
         remaining_shots -= batch_shots
     
     hw_probs = {}
