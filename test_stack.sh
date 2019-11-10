@@ -1,6 +1,8 @@
+rm -r ./logs
+mkdir logs
 # NOTE: toggle here to change max qc size, max clusters
 echo "Generate evaluator input"
-python generate_evaluator_input.py --min-qubit 3 --max-qubit 9 --max-clusters 5 --device-name ibmq_boeblingen
+python generate_evaluator_input.py --min-qubit 3 --max-qubit 9 --max-clusters 5 --device-name ibmq_boeblingen 2>&1 | tee ./logs/generator_logs.txt
 
 # NOTE: toggle here to change cluster shots
 echo "Running evaluator"
@@ -10,9 +12,9 @@ echo "Running evaluator"
 
 mpiexec -n 2 python evaluator_prob.py --saturated-shots --evaluation-method hardware --device-name ibmq_boeblingen
 echo "Running job submittor"
-python hardware_job_submittor.py --saturated-shots --device-name ibmq_boeblingen
+python hardware_job_submittor.py --saturated-shots --device-name ibmq_boeblingen 2>&1 | tee ./logs/hw_job_submittor_logs.txt
 
 echo "Running reconstruction"
-python uniter_prob.py --device-name ibmq_boeblingen --evaluation-method hardware --saturated-shots
+python uniter_prob.py --device-name ibmq_boeblingen --evaluation-method hardware --saturated-shots 2>&1 | tee ./logs/uniter_logs.txt
 
-python plot.py
+python plot.py 2>&1 | tee ./logs/plotter_logs.txt
