@@ -5,8 +5,11 @@ import matplotlib.pyplot as plt
 import numpy as np
 from helper_fun import cross_entropy
 
-def func(x, a, b):
-    return np.exp(a*x)+b
+def initialize_dict(cases):
+    empty_dict = {}
+    for case in cases:
+        empty_dict[case] = 0.0
+    return empty_dict
 
 if __name__ == '__main__':
     all_files = glob.glob('./benchmark_data/*_plotter_input_*.p')
@@ -26,64 +29,70 @@ if __name__ == '__main__':
         dx = [0.2 for x in plotter_inputs[0]]
         dy = [0.2 for x in plotter_inputs[0]]
 
-        searcher_time_avg = np.array([0.0 for case in plotter_inputs[0]])
-        classical_time_avg = np.array([0.0 for case in plotter_inputs[0]])
-        quantum_time_avg = np.array([0.0 for case in plotter_inputs[0]])
-        uniter_time_avg = np.array([0.0 for case in plotter_inputs[0]])
-        ground_truth_avg = np.array([0.0 for case in plotter_inputs[0]])
-        qasm_avg = np.array([0.0 for case in plotter_inputs[0]])
-        qasm_noise_avg = np.array([0.0 for case in plotter_inputs[0]])
-        cutting_avg = np.array([0.0 for case in plotter_inputs[0]])
-        percent_change_avg = np.array([0.0 for case in plotter_inputs[0]])
+        searcher_time_avg = initialize_dict(plotter_inputs[0].keys())
+        classical_time_avg = initialize_dict(plotter_inputs[0].keys())
+        quantum_time_avg = initialize_dict(plotter_inputs[0].keys())
+        uniter_time_avg = initialize_dict(plotter_inputs[0].keys())
+        ground_truth_avg = initialize_dict(plotter_inputs[0].keys())
+        qasm_avg = initialize_dict(plotter_inputs[0].keys())
+        qasm_noise_avg = initialize_dict(plotter_inputs[0].keys())
+        hw_fc_avg = initialize_dict(plotter_inputs[0].keys())
+        cutting_avg = initialize_dict(plotter_inputs[0].keys())
+        percent_change_avg = initialize_dict(plotter_inputs[0].keys())
 
-        for plotter_input in plotter_inputs:
-            searcher_time = np.array([plotter_input[case]['searcher_time'] for case in plotter_input])
-            classical_time = np.array([plotter_input[case]['classical_time'] for case in plotter_input])
-            quantum_time = np.array([plotter_input[case]['quantum_time'] for case in plotter_input])
-            uniter_time = np.array([plotter_input[case]['uniter_time'] for case in plotter_input])
-            ground_truth = np.array([
-                cross_entropy(target=plotter_input[case]['evaluations']['sv_noiseless'],
-                obs= plotter_input[case]['evaluations']['sv_noiseless'])for case in plotter_input])
-            qasm = np.array([
-                cross_entropy(target=plotter_input[case]['evaluations']['sv_noiseless'],
-                obs= plotter_input[case]['evaluations']['qasm'])for case in plotter_input])
-            qasm_noise = np.array([
-                cross_entropy(target=plotter_input[case]['evaluations']['sv_noiseless'],
-                obs= plotter_input[case]['evaluations']['qasm+noise'])for case in plotter_input])
-            hw_fc = np.array([
-                cross_entropy(target=plotter_input[case]['evaluations']['sv_noiseless'],
-                obs= plotter_input[case]['evaluations']['hw'])for case in plotter_input])
-            cutting = np.array([
-                cross_entropy(target=plotter_input[case]['evaluations']['sv_noiseless'],
-                obs= plotter_input[case]['evaluations']['cutting'])for case in plotter_input])
-            percent_change = np.array([100*(hw_fc[i] - cutting[i])/(hw_fc[i] - ground_truth[i]) for i in range(len(plotter_input))])
-            searcher_time_avg += searcher_time
-            classical_time_avg += classical_time
-            quantum_time_avg += quantum_time
-            uniter_time_avg += uniter_time
-            ground_truth_avg += ground_truth
-            qasm_avg += qasm
-            qasm_noise_avg += qasm_noise
-            cutting_avg += cutting
-            percent_change_avg += percent_change
+        for i, plotter_input in enumerate(plotter_inputs):
+            print('repetition ',i)
+            # Iterate over repetitions
+            for case in plotter_input:
+                searcher_time_avg[case] += plotter_input[case]['searcher_time']
+                classical_time_avg[case] += plotter_input[case]['classical_time']
+                quantum_time_avg[case] += plotter_input[case]['quantum_time']
+                uniter_time_avg[case] += plotter_input[case]['uniter_time']
+
+                case_ground_truth = cross_entropy(target=plotter_input[case]['evaluations']['sv_noiseless'],
+                obs= plotter_input[case]['evaluations']['sv_noiseless'])
+                
+                case_qasm = cross_entropy(target=plotter_input[case]['evaluations']['sv_noiseless'],
+                obs= plotter_input[case]['evaluations']['qasm'])
+                
+                case_qasm_noise = cross_entropy(target=plotter_input[case]['evaluations']['sv_noiseless'],
+                obs= plotter_input[case]['evaluations']['qasm+noise'])
+
+                case_hw_fc = cross_entropy(target=plotter_input[case]['evaluations']['sv_noiseless'],
+                obs= plotter_input[case]['evaluations']['hw'])
+
+                case_cutting = cross_entropy(target=plotter_input[case]['evaluations']['sv_noiseless'],
+                obs= plotter_input[case]['evaluations']['cutting'])
+
+                # FIXME: percent change calculations are wrong
+                case_percent_change = 100*(case_hw_fc - case_cutting)/(case_hw_fc - case_ground_truth)
+                print('case {}: percentage reduction = {}, reconstruction time: {:.3e}'.format(case,
+                case_percent_change,plotter_input[case]['uniter_time']))
+                assert case_percent_change == plotter_input[case]['percent_reduction']
+                
+                ground_truth_avg[case] += case_ground_truth
+                qasm_avg[case] += case_qasm
+                qasm_noise_avg[case] += case_qasm_noise
+                hw_fc_avg[case] += case_hw_fc
+                cutting_avg[case] += case_cutting
+                percent_change_avg[case] += case_percent_change
+
+                # print('case {} reduction:{},time:{}'.format(case,case_percent_change,plotter_input[case]['uniter_time']))
+            print('*'*50)
         
-        searcher_time_avg /= len(plotter_inputs)
-        classical_time_avg /= len(plotter_inputs)
-        quantum_time_avg /= len(plotter_inputs)
-        uniter_time_avg /= len(plotter_inputs)
-        ground_truth_avg /= len(plotter_inputs)
-        qasm_avg /= len(plotter_inputs)
-        qasm_noise_avg /= len(plotter_inputs)
-        cutting_avg /= len(plotter_inputs)
-        percent_change_avg /= len(plotter_inputs)
+        num_repetitions = len(plotter_inputs)
+        for dictionary in (searcher_time_avg,classical_time_avg,quantum_time_avg,uniter_time_avg,ground_truth_avg,qasm_avg,qasm_noise_avg,hw_fc_avg,cutting_avg,percent_change_avg):
+            for case in dictionary:
+                dictionary[case] = dictionary[case]/num_repetitions
+
         best_cc = {}
-        for i in range(len(plotter_inputs[0])):
-            percent = percent_change_avg[i]
-            hw = hw_qubits[i]
-            fc = fc_qubits[i]
-            if (fc in best_cc and percent>best_cc[fc][1]) or (fc not in best_cc):
-                best_cc[fc] = (uniter_time_avg[i],percent)
-        [print('Full circuit size %d. Cross entropy reduction = %.3f%%. Reconstruction time = %.3e seconds.'%(fc,best_cc[fc][1],best_cc[fc][0])) for fc in best_cc]
+        for case in percent_change_avg:
+            percent = percent_change_avg[case]
+            uniter_time = uniter_time_avg[case]
+            hw, fc = case
+            if (fc in best_cc and percent>best_cc[fc][0]) or (fc not in best_cc):
+                best_cc[fc] = (percent,uniter_time,case)
+        [print('Full circuit size {:d}. Best case {}. Cross entropy reduction = {:.3f}%. Reconstruction time = {:.3e} seconds.'.format(fc,best_cc[fc][2],best_cc[fc][0],best_cc[fc][1])) for fc in best_cc]
 
         fig, ax1 = plt.subplots()
 
@@ -108,30 +117,30 @@ if __name__ == '__main__':
         fig_scale = 4.5
         fig = plt.figure(figsize=(3*fig_scale,2*fig_scale))
         ax1 = fig.add_subplot(231, projection='3d')
-        ax1.bar3d(hw_qubits, fc_qubits, np.zeros(len(plotter_input)), dx, dy, searcher_time_avg)
+        ax1.bar3d(hw_qubits, fc_qubits, np.zeros(len(plotter_input)), dx, dy, [searcher_time_avg[case] for case in searcher_time_avg])
         ax1.set_xlabel('hardware qubits')
         ax1.set_ylabel('full circuit qubits')
         ax1.set_zlabel('searcher time (seconds)')
         ax1 = fig.add_subplot(232, projection='3d')
-        ax1.bar3d(hw_qubits, fc_qubits, np.zeros(len(plotter_input)), dx, dy, classical_time_avg)
-        ax1.set_zlim3d(0, 1.2*max(classical_time_avg)+1)
+        ax1.bar3d(hw_qubits, fc_qubits, np.zeros(len(plotter_input)), dx, dy, [classical_time_avg[case] for case in classical_time_avg])
+        ax1.set_zlim3d(0, 1.2*max(classical_time_avg.values())+1)
         ax1.set_xlabel('hardware qubits')
         ax1.set_ylabel('full circuit qubits')
         ax1.set_zlabel('classical evaluator time (seconds)')
         ax1 = fig.add_subplot(233, projection='3d')
-        ax1.bar3d(hw_qubits, fc_qubits, np.zeros(len(plotter_input)), dx, dy, quantum_time_avg)
-        ax1.set_zlim3d(0, 1.2*max(quantum_time_avg)+1)
+        ax1.bar3d(hw_qubits, fc_qubits, np.zeros(len(plotter_input)), dx, dy, [quantum_time_avg[case] for case in quantum_time_avg])
+        ax1.set_zlim3d(0, 1.2*max(quantum_time_avg.values())+1)
         ax1.set_xlabel('hardware qubits')
         ax1.set_ylabel('full circuit qubits')
         ax1.set_zlabel('quantum evaluator time (seconds)')
         ax1 = fig.add_subplot(234, projection='3d')
-        ax1.bar3d(hw_qubits, fc_qubits, np.zeros(len(plotter_input)), dx, dy, uniter_time_avg)
+        ax1.bar3d(hw_qubits, fc_qubits, np.zeros(len(plotter_input)), dx, dy, [uniter_time_avg[case] for case in uniter_time_avg])
         ax1.set_xlabel('hardware qubits')
         ax1.set_ylabel('full circuit qubits')
         ax1.set_zlabel('reconstructor time (seconds)')
         ax1 = fig.add_subplot(235, projection='3d')
-        ax1.bar3d(hw_qubits, fc_qubits, np.zeros(len(plotter_input)), dx, dy, percent_change_avg)
-        ax1.set_zlim3d(min(0,1.2*min(percent_change_avg)), max(0,1.2*max(percent_change_avg)))
+        ax1.bar3d(hw_qubits, fc_qubits, np.zeros(len(plotter_input)), dx, dy, [percent_change_avg[case] for case in percent_change_avg])
+        ax1.set_zlim3d(min(0,1.2*min(percent_change_avg.values())), max(0,1.2*max(percent_change_avg.values())))
         ax1.set_xlabel('hardware qubits')
         ax1.set_ylabel('full circuit qubits')
         ax1.set_zlabel('cross entropy gap reduction due to cutting (%)')

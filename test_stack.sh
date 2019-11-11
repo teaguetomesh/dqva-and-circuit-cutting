@@ -1,28 +1,20 @@
+rm -r ./logs
+mkdir logs
 # NOTE: toggle here to change max qc size, max clusters
 echo "Generate evaluator input"
-python generate_evaluator_input.py --min-qubit 3 --max-qubit 9 --max-clusters 5 --device-name ibmq_boeblingen
-EVALUATOR_FILE=./benchmark_data/evaluator_input_*.p
+python generate_evaluator_input.py --min-qubit 3 --max-qubit 9 --max-clusters 5 --device-name ibmq_boeblingen 2>&1 | tee ./logs/generator_logs.txt
 
-for i in {1..1};
-do
-    # NOTE: toggle here to change cluster shots
-    echo "Running evaluator"
-    # mpiexec -n 5 python evaluator_prob.py --input-file $EVALUATOR_FILE --saturated-shots --evaluation-method statevector_simulator
-    
-    # mpiexec -n 5 python evaluator_prob.py --input-file $EVALUATOR_FILE --saturated-shots --evaluation-method noisy_qasm_simulator
-    
-    mpiexec -n 2 python evaluator_prob.py --input-file $EVALUATOR_FILE --saturated-shots --evaluation-method hardware
-    echo "Running job submittor"
-    JOB_SUBMITTOR_FILE=./benchmark_data/job_submittor_input_*.p
-    python hardware_job_submittor.py --input-file $JOB_SUBMITTOR_FILE --saturated-shots
-    # rm $JOB_SUBMITTOR_FILE
+# NOTE: toggle here to change cluster shots
+echo "Running evaluator"
+# mpiexec -n 5 python evaluator_prob.py --saturated-shots --evaluation-method statevector_simulator --device-name ibmq_boeblingen
 
-    echo "Running reconstruction"
-    UNITER_INPUT_FILE=./benchmark_data/*_uniter_input_*.p
-    python uniter_prob.py --input-file $UNITER_INPUT_FILE
-    # rm $UNITER_INPUT_FILE
-done
+# mpiexec -n 5 python evaluator_prob.py --saturated-shots --evaluation-method noisy_qasm_simulator --device-name ibmq_boeblingen
 
-# rm $EVALUATOR_FILE
+mpiexec -n 2 python evaluator_prob.py --saturated-shots --evaluation-method hardware --device-name ibmq_boeblingen
+echo "Running job submittor"
+python hardware_job_submittor.py --saturated-shots --device-name ibmq_boeblingen 2>&1 | tee ./logs/hw_job_submittor_logs.txt
 
-# python plot.py
+echo "Running reconstruction"
+python uniter_prob.py --device-name ibmq_boeblingen --evaluation-method hardware --saturated-shots 2>&1 | tee ./logs/uniter_logs.txt
+
+python plot.py 2>&1 | tee ./logs/plotter_logs.txt
