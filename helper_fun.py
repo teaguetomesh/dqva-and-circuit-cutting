@@ -251,7 +251,7 @@ def tensored_readout_mitigation(num_shots,device,initial_layout):
         num_shots = device.configuration().max_shots
     filter_begin = time()
     properties = device.properties()
-    max_group_len = int(np.log2(device.configuration().max_experiments/3*2))
+    max_group_len = int(np.log2(device.configuration().max_experiments/2))
 
     # Generate the calibration circuits
     num_qubits = len(properties.qubits)
