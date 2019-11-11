@@ -66,8 +66,9 @@ if __name__ == '__main__':
 
                 # FIXME: percent change calculations are wrong
                 case_percent_change = 100*(case_hw_fc - case_cutting)/(case_hw_fc - case_ground_truth)
-                print('case {}: plotter calculated: {}, uniter calculated: {}, reconstruction time: {:.3e}'.format(case,
-                case_percent_change,plotter_input[case]['percent_reduction'],plotter_input[case]['uniter_time']))
+                print('case {}: percentage reduction = {}, reconstruction time: {:.3e}'.format(case,
+                case_percent_change,plotter_input[case]['uniter_time']))
+                assert case_percent_change == plotter_input[case]['percent_reduction']
                 
                 ground_truth_avg[case] += case_ground_truth
                 qasm_avg[case] += case_qasm
@@ -90,8 +91,8 @@ if __name__ == '__main__':
             uniter_time = uniter_time_avg[case]
             hw, fc = case
             if (fc in best_cc and percent>best_cc[fc][0]) or (fc not in best_cc):
-                best_cc[fc] = (percent,uniter_time)
-        [print('Full circuit size %d. Cross entropy reduction = %.3f%%. Reconstruction time = %.3e seconds.'%(fc,best_cc[fc][0],best_cc[fc][1])) for fc in best_cc]
+                best_cc[fc] = (percent,uniter_time,case)
+        [print('Full circuit size {:d}. Best case {}. Cross entropy reduction = {:.3f}%. Reconstruction time = {:.3e} seconds.'.format(fc,best_cc[fc][2],best_cc[fc][0],best_cc[fc][1])) for fc in best_cc]
 
         fig, ax1 = plt.subplots()
 

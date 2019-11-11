@@ -21,11 +21,11 @@ Evaluating sv noiseless fc
 Evaluating qasm
 evaluator fields: dict_keys(['num_shots']) Saturated = 2.048e+03 shots
 Evaluating on hardware
-Calculating measurement filter, 20-qubit calibration circuits * 16 * 2.048e+03 shots. 2.178e+02 seconds
+Calculating measurement filter, 20-qubit calibration circuits * 16 * 2.048e+03 shots. 2.586e+02 seconds
 evaluator fields: dict_keys(['device', 'basis_gates', 'coupling_map', 'properties', 'initial_layout', 'num_shots', 'meas_filter']) Saturated = 2.048e+03 shots
 Execute on hardware Mitigation for 4 qubit circuit
-Mitigation for 4 qubit circuit took 3.143e-02 seconds
-4.869e+01 seconds
+Mitigation for 4 qubit circuit took 3.021e-02 seconds
+4.952e+01 seconds
 Evaluator input cases: dict_keys([(3, 4)])
 ----------------------------------------------------------------------------------------------------
 ----------------------------------------------------------------------------------------------------
@@ -52,11 +52,11 @@ Evaluating sv noiseless fc
 Evaluating qasm
 evaluator fields: dict_keys(['num_shots']) Saturated = 3.072e+03 shots
 Evaluating on hardware
-Calculating measurement filter, 20-qubit calibration circuits * 64 * 2.048e+03 shots. 1.171e+02 seconds
-evaluator fields: dict_keys(['device', 'basis_gates', 'coupling_map', 'properties', 'initial_layout', 'num_shots', 'meas_filter']) Saturated = 3.072e+03 shots
+Calculating measurement filter, 20-qubit calibration circuits * 64 * 3.072e+03 shots. 1.517e+02 seconds
+evaluator fields: dict_keys(['device', 'basis_gates', 'coupling_map', 'properties', 'initial_layout', 'num_shots', 'meas_filter']) Saturated = 2.048e+03 shots
 Execute on hardware Mitigation for 6 qubit circuit
-Mitigation for 6 qubit circuit took 1.158e-01 seconds
-5.230e+01 seconds
+Mitigation for 6 qubit circuit took 1.196e-01 seconds
+4.814e+01 seconds
 Evaluator input cases: dict_keys([(3, 4), (3, 6)])
 ----------------------------------------------------------------------------------------------------
 ----------------------------------------------------------------------------------------------------
@@ -164,13 +164,13 @@ OPTIMAL
 ********************
 Evaluating sv noiseless fc
 Evaluating qasm
-evaluator fields: dict_keys(['num_shots']) Saturated = 7.168e+03 shots
+evaluator fields: dict_keys(['num_shots']) Saturated = 6.144e+03 shots
 Evaluating on hardware
-Calculating measurement filter, 20-qubit calibration circuits * 512 * 7.168e+03 shots. 2.340e+03 seconds
+Calculating measurement filter, 20-qubit calibration circuits * 512 * 6.144e+03 shots. 1.971e+03 seconds
 evaluator fields: dict_keys(['device', 'basis_gates', 'coupling_map', 'properties', 'initial_layout', 'num_shots', 'meas_filter']) Saturated = 6.144e+03 shots
 Execute on hardware Mitigation for 9 qubit circuit
-Mitigation for 9 qubit circuit took 8.141e+00 seconds
-1.171e+02 seconds
+Mitigation for 9 qubit circuit took 1.016e+01 seconds
+6.889e+01 seconds
 Evaluator input cases: dict_keys([(3, 4), (3, 6), (4, 6), (4, 9)])
 ----------------------------------------------------------------------------------------------------
 ----------------------------------------------------------------------------------------------------
@@ -198,8 +198,7 @@ Evaluating qasm
 evaluator fields: dict_keys(['num_shots']) Saturated = 9.216e+03 shots
 Evaluating on hardware
 evaluator fields: dict_keys(['device', 'basis_gates', 'coupling_map', 'properties', 'initial_layout', 'num_shots']) Saturated = 9.216e+03 shots
-Execute on hardware During circuit evaluation on hardware, num_shots 9.216e+03 exceeded hardware max
-4.971e+01 seconds
+Execute on hardware 9.277e+01 seconds
 Evaluator input cases: dict_keys([(3, 4), (3, 6), (4, 6), (4, 9), (4, 10)])
 ----------------------------------------------------------------------------------------------------
 ----------------------------------------------------------------------------------------------------
@@ -324,11 +323,10 @@ OPTIMAL
 ********************
 Evaluating sv noiseless fc
 Evaluating qasm
-evaluator fields: dict_keys(['num_shots']) Saturated = 1.741e+04 shots
+evaluator fields: dict_keys(['num_shots']) Saturated = 1.638e+04 shots
 Evaluating on hardware
-evaluator fields: dict_keys(['device', 'basis_gates', 'coupling_map', 'properties', 'initial_layout', 'num_shots']) Saturated = 1.843e+04 shots
-Execute on hardware During circuit evaluation on hardware, num_shots 1.843e+04 exceeded hardware max
-3.143e+02 seconds
+evaluator fields: dict_keys(['device', 'basis_gates', 'coupling_map', 'properties', 'initial_layout', 'num_shots']) Saturated = 1.741e+04 shots
+Execute on hardware 3.956e+02 seconds
 Evaluator input cases: dict_keys([(3, 4), (3, 6), (4, 6), (4, 9), (4, 10), (5, 6), (5, 9), (5, 10), (5, 12)])
 ----------------------------------------------------------------------------------------------------
 ----------------------------------------------------------------------------------------------------
@@ -439,11 +437,10 @@ OPTIMAL
 ********************
 Evaluating sv noiseless fc
 Evaluating qasm
-evaluator fields: dict_keys(['num_shots']) Saturated = 3.277e+04 shots
+evaluator fields: dict_keys(['num_shots']) Saturated = 3.072e+04 shots
 Evaluating on hardware
 evaluator fields: dict_keys(['device', 'basis_gates', 'coupling_map', 'properties', 'initial_layout', 'num_shots']) Saturated = 3.277e+04 shots
-Execute on hardware During circuit evaluation on hardware, num_shots 3.277e+04 exceeded hardware max
-3.673e+02 seconds
+Execute on hardware 1.643e+03 seconds
 Evaluator input cases: dict_keys([(3, 4), (3, 6), (4, 6), (4, 9), (4, 10), (5, 6), (5, 9), (5, 10), (5, 12), (6, 9), (6, 10), (6, 12), (6, 16)])
 ----------------------------------------------------------------------------------------------------
 ----------------------------------------------------------------------------------------------------
@@ -567,7 +564,7 @@ Evaluating qasm
 evaluator fields: dict_keys(['num_shots']) Saturated = 2.048e+03 shots
 Evaluating on hardware
 evaluator fields: dict_keys(['device', 'basis_gates', 'coupling_map', 'properties', 'initial_layout', 'num_shots']) Saturated = 2.048e+03 shots
-Execute on hardware 1.380e+02 seconds
+Execute on hardware 7.324e+01 seconds
 Evaluator input cases: dict_keys([(3, 4), (3, 6), (4, 6), (4, 9), (4, 10), (5, 6), (5, 9), (5, 10), (5, 12), (6, 9), (6, 10), (6, 12), (6, 16), (7, 9), (7, 10), (7, 12), (7, 16), (7, 20)])
 ----------------------------------------------------------------------------------------------------
 ----------------------------------------------------------------------------------------------------

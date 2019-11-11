@@ -27,7 +27,7 @@ def load_IBMQ():
 
 def cross_entropy(target,obs):
     assert len(target)==len(obs)
-    obs = [x if x>=0 else 0 for x in obs]
+    obs = [x if x>=0 else -x for x in obs]
     alpha = 1e-14
     if 0 in obs:
         obs = [(x+alpha)/(1+alpha*len(obs)) for x in obs]

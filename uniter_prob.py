@@ -347,5 +347,3 @@ if __name__ == '__main__':
         pickle.dump(uniter_output, open('%s'%filename,'wb'))
         print('Reconstruction output has %d cases'%(len(uniter_output)))
         print('-'*100)
-        if len(uniter_output) == 2:
-            break
