@@ -99,6 +99,7 @@ if __name__ == '__main__':
         color = 'tab:blue'
         ax1.set_xlabel('Number of qubits')
         ax1.set_ylabel('Cross entropy reduction (%)', color=color)  # we already handled the x-label with ax1
+        ax1.set_ylim(0,100)
         ax1.plot([fc for fc in best_cc], [best_cc[fc][0] for fc in best_cc], 'X',color=color)
         ax1.tick_params(axis='y', labelcolor=color)
 

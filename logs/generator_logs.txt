@@ -1,0 +1,172 @@
+----------------------------------------------------------------------------------------------------
+Case  (3, 4)
+Generating 2x2, 1+8+1 supremacy circuit
+Academic license - for non-commercial use only
+solving for 2 clusters
+solving for 3 clusters
+solving for 4 clusters
+Infeasible
+solving for 5 clusters
+Infeasible
+********************
+MIQCP stats:
+2 cuts, 2 clusters, max qubit = 3
+cluster 0: original input = 2.00, rho qubits = 1.00, O qubits = 1.00, d = 3.00, K = 2.00
+cluster 1: original input = 2.00, rho qubits = 1.00, O qubits = 1.00, d = 3.00, K = 2.00
+objective value: 36.12353473892681
+manually calculated objective value: 35.999983874172
+OPTIMAL
+********************
+Evaluating sv noiseless fc
+Evaluating qasm
+evaluator fields: dict_keys(['num_shots']) Saturated = 1.024e+03 shots
+Evaluating on hardware
+Calculating measurement filter, 20-qubit calibration circuits * 16 * 8.192e+03 shots. 3.043e+03 seconds
+evaluator fields: dict_keys(['device', 'basis_gates', 'coupling_map', 'properties', 'initial_layout', 'num_shots', 'meas_filter']) Saturated = 1.024e+03 shots
+Submitted 1024 shots to hardware
+Mitigation for 4 qubit circuit
+Mitigation for 4 qubit circuit took 2.874e-02 seconds
+Execute on hardware, 5.356e+02 seconds
+Evaluator input cases: dict_keys([(3, 4)])
+----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
+Case  (3, 6)
+Generating 2x3, 1+8+1 supremacy circuit
+solving for 2 clusters
+Infeasible
+solving for 3 clusters
+Infeasible
+solving for 4 clusters
+solving for 5 clusters
+********************
+MIQCP stats:
+5 cuts, 4 clusters, max qubit = 3
+cluster 0: original input = 1.00, rho qubits = 2.00, O qubits = 1.00, d = 3.00, K = 3.00
+cluster 1: original input = 2.00, rho qubits = 1.00, O qubits = 1.00, d = 3.00, K = 2.00
+cluster 2: original input = 1.00, rho qubits = 2.00, O qubits = 1.00, d = 3.00, K = 3.00
+cluster 3: original input = 2.00, rho qubits = -0.00, O qubits = 2.00, d = 2.00, K = 2.00
+objective value: 243.2336966754033
+manually calculated objective value: 243.00000000000094
+OPTIMAL
+********************
+Evaluating sv noiseless fc
+Evaluating qasm
+evaluator fields: dict_keys(['num_shots']) Saturated = 1.024e+03 shots
+Evaluating on hardware
+Calculating measurement filter, 20-qubit calibration circuits * 64 * 8.192e+03 shots. Error checking job status using websocket, retrying using HTTP.
+9.255e+02 seconds
+evaluator fields: dict_keys(['device', 'basis_gates', 'coupling_map', 'properties', 'initial_layout', 'num_shots', 'meas_filter']) Saturated = 1.024e+03 shots
+Submitted 1024 shots to hardware
+Mitigation for 6 qubit circuit
+Mitigation for 6 qubit circuit took 1.109e-01 seconds
+Execute on hardware, 5.843e+02 seconds
+Evaluator input cases: dict_keys([(3, 4), (3, 6)])
+----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
+Case  (3, 9)
+Generating 3x3, 1+8+1 supremacy circuit
+solving for 2 clusters
+Infeasible
+solving for 3 clusters
+Infeasible
+solving for 4 clusters
+Infeasible
+solving for 5 clusters
+Infeasible
+Case (3, 9) not feasible
+----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
+Case  (3, 10)
+Generating 2x5, 1+8+1 supremacy circuit
+solving for 2 clusters
+Infeasible
+solving for 3 clusters
+Infeasible
+solving for 4 clusters
+Infeasible
+solving for 5 clusters
+Infeasible
+Case (3, 10) not feasible
+----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
+Case  (3, 12)
+Generating 3x4, 1+8+1 supremacy circuit
+solving for 2 clusters
+Infeasible
+solving for 3 clusters
+Infeasible
+solving for 4 clusters
+Infeasible
+solving for 5 clusters
+Infeasible
+Case (3, 12) not feasible
+----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
+Case  (3, 16)
+Generating 4x4, 1+8+1 supremacy circuit
+solving for 2 clusters
+Infeasible
+solving for 3 clusters
+Infeasible
+solving for 4 clusters
+Infeasible
+solving for 5 clusters
+Infeasible
+Case (3, 16) not feasible
+----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
+Case  (3, 20)
+Generating 4x5, 1+8+1 supremacy circuit
+solving for 2 clusters
+Infeasible
+solving for 3 clusters
+Infeasible
+solving for 4 clusters
+Infeasible
+solving for 5 clusters
+Infeasible
+Case (3, 20) not feasible
+----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
+Case  (4, 6)
+solving for 2 clusters
+solving for 3 clusters
+solving for 4 clusters
+solving for 5 clusters
+********************
+MIQCP stats:
+2 cuts, 2 clusters, max qubit = 4
+cluster 0: original input = 2.00, rho qubits = 2.00, O qubits = -0.00, d = 4.00, K = 2.00
+cluster 1: original input = 4.00, rho qubits = 0.00, O qubits = 2.00, d = 4.00, K = 2.00
+objective value: 45.1555879374221
+manually calculated objective value: 45.0
+OPTIMAL
+********************
+Use existing full circ evaluations
+Evaluator input cases: dict_keys([(3, 4), (3, 6), (4, 6)])
+----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
+Case  (4, 9)
+Generating 3x3, 1+8+1 supremacy circuit
+solving for 2 clusters
+Infeasible
+solving for 3 clusters
+Infeasible
+solving for 4 clusters
+solving for 5 clusters
+********************
+MIQCP stats:
+6 cuts, 4 clusters, max qubit = 4
+cluster 0: original input = 1.00, rho qubits = 2.00, O qubits = 1.00, d = 3.00, K = 3.00
+cluster 1: original input = 3.00, rho qubits = 1.00, O qubits = 2.00, d = 4.00, K = 3.00
+cluster 2: original input = 4.00, rho qubits = 0.00, O qubits = 3.00, d = 4.00, K = 3.00
+cluster 3: original input = 1.00, rho qubits = 3.00, O qubits = 0.00, d = 4.00, K = 3.00
+objective value: 405.27880986558785
+manually calculated objective value: 405.0
+OPTIMAL
+********************
+Evaluating sv noiseless fc
+Evaluating qasm
+evaluator fields: dict_keys(['num_shots']) Saturated = 3.072e+03 shots
+Evaluating on hardware
+Calculating measurement filter, 20-qubit calibration circuits * 512 * 8.192e+03 shots. 
