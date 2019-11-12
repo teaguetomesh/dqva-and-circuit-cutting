@@ -95,35 +95,5 @@ value: list(tuple)
 Compares the operations on each qubit in the original uncut circuit and all the fragments. Test for correctness.
 
 ## TODO
-#### Circuit generator
- - [x] Update to newest supremacy circuit generator
-
-#### Auto Cut Finder
-- [x] Implement randomized cut searcher
-- [x] Implement exhaustive cut searcher
-- [x] Sort output cuts in reverse topological order
-- [x] Implement MIQCP cut searcher
-
-#### Cutter
-- [x] Easy interface for the uniter
-- [x] Cut the circuit into multiple parts
-- [ ] Check if cut_dag is legal
-- [x] Need to address one qubit entering a fragment more than once
-
-#### Simulator
-- [x] MPI for intra-cluster parallelism
-- [ ] Multiple job submission for inter-cluster parallelism
-- [x] Replace output measurement basis with classical post processing
-- [ ] Implement simulator in Intel QS
-- [ ] Small clusters (<=9 qubits>) use np.matmul to modify measurement basis. Others use direct simulation.
-
-#### Uniter
-- [ ] Implement uniter in MPI/MKL
-
-### Misc
-- [x] Is modification to Qiskit source code still needed?
-- [x] Is Qiskit 0.11 going to crash the current codes? It won't.
-- [ ] Add a dependency installation file
-
-## Future Directions
-- [x] Weighted tensor network contraction, considering 'hardness' of each cluster. Implemented in MIQCP solver.
+- [ ] Implement partial measurement mitigation
+- [ ] Optimize uniter in MPI, NUMBA
