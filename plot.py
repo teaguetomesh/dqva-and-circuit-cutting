@@ -64,8 +64,8 @@ if __name__ == '__main__':
                 case_cutting = cross_entropy(target=plotter_input[case]['evaluations']['sv_noiseless'],
                 obs= plotter_input[case]['evaluations']['cutting'])
 
-                # FIXME: percent change calculations are wrong
                 case_percent_change = 100*(case_hw_fc - case_cutting)/(case_hw_fc - case_ground_truth)
+                # case_percent_change = (case_hw_fc - case_ground_truth)/(case_cutting - case_ground_truth)
                 print('case {}: percentage reduction = {}, reconstruction time: {:.3e}'.format(case,
                 case_percent_change,plotter_input[case]['uniter_time']))
                 assert case_percent_change == plotter_input[case]['percent_reduction']
@@ -99,14 +99,14 @@ if __name__ == '__main__':
         color = 'tab:blue'
         ax1.set_xlabel('Number of qubits')
         ax1.set_ylabel('Cross entropy reduction (%)', color=color)  # we already handled the x-label with ax1
-        ax1.plot([fc for fc in best_cc], [best_cc[fc][1] for fc in best_cc], 'X',color=color)
+        ax1.plot([fc for fc in best_cc], [best_cc[fc][0] for fc in best_cc], 'X',color=color)
         ax1.tick_params(axis='y', labelcolor=color)
 
         ax2 = ax1.twinx()  # instantiate a second axes that shares the same x-axis
 
         color = 'tab:red'
         ax2.set_ylabel('Reconstruction time (s)', color=color)
-        ax2.plot([fc for fc in best_cc], [best_cc[fc][0] for fc in best_cc], '*',color=color)
+        ax2.plot([fc for fc in best_cc], [best_cc[fc][1] for fc in best_cc], '*',color=color)
         ax2.tick_params(axis='y', labelcolor=color)
 
         fig.tight_layout()  # otherwise the right y-label is slightly clipped
