@@ -95,5 +95,5 @@ value: list(tuple)
 Compares the operations on each qubit in the original uncut circuit and all the fragments. Test for correctness.
 
 ## TODO
-#### Uniter
+- [ ] Implement partial measurement mitigation
 - [ ] Optimize uniter in MPI, NUMBA
