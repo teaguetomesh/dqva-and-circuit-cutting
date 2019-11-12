@@ -39,7 +39,7 @@ def cross_entropy(target,obs):
             h += -p*np.log(q)
     return h
 
-def find_saturated_shots(circ):
+def find_saturated_shots(circ,accuracy):
     ground_truth = evaluate_circ(circ=circ,backend='statevector_simulator',evaluator_info=None)
     min_ce = cross_entropy(target=ground_truth,obs=ground_truth)
     qasm_prob = [0 for i in ground_truth]
@@ -53,7 +53,7 @@ def find_saturated_shots(circ):
         qasm_prob = [(x*(counter-1)+y)/counter for x,y in zip(qasm_prob,qasm_prob_batch)]
         ce = cross_entropy(target=ground_truth,obs=qasm_prob)
         diff = abs((ce-min_ce)/min_ce)
-        if diff < 1e-1:
+        if diff < accuracy:
             return int(counter*shots_increment)
         if counter%50==49:
             print('current diff:',diff,'current shots:',int(counter*shots_increment))
@@ -179,10 +179,7 @@ def get_bprop():
     return bprop_noise_model
 
 # Entangled readout mitigation
-def readout_mitigation(num_shots,device,initial_layout):
-    if num_shots>device.configuration().max_shots:
-        print('During readout mitigation, num_shots %.3e exceeded hardware max'%num_shots)
-        num_shots = device.configuration().max_shots
+def readout_mitigation(device,initial_layout):
     filter_begin = time()
     properties = device.properties()
     num_qubits = len(properties.qubits)
@@ -195,6 +192,7 @@ def readout_mitigation(num_shots,device,initial_layout):
         if 'ancilla' not in _initial_layout[q].register.name:
             qubit_list.append(q)
     meas_calibs, state_labels = complete_meas_cal(qubit_list=qubit_list, qr=qr, circlabel='mcal')
+    num_shots = device.configuration().max_shots
     print('Calculating measurement filter, %d-qubit calibration circuits * %d * %.3e shots.'%(len(meas_calibs[0].qubits),len(meas_calibs),num_shots),end=' ')
     assert len(meas_calibs)<=device.configuration().max_experiments/3*2
 
@@ -211,10 +209,8 @@ def readout_mitigation(num_shots,device,initial_layout):
     return meas_filter
 
 # Fully local readout mitigation
-def fully_local_readout_mitigation(num_shots,device,initial_layout):
-    if num_shots>device.configuration().max_shots:
-        print('During fully local readout mitigation, num_shots %.3e exceeded hardware max'%num_shots)
-        num_shots = device.configuration().max_shots
+def fully_local_readout_mitigation(device,initial_layout):
+    num_shots = device.configuration().max_shots
     filter_begin = time()
     properties = device.properties()
     num_qubits = len(properties.qubits)
@@ -244,9 +240,7 @@ def fully_local_readout_mitigation(num_shots,device,initial_layout):
 
 # Tensored readout mitigation
 def tensored_readout_mitigation(num_shots,device,initial_layout):
-    if num_shots>device.configuration().max_shots:
-        print('During tensored readout mitigation, num_shots %.3e exceeded hardware max'%num_shots)
-        num_shots = device.configuration().max_shots
+    num_shots = device.configuration().max_shots
     filter_begin = time()
     properties = device.properties()
     max_group_len = int(np.log2(device.configuration().max_experiments/2))
@@ -307,12 +301,12 @@ def get_evaluator_info(circ,device_name,fields):
         noise_mapper.run(dag)
         initial_layout = noise_mapper.property_set['layout']
         _evaluator_info['initial_layout'] = initial_layout
-        num_shots = find_saturated_shots(circ)
-        meas_filter = readout_mitigation(num_shots,device,initial_layout)
+        num_shots = find_saturated_shots(circ,1e-1)
+        meas_filter = readout_mitigation(device,initial_layout)
         _evaluator_info['meas_filter'] = meas_filter
         _evaluator_info['num_shots'] = num_shots
     elif 'num_shots' in fields:
-        num_shots = find_saturated_shots(circ)
+        num_shots = find_saturated_shots(circ,1e-1)
         _evaluator_info['num_shots'] = num_shots
 
     evaluator_info = {}
