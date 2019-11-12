@@ -36,10 +36,9 @@ def evaluate_full_circ(circ, device_name):
         _evaluator_info = get_evaluator_info(circ=circ,device_name=device_name,fields=['meas_filter'])
         evaluator_info.update(_evaluator_info)
     print('evaluator fields:',evaluator_info.keys(),'Saturated = %.3e shots'%evaluator_info['num_shots'])
-    print('Execute on hardware',end=' ')
     execute_begin = time()
     hw_fc = evaluate_circ(circ=circ,backend='hardware',evaluator_info=evaluator_info)
-    print('%.3e seconds'%(time()-execute_begin))
+    print('Execute on hardware, %.3e seconds'%(time()-execute_begin))
     # hw_fc = [0 for i in sv_noiseless_fc]
 
     fc_evaluations = {'sv_noiseless':sv_noiseless_fc,
