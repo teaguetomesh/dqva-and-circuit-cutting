@@ -16,7 +16,8 @@ def evaluate_full_circ(circ, device_name):
 
     print('Evaluating qasm')
     evaluator_info = get_evaluator_info(circ=circ,device_name=device_name,fields=['num_shots'])
-    print('evaluator fields:',evaluator_info.keys(),'Saturated = %.3e shots'%evaluator_info['num_shots'])
+    num_shots = evaluator_info['num_shots']
+    print('evaluator fields:',evaluator_info.keys(),'Saturated = %.3e shots'%num_shots)
     qasm_noiseless_fc = evaluate_circ(circ=circ,backend='noiseless_qasm_simulator',evaluator_info=evaluator_info)
 
     # print('Evaluating qasm + noise')
@@ -31,7 +32,8 @@ def evaluate_full_circ(circ, device_name):
 
     print('Evaluating on hardware')
     evaluator_info = get_evaluator_info(circ=circ,device_name=device_name,
-    fields=['device','basis_gates','coupling_map','properties','initial_layout','num_shots'])
+    fields=['device','basis_gates','coupling_map','properties','initial_layout'])
+    evaluator_info['num_shots'] = num_shots
     if np.power(2,len(circ.qubits))<evaluator_info['device'].configuration().max_experiments/3*2:
         _evaluator_info = get_evaluator_info(circ=circ,device_name=device_name,fields=['meas_filter'])
         evaluator_info.update(_evaluator_info)
@@ -61,7 +63,8 @@ if __name__ == '__main__':
     device_size = len(device_properties['properties'].qubits)
 
     # NOTE: toggle circuits to benchmark
-    dimension_l = [[2,2],[2,3],[3,3],[2,5],[3,4],[4,4],[4,5]]
+    # dimension_l = [[2,2],[2,3],[3,3],[2,5],[3,4],[4,4],[4,5]]
+    dimension_l = [[2,2],[2,3]]
     dirname = './benchmark_data'
     if not os.path.exists(dirname):
         os.mkdir(dirname)
