@@ -68,7 +68,16 @@ class Basic_Model(object):
                 self.model.addConstr(self.edge_vars[i][e] >= v_node_var-u_node_var)
                 self.model.addConstr(self.edge_vars[i][e] <= 2-u_node_var-v_node_var)
 
-        # symmetry-breaking constraints
+        # Better (but not best) symmetry-breaking constraints
+        #   Force small-numbered vertices into small-numbered clusters:
+        #     v0: in cluster 0
+        #     v1: in c0 or c1
+        #     v2: in c0 or c1 or c2
+        #     ....
+        for c in range(k):
+            self.model.addConstr(quicksum([self.node_vars[j][c] for j in range(c+1,k)]) == 0)
+
+        # Previous symmetry-breaking constraints
         # TODO: this does not break all the symmetries, is this necessary?
         # self.model.addConstr(self.node_vars[0][0], GRB.EQUAL, 1)
         # for i in range(2, k):
@@ -343,7 +352,7 @@ def find_cuts(circ, num_clusters = range(1,5), hw_max_qubit=20,evaluator_weight=
 
 if __name__ == '__main__':
     circ = gen_supremacy(4,4,8)
-    hardness, positions, K, d, num_cluster, m = find_cuts(circ,num_clusters=[1],hw_max_qubit=16)
+    hardness, positions, K, d, num_cluster, m = find_cuts(circ,num_clusters=[5],hw_max_qubit=16)
     m.print_stat()
     fragments, complete_path_map, K, d = cutter.cut_circuit(circ, positions)
     print('Testing in cutter:')
