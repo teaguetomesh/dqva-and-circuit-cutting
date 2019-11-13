@@ -15,7 +15,7 @@ if __name__ == '__main__':
 
     for x in provider.backends():
         if 'qasm' not in str(x):
-            evaluator_info = get_evaluator_info(circ=None,device_name=str(x),fields=['properties'])
+            evaluator_info = get_evaluator_info(circ=None,device_name=str(x),fields=['properties'],accuracy=None)
             num_qubits = len(evaluator_info['properties'].qubits)
             print('%s: %d-qubit, max %d jobs * %d shots'%(x,num_qubits,x.configuration().max_experiments,x.configuration().max_shots))
             # plot_error_map(x).savefig('./plots/%s_error_map.png'%str(x))

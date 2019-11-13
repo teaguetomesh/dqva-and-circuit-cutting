@@ -15,7 +15,7 @@ def evaluate_full_circ(circ, device_name):
     sv_noiseless_fc = evaluate_circ(circ=circ,backend='statevector_simulator',evaluator_info=None)
 
     print('Evaluating qasm')
-    evaluator_info = get_evaluator_info(circ=circ,device_name=device_name,fields=['num_shots'])
+    evaluator_info = get_evaluator_info(circ=circ,device_name=device_name,fields=['num_shots'],accuracy=1e-1)
     num_shots = evaluator_info['num_shots']
     print('evaluator fields:',evaluator_info.keys(),'Saturated = %.3e shots'%num_shots)
     qasm_noiseless_fc = evaluate_circ(circ=circ,backend='noiseless_qasm_simulator',evaluator_info=evaluator_info)
@@ -32,10 +32,10 @@ def evaluate_full_circ(circ, device_name):
 
     print('Evaluating on hardware')
     evaluator_info = get_evaluator_info(circ=circ,device_name=device_name,
-    fields=['device','basis_gates','coupling_map','properties','initial_layout'])
+    fields=['device','basis_gates','coupling_map','properties','initial_layout'],accuracy=None)
     evaluator_info['num_shots'] = num_shots
     if np.power(2,len(circ.qubits))<evaluator_info['device'].configuration().max_experiments/3*2:
-        _evaluator_info = get_evaluator_info(circ=circ,device_name=device_name,fields=['meas_filter'])
+        _evaluator_info = get_evaluator_info(circ=circ,device_name=device_name,fields=['meas_filter'],accuracy=None)
         evaluator_info.update(_evaluator_info)
     print('evaluator fields:',evaluator_info.keys(),'Saturated = %.3e shots'%evaluator_info['num_shots'])
     execute_begin = time()
@@ -59,14 +59,12 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     device_name = args.device_name
-    device_properties = get_evaluator_info(circ=None,device_name=device_name,fields=['properties'])
+    device_properties = get_evaluator_info(circ=None,device_name=device_name,fields=['properties'],accuracy=None)
     device_size = len(device_properties['properties'].qubits)
 
     # NOTE: toggle circuits to benchmark
     dimension_l = [[2,2],[2,3],[2,4],[2,5],[3,4],[2,7],[4,4],[3,6]]
-    dirname = './benchmark_data'
-    if not os.path.exists(dirname):
-        os.mkdir(dirname)
+    dimension_l = [[2,3]]
 
     evaluator_input = {}
     full_circs = {}
@@ -111,6 +109,11 @@ if __name__ == '__main__':
                     fc_evaluations, num_shots = evaluate_full_circ(circ,device_name)
                     full_circs[(i*j)] = circ, fc_evaluations, num_shots
                     evaluator_input[(hw_max_qubit,i*j)] = dimension,num_shots,searcher_time,circ,fc_evaluations,clusters,complete_path_map
-            pickle.dump(evaluator_input,open('{}/evaluator_input_{}.p'.format(dirname,device_name),'wb'))
-            print('Evaluator input cases:',evaluator_input.keys())
+            try:
+                curr_evaluator_input = pickle.load(open('./benchmark_data/evaluator_input_{}.p'.format(device_name), 'rb' ))
+            except:
+                curr_evaluator_input = {}
+            curr_evaluator_input[(hw_max_qubit,i*j)] = evaluator_input[(hw_max_qubit,i*j)]
+            pickle.dump(curr_evaluator_input,open('./benchmark_data/evaluator_input_{}.p'.format(device_name),'wb'))
+            print('Evaluator input cases:',curr_evaluator_input.keys())
             print('-'*100)

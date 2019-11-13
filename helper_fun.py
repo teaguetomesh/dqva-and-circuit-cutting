@@ -275,7 +275,7 @@ def tensored_readout_mitigation(num_shots,device,initial_layout):
     print('%.3e seconds'%filter_time)
     return meas_filter
 
-def get_evaluator_info(circ,device_name,fields):
+def get_evaluator_info(circ,device_name,fields,accuracy):
     provider = load_IBMQ()
     device = provider.get_backend(device_name)
     properties = device.properties()
@@ -300,13 +300,12 @@ def get_evaluator_info(circ,device_name,fields):
         noise_mapper = NoiseAdaptiveLayout(properties)
         noise_mapper.run(dag)
         initial_layout = noise_mapper.property_set['layout']
-        _evaluator_info['initial_layout'] = initial_layout
-        num_shots = find_saturated_shots(circ,5e-1)
         meas_filter = readout_mitigation(device,initial_layout)
         _evaluator_info['meas_filter'] = meas_filter
-        _evaluator_info['num_shots'] = num_shots
     elif 'num_shots' in fields:
-        num_shots = find_saturated_shots(circ,5e-1)
+        assert accuracy != None
+        num_shots = find_saturated_shots(circ,accuracy)
+        num_shots = min(num_shots,_evaluator_info['device'].configuration().max_shots*10)
         _evaluator_info['num_shots'] = num_shots
 
     evaluator_info = {}

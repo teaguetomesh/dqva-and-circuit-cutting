@@ -230,7 +230,7 @@ class Basic_Model(object):
         print('objective value:', self.objective)
         print('manually calculated objective value:', self.evaluator_weight*evaluator_cost_verify+(1-self.evaluator_weight)*uniter_cost_verify)
         # print('mip gap:', self.mip_gap)
-        # print('runtime:', self.runtime)
+        print('runtime:', self.runtime)
 
         if (self.optimal):
             print('OPTIMAL')

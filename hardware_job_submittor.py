@@ -93,7 +93,7 @@ if __name__ == '__main__':
             cluster_instances = job_submittor_input[case]['all_cluster_prob'][cluster_idx]
             print('Cluster %d has %d instances'%(cluster_idx,len(cluster_instances)))
             evaluator_info = get_evaluator_info(circ=cluster_circ,device_name=device_name,
-            fields=['device','basis_gates','coupling_map','properties','initial_layout','noise_model','num_shots','meas_filter'])
+            fields=['device','basis_gates','coupling_map','properties','initial_layout','noise_model','num_shots','meas_filter'],accuracy=1e-1)
             max_experiments = int(evaluator_info['device'].configuration().max_experiments/2)
             hw_begin = time()
             hw_probs = {}
@@ -113,7 +113,12 @@ if __name__ == '__main__':
             hw_elapsed = time()-hw_begin
             print('Hardware queue time = %.3e seconds'%hw_elapsed)
             job_submittor_output[case]['all_cluster_prob'][cluster_idx] = copy.deepcopy(hw_probs)
-        pickle.dump(job_submittor_output, open('%s'%filename,'wb'))
-        print('Job submittor output has %d cases'%len(job_submittor_output))
+        try:
+            curr_job_submittor_output = pickle.load(open('%s'%filename, 'rb' ))
+        except:
+            curr_job_submittor_output = {}
+        curr_job_submittor_output[case] = job_submittor_output[case]
+        pickle.dump(curr_job_submittor_output, open('%s'%filename,'wb'))
+        print('Job submittor output has %d cases'%len(curr_job_submittor_output))
         print('*'*50)
     print('-'*100)

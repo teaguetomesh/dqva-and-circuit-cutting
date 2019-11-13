@@ -219,7 +219,7 @@ if __name__ == '__main__':
                             len(rank_combinations[key][cluster_idx]),elapsed_time))
                     elif args.evaluation_method == 'noisy_qasm_simulator':
                         evaluator_info = get_evaluator_info(circ=clusters[cluster_idx],device_name=device_name,
-                        fields=['device','basis_gates','coupling_map','properties','initial_layout','noise_model','num_shots'])
+                        fields=['device','basis_gates','coupling_map','properties','initial_layout','noise_model','num_shots'],accuracy=1e-1)
                         quantum_evaluator_begin = time()
                         if not args.saturated_shots:
                             rank_shots = int(num_shots/len(rank_combinations[key][cluster_idx])/num_workers)+1
@@ -234,16 +234,11 @@ if __name__ == '__main__':
                                 rank,key,cluster_idx,len(clusters[cluster_idx].qubits),
                                 len(rank_combinations[key][cluster_idx]),device_name,'saturated' if args.saturated_shots else 'same_total',evaluator_info['num_shots'], elapsed_time))
                     elif args.evaluation_method == 'hardware':
-                        evaluator_info = get_evaluator_info(circ=clusters[cluster_idx],device_name=device_name,
-                        fields=['device','basis_gates','coupling_map','properties','initial_layout','num_shots'])
                         quantum_evaluator_begin = time()
-                        if not args.saturated_shots:
-                            rank_shots = int(num_shots/len(rank_combinations[key][cluster_idx])/num_workers)+1
-                            evaluator_info['num_shots'] = rank_shots
                         cluster_prob = evaluate_cluster(complete_path_map=complete_path_map,
                         cluster_circ=clusters[cluster_idx],
                         combinations=rank_combinations[key][cluster_idx],
-                        backend='hardware',evaluator_info=evaluator_info)
+                        backend='hardware',evaluator_info=None)
                         elapsed_time = time()-quantum_evaluator_begin
                         rank_quantum_time[key] += elapsed_time
                         print('case {}, cluster_{} {}_qubits * {}_instances on {} QUANTUM HARDWARE, {} shots = {}'.format(
