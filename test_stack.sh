@@ -12,6 +12,6 @@ echo "Running job submittor"
 python hardware_job_submittor.py --saturated-shots --device-name ibmq_boeblingen 2>&1 | tee ./logs/hw_job_submittor_logs.txt
 
 echo "Running reconstruction"
-python uniter_prob.py --device-name ibmq_boeblingen --evaluation-method hardware --saturated-shots 2>&1 | tee ./logs/uniter_logs.txt
+python uniter_prob.py --evaluation-method hardware --saturated-shots --device-name ibmq_boeblingen 2>&1 | tee ./logs/uniter_logs.txt
 
 python plot.py 2>&1 | tee ./logs/plotter_logs.txt
