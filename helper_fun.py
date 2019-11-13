@@ -302,7 +302,8 @@ def get_evaluator_info(circ,device_name,fields,accuracy):
         initial_layout = noise_mapper.property_set['layout']
         meas_filter = readout_mitigation(device,initial_layout)
         _evaluator_info['meas_filter'] = meas_filter
-    elif 'num_shots' in fields:
+    
+    if 'num_shots' in fields:
         assert accuracy != None
         num_shots = find_saturated_shots(circ,accuracy)
         num_shots = min(num_shots,_evaluator_info['device'].configuration().max_shots*10)

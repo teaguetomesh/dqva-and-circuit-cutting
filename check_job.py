@@ -19,7 +19,7 @@ if __name__ == '__main__':
             num_qubits = len(evaluator_info['properties'].qubits)
             print('%s: %d-qubit, max %d jobs * %d shots'%(x,num_qubits,x.configuration().max_experiments,x.configuration().max_shots))
             # plot_error_map(x).savefig('./plots/%s_error_map.png'%str(x))
-            if str(x) == 'ibmq_boeblingen':
+            if num_qubits==20:
                 for job in x.jobs():
                     if job.status() != JobStatus['RUNNING']:
                         print(job.creation_date(),job.status(),job.error_message(),job.job_id())

@@ -241,9 +241,9 @@ if __name__ == '__main__':
                         backend='hardware',evaluator_info=None)
                         elapsed_time = time()-quantum_evaluator_begin
                         rank_quantum_time[key] += elapsed_time
-                        print('case {}, cluster_{} {}_qubits * {}_instances on {} QUANTUM HARDWARE, {} shots = {}'.format(
+                        print('case {}, cluster_{} {}_qubits * {}_instances on {} QUANTUM HARDWARE, {} shots'.format(
                                 key,cluster_idx,len(clusters[cluster_idx].qubits),
-                                len(rank_combinations[key][cluster_idx]),device_name,'saturated' if args.saturated_shots else 'same_total',evaluator_info['num_shots']))
+                                len(rank_combinations[key][cluster_idx]),device_name,'saturated' if args.saturated_shots else 'same_total'))
                     else:
                         raise Exception('Illegal evaluation method:',args.evaluation_method)
                     rank_results[key][cluster_idx] = cluster_prob
