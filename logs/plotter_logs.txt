@@ -1,0 +1,9 @@
+repetition  0
+case (3, 4): percentage reduction = 42.16350150270756, reconstruction time: 8.409e-03
+case (4, 6): percentage reduction = 77.03130011111013, reconstruction time: 7.772e-03
+case (5, 6): percentage reduction = 50.94152201591289, reconstruction time: 1.635e-02
+**************************************************
+Full circuit size 4. Best case (3, 4). Cross entropy reduction = 42.164%. Reconstruction time = 8.409e-03 seconds.
+Full circuit size 6. Best case (4, 6). Cross entropy reduction = 77.031%. Reconstruction time = 7.772e-03 seconds.
+plotting ./plots/hardware_ibmq_boeblingen_saturated.p, 1 times average
+----------------------------------------------------------------------------------------------------
