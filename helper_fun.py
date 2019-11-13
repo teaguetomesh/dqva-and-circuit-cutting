@@ -301,12 +301,12 @@ def get_evaluator_info(circ,device_name,fields):
         noise_mapper.run(dag)
         initial_layout = noise_mapper.property_set['layout']
         _evaluator_info['initial_layout'] = initial_layout
-        num_shots = find_saturated_shots(circ,1e-1)
+        num_shots = find_saturated_shots(circ,5e-1)
         meas_filter = readout_mitigation(device,initial_layout)
         _evaluator_info['meas_filter'] = meas_filter
         _evaluator_info['num_shots'] = num_shots
     elif 'num_shots' in fields:
-        num_shots = find_saturated_shots(circ,1e-1)
+        num_shots = find_saturated_shots(circ,5e-1)
         _evaluator_info['num_shots'] = num_shots
 
     evaluator_info = {}

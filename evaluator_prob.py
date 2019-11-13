@@ -222,7 +222,7 @@ if __name__ == '__main__':
                         fields=['device','basis_gates','coupling_map','properties','initial_layout','noise_model','num_shots'])
                         quantum_evaluator_begin = time()
                         if not args.saturated_shots:
-                            rank_shots = max(int(num_shots/len(rank_combinations[key][cluster_idx])/num_workers)+1,1000)
+                            rank_shots = int(num_shots/len(rank_combinations[key][cluster_idx])/num_workers)+1
                             evaluator_info['num_shots'] = rank_shots
                         cluster_prob = evaluate_cluster(complete_path_map=complete_path_map,
                         cluster_circ=clusters[cluster_idx],
@@ -238,7 +238,7 @@ if __name__ == '__main__':
                         fields=['device','basis_gates','coupling_map','properties','initial_layout','num_shots'])
                         quantum_evaluator_begin = time()
                         if not args.saturated_shots:
-                            rank_shots = max(int(num_shots/len(rank_combinations[key][cluster_idx])/num_workers)+1,1000)
+                            rank_shots = int(num_shots/len(rank_combinations[key][cluster_idx])/num_workers)+1
                             evaluator_info['num_shots'] = rank_shots
                         cluster_prob = evaluate_cluster(complete_path_map=complete_path_map,
                         cluster_circ=clusters[cluster_idx],
