@@ -74,7 +74,7 @@ if __name__ == '__main__':
     for hw_max_qubit in range(args.min_qubit,args.max_qubit+1):
         for dimension in dimension_l:
             i,j = dimension
-            if i*j<=hw_max_qubit or i*j>device_size:
+            if i*j<=hw_max_qubit or i*j>device_size or (hw_max_qubit-1)*args.max_clusters<i*j:
                 continue
             
             print('-'*100)
