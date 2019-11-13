@@ -1,20 +1,40 @@
-from .supremacy import Qgrid
-from .supremacy import Qbit
-#from .ansatz import HWEA
+from .Supremacy import Qgrid_original, Qgrid_Sycamore
 from .QAOA import hw_efficient_ansatz
 from .VQE import uccsd_ansatz
 from .QFT import qft_circ
+from .QWalk import quantum_walk
+from .Dynamics import quantum_dynamics
+from .BernsteinVazirani import bernstein_vazirani
 
 def gen_supremacy(height, width, depth, order=None, singlegates=True,
-                  mirror=True, barriers=False, measure=False, regname=None):
+                  mirror=False, barriers=False, measure=False, regname=None):
     """
     Calling this function will create and return a quantum supremacy
-    circuit as found in https://www.nature.com/articles/s41567-018-0124-x
+    circuit based on the implementations in
+    https://www.nature.com/articles/s41567-018-0124-x and
+    https://github.com/sboixo/GRCS.
     """
 
-    grid = Qgrid.Qgrid(height, width, depth, order=order,
-                       singlegates=singlegates, mirror=mirror,
-                       barriers=barriers, measure=measure, regname=regname)
+    grid = Qgrid_original.Qgrid(height, width, depth, order=order,
+                                mirror=mirror, singlegates=singlegates,
+                                barriers=barriers, measure=measure,
+                                regname=regname)
+
+    circ = grid.gen_circuit()
+
+    return circ
+
+
+def gen_sycamore(height, width, depth, order=None, singlegates=True,
+                  barriers=False, measure=False, regname=None):
+    """
+    Calling this function will create and return a quantum supremacy
+    circuit as found in https://www.nature.com/articles/s41586-019-1666-5
+    """
+
+    grid = Qgrid_Sycamore.Qgrid(height, width, depth, order=order,
+                                singlegates=singlegates, barriers=barriers,
+                                measure=measure, regname=regname)
 
     circ = grid.gen_circuit()
 
@@ -64,4 +84,50 @@ def gen_qft(width, inverse=False, kvals=False, barriers=True, measure=False,
     circ = qft.gen_circuit()
 
     return circ
+
+
+def gen_qwalk(n, barriers=True, regname=None):
+    """
+    Generate a quantum walk circuit with specified value of n
+    """
+
+    qwalk = quantum_walk.QWALK(n, barriers=barriers, regname=regname)
+
+    circ = qwalk.gen_circuit()
+
+    return circ
+
+
+def gen_dynamics(H, barriers=True, measure=False, regname=None):
+    """
+    Generate a circuit to simulate the dynamics of a given Hamiltonian
+    """
+
+    dynamics = quantum_dynamics.Dynamics(H, barriers=barriers, measure=measure,
+                                         regname=regname)
+
+    circ = dynamics.gen_circuit()
+
+    return circ
+
+
+def gen_BV(secret=None, barriers=True,  measure=False, regname=None):
+    """
+    Generate an instance of the Bernstein-Vazirani algorithm which queries a
+    black-box oracle once to discover the secret key in:
+
+    f(x) = x . secret (mod 2)
+
+    The user must specify the secret bitstring to use: e.g. 00111001
+    (It can be given as a string or integer)
+    """
+
+    bv = bernstein_vazirani.BV(secret=secret, barriers=barriers,
+                               measure=measure, regname=regname)
+
+    circ = bv.gen_circuit()
+
+    return circ
+
+
 

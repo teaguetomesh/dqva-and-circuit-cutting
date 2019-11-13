@@ -27,7 +27,7 @@ def load_IBMQ():
 
 def cross_entropy(target,obs):
     assert len(target)==len(obs)
-    # obs = [x if x>=0 else 0 for x in obs]
+    obs = [abs(x) for x in obs]
     alpha = 1e-14
     if 0 in obs:
         obs = [(x+alpha)/(1+alpha*len(obs)) for x in obs]
@@ -39,33 +39,32 @@ def cross_entropy(target,obs):
             h += -p*np.log(q)
     return h
 
-def find_saturated_shots(circ,device,basis_gates,coupling_map,properties,initial_layout,noise_model):
+def find_saturated_shots(circ,accuracy):
     ground_truth = evaluate_circ(circ=circ,backend='statevector_simulator',evaluator_info=None)
-    noisy_prob = [0 for i in ground_truth]
+    min_ce = cross_entropy(target=ground_truth,obs=ground_truth)
+    qasm_prob = [0 for i in ground_truth]
     shots_increment = 1024
     evaluator_info = {}
     evaluator_info['num_shots'] = shots_increment
-    evaluator_info['device'] = device
-    evaluator_info['basis_gates'] = basis_gates
-    evaluator_info['coupling_map'] = coupling_map
-    evaluator_info['properties'] = properties
-    evaluator_info['initial_layout'] = initial_layout
-    evaluator_info['noise_model'] = noise_model
     counter = 0.0
-    ce_list = []
     while 1:
         counter += 1.0
-        noisy_prob_batch = evaluate_circ(circ=circ,backend='noisy_qasm_simulator',evaluator_info=evaluator_info)
-        noisy_prob = [(x*(counter-1)+y)/counter for x,y in zip(noisy_prob,noisy_prob_batch)]
-        ce = cross_entropy(target=ground_truth,obs=noisy_prob)
-        ce_list.append(ce)
-        if len(ce_list)>1:
-            change = abs((ce_list[-1]-ce_list[-2])/ce_list[-2])
-            # NOTE: toggle here to change saturated shots termination condition
-            if change <= 1e-2:
-                return int(counter*shots_increment)
-        if counter%10==9:
-            print('Accumulated %d shots'%(int(counter*shots_increment)))
+        qasm_prob_batch = evaluate_circ(circ=circ,backend='noiseless_qasm_simulator',evaluator_info=evaluator_info)
+        qasm_prob = [(x*(counter-1)+y)/counter for x,y in zip(qasm_prob,qasm_prob_batch)]
+        ce = cross_entropy(target=ground_truth,obs=qasm_prob)
+        diff = abs((ce-min_ce)/min_ce)
+        if diff < accuracy:
+            return int(counter*shots_increment)
+        if counter%50==49:
+            print('current diff:',diff,'current shots:',int(counter*shots_increment))
+
+def apply_measurement(circ):
+    c = ClassicalRegister(len(circ.qubits), 'c')
+    meas = QuantumCircuit(circ.qregs[0], c)
+    meas.barrier(circ.qubits)
+    meas.measure(circ.qubits,c)
+    qc = circ+meas
+    return qc
 
 def reverseBits(num,bitSize): 
     binary = bin(num)
@@ -89,11 +88,7 @@ def evaluate_circ(circ, backend, evaluator_info):
     elif backend == 'noiseless_qasm_simulator':
         # print('using noiseless qasm simulator %d shots'%num_shots)
         backend = Aer.get_backend('qasm_simulator')
-        c = ClassicalRegister(len(circ.qubits), 'c')
-        meas = QuantumCircuit(circ.qregs[0], c)
-        meas.barrier(circ.qubits)
-        meas.measure(circ.qubits,c)
-        qc = circ+meas
+        qc = apply_measurement(circ)
 
         num_shots = evaluator_info['num_shots']
         noiseless_qasm_result = execute(qc, backend, shots=num_shots).result()
@@ -106,11 +101,7 @@ def evaluate_circ(circ, backend, evaluator_info):
     elif backend == 'noisy_qasm_simulator':
         # print('using noisy qasm simulator {} shots'.format(num_shots))
         backend = Aer.get_backend('qasm_simulator')
-        c = ClassicalRegister(len(circ.qubits), 'c')
-        meas = QuantumCircuit(circ.qregs[0], c)
-        meas.barrier(circ.qubits)
-        meas.measure(circ.qubits,c)
-        qc = circ+meas
+        qc=apply_measurement(circ)
         mapped_circuit = transpile(qc,
         backend=evaluator_info['device'], basis_gates=evaluator_info['basis_gates'], 
         coupling_map=evaluator_info['coupling_map'],backend_properties=evaluator_info['properties'],
@@ -121,38 +112,46 @@ def evaluate_circ(circ, backend, evaluator_info):
         coupling_map=evaluator_info['coupling_map'],
         basis_gates=evaluator_info['basis_gates'],
         shots=evaluator_info['num_shots']).result()
-        if 'meas_filter' in evaluator_info:
-            # print('Apply mitigation',end=' ')
-            mitigation_begin = time()
-            mitigated_results = evaluator_info['meas_filter'].apply(noisy_qasm_result)
-            noisy_counts = mitigated_results.get_counts(0)
-            # print('%.3e seconds'%(time()-mitigation_begin))
-        else:
-            noisy_counts = noisy_qasm_result.get_counts(qc)
+        assert 'meas_filter' not in evaluator_info
+        noisy_counts = noisy_qasm_result.get_counts(qc)
         noisy_prob = [0 for x in range(np.power(2,len(circ.qubits)))]
         for state in noisy_counts:
             reversed_state = reverseBits(int(state,2),len(circ.qubits))
             noisy_prob[reversed_state] = noisy_counts[state]/evaluator_info['num_shots']
         return noisy_prob
     elif backend == 'hardware':
-        c = ClassicalRegister(len(circ.qubits), 'c')
-        meas = QuantumCircuit(circ.qregs[0], c)
-        meas.barrier(circ.qubits)
-        meas.measure(circ.qubits,c)
-        qc = circ+meas
+        # TODO: split up shots here
+        qc=apply_measurement(circ)
 
-        new_circuit = transpile(qc,
+        mapped_circuit = transpile(qc,
         backend=evaluator_info['device'], basis_gates=evaluator_info['basis_gates'],
         coupling_map=evaluator_info['coupling_map'],backend_properties=evaluator_info['properties'],
         initial_layout=evaluator_info['initial_layout'])
-        qobj = assemble(new_circuit, backend=evaluator_info['device'], shots=evaluator_info['num_shots'])
-        job = evaluator_info['device'].run(qobj)
-        hw_result = job.result()
-        if 'meas_filter' in evaluator_info:
-            mitigated_results = evaluator_info['meas_filter'].apply(hw_result)
-            hw_counts = mitigated_results.get_counts(0)
-        else:
-            hw_counts = hw_result.get_counts(qc)
+
+        device_max_shots = evaluator_info['device'].configuration().max_shots
+        remaining_shots = evaluator_info['num_shots']
+        hw_counts = {}
+        while remaining_shots>0:
+            batch_shots = min(remaining_shots,device_max_shots)
+            qobj = assemble(mapped_circuit, backend=evaluator_info['device'], shots=batch_shots)
+            print('Submitted %d shots to hardware'%(batch_shots))
+            job = evaluator_info['device'].run(qobj)
+            hw_result = job.result()
+            if 'meas_filter' in evaluator_info:
+                print('Mitigation for %d qubit circuit'%(len(circ.qubits)))
+                mitigation_begin = time()
+                mitigated_results = evaluator_info['meas_filter'].apply(hw_result)
+                hw_counts_batch = mitigated_results.get_counts(0)
+                print('Mitigation for %d qubit circuit took %.3e seconds'%(len(circ.qubits),time()-mitigation_begin))
+            else:
+                hw_counts_batch = hw_result.get_counts(qc)
+            for state in hw_counts_batch:
+                if state not in hw_counts:
+                    hw_counts[state] = hw_counts_batch[state]
+                else:
+                    hw_counts[state] += hw_counts_batch[state]
+            remaining_shots -= batch_shots
+        
         hw_prob = [0 for x in range(np.power(2,len(circ.qubits)))]
         for state in hw_counts:
             reversed_state = reverseBits(int(state,2),len(circ.qubits))
@@ -180,7 +179,7 @@ def get_bprop():
     return bprop_noise_model
 
 # Entangled readout mitigation
-def readout_mitigation(circ,num_shots,device,initial_layout):
+def readout_mitigation(device,initial_layout):
     filter_begin = time()
     properties = device.properties()
     num_qubits = len(properties.qubits)
@@ -193,20 +192,25 @@ def readout_mitigation(circ,num_shots,device,initial_layout):
         if 'ancilla' not in _initial_layout[q].register.name:
             qubit_list.append(q)
     meas_calibs, state_labels = complete_meas_cal(qubit_list=qubit_list, qr=qr, circlabel='mcal')
+    num_shots = device.configuration().max_shots
+    print('Calculating measurement filter, %d-qubit calibration circuits * %d * %.3e shots.'%(len(meas_calibs[0].qubits),len(meas_calibs),num_shots),end=' ')
+    assert len(meas_calibs)<=device.configuration().max_experiments/3*2
 
     # Execute the calibration circuits
-    qobj = assemble(meas_calibs, backend=device, shots=num_shots)
+    meas_calibs_transpiled = transpile(meas_calibs, backend=device)
+    qobj = assemble(meas_calibs_transpiled, backend=device, shots=num_shots)
     job = device.run(qobj)
     cal_results = job.result()
 
     meas_fitter = CompleteMeasFitter(cal_results, state_labels, qubit_list=qubit_list, circlabel='mcal')
     meas_filter = meas_fitter.filter
     filter_time = time() - filter_begin
-    print('Calculating measurement filter, %d-qubit calibration circuits * %d * %.3e shots. %.3e seconds'%(len(meas_calibs[0].qubits),len(meas_calibs),num_shots,filter_time))
+    print('%.3e seconds'%filter_time)
     return meas_filter
 
-# Tensored readout mitigation
-def tensored_readout_mitigation(circ,num_shots,device,initial_layout):
+# Fully local readout mitigation
+def fully_local_readout_mitigation(device,initial_layout):
+    num_shots = device.configuration().max_shots
     filter_begin = time()
     properties = device.properties()
     num_qubits = len(properties.qubits)
@@ -219,15 +223,56 @@ def tensored_readout_mitigation(circ,num_shots,device,initial_layout):
         if 'ancilla' not in _initial_layout[q].register.name:
             mit_pattern.append([q])
     meas_calibs, state_labels = tensored_meas_cal(mit_pattern=mit_pattern, qr=qr, circlabel='mcal')
+    print('Calculating measurement filter, %d-qubit calibration circuits * %d * %.3e shots.'%(len(meas_calibs[0].qubits),len(meas_calibs),num_shots),end=' ')
 
     # Execute the calibration circuits
-    qobj = assemble(meas_calibs, backend=device, shots=num_shots)
+    meas_calibs_transpiled = transpile(meas_calibs, backend=device)
+    qobj = assemble(meas_calibs_transpiled, backend=device, shots=num_shots)
     job = device.run(qobj)
+    # print(job.job_id())
     cal_results = job.result()
+
     meas_fitter = TensoredMeasFitter(cal_results, mit_pattern=mit_pattern)
     meas_filter = meas_fitter.filter
     filter_time = time() - filter_begin
-    print('Calculating measurement filter, %d-qubit calibration circuits * %d * %.3e shots. %.3e seconds'%(len(meas_calibs[0].qubits),len(meas_calibs),num_shots,filter_time))
+    print('%.3e seconds'%filter_time)
+    return meas_filter
+
+# Tensored readout mitigation
+def tensored_readout_mitigation(num_shots,device,initial_layout):
+    num_shots = device.configuration().max_shots
+    filter_begin = time()
+    properties = device.properties()
+    max_group_len = int(np.log2(device.configuration().max_experiments/2))
+
+    # Generate the calibration circuits
+    num_qubits = len(properties.qubits)
+    qr = QuantumRegister(num_qubits)
+    mit_pattern = []
+    _initial_layout = initial_layout.get_physical_bits()
+    group = []
+    for q in _initial_layout:
+        if 'ancilla' not in _initial_layout[q].register.name:
+            if len(group) == max_group_len:
+                mit_pattern.append(group)
+                group = [q]
+            else:
+                group.append(q)
+    mit_pattern.append(group)
+    meas_calibs, state_labels = tensored_meas_cal(mit_pattern=mit_pattern, qr=qr, circlabel='mcal')
+    print('Calculating measurement filter, %d-qubit calibration circuits * %d * %.3e shots.'%(len(meas_calibs[0].qubits),len(meas_calibs),num_shots),end=' ')
+
+    # Execute the calibration circuits
+    meas_calibs_transpiled = transpile(meas_calibs, backend=device)
+    qobj = assemble(meas_calibs_transpiled, backend=device, shots=num_shots)
+    job = device.run(qobj)
+    # print(job.job_id())
+    cal_results = job.result()
+
+    meas_fitter = TensoredMeasFitter(cal_results, mit_pattern=mit_pattern)
+    meas_filter = meas_fitter.filter
+    filter_time = time() - filter_begin
+    print('%.3e seconds'%filter_time)
     return meas_filter
 
 def get_evaluator_info(circ,device_name,fields):
@@ -237,29 +282,35 @@ def get_evaluator_info(circ,device_name,fields):
     coupling_map = device.configuration().coupling_map
     noise_model = noise.device.basic_device_noise_model(properties)
     basis_gates = noise_model.basis_gates
-    dag = circuit_to_dag(circ)
-    noise_mapper = NoiseAdaptiveLayout(properties)
-    noise_mapper.run(dag)
-    initial_layout = noise_mapper.property_set['layout']
-    
-    evaluator_info = {'device':device,
+    _evaluator_info = {'device':device,
     'properties':properties,
     'coupling_map':coupling_map,
     'noise_model':noise_model,
-    'basis_gates':basis_gates,
-    'initial_layout':initial_layout}
+    'basis_gates':basis_gates}
+    
+    if 'initial_layout' in fields:
+        dag = circuit_to_dag(circ)
+        noise_mapper = NoiseAdaptiveLayout(properties)
+        noise_mapper.run(dag)
+        initial_layout = noise_mapper.property_set['layout']
+        _evaluator_info['initial_layout'] = initial_layout
 
     if 'meas_filter' in fields:
-        num_shots = find_saturated_shots(circ,device,basis_gates,coupling_map,properties,initial_layout,noise_model)
-        meas_filter = readout_mitigation(circ,num_shots,device,initial_layout)
-        evaluator_info['meas_filter'] = meas_filter
-        evaluator_info['num_shots'] = num_shots
+        dag = circuit_to_dag(circ)
+        noise_mapper = NoiseAdaptiveLayout(properties)
+        noise_mapper.run(dag)
+        initial_layout = noise_mapper.property_set['layout']
+        _evaluator_info['initial_layout'] = initial_layout
+        num_shots = find_saturated_shots(circ,5e-1)
+        meas_filter = readout_mitigation(device,initial_layout)
+        _evaluator_info['meas_filter'] = meas_filter
+        _evaluator_info['num_shots'] = num_shots
     elif 'num_shots' in fields:
-        num_shots = find_saturated_shots(circ,device,basis_gates,coupling_map,properties,initial_layout,noise_model)
-        evaluator_info['num_shots'] = num_shots
+        num_shots = find_saturated_shots(circ,5e-1)
+        _evaluator_info['num_shots'] = num_shots
 
-    _evaluator_info = {}
+    evaluator_info = {}
     for field in fields:
-        _evaluator_info[field] = evaluator_info[field]
+        evaluator_info[field] = _evaluator_info[field]
     
-    return _evaluator_info
+    return evaluator_info

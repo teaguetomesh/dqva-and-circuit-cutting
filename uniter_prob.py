@@ -8,6 +8,8 @@ import progressbar as pb
 from qiskit.quantum_info.states.measures import state_fidelity
 from scipy.stats import wasserstein_distance
 import argparse
+from helper_fun import cross_entropy
+import copy
 
 def find_cuts_pairs(complete_path_map):
     O_rho_pairs = []
@@ -276,22 +278,47 @@ def reconstruct(complete_path_map, full_circ, cluster_circs, cluster_sim_probs):
     # print('reconstruction len = ', len(reconstructed_prob),'probabilities sum = ', sum(reconstructed_prob))
     return reconstructed_prob
 
+def get_filename(device_name,saturated_shots,evaluation_method):
+    filename = None
+    if evaluation_method == 'hardware':
+        filename = './benchmark_data/hardware_uniter_input_{}'.format(device_name)
+        if saturated_shots:
+            filename = filename + '_saturated.p'
+        else:
+            filename = filename + '.p'
+    elif evaluation_method == 'statevector_simulator':
+        filename = './benchmark_data/classical_uniter_input_{}.p'.format(device_name)
+    elif evaluation_method == 'noisy_qasm_simulator':
+        filename = './benchmark_data/quantum_uniter_input_{}'.format(device_name)
+        if saturated_shots:
+            filename = filename + '_saturated.p'
+        else:
+            filename = filename + '.p'
+    else:
+        raise Exception('Illegal evaluation method:',evaluation_method)
+    return filename
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Uniter')
-    parser.add_argument('--input-file', metavar='S', type=str,help='which evaluator output file to run')
+    parser.add_argument('--device-name', metavar='S', type=str,help='which evaluator device output file to reconstruct')
+    parser.add_argument('--evaluation-method', metavar='S', type=str,help='which evaluator backend file to reconstruct')
+    parser.add_argument('--saturated-shots',action="store_true",help='run saturated number of cluster shots')
     args = parser.parse_args()
-    print('Reconstructing %s'%args.input_file)
+
+    input_file = get_filename(args.device_name,args.saturated_shots,args.evaluation_method)
+    filename = input_file.replace('uniter_input','plotter_input')
+    print('Reconstructing %s'%input_file)
 
     uniter_output = {}
-
-    evaluator_output = pickle.load(open(args.input_file, 'rb' ) )
+    evaluator_output = pickle.load(open(input_file, 'rb' ) )
     for case in evaluator_output:
+        print('case {}'.format(case))
         uniter_output[case] = {}
         num_shots = evaluator_output[case]['num_shots']
         searcher_time = evaluator_output[case]['searcher_time']
         circ = evaluator_output[case]['circ']
         clusters = evaluator_output[case]['clusters']
-        fc_evaluations = evaluator_output[case]['fc_evaluations']
+        evaluations = evaluator_output[case]['fc_evaluations']
         clusters = evaluator_output[case]['clusters']
         complete_path_map = evaluator_output[case]['complete_path_map']
         all_cluster_prob = evaluator_output[case]['all_cluster_prob']
@@ -299,18 +326,24 @@ if __name__ == '__main__':
         uniter_begin = time()
         reconstructed_prob = reconstruct(complete_path_map=complete_path_map, full_circ=circ, cluster_circs=clusters, cluster_sim_probs=all_cluster_prob)
         uniter_time = time()-uniter_begin
-        print('case {} reconstruction distance ='.format(case),wasserstein_distance(fc_evaluations['sv_noiseless'],reconstructed_prob))
-    
-        evaluations = fc_evaluations
-        evaluations['qasm+noise+cutting'] = reconstructed_prob
+        evaluations['cutting'] = reconstructed_prob
+        
+        ground_truth_ce = cross_entropy(target=evaluations['sv_noiseless'],obs=evaluations['sv_noiseless'])
+        fc_ce = cross_entropy(target=evaluations['sv_noiseless'],obs=evaluations['hw'])
+        cutting_ce = cross_entropy(target=evaluations['sv_noiseless'],obs=evaluations['cutting'])
+        percent_change = 100*(fc_ce-cutting_ce)/(fc_ce-ground_truth_ce)
+        distance = wasserstein_distance(evaluations['sv_noiseless'],evaluations['cutting'])
+        print('reconstruction distance = {}, percent reduction = {}, time = {:.3e}'.format(distance,percent_change,uniter_time))
 
-        uniter_output[case]['num_shots'] = num_shots
-        uniter_output[case]['circ'] = circ
-        uniter_output[case]['clusters'] = clusters
-        uniter_output[case]['evaluations'] = evaluations
-        uniter_output[case]['searcher_time'] = searcher_time
-        uniter_output[case]['classical_time'] = evaluator_output[case]['classical_time']
-        uniter_output[case]['quantum_time'] = evaluator_output[case]['quantum_time']
-        uniter_output[case]['uniter_time'] = uniter_time
-    filename = args.input_file.replace('uniter_input','plotter_input')
-    pickle.dump(uniter_output, open('%s'%filename,'ab'))
+        uniter_output[case]['num_shots'] = copy.deepcopy(num_shots)
+        uniter_output[case]['circ'] = copy.deepcopy(circ)
+        uniter_output[case]['clusters'] = copy.deepcopy(clusters)
+        uniter_output[case]['evaluations'] = copy.deepcopy(evaluations)
+        uniter_output[case]['searcher_time'] = copy.deepcopy(searcher_time)
+        uniter_output[case]['classical_time'] = copy.deepcopy(evaluator_output[case]['classical_time'])
+        uniter_output[case]['quantum_time'] = copy.deepcopy(evaluator_output[case]['quantum_time'])
+        uniter_output[case]['uniter_time'] = copy.deepcopy(uniter_time)
+        uniter_output[case]['percent_reduction'] = copy.deepcopy(percent_change)
+        pickle.dump(uniter_output, open('%s'%filename,'wb'))
+        print('Reconstruction output has %d cases'%(len(uniter_output)))
+        print('-'*100)

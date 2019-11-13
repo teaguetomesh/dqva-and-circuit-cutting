@@ -1,23 +1,23 @@
+rm -r ./logs
+mkdir logs
+rm -r benchmark_data
+mkdir benchmark_data
+rm -r plots
+mkdir plots
 # NOTE: toggle here to change max qc size, max clusters
-python generate_evaluator_input.py --min-qubit 3 --max-qubit 6 --max-clusters 5 --device-name ibmq_boeblingen
-EVALUATOR_FILES=./benchmark_data/evaluator_input_*.p
+echo "Generate evaluator input"
+python generate_evaluator_input.py --min-qubit 3 --max-qubit 9 --max-clusters 4 --device-name ibmq_boeblingen 2>&1 | tee ./logs/generator_logs.txt
 
-for i in {1..5};
-do
-    for f in $EVALUATOR_FILES;
-    do
-        # NOTE: toggle here to change cluster shots
-        mpiexec -n 20 python evaluator_prob.py --input-file $f --saturated-shots --evaluation-method noisy_qasm_simulator
+echo "Running evaluator"
+# mpiexec -n 5 python evaluator_prob.py --saturated-shots --evaluation-method statevector_simulator --device-name ibmq_boeblingen
 
-        UNITER_INPUT_FILE=./benchmark_data/*_uniter_input_*.p
-        python uniter_prob.py --input-file $UNITER_INPUT_FILE
-        rm $UNITER_INPUT_FILE
-    done
-done
+# mpiexec -n 5 python evaluator_prob.py --saturated-shots --evaluation-method noisy_qasm_simulator --device-name ibmq_boeblingen
 
-for f in $EVALUATOR_FILES;
-    do
-        rm $f
-    done
+mpiexec -n 2 python evaluator_prob.py --saturated-shots --evaluation-method hardware --device-name ibmq_boeblingen
+echo "Running job submittor"
+python hardware_job_submittor.py --saturated-shots --device-name ibmq_boeblingen 2>&1 | tee ./logs/hw_job_submittor_logs.txt
 
-python plot.py
+echo "Running reconstruction"
+python uniter_prob.py --device-name ibmq_boeblingen --evaluation-method hardware --saturated-shots 2>&1 | tee ./logs/uniter_logs.txt
+
+python plot.py 2>&1 | tee ./logs/plotter_logs.txt

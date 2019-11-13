@@ -97,9 +97,14 @@ def evaluate_cluster(complete_path_map, cluster_circ, combinations, backend, eva
         # print(cluster_circ_inst)
         if backend=='statevector_simulator':
             cluster_inst_prob = evaluate_circ(circ=cluster_circ_inst,backend=backend,evaluator_info=None)
-        else:
+            cluster_prob[(tuple(inits),tuple(meas))] = cluster_inst_prob
+        elif backend=='noisy_qasm_simulator':
             cluster_inst_prob = evaluate_circ(circ=cluster_circ_inst,backend=backend,evaluator_info=evaluator_info)
-        cluster_prob[(tuple(inits),tuple(meas))] = cluster_inst_prob
+            cluster_prob[(tuple(inits),tuple(meas))] = cluster_inst_prob
+        elif backend=='hardware':
+            cluster_prob[(tuple(inits),tuple(meas))] = cluster_circ_inst
+        else:
+            raise Exception('Illegal backend:',backend)
     return cluster_prob
 
 def find_rank_combinations(evaluator_input,rank,size):
@@ -129,7 +134,7 @@ def get_filename(input_file,saturated_shots,evaluation_method):
     elif evaluation_method == 'noisy_qasm_simulator':
         filename = input_file.replace('evaluator_input','quantum_uniter_input')
     elif evaluation_method == 'hardware':
-        filename = input_file.replace('evaluator_input','hardware_uniter_input')
+        filename = input_file.replace('evaluator_input','job_submittor_input')
     else:
         raise Exception('Illegal evaluation method :',evaluation_method)
     if evaluation_method != 'statevector_simulator' and saturated_shots:
@@ -145,7 +150,7 @@ def get_filename(input_file,saturated_shots,evaluation_method):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='MPI evaluator.')
-    parser.add_argument('--input-file', metavar='S', type=str,help='which evaluator input file to run')
+    parser.add_argument('--device-name', metavar='S', type=str,help='which evaluator device input file to run')
     parser.add_argument('--saturated-shots',action="store_true",help='run saturated number of cluster shots')
     parser.add_argument('--evaluation-method', metavar='S', type=str,help='which evaluator backend to use')
     args = parser.parse_args()
@@ -156,8 +161,9 @@ if __name__ == '__main__':
 
     num_workers = size - 1
 
-    evaluator_input = pickle.load(open(args.input_file, 'rb' ))
-    device_name = args.input_file.split('evaluator_input_')[1].split('.p')[0]
+    input_file = './benchmark_data/evaluator_input_{}.p'.format(args.device_name)
+    evaluator_input = pickle.load(open(input_file, 'rb' ))
+    device_name = args.device_name
 
     if rank == size-1:
         evaluator_output = {}
@@ -185,10 +191,9 @@ if __name__ == '__main__':
                 else:
                     for cluster_idx in evaluator_output[key]['all_cluster_prob']:
                         evaluator_output[key]['all_cluster_prob'][cluster_idx].update(rank_results[key][cluster_idx])
-        # quantum_eval = sum([evaluator_output[key]['quantum_time'] for key in evaluator_output])>0
-        # classical_eval = sum([evaluator_output[key]['classical_time'] for key in evaluator_output])>0
-        filename = get_filename(input_file=args.input_file,saturated_shots=args.saturated_shots,evaluation_method=args.evaluation_method)
+        filename = get_filename(input_file=input_file,saturated_shots=args.saturated_shots,evaluation_method=args.evaluation_method)
         pickle.dump(evaluator_output, open('%s'%filename,'wb'))
+        print('-'*100)
     else:
         rank_combinations = find_rank_combinations(evaluator_input,rank,size)
         rank_results = {}
@@ -214,10 +219,10 @@ if __name__ == '__main__':
                             len(rank_combinations[key][cluster_idx]),elapsed_time))
                     elif args.evaluation_method == 'noisy_qasm_simulator':
                         evaluator_info = get_evaluator_info(circ=clusters[cluster_idx],device_name=device_name,
-                        fields=['device','basis_gates','coupling_map','properties','initial_layout','noise_model','num_shots','meas_filter'])
+                        fields=['device','basis_gates','coupling_map','properties','initial_layout','noise_model','num_shots'])
                         quantum_evaluator_begin = time()
                         if not args.saturated_shots:
-                            rank_shots = max(int(num_shots/len(rank_combinations[key][cluster_idx])/num_workers)+1,1000)
+                            rank_shots = int(num_shots/len(rank_combinations[key][cluster_idx])/num_workers)+1
                             evaluator_info['num_shots'] = rank_shots
                         cluster_prob = evaluate_cluster(complete_path_map=complete_path_map,
                         cluster_circ=clusters[cluster_idx],
@@ -229,12 +234,11 @@ if __name__ == '__main__':
                                 rank,key,cluster_idx,len(clusters[cluster_idx].qubits),
                                 len(rank_combinations[key][cluster_idx]),device_name,'saturated' if args.saturated_shots else 'same_total',evaluator_info['num_shots'], elapsed_time))
                     elif args.evaluation_method == 'hardware':
-                        evaluator_info = get_evaluator_info(circ=circ,device_name=device_name,
-                        fields=['device','basis_gates','coupling_map','properties','initial_layout','noise_model','num_shots','meas_filter'])
-                        del evaluator_info['noise_model']
+                        evaluator_info = get_evaluator_info(circ=clusters[cluster_idx],device_name=device_name,
+                        fields=['device','basis_gates','coupling_map','properties','initial_layout','num_shots'])
                         quantum_evaluator_begin = time()
                         if not args.saturated_shots:
-                            rank_shots = max(int(num_shots/len(rank_combinations[key][cluster_idx])/num_workers)+1,1000)
+                            rank_shots = int(num_shots/len(rank_combinations[key][cluster_idx])/num_workers)+1
                             evaluator_info['num_shots'] = rank_shots
                         cluster_prob = evaluate_cluster(complete_path_map=complete_path_map,
                         cluster_circ=clusters[cluster_idx],
@@ -242,9 +246,9 @@ if __name__ == '__main__':
                         backend='hardware',evaluator_info=evaluator_info)
                         elapsed_time = time()-quantum_evaluator_begin
                         rank_quantum_time[key] += elapsed_time
-                        print('rank {} runs case {}, cluster_{} {}_qubits * {}_instances on {} QUANTUM HARDWARE, {} shots = {}, queue time  = {:.3e}'.format(
-                                rank,key,cluster_idx,len(clusters[cluster_idx].qubits),
-                                len(rank_combinations[key][cluster_idx]),device_name,'saturated' if args.saturated_shots else 'same_total',evaluator_info['num_shots'], elapsed_time))
+                        print('case {}, cluster_{} {}_qubits * {}_instances on {} QUANTUM HARDWARE, {} shots = {}'.format(
+                                key,cluster_idx,len(clusters[cluster_idx].qubits),
+                                len(rank_combinations[key][cluster_idx]),device_name,'saturated' if args.saturated_shots else 'same_total',evaluator_info['num_shots']))
                     else:
                         raise Exception('Illegal evaluation method:',args.evaluation_method)
                     rank_results[key][cluster_idx] = cluster_prob
