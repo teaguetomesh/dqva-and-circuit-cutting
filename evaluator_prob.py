@@ -13,7 +13,7 @@ import progressbar as pb
 from time import time
 from mpi4py import MPI
 import argparse
-from helper_fun import evaluate_circ, get_evaluator_info
+from helper_fun import evaluate_circ, get_evaluator_info, get_circ_saturated_shots
 import datetime as dt
 
 def find_cluster_O_rho_qubits(complete_path_map,cluster_idx):
@@ -112,7 +112,8 @@ def find_rank_combinations(evaluator_input,rank,size):
     rank_combinations = {}
     for case in evaluator_input:
         rank_combinations[case] = []
-        _,_,_,_,_,clusters,complete_path_map = evaluator_input[case]
+        clusters = evaluator_input[case]['clusters']
+        complete_path_map = evaluator_input[case]['complete_path_map']
         for cluster_idx, cluster_circ in enumerate(clusters):
             O_qubits, rho_qubits = find_cluster_O_rho_qubits(complete_path_map,cluster_idx)
             combinations = find_all_simulation_combinations(O_qubits, rho_qubits, len(cluster_circ.qubits))
@@ -167,30 +168,24 @@ if __name__ == '__main__':
 
     if rank == size-1:
         evaluator_output = {}
-        for key in evaluator_input:
-            dimension,num_shots,searcher_time,circ,fc_evaluations,clusters,complete_path_map = evaluator_input[key]
-            evaluator_output[key] = {}
-            evaluator_output[key]['num_shots'] = num_shots
-            evaluator_output[key]['circ'] = circ
-            evaluator_output[key]['clusters'] = clusters
-            evaluator_output[key]['searcher_time'] = searcher_time
-            evaluator_output[key]['classical_time'] = 0
-            evaluator_output[key]['quantum_time'] = 0
-            evaluator_output[key]['complete_path_map'] = complete_path_map
-            evaluator_output[key]['all_cluster_prob'] = {}
-            evaluator_output[key]['fc_evaluations'] = fc_evaluations
+        for case in evaluator_input:
+            # case_dict = {'full_circ':full_circ,'fc_evaluations':fc_evaluations,'total_shots':total_shots,
+            #     'searcher_time':searcher_time,'clusters':clusters,'complete_path_map':complete_path_map}
+            evaluator_output[case] = copy.deepcopy(evaluator_input[case])
+            evaluator_output[case]['classical_time'] = 0
+            evaluator_output[case]['quantum_time'] = 0
+            evaluator_output[case]['all_cluster_prob'] = {}
         for i in range(num_workers):
             state = MPI.Status()
             rank_results, rank_classical_time, rank_quantum_time = comm.recv(source=MPI.ANY_SOURCE,status=state)
-            for key in evaluator_output:
-                # FIXME: times should not simply be added
-                evaluator_output[key]['classical_time'] += rank_classical_time[key]
-                evaluator_output[key]['quantum_time'] += rank_quantum_time[key]
-                if evaluator_output[key]['all_cluster_prob'] == {}:
-                    evaluator_output[key]['all_cluster_prob'].update(rank_results[key])
+            for case in evaluator_output:
+                evaluator_output[case]['classical_time'] = max(evaluator_output[case]['classical_time'],rank_classical_time[case])
+                evaluator_output[case]['quantum_time'] = max(evaluator_output[case]['quantum_time'],rank_quantum_time[case])
+                if evaluator_output[case]['all_cluster_prob'] == {}:
+                    evaluator_output[case]['all_cluster_prob'].update(rank_results[case])
                 else:
-                    for cluster_idx in evaluator_output[key]['all_cluster_prob']:
-                        evaluator_output[key]['all_cluster_prob'][cluster_idx].update(rank_results[key][cluster_idx])
+                    for cluster_idx in evaluator_output[case]['all_cluster_prob']:
+                        evaluator_output[case]['all_cluster_prob'][cluster_idx].update(rank_results[case][cluster_idx])
         filename = get_filename(input_file=input_file,saturated_shots=args.saturated_shots,evaluation_method=args.evaluation_method)
         pickle.dump(evaluator_output, open('%s'%filename,'wb'))
         print('-'*100)
@@ -199,54 +194,57 @@ if __name__ == '__main__':
         rank_results = {}
         rank_classical_time = {}
         rank_quantum_time = {}
-        for key in rank_combinations:
-            rank_results[key] = {}
-            rank_quantum_time[key] = 0
-            rank_classical_time[key] = 0
-            dimension,num_shots,searcher_time,circ,fc_evaluations,clusters,complete_path_map = evaluator_input[key]
-            for cluster_idx in range(len(rank_combinations[key])):
-                if len(rank_combinations[key][cluster_idx]) > 0:
+        for case in rank_combinations:
+            rank_results[case] = {}
+            rank_quantum_time[case] = 0
+            rank_classical_time[case] = 0
+            clusters = evaluator_input[case]['clusters']
+            complete_path_map = evaluator_input[case]['complete_path_map']
+            total_shots = evaluator_input[case]['total_shots']
+            for cluster_idx in range(len(rank_combinations[case])):
+                if len(rank_combinations[case][cluster_idx]) > 0:
                     if args.evaluation_method == 'statevector_simulator':
                         classical_evaluator_begin = time()
                         cluster_prob = evaluate_cluster(complete_path_map=complete_path_map,
                         cluster_circ=clusters[cluster_idx],
-                        combinations=rank_combinations[key][cluster_idx],
+                        combinations=rank_combinations[case][cluster_idx],
                         backend='statevector_simulator',evaluator_info=None)
                         elapsed_time = time()-classical_evaluator_begin
-                        rank_classical_time[key] += elapsed_time
+                        rank_classical_time[case] += elapsed_time
                         print('rank {} runs case {}, cluster_{} {}_qubits * {}_instances on CLASSICAL, classical time = {:.3e}'.format(
-                            rank,key,cluster_idx,len(clusters[cluster_idx].qubits),
-                            len(rank_combinations[key][cluster_idx]),elapsed_time))
+                            rank,case,cluster_idx,len(clusters[cluster_idx].qubits),
+                            len(rank_combinations[case][cluster_idx]),elapsed_time))
                     elif args.evaluation_method == 'noisy_qasm_simulator':
                         evaluator_info = get_evaluator_info(circ=clusters[cluster_idx],device_name=device_name,
-                        fields=['device','basis_gates','coupling_map','properties','initial_layout','noise_model','num_shots'],accuracy=1e-1)
+                        fields=['device','basis_gates','coupling_map','properties','initial_layout','noise_model'])
                         quantum_evaluator_begin = time()
-                        if not args.saturated_shots:
-                            rank_shots = int(num_shots/len(rank_combinations[key][cluster_idx])/num_workers)+1
-                            evaluator_info['num_shots'] = rank_shots
+                        if args.saturated_shots:
+                            evaluator_info['num_shots'] = get_circ_saturated_shots(circ=clusters[cluster_idx],accuracy=1e-1)
+                        else:
+                            evaluator_info['num_shots'] = int(total_shots/len(rank_combinations[case][cluster_idx])/num_workers)+1
                         cluster_prob = evaluate_cluster(complete_path_map=complete_path_map,
                         cluster_circ=clusters[cluster_idx],
-                        combinations=rank_combinations[key][cluster_idx],
+                        combinations=rank_combinations[case][cluster_idx],
                         backend='noisy_qasm_simulator',evaluator_info=evaluator_info)
                         elapsed_time = time()-quantum_evaluator_begin
-                        rank_quantum_time[key] += elapsed_time
+                        rank_quantum_time[case] += elapsed_time
                         print('rank {} runs case {}, cluster_{} {}_qubits * {}_instances on {} QUANTUM SIMULATOR, {} shots = {}, quantum time  = {:.3e}'.format(
-                                rank,key,cluster_idx,len(clusters[cluster_idx].qubits),
-                                len(rank_combinations[key][cluster_idx]),device_name,'saturated' if args.saturated_shots else 'same_total',evaluator_info['num_shots'], elapsed_time))
+                                rank,case,cluster_idx,len(clusters[cluster_idx].qubits),
+                                len(rank_combinations[case][cluster_idx]),device_name,'saturated' if args.saturated_shots else 'same_total',evaluator_info['num_shots'], elapsed_time))
                     elif args.evaluation_method == 'hardware':
                         quantum_evaluator_begin = time()
                         cluster_prob = evaluate_cluster(complete_path_map=complete_path_map,
                         cluster_circ=clusters[cluster_idx],
-                        combinations=rank_combinations[key][cluster_idx],
+                        combinations=rank_combinations[case][cluster_idx],
                         backend='hardware',evaluator_info=None)
                         elapsed_time = time()-quantum_evaluator_begin
-                        rank_quantum_time[key] += elapsed_time
+                        rank_quantum_time[case] += elapsed_time
                         print('case {}, cluster_{} {}_qubits * {}_instances on {} QUANTUM HARDWARE, {} shots'.format(
-                                key,cluster_idx,len(clusters[cluster_idx].qubits),
-                                len(rank_combinations[key][cluster_idx]),device_name,'saturated' if args.saturated_shots else 'same_total'))
+                                case,cluster_idx,len(clusters[cluster_idx].qubits),
+                                len(rank_combinations[case][cluster_idx]),device_name,'saturated' if args.saturated_shots else 'same_total'))
                     else:
                         raise Exception('Illegal evaluation method:',args.evaluation_method)
-                    rank_results[key][cluster_idx] = cluster_prob
+                    rank_results[case][cluster_idx] = cluster_prob
                 else:
-                    rank_results[key][cluster_idx] = {}
+                    rank_results[case][cluster_idx] = {}
         comm.send((rank_results,rank_classical_time,rank_quantum_time), dest=size-1)

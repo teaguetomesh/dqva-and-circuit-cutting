@@ -61,6 +61,25 @@ def find_cluster_O_rho_qubits(complete_path_map,cluster_idx):
                     rho_qubits.append(q)
     return O_qubits, rho_qubits
 
+def get_circ_saturated_shots(circ,accuracy):
+    ground_truth = evaluate_circ(circ=circ,backend='statevector_simulator',evaluator_info=None)
+    min_ce = cross_entropy(target=ground_truth,obs=ground_truth)
+    qasm_prob = [0 for i in ground_truth]
+    shots_increment = 1024
+    evaluator_info = {}
+    evaluator_info['num_shots'] = shots_increment
+    counter = 0.0
+    while 1:
+        counter += 1.0
+        qasm_prob_batch = evaluate_circ(circ=circ,backend='noiseless_qasm_simulator',evaluator_info=evaluator_info)
+        qasm_prob = [(x*(counter-1)+y)/counter for x,y in zip(qasm_prob,qasm_prob_batch)]
+        ce = cross_entropy(target=ground_truth,obs=qasm_prob)
+        diff = abs((ce-min_ce)/min_ce)
+        if counter%50==49:
+            print('current diff:',diff,'current shots:',int(counter*shots_increment))
+        if diff < accuracy:
+            return int(counter*shots_increment)
+
 def find_saturated_shots(clusters,complete_path_map,accuracy):
     total_shots = 0
     for cluster_idx, cluster_circ in enumerate(clusters):

@@ -21,7 +21,7 @@ if __name__ == '__main__':
             # plot_error_map(x).savefig('./plots/%s_error_map.png'%str(x))
             if num_qubits==20:
                 for job in x.jobs():
-                    if job.status() != JobStatus['RUNNING']:
+                    if job.status() in [JobStatus['DONE'],JobStatus['CANCELLED'],JobStatus['ERROR']]:
                         print(job.creation_date(),job.status(),job.error_message(),job.job_id())
                     else:
                         print(job.creation_date(),job.status(),job.job_id())

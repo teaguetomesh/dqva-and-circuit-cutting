@@ -293,7 +293,7 @@ def get_filename(device_name,saturated_shots,evaluation_method):
         if saturated_shots:
             filename = filename + '_saturated.p'
         else:
-            filename = filename + '.p'
+            filename = filename + '_sametotal.p'
     else:
         raise Exception('Illegal evaluation method:',evaluation_method)
     return filename
@@ -314,9 +314,9 @@ if __name__ == '__main__':
     for case in evaluator_output:
         print('case {}'.format(case))
         uniter_output[case] = {}
-        num_shots = evaluator_output[case]['num_shots']
+        num_shots = evaluator_output[case]['total_shots']
         searcher_time = evaluator_output[case]['searcher_time']
-        circ = evaluator_output[case]['circ']
+        circ = evaluator_output[case]['full_circ']
         clusters = evaluator_output[case]['clusters']
         evaluations = evaluator_output[case]['fc_evaluations']
         clusters = evaluator_output[case]['clusters']
