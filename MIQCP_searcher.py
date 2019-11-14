@@ -74,8 +74,8 @@ class Basic_Model(object):
         #     v1: in c0 or c1
         #     v2: in c0 or c1 or c2
         #     ....
-        for c in range(k):
-            self.model.addConstr(quicksum([self.node_vars[j][c] for j in range(c+1,k)]) == 0)
+        # for c in range(k):
+        #     self.model.addConstr(quicksum([self.node_vars[j][c] for j in range(c+1,k)]) == 0)
 
         # Previous symmetry-breaking constraints
         # TODO: this does not break all the symmetries, is this necessary?

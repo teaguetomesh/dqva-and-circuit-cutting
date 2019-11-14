@@ -61,9 +61,10 @@ if __name__ == '__main__':
     device_size = len(device_properties['properties'].qubits)
 
     # NOTE: toggle circuits to benchmark
-    dimension_l = [[2,2],[2,3],[2,4],[2,5],[3,4],[2,7],[4,4],[3,6]]
+    dimension_l = [[1,3],[2,2],[1,5],[2,3],[1,7],[2,4],[3,3]]
 
     full_circs = {}
+    all_total_shots = {}
     for cluster_max_qubit in range(args.min_qubit,args.max_qubit+1):
         for dimension in dimension_l:
             i,j = dimension
@@ -76,9 +77,11 @@ if __name__ == '__main__':
             print('Case',case)
 
             if full_circuit_size in full_circs:
-                full_circ = full_circs[full_circuit_size]['circ']
+                print('Use existing full circuit')
+                full_circ = full_circs[full_circuit_size]
             else:
                 full_circ = gen_supremacy(i,j,8)
+                full_circs[full_circuit_size] = full_circ
             
             searcher_begin = time()
             hardness, positions, ancilla, d, num_cluster, m = searcher.find_cuts(circ=full_circ,num_clusters=range(2,args.max_clusters+1),hw_max_qubit=cluster_max_qubit,evaluator_weight=1)
@@ -92,6 +95,7 @@ if __name__ == '__main__':
                 m.print_stat()
                 clusters, complete_path_map, K, d = cutter.cut_circuit(full_circ, positions)
                 total_shots = find_saturated_shots(clusters=clusters,complete_path_map=complete_path_map,accuracy=1e-1)
+                all_total_shots[case] = total_shots
                 fc_evaluations = evaluate_full_circ(full_circ,total_shots,device_name)
                 case_dict = {'full_circ':full_circ,'fc_evaluations':fc_evaluations,
                 'searcher_time':searcher_time,'clusters':clusters,'complete_path_map':complete_path_map}
@@ -103,3 +107,4 @@ if __name__ == '__main__':
             pickle.dump(evaluator_input,open('./benchmark_data/evaluator_input_{}.p'.format(device_name),'wb'))
             print('Evaluator input cases:',evaluator_input.keys())
             print('-'*100)
+    [print(case,all_total_shots[case]) for case in all_total_shots]

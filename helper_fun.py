@@ -63,7 +63,7 @@ def find_saturated_shots(clusters,complete_path_map,accuracy):
         ground_truth = evaluate_circ(circ=cluster_circ,backend='statevector_simulator',evaluator_info=None)
         min_ce = cross_entropy(target=ground_truth,obs=ground_truth)
         qasm_prob = [0 for i in ground_truth]
-        shots_increment = 1024
+        shots_increment = min(1024,10*int(np.power(2,len(cluster_circ.qubits))))
         evaluator_info = {'num_shots':shots_increment}
         counter = 0.0
         while 1:
@@ -79,7 +79,7 @@ def find_saturated_shots(clusters,complete_path_map,accuracy):
                 print('current diff:',diff,'current shots:',int(counter*shots_increment))
         assert num_shots!=None
         cluster_total_shots = num_instances*num_shots
-        print('cluster %d, cluster total shots = %d * %d = %d'%(cluster_idx,num_instances,num_shots,cluster_total_shots))
+        print('cluster %d, %d-qubit cluster total shots = %d * %d = %d'%(cluster_idx,len(cluster_circ.qubits),num_instances,num_shots,cluster_total_shots))
         total_shots = max(total_shots, cluster_total_shots)
     assert total_shots>0
     return total_shots
