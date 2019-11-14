@@ -39,6 +39,14 @@ def cross_entropy(target,obs):
             h += -p*np.log(q)
     return h
 
+def fidelity(target,obs):
+    assert len(target)==len(obs)
+    fidelity = 0
+    for t,o in zip(target,obs):
+        if t!= 0:
+            fidelity += o
+    return fidelity
+
 def find_cluster_O_rho_qubits(complete_path_map,cluster_idx):
     O_qubits = []
     rho_qubits = []

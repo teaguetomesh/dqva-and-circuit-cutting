@@ -1,5 +1,5 @@
 from qcg.generators import gen_supremacy, gen_hwea
-from helper_fun import evaluate_circ, cross_entropy, get_evaluator_info
+from helper_fun import evaluate_circ, cross_entropy, get_evaluator_info, fidelity
 import matplotlib
 import matplotlib.pyplot as plt
 from plot import heatmap, annotate_heatmap
@@ -41,14 +41,21 @@ def evaluate_full_circ(circ, total_shots, device_name):
     ground_truth_ce = cross_entropy(target=sv_noiseless_fc,obs=sv_noiseless_fc)
     qasm_noiseless_ce = cross_entropy(target=sv_noiseless_fc,obs=qasm_noiseless_fc)
     qasm_noise_ce = cross_entropy(target=sv_noiseless_fc,obs=qasm_noisy_fc)
-    noise_effect = (qasm_noise_ce - ground_truth_ce)/(qasm_noiseless_ce - ground_truth_ce)
+    noise_effect_ce = (qasm_noise_ce - ground_truth_ce)/(qasm_noiseless_ce - ground_truth_ce)
 
-    return noise_effect
+    ground_truth_fid = fidelity(target=sv_noiseless_fc,obs=sv_noiseless_fc)
+    assert ground_truth_fid == 1
+    qasm_noiseless_fid = fidelity(target=sv_noiseless_fc,obs=qasm_noiseless_fc)
+    assert qasm_noiseless_fid == 1
+    qasm_noise_fid = fidelity(target=sv_noiseless_fc,obs=qasm_noisy_fc)
+    noise_effect_fid = qasm_noise_fid
+
+    return noise_effect_fid
 
 if __name__ == '__main__':
 
     dimension_l = [[1,3],[2,2],[1,5],[2,3],[1,7],[2,4],[3,3]]
-    depths = [3,4,5,6,7,8]
+    depths = [1,2,3,4,5]
     widths = []
     percent_dict = {}
     num_trials = 3
@@ -62,7 +69,8 @@ if __name__ == '__main__':
                 case = (width,depth)
                 # print('Case',case)
 
-                full_circ = gen_supremacy(i,j,depth)
+                # full_circ = gen_supremacy(i,j,depth)
+                full_circ = gen_hwea(i*j,depth)
                 num_shots = find_saturated_shots(circ=full_circ,accuracy=5e-3)
                 
                 percent = evaluate_full_circ(circ=full_circ, total_shots=num_shots, device_name='ibmq_boeblingen')
@@ -90,7 +98,7 @@ if __name__ == '__main__':
     fig, ax = plt.subplots(figsize=(10,10))
 
     im, cbar = heatmap(data=data_map, row_labels=depths, col_labels=widths, ax=ax,
-                    cmap="YlGn", cbarlabel="Cross Entropy Loss Increase")
+                    cmap="YlGn", cbarlabel="Fidelity")
     texts = annotate_heatmap(im, valfmt="{x:.3f}")
     ax.set_xlabel('Circuit width')
     ax.set_ylabel('Circuit depth')
