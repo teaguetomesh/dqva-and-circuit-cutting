@@ -98,7 +98,7 @@ if __name__ == '__main__':
                 total_shots = find_saturated_shots(clusters=clusters,complete_path_map=complete_path_map,accuracy=1e-1)
                 all_total_shots[case] = total_shots
                 fc_evaluations = evaluate_full_circ(full_circ,total_shots,device_name)
-                case_dict = {'full_circ':full_circ,'fc_evaluations':fc_evaluations,
+                case_dict = {'full_circ':full_circ,'fc_evaluations':fc_evaluations,'total_shots':total_shots,
                 'searcher_time':searcher_time,'clusters':clusters,'complete_path_map':complete_path_map}
             try:
                 evaluator_input = pickle.load(open('./benchmark_data/evaluator_input_{}.p'.format(device_name), 'rb' ))
