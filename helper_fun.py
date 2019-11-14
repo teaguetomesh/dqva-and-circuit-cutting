@@ -91,7 +91,7 @@ def find_saturated_shots(clusters,complete_path_map,accuracy):
         print('cluster %d, %d-qubit cluster total shots = %d * %d = %d'%(cluster_idx,len(cluster_circ.qubits),num_instances,num_shots,cluster_total_shots))
         total_shots = max(total_shots, cluster_total_shots)
     assert total_shots>0
-    return total_shots
+    return int(total_shots)
 
 def apply_measurement(circ):
     c = ClassicalRegister(len(circ.qubits), 'c')
