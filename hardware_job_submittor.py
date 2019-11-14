@@ -117,7 +117,7 @@ if __name__ == '__main__':
             curr_job_submittor_output = pickle.load(open('%s'%filename, 'rb' ))
         except:
             curr_job_submittor_output = {}
-        curr_job_submittor_output[case] = job_submittor_output[case]
+        curr_job_submittor_output[case] = copy.deepcopy(job_submittor_output[case])
         pickle.dump(curr_job_submittor_output, open('%s'%filename,'wb'))
         print('Job submittor output has %d cases'%len(curr_job_submittor_output))
         print('*'*50)
