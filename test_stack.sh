@@ -17,6 +17,6 @@ mpiexec -n 2 python evaluator_prob.py --evaluation-method hardware --device-name
 echo "Running job submittor"
 python hardware_job_submittor.py --device-name ibmq_johannesburg --circuit-name supremacy 2>&1 | tee ./logs/hw_job_submittor_logs.txt
 echo "Running reconstruction"
-python uniter_prob.py --evaluation-method hardware --device-name ibmq_johannesburg 2>&1 | tee ./logs/uniter_logs.txt
+python uniter_prob.py --evaluation-method hardware --device-name ibmq_johannesburg --circuit-name supremacy 2>&1 | tee ./logs/uniter_logs.txt
 
 python plot.py
