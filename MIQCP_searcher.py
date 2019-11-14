@@ -74,8 +74,8 @@ class Basic_Model(object):
         #     v1: in c0 or c1
         #     v2: in c0 or c1 or c2
         #     ....
-        # for c in range(k):
-        #     self.model.addConstr(quicksum([self.node_vars[j][c] for j in range(c+1,k)]) == 0)
+        for c in range(k):
+            self.model.addConstr(quicksum([self.node_vars[j][c] for j in range(c+1,k)]) == 0)
 
         # Previous symmetry-breaking constraints
         # TODO: this does not break all the symmetries, is this necessary?
@@ -354,8 +354,8 @@ def find_cuts(circ, num_clusters = range(1,5), hw_max_qubit=20,evaluator_weight=
     return min_objective, best_positions, best_ancilla, best_d, best_num_cluster, best_model
 
 if __name__ == '__main__':
-    circ = gen_supremacy(4,4,8)
-    hardness, positions, K, d, num_cluster, m = find_cuts(circ,num_clusters=[5],hw_max_qubit=16)
+    circ = gen_supremacy(1,3,4)
+    hardness, positions, K, d, num_cluster, m = find_cuts(circ,num_clusters=[2],hw_max_qubit=2)
     m.print_stat()
     fragments, complete_path_map, K, d = cutter.cut_circuit(circ, positions)
     print('Testing in cutter:')
