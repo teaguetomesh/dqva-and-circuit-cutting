@@ -1,5 +1,5 @@
 from qiskit.compiler import transpile, assemble
-from helper_fun import load_IBMQ, readout_mitigation, get_evaluator_info
+from helper_fun import load_IBMQ, get_evaluator_info
 from qiskit.providers.aer import noise
 from qiskit import IBMQ
 from qiskit.providers.jobstatus import JobStatus
@@ -15,7 +15,7 @@ if __name__ == '__main__':
 
     for x in provider.backends():
         if 'qasm' not in str(x):
-            evaluator_info = get_evaluator_info(circ=None,device_name=str(x),fields=['properties'],accuracy=None)
+            evaluator_info = get_evaluator_info(circ=None,device_name=str(x),fields=['properties'])
             num_qubits = len(evaluator_info['properties'].qubits)
             print('%s: %d-qubit, max %d jobs * %d shots'%(x,num_qubits,x.configuration().max_experiments,x.configuration().max_shots))
             # plot_error_map(x).savefig('./plots/%s_error_map.png'%str(x))
