@@ -483,4 +483,4 @@ Evaluate full circuit, 34560 shots
 Evaluating fc state vector
 Evaluating fc qasm, 34560 shots
 Evaluating fc hardware, 34560 shots
-Calculating measurement filter, 20-qubit calibration circuits * 512 * 8.192e+03 shots. 
+Calculating measurement filter, 20-qubit calibration circuits * 512 * 8.192e+03 shots. Error checking job status using websocket, retrying using HTTP.

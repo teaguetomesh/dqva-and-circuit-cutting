@@ -2,7 +2,7 @@ import pickle
 import os
 from time import time
 import numpy as np
-from qcg.generators import gen_supremacy, gen_hwea
+from qcg.generators import gen_supremacy, gen_hwea, gen_BV, gen_qft
 import MIQCP_searcher as searcher
 import cutter
 from helper_fun import evaluate_circ, get_evaluator_info, find_saturated_shots
@@ -85,7 +85,7 @@ if __name__ == '__main__':
                 full_circs[full_circuit_size] = full_circ
             
             searcher_begin = time()
-            hardness, positions, ancilla, d, num_cluster, m = searcher.find_cuts(circ=full_circ,num_clusters=range(2,args.max_clusters),hw_max_qubit=cluster_max_qubit,evaluator_weight=1)
+            hardness, positions, ancilla, d, num_cluster, m = searcher.find_cuts(circ=full_circ,num_clusters=range(2,args.max_clusters+1),hw_max_qubit=cluster_max_qubit,evaluator_weight=1)
             searcher_time = time() - searcher_begin
             
             if m == None:
