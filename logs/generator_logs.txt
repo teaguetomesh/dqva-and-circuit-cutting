@@ -341,4 +341,146 @@ Evaluate full circuit, 34560 shots
 Evaluating fc state vector
 Evaluating fc qasm, 34560 shots
 Evaluating fc hardware, 34560 shots
+Calculating measurement filter, 20-qubit calibration circuits * 512 * 8.192e+03 shots. 4.693e+03 seconds
+Submitted 8192 shots to hardware
+Mitigation for 9 qubit circuit
+Mitigation for 9 qubit circuit took 7.515e+00 seconds
+Submitted 8192 shots to hardware
+Mitigation for 9 qubit circuit
+Mitigation for 9 qubit circuit took 7.486e+00 seconds
+Submitted 8192 shots to hardware
+Mitigation for 9 qubit circuit
+Mitigation for 9 qubit circuit took 7.538e+00 seconds
+Submitted 8192 shots to hardware
+Mitigation for 9 qubit circuit
+Mitigation for 9 qubit circuit took 7.410e+00 seconds
+Submitted 1792 shots to hardware
+Mitigation for 9 qubit circuit
+Mitigation for 9 qubit circuit took 6.677e+00 seconds
+Execute on hardware, 1.662e+03 seconds
+Evaluator input cases: dict_keys([(2, 3), (3, 4), (3, 5), (3, 6), (3, 7), (4, 5), (4, 6), (4, 7), (4, 8), (4, 9)])
+----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
+Case (5, 6)
+Use existing full circuit
+solving for 2 clusters
+solving for 3 clusters
+solving for 4 clusters
+********************
+MIQCP stats:
+2 cuts, 2 clusters, max qubit = 5
+cluster 0: original input = 4.00, rho qubits = 1.00, O qubits = 1.00, d = 5.00, K = 2.00
+cluster 1: original input = 2.00, rho qubits = 1.00, O qubits = 1.00, d = 3.00, K = 2.00
+objective value: 36.12355050256896
+manually calculated objective value: 36.0
+runtime: 0.10892987251281738
+OPTIMAL
+********************
+cluster 0, 5-qubit cluster total shots = 18 * 320 = 5760
+cluster 1, 3-qubit cluster total shots = 18 * 160 = 2880
+Evaluate full circuit, 5760 shots
+Evaluating fc state vector
+Evaluating fc qasm, 5760 shots
+Evaluating fc hardware, 5760 shots
+Calculating measurement filter, 20-qubit calibration circuits * 64 * 8.192e+03 shots. 1.705e+03 seconds
+Submitted 5760 shots to hardware
+Mitigation for 6 qubit circuit
+Mitigation for 6 qubit circuit took 9.890e-02 seconds
+Execute on hardware, 2.091e+02 seconds
+Evaluator input cases: dict_keys([(2, 3), (3, 4), (3, 5), (3, 6), (3, 7), (4, 5), (4, 6), (4, 7), (4, 8), (4, 9), (5, 6)])
+----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
+Case (5, 7)
+Use existing full circuit
+solving for 2 clusters
+solving for 3 clusters
+solving for 4 clusters
+********************
+MIQCP stats:
+1 cuts, 2 clusters, max qubit = 5
+cluster 0: original input = 4.00, rho qubits = 1.00, O qubits = 0.00, d = 5.00, K = 1.00
+cluster 1: original input = 3.00, rho qubits = 0.00, O qubits = 1.00, d = 3.00, K = 1.00
+objective value: 9.030065603289177
+manually calculated objective value: 9.0
+runtime: 0.03906702995300293
+OPTIMAL
+********************
+cluster 0, 3-qubit cluster total shots = 3 * 80 = 240
+cluster 1, 5-qubit cluster total shots = 6 * 320 = 1920
+Evaluate full circuit, 1920 shots
+Evaluating fc state vector
+Evaluating fc qasm, 1920 shots
+Evaluating fc hardware, 1920 shots
+Calculating measurement filter, 20-qubit calibration circuits * 128 * 8.192e+03 shots. 1.469e+03 seconds
+Submitted 1920 shots to hardware
+Mitigation for 7 qubit circuit
+Mitigation for 7 qubit circuit took 5.007e-01 seconds
+Execute on hardware, 3.768e+02 seconds
+Evaluator input cases: dict_keys([(2, 3), (3, 4), (3, 5), (3, 6), (3, 7), (4, 5), (4, 6), (4, 7), (4, 8), (4, 9), (5, 6), (5, 7)])
+----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
+Case (5, 8)
+Use existing full circuit
+solving for 2 clusters
+Infeasible
+solving for 3 clusters
+solving for 4 clusters
+********************
+MIQCP stats:
+4 cuts, 3 clusters, max qubit = 5
+cluster 0: original input = 4.00, rho qubits = 1.00, O qubits = 2.00, d = 5.00, K = 3.00
+cluster 1: original input = 3.00, rho qubits = 1.00, O qubits = 1.00, d = 4.00, K = 2.00
+cluster 2: original input = 1.00, rho qubits = 2.00, O qubits = 1.00, d = 3.00, K = 3.00
+objective value: 180.16075799762916
+manually calculated objective value: 180.0
+runtime: 0.23020410537719727
+OPTIMAL
+********************
+cluster 0, 5-qubit cluster total shots = 54 * 320 = 17280
+cluster 1, 4-qubit cluster total shots = 18 * 160 = 2880
+cluster 2, 3-qubit cluster total shots = 108 * 80 = 8640
+Evaluate full circuit, 17280 shots
+Evaluating fc state vector
+Evaluating fc qasm, 17280 shots
+Evaluating fc hardware, 17280 shots
+Calculating measurement filter, 20-qubit calibration circuits * 256 * 8.192e+03 shots. 2.365e+03 seconds
+Submitted 8192 shots to hardware
+Mitigation for 8 qubit circuit
+Mitigation for 8 qubit circuit took 1.805e+00 seconds
+Submitted 8192 shots to hardware
+Mitigation for 8 qubit circuit
+Mitigation for 8 qubit circuit took 1.843e+00 seconds
+Submitted 896 shots to hardware
+Mitigation for 8 qubit circuit
+Mitigation for 8 qubit circuit took 1.541e+00 seconds
+Execute on hardware, 1.688e+03 seconds
+Evaluator input cases: dict_keys([(2, 3), (3, 4), (3, 5), (3, 6), (3, 7), (4, 5), (4, 6), (4, 7), (4, 8), (4, 9), (5, 6), (5, 7), (5, 8)])
+----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
+Case (5, 9)
+Use existing full circuit
+solving for 2 clusters
+Infeasible
+solving for 3 clusters
+solving for 4 clusters
+********************
+MIQCP stats:
+6 cuts, 4 clusters, max qubit = 5
+cluster 0: original input = 3.00, rho qubits = 2.00, O qubits = 1.00, d = 5.00, K = 3.00
+cluster 1: original input = 1.00, rho qubits = 2.00, O qubits = 1.00, d = 3.00, K = 3.00
+cluster 2: original input = 3.00, rho qubits = 1.00, O qubits = 2.00, d = 4.00, K = 3.00
+cluster 3: original input = 2.00, rho qubits = 1.00, O qubits = 2.00, d = 3.00, K = 3.00
+objective value: 324.1979654926894
+manually calculated objective value: 324.0
+runtime: 0.8858850002288818
+OPTIMAL
+********************
+cluster 0, 5-qubit cluster total shots = 108 * 320 = 34560
+cluster 1, 4-qubit cluster total shots = 54 * 320 = 17280
+cluster 2, 3-qubit cluster total shots = 108 * 80 = 8640
+cluster 3, 3-qubit cluster total shots = 54 * 160 = 8640
+Evaluate full circuit, 34560 shots
+Evaluating fc state vector
+Evaluating fc qasm, 34560 shots
+Evaluating fc hardware, 34560 shots
 Calculating measurement filter, 20-qubit calibration circuits * 512 * 8.192e+03 shots. 
