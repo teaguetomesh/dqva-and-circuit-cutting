@@ -2,7 +2,7 @@ import numpy as np
 import pickle
 import argparse
 from qiskit.compiler import transpile, assemble
-from helper_fun import get_evaluator_info, apply_measurement, reverseBits
+from helper_fun import get_evaluator_info, apply_measurement, reverseBits, get_circ_saturated_shots
 from time import time
 import copy
 from qiskit import Aer
@@ -91,11 +91,16 @@ if __name__ == '__main__':
     for case in job_submittor_input:
         print('Case ',case)
         job_submittor_output[case] = copy.deepcopy(job_submittor_input[case])
+        total_shots = job_submittor_input[case]['total_shots']
         for cluster_idx, cluster_circ in enumerate(job_submittor_input[case]['clusters']):
             cluster_instances = job_submittor_input[case]['all_cluster_prob'][cluster_idx]
             print('Cluster %d has %d instances'%(cluster_idx,len(cluster_instances)))
             evaluator_info = get_evaluator_info(circ=cluster_circ,device_name=device_name,
-            fields=['device','basis_gates','coupling_map','properties','initial_layout','noise_model','num_shots','meas_filter'])
+            fields=['device','basis_gates','coupling_map','properties','initial_layout','meas_filter'])
+            if args.saturated_shots:
+                evaluator_info['num_shots'] = get_circ_saturated_shots(circ=cluster_circ,accuracy=1e-1)
+            else:
+                evaluator_info['num_shots'] = int(total_shots/len(cluster_instances))+1
             max_experiments = int(evaluator_info['device'].configuration().max_experiments/2)
             hw_begin = time()
             hw_probs = {}
