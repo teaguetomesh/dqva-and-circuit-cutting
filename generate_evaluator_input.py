@@ -11,7 +11,7 @@ from qiskit import IBMQ
 import copy
 
 def evaluate_full_circ(circ, total_shots, device_name):
-    print('Evaluate full circuit using %d shots'%total_shots)
+    print('Evaluate full circuit, %d shots'%total_shots)
     # print('Evaluating fc state vector')
     sv_noiseless_fc = evaluate_circ(circ=circ,backend='statevector_simulator',evaluator_info=None)
 
