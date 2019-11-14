@@ -85,7 +85,7 @@ if __name__ == '__main__':
                 full_circs[full_circuit_size] = full_circ
             
             searcher_begin = time()
-            hardness, positions, ancilla, d, num_cluster, m = searcher.find_cuts(circ=full_circ,num_clusters=range(2,args.max_clusters+1),hw_max_qubit=cluster_max_qubit,evaluator_weight=1)
+            hardness, positions, ancilla, d, num_cluster, m = searcher.find_cuts(circ=full_circ,num_clusters=range(2,args.max_clusters),hw_max_qubit=cluster_max_qubit,evaluator_weight=1)
             searcher_time = time() - searcher_begin
             
             if m == None:
