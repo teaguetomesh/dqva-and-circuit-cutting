@@ -152,8 +152,9 @@ def get_filename(input_file,saturated_shots,evaluation_method):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='MPI evaluator.')
     parser.add_argument('--device-name', metavar='S', type=str,help='which evaluator device input file to run')
-    parser.add_argument('--saturated-shots',action="store_true",help='run saturated number of cluster shots')
+    parser.add_argument('--circuit-name', metavar='S', type=str,help='which circuit input file to run')
     parser.add_argument('--evaluation-method', metavar='S', type=str,help='which evaluator backend to use')
+    parser.add_argument('--saturated-shots',action="store_true",help='run saturated number of cluster shots')
     args = parser.parse_args()
 
     comm = MPI.COMM_WORLD
@@ -162,7 +163,7 @@ if __name__ == '__main__':
 
     num_workers = size - 1
 
-    input_file = './benchmark_data/evaluator_input_{}.p'.format(args.device_name)
+    input_file = './benchmark_data/evaluator_input_{}_{}.p'.format(args.device_name,args.circuit_name)
     evaluator_input = pickle.load(open(input_file, 'rb' ))
     device_name = args.device_name
 

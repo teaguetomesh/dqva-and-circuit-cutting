@@ -55,9 +55,11 @@ if __name__ == '__main__':
     parser.add_argument('--max-qubit', metavar='N', type=int,help='Benchmark maximum number of HW qubits')
     parser.add_argument('--max-clusters', metavar='N', type=int,help='max number of clusters to split into')
     parser.add_argument('--device-name', metavar='S',type=str,help='IBM device')
+    parser.add_argument('--circuit-name', metavar='S', type=str,help='which circuit input file to run')
     args = parser.parse_args()
 
     device_name = args.device_name
+    circuit_type = args.circuit_name
     device_properties = get_evaluator_info(circ=None,device_name=device_name,fields=['properties'])
     device_size = len(device_properties['properties'].qubits)
 
@@ -101,11 +103,11 @@ if __name__ == '__main__':
                 case_dict = {'full_circ':full_circ,'fc_evaluations':fc_evaluations,'total_shots':total_shots,
                 'searcher_time':searcher_time,'clusters':clusters,'complete_path_map':complete_path_map}
             try:
-                evaluator_input = pickle.load(open('./benchmark_data/evaluator_input_{}.p'.format(device_name), 'rb' ))
+                evaluator_input = pickle.load(open('./benchmark_data/evaluator_input_{}_{}.p'.format(device_name,circuit_type), 'rb' ))
             except:
                 evaluator_input = {}
             evaluator_input[case] = copy.deepcopy(case_dict)
-            pickle.dump(evaluator_input,open('./benchmark_data/evaluator_input_{}.p'.format(device_name),'wb'))
+            pickle.dump(evaluator_input,open('./benchmark_data/evaluator_input_{}_{}.p'.format(device_name,circuit_type),'wb'))
             print('Evaluator input cases:',evaluator_input.keys())
             print('-'*100)
     [print(case,all_total_shots[case]) for case in all_total_shots]

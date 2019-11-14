@@ -72,15 +72,17 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='MPI evaluator.')
     parser.add_argument('--device-name', metavar='S', type=str,help='which device to submit jobs to')
     parser.add_argument('--saturated-shots',action="store_true",help='run saturated number of cluster shots?')
+    parser.add_argument('--circuit-name', metavar='S', type=str,help='which circuit input file to run')
     args = parser.parse_args()
 
     device_name = args.device_name
+    circuit_type = args.circuit_name
     print(device_name)
-    input_file = './benchmark_data/job_submittor_input_{}'.format(device_name)
+    input_file = './benchmark_data/job_submittor_input_{}_{}'.format(device_name,circuit_type)
     if args.saturated_shots:
         input_file = input_file+'_saturated.p'
     else:
-        input_file = input_file+'.p'
+        input_file = input_file+'_sametotal.p'
 
     job_submittor_input = pickle.load(open(input_file, 'rb' ))
     job_submittor_output = {}
@@ -93,7 +95,7 @@ if __name__ == '__main__':
             cluster_instances = job_submittor_input[case]['all_cluster_prob'][cluster_idx]
             print('Cluster %d has %d instances'%(cluster_idx,len(cluster_instances)))
             evaluator_info = get_evaluator_info(circ=cluster_circ,device_name=device_name,
-            fields=['device','basis_gates','coupling_map','properties','initial_layout','noise_model','num_shots','meas_filter'],accuracy=1e-1)
+            fields=['device','basis_gates','coupling_map','properties','initial_layout','noise_model','num_shots','meas_filter'])
             max_experiments = int(evaluator_info['device'].configuration().max_experiments/2)
             hw_begin = time()
             hw_probs = {}

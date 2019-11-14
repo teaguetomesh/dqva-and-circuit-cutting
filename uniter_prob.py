@@ -278,18 +278,18 @@ def reconstruct(complete_path_map, full_circ, cluster_circs, cluster_sim_probs):
     # print('reconstruction len = ', len(reconstructed_prob),'probabilities sum = ', sum(reconstructed_prob))
     return reconstructed_prob
 
-def get_filename(device_name,saturated_shots,evaluation_method):
+def get_filename(device_name,saturated_shots,evaluation_method,circuit_name):
     filename = None
     if evaluation_method == 'hardware':
-        filename = './benchmark_data/hardware_uniter_input_{}'.format(device_name)
+        filename = './benchmark_data/hardware_uniter_input_{}_{}'.format(device_name,circuit_name)
         if saturated_shots:
             filename = filename + '_saturated.p'
         else:
-            filename = filename + '.p'
+            filename = filename + '_sametotal.p'
     elif evaluation_method == 'statevector_simulator':
-        filename = './benchmark_data/classical_uniter_input_{}.p'.format(device_name)
+        filename = './benchmark_data/classical_uniter_input_{}_{}.p'.format(device_name,circuit_name)
     elif evaluation_method == 'noisy_qasm_simulator':
-        filename = './benchmark_data/quantum_uniter_input_{}'.format(device_name)
+        filename = './benchmark_data/quantum_uniter_input_{}_{}'.format(device_name,circuit_name)
         if saturated_shots:
             filename = filename + '_saturated.p'
         else:
@@ -302,10 +302,11 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Uniter')
     parser.add_argument('--device-name', metavar='S', type=str,help='which evaluator device output file to reconstruct')
     parser.add_argument('--evaluation-method', metavar='S', type=str,help='which evaluator backend file to reconstruct')
+    parser.add_argument('--circuit-name', metavar='S', type=str,help='which circuit input file to run')
     parser.add_argument('--saturated-shots',action="store_true",help='run saturated number of cluster shots')
     args = parser.parse_args()
 
-    input_file = get_filename(args.device_name,args.saturated_shots,args.evaluation_method)
+    input_file = get_filename(args.device_name,args.saturated_shots,args.evaluation_method,args.circuit_name)
     filename = input_file.replace('uniter_input','plotter_input')
     print('Reconstructing %s'%input_file)
 
