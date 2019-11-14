@@ -110,9 +110,9 @@ def evaluate_cluster(complete_path_map, cluster_circ, combinations, backend, eva
 def find_rank_combinations(evaluator_input,rank,size):
     num_workers = size - 1
     rank_combinations = {}
-    for key in evaluator_input:
-        rank_combinations[key] = []
-        _,_,_,_,_,clusters,complete_path_map = evaluator_input[key]
+    for case in evaluator_input:
+        rank_combinations[case] = []
+        _,_,_,_,_,clusters,complete_path_map = evaluator_input[case]
         for cluster_idx, cluster_circ in enumerate(clusters):
             O_qubits, rho_qubits = find_cluster_O_rho_qubits(complete_path_map,cluster_idx)
             combinations = find_all_simulation_combinations(O_qubits, rho_qubits, len(cluster_circ.qubits))
@@ -124,7 +124,7 @@ def find_rank_combinations(evaluator_input,rank,size):
             else:
                 combinations_start = rank * count + remainder
                 combinations_stop = combinations_start + (count - 1) + 1
-            rank_combinations[key].append(combinations[combinations_start:combinations_stop])
+            rank_combinations[case].append(combinations[combinations_start:combinations_stop])
     return rank_combinations
 
 def get_filename(input_file,saturated_shots,evaluation_method):

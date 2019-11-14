@@ -39,24 +39,50 @@ def cross_entropy(target,obs):
             h += -p*np.log(q)
     return h
 
-def find_saturated_shots(circ,accuracy):
-    ground_truth = evaluate_circ(circ=circ,backend='statevector_simulator',evaluator_info=None)
-    min_ce = cross_entropy(target=ground_truth,obs=ground_truth)
-    qasm_prob = [0 for i in ground_truth]
-    shots_increment = 1024
-    evaluator_info = {}
-    evaluator_info['num_shots'] = shots_increment
-    counter = 0.0
-    while 1:
-        counter += 1.0
-        qasm_prob_batch = evaluate_circ(circ=circ,backend='noiseless_qasm_simulator',evaluator_info=evaluator_info)
-        qasm_prob = [(x*(counter-1)+y)/counter for x,y in zip(qasm_prob,qasm_prob_batch)]
-        ce = cross_entropy(target=ground_truth,obs=qasm_prob)
-        diff = abs((ce-min_ce)/min_ce)
-        if diff < accuracy:
-            return int(counter*shots_increment)
-        if counter%50==49:
-            print('current diff:',diff,'current shots:',int(counter*shots_increment))
+def find_cluster_O_rho_qubits(complete_path_map,cluster_idx):
+    O_qubits = []
+    rho_qubits = []
+    for input_qubit in complete_path_map:
+        path = complete_path_map[input_qubit]
+        if len(path)>1:
+            for q in path[:-1]:
+                if q[0] == cluster_idx:
+                    O_qubits.append(q)
+            for q in path[1:]:
+                if q[0] == cluster_idx:
+                    rho_qubits.append(q)
+    return O_qubits, rho_qubits
+
+def find_saturated_shots(clusters,complete_path_map,accuracy):
+    total_shots = 0
+    for cluster_idx, cluster_circ in enumerate(clusters):
+        O_qubits, rho_qubits = find_cluster_O_rho_qubits(complete_path_map,cluster_idx)
+        num_instances = np.power(6,len(rho_qubits))*np.power(3,len(O_qubits))
+        num_shots = None
+
+        ground_truth = evaluate_circ(circ=cluster_circ,backend='statevector_simulator',evaluator_info=None)
+        min_ce = cross_entropy(target=ground_truth,obs=ground_truth)
+        qasm_prob = [0 for i in ground_truth]
+        shots_increment = 1024
+        evaluator_info = {'num_shots':shots_increment}
+        counter = 0.0
+        while 1:
+            counter += 1.0
+            qasm_prob_batch = evaluate_circ(circ=cluster_circ,backend='noiseless_qasm_simulator',evaluator_info=evaluator_info)
+            qasm_prob = [(x*(counter-1)+y)/counter for x,y in zip(qasm_prob,qasm_prob_batch)]
+            ce = cross_entropy(target=ground_truth,obs=qasm_prob)
+            diff = abs((ce-min_ce)/min_ce)
+            if diff <= accuracy:
+                num_shots = int(counter*shots_increment)
+                break
+            if counter%50==49:
+                print('current diff:',diff,'current shots:',int(counter*shots_increment))
+        assert num_shots!=None
+        cluster_total_shots = num_instances*num_shots
+        print('cluster %d, cluster total shots = %d * %d = %d'%(cluster_idx,num_instances,num_shots,cluster_total_shots))
+        total_shots = max(total_shots, cluster_total_shots)
+    assert total_shots>0
+    return total_shots
 
 def apply_measurement(circ):
     c = ClassicalRegister(len(circ.qubits), 'c')
@@ -275,7 +301,7 @@ def tensored_readout_mitigation(num_shots,device,initial_layout):
     print('%.3e seconds'%filter_time)
     return meas_filter
 
-def get_evaluator_info(circ,device_name,fields,accuracy):
+def get_evaluator_info(circ,device_name,fields):
     provider = load_IBMQ()
     device = provider.get_backend(device_name)
     properties = device.properties()
@@ -302,12 +328,6 @@ def get_evaluator_info(circ,device_name,fields,accuracy):
         initial_layout = noise_mapper.property_set['layout']
         meas_filter = readout_mitigation(device,initial_layout)
         _evaluator_info['meas_filter'] = meas_filter
-    
-    if 'num_shots' in fields:
-        assert accuracy != None
-        num_shots = find_saturated_shots(circ,accuracy)
-        num_shots = min(num_shots,_evaluator_info['device'].configuration().max_shots*10)
-        _evaluator_info['num_shots'] = num_shots
 
     evaluator_info = {}
     for field in fields:

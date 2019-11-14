@@ -8,47 +8,45 @@ import cutter
 from helper_fun import evaluate_circ, get_evaluator_info, find_saturated_shots
 import argparse
 from qiskit import IBMQ
+import copy
 
-def evaluate_full_circ(circ, device_name):
-    # Evaluate full circuit
-    print('Evaluating sv noiseless fc')
+def evaluate_full_circ(circ, total_shots, device_name):
+    print('Evaluate full circuit using %d shots'%total_shots)
+    # print('Evaluating fc state vector')
     sv_noiseless_fc = evaluate_circ(circ=circ,backend='statevector_simulator',evaluator_info=None)
 
-    print('Evaluating qasm')
-    evaluator_info = get_evaluator_info(circ=circ,device_name=device_name,fields=['num_shots'],accuracy=1e-1)
-    num_shots = evaluator_info['num_shots']
-    print('evaluator fields:',evaluator_info.keys(),'Saturated = %.3e shots'%num_shots)
-    qasm_noiseless_fc = evaluate_circ(circ=circ,backend='noiseless_qasm_simulator',evaluator_info=evaluator_info)
+    # print('Evaluating fc qasm, %d shots'%total_shots)
+    # evaluator_info = {'num_shots':total_shots}
+    # qasm_noiseless_fc = evaluate_circ(circ=circ,backend='noiseless_qasm_simulator',evaluator_info=evaluator_info)
+    qasm_noiseless_fc = [0 for i in sv_noiseless_fc]
 
-    # print('Evaluating qasm + noise')
+    # print('Evaluating fc qasm + noise, %d shots'%total_shots)
     # evaluator_info = get_evaluator_info(circ=circ,device_name=device_name,
-    # fields=['device','basis_gates','coupling_map','properties','initial_layout','noise_model','num_shots'])
-    # print('evaluator fields:',evaluator_info.keys(),'Saturated = %.3e shots'%evaluator_info['num_shots'])
-    # print('Execute noisy qasm simulator',end=' ')
+    # fields=['device','basis_gates','coupling_map','properties','initial_layout','noise_model'])
+    # evaluator_info['num_shots'] = total_shots
     # execute_begin = time()
     # qasm_noisy_fc = evaluate_circ(circ=circ,backend='noisy_qasm_simulator',evaluator_info=evaluator_info)
     # print('%.3e seconds'%(time()-execute_begin))
     qasm_noisy_fc = [0 for i in sv_noiseless_fc]
 
-    print('Evaluating on hardware')
-    evaluator_info = get_evaluator_info(circ=circ,device_name=device_name,
-    fields=['device','basis_gates','coupling_map','properties','initial_layout'],accuracy=None)
-    evaluator_info['num_shots'] = num_shots
-    if np.power(2,len(circ.qubits))<evaluator_info['device'].configuration().max_experiments/3*2:
-        _evaluator_info = get_evaluator_info(circ=circ,device_name=device_name,fields=['meas_filter'],accuracy=None)
-        evaluator_info.update(_evaluator_info)
-    print('evaluator fields:',evaluator_info.keys(),'Saturated = %.3e shots'%evaluator_info['num_shots'])
-    execute_begin = time()
-    hw_fc = evaluate_circ(circ=circ,backend='hardware',evaluator_info=evaluator_info)
-    print('Execute on hardware, %.3e seconds'%(time()-execute_begin))
-    # hw_fc = [0 for i in sv_noiseless_fc]
+    # print('Evaluating fc hardware, %d shots'%total_shots)
+    # evaluator_info = get_evaluator_info(circ=circ,device_name=device_name,
+    # fields=['device','basis_gates','coupling_map','properties','initial_layout'])
+    # evaluator_info['num_shots'] = total_shots
+    # if np.power(2,len(circ.qubits))<evaluator_info['device'].configuration().max_experiments/3*2:
+    #     _evaluator_info = get_evaluator_info(circ=circ,device_name=device_name,fields=['meas_filter'])
+    #     evaluator_info.update(_evaluator_info)
+    # execute_begin = time()
+    # hw_fc = evaluate_circ(circ=circ,backend='hardware',evaluator_info=evaluator_info)
+    # print('Execute on hardware, %.3e seconds'%(time()-execute_begin))
+    hw_fc = [0 for i in sv_noiseless_fc]
 
     fc_evaluations = {'sv_noiseless':sv_noiseless_fc,
     'qasm':qasm_noiseless_fc,
     'qasm+noise':qasm_noisy_fc,
     'hw':hw_fc}
 
-    return fc_evaluations, evaluator_info['num_shots']
+    return fc_evaluations
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='generate evaluator inputs')
@@ -59,61 +57,49 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     device_name = args.device_name
-    device_properties = get_evaluator_info(circ=None,device_name=device_name,fields=['properties'],accuracy=None)
+    device_properties = get_evaluator_info(circ=None,device_name=device_name,fields=['properties'])
     device_size = len(device_properties['properties'].qubits)
 
     # NOTE: toggle circuits to benchmark
     dimension_l = [[2,2],[2,3],[2,4],[2,5],[3,4],[2,7],[4,4],[3,6]]
-    dimension_l = [[2,5]]
 
-    evaluator_input = {}
     full_circs = {}
-    for hw_max_qubit in range(args.min_qubit,args.max_qubit+1):
+    for cluster_max_qubit in range(args.min_qubit,args.max_qubit+1):
         for dimension in dimension_l:
             i,j = dimension
-            if i*j<=hw_max_qubit or i*j>device_size or (hw_max_qubit-1)*args.max_clusters<i*j:
+            full_circuit_size = i*j
+            if full_circuit_size<=cluster_max_qubit or full_circuit_size>device_size or (cluster_max_qubit-1)*args.max_clusters<full_circuit_size:
                 continue
             
             print('-'*100)
-            print('Case ',(hw_max_qubit,i*j))
+            case = (cluster_max_qubit,full_circuit_size)
+            print('Case',case)
 
-            if (i*j) in full_circs:
-                circ, fc_evaluations, num_shots = full_circs[(i*j)]
-                # Looking for a cut
-                searcher_begin = time()
-                hardness, positions, ancilla, d, num_cluster, m = searcher.find_cuts(circ=circ,num_clusters=range(2,args.max_clusters+1),hw_max_qubit=hw_max_qubit,evaluator_weight=1)
-                searcher_time = time() - searcher_begin
-                if m == None:
-                    print('Case {} not feasible'.format((hw_max_qubit,i*j)))
-                    print('-'*100)
-                    continue
-                else:
-                    m.print_stat()
-                    print('Use existing full circ evaluations')
-                    clusters, complete_path_map, K, d = cutter.cut_circuit(circ, positions)
-                    # print('Complete path map:')
-                    # [print(x,complete_path_map[x]) for x in complete_path_map]
-                    evaluator_input[(hw_max_qubit,i*j)] = dimension,num_shots,searcher_time,circ,fc_evaluations,clusters,complete_path_map
+            if full_circuit_size in full_circs:
+                full_circ = full_circs[full_circuit_size]['circ']
             else:
-                circ = gen_supremacy(i,j,8)
-                searcher_begin = time()
-                hardness, positions, ancilla, d, num_cluster, m = searcher.find_cuts(circ=circ,num_clusters=range(2,args.max_clusters+1),hw_max_qubit=hw_max_qubit,evaluator_weight=1)
-                searcher_time = time() - searcher_begin
-                if m == None:
-                    print('Case {} not feasible'.format((hw_max_qubit,i*j)))
-                    print('-'*100)
-                    continue
-                else:
-                    m.print_stat()
-                    clusters, complete_path_map, K, d = cutter.cut_circuit(circ, positions)
-                    fc_evaluations, num_shots = evaluate_full_circ(circ,device_name)
-                    full_circs[(i*j)] = circ, fc_evaluations, num_shots
-                    evaluator_input[(hw_max_qubit,i*j)] = dimension,num_shots,searcher_time,circ,fc_evaluations,clusters,complete_path_map
+                full_circ = gen_supremacy(i,j,8)
+            
+            searcher_begin = time()
+            hardness, positions, ancilla, d, num_cluster, m = searcher.find_cuts(circ=full_circ,num_clusters=range(2,args.max_clusters+1),hw_max_qubit=cluster_max_qubit,evaluator_weight=1)
+            searcher_time = time() - searcher_begin
+            
+            if m == None:
+                print('Case {} not feasible'.format(case))
+                print('-'*100)
+                continue
+            else:
+                m.print_stat()
+                clusters, complete_path_map, K, d = cutter.cut_circuit(full_circ, positions)
+                total_shots = find_saturated_shots(clusters=clusters,complete_path_map=complete_path_map,accuracy=1e-1)
+                fc_evaluations = evaluate_full_circ(full_circ,total_shots,device_name)
+                case_dict = {'full_circ':full_circ,'fc_evaluations':fc_evaluations,
+                'searcher_time':searcher_time,'clusters':clusters,'complete_path_map':complete_path_map}
             try:
-                curr_evaluator_input = pickle.load(open('./benchmark_data/evaluator_input_{}.p'.format(device_name), 'rb' ))
+                evaluator_input = pickle.load(open('./benchmark_data/evaluator_input_{}.p'.format(device_name), 'rb' ))
             except:
-                curr_evaluator_input = {}
-            curr_evaluator_input[(hw_max_qubit,i*j)] = evaluator_input[(hw_max_qubit,i*j)]
-            pickle.dump(curr_evaluator_input,open('./benchmark_data/evaluator_input_{}.p'.format(device_name),'wb'))
-            print('Evaluator input cases:',curr_evaluator_input.keys())
+                evaluator_input = {}
+            evaluator_input[case] = copy.deepcopy(case_dict)
+            pickle.dump(evaluator_input,open('./benchmark_data/evaluator_input_{}.p'.format(device_name),'wb'))
+            print('Evaluator input cases:',evaluator_input.keys())
             print('-'*100)
