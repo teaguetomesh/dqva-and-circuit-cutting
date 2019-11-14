@@ -9,6 +9,14 @@ from helper_fun import evaluate_circ, get_evaluator_info, find_saturated_shots
 import argparse
 from qiskit import IBMQ
 import copy
+import random
+
+def gen_secret(num_qubit):
+    num_digit = num_qubit-1
+    num = random.randint(0, 2**num_digit-1)
+    num = bin(num)[2:]
+    num_with_zeros = str(num).zfill(num_digit)
+    return num_with_zeros
 
 def evaluate_full_circ(circ, total_shots, device_name):
     print('Evaluate full circuit, %d shots'%total_shots)
@@ -83,7 +91,16 @@ if __name__ == '__main__':
                 print('Use existing full circuit')
                 full_circ = full_circs[full_circuit_size]
             else:
-                full_circ = gen_supremacy(i,j,8)
+                if circuit_type == 'supremacy':
+                    full_circ = gen_supremacy(i,j,8)
+                elif circuit_type == 'hwea':
+                    full_circ = gen_hwea(i*j,1)
+                elif circuit_type == 'bv':
+                    full_circ = gen_BV(gen_secret(i*j),barriers=False)
+                elif circuit_type == 'qft':
+                    full_circ = gen_qft(width=i*j, barriers=False)
+                else:
+                    raise Exception('Illegal circuit type %s'%circuit_type)
                 full_circs[full_circuit_size] = full_circ
             
             searcher_begin = time()
