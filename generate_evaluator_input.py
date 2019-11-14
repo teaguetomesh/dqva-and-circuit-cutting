@@ -64,7 +64,7 @@ if __name__ == '__main__':
 
     # NOTE: toggle circuits to benchmark
     dimension_l = [[2,2],[2,3],[2,4],[2,5],[3,4],[2,7],[4,4],[3,6]]
-    dimension_l = [[2,2],[2,4]]
+    dimension_l = [[2,5]]
 
     evaluator_input = {}
     full_circs = {}
