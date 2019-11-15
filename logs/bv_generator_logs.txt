@@ -1,0 +1,12 @@
+----------------------------------------------------------------------------------------------------
+Case (2, 3)
+Traceback (most recent call last):
+  File "generate_evaluator_input.py", line 107, in <module>
+    hardness, positions, ancilla, d, num_cluster, m = searcher.find_cuts(circ=full_circ,num_clusters=range(2,min(len(full_circ.qubits),args.max_clusters)+1),hw_max_qubit=cluster_max_qubit,evaluator_weight=1)
+  File "/n/fs/weit-proj/circuit_cutting/MIQCP_searcher.py", line 336, in find_cuts
+    m = Basic_Model(**kwargs)
+  File "/n/fs/weit-proj/circuit_cutting/MIQCP_searcher.py", line 12, in __init__
+    self.check_graph(n_vertices, edges)
+  File "/n/fs/weit-proj/circuit_cutting/MIQCP_searcher.py", line 160, in check_graph
+    assert(vertices == set(range(n_vertices)))
+AssertionError

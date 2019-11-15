@@ -13,7 +13,8 @@ import random
 
 def gen_secret(num_qubit):
     num_digit = num_qubit-1
-    num = random.randint(1, 2**num_digit-1)
+    # num = random.randint(1, 2**num_digit-1)
+    num = 2**num_digit-1
     num = bin(num)[2:]
     num_with_zeros = str(num).zfill(num_digit)
     return num_with_zeros

@@ -72,4 +72,32 @@ Evaluate full circuit, 480 shots
 Evaluating fc state vector
 Evaluating fc qasm, 480 shots
 Evaluating fc hardware, 480 shots
-Calculating measurement filter, 20-qubit calibration circuits * 16 * 8.192e+03 shots. 
+Calculating measurement filter, 20-qubit calibration circuits * 16 * 8.192e+03 shots. 1.154e+03 seconds
+Submitted 480 shots to hardware
+Mitigation for 4 qubit circuit
+Mitigation for 4 qubit circuit took 1.885e-02 seconds
+Execute on hardware, 3.419e+03 seconds
+Evaluator input cases: dict_keys([(2, 3), (2, 4), (3, 4)])
+----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
+Case (3, 5)
+solving for 2 clusters
+solving for 3 clusters
+solving for 4 clusters
+********************
+MIQCP stats:
+1 cuts, 2 clusters, max qubit = 3
+cluster 0: original input = 3.00, rho qubits = 0.00, O qubits = 1.00, d = 3.00, K = 1.00
+cluster 1: original input = 2.00, rho qubits = 1.00, O qubits = 0.00, d = 3.00, K = 1.00
+objective value: 9.030065603289177
+manually calculated objective value: 9.0
+runtime: 0.013979196548461914
+OPTIMAL
+********************
+cluster 0, 3-qubit cluster total shots = 3 * 80 = 240
+cluster 1, 3-qubit cluster total shots = 6 * 80 = 480
+Evaluate full circuit, 480 shots
+Evaluating fc state vector
+Evaluating fc qasm, 480 shots
+Evaluating fc hardware, 480 shots
+Calculating measurement filter, 20-qubit calibration circuits * 32 * 8.192e+03 shots. 
