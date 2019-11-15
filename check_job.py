@@ -26,6 +26,7 @@ if __name__ == '__main__':
     provider = load_IBMQ()
 
     past_5_hrs = format_time()
+    terminal_status = [JobStatus['DONE'],JobStatus['CANCELLED'],JobStatus['ERROR']]
 
     for x in provider.backends():
         if 'qasm' not in str(x):
@@ -34,12 +35,12 @@ if __name__ == '__main__':
             if num_qubits==20:
                 print('%s: %d-qubit, max %d jobs * %d shots'%(x,num_qubits,x.configuration().max_experiments,x.configuration().max_shots))
                 for job in x.jobs():
+                    if args.cancel_jobs and job.status() not in terminal_status:
+                        job.cancel()
+                        print('cancelled')
                     if job.creation_date()>past_5_hrs:
-                        if job.status() in [JobStatus['DONE'],JobStatus['CANCELLED'],JobStatus['ERROR']]:
+                        if job.status() in terminal_status:
                             print(job.creation_date(),job.status(),job.error_message(),job.job_id())
                         else:
                             print(job.creation_date(),job.status(),job.queue_position(),job.job_id())
-                            if args.cancel_jobs:
-                                job.cancel()
-                                print('cancelled')
                 print('-'*100)
