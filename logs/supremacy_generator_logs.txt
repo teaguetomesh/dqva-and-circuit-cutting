@@ -463,4 +463,50 @@ Evaluate full circuit, 34560 shots
 Evaluating fc state vector
 Evaluating fc qasm, 34560 shots
 Evaluating fc hardware, 34560 shots
-Calculating measurement filter, 20-qubit calibration circuits * 256 * 8.192e+03 shots. 
+Calculating measurement filter, 20-qubit calibration circuits * 256 * 8.192e+03 shots. 1.642e+03 seconds
+Submitted 8192 shots to hardware
+Mitigation for 8 qubit circuit
+Mitigation for 8 qubit circuit took 2.680e+00 seconds
+Submitted 8192 shots to hardware
+Mitigation for 8 qubit circuit
+Mitigation for 8 qubit circuit took 2.706e+00 seconds
+Submitted 8192 shots to hardware
+Mitigation for 8 qubit circuit
+Mitigation for 8 qubit circuit took 2.815e+00 seconds
+Submitted 8192 shots to hardware
+Mitigation for 8 qubit circuit
+Mitigation for 8 qubit circuit took 2.828e+00 seconds
+Submitted 1792 shots to hardware
+Mitigation for 8 qubit circuit
+Mitigation for 8 qubit circuit took 2.665e+00 seconds
+Execute on hardware, 2.834e+03 seconds
+Evaluator input cases: dict_keys([(2, 3), (3, 4), (3, 5), (3, 6), (3, 7), (4, 5), (4, 6), (4, 7), (4, 8), (4, 9), (5, 6), (5, 7), (5, 8)])
+----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
+Case (5, 9)
+Use existing full circuit
+solving for 2 clusters
+Infeasible
+solving for 3 clusters
+solving for 4 clusters
+********************
+MIQCP stats:
+6 cuts, 4 clusters, max qubit = 5
+cluster 0: original input = 3.00, rho qubits = 2.00, O qubits = 1.00, d = 5.00, K = 3.00
+cluster 1: original input = 3.00, rho qubits = 1.00, O qubits = 2.00, d = 4.00, K = 3.00
+cluster 2: original input = 2.00, rho qubits = 1.00, O qubits = 2.00, d = 3.00, K = 3.00
+cluster 3: original input = 1.00, rho qubits = 2.00, O qubits = 1.00, d = 3.00, K = 3.00
+objective value: 324.1979654926894
+manually calculated objective value: 324.0
+runtime: 0.2431020736694336
+OPTIMAL
+********************
+cluster 0, 5-qubit cluster total shots = 108 * 320 = 34560
+cluster 1, 4-qubit cluster total shots = 54 * 160 = 8640
+cluster 2, 3-qubit cluster total shots = 108 * 160 = 17280
+cluster 3, 3-qubit cluster total shots = 54 * 80 = 4320
+Evaluate full circuit, 34560 shots
+Evaluating fc state vector
+Evaluating fc qasm, 34560 shots
+Evaluating fc hardware, 34560 shots
+Calculating measurement filter, 20-qubit calibration circuits * 512 * 8.192e+03 shots. 
