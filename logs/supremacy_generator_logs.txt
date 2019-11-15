@@ -509,4 +509,45 @@ Evaluate full circuit, 34560 shots
 Evaluating fc state vector
 Evaluating fc qasm, 34560 shots
 Evaluating fc hardware, 34560 shots
-Calculating measurement filter, 20-qubit calibration circuits * 512 * 8.192e+03 shots. 
+Calculating measurement filter, 20-qubit calibration circuits * 512 * 8.192e+03 shots. 2.732e+03 seconds
+Submitted 8192 shots to hardware
+Mitigation for 9 qubit circuit
+Mitigation for 9 qubit circuit took 1.908e+01 seconds
+Submitted 8192 shots to hardware
+Mitigation for 9 qubit circuit
+Mitigation for 9 qubit circuit took 1.925e+01 seconds
+Submitted 8192 shots to hardware
+Mitigation for 9 qubit circuit
+Mitigation for 9 qubit circuit took 1.183e+01 seconds
+Submitted 8192 shots to hardware
+Mitigation for 9 qubit circuit
+Mitigation for 9 qubit circuit took 1.184e+01 seconds
+Submitted 1792 shots to hardware
+Mitigation for 9 qubit circuit
+Mitigation for 9 qubit circuit took 1.148e+01 seconds
+Execute on hardware, 2.845e+03 seconds
+Evaluator input cases: dict_keys([(2, 3), (3, 4), (3, 5), (3, 6), (3, 7), (4, 5), (4, 6), (4, 7), (4, 8), (4, 9), (5, 6), (5, 7), (5, 8), (5, 9)])
+----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
+Case (6, 7)
+Use existing full circuit
+solving for 2 clusters
+solving for 3 clusters
+solving for 4 clusters
+********************
+MIQCP stats:
+1 cuts, 2 clusters, max qubit = 6
+cluster 0: original input = 2.00, rho qubits = 0.00, O qubits = 1.00, d = 2.00, K = 1.00
+cluster 1: original input = 5.00, rho qubits = 1.00, O qubits = 0.00, d = 6.00, K = 1.00
+objective value: 9.030065603289177
+manually calculated objective value: 9.0
+runtime: 0.03146696090698242
+OPTIMAL
+********************
+cluster 0, 2-qubit cluster total shots = 3 * 40 = 120
+cluster 1, 6-qubit cluster total shots = 6 * 640 = 3840
+Evaluate full circuit, 3840 shots
+Evaluating fc state vector
+Evaluating fc qasm, 3840 shots
+Evaluating fc hardware, 3840 shots
+Calculating measurement filter, 20-qubit calibration circuits * 128 * 8.192e+03 shots. 

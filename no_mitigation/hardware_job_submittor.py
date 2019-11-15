@@ -30,7 +30,6 @@ def submit_hardware_jobs(cluster_instances, evaluator_info):
     for init_meas in mapped_circuits:
         hw_counts[init_meas] = {}
     
-    # FIXME: split up hardware shots
     device_max_shots = evaluator_info['device'].configuration().max_shots
     remaining_shots = evaluator_info['num_shots']
     while remaining_shots>0:
@@ -40,21 +39,9 @@ def submit_hardware_jobs(cluster_instances, evaluator_info):
         job = evaluator_info['device'].run(qobj)
         hw_results = job.result()
 
-        if 'meas_filter' in evaluator_info:
-            print('Mitigation for %d * %d-qubit circuit'%(len(cluster_instances),len(circ.qubits)))
-            mitigation_begin = time()
-            mitigated_results = evaluator_info['meas_filter'].apply(hw_results)
-            mitigation_time = time() - mitigation_begin
-            print('Mitigation for %d * %d-qubit circuit took %.3e seconds'%(len(cluster_instances),len(circ.qubits),mitigation_time))
-            for init_meas in mapped_circuits:
-                hw_count = mitigated_results.get_counts(mapped_circuits[init_meas])
-                hw_counts[init_meas] = update_counts(cumulated=hw_counts[init_meas], batch=hw_count)
-        else:
-            for init_meas in mapped_circuits:
-                hw_count = hw_results.get_counts(mapped_circuits[init_meas])
-                # print('batch {} counts:'.format(init_meas),hw_count)
-                # print('cumulative {} counts:'.format(init_meas),hw_counts[init_meas])
-                hw_counts[init_meas] = update_counts(cumulated=hw_counts[init_meas], batch=hw_count)
+        for init_meas in mapped_circuits:
+            hw_count = hw_results.get_counts(mapped_circuits[init_meas])
+            hw_counts[init_meas] = update_counts(cumulated=hw_counts[init_meas], batch=hw_count)
         remaining_shots -= batch_shots
     
     hw_probs = {}
@@ -96,7 +83,7 @@ if __name__ == '__main__':
             cluster_instances = job_submittor_input[case]['all_cluster_prob'][cluster_idx]
             print('Cluster %d has %d instances'%(cluster_idx,len(cluster_instances)))
             evaluator_info = get_evaluator_info(circ=cluster_circ,device_name=device_name,
-            fields=['device','basis_gates','coupling_map','properties','initial_layout','meas_filter'])
+            fields=['device','basis_gates','coupling_map','properties','initial_layout'])
             if args.saturated_shots:
                 evaluator_info['num_shots'] = get_circ_saturated_shots(circ=cluster_circ,accuracy=1e-1)
             else:
