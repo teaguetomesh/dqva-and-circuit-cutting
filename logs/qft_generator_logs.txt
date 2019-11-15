@@ -1,0 +1,96 @@
+----------------------------------------------------------------------------------------------------
+Case (2, 3)
+solving for 2 clusters
+Infeasible
+solving for 3 clusters
+Infeasible
+Case (2, 3) not feasible
+----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
+Case (2, 4)
+solving for 2 clusters
+Infeasible
+solving for 3 clusters
+Infeasible
+solving for 4 clusters
+Infeasible
+Case (2, 4) not feasible
+----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
+Case (3, 4)
+Use existing full circuit
+solving for 2 clusters
+Infeasible
+solving for 3 clusters
+Infeasible
+solving for 4 clusters
+Infeasible
+Case (3, 4) not feasible
+----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
+Case (3, 5)
+solving for 2 clusters
+Infeasible
+solving for 3 clusters
+Infeasible
+solving for 4 clusters
+Infeasible
+Case (3, 5) not feasible
+----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
+Case (3, 6)
+solving for 2 clusters
+Infeasible
+solving for 3 clusters
+Infeasible
+solving for 4 clusters
+Infeasible
+Case (3, 6) not feasible
+----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
+Case (3, 7)
+solving for 2 clusters
+Infeasible
+solving for 3 clusters
+Infeasible
+solving for 4 clusters
+Infeasible
+Case (3, 7) not feasible
+----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
+Case (3, 8)
+solving for 2 clusters
+Infeasible
+solving for 3 clusters
+Infeasible
+solving for 4 clusters
+Infeasible
+Case (3, 8) not feasible
+----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
+Case (4, 5)
+Use existing full circuit
+solving for 2 clusters
+Infeasible
+solving for 3 clusters
+solving for 4 clusters
+********************
+MIQCP stats:
+7 cuts, 3 clusters, max qubit = 4
+cluster 0: original input = 3.00, rho qubits = 1.00, O qubits = 4.00, d = 4.00, K = 5.00
+cluster 1: original input = 1.00, rho qubits = 3.00, O qubits = 1.00, d = 4.00, K = 4.00
+cluster 2: original input = 1.00, rho qubits = 3.00, O qubits = 2.00, d = 4.00, K = 5.00
+objective value: 3088.713289375226
+manually calculated objective value: 3078.0
+runtime: 0.14335989952087402
+OPTIMAL
+********************
+cluster 0, 4-qubit cluster total shots = 486 * 160 = 77760
+cluster 1, 2-qubit cluster total shots = 54 * 40 = 2160
+cluster 2, 4-qubit cluster total shots = 648 * 160 = 103680
+cluster 3, 2-qubit cluster total shots = 36 * 40 = 1440
+Evaluate full circuit, 103680 shots
+Evaluating fc state vector
+Evaluating fc qasm, 103680 shots
+Evaluating fc hardware, 103680 shots
+Calculating measurement filter, 20-qubit calibration circuits * 32 * 8.192e+03 shots. 
