@@ -5,6 +5,18 @@ from qiskit import IBMQ
 from qiskit.providers.jobstatus import JobStatus
 import argparse
 from qiskit.visualization import plot_gate_map, plot_error_map
+import datetime
+from datetime import timedelta
+
+def format_time():
+    t = datetime.datetime.now(datetime.timezone.utc)
+    delta = timedelta(days=0,seconds=0,microseconds=0,milliseconds=0,minutes=0,hours=5,weeks=0)
+    t = t - delta
+    s = t.strftime('%Y-%m-%dT%H:%M:%S.%f')
+    tail = s[-7:]
+    f = round(float(tail), 3)
+    temp = "%.3f" % f
+    return "%s%sZ" % (s[:-7], temp[1:])
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='check hardware jobs')
@@ -13,18 +25,21 @@ if __name__ == '__main__':
 
     provider = load_IBMQ()
 
+    past_5_hrs = format_time()
+
     for x in provider.backends():
         if 'qasm' not in str(x):
             evaluator_info = get_evaluator_info(circ=None,device_name=str(x),fields=['properties'])
             num_qubits = len(evaluator_info['properties'].qubits)
-            print('%s: %d-qubit, max %d jobs * %d shots'%(x,num_qubits,x.configuration().max_experiments,x.configuration().max_shots))
-            # plot_error_map(x).savefig('./plots/%s_error_map.png'%str(x))
             if num_qubits==20:
+                print('%s: %d-qubit, max %d jobs * %d shots'%(x,num_qubits,x.configuration().max_experiments,x.configuration().max_shots))
                 for job in x.jobs():
-                    if job.status() in [JobStatus['DONE'],JobStatus['CANCELLED'],JobStatus['ERROR']]:
-                        print(job.creation_date(),job.status(),job.error_message(),job.job_id())
-                    else:
-                        print(job.creation_date(),job.status(),job.job_id())
-                        if args.cancel_jobs:
-                            job.cancel()
-                            print('cancelled')
+                    if job.creation_date()>past_5_hrs:
+                        if job.status() in [JobStatus['DONE'],JobStatus['CANCELLED'],JobStatus['ERROR']]:
+                            print(job.creation_date(),job.status(),job.error_message(),job.job_id())
+                        else:
+                            print(job.creation_date(),job.status(),job.queue_position(),job.job_id())
+                            if args.cancel_jobs:
+                                job.cancel()
+                                print('cancelled')
+                print('-'*100)

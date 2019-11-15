@@ -99,7 +99,7 @@ def find_saturated_shots(clusters,complete_path_map,accuracy):
             qasm_prob = [(x*(counter-1)+y)/counter for x,y in zip(qasm_prob,qasm_prob_batch)]
             ce = cross_entropy(target=ground_truth,obs=qasm_prob)
             diff = (ce-min_ce)/min_ce
-            assert diff > 0
+            assert diff >= 0
             if diff <= accuracy:
                 num_shots = int(counter*shots_increment)
                 break

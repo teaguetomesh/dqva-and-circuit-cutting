@@ -13,7 +13,7 @@ import random
 
 def gen_secret(num_qubit):
     num_digit = num_qubit-1
-    num = random.randint(0, 2**num_digit-1)
+    num = random.randint(1, 2**num_digit-1)
     num = bin(num)[2:]
     num_with_zeros = str(num).zfill(num_digit)
     return num_with_zeros
@@ -37,18 +37,18 @@ def evaluate_full_circ(circ, total_shots, device_name):
     # print('%.3e seconds'%(time()-execute_begin))
     qasm_noisy_fc = [0 for i in sv_noiseless_fc]
 
-    print('Evaluating fc hardware, %d shots'%total_shots)
-    evaluator_info = get_evaluator_info(circ=circ,device_name=device_name,
-    fields=['device','basis_gates','coupling_map','properties','initial_layout'])
-    assert np.power(2,len(circ.qubits))<evaluator_info['device'].configuration().max_experiments/3*2
-    evaluator_info['num_shots'] = total_shots
-    if np.power(2,len(circ.qubits))<evaluator_info['device'].configuration().max_experiments/3*2:
-        _evaluator_info = get_evaluator_info(circ=circ,device_name=device_name,fields=['meas_filter'])
-        evaluator_info.update(_evaluator_info)
-    execute_begin = time()
-    hw_fc = evaluate_circ(circ=circ,backend='hardware',evaluator_info=evaluator_info)
-    print('Execute on hardware, %.3e seconds'%(time()-execute_begin))
-    # hw_fc = [0 for i in sv_noiseless_fc]
+    # print('Evaluating fc hardware, %d shots'%total_shots)
+    # evaluator_info = get_evaluator_info(circ=circ,device_name=device_name,
+    # fields=['device','basis_gates','coupling_map','properties','initial_layout'])
+    # assert np.power(2,len(circ.qubits))<evaluator_info['device'].configuration().max_experiments/3*2
+    # evaluator_info['num_shots'] = total_shots
+    # if np.power(2,len(circ.qubits))<evaluator_info['device'].configuration().max_experiments/3*2:
+    #     _evaluator_info = get_evaluator_info(circ=circ,device_name=device_name,fields=['meas_filter'])
+    #     evaluator_info.update(_evaluator_info)
+    # execute_begin = time()
+    # hw_fc = evaluate_circ(circ=circ,backend='hardware',evaluator_info=evaluator_info)
+    # print('Execute on hardware, %.3e seconds'%(time()-execute_begin))
+    hw_fc = [0 for i in sv_noiseless_fc]
 
     fc_evaluations = {'sv_noiseless':sv_noiseless_fc,
     'qasm':qasm_noiseless_fc,
@@ -104,7 +104,7 @@ if __name__ == '__main__':
                 full_circs[full_circuit_size] = full_circ
             
             searcher_begin = time()
-            hardness, positions, ancilla, d, num_cluster, m = searcher.find_cuts(circ=full_circ,num_clusters=range(2,min(len(full_circ.qubits),args.max_clusters+1)),hw_max_qubit=cluster_max_qubit,evaluator_weight=1)
+            hardness, positions, ancilla, d, num_cluster, m = searcher.find_cuts(circ=full_circ,num_clusters=range(2,min(len(full_circ.qubits),args.max_clusters)+1),hw_max_qubit=cluster_max_qubit,evaluator_weight=1)
             searcher_time = time() - searcher_begin
             
             if m == None:
