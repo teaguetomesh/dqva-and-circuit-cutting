@@ -71,8 +71,8 @@ def submit_hardware_jobs(cluster_instances, evaluator_info):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='MPI evaluator.')
     parser.add_argument('--device-name', metavar='S', type=str,help='which device to submit jobs to')
-    parser.add_argument('--saturated-shots',action="store_true",help='run saturated number of cluster shots?')
     parser.add_argument('--circuit-name', metavar='S', type=str,help='which circuit input file to run')
+    parser.add_argument('--saturated-shots',action="store_true",help='run saturated number of cluster shots?')
     args = parser.parse_args()
 
     device_name = args.device_name

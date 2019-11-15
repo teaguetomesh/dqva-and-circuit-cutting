@@ -38,18 +38,18 @@ def evaluate_full_circ(circ, total_shots, device_name):
     # print('%.3e seconds'%(time()-execute_begin))
     qasm_noisy_fc = [0 for i in sv_noiseless_fc]
 
-    # print('Evaluating fc hardware, %d shots'%total_shots)
-    # evaluator_info = get_evaluator_info(circ=circ,device_name=device_name,
-    # fields=['device','basis_gates','coupling_map','properties','initial_layout'])
-    # assert np.power(2,len(circ.qubits))<evaluator_info['device'].configuration().max_experiments/3*2
-    # evaluator_info['num_shots'] = total_shots
-    # if np.power(2,len(circ.qubits))<evaluator_info['device'].configuration().max_experiments/3*2:
-    #     _evaluator_info = get_evaluator_info(circ=circ,device_name=device_name,fields=['meas_filter'])
-    #     evaluator_info.update(_evaluator_info)
-    # execute_begin = time()
-    # hw_fc = evaluate_circ(circ=circ,backend='hardware',evaluator_info=evaluator_info)
-    # print('Execute on hardware, %.3e seconds'%(time()-execute_begin))
-    hw_fc = [0 for i in sv_noiseless_fc]
+    print('Evaluating fc hardware, %d shots'%total_shots)
+    evaluator_info = get_evaluator_info(circ=circ,device_name=device_name,
+    fields=['device','basis_gates','coupling_map','properties','initial_layout'])
+    assert np.power(2,len(circ.qubits))<evaluator_info['device'].configuration().max_experiments/3*2
+    evaluator_info['num_shots'] = total_shots
+    if np.power(2,len(circ.qubits))<evaluator_info['device'].configuration().max_experiments/3*2:
+        _evaluator_info = get_evaluator_info(circ=circ,device_name=device_name,fields=['meas_filter'])
+        evaluator_info.update(_evaluator_info)
+    execute_begin = time()
+    hw_fc = evaluate_circ(circ=circ,backend='hardware',evaluator_info=evaluator_info)
+    print('Execute on hardware, %.3e seconds'%(time()-execute_begin))
+    # hw_fc = [0 for i in sv_noiseless_fc]
 
     fc_evaluations = {'sv_noiseless':sv_noiseless_fc,
     'qasm':qasm_noiseless_fc,
