@@ -89,6 +89,8 @@ if __name__ == '__main__':
     filename = input_file.replace('job_submittor_input','hardware_uniter_input')
 
     for case in job_submittor_input:
+        if case not in [(2,3),(7,9),(8,9)]:
+            continue
         print('Case ',case)
         job_submittor_output[case] = copy.deepcopy(job_submittor_input[case])
         total_shots = job_submittor_input[case]['total_shots']

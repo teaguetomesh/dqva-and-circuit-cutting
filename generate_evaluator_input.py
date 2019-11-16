@@ -84,8 +84,10 @@ if __name__ == '__main__':
             if full_circuit_size<=cluster_max_qubit or full_circuit_size>device_size or (cluster_max_qubit-1)*args.max_clusters<full_circuit_size:
                 continue
             
-            print('-'*100)
             case = (cluster_max_qubit,full_circuit_size)
+            if case not in [(2,3),(7,9),(8,9)]:
+                continue
+            print('-'*100)
             print('Case',case)
 
             if full_circuit_size in full_circs:

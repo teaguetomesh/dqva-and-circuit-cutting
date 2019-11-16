@@ -247,4 +247,25 @@ Job submittor output has 14 cases
 **************************************************
 Case  (5, 8)
 Cluster 0 has 3 instances
+Calculating measurement filter, 20-qubit calibration circuits * 32 * 8.192e+03 shots. 3.616e+02 seconds
+Submitted 3 circuits to hardware, 321 shots
+Mitigation for 3 * 5-qubit circuit
+Mitigation for 3 * 5-qubit circuit took 1.961e-01 seconds
+Hardware queue time = 1.153e+02 seconds
+Cluster 1 has 6 instances
+Calculating measurement filter, 20-qubit calibration circuits * 16 * 8.192e+03 shots. 2.540e+02 seconds
+Submitted 6 circuits to hardware, 161 shots
+Mitigation for 6 * 4-qubit circuit
+Mitigation for 6 * 4-qubit circuit took 1.960e-01 seconds
+Hardware queue time = 8.840e+01 seconds
+Job submittor output has 15 cases
+**************************************************
+Case  (5, 9)
+Cluster 0 has 3 instances
+Calculating measurement filter, 20-qubit calibration circuits * 32 * 8.192e+03 shots. 3.908e+02 seconds
+Submitted 3 circuits to hardware, 641 shots
+Mitigation for 3 * 5-qubit circuit
+Mitigation for 3 * 5-qubit circuit took 1.946e-01 seconds
+Hardware queue time = 7.832e+01 seconds
+Cluster 1 has 6 instances
 Calculating measurement filter, 20-qubit calibration circuits * 32 * 8.192e+03 shots. 

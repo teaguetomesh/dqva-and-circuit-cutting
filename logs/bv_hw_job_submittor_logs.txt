@@ -238,4 +238,13 @@ Mitigation for 3 * 3-qubit circuit
 Mitigation for 3 * 3-qubit circuit took 1.956e-01 seconds
 Hardware queue time = 1.181e+03 seconds
 Cluster 1 has 6 instances
+Calculating measurement filter, 20-qubit calibration circuits * 32 * 8.192e+03 shots. 1.583e+03 seconds
+Submitted 6 circuits to hardware, 321 shots
+Mitigation for 6 * 5-qubit circuit
+Mitigation for 6 * 5-qubit circuit took 1.926e-01 seconds
+Hardware queue time = 3.558e+02 seconds
+Job submittor output has 14 cases
+**************************************************
+Case  (5, 8)
+Cluster 0 has 3 instances
 Calculating measurement filter, 20-qubit calibration circuits * 32 * 8.192e+03 shots. 
