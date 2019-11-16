@@ -1,0 +1,81 @@
+Reconstructing ./benchmark_data/hardware_uniter_input_ibmq_boeblingen_supremacy_sametotal.p
+case (2, 3)
+reconstruction distance = 0.016312759402534502, percent reduction = -92.18804691365257, time = 1.674e-03
+Reconstruction output has 1 cases
+----------------------------------------------------------------------------------------------------
+case (3, 4)
+reconstruction distance = 0.01421384806287277, percent reduction = 76.27587876924609, time = 6.573e-03
+Reconstruction output has 2 cases
+----------------------------------------------------------------------------------------------------
+case (3, 5)
+reconstruction distance = 0.005376120670935094, percent reduction = 64.21529154409694, time = 1.820e-03
+Reconstruction output has 3 cases
+----------------------------------------------------------------------------------------------------
+case (3, 6)
+reconstruction distance = 0.0013550683558624518, percent reduction = 40.81468732979481, time = 5.178e-01
+Reconstruction output has 4 cases
+----------------------------------------------------------------------------------------------------
+case (3, 7)
+reconstruction distance = 0.0014567926378416351, percent reduction = 86.83915682800468, time = 1.198e-02
+Reconstruction output has 5 cases
+----------------------------------------------------------------------------------------------------
+case (4, 5)
+reconstruction distance = 0.007415314659793917, percent reduction = 92.68261601138758, time = 2.089e-03
+Reconstruction output has 6 cases
+----------------------------------------------------------------------------------------------------
+case (4, 6)
+reconstruction distance = 0.002273510558974196, percent reduction = 26.268075669107336, time = 7.326e-03
+Reconstruction output has 7 cases
+----------------------------------------------------------------------------------------------------
+case (4, 7)
+reconstruction distance = 0.0029923464292363135, percent reduction = 24.408985004294454, time = 2.722e-03
+Reconstruction output has 8 cases
+----------------------------------------------------------------------------------------------------
+case (4, 8)
+reconstruction distance = 0.0009790728985599236, percent reduction = 44.176749583494164, time = 1.011e-01
+Reconstruction output has 9 cases
+----------------------------------------------------------------------------------------------------
+case (4, 9)
+reconstruction distance = 0.00041883872856028344, percent reduction = 23.96337427992088, time = 2.704e+00
+Reconstruction output has 10 cases
+----------------------------------------------------------------------------------------------------
+case (5, 6)
+reconstruction distance = 0.0032025292695940094, percent reduction = 21.749806190152594, time = 6.968e-03
+Reconstruction output has 11 cases
+----------------------------------------------------------------------------------------------------
+case (5, 7)
+reconstruction distance = 0.0027190762485054384, percent reduction = 30.947569578620552, time = 2.248e-03
+Reconstruction output has 12 cases
+----------------------------------------------------------------------------------------------------
+case (5, 8)
+reconstruction distance = 0.000664015472493771, percent reduction = 33.081937668570326, time = 1.108e-01
+Reconstruction output has 13 cases
+----------------------------------------------------------------------------------------------------
+case (5, 9)
+reconstruction distance = 0.00030869682370054594, percent reduction = 41.14838227201313, time = 2.673e+00
+Reconstruction output has 14 cases
+----------------------------------------------------------------------------------------------------
+case (6, 7)
+reconstruction distance = 0.002115753822092362, percent reduction = 28.52479578560028, time = 2.509e-03
+Reconstruction output has 15 cases
+----------------------------------------------------------------------------------------------------
+case (6, 8)
+reconstruction distance = 0.0006525583632267745, percent reduction = 11.126435888024929, time = 1.086e-02
+Reconstruction output has 16 cases
+----------------------------------------------------------------------------------------------------
+case (6, 9)
+reconstruction distance = 0.000436831587888298, percent reduction = 9.112358828268615, time = 5.754e-02
+Reconstruction output has 17 cases
+----------------------------------------------------------------------------------------------------
+case (7, 8)
+reconstruction distance = 0.0008208181109303824, percent reduction = 13.021871644841859, time = 1.465e-02
+Reconstruction output has 18 cases
+----------------------------------------------------------------------------------------------------
+case (7, 9)
+reconstruction distance = 0.0005949755317588198, percent reduction = -15.574065098502832, time = 7.093e-02
+Reconstruction output has 19 cases
+----------------------------------------------------------------------------------------------------
+case (8, 9)
+reconstruction distance = 0.0005156240556566621, percent reduction = -33.66680155482081, time = 1.747e-02
+Reconstruction output has 20 cases
+----------------------------------------------------------------------------------------------------

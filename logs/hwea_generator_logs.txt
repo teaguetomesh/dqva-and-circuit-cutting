@@ -642,4 +642,32 @@ Evaluate full circuit, 6144 shots
 Evaluating fc state vector
 Evaluating fc qasm, 6144 shots
 Evaluating fc hardware, 6144 shots
-Calculating measurement filter, 20-qubit calibration circuits * 512 * 8.192e+03 shots. 
+Calculating measurement filter, 20-qubit calibration circuits * 512 * 8.192e+03 shots. 6.628e+03 seconds
+Submitted 6144 shots to hardware
+Mitigation for 9 qubit circuit
+Mitigation for 9 qubit circuit took 1.192e+01 seconds
+Execute on hardware, 3.423e+03 seconds
+Evaluator input cases: dict_keys([(2, 3), (2, 4), (3, 4), (3, 5), (3, 6), (3, 7), (3, 8), (4, 5), (4, 6), (4, 7), (4, 8), (4, 9), (5, 6), (5, 7), (5, 8), (5, 9), (6, 7), (6, 8), (6, 9), (7, 8), (7, 9), (8, 9)])
+----------------------------------------------------------------------------------------------------
+(2, 3) 240
+(2, 4) 480
+(3, 4) 480
+(3, 5) 480
+(3, 6) 1440
+(3, 7) 1440
+(3, 8) 1440
+(4, 5) 960
+(4, 6) 960
+(4, 7) 960
+(4, 8) 960
+(4, 9) 1440
+(5, 6) 1920
+(5, 7) 1920
+(5, 8) 960
+(5, 9) 1920
+(6, 7) 3840
+(6, 8) 3840
+(6, 9) 1920
+(7, 8) 3840
+(7, 9) 6144
+(8, 9) 6144

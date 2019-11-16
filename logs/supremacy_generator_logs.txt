@@ -806,4 +806,54 @@ Evaluate full circuit, 73728 shots
 Evaluating fc state vector
 Evaluating fc qasm, 73728 shots
 Evaluating fc hardware, 73728 shots
-Calculating measurement filter, 20-qubit calibration circuits * 512 * 8.192e+03 shots. 
+Calculating measurement filter, 20-qubit calibration circuits * 512 * 8.192e+03 shots. 2.771e+03 seconds
+Submitted 8192 shots to hardware
+Mitigation for 9 qubit circuit
+Mitigation for 9 qubit circuit took 1.189e+01 seconds
+Submitted 8192 shots to hardware
+Mitigation for 9 qubit circuit
+Mitigation for 9 qubit circuit took 1.275e+01 seconds
+Submitted 8192 shots to hardware
+Mitigation for 9 qubit circuit
+Mitigation for 9 qubit circuit took 1.203e+01 seconds
+Submitted 8192 shots to hardware
+Mitigation for 9 qubit circuit
+Mitigation for 9 qubit circuit took 1.172e+01 seconds
+Submitted 8192 shots to hardware
+Mitigation for 9 qubit circuit
+Mitigation for 9 qubit circuit took 1.259e+01 seconds
+Submitted 8192 shots to hardware
+Mitigation for 9 qubit circuit
+Mitigation for 9 qubit circuit took 1.263e+01 seconds
+Submitted 8192 shots to hardware
+Mitigation for 9 qubit circuit
+Mitigation for 9 qubit circuit took 1.258e+01 seconds
+Submitted 8192 shots to hardware
+Mitigation for 9 qubit circuit
+Mitigation for 9 qubit circuit took 1.187e+01 seconds
+Submitted 8192 shots to hardware
+Mitigation for 9 qubit circuit
+Mitigation for 9 qubit circuit took 1.234e+01 seconds
+Execute on hardware, 4.265e+03 seconds
+Evaluator input cases: dict_keys([(2, 3), (3, 4), (3, 5), (3, 6), (3, 7), (4, 5), (4, 6), (4, 7), (4, 8), (4, 9), (5, 6), (5, 7), (5, 8), (5, 9), (6, 7), (6, 8), (6, 9), (7, 8), (7, 9), (8, 9)])
+----------------------------------------------------------------------------------------------------
+(2, 3) 240
+(3, 4) 1440
+(3, 5) 480
+(3, 6) 17280
+(3, 7) 5760
+(4, 5) 960
+(4, 6) 11520
+(4, 7) 2880
+(4, 8) 86400
+(4, 9) 34560
+(5, 6) 5760
+(5, 7) 3840
+(5, 8) 34560
+(5, 9) 34560
+(6, 7) 3840
+(6, 8) 11520
+(6, 9) 69120
+(7, 8) 18432
+(7, 9) 221184
+(8, 9) 73728
