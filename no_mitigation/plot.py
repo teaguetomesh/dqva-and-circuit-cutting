@@ -183,7 +183,7 @@ if __name__ == '__main__':
                 case_cutting = cross_entropy(target=plotter_input[case]['evaluations']['sv_noiseless'],
                 obs= plotter_input[case]['evaluations']['cutting'])
 
-                case_percent_change = 100*(case_hw_fc - case_cutting)/(case_hw_fc - case_ground_truth)
+                case_percent_change = 100*(case_qasm_noise - case_cutting)/(case_qasm_noise - case_ground_truth)
                 # case_percent_change = (case_hw_fc - case_ground_truth)/(case_cutting - case_ground_truth)
                 print('case {}: percentage reduction = {}, reconstruction time: {:.3e}'.format(case,
                 case_percent_change,plotter_input[case]['uniter_time']))

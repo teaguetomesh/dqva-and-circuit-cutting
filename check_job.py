@@ -36,11 +36,11 @@ if __name__ == '__main__':
                 print('%s: %d-qubit, max %d jobs * %d shots'%(x,num_qubits,x.configuration().max_experiments,x.configuration().max_shots))
                 for job in x.jobs():
                     if args.cancel_jobs and job.status() not in terminal_status:
+                        print(job.creation_date(),job.status(),job.queue_position(),job.job_id())
                         job.cancel()
                         print('cancelled')
-                    if job.creation_date()>past_5_hrs:
-                        if job.status() in terminal_status:
-                            print(job.creation_date(),job.status(),job.error_message(),job.job_id())
-                        else:
-                            print(job.creation_date(),job.status(),job.queue_position(),job.job_id())
+                    if job.status() not in terminal_status:
+                        print(job.creation_date(),job.status(),job.queue_position(),job.job_id())
+                    elif job.creation_date()>past_5_hrs:
+                        print(job.creation_date(),job.status(),job.error_message(),job.job_id())
                 print('-'*100)

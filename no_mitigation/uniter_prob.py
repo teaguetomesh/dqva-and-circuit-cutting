@@ -328,11 +328,13 @@ if __name__ == '__main__':
         reconstructed_prob = reconstruct(complete_path_map=complete_path_map, full_circ=circ, cluster_circs=clusters, cluster_sim_probs=all_cluster_prob)
         uniter_time = time()-uniter_begin
         evaluations['cutting'] = reconstructed_prob
+        print('sum of prob:',sum(reconstructed_prob))
         
         ground_truth_ce = cross_entropy(target=evaluations['sv_noiseless'],obs=evaluations['sv_noiseless'])
+        qasm_noise_ce = cross_entropy(target=evaluations['sv_noiseless'],obs=evaluations['qasm+noise'])
         fc_ce = cross_entropy(target=evaluations['sv_noiseless'],obs=evaluations['hw'])
         cutting_ce = cross_entropy(target=evaluations['sv_noiseless'],obs=evaluations['cutting'])
-        percent_change = 100*(fc_ce-cutting_ce)/(fc_ce-ground_truth_ce)
+        percent_change = 100*(qasm_noise_ce-cutting_ce)/(qasm_noise_ce-ground_truth_ce)
         distance = wasserstein_distance(evaluations['sv_noiseless'],evaluations['cutting'])
         print('reconstruction distance = {}, percent reduction = {}, time = {:.3e}'.format(distance,percent_change,uniter_time))
 

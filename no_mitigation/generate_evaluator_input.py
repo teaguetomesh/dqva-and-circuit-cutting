@@ -22,23 +22,23 @@ def gen_secret(num_qubit):
 def evaluate_full_circ(circ, total_shots, device_name):
     empty_prob = [0 for i in range(np.power(2,len(circ.qubits)))]
     print('Evaluate full circuit, %d shots'%total_shots)
-    # print('Evaluating fc state vector')
-    # sv_noiseless_fc = evaluate_circ(circ=circ,backend='statevector_simulator',evaluator_info=None)
-    sv_noiseless_fc = empty_prob
+    print('Evaluating fc state vector')
+    sv_noiseless_fc = evaluate_circ(circ=circ,backend='statevector_simulator',evaluator_info=None)
+    # sv_noiseless_fc = empty_prob
 
-    # print('Evaluating fc qasm, %d shots'%total_shots)
-    # evaluator_info = {'num_shots':total_shots}
-    # qasm_noiseless_fc = evaluate_circ(circ=circ,backend='noiseless_qasm_simulator',evaluator_info=evaluator_info)
-    qasm_noiseless_fc = empty_prob
+    print('Evaluating fc qasm, %d shots'%total_shots)
+    evaluator_info = {'num_shots':total_shots}
+    qasm_noiseless_fc = evaluate_circ(circ=circ,backend='noiseless_qasm_simulator',evaluator_info=evaluator_info)
+    # qasm_noiseless_fc = empty_prob
 
-    # print('Evaluating fc qasm + noise, %d shots'%total_shots)
-    # evaluator_info = get_evaluator_info(circ=circ,device_name=device_name,
-    # fields=['device','basis_gates','coupling_map','properties','initial_layout','noise_model'])
-    # evaluator_info['num_shots'] = total_shots
-    # execute_begin = time()
-    # qasm_noisy_fc = evaluate_circ(circ=circ,backend='noisy_qasm_simulator',evaluator_info=evaluator_info)
-    # print('%.3e seconds'%(time()-execute_begin))
-    qasm_noisy_fc = empty_prob
+    print('Evaluating fc qasm + noise, %d shots'%total_shots)
+    evaluator_info = get_evaluator_info(circ=circ,device_name=device_name,
+    fields=['device','basis_gates','coupling_map','properties','initial_layout','noise_model'])
+    evaluator_info['num_shots'] = total_shots
+    execute_begin = time()
+    qasm_noisy_fc = evaluate_circ(circ=circ,backend='noisy_qasm_simulator',evaluator_info=evaluator_info)
+    print('%.3e seconds'%(time()-execute_begin))
+    # qasm_noisy_fc = empty_prob
 
     # print('Evaluating fc hardware, %d shots'%total_shots)
     # evaluator_info = get_evaluator_info(circ=circ,device_name=device_name,
@@ -73,7 +73,7 @@ if __name__ == '__main__':
     device_size = len(device_properties['properties'].qubits)
 
     # NOTE: toggle circuits to benchmark
-    dimension_l = [[2,5],[3,4],[2,7],[4,4],[3,6],[4,5]]
+    dimension_l = [[4,4]]
 
     full_circs = {}
     all_total_shots = {}
@@ -115,9 +115,9 @@ if __name__ == '__main__':
             else:
                 m.print_stat()
                 clusters, complete_path_map, K, d = cutter.cut_circuit(full_circ, positions)
-                total_shots = find_saturated_shots(clusters=clusters,complete_path_map=complete_path_map,accuracy=1e-1)/args.shots_scaling
+                total_shots = find_saturated_shots(clusters=clusters,complete_path_map=complete_path_map,accuracy=1e-1)
                 all_total_shots[case] = total_shots
-                fc_evaluations = evaluate_full_circ(full_circ,total_shots,device_name)
+                fc_evaluations = evaluate_full_circ(full_circ,int(total_shots/args.shots_scaling),device_name)
                 case_dict = {'full_circ':full_circ,'fc_evaluations':fc_evaluations,'total_shots':total_shots,
                 'searcher_time':searcher_time,'clusters':clusters,'complete_path_map':complete_path_map}
             try:
