@@ -1,6 +1,6 @@
 from qcg.generators import gen_hwea
 import numpy as np
-from helper_fun import evaluate_circ, find_saturated_shots, get_circ_saturated_shots, fidelity
+from helper_fun import evaluate_circ, find_saturated_shots, get_circ_saturated_shots, fidelity, cross_entropy
 from evaluator_prob import find_rank_combinations, get_evaluator_info
 import MIQCP_searcher as searcher
 import cutter
@@ -61,14 +61,14 @@ def evaluate_cluster(complete_path_map, cluster_circ, combinations, backend, eva
     return cluster_prob
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='MPI evaluator.')
+    parser = argparse.ArgumentParser(description='Large quantum circuits on small machine.')
     parser.add_argument('--device-name', metavar='S', type=str,help='which evaluator device input file to run')
     parser.add_argument('--evaluation-method', metavar='S', type=str,help='which evaluator backend to use')
     parser.add_argument('--saturated-shots',action="store_true",help='run saturated number of cluster shots')
     args = parser.parse_args()
 
-    cluster_max_qubit = 10
-    fc_sizes = np.arange(11,12)
+    cluster_max_qubit = 6
+    fc_sizes = np.arange(10,11)
     rank_classical_time = {}
     rank_quantum_time = {}
     rank_results = {}
@@ -79,7 +79,7 @@ if __name__ == '__main__':
         rank_classical_time[case] = 0
         full_circ = gen_hwea(fc_size,1)
         
-        hardness, positions, ancilla, d, num_cluster, m = searcher.find_cuts(circ=full_circ,num_clusters=range(2,5),hw_max_qubit=cluster_max_qubit,evaluator_weight=1)
+        hardness, positions, ancilla, d, num_cluster, m = searcher.find_cuts(circ=full_circ,num_clusters=range(2,4),hw_max_qubit=cluster_max_qubit,evaluator_weight=1)
         m.print_stat()
         clusters, complete_path_map, K, d = cutter.cut_circuit(full_circ, positions)
         total_shots = find_saturated_shots(clusters=clusters,complete_path_map=complete_path_map,accuracy=1e-1)
@@ -113,6 +113,7 @@ if __name__ == '__main__':
                 quantum_evaluator_begin = time()
                 if args.saturated_shots:
                     evaluator_info['num_shots'] = get_circ_saturated_shots(circ=clusters[cluster_idx],accuracy=1e-1)
+                    evaluator_info['num_shots'] = total_shots
                 else:
                     evaluator_info['num_shots'] = int(total_shots/len(rank_combinations[case][cluster_idx]))+1
                 cluster_prob = evaluate_cluster(complete_path_map=complete_path_map,
@@ -142,5 +143,7 @@ if __name__ == '__main__':
         reconstructed_prob = reconstruct(complete_path_map=complete_path_map, full_circ=full_circ, cluster_circs=clusters, cluster_sim_probs=all_cluster_prob)
         vanilla_fid = fidelity(target=ground_truth,obs=qasm_noisy_fc)
         cutting_fid = fidelity(target=ground_truth,obs=reconstructed_prob)
-        print('vanilla fidelity =',vanilla_fid)
-        print('cutting fidelity =',cutting_fid)
+        vanilla_ce = cross_entropy(target=ground_truth,obs=qasm_noisy_fc)
+        cutting_ce = cross_entropy(target=ground_truth,obs=reconstructed_prob)
+        print('vanilla fidelity = %.3f. cutting fidelity = %.3f'%(vanilla_fid,cutting_fid))
+        print('vanilla ce = %.3f. cutting ce = %.3f'%(vanilla_ce,cutting_ce))

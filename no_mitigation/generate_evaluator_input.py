@@ -20,14 +20,16 @@ def gen_secret(num_qubit):
     return num_with_zeros
 
 def evaluate_full_circ(circ, total_shots, device_name):
+    empty_prob = [0 for i in range(np.power(2,len(circ.qubits)))]
     print('Evaluate full circuit, %d shots'%total_shots)
-    print('Evaluating fc state vector')
-    sv_noiseless_fc = evaluate_circ(circ=circ,backend='statevector_simulator',evaluator_info=None)
+    # print('Evaluating fc state vector')
+    # sv_noiseless_fc = evaluate_circ(circ=circ,backend='statevector_simulator',evaluator_info=None)
+    sv_noiseless_fc = empty_prob
 
-    print('Evaluating fc qasm, %d shots'%total_shots)
-    evaluator_info = {'num_shots':total_shots}
-    qasm_noiseless_fc = evaluate_circ(circ=circ,backend='noiseless_qasm_simulator',evaluator_info=evaluator_info)
-    # qasm_noiseless_fc = [0 for i in sv_noiseless_fc]
+    # print('Evaluating fc qasm, %d shots'%total_shots)
+    # evaluator_info = {'num_shots':total_shots}
+    # qasm_noiseless_fc = evaluate_circ(circ=circ,backend='noiseless_qasm_simulator',evaluator_info=evaluator_info)
+    qasm_noiseless_fc = empty_prob
 
     # print('Evaluating fc qasm + noise, %d shots'%total_shots)
     # evaluator_info = get_evaluator_info(circ=circ,device_name=device_name,
@@ -36,7 +38,7 @@ def evaluate_full_circ(circ, total_shots, device_name):
     # execute_begin = time()
     # qasm_noisy_fc = evaluate_circ(circ=circ,backend='noisy_qasm_simulator',evaluator_info=evaluator_info)
     # print('%.3e seconds'%(time()-execute_begin))
-    qasm_noisy_fc = [0 for i in sv_noiseless_fc]
+    qasm_noisy_fc = empty_prob
 
     # print('Evaluating fc hardware, %d shots'%total_shots)
     # evaluator_info = get_evaluator_info(circ=circ,device_name=device_name,
@@ -46,7 +48,7 @@ def evaluate_full_circ(circ, total_shots, device_name):
     # execute_begin = time()
     # hw_fc = evaluate_circ(circ=circ,backend='hardware',evaluator_info=evaluator_info)
     # print('Execute on hardware, %.3e seconds'%(time()-execute_begin))
-    hw_fc = [0 for i in sv_noiseless_fc]
+    hw_fc = empty_prob
 
     fc_evaluations = {'sv_noiseless':sv_noiseless_fc,
     'qasm':qasm_noiseless_fc,
@@ -62,6 +64,7 @@ if __name__ == '__main__':
     parser.add_argument('--max-clusters', metavar='N', type=int,help='max number of clusters to split into')
     parser.add_argument('--device-name', metavar='S',type=str,help='IBM device')
     parser.add_argument('--circuit-name', metavar='S', type=str,help='which circuit input file to run')
+    parser.add_argument('--shots-scaling', metavar='N', type=int,help='scaling factor for total number of shots')
     args = parser.parse_args()
 
     device_name = args.device_name
@@ -112,7 +115,7 @@ if __name__ == '__main__':
             else:
                 m.print_stat()
                 clusters, complete_path_map, K, d = cutter.cut_circuit(full_circ, positions)
-                total_shots = find_saturated_shots(clusters=clusters,complete_path_map=complete_path_map,accuracy=1e-1)
+                total_shots = find_saturated_shots(clusters=clusters,complete_path_map=complete_path_map,accuracy=1e-1)/args.shots_scaling
                 all_total_shots[case] = total_shots
                 fc_evaluations = evaluate_full_circ(full_circ,total_shots,device_name)
                 case_dict = {'full_circ':full_circ,'fc_evaluations':fc_evaluations,'total_shots':total_shots,

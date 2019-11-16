@@ -1,0 +1,10 @@
+ibmq_johannesburg
+Case  (2, 3)
+Cluster 0 has 3 instances
+Calculating measurement filter, 20-qubit calibration circuits * 4 * 8.192e+03 shots. 9.836e+02 seconds
+Submitted 3 circuits to hardware, 81 shots
+Mitigation for 3 * 2-qubit circuit
+Mitigation for 3 * 2-qubit circuit took 1.728e-01 seconds
+Hardware queue time = 1.132e+03 seconds
+Cluster 1 has 6 instances
+Calculating measurement filter, 20-qubit calibration circuits * 4 * 8.192e+03 shots. 
