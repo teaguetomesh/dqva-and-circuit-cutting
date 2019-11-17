@@ -39,9 +39,21 @@ def submit_hardware_jobs(cluster_instances, evaluator_info):
         job = evaluator_info['device'].run(qobj)
         hw_results = job.result()
 
-        for init_meas in mapped_circuits:
-            hw_count = hw_results.get_counts(mapped_circuits[init_meas])
-            hw_counts[init_meas] = update_counts(cumulated=hw_counts[init_meas], batch=hw_count)
+        if 'meas_filter' in evaluator_info:
+            print('Mitigation for %d * %d-qubit circuit'%(len(cluster_instances),len(circ.qubits)))
+            mitigation_begin = time()
+            mitigated_results = evaluator_info['meas_filter'].apply(hw_results)
+            mitigation_time = time() - mitigation_begin
+            print('Mitigation for %d * %d-qubit circuit took %.3e seconds'%(len(cluster_instances),len(circ.qubits),mitigation_time))
+            for init_meas in mapped_circuits:
+                hw_count = mitigated_results.get_counts(mapped_circuits[init_meas])
+                hw_counts[init_meas] = update_counts(cumulated=hw_counts[init_meas], batch=hw_count)
+        else:
+            for init_meas in mapped_circuits:
+                hw_count = hw_results.get_counts(mapped_circuits[init_meas])
+                # print('batch {} counts:'.format(init_meas),hw_count)
+                # print('cumulative {} counts:'.format(init_meas),hw_counts[init_meas])
+                hw_counts[init_meas] = update_counts(cumulated=hw_counts[init_meas], batch=hw_count)
         remaining_shots -= batch_shots
     
     hw_probs = {}

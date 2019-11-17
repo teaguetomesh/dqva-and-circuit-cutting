@@ -20,35 +20,37 @@ def gen_secret(num_qubit):
     return num_with_zeros
 
 def evaluate_full_circ(circ, total_shots, device_name):
-    empty_prob = [1.0/np.power(2,len(circ.qubits)) for i in range(np.power(2,len(circ.qubits)))]
+    uniform_p = 1.0/np.power(2,len(circ.qubits))
+    uniform_prob = [uniform_p for i in range(np.power(2,len(circ.qubits)))]
     print('Evaluate full circuit, %d shots'%total_shots)
     print('Evaluating fc state vector')
     sv_noiseless_fc = evaluate_circ(circ=circ,backend='statevector_simulator',evaluator_info=None)
-    # sv_noiseless_fc = empty_prob
 
     print('Evaluating fc qasm, %d shots'%total_shots)
     evaluator_info = {'num_shots':total_shots}
     qasm_noiseless_fc = evaluate_circ(circ=circ,backend='noiseless_qasm_simulator',evaluator_info=evaluator_info)
-    # qasm_noiseless_fc = empty_prob
 
-    print('Evaluating fc qasm + noise, %d shots'%total_shots)
-    evaluator_info = get_evaluator_info(circ=circ,device_name=device_name,
-    fields=['device','basis_gates','coupling_map','properties','initial_layout','noise_model'])
-    evaluator_info['num_shots'] = total_shots
-    execute_begin = time()
-    qasm_noisy_fc = evaluate_circ(circ=circ,backend='noisy_qasm_simulator',evaluator_info=evaluator_info)
-    print('%.3e seconds'%(time()-execute_begin))
-    # qasm_noisy_fc = empty_prob
-
-    # print('Evaluating fc hardware, %d shots'%total_shots)
+    # print('Evaluating fc qasm + noise, %d shots'%total_shots)
     # evaluator_info = get_evaluator_info(circ=circ,device_name=device_name,
-    # fields=['device','basis_gates','coupling_map','properties','initial_layout'])
-    # assert np.power(2,len(circ.qubits))<evaluator_info['device'].configuration().max_experiments/3*2
+    # fields=['device','basis_gates','coupling_map','properties','initial_layout','noise_model'])
     # evaluator_info['num_shots'] = total_shots
     # execute_begin = time()
-    # hw_fc = evaluate_circ(circ=circ,backend='hardware',evaluator_info=evaluator_info)
-    # print('Execute on hardware, %.3e seconds'%(time()-execute_begin))
-    hw_fc = empty_prob
+    # qasm_noisy_fc = evaluate_circ(circ=circ,backend='noisy_qasm_simulator',evaluator_info=evaluator_info)
+    # print('%.3e seconds'%(time()-execute_begin))
+
+    print('Evaluating fc hardware, %d shots'%total_shots)
+    evaluator_info = get_evaluator_info(circ=circ,device_name=device_name,
+    fields=['device','basis_gates','coupling_map','properties','initial_layout'])
+    assert np.power(2,len(circ.qubits))<evaluator_info['device'].configuration().max_experiments/3*2
+    evaluator_info['num_shots'] = total_shots
+    execute_begin = time()
+    hw_fc = evaluate_circ(circ=circ,backend='hardware',evaluator_info=evaluator_info)
+    print('Execute on hardware, %.3e seconds'%(time()-execute_begin))
+
+    # sv_noiseless_fc = uniform_prob
+    # qasm_noiseless_fc = uniform_prob
+    qasm_noisy_fc = uniform_prob
+    # hw_fc = uniform_prob
 
     fc_evaluations = {'sv_noiseless':sv_noiseless_fc,
     'qasm':qasm_noiseless_fc,
@@ -64,7 +66,6 @@ if __name__ == '__main__':
     parser.add_argument('--max-clusters', metavar='N', type=int,help='max number of clusters to split into')
     parser.add_argument('--device-name', metavar='S',type=str,help='IBM device')
     parser.add_argument('--circuit-name', metavar='S', type=str,help='which circuit input file to run')
-    parser.add_argument('--shots-scaling', metavar='N', type=int,help='scaling factor for total number of shots')
     args = parser.parse_args()
 
     device_name = args.device_name
@@ -73,7 +74,7 @@ if __name__ == '__main__':
     device_size = len(device_properties['properties'].qubits)
 
     # NOTE: toggle circuits to benchmark
-    dimension_l = [[4,4]]
+    dimension_l = [[2,5],[3,4],[2,7],[4,4],[3,6],[4,5]]
 
     full_circs = {}
     all_total_shots = {}
@@ -84,8 +85,8 @@ if __name__ == '__main__':
             if full_circuit_size<=cluster_max_qubit or full_circuit_size>device_size or (cluster_max_qubit-1)*args.max_clusters<full_circuit_size:
                 continue
             
-            print('-'*100)
             case = (cluster_max_qubit,full_circuit_size)
+            print('-'*100)
             print('Case',case)
 
             if full_circuit_size in full_circs:
@@ -117,7 +118,7 @@ if __name__ == '__main__':
                 clusters, complete_path_map, K, d = cutter.cut_circuit(full_circ, positions)
                 total_shots = find_saturated_shots(clusters=clusters,complete_path_map=complete_path_map,accuracy=1e-1)
                 all_total_shots[case] = total_shots
-                fc_evaluations = evaluate_full_circ(full_circ,int(total_shots/args.shots_scaling),device_name)
+                fc_evaluations = evaluate_full_circ(full_circ,total_shots,device_name)
                 case_dict = {'full_circ':full_circ,'fc_evaluations':fc_evaluations,'total_shots':total_shots,
                 'searcher_time':searcher_time,'clusters':clusters,'complete_path_map':complete_path_map}
             try:

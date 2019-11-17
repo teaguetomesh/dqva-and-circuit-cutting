@@ -27,13 +27,14 @@ def load_IBMQ():
 
 def cross_entropy(target,obs):
     assert len(target)==len(obs)
-    obs = [abs(x) for x in obs]
-    alpha = 1e-14
-    if 0 in obs:
-        obs = [(x+alpha)/(1+alpha*len(obs)) for x in obs]
+    epsilon = 1e-20
+    obs = [abs(x) if x!=0 else epsilon for x in obs]
+    sum_of_prob = sum(obs)
+    obs = [x/sum_of_prob for x in obs]
+    assert abs(sum(obs)-1) <= 1e-10
     h = 0
     for p,q in zip(target,obs):
-        if p==0:
+        if p==0 or q<=0:
             h += 0
         else:
             h += -p*np.log(q)
@@ -74,7 +75,10 @@ def get_circ_saturated_shots(circ,accuracy):
         qasm_prob_batch = evaluate_circ(circ=circ,backend='noiseless_qasm_simulator',evaluator_info=evaluator_info)
         qasm_prob = [(x*(counter-1)+y)/counter for x,y in zip(qasm_prob,qasm_prob_batch)]
         ce = cross_entropy(target=ground_truth,obs=qasm_prob)
-        diff = abs((ce-min_ce)/min_ce)
+        if min_ce != 0:
+            diff = abs((ce-min_ce)/min_ce)
+        else:
+            diff = abs(ce-min_ce)
         if counter%50==49:
             print('current diff:',diff,'current shots:',int(counter*shots_increment))
         if diff < accuracy:
@@ -98,7 +102,10 @@ def find_saturated_shots(clusters,complete_path_map,accuracy):
             qasm_prob_batch = evaluate_circ(circ=cluster_circ,backend='noiseless_qasm_simulator',evaluator_info=evaluator_info)
             qasm_prob = [(x*(counter-1)+y)/counter for x,y in zip(qasm_prob,qasm_prob_batch)]
             ce = cross_entropy(target=ground_truth,obs=qasm_prob)
-            diff = (ce-min_ce)/min_ce
+            if min_ce != 0:
+                diff = abs((ce-min_ce)/min_ce)
+            else:
+                diff = abs(ce-min_ce)
             assert diff >= -1e-14
             if diff <= accuracy:
                 num_shots = int(counter*shots_increment)
