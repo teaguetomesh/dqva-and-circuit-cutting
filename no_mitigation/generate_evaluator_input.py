@@ -20,7 +20,7 @@ def gen_secret(num_qubit):
     return num_with_zeros
 
 def evaluate_full_circ(circ, total_shots, device_name):
-    empty_prob = [0 for i in range(np.power(2,len(circ.qubits)))]
+    empty_prob = [1.0/np.power(2,len(circ.qubits)) for i in range(np.power(2,len(circ.qubits)))]
     print('Evaluate full circuit, %d shots'%total_shots)
     print('Evaluating fc state vector')
     sv_noiseless_fc = evaluate_circ(circ=circ,backend='statevector_simulator',evaluator_info=None)

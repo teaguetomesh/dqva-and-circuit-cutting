@@ -72,7 +72,7 @@ if __name__ == '__main__':
     device_properties = get_evaluator_info(circ=None,device_name=device_name,fields=['properties'])
     device_size = len(device_properties['properties'].qubits)
 
-    cluster_max_qubits = np.arange(3,7)
+    cluster_max_qubits = np.arange(6,7)
     max_clusters = 3
     fc_sizes = np.arange(10,11)
     rank_classical_time = {}
@@ -159,17 +159,25 @@ if __name__ == '__main__':
             all_cluster_prob = rank_results[case]
             reconstructed_prob = reconstruct(complete_path_map=complete_path_map, full_circ=full_circ, cluster_circs=clusters, cluster_sim_probs=all_cluster_prob)
             results[case]['cutting'] = reconstructed_prob
+            
             vanilla_fid = fidelity(target=ground_truth,obs=qasm_noisy_fc)
             cutting_fid = fidelity(target=ground_truth,obs=reconstructed_prob)
+            
+            ground_truth_ce = cross_entropy(target=ground_truth,obs=ground_truth)
             vanilla_ce = cross_entropy(target=ground_truth,obs=qasm_noisy_fc)
             cutting_ce = cross_entropy(target=ground_truth,obs=reconstructed_prob)
             print('vanilla fidelity = %.3f. cutting fidelity = %.3f'%(vanilla_fid,cutting_fid))
-            print('vanilla ce = %.3f. cutting ce = %.3f'%(vanilla_ce,cutting_ce))
+            print('ground_truth ce = %.3f. vanilla ce = %.3f. cutting ce = %.3f'%(ground_truth_ce,vanilla_ce,cutting_ce))
             print('-'*100)
 
-    d1 = results[(5,10)]['ground_truth']
-    d2 = results[(5,10)]['vanilla']
-    d3 = [abs(x) for x in results[(5,10)]['cutting']]
+    d1 = results[(6,10)]['ground_truth']
+    d2 = results[(6,10)]['vanilla']
+    
+    d3 = results[(6,10)]['cutting']
+    epsilon = 1e-20
+    d3 = [abs(x) if x!=0 else epsilon for x in d3]
+    sum_of_prob = sum(d3)
+    d3 = [x/sum_of_prob for x in d3]
     
     x = np.arange(len(d1))
 

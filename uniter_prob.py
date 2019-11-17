@@ -8,7 +8,7 @@ import progressbar as pb
 from qiskit.quantum_info.states.measures import state_fidelity
 from scipy.stats import wasserstein_distance
 import argparse
-from helper_fun import cross_entropy
+from helper_fun import cross_entropy, fidelity
 import copy
 
 def find_cuts_pairs(complete_path_map):
@@ -332,9 +332,15 @@ if __name__ == '__main__':
         ground_truth_ce = cross_entropy(target=evaluations['sv_noiseless'],obs=evaluations['sv_noiseless'])
         fc_ce = cross_entropy(target=evaluations['sv_noiseless'],obs=evaluations['hw'])
         cutting_ce = cross_entropy(target=evaluations['sv_noiseless'],obs=evaluations['cutting'])
-        percent_change = 100*(fc_ce-cutting_ce)/(fc_ce-ground_truth_ce)
+        ce_percent_change = 100*(fc_ce-cutting_ce)/(fc_ce-ground_truth_ce)
         distance = wasserstein_distance(evaluations['sv_noiseless'],evaluations['cutting'])
-        print('reconstruction distance = {}, percent reduction = {}, time = {:.3e}'.format(distance,percent_change,uniter_time))
+
+        ground_truth_fid = fidelity(target=evaluations['sv_noiseless'],obs=evaluations['sv_noiseless'])
+        fc_fid = fidelity(target=evaluations['sv_noiseless'],obs=evaluations['hw'])
+        cutting_fid = fidelity(target=evaluations['sv_noiseless'],obs=evaluations['cutting'])
+        fid_percent_change = 100*(cutting_fid-fc_fid)/fc_fid
+        print('reconstruction distance = {:.3f}, ce percent reduction = {:.3f}, fidelity improvement = {:.3f}, time = {:.3e}'.format(distance,ce_percent_change,fid_percent_change,uniter_time))
+        assert fc_ce>=ground_truth_ce and cutting_ce>=ground_truth_ce and ce_percent_change<=100
 
         uniter_output[case]['num_shots'] = copy.deepcopy(num_shots)
         uniter_output[case]['circ'] = copy.deepcopy(circ)
@@ -344,7 +350,8 @@ if __name__ == '__main__':
         uniter_output[case]['classical_time'] = copy.deepcopy(evaluator_output[case]['classical_time'])
         uniter_output[case]['quantum_time'] = copy.deepcopy(evaluator_output[case]['quantum_time'])
         uniter_output[case]['uniter_time'] = copy.deepcopy(uniter_time)
-        uniter_output[case]['percent_reduction'] = copy.deepcopy(percent_change)
+        uniter_output[case]['ce_percent_reduction'] = copy.deepcopy(ce_percent_change)
+        uniter_output[case]['fid_percent_improvement'] = copy.deepcopy(fid_percent_change)
         pickle.dump(uniter_output, open('%s'%filename,'wb'))
         print('Reconstruction output has %d cases'%(len(uniter_output)))
         print('-'*100)

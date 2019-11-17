@@ -187,7 +187,8 @@ if __name__ == '__main__':
                 # case_percent_change = (case_hw_fc - case_ground_truth)/(case_cutting - case_ground_truth)
                 print('case {}: percentage reduction = {}, reconstruction time: {:.3e}'.format(case,
                 case_percent_change,plotter_input[case]['uniter_time']))
-                assert case_percent_change == plotter_input[case]['percent_reduction']
+                assert case_percent_change <= 100
+                assert case_percent_change == plotter_input[case]['ce_percent_reduction']
                 
                 ground_truth_avg[case] += case_ground_truth
                 qasm_avg[case] += case_qasm
@@ -263,11 +264,12 @@ if __name__ == '__main__':
         ax1.set_zlabel('cross entropy gap reduction due to cutting (%)')
         # pickle.dump(fig,open('%s'%figname, 'wb'))
         plt.savefig('%s.png'%figname[:-2],dpi=400)
-        print('-'*100)
         plt.close()
 
         hw_qubits_unique = list(np.unique(hw_qubits))
+        # hw_qubits_unique.remove(2)
         fc_qubits_unique = list(np.unique(fc_qubits))
+        # fc_qubits_unique.remove(3)
         fc_qubits_unique.sort(reverse=True)
         reduction_map = np.zeros((len(fc_qubits_unique), len(hw_qubits_unique)))
         for fc_qubit in fc_qubits_unique:
@@ -290,3 +292,4 @@ if __name__ == '__main__':
         fig.tight_layout()
         plt.savefig('%s_ce_map.png'%figname[:-2],dpi=400)
         plt.close()
+        print('-'*100)
