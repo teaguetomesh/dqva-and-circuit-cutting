@@ -1,6 +1,6 @@
 # NOTE: toggle here to change max qc size, max clusters
 echo "Generate evaluator input"
-python generate_evaluator_input.py --min-qubit 5 --max-qubit 15 --max-clusters 4 --device-name ibmq_johannesburg --circuit-name supremacy 2>&1 | tee ./logs/supremacy_generator_logs.txt
+python generate_evaluator_input.py --min-qubit 5 --max-qubit 15 --max-clusters 4 --device-name ibmq_johannesburg --circuit-name supremacy --shots-scaling 100 2>&1 | tee ./logs/supremacy_generator_logs.txt
 
 echo "Running evaluator"
 mpiexec -n 2 python evaluator_prob.py --device-name ibmq_johannesburg --circuit-name supremacy --evaluation-method hardware
