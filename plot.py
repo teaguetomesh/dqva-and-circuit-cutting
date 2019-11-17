@@ -3,7 +3,7 @@ import glob
 import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
-from helper_fun import cross_entropy
+from helper_fun import cross_entropy, fidelity
 
 def heatmap(data, row_labels, col_labels, ax=None,
             cbar_kw={}, cbarlabel="", **kwargs):
@@ -134,93 +134,79 @@ if __name__ == '__main__':
     all_files = glob.glob('./benchmark_data/*_plotter_input_*.p')
     for filename in all_files:
         f = open(filename, 'rb' )
-        plotter_inputs = []
-        while 1:
-            try:
-                plotter_inputs.append(pickle.load(f))
-            except EOFError:
-                break
+        plotter_input = pickle.load(f)
         evaluator_type = filename.split('/')[-1].split('_')[0]
         figname = './plots/'+filename.split('/')[-1].replace('_plotter_input','')
+        circuit_type = filename.split('_')[-2]
 
-        hw_qubits = [case[0] for case in plotter_inputs[0]]
-        fc_qubits = [case[1] for case in plotter_inputs[0]]
-        dx = [0.2 for x in plotter_inputs[0]]
-        dy = [0.2 for x in plotter_inputs[0]]
+        hw_qubits = [case[0] for case in plotter_input]
+        fc_qubits = [case[1] for case in plotter_input]
+        dx = [0.2 for x in plotter_input]
+        dy = [0.2 for x in plotter_input]
 
-        searcher_time_avg = initialize_dict(plotter_inputs[0].keys())
-        classical_time_avg = initialize_dict(plotter_inputs[0].keys())
-        quantum_time_avg = initialize_dict(plotter_inputs[0].keys())
-        uniter_time_avg = initialize_dict(plotter_inputs[0].keys())
-        ground_truth_avg = initialize_dict(plotter_inputs[0].keys())
-        qasm_avg = initialize_dict(plotter_inputs[0].keys())
-        qasm_noise_avg = initialize_dict(plotter_inputs[0].keys())
-        hw_fc_avg = initialize_dict(plotter_inputs[0].keys())
-        cutting_avg = initialize_dict(plotter_inputs[0].keys())
-        percent_change_avg = initialize_dict(plotter_inputs[0].keys())
+        for case in plotter_input:
+            ground_truth_ce = cross_entropy(target=plotter_input[case]['evaluations']['sv_noiseless'],
+            obs= plotter_input[case]['evaluations']['sv_noiseless'])
+            qasm_ce = cross_entropy(target=plotter_input[case]['evaluations']['sv_noiseless'],
+            obs= plotter_input[case]['evaluations']['qasm'])
+            qasm_noise_ce = cross_entropy(target=plotter_input[case]['evaluations']['sv_noiseless'],
+            obs= plotter_input[case]['evaluations']['qasm+noise'])
+            hw_fc_ce = cross_entropy(target=plotter_input[case]['evaluations']['sv_noiseless'],
+            obs= plotter_input[case]['evaluations']['hw'])
+            cutting_ce = cross_entropy(target=plotter_input[case]['evaluations']['sv_noiseless'],
+            obs= plotter_input[case]['evaluations']['cutting'])
+            ce_percent_change = 100*(hw_fc_ce - cutting_ce)/(hw_fc_ce - ground_truth_ce)
+            assert ce_percent_change <= 100 and ce_percent_change == plotter_input[case]['ce_percent_reduction']
 
-        for i, plotter_input in enumerate(plotter_inputs):
-            print('repetition ',i)
-            # Iterate over repetitions
-            for case in plotter_input:
-                searcher_time_avg[case] += plotter_input[case]['searcher_time']
-                classical_time_avg[case] += plotter_input[case]['classical_time']
-                quantum_time_avg[case] += plotter_input[case]['quantum_time']
-                uniter_time_avg[case] += plotter_input[case]['uniter_time']
+            ground_truth_fid = fidelity(target=plotter_input[case]['evaluations']['sv_noiseless'],
+            obs= plotter_input[case]['evaluations']['sv_noiseless'])
+            qasm_fid = fidelity(target=plotter_input[case]['evaluations']['sv_noiseless'],
+            obs= plotter_input[case]['evaluations']['qasm'])
+            qasm_noise_fid = fidelity(target=plotter_input[case]['evaluations']['sv_noiseless'],
+            obs= plotter_input[case]['evaluations']['qasm+noise'])
+            hw_fc_fid = fidelity(target=plotter_input[case]['evaluations']['sv_noiseless'],
+            obs= plotter_input[case]['evaluations']['hw'])
+            cutting_fid = fidelity(target=plotter_input[case]['evaluations']['sv_noiseless'],
+            obs= plotter_input[case]['evaluations']['cutting'])
+            fid_percent_change = 100*(cutting_fid-hw_fc_fid)/hw_fc_fid
+            assert fid_percent_change == plotter_input[case]['fid_percent_improvement']
 
-                case_ground_truth = cross_entropy(target=plotter_input[case]['evaluations']['sv_noiseless'],
-                obs= plotter_input[case]['evaluations']['sv_noiseless'])
-                
-                case_qasm = cross_entropy(target=plotter_input[case]['evaluations']['sv_noiseless'],
-                obs= plotter_input[case]['evaluations']['qasm'])
-                
-                case_qasm_noise = cross_entropy(target=plotter_input[case]['evaluations']['sv_noiseless'],
-                obs= plotter_input[case]['evaluations']['qasm+noise'])
-
-                case_hw_fc = cross_entropy(target=plotter_input[case]['evaluations']['sv_noiseless'],
-                obs= plotter_input[case]['evaluations']['hw'])
-
-                case_cutting = cross_entropy(target=plotter_input[case]['evaluations']['sv_noiseless'],
-                obs= plotter_input[case]['evaluations']['cutting'])
-
-                case_percent_change = 100*(case_hw_fc - case_cutting)/(case_hw_fc - case_ground_truth)
-                # case_percent_change = (case_hw_fc - case_ground_truth)/(case_cutting - case_ground_truth)
-                print('case {}: percentage reduction = {}, reconstruction time: {:.3e}'.format(case,
-                case_percent_change,plotter_input[case]['uniter_time']))
-                assert case_percent_change <= 100
-                assert case_percent_change == plotter_input[case]['ce_percent_reduction']
-                
-                ground_truth_avg[case] += case_ground_truth
-                qasm_avg[case] += case_qasm
-                qasm_noise_avg[case] += case_qasm_noise
-                hw_fc_avg[case] += case_hw_fc
-                cutting_avg[case] += case_cutting
-                percent_change_avg[case] += case_percent_change
-
-                # print('case {} reduction:{},time:{}'.format(case,case_percent_change,plotter_input[case]['uniter_time']))
-            print('*'*50)
-        
-        num_repetitions = len(plotter_inputs)
-        for dictionary in (searcher_time_avg,classical_time_avg,quantum_time_avg,uniter_time_avg,ground_truth_avg,qasm_avg,qasm_noise_avg,hw_fc_avg,cutting_avg,percent_change_avg):
-            for case in dictionary:
-                dictionary[case] = dictionary[case]/num_repetitions
+            print('case {}: ce percentage reduction = {:.3f}, fidelity improvement = {:.3f}, reconstruction time: {:.3e}'.format(case,ce_percent_change,fid_percent_change,plotter_input[case]['uniter_time']))
+        print('*'*50)
 
         best_cc = {}
-        for case in percent_change_avg:
-            percent = percent_change_avg[case]
-            uniter_time = uniter_time_avg[case]
+        for case in plotter_input:
+            ce_percent = plotter_input[case]['ce_percent_reduction']
+            fid_percent = plotter_input[case]['fid_percent_improvement']
+            uniter_time = plotter_input[case]['uniter_time']
             hw, fc = case
-            if (fc in best_cc and percent>best_cc[fc][0]) or (fc not in best_cc):
-                best_cc[fc] = (percent,uniter_time,case)
-        [print('Full circuit size {:d}. Best case {}. Cross entropy reduction = {:.3f}%. Reconstruction time = {:.3e} seconds.'.format(fc,best_cc[fc][2],best_cc[fc][0],best_cc[fc][1])) for fc in best_cc]
+            if circuit_type == 'supremacy' or circuit_type == 'qft':
+                if (fc in best_cc and ce_percent>best_cc[fc][0]) or (fc not in best_cc):
+                    best_cc[fc] = (ce_percent,uniter_time,case)
+            elif circuit_type == 'bv' or circuit_type=='hwea':
+                if (fc in best_cc and fid_percent>best_cc[fc][0]) or (fc not in best_cc):
+                    best_cc[fc] = (fid_percent,uniter_time,case)
+            else:
+                raise Exception('Illegal circuit type:',circuit_type)
+        if circuit_type == 'supremacy' or circuit_type == 'qft':
+            [print('Full circuit size {:d}. Best case {}. Cross entropy reduction = {:.3f}%. Reconstruction time = {:.3e} seconds.'.format(fc,best_cc[fc][2],best_cc[fc][0],best_cc[fc][1])) for fc in best_cc]
+        elif circuit_type == 'bv' or circuit_type=='hwea':
+            [print('Full circuit size {:d}. Best case {}. Fidelity improvement = {:.3f}%. Reconstruction time = {:.3e} seconds.'.format(fc,best_cc[fc][2],best_cc[fc][0],best_cc[fc][1])) for fc in best_cc]
+        else:
+            raise Exception('Illegal circuit type:',circuit_type)
+        
+        print('plotting %s'%(figname))
 
         plt.figure(figsize=(10,5))
         plt.subplot(121)
         plt.plot([fc for fc in best_cc], [best_cc[fc][0] for fc in best_cc], 'bX')
         plt.xlabel('Number of qubits')
-        plt.ylabel('Cross entropy reduction (%)')
+        if circuit_type == 'supremacy' or circuit_type == 'qft':
+            plt.ylabel('Cross entropy reduction (%)')
+            plt.ylim(0,100)
+        elif circuit_type == 'bv' or circuit_type=='hwea':
+            plt.ylabel('Fidelity improvement (%)')
         plt.xticks([x for x in best_cc])
-        plt.ylim(0,100)
         plt.subplot(122)
         plt.plot([fc for fc in best_cc], [best_cc[fc][1] for fc in best_cc], 'r*')
         plt.xlabel('Number of qubits')
@@ -230,66 +216,76 @@ if __name__ == '__main__':
         plt.savefig('%s_tradeoff.png'%figname[:-2],dpi=400)
         plt.close()
 
-        print('plotting %s, %d times average'%(figname,len(plotter_inputs)))
-
+        searcher_times = [plotter_input[case]['searcher_time'] for case in plotter_input]
+        classical_times = [plotter_input[case]['classical_time'] for case in plotter_input]
+        quantum_times = [plotter_input[case]['quantum_time'] for case in plotter_input]
+        uniter_times = [plotter_input[case]['uniter_time'] for case in plotter_input]
+        ce_percent_changes = [plotter_input[case]['ce_percent_reduction'] for case in plotter_input]
+        fid_percent_changes = [plotter_input[case]['fid_percent_improvement'] for case in plotter_input]
         fig_scale = 4.5
         fig = plt.figure(figsize=(3*fig_scale,2*fig_scale))
         ax1 = fig.add_subplot(231, projection='3d')
-        ax1.bar3d(hw_qubits, fc_qubits, np.zeros(len(plotter_input)), dx, dy, [searcher_time_avg[case] for case in searcher_time_avg])
+        ax1.bar3d(hw_qubits, fc_qubits, np.zeros(len(plotter_input)), dx, dy, searcher_times)
         ax1.set_xlabel('hardware qubits')
         ax1.set_ylabel('full circuit qubits')
         ax1.set_zlabel('searcher time (seconds)')
         ax1 = fig.add_subplot(232, projection='3d')
-        ax1.bar3d(hw_qubits, fc_qubits, np.zeros(len(plotter_input)), dx, dy, [classical_time_avg[case] for case in classical_time_avg])
-        ax1.set_zlim3d(0, 1.2*max(classical_time_avg.values())+1)
+        ax1.bar3d(hw_qubits, fc_qubits, np.zeros(len(plotter_input)), dx, dy, classical_times)
+        ax1.set_zlim3d(0, 1.2*max(classical_times)+1)
         ax1.set_xlabel('hardware qubits')
         ax1.set_ylabel('full circuit qubits')
         ax1.set_zlabel('classical evaluator time (seconds)')
         ax1 = fig.add_subplot(233, projection='3d')
-        ax1.bar3d(hw_qubits, fc_qubits, np.zeros(len(plotter_input)), dx, dy, [quantum_time_avg[case] for case in quantum_time_avg])
-        ax1.set_zlim3d(0, 1.2*max(quantum_time_avg.values())+1)
+        ax1.bar3d(hw_qubits, fc_qubits, np.zeros(len(plotter_input)), dx, dy, quantum_times)
+        ax1.set_zlim3d(0, 1.2*max(quantum_times)+1)
         ax1.set_xlabel('hardware qubits')
         ax1.set_ylabel('full circuit qubits')
         ax1.set_zlabel('quantum evaluator time (seconds)')
         ax1 = fig.add_subplot(234, projection='3d')
-        ax1.bar3d(hw_qubits, fc_qubits, np.zeros(len(plotter_input)), dx, dy, [uniter_time_avg[case] for case in uniter_time_avg])
+        ax1.bar3d(hw_qubits, fc_qubits, np.zeros(len(plotter_input)), dx, dy, uniter_times)
         ax1.set_xlabel('hardware qubits')
         ax1.set_ylabel('full circuit qubits')
         ax1.set_zlabel('reconstructor time (seconds)')
         ax1 = fig.add_subplot(235, projection='3d')
-        ax1.bar3d(hw_qubits, fc_qubits, np.zeros(len(plotter_input)), dx, dy, [percent_change_avg[case] for case in percent_change_avg])
-        ax1.set_zlim3d(min(0,1.2*min(percent_change_avg.values())), max(0,1.2*max(percent_change_avg.values())))
+        ax1.bar3d(hw_qubits, fc_qubits, np.zeros(len(plotter_input)), dx, dy, ce_percent_changes)
+        ax1.set_zlim3d(min(0,1.2*min(ce_percent_changes)), max(0,1.2*max(ce_percent_changes)))
         ax1.set_xlabel('hardware qubits')
         ax1.set_ylabel('full circuit qubits')
         ax1.set_zlabel('cross entropy gap reduction due to cutting (%)')
-        # pickle.dump(fig,open('%s'%figname, 'wb'))
+        ax1 = fig.add_subplot(236, projection='3d')
+        ax1.bar3d(hw_qubits, fc_qubits, np.zeros(len(plotter_input)), dx, dy, fid_percent_changes)
+        ax1.set_zlim3d(min(0,1.2*min(fid_percent_changes)), max(0,1.2*max(fid_percent_changes)))
+        ax1.set_xlabel('hardware qubits')
+        ax1.set_ylabel('full circuit qubits')
+        ax1.set_zlabel('Fidelity improvement due to cutting (%)')
         plt.savefig('%s.png'%figname[:-2],dpi=400)
         plt.close()
 
         hw_qubits_unique = list(np.unique(hw_qubits))
-        # hw_qubits_unique.remove(2)
         fc_qubits_unique = list(np.unique(fc_qubits))
-        # fc_qubits_unique.remove(3)
         fc_qubits_unique.sort(reverse=True)
         reduction_map = np.zeros((len(fc_qubits_unique), len(hw_qubits_unique)))
         for fc_qubit in fc_qubits_unique:
             for hw_qubit in hw_qubits_unique:
                 case = (hw_qubit,fc_qubit)
-                percent = percent_change_avg[case] if case in percent_change_avg else 0
+                if circuit_type == 'supremacy' or circuit_type == 'qft':
+                    percent = plotter_input[case]['ce_percent_reduction'] if case in plotter_input else 0
+                elif circuit_type == 'bv' or circuit_type=='hwea':
+                    percent = plotter_input[case]['fid_percent_improvement'] if case in plotter_input else 0
                 row_idx = fc_qubits_unique.index(fc_qubit)
                 col_idx = hw_qubits_unique.index(hw_qubit)
-                # print('case {}, position {}, percent = {}'.format(case,(row_idx, col_idx),percent))
                 reduction_map[row_idx, col_idx] = percent
 
         fig, ax = plt.subplots(figsize=(10,10))
 
         im, cbar = heatmap(reduction_map, fc_qubits_unique, hw_qubits_unique, ax=ax,
-                        cmap="YlGn", cbarlabel="Cross Entropy Loss Reduction [%]")
+                        cmap="YlGn", cbarlabel="Cross Entropy Loss Reduction [%]" if circuit_type == 'supremacy' or circuit_type == 'qft' else "Fidelity Improvement [%]")
         texts = annotate_heatmap(im, valfmt="{x:.3f} %")
         ax.set_xlabel('Hardware qubits')
         ax.set_ylabel('Full circuit qubits')
 
+        metric_type = 'ce' if (circuit_type == 'supremacy' or circuit_type == 'qft') else 'fid'
         fig.tight_layout()
-        plt.savefig('%s_ce_map.png'%figname[:-2],dpi=400)
+        plt.savefig('{}_{}_map.png'.format(figname[:-2],metric_type),dpi=400)
         plt.close()
         print('-'*100)

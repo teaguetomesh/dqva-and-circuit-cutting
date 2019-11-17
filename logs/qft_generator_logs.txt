@@ -467,4 +467,212 @@ Evaluate full circuit, 3732480 shots
 Evaluating fc state vector
 Evaluating fc qasm, 3732480 shots
 Evaluating fc hardware, 3732480 shots
-Calculating measurement filter, 20-qubit calibration circuits * 128 * 8.192e+03 shots. 
+Calculating measurement filter, 20-qubit calibration circuits * 128 * 8.192e+03 shots. 1.296e+03 seconds
+Submitted 8192 shots to hardware
+Mitigation for 7 qubit circuit
+Mitigation for 7 qubit circuit took 6.265e-01 seconds
+Submitted 8192 shots to hardware
+Mitigation for 7 qubit circuit
+Mitigation for 7 qubit circuit took 5.895e-01 seconds
+Submitted 8192 shots to hardware
+Mitigation for 7 qubit circuit
+Mitigation for 7 qubit circuit took 5.961e-01 seconds
+Submitted 8192 shots to hardware
+Mitigation for 7 qubit circuit
+Mitigation for 7 qubit circuit took 5.356e-01 seconds
+Submitted 8192 shots to hardware
+Mitigation for 7 qubit circuit
+Mitigation for 7 qubit circuit took 7.052e-01 seconds
+Submitted 8192 shots to hardware
+Mitigation for 7 qubit circuit
+Mitigation for 7 qubit circuit took 7.734e-01 seconds
+Submitted 8192 shots to hardware
+Mitigation for 7 qubit circuit
+Mitigation for 7 qubit circuit took 7.238e-01 seconds
+Submitted 8192 shots to hardware
+Mitigation for 7 qubit circuit
+Mitigation for 7 qubit circuit took 6.618e-01 seconds
+Submitted 8192 shots to hardware
+Mitigation for 7 qubit circuit
+Mitigation for 7 qubit circuit took 6.751e-01 seconds
+Submitted 8192 shots to hardware
+Mitigation for 7 qubit circuit
+Mitigation for 7 qubit circuit took 7.022e-01 seconds
+Submitted 8192 shots to hardware
+Mitigation for 7 qubit circuit
+Mitigation for 7 qubit circuit took 6.464e-01 seconds
+Submitted 8192 shots to hardware
+Mitigation for 7 qubit circuit
+Mitigation for 7 qubit circuit took 6.993e-01 seconds
+Submitted 8192 shots to hardware
+Mitigation for 7 qubit circuit
+Mitigation for 7 qubit circuit took 6.590e-01 seconds
+Submitted 8192 shots to hardware
+Mitigation for 7 qubit circuit
+Mitigation for 7 qubit circuit took 7.051e-01 seconds
+Submitted 8192 shots to hardware
+Mitigation for 7 qubit circuit
+Mitigation for 7 qubit circuit took 6.678e-01 seconds
+Submitted 8192 shots to hardware
+Mitigation for 7 qubit circuit
+Mitigation for 7 qubit circuit took 6.678e-01 seconds
+Submitted 8192 shots to hardware
+Mitigation for 7 qubit circuit
+Mitigation for 7 qubit circuit took 7.094e-01 seconds
+Submitted 8192 shots to hardware
+Mitigation for 7 qubit circuit
+Mitigation for 7 qubit circuit took 6.878e-01 seconds
+Submitted 8192 shots to hardware
+Mitigation for 7 qubit circuit
+Mitigation for 7 qubit circuit took 6.566e-01 seconds
+Submitted 8192 shots to hardware
+Mitigation for 7 qubit circuit
+Mitigation for 7 qubit circuit took 7.063e-01 seconds
+Submitted 8192 shots to hardware
+Mitigation for 7 qubit circuit
+Mitigation for 7 qubit circuit took 6.526e-01 seconds
+Submitted 8192 shots to hardware
+Mitigation for 7 qubit circuit
+Mitigation for 7 qubit circuit took 6.017e-01 seconds
+Submitted 8192 shots to hardware
+Mitigation for 7 qubit circuit
+Mitigation for 7 qubit circuit took 6.933e-01 seconds
+Submitted 8192 shots to hardware
+Mitigation for 7 qubit circuit
+Mitigation for 7 qubit circuit took 6.919e-01 seconds
+Submitted 8192 shots to hardware
+Mitigation for 7 qubit circuit
+Mitigation for 7 qubit circuit took 6.791e-01 seconds
+Submitted 8192 shots to hardware
+Mitigation for 7 qubit circuit
+Mitigation for 7 qubit circuit took 6.464e-01 seconds
+Submitted 8192 shots to hardware
+Mitigation for 7 qubit circuit
+Mitigation for 7 qubit circuit took 6.767e-01 seconds
+Submitted 8192 shots to hardware
+Mitigation for 7 qubit circuit
+Mitigation for 7 qubit circuit took 6.846e-01 seconds
+Submitted 8192 shots to hardware
+Mitigation for 7 qubit circuit
+Mitigation for 7 qubit circuit took 6.499e-01 seconds
+Submitted 8192 shots to hardware
+Mitigation for 7 qubit circuit
+Mitigation for 7 qubit circuit took 6.980e-01 seconds
+Submitted 8192 shots to hardware
+Mitigation for 7 qubit circuit
+Mitigation for 7 qubit circuit took 6.920e-01 seconds
+Submitted 8192 shots to hardware
+Mitigation for 7 qubit circuit
+Mitigation for 7 qubit circuit took 6.550e-01 seconds
+Submitted 8192 shots to hardware
+Mitigation for 7 qubit circuit
+Mitigation for 7 qubit circuit took 6.922e-01 seconds
+Submitted 8192 shots to hardware
+Mitigation for 7 qubit circuit
+Mitigation for 7 qubit circuit took 6.915e-01 seconds
+Submitted 8192 shots to hardware
+Mitigation for 7 qubit circuit
+Mitigation for 7 qubit circuit took 6.493e-01 seconds
+Submitted 8192 shots to hardware
+Mitigation for 7 qubit circuit
+Mitigation for 7 qubit circuit took 6.713e-01 seconds
+Submitted 8192 shots to hardware
+Mitigation for 7 qubit circuit
+Mitigation for 7 qubit circuit took 6.677e-01 seconds
+Submitted 8192 shots to hardware
+Mitigation for 7 qubit circuit
+Mitigation for 7 qubit circuit took 6.411e-01 seconds
+Submitted 8192 shots to hardware
+Mitigation for 7 qubit circuit
+Mitigation for 7 qubit circuit took 6.582e-01 seconds
+Submitted 8192 shots to hardware
+Mitigation for 7 qubit circuit
+Mitigation for 7 qubit circuit took 6.414e-01 seconds
+Submitted 8192 shots to hardware
+Mitigation for 7 qubit circuit
+Mitigation for 7 qubit circuit took 6.406e-01 seconds
+Submitted 8192 shots to hardware
+Mitigation for 7 qubit circuit
+Mitigation for 7 qubit circuit took 6.932e-01 seconds
+Submitted 8192 shots to hardware
+Mitigation for 7 qubit circuit
+Mitigation for 7 qubit circuit took 6.863e-01 seconds
+Submitted 8192 shots to hardware
+Mitigation for 7 qubit circuit
+Mitigation for 7 qubit circuit took 6.402e-01 seconds
+Submitted 8192 shots to hardware
+Mitigation for 7 qubit circuit
+Mitigation for 7 qubit circuit took 7.053e-01 seconds
+Submitted 8192 shots to hardware
+Mitigation for 7 qubit circuit
+Mitigation for 7 qubit circuit took 6.518e-01 seconds
+Submitted 8192 shots to hardware
+Mitigation for 7 qubit circuit
+Mitigation for 7 qubit circuit took 6.889e-01 seconds
+Submitted 8192 shots to hardware
+Mitigation for 7 qubit circuit
+Mitigation for 7 qubit circuit took 6.596e-01 seconds
+Submitted 8192 shots to hardware
+Mitigation for 7 qubit circuit
+Mitigation for 7 qubit circuit took 6.872e-01 seconds
+Submitted 8192 shots to hardware
+Mitigation for 7 qubit circuit
+Mitigation for 7 qubit circuit took 6.602e-01 seconds
+Submitted 8192 shots to hardware
+Mitigation for 7 qubit circuit
+Mitigation for 7 qubit circuit took 6.965e-01 seconds
+Submitted 8192 shots to hardware
+Mitigation for 7 qubit circuit
+Mitigation for 7 qubit circuit took 6.507e-01 seconds
+Submitted 8192 shots to hardware
+Mitigation for 7 qubit circuit
+Mitigation for 7 qubit circuit took 6.299e-01 seconds
+Submitted 8192 shots to hardware
+Mitigation for 7 qubit circuit
+Mitigation for 7 qubit circuit took 7.024e-01 seconds
+Submitted 8192 shots to hardware
+Mitigation for 7 qubit circuit
+Mitigation for 7 qubit circuit took 6.973e-01 seconds
+Submitted 8192 shots to hardware
+Mitigation for 7 qubit circuit
+Mitigation for 7 qubit circuit took 6.997e-01 seconds
+Submitted 8192 shots to hardware
+Mitigation for 7 qubit circuit
+Mitigation for 7 qubit circuit took 6.926e-01 seconds
+Submitted 8192 shots to hardware
+Mitigation for 7 qubit circuit
+Mitigation for 7 qubit circuit took 6.956e-01 seconds
+Submitted 8192 shots to hardware
+Mitigation for 7 qubit circuit
+Mitigation for 7 qubit circuit took 6.989e-01 seconds
+Submitted 8192 shots to hardware
+Mitigation for 7 qubit circuit
+Mitigation for 7 qubit circuit took 7.015e-01 seconds
+Submitted 8192 shots to hardware
+Mitigation for 7 qubit circuit
+Mitigation for 7 qubit circuit took 6.536e-01 seconds
+Submitted 8192 shots to hardware
+Mitigation for 7 qubit circuit
+Mitigation for 7 qubit circuit took 7.022e-01 seconds
+Submitted 8192 shots to hardware
+Mitigation for 7 qubit circuit
+Mitigation for 7 qubit circuit took 6.843e-01 seconds
+Submitted 8192 shots to hardware
+Mitigation for 7 qubit circuit
+Mitigation for 7 qubit circuit took 6.934e-01 seconds
+Submitted 8192 shots to hardware
+Mitigation for 7 qubit circuit
+Mitigation for 7 qubit circuit took 6.619e-01 seconds
+Submitted 8192 shots to hardware
+Mitigation for 7 qubit circuit
+Mitigation for 7 qubit circuit took 6.563e-01 seconds
+Submitted 8192 shots to hardware
+Mitigation for 7 qubit circuit
+Mitigation for 7 qubit circuit took 6.591e-01 seconds
+Submitted 8192 shots to hardware
+Mitigation for 7 qubit circuit
+Mitigation for 7 qubit circuit took 6.522e-01 seconds
+Submitted 8192 shots to hardware
+Mitigation for 7 qubit circuit
+Mitigation for 7 qubit circuit took 6.969e-01 seconds
+Submitted 8192 shots to hardware
