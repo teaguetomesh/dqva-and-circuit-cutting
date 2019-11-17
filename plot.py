@@ -286,6 +286,6 @@ if __name__ == '__main__':
 
         metric_type = 'ce' if (circuit_type == 'supremacy' or circuit_type == 'qft') else 'fid'
         fig.tight_layout()
-        plt.savefig('{}_{}_map.png'.format(figname[:-2],metric_type),dpi=400)
+        plt.savefig('{}_{}_map.png'.format(figname[:-2],metric_type),dpi=1000)
         plt.close()
         print('-'*100)
