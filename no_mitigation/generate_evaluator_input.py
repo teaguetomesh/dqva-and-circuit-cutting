@@ -41,7 +41,6 @@ def evaluate_full_circ(circ, total_shots, device_name):
     print('Evaluating fc hardware, %d shots'%total_shots)
     evaluator_info = get_evaluator_info(circ=circ,device_name=device_name,
     fields=['device','basis_gates','coupling_map','properties','initial_layout'])
-    assert np.power(2,len(circ.qubits))<evaluator_info['device'].configuration().max_experiments/3*2
     evaluator_info['num_shots'] = total_shots
     execute_begin = time()
     hw_fc = evaluate_circ(circ=circ,backend='hardware',evaluator_info=evaluator_info)
