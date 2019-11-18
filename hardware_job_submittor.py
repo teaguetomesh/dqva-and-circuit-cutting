@@ -30,7 +30,6 @@ def submit_hardware_jobs(cluster_instances, evaluator_info):
     for init_meas in mapped_circuits:
         hw_counts[init_meas] = {}
     
-    # FIXME: split up hardware shots
     device_max_shots = evaluator_info['device'].configuration().max_shots
     remaining_shots = evaluator_info['num_shots']
     while remaining_shots>0:
@@ -89,8 +88,6 @@ if __name__ == '__main__':
     filename = input_file.replace('job_submittor_input','hardware_uniter_input')
 
     for case in job_submittor_input:
-        if case not in [(2,3),(7,9),(8,9)]:
-            continue
         print('Case ',case)
         job_submittor_output[case] = copy.deepcopy(job_submittor_input[case])
         total_shots = job_submittor_input[case]['total_shots']

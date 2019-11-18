@@ -276,17 +276,17 @@ def cuts_parser(cuts, circ):
     positions = []
     for position in cuts:
         source, dest = position
-        source_qargs = [x[:len(x)-1] for x in source.split(' ')]
-        dest_qargs = [x[:len(x)-1] for x in dest.split(' ')]
+        source_qargs = [x.split(']')[0]+']' for x in source.split(' ')]
+        dest_qargs = [x.split(']')[0]+']' for x in dest.split(' ')]
         qubit_cut = list(set(source_qargs).intersection(set(dest_qargs)))
         if len(qubit_cut)>1:
             raise Exception('one cut is cutting on multiple qubits')
         for x in source.split(' '):
-            if x[:len(x)-1] == qubit_cut[0]:
-                source_idx = int(x[len(x)-1])
+            if x.split(']')[0]+']' == qubit_cut[0]:
+                source_idx = int(x.split(']')[1])
         for x in dest.split(' '):
-            if x[:len(x)-1] == qubit_cut[0]:
-                dest_idx = int(x[len(x)-1])
+            if x.split(']')[0]+']' == qubit_cut[0]:
+                dest_idx = int(x.split(']')[1])
         multi_Q_gate_idx = max(source_idx, dest_idx)
         
         wire = None
