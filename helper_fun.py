@@ -42,6 +42,11 @@ def cross_entropy(target,obs):
 
 def fidelity(target,obs):
     assert len(target)==len(obs)
+    epsilon = 1e-20
+    obs = [abs(x) if x!=0 else epsilon for x in obs]
+    sum_of_prob = sum(obs)
+    obs = [x/sum_of_prob for x in obs]
+    assert abs(sum(obs)-1) <= 1e-10
     fidelity = 0
     for t,o in zip(target,obs):
         if t!= 0:
