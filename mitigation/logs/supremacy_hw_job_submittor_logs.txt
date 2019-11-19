@@ -1,0 +1,20 @@
+ibmq_johannesburg
+Case  (5, 8)
+Cluster 0 has 54 instances
+Hardware queue time = 2.000e-03 seconds
+Cluster 1 has 108 instances
+Hardware queue time = 2.559e-03 seconds
+Cluster 2 has 18 instances
+Hardware queue time = 6.371e-04 seconds
+Job submittor output has 1 cases
+**************************************************
+Case  (9, 16)
+Cluster 0 has 324 instances
+Hardware queue time = 1.200e-02 seconds
+Cluster 1 has 648 instances
+Hardware queue time = 7.339e-02 seconds
+Cluster 2 has 162 instances
+Hardware queue time = 3.198e-02 seconds
+Job submittor output has 2 cases
+**************************************************
+----------------------------------------------------------------------------------------------------

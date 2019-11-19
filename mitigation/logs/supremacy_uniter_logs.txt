@@ -1,0 +1,9 @@
+Reconstructing ./benchmark_data/supremacy/classical_uniter_input_ibmq_johannesburg_supremacy.p
+case (5, 8)
+reconstruction distance = 0.000, ce percent reduction = 100.000, fidelity improvement = 0.000, time = 5.813e-02
+Reconstruction output has 1 cases
+----------------------------------------------------------------------------------------------------
+case (9, 16)
+reconstruction distance = 0.000, ce percent reduction = 100.000, fidelity improvement = 0.000, time = 5.464e+00
+Reconstruction output has 2 cases
+----------------------------------------------------------------------------------------------------
