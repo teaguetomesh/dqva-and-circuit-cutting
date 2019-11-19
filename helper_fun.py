@@ -7,6 +7,7 @@ from qiskit import Aer, IBMQ, execute
 from qiskit.compiler import transpile, assemble
 from qiskit.providers.aer import noise
 import numpy as np
+import math
 from datetime import datetime
 from qiskit.providers.models import BackendProperties
 from qiskit.ignis.mitigation.measurement import (complete_meas_cal, tensored_meas_cal,CompleteMeasFitter, TensoredMeasFitter)
@@ -67,62 +68,57 @@ def find_cluster_O_rho_qubits(complete_path_map,cluster_idx):
                     rho_qubits.append(q)
     return O_qubits, rho_qubits
 
-def get_circ_saturated_shots(circ,accuracy):
-    ground_truth = evaluate_circ(circ=circ,backend='statevector_simulator',evaluator_info=None)
-    min_ce = cross_entropy(target=ground_truth,obs=ground_truth)
-    qasm_prob = [0 for i in ground_truth]
-    shots_increment = 1024
-    evaluator_info = {}
-    evaluator_info['num_shots'] = shots_increment
-    counter = 0.0
-    while 1:
-        counter += 1.0
-        qasm_prob_batch = evaluate_circ(circ=circ,backend='noiseless_qasm_simulator',evaluator_info=evaluator_info)
-        qasm_prob = [(x*(counter-1)+y)/counter for x,y in zip(qasm_prob,qasm_prob_batch)]
-        ce = cross_entropy(target=ground_truth,obs=qasm_prob)
-        if min_ce != 0:
-            diff = abs((ce-min_ce)/min_ce)
-        else:
-            diff = abs(ce-min_ce)
-        if counter%50==49:
-            print('current diff:',diff,'current shots:',int(counter*shots_increment))
-        if diff < accuracy:
-            return int(counter*shots_increment)
-
-def find_saturated_shots(clusters,complete_path_map,accuracy):
-    total_shots = 0
-    for cluster_idx, cluster_circ in enumerate(clusters):
-        O_qubits, rho_qubits = find_cluster_O_rho_qubits(complete_path_map,cluster_idx)
-        num_instances = np.power(6,len(rho_qubits))*np.power(3,len(O_qubits))
-        num_shots = None
-
-        ground_truth = evaluate_circ(circ=cluster_circ,backend='statevector_simulator',evaluator_info=None)
+def get_circ_saturated_shots(circs,accuracy):
+    saturated_shots = []
+    for circ_idx, circ in enumerate(circs):
+        ground_truth = evaluate_circ(circ=circ,backend='statevector_simulator',evaluator_info=None)
         min_ce = cross_entropy(target=ground_truth,obs=ground_truth)
         qasm_prob = [0 for i in ground_truth]
-        shots_increment = min(1024,10*int(np.power(2,len(cluster_circ.qubits))))
-        evaluator_info = {'num_shots':shots_increment}
+        shots_increment = 1024
+        evaluator_info = {}
+        evaluator_info['num_shots'] = shots_increment
         counter = 0.0
         while 1:
             counter += 1.0
-            qasm_prob_batch = evaluate_circ(circ=cluster_circ,backend='noiseless_qasm_simulator',evaluator_info=evaluator_info)
+            qasm_prob_batch = evaluate_circ(circ=circ,backend='noiseless_qasm_simulator',evaluator_info=evaluator_info)
             qasm_prob = [(x*(counter-1)+y)/counter for x,y in zip(qasm_prob,qasm_prob_batch)]
             ce = cross_entropy(target=ground_truth,obs=qasm_prob)
             if min_ce != 0:
                 diff = abs((ce-min_ce)/min_ce)
             else:
                 diff = abs(ce-min_ce)
-            assert diff >= -1e-14
-            if diff <= accuracy:
-                num_shots = int(counter*shots_increment)
-                break
             if counter%50==49:
                 print('current diff:',diff,'current shots:',int(counter*shots_increment))
-        assert num_shots!=None
-        cluster_total_shots = num_instances*num_shots
-        print('cluster %d, %d-qubit cluster total shots = %d * %d = %d'%(cluster_idx,len(cluster_circ.qubits),num_instances,num_shots,cluster_total_shots))
-        total_shots = max(total_shots, cluster_total_shots)
-    assert total_shots>0
-    return int(total_shots)
+            if diff < accuracy:
+                saturated_shots.append(int(counter*shots_increment))
+                break
+        # print('circ %d saturated shots = %d'%(circ_idx,saturated_shots[-1]))
+    return saturated_shots
+
+def distribute_cluster_shots(total_shots,clusters,complete_path_map):
+    cluster_shots = []
+    for cluster_idx, cluster_circ in enumerate(clusters):
+        O_qubits, rho_qubits = find_cluster_O_rho_qubits(complete_path_map,cluster_idx)
+        num_instances = np.power(6,len(rho_qubits))*np.power(3,len(O_qubits))
+        cluster_shots.append(math.ceil(total_shots/num_instances))
+    return cluster_shots
+
+def split_shots(total_shots,max_shots,max_experiments):
+    if total_shots > max_shots*max_experiments:
+        current_schedule = (max_experiments,max_shots)
+        next_schedule = split_shots(total_shots=total_shots-max_shots*max_experiments,max_shots=max_shots,max_experiments=max_experiments)
+        next_schedule.insert(0,current_schedule)
+        return next_schedule
+    elif total_shots == max_shots*max_experiments:
+        return [(max_experiments,max_shots)]
+    else:
+        for num_experiments in range(1,max_experiments+1):
+            equally_divided_shots = int(total_shots/num_experiments)
+            if total_shots%num_experiments==0 and equally_divided_shots<=max_shots:
+                return [(num_experiments,equally_divided_shots)]
+            else:
+                continue
+        return None
 
 def apply_measurement(circ):
     c = ClassicalRegister(len(circ.qubits), 'c')
@@ -186,7 +182,6 @@ def evaluate_circ(circ, backend, evaluator_info):
             noisy_prob[reversed_state] = noisy_counts[state]/evaluator_info['num_shots']
         return noisy_prob
     elif backend == 'hardware':
-        # TODO: split up shots here
         qc=apply_measurement(circ)
 
         mapped_circuit = transpile(qc,
@@ -195,28 +190,35 @@ def evaluate_circ(circ, backend, evaluator_info):
         initial_layout=evaluator_info['initial_layout'])
 
         device_max_shots = evaluator_info['device'].configuration().max_shots
-        remaining_shots = evaluator_info['num_shots']
+        device_max_experiments = int(evaluator_info['device'].configuration().max_experiments/2)
+
+        schedule = split_shots(total_shots=evaluator_info['num_shots'],
+        max_shots=device_max_shots,
+        max_experiments=device_max_experiments)
+        
         hw_counts = {}
-        while remaining_shots>0:
-            batch_shots = min(remaining_shots,device_max_shots)
-            qobj = assemble(mapped_circuit, backend=evaluator_info['device'], shots=batch_shots)
-            print('Submitted %d shots to hardware'%(batch_shots))
+        accumulated_shots = 0
+        for s in schedule:
+            num_experiments, num_shots = s
+            accumulated_shots += num_experiments*num_shots
+            mapped_circuit_l = [mapped_circuit for i in range(num_experiments)]
+            qobj = assemble(mapped_circuit_l, backend=evaluator_info['device'], shots=num_shots)
+            print('Submitted %d * %d = %d shots to hardware'%(num_experiments,num_shots,num_experiments*num_shots))
             job = evaluator_info['device'].run(qobj)
             hw_result = job.result()
             if 'meas_filter' in evaluator_info:
                 print('Mitigation for %d qubit circuit'%(len(circ.qubits)))
                 mitigation_begin = time()
-                mitigated_results = evaluator_info['meas_filter'].apply(hw_result)
-                hw_counts_batch = mitigated_results.get_counts(0)
+                hw_result = evaluator_info['meas_filter'].apply(hw_result)
                 print('Mitigation for %d qubit circuit took %.3e seconds'%(len(circ.qubits),time()-mitigation_begin))
-            else:
-                hw_counts_batch = hw_result.get_counts(qc)
-            for state in hw_counts_batch:
-                if state not in hw_counts:
-                    hw_counts[state] = hw_counts_batch[state]
-                else:
-                    hw_counts[state] += hw_counts_batch[state]
-            remaining_shots -= batch_shots
+            for identical_circ in mapped_circuit_l:
+                experiment_hw_counts = hw_result.get_counts(identical_circ)
+                for state in experiment_hw_counts:
+                    if state not in hw_counts:
+                        hw_counts[state] = experiment_hw_counts[state]
+                    else:
+                        hw_counts[state] += experiment_hw_counts[state]
+        assert accumulated_shots == evaluator_info['num_shots']
         
         hw_prob = [0 for x in range(np.power(2,len(circ.qubits)))]
         for state in hw_counts:
