@@ -111,22 +111,22 @@ if __name__ == '__main__':
                 evaluator_info['num_shots'] = same_total_cutting_shots[cluster_idx]
             
             max_experiments = int(evaluator_info['device'].configuration().max_experiments/3*2)
-            # if np.power(2,len(cluster_circ.qubits))<=max_experiments:
-            #     _evaluator_info = get_evaluator_info(circ=cluster_circ,device_name=args.device_name,fields=['meas_filter'])
-            #     evaluator_info.update(_evaluator_info)
+            if np.power(2,len(cluster_circ.qubits))<=max_experiments:
+                _evaluator_info = get_evaluator_info(circ=cluster_circ,device_name=args.device_name,fields=['meas_filter'])
+                evaluator_info.update(_evaluator_info)
             hw_begin = time()
             hw_probs = {}
             cluster_instances_batch = {}
             for init_meas in cluster_instances:
                 if len(cluster_instances_batch)==max_experiments:
-                    hw_probs_batch = _submit_hardware_jobs(cluster_instances=cluster_instances_batch,evaluator_info=evaluator_info)
+                    hw_probs_batch = submit_hardware_jobs(cluster_instances=cluster_instances_batch,evaluator_info=evaluator_info)
                     hw_probs_batch_copy = copy.deepcopy(hw_probs_batch)
                     hw_probs.update(hw_probs_batch_copy)
                     cluster_instances_batch = {}
                     cluster_instances_batch[init_meas] = cluster_instances[init_meas]
                 else:
                     cluster_instances_batch[init_meas] = cluster_instances[init_meas]
-            hw_probs_batch = _submit_hardware_jobs(cluster_instances=cluster_instances_batch,evaluator_info=evaluator_info)
+            hw_probs_batch = submit_hardware_jobs(cluster_instances=cluster_instances_batch,evaluator_info=evaluator_info)
             hw_probs_batch_copy = copy.deepcopy(hw_probs_batch)
             hw_probs.update(hw_probs_batch_copy)
             hw_elapsed = time()-hw_begin

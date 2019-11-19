@@ -3,7 +3,6 @@ import numpy as np
 import math
 import pickle
 import glob
-import os
 from time import time
 import progressbar as pb
 from qiskit.quantum_info.states.measures import state_fidelity

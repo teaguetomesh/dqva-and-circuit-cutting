@@ -101,8 +101,6 @@ if __name__ == '__main__':
                 continue
             
             case = (cluster_max_qubit,full_circuit_size)
-            if case not in [(5,8),(9,16)]:
-                continue
             
             print('-'*100)
             print('Case',case)
@@ -135,8 +133,13 @@ if __name__ == '__main__':
                 m.print_stat()
                 clusters, complete_path_map, K, d = cutter.cut_circuit(full_circ, positions)
                 fc_shots = get_circ_saturated_shots(circs=[full_circ],accuracy=1e-1)[0]
-                print('saturated fc shots =',fc_shots)
-                fc_evaluations = evaluate_full_circ(circ=full_circ,total_shots=fc_shots,device_name=args.device_name,fields=['sv_noiseless'])
+                num_jobs = math.ceil(fc_shots/device_max_shots/device_max_experiments)
+                if num_jobs>10:
+                    print('Case {} needs {} jobs'.format(case,num_jobs))
+                    print('-'*100)
+                    continue
+                print('saturated fc shots = %d, needs %d jobs'%(fc_shots,num_jobs))
+                fc_evaluations = evaluate_full_circ(circ=full_circ,total_shots=fc_shots,device_name=args.device_name,fields=['sv_noiseless','qasm','hw'])
                 case_dict = {'full_circ':full_circ,'fc_evaluations':fc_evaluations,'fc_shots':fc_shots,
                 'searcher_time':searcher_time,'clusters':clusters,'complete_path_map':complete_path_map}
             try:
