@@ -139,7 +139,7 @@ if __name__ == '__main__':
                     cutting_shots = distribute_cluster_shots(total_shots=fc_shots,clusters=clusters,complete_path_map=complete_path_map)
                     print('saturated fc shots =',fc_shots,'sametotal cutting shots =',cutting_shots)
                 
-                fc_evaluations = evaluate_full_circ(circ=full_circ,total_shots=fc_shots,device_name=args.device_name,fields=['sv_noiseless','qasm','qasm+noise'])
+                fc_evaluations = evaluate_full_circ(circ=full_circ,total_shots=fc_shots,device_name=args.device_name,fields=['sv_noiseless','qasm','hw'])
                 case_dict = {'full_circ':full_circ,'fc_evaluations':fc_evaluations,'fc_shots':fc_shots,
                 'cutting_shots':cutting_shots,'searcher_time':searcher_time,'clusters':clusters,'complete_path_map':complete_path_map}
             try:

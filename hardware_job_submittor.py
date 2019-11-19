@@ -83,17 +83,16 @@ if __name__ == '__main__':
     for case in job_submittor_input:
         print('Case ',case)
         job_submittor_output[case] = copy.deepcopy(job_submittor_input[case])
-        total_shots = job_submittor_input[case]['total_shots']
         for cluster_idx, cluster_circ in enumerate(job_submittor_input[case]['clusters']):
             cluster_instances = job_submittor_input[case]['all_cluster_prob'][cluster_idx]
             print('Cluster %d has %d instances'%(cluster_idx,len(cluster_instances)))
-            evaluator_info = get_evaluator_info(circ=cluster_circ,device_name=device_name,
+            evaluator_info = get_evaluator_info(circ=cluster_circ,device_name=args.device_name,
             fields=['device','basis_gates','coupling_map','properties','initial_layout'])
-            if args.saturated_shots:
-                evaluator_info['num_shots'] = get_circ_saturated_shots(circ=cluster_circ,accuracy=1e-1)
-            else:
-                evaluator_info['num_shots'] = int(total_shots/len(cluster_instances))+1
-            max_experiments = int(evaluator_info['device'].configuration().max_experiments/2)
+            evaluator_info['num_shots'] = job_submittor_input[case]['cutting_shots'][cluster_idx]
+            max_experiments = int(evaluator_info['device'].configuration().max_experiments/3*2)
+            if np.power(2,len(cluster_circ.qubits))<=max_experiments:
+                _evaluator_info = get_evaluator_info(circ=cluster_circ,device_name=args.device_name,fields=['meas_filter'])
+                evaluator_info.update(_evaluator_info)
             hw_begin = time()
             hw_probs = {}
             cluster_instances_batch = {}
