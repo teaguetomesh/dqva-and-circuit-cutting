@@ -4,6 +4,7 @@ import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
 from helper_fun import cross_entropy, fidelity
+import os
 
 def heatmap(data, row_labels, col_labels, ax=None,
             cbar_kw={}, cbarlabel="", **kwargs):
@@ -263,13 +264,17 @@ def plot_fid_bar(best_cc,circuit_type):
 
 
 if __name__ == '__main__':
-    all_files = glob.glob('./benchmark_data/*_plotter_input_*.p')
+    dirname = './plots'
+    if not os.path.exists(dirname):
+        os.mkdir(dirname)
+
+    all_files = glob.glob('./benchmark_data/*/*_plotter_input_*.p')
     for filename in all_files:
         f = open(filename, 'rb' )
         plotter_input = pickle.load(f)
-        evaluator_type = filename.split('/')[-1].split('_')[0]
+        circuit_type = filename.split('/')[2]
         figname = './plots/'+filename.split('/')[-1].replace('_plotter_input','')
-        circuit_type = filename.split('_')[-2]
+        print('plotting',figname)
 
         hw_qubits = [case[0] for case in plotter_input]
         fc_qubits = [case[1] for case in plotter_input]
@@ -327,8 +332,6 @@ if __name__ == '__main__':
             else:
                 raise Exception('Illegal circuit type:',circuit_type)
         [print(best_cc[fc]) for fc in best_cc]
-        
-        print('plotting %s'%(figname))
 
         plot_tradeoff(best_cc,circuit_type)
         plot_3d_bar(plotter_input,hw_qubits,fc_qubits)

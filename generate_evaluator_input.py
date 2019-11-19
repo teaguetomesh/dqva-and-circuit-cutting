@@ -5,7 +5,7 @@ import numpy as np
 from qcg.generators import gen_supremacy, gen_hwea, gen_BV, gen_qft, gen_sycamore
 import MIQCP_searcher as searcher
 import cutter
-from helper_fun import evaluate_circ, get_evaluator_info, get_circ_saturated_shots, distribute_cluster_shots
+from helper_fun import evaluate_circ, get_evaluator_info, get_circ_saturated_shots
 import argparse
 from qiskit import IBMQ
 import copy
@@ -75,11 +75,13 @@ if __name__ == '__main__':
     parser.add_argument('--max-clusters', metavar='N', type=int,help='max number of clusters to split into')
     parser.add_argument('--device-name', metavar='S',type=str,help='IBM device')
     parser.add_argument('--circuit-type', metavar='S', type=str,help='which circuit input file to run')
-    parser.add_argument('--shots-mode', metavar='S', type=str,help='saturated/sametotal shots mode')
     args = parser.parse_args()
 
     assert args.circuit_type in ['supremacy','hwea','bv','qft','sycamore']
-    assert args.shots_mode in ['saturated','sametotal']
+
+    dirname = './benchmark_data'
+    if not os.path.exists(dirname):
+        os.mkdir(dirname)
 
     evaluator_info = get_evaluator_info(circ=None,device_name=args.device_name,fields=['properties','device'])
     device_size = len(evaluator_info['properties'].qubits)
@@ -99,7 +101,7 @@ if __name__ == '__main__':
                 continue
             
             case = (cluster_max_qubit,full_circuit_size)
-            if case not in [(3,5),(5,9),(8,12),(10,16)]:
+            if case not in [(5,8)]:
                 continue
             
             print('-'*100)
@@ -132,27 +134,19 @@ if __name__ == '__main__':
             else:
                 m.print_stat()
                 clusters, complete_path_map, K, d = cutter.cut_circuit(full_circ, positions)
-                if args.shots_mode == 'saturated':
-                    fc_shots = get_circ_saturated_shots(circs=[full_circ],accuracy=1e-1)[0]
-                    cutting_shots = get_circ_saturated_shots(circs=clusters,accuracy=1e-1)
-                    print('saturated fc shots =',fc_shots,'saturated cutting shots =',cutting_shots)
-                elif args.shots_mode == 'sametotal':
-                    fc_shots = get_circ_saturated_shots(circs=[full_circ],accuracy=1e-1)[0]
-                    cutting_shots = distribute_cluster_shots(total_shots=fc_shots,clusters=clusters,complete_path_map=complete_path_map)
-                    print('saturated fc shots =',fc_shots,'sametotal cutting shots =',cutting_shots)
-                
-                fc_evaluations = evaluate_full_circ(circ=full_circ,total_shots=fc_shots,device_name=args.device_name,fields=['sv_noiseless','qasm','hw'])
+                fc_shots = get_circ_saturated_shots(circs=[full_circ],accuracy=1e-1)[0]
+                print('saturated fc shots =',fc_shots)
+                fc_evaluations = evaluate_full_circ(circ=full_circ,total_shots=fc_shots,device_name=args.device_name,fields=['sv_noiseless'])
                 case_dict = {'full_circ':full_circ,'fc_evaluations':fc_evaluations,'fc_shots':fc_shots,
-                'cutting_shots':cutting_shots,'searcher_time':searcher_time,'clusters':clusters,'complete_path_map':complete_path_map}
+                'searcher_time':searcher_time,'clusters':clusters,'complete_path_map':complete_path_map}
             try:
-                evaluator_input = pickle.load(open('./benchmark_data/evaluator_input_{}_{}_{}.p'.format(args.device_name,args.circuit_type,args.shots_mode), 'rb' ))
+                evaluator_input = pickle.load(open('./benchmark_data/evaluator_input_{}_{}.p'.format(args.device_name,args.circuit_type), 'rb' ))
             except:
                 evaluator_input = {}
             evaluator_input[case] = copy.deepcopy(case_dict)
-            pickle.dump(evaluator_input,open('./benchmark_data/evaluator_input_{}_{}_{}.p'.format(args.device_name,args.circuit_type,args.shots_mode),'wb'))
+            pickle.dump(evaluator_input,open('./benchmark_data/evaluator_input_{}_{}.p'.format(args.device_name,args.circuit_type),'wb'))
             print('Evaluator input cases:',evaluator_input.keys())
             print('-'*100)
     for case in evaluator_input:
         fc_jobs = math.ceil(evaluator_input[case]['fc_shots']/device_max_shots/device_max_experiments)
-        cutting_jobs = [math.ceil(x/device_max_shots/device_max_experiments) for x in evaluator_input[case]['cutting_shots']]
-        print('case {} needs {} fc jobs, {} cutting jobs'.format(case,fc_jobs,cutting_jobs))
+        print('case {} needs {} fc jobs'.format(case,fc_jobs))
