@@ -1,6 +1,6 @@
 # NOTE: toggle here to change max qc size, max clusters
 echo "Generate evaluator input"
-python generate_evaluator_input.py --min-qubit 2 --max-qubit 8 --max-clusters 4 --device-name ibmq_poughkeepsie --circuit-name qft 2>&1 | tee ./logs/qft_generator_logs.txt
+python generate_evaluator_input.py --min-qubit 9 --max-qubit 9 --max-clusters 3 --device-name ibmq_poughkeepsie --circuit-type qft --shots-mode saturated 2>&1 | tee ./logs/qft_generator_logs.txt
 
 echo "Running evaluator"
 mpiexec -n 2 python evaluator_prob.py --device-name ibmq_poughkeepsie --circuit-name qft --evaluation-method hardware

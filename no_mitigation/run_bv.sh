@@ -1,6 +1,6 @@
 # NOTE: toggle here to change max qc size, max clusters
 echo "Generate evaluator input"
-python generate_evaluator_input.py --min-qubit 5 --max-qubit 15 --max-clusters 4 --device-name ibmq_johannesburg --circuit-name bv --shots-scaling 100 2>&1 | tee ./logs/bv_generator_logs.txt
+python generate_evaluator_input.py --min-qubit 9 --max-qubit 9 --max-clusters 3 --device-name ibmq_johannesburg --circuit-name bv --shots-mode saturated 2>&1 | tee ./logs/bv_generator_logs.txt
 
 echo "Running evaluator"
 mpiexec -n 2 python evaluator_prob.py --device-name ibmq_johannesburg --circuit-name bv --evaluation-method hardware

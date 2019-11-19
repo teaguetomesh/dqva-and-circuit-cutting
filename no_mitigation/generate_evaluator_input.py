@@ -2,10 +2,10 @@ import pickle
 import os
 from time import time
 import numpy as np
-from qcg.generators import gen_supremacy, gen_hwea, gen_BV, gen_qft
+from qcg.generators import gen_supremacy, gen_hwea, gen_BV, gen_qft, gen_sycamore
 import MIQCP_searcher as searcher
 import cutter
-from helper_fun import evaluate_circ, get_evaluator_info, find_saturated_shots
+from helper_fun import evaluate_circ, get_evaluator_info, get_circ_saturated_shots, distribute_cluster_shots
 import argparse
 from qiskit import IBMQ
 import copy
@@ -13,7 +13,6 @@ import random
 
 def gen_secret(num_qubit):
     num_digit = num_qubit-1
-    # num = random.randint(1, 2**num_digit-1)
     num = 2**num_digit-1
     num = bin(num)[2:]
     num_with_zeros = str(num).zfill(num_digit)
@@ -22,7 +21,7 @@ def gen_secret(num_qubit):
 def evaluate_full_circ(circ, total_shots, device_name):
     uniform_p = 1.0/np.power(2,len(circ.qubits))
     uniform_prob = [uniform_p for i in range(np.power(2,len(circ.qubits)))]
-    print('Evaluate full circuit, %d shots'%total_shots)
+    # print('Evaluate full circuit, %d shots'%total_shots)
     
     # print('Evaluating fc state vector')
     # sv_noiseless_fc = evaluate_circ(circ=circ,backend='statevector_simulator',evaluator_info=None)
@@ -65,15 +64,17 @@ if __name__ == '__main__':
     parser.add_argument('--max-qubit', metavar='N', type=int,help='Benchmark maximum number of HW qubits')
     parser.add_argument('--max-clusters', metavar='N', type=int,help='max number of clusters to split into')
     parser.add_argument('--device-name', metavar='S',type=str,help='IBM device')
-    parser.add_argument('--circuit-name', metavar='S', type=str,help='which circuit input file to run')
-    parser.add_argument('--shots-scaling', metavar='N', type=int,help='Scaling factor for total shots')
+    parser.add_argument('--circuit-type', metavar='S', type=str,help='which circuit input file to run')
+    parser.add_argument('--shots-mode', metavar='S', type=str,help='saturated/sametotal shots mode')
     args = parser.parse_args()
 
-    device_name = args.device_name
-    circuit_type = args.circuit_name
-    evaluator_info = get_evaluator_info(circ=None,device_name=device_name,fields=['properties','device'])
+    assert args.circuit_type in ['supremacy','hwea','bv','qft','sycamore']
+    assert args.shots_mode in ['saturated','sametotal']
+
+    evaluator_info = get_evaluator_info(circ=None,device_name=args.device_name,fields=['properties','device'])
     device_size = len(evaluator_info['properties'].qubits)
     device_max_shots = evaluator_info['device'].configuration().max_shots
+    device_max_experiments = int(evaluator_info['device'].configuration().max_experiments/2)
 
     # NOTE: toggle circuits to benchmark
     dimension_l = [[2,5],[3,4],[2,7],[4,4],[3,6],[4,5]]
@@ -95,16 +96,16 @@ if __name__ == '__main__':
                 print('Use existing full circuit')
                 full_circ = full_circs[full_circuit_size]
             else:
-                if circuit_type == 'supremacy':
+                if args.circuit_type == 'supremacy':
                     full_circ = gen_supremacy(i,j,8)
-                elif circuit_type == 'hwea':
+                elif args.circuit_type == 'hwea':
                     full_circ = gen_hwea(i*j,1)
-                elif circuit_type == 'bv':
+                elif args.circuit_type == 'bv':
                     full_circ = gen_BV(gen_secret(i*j),barriers=False)
-                elif circuit_type == 'qft':
+                elif args.circuit_type == 'qft':
                     full_circ = gen_qft(width=i*j, barriers=False)
-                else:
-                    raise Exception('Illegal circuit type %s'%circuit_type)
+                elif args.circuit_type == 'sycamore':
+                    full_circ = gen_sycamore(i,j,8)
                 full_circs[full_circuit_size] = full_circ
             
             searcher_begin = time()
@@ -118,22 +119,27 @@ if __name__ == '__main__':
             else:
                 m.print_stat()
                 clusters, complete_path_map, K, d = cutter.cut_circuit(full_circ, positions)
-                total_shots = find_saturated_shots(clusters=clusters,complete_path_map=complete_path_map,accuracy=1e-1)
-                scaled_shots = int(total_shots/args.shots_scaling)
-                if scaled_shots/device_max_shots>10 or scaled_shots<1024:
-                    print('Case {} requires {} jobs, {} shots'.format(case,scaled_shots/device_max_shots,scaled_shots))
-                    print('-'*100)
-                    continue
-                all_total_shots[case] = scaled_shots
-                fc_evaluations = evaluate_full_circ(full_circ,scaled_shots,device_name)
-                case_dict = {'full_circ':full_circ,'fc_evaluations':fc_evaluations,'total_shots':total_shots,
-                'searcher_time':searcher_time,'clusters':clusters,'complete_path_map':complete_path_map}
+                if args.shots_mode == 'saturated':
+                    fc_shots = get_circ_saturated_shots(circs=[full_circ],accuracy=1e-1)[0]
+                    cutting_shots = get_circ_saturated_shots(circs=clusters,accuracy=1e-1)
+                    print('saturated fc shots =',fc_shots,'saturated cutting shots =',cutting_shots)
+                elif args.shots_mode == 'sametotal':
+                    fc_shots = get_circ_saturated_shots(circs=[full_circ],accuracy=1e-1)[0]
+                    cutting_shots = distribute_cluster_shots(total_shots=fc_shots,clusters=clusters,complete_path_map=complete_path_map)
+                    print('saturated fc shots =',fc_shots,'sametotal cutting shots =',cutting_shots)
+                
+                fc_evaluations = evaluate_full_circ(full_circ,fc_shots,args.device_name)
+                case_dict = {'full_circ':full_circ,'fc_evaluations':fc_evaluations,'fc_shots':fc_shots,
+                'cutting_shots':cutting_shots,'searcher_time':searcher_time,'clusters':clusters,'complete_path_map':complete_path_map}
             try:
-                evaluator_input = pickle.load(open('./benchmark_data/evaluator_input_{}_{}.p'.format(device_name,circuit_type), 'rb' ))
+                evaluator_input = pickle.load(open('./benchmark_data/evaluator_input_{}_{}_{}.p'.format(args.device_name,args.circuit_type,args.shots_mode), 'rb' ))
             except:
                 evaluator_input = {}
             evaluator_input[case] = copy.deepcopy(case_dict)
-            pickle.dump(evaluator_input,open('./benchmark_data/evaluator_input_{}_{}.p'.format(device_name,circuit_type),'wb'))
+            pickle.dump(evaluator_input,open('./benchmark_data/evaluator_input_{}_{}_{}.p'.format(args.device_name,args.circuit_type,args.shots_mode),'wb'))
             print('Evaluator input cases:',evaluator_input.keys())
             print('-'*100)
-    [print(case,all_total_shots[case]) for case in all_total_shots]
+    for case in evaluator_input:
+        fc_jobs = evaluator_input[case]['fc_shots']/device_max_shots/device_max_experiments
+        cutting_jobs = [x/device_max_shots/device_max_experiments for x in evaluator_input[case]['cutting_shots']]
+        print('case {} needs {} fc jobs, {} cutting jobs'.format(case,fc_jobs,cutting_jobs))
