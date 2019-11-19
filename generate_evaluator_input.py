@@ -10,6 +10,7 @@ import argparse
 from qiskit import IBMQ
 import copy
 import random
+import math
 
 def gen_secret(num_qubit):
     num_digit = num_qubit-1
@@ -86,7 +87,8 @@ if __name__ == '__main__':
     device_max_experiments = int(evaluator_info['device'].configuration().max_experiments/2)
 
     # NOTE: toggle circuits to benchmark
-    dimension_l = [[2,5],[3,4],[2,7],[4,4],[3,6],[4,5]]
+    dimension_l = [[1,3],[2,2],[1,5],[2,3],[1,7],[2,4],[3,3],[2,5],[3,4],[2,7],[4,4],[3,6],[4,5]]
+    dimension_l = [[2,2],[2,3],[2,5],[3,4]]
 
     full_circs = {}
     all_total_shots = {}
@@ -137,7 +139,7 @@ if __name__ == '__main__':
                     cutting_shots = distribute_cluster_shots(total_shots=fc_shots,clusters=clusters,complete_path_map=complete_path_map)
                     print('saturated fc shots =',fc_shots,'sametotal cutting shots =',cutting_shots)
                 
-                fc_evaluations = evaluate_full_circ(circ=full_circ,total_shots=fc_shots,device_name=args.device_name,fields=[])
+                fc_evaluations = evaluate_full_circ(circ=full_circ,total_shots=fc_shots,device_name=args.device_name,fields=['sv_noiseless','qasm','qasm+noise'])
                 case_dict = {'full_circ':full_circ,'fc_evaluations':fc_evaluations,'fc_shots':fc_shots,
                 'cutting_shots':cutting_shots,'searcher_time':searcher_time,'clusters':clusters,'complete_path_map':complete_path_map}
             try:
@@ -149,6 +151,6 @@ if __name__ == '__main__':
             print('Evaluator input cases:',evaluator_input.keys())
             print('-'*100)
     for case in evaluator_input:
-        fc_jobs = evaluator_input[case]['fc_shots']/device_max_shots/device_max_experiments
-        cutting_jobs = [x/device_max_shots/device_max_experiments for x in evaluator_input[case]['cutting_shots']]
+        fc_jobs = math.ceil(evaluator_input[case]['fc_shots']/device_max_shots/device_max_experiments)
+        cutting_jobs = [math.ceil(x/device_max_shots/device_max_experiments) for x in evaluator_input[case]['cutting_shots']]
         print('case {} needs {} fc jobs, {} cutting jobs'.format(case,fc_jobs,cutting_jobs))
