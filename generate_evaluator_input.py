@@ -88,7 +88,6 @@ if __name__ == '__main__':
 
     # NOTE: toggle circuits to benchmark
     dimension_l = [[1,3],[2,2],[1,5],[2,3],[1,7],[2,4],[3,3],[2,5],[3,4],[2,7],[4,4],[3,6],[4,5]]
-    dimension_l = [[2,2],[2,3],[2,5],[3,4]]
 
     full_circs = {}
     all_total_shots = {}
@@ -100,6 +99,9 @@ if __name__ == '__main__':
                 continue
             
             case = (cluster_max_qubit,full_circuit_size)
+            if full_circuit_size != 5 and full_circuit_size != 9 and full_circuit_size != 12 and full_circuit_size != 16:
+                continue
+            
             print('-'*100)
             print('Case',case)
 
