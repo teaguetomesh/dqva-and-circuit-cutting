@@ -99,7 +99,7 @@ if __name__ == '__main__':
                 continue
             
             case = (cluster_max_qubit,full_circuit_size)
-            if full_circuit_size != 5 and full_circuit_size != 9 and full_circuit_size != 12 and full_circuit_size != 16:
+            if case not in [(3,5),(5,9),(8,12),(10,16)]:
                 continue
             
             print('-'*100)
