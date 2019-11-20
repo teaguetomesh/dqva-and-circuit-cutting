@@ -6,7 +6,7 @@ mpiexec -n 5 python generate_evaluator_input.py --min-qubit 2 --max-qubit 9 --ma
 echo "Running saturated hardware evaluator"
 mpiexec -n 2 python evaluator_prob.py --device-name ibmq_boeblingen --circuit-type supremacy --shots-mode saturated --evaluation-method hardware
 echo "Running job submittor"
-python hardware_job_submittor.py --device-name ibmq_boeblingen --circuit-type supremacy --shots-mode saturated 2>&1 | tee ./logs/supremacy_saturated_ibmq_boeblingen_hw_job_submittor_logs.txt
+mpiexec -n 5 python hardware_job_submittor.py --device-name ibmq_boeblingen --circuit-type supremacy --shots-mode saturated 2>&1 | tee ./logs/supremacy_saturated_ibmq_boeblingen_hw_job_submittor_logs.txt
 echo "Running reconstruction"
 python uniter_prob.py --device-name ibmq_boeblingen --circuit-type supremacy --shots-mode saturated --evaluation-method hardware 2>&1 | tee ./logs/supremacy_saturated_ibmq_boeblingen_uniter_logs.txt
 } &
@@ -16,7 +16,7 @@ P1=$!
 echo "Running sametotal hardware evaluator"
 mpiexec -n 2 python evaluator_prob.py --device-name ibmq_boeblingen --circuit-type supremacy --shots-mode sametotal --evaluation-method hardware
 echo "Running job submittor"
-python hardware_job_submittor.py --device-name ibmq_boeblingen --circuit-type supremacy --shots-mode sametotal 2>&1 | tee ./logs/supremacy_sametotal_ibmq_boeblingen_hw_job_submittor_logs.txt
+mpiexec -n 5 python hardware_job_submittor.py --device-name ibmq_boeblingen --circuit-type supremacy --shots-mode sametotal 2>&1 | tee ./logs/supremacy_sametotal_ibmq_boeblingen_hw_job_submittor_logs.txt
 echo "Running reconstruction"
 python uniter_prob.py --device-name ibmq_boeblingen --circuit-type supremacy --shots-mode sametotal --evaluation-method hardware 2>&1 | tee ./logs/supremacy_sametotal_ibmq_boeblingen_uniter_logs.txt
 } &
