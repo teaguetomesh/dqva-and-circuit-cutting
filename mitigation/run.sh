@@ -2,7 +2,7 @@ CIRCUIT_TYPE="$1"
 DEVICE_NAME="$2"
 
 echo "Generate evaluator input"
-mpiexec -n 5 python generate_evaluator_input.py --min-qubit 2 --max-qubit 9 --max-clusters 3 --device-name $DEVICE_NAME --circuit-type $CIRCUIT_TYPE 2>&1 | tee ./logs/$CIRCUIT_TYPE\_$DEVICE_NAME\_generator_logs.txt
+mpiexec -n 5 python generate_evaluator_input.py --min-qubit 2 --max-qubit 9 --max-clusters 4 --device-name $DEVICE_NAME --circuit-type $CIRCUIT_TYPE 2>&1 | tee ./logs/$CIRCUIT_TYPE\_$DEVICE_NAME\_generator_logs.txt
 
 {
 echo "Running saturated hardware evaluator"
