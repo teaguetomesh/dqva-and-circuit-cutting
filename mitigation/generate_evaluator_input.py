@@ -161,29 +161,32 @@ if __name__ == '__main__':
                     case_dict = {'full_circ':full_circ,'fc_shots':fc_shots,'searcher_time':searcher_time,
                     'clusters':clusters,'complete_path_map':complete_path_map}
                     evaluator_input[case] = copy.deepcopy(case_dict)
-                    print('Evaluator input cases:',evaluator_input.keys())
+                    print('Evaluator input has %d cases:'%(len(evaluator_input)),evaluator_input.keys())
                     print('-'*100)
         for case in evaluator_input:
             fc_jobs = math.ceil(evaluator_input[case]['fc_shots']/device_max_shots/device_max_experiments)
             print('case {} needs {} fc jobs'.format(case,fc_jobs))
         for i in range(num_workers):
             comm.send(evaluator_input, dest=i)
-        for i in range(num_workers):
+        master_resuts = {}
+        for i in range(len(evaluator_input)):
             state = MPI.Status()
             rank_evaluator_input = comm.recv(source=MPI.ANY_SOURCE,status=state)
-            evaluator_input.update(rank_evaluator_input)
-            pickle.dump(evaluator_input,open('./benchmark_data/evaluator_input_{}_{}.p'.format(args.device_name,args.circuit_type),'wb'))
+            master_resuts.update(rank_evaluator_input)
+            print('Dump evaluator_input with %d cases'%(len(master_resuts)))
+            pickle.dump(master_resuts,open('./benchmark_data/evaluator_input_{}_{}.p'.format(args.device_name,args.circuit_type),'wb'))
+        print('-'*100)
     else:
         state = MPI.Status()
         evaluator_input = comm.recv(source=size-1,status=state)
         rank_cases = distribute_rank_cases(evaluator_input=evaluator_input,rank=rank,size=size)
         print('Rank %d has %d cases'%(rank,len(rank_cases)))
-        rank_evaluator_input = {}
         for case in rank_cases:
             full_circ = evaluator_input[case]['full_circ']
             fc_shots = evaluator_input[case]['fc_shots']
             fc_evaluations = evaluate_full_circ(circ=full_circ,total_shots=fc_shots,device_name=args.device_name,fields=['sv_noiseless','qasm','hw'])
             case_dict = copy.deepcopy(evaluator_input[case])
             case_dict['fc_evaluations'] = copy.deepcopy(fc_evaluations)
-            rank_evaluator_input[case] = copy.deepcopy(case_dict)
-        comm.send(rank_evaluator_input, dest=size-1)
+            rank_evaluator_input = {case:case_dict}
+            comm.send(rank_evaluator_input, dest=size-1)
+        print('-'*100)

@@ -109,9 +109,11 @@ if __name__ == '__main__':
         print(args.device_name)
         input_file = './benchmark_data/{}/job_submittor_input_{}_{}_{}.p'.format(args.circuit_type,args.device_name,args.circuit_type,args.shots_mode)
         job_submittor_input = pickle.load(open(input_file, 'rb' ))
+        for i in range(num_workers):
+            comm.send(job_submittor_input, dest=i)
         job_submittor_output = {}
         filename = input_file.replace('job_submittor_input','hardware_uniter_input')
-        for i in range(num_workers):
+        for i in range(len(job_submittor_input)):
             state = MPI.Status()
             rank_job_submittor_output = comm.recv(source=MPI.ANY_SOURCE,status=state)
             job_submittor_output.update(rank_job_submittor_output)
@@ -119,13 +121,12 @@ if __name__ == '__main__':
             print('Job submittor output has %d cases'%len(job_submittor_output))
             print('*'*50)
     else:
-        input_file = './benchmark_data/{}/job_submittor_input_{}_{}_{}.p'.format(args.circuit_type,args.device_name,args.circuit_type,args.shots_mode)
-        job_submittor_input = pickle.load(open(input_file, 'rb' ))
+        state = MPI.Status()
+        job_submittor_input = comm.recv(source=size-1,status=state)
         rank_cases = distribute_rank_cases(job_submittor_input,rank,size)
         print('Rank %d has %d cases'%(rank,len(rank_cases)))
-        rank_job_submittor_output = {}
         for case in rank_cases:
-            rank_job_submittor_output[case] = copy.deepcopy(job_submittor_input[case])
+            case_dict = copy.deepcopy(job_submittor_input[case])
             fc_shots = job_submittor_input[case]['fc_shots']
             clusters = job_submittor_input[case]['clusters']
             complete_path_map = job_submittor_input[case]['complete_path_map']
@@ -162,6 +163,7 @@ if __name__ == '__main__':
                 hw_probs.update(hw_probs_batch_copy)
                 hw_elapsed = time()-hw_begin
                 print('Hardware queue time = %.3e seconds'%hw_elapsed)
-                rank_job_submittor_output[case]['all_cluster_prob'][cluster_idx] = copy.deepcopy(hw_probs)
-        comm.send(rank_job_submittor_output, dest=size-1)
+                case_dict['all_cluster_prob'][cluster_idx] = copy.deepcopy(hw_probs)
+            rank_job_submittor_output = {case:case_dict}
+            comm.send(rank_job_submittor_output, dest=size-1)
         print('-'*100)
