@@ -197,10 +197,8 @@ def evaluate_circ(circ, backend, evaluator_info):
         max_experiments=device_max_experiments)
         
         hw_counts = {}
-        accumulated_shots = 0
         for s in schedule:
             num_experiments, num_shots = s
-            accumulated_shots += num_experiments*num_shots
             mapped_circuit_l = [mapped_circuit for i in range(num_experiments)]
             qobj = assemble(mapped_circuit_l, backend=evaluator_info['device'], shots=num_shots)
             print('Submitted %d * %d = %d shots to hardware'%(num_experiments,num_shots,num_experiments*num_shots))
@@ -211,14 +209,14 @@ def evaluate_circ(circ, backend, evaluator_info):
                 mitigation_begin = time()
                 hw_result = evaluator_info['meas_filter'].apply(hw_result)
                 print('Mitigation for %d qubit circuit took %.3e seconds'%(len(circ.qubits),time()-mitigation_begin))
-            for identical_circ in mapped_circuit_l:
-                experiment_hw_counts = hw_result.get_counts(identical_circ)
+            for idx in range(len(mapped_circuit_l)):
+                experiment_hw_counts = hw_result.get_counts(idx)
                 for state in experiment_hw_counts:
                     if state not in hw_counts:
                         hw_counts[state] = experiment_hw_counts[state]
                     else:
                         hw_counts[state] += experiment_hw_counts[state]
-        assert accumulated_shots == evaluator_info['num_shots']
+        assert sum(list(hw_counts.values())) == evaluator_info['num_shots']
         
         hw_prob = [0 for x in range(np.power(2,len(circ.qubits)))]
         for state in hw_counts:
