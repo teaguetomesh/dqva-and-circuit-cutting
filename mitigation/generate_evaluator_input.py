@@ -90,6 +90,8 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     assert args.circuit_type in ['supremacy','hwea','bv','qft','sycamore']
+
+    print('-'*50,'Generator %s %s'%(args.device_name,args.circuit_type),'-'*50)
     
     dirname = './benchmark_data'
     if not os.path.exists(dirname):
@@ -109,7 +111,6 @@ if __name__ == '__main__':
 
     # NOTE: toggle circuits to benchmark
     dimension_l = [[1,3],[2,2],[1,5],[2,3],[1,7],[2,4],[3,3],[2,5],[3,4],[2,7],[4,4],[3,6],[4,5]]
-    dimension_l = [[1,3]]
     full_circs = {}
     cases_to_run = {}
     for cluster_max_qubit in range(args.min_qubit,args.max_qubit+1):
@@ -120,6 +121,8 @@ if __name__ == '__main__':
                 continue
             
             case = (cluster_max_qubit,full_circuit_size)
+            if case not in [(4,6)]:
+                continue
             if case in evaluator_input:
                 continue
             
@@ -154,7 +157,6 @@ if __name__ == '__main__':
                 m.print_stat()
                 clusters, complete_path_map, K, d = cutter.cut_circuit(full_circ, positions)
                 fc_shots = get_circ_saturated_shots(circs=[full_circ],accuracy=1e-1)[0]
-                fc_shots = int(8192*500)
                 num_jobs = math.ceil(fc_shots/device_max_shots/device_max_experiments)
                 if num_jobs>10:
                     print('Case {} needs {} jobs'.format(case,num_jobs))
@@ -179,6 +181,7 @@ if __name__ == '__main__':
         cases_to_run[case]['fc_evaluations'] = fc_evaluations
         hw_jobs = fc_evaluations['hw']
         print('Submitting case {} has job id {}'.format(case,[x['job'].job_id() for x in hw_jobs]))
+        print('*'*50)
     print('Submitted %d cases to hw'%(len(cases_to_run)))
     print('-'*100)
     for case in cases_to_run:
@@ -187,7 +190,7 @@ if __name__ == '__main__':
             evaluator_input.update({case:case_dict})
         else:
             hw_jobs = cases_to_run[case]['fc_evaluations']['hw']
-            print('case {} has job id {}'.format(case,[x['job'].job_id() for x in hw_jobs]))
+            print('Retrieving case {} has job id {}'.format(case,[x['job'].job_id() for x in hw_jobs]))
             execute_begin = time()
             hw_prob = accumulate_jobs(jobs=hw_jobs)
             print('Execute on hardware, %.3e seconds'%(time()-execute_begin))
@@ -196,3 +199,4 @@ if __name__ == '__main__':
             evaluator_input.update({case:case_dict})
         print('Dump evaluator_input with %d cases'%(len(evaluator_input)))
         pickle.dump(evaluator_input,open('./benchmark_data/evaluator_input_{}_{}.p'.format(args.device_name,args.circuit_type),'wb'))
+    print('-'*100)

@@ -158,10 +158,12 @@ if __name__ == '__main__':
 
     num_workers = size - 1
 
-    input_file = './benchmark_data/evaluator_input_{}_{}.p'.format(args.device_name,args.circuit_type)
-    evaluator_input = pickle.load(open(input_file, 'rb' ))
-
     if rank == size-1:
+        print('-'*50,'Generate Cluster Circuits','-'*50,flush=True)
+        input_file = './benchmark_data/evaluator_input_{}_{}.p'.format(args.device_name,args.circuit_type)
+        evaluator_input = pickle.load(open(input_file, 'rb' ))
+        for i in range(num_workers):
+            comm.send(evaluator_input, dest=i)
         evaluator_output = {}
         for case in evaluator_input:
             evaluator_output[case] = copy.deepcopy(evaluator_input[case])
@@ -186,6 +188,8 @@ if __name__ == '__main__':
         pickle.dump(evaluator_output, open('%s'%filename,'wb'))
         print('-'*100)
     else:
+        state = MPI.Status()
+        evaluator_input = comm.recv(source=size-1,status=state)
         rank_combinations = find_rank_combinations(evaluator_input,rank,size)
         rank_results = {}
         rank_classical_time = {}

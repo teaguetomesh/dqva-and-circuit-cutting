@@ -16,59 +16,41 @@ def update_counts(cumulated, batch):
             cumulated[state] = cumulated[state] + batch[state]
     return cumulated
 
-def _submit_hardware_jobs(cluster_instances, evaluator_info):
-    mapped_circuits = {}
-    for init_meas in cluster_instances:
-        circ = cluster_instances[init_meas]
-        qc=apply_measurement(circ)
-        mapped_circuit = transpile(qc,
-        backend=evaluator_info['device'], basis_gates=evaluator_info['basis_gates'],
-        coupling_map=evaluator_info['coupling_map'],backend_properties=evaluator_info['properties'],
-        initial_layout=evaluator_info['initial_layout'])
-        mapped_circuits[init_meas] = mapped_circuit
-
-    hw_counts = {}
-    for init_meas in mapped_circuits:
-        hw_counts[init_meas] = {}
-    
-    device_max_shots = evaluator_info['device'].configuration().max_shots
-    remaining_shots = evaluator_info['num_shots']
-    while remaining_shots>0:
-        batch_shots = min(remaining_shots,device_max_shots)
-        print('Submitted %d circuits to hardware, %d shots'%(len(cluster_instances),batch_shots))
-        qobj = assemble(list(mapped_circuits.values()), backend=evaluator_info['device'], shots=batch_shots)
-        job = Aer.get_backend('qasm_simulator').run(qobj)
-        hw_results = job.result()
-
-        if 'meas_filter' in evaluator_info:
-            print('Mitigation for %d * %d-qubit circuit'%(len(cluster_instances),len(circ.qubits)))
-            mitigation_begin = time()
-            mitigated_results = evaluator_info['meas_filter'].apply(hw_results)
-            mitigation_time = time() - mitigation_begin
-            print('Mitigation for %d * %d-qubit circuit took %.3e seconds'%(len(cluster_instances),len(circ.qubits),mitigation_time))
-            for init_meas in mapped_circuits:
-                hw_count = mitigated_results.get_counts(mapped_circuits[init_meas])
-                hw_counts[init_meas] = update_counts(cumulated=hw_counts[init_meas], batch=hw_count)
-        else:
-            for init_meas in mapped_circuits:
-                hw_count = hw_results.get_counts(mapped_circuits[init_meas])
-                # print('batch {} counts:'.format(init_meas),hw_count)
-                # print('cumulative {} counts:'.format(init_meas),hw_counts[init_meas])
-                hw_counts[init_meas] = update_counts(cumulated=hw_counts[init_meas], batch=hw_count)
-        remaining_shots -= batch_shots
-    
-    hw_probs = {}
-    for init_meas in hw_counts:
-        circ = cluster_instances[init_meas]
-        hw_count = hw_counts[init_meas]
-        hw_prob = [0 for x in range(np.power(2,len(circ.qubits)))]
-        for state in hw_count:
-            reversed_state = reverseBits(int(state,2),len(circ.qubits))
-            hw_prob[reversed_state] = hw_count[state]/evaluator_info['num_shots']
-        hw_probs[init_meas] = hw_prob
-    return hw_probs
+def split_cluster_instances(circs,shots,max_experiments,max_shots):
+    if len(circs)<=max_experiments and shots<=max_shots:
+        current_schedule = [(circs,shots)]
+        return current_schedule
+    elif len(circs)>max_experiments and shots<=max_shots:
+        current_instances = {}
+        next_instances = {}
+        for init_meas in circs:
+            if len(current_instances) < max_experiments:
+                current_instances[init_meas] = circs[init_meas]
+            else:
+                next_instances[init_meas] = circs[init_meas]
+        current_schedule = [(current_instances,shots)]
+        next_schedule = split_cluster_instances(circs=next_instances,shots=shots,max_experiments=max_experiments,max_shots=max_shots)
+        return current_schedule + next_schedule
+    elif len(circs)<=max_experiments and shots>max_shots:
+        current_schedule = [(circs,max_shots)]
+        next_schedule = split_cluster_instances(circs=circs,shots=shots-max_shots,max_experiments=max_experiments,max_shots=max_shots)
+        return current_schedule + next_schedule
+    elif len(circs)>max_experiments and shots>max_shots:
+        left_circs = {}
+        right_circs = {}
+        for init_meas in circs:
+            if len(left_circs) < max_experiments:
+                left_circs[init_meas] = circs[init_meas]
+            else:
+                right_circs[init_meas] = circs[init_meas]
+        left_schedule = split_cluster_instances(circs=left_circs,shots=shots,max_experiments=max_experiments,max_shots=max_shots)
+        right_schedule = split_cluster_instances(circs=right_circs,shots=shots,max_experiments=max_experiments,max_shots=max_shots)
+        return left_schedule + right_schedule
+    else:
+        raise Exception('This condition should not happen')
 
 def submit_hardware_jobs(cluster_instances, evaluator_info):
+    print('Submitted %d circuits to hardware, %d shots'%(len(cluster_instances),evaluator_info['num_shots']))
     mapped_circuits = {}
     for init_meas in cluster_instances:
         circ = cluster_instances[init_meas]
@@ -82,56 +64,42 @@ def submit_hardware_jobs(cluster_instances, evaluator_info):
     hw_counts = {}
     for init_meas in mapped_circuits:
         hw_counts[init_meas] = {}
-    
-    device_max_shots = evaluator_info['device'].configuration().max_shots
-    remaining_shots = evaluator_info['num_shots']
-    while remaining_shots>0:
-        batch_shots = min(remaining_shots,device_max_shots)
-        print('Submitted %d circuits to hardware, %d shots'%(len(cluster_instances),batch_shots))
-        qobj = assemble(list(mapped_circuits.values()), backend=evaluator_info['device'], shots=batch_shots)
-        job = evaluator_info['device'].run(qobj)
-        hw_results = job.result()
 
-        if 'meas_filter' in evaluator_info:
-            print('Mitigation for %d * %d-qubit circuit'%(len(cluster_instances),len(circ.qubits)))
-            mitigation_begin = time()
-            mitigated_results = evaluator_info['meas_filter'].apply(hw_results)
-            mitigation_time = time() - mitigation_begin
-            print('Mitigation for %d * %d-qubit circuit took %.3e seconds'%(len(cluster_instances),len(circ.qubits),mitigation_time))
-            for init_meas in mapped_circuits:
-                hw_count = mitigated_results.get_counts(mapped_circuits[init_meas])
-                hw_counts[init_meas] = update_counts(cumulated=hw_counts[init_meas], batch=hw_count)
-        else:
-            for init_meas in mapped_circuits:
-                hw_count = hw_results.get_counts(mapped_circuits[init_meas])
-                # print('batch {} counts:'.format(init_meas),hw_count)
-                # print('cumulative {} counts:'.format(init_meas),hw_counts[init_meas])
-                hw_counts[init_meas] = update_counts(cumulated=hw_counts[init_meas], batch=hw_count)
-        remaining_shots -= batch_shots
-    
-    hw_probs = {}
-    for init_meas in hw_counts:
-        circ = cluster_instances[init_meas]
-        hw_count = hw_counts[init_meas]
-        hw_prob = [0 for x in range(np.power(2,len(circ.qubits)))]
-        for state in hw_count:
-            reversed_state = reverseBits(int(state,2),len(circ.qubits))
-            hw_prob[reversed_state] = hw_count[state]/evaluator_info['num_shots']
-        hw_probs[init_meas] = hw_prob
-    return hw_probs
+    qobj = assemble(list(mapped_circuits.values()), backend=evaluator_info['device'], shots=batch_shots)
+    # job = evaluator_info['device'].run(qobj)
+    job = Aer.get_backend('qasm_simulator').run(qobj)
+    job_dict = {'job':job,'mapped_circuits':mapped_circuits,'evaluator_info':evaluator_info}
+    return job_dict
 
-def distribute_rank_cases(job_submittor_input,rank,size):
-    num_workers = size - 1
-    count = int(len(job_submittor_input)/num_workers)
-    remainder = len(job_submittor_input) % num_workers
-    if rank<remainder:
-        rank_cases_start = rank * (count + 1)
-        rank_cases_stop = rank_cases_start + count + 1
-    else:
-        rank_cases_start = rank * count + remainder
-        rank_cases_stop = rank_cases_start + (count - 1) + 1
-    rank_cases = list(job_submittor_input.keys())[rank_cases_start:rank_cases_stop]
-    return rank_cases
+    # hw_results = job.result()
+
+    # if 'meas_filter' in evaluator_info:
+    #     print('Mitigation for %d * %d-qubit circuit'%(len(cluster_instances),len(circ.qubits)))
+    #     mitigation_begin = time()
+    #     mitigated_results = evaluator_info['meas_filter'].apply(hw_results)
+    #     mitigation_time = time() - mitigation_begin
+    #     print('Mitigation for %d * %d-qubit circuit took %.3e seconds'%(len(cluster_instances),len(circ.qubits),mitigation_time))
+    #     for init_meas in mapped_circuits:
+    #         hw_count = mitigated_results.get_counts(mapped_circuits[init_meas])
+    #         hw_counts[init_meas] = update_counts(cumulated=hw_counts[init_meas], batch=hw_count)
+    # else:
+    #     for init_meas in mapped_circuits:
+    #         hw_count = hw_results.get_counts(mapped_circuits[init_meas])
+    #         # print('batch {} counts:'.format(init_meas),hw_count)
+    #         # print('cumulative {} counts:'.format(init_meas),hw_counts[init_meas])
+    #         hw_counts[init_meas] = update_counts(cumulated=hw_counts[init_meas], batch=hw_count)
+    # remaining_shots -= batch_shots
+    
+    # hw_probs = {}
+    # for init_meas in hw_counts:
+    #     circ = cluster_instances[init_meas]
+    #     hw_count = hw_counts[init_meas]
+    #     hw_prob = [0 for x in range(np.power(2,len(circ.qubits)))]
+    #     for state in hw_count:
+    #         reversed_state = reverseBits(int(state,2),len(circ.qubits))
+    #         hw_prob[reversed_state] = hw_count[state]/evaluator_info['num_shots']
+    #     hw_probs[init_meas] = hw_prob
+    # return hw_probs
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='MPI evaluator.')
@@ -142,80 +110,52 @@ if __name__ == '__main__':
 
     assert args.circuit_type in ['supremacy','hwea','bv','qft','sycamore']
     assert args.shots_mode in ['saturated','sametotal']
-
-    comm = MPI.COMM_WORLD
-    rank = comm.Get_rank()
-    size = comm.Get_size()
-    num_workers = size - 1
     
-    if rank == size-1:
-        print(args.device_name)
-        input_file = './benchmark_data/{}/job_submittor_input_{}_{}_{}.p'.format(args.circuit_type,args.device_name,args.circuit_type,args.shots_mode)
-        job_submittor_input = pickle.load(open(input_file, 'rb' ))
+    print('-'*50,'Job Submittor %s %s %s'%(args.shots_mode,args.circuit_type,args.device_name),'-'*50)
+    input_file = './benchmark_data/{}/job_submittor_input_{}_{}_{}.p'.format(args.circuit_type,args.device_name,args.circuit_type,args.shots_mode)
+    job_submittor_input = pickle.load(open(input_file, 'rb' ))
+    cases_to_run = {}
+    filename = input_file.replace('job_submittor_input','hardware_uniter_input')
+    try:
+        f = open('%s'%filename,'rb')
+        job_submittor_output = pickle.load(f)
+        print('Existing cases:',job_submittor_output.keys())
+    except:
         job_submittor_output = {}
-        filename = input_file.replace('job_submittor_input','hardware_uniter_input')
-        try:
-            f = open('%s'%filename,'rb')
-            existing_job_submittor_output = pickle.load(f)
-            print('Existing cases:',existing_job_submittor_output.keys())
-        except:
-            existing_job_submittor_output = {}
-        for case in job_submittor_input:
-            if case in existing_job_submittor_output:
-                del job_submittor_input[case]
-        for i in range(num_workers):
-            comm.send(job_submittor_input, dest=i)
-        for i in range(len(job_submittor_input)):
-            state = MPI.Status()
-            rank_job_submittor_output = comm.recv(source=MPI.ANY_SOURCE,status=state)
-            job_submittor_output.update(rank_job_submittor_output)
-            pickle.dump(job_submittor_output, open('%s'%filename,'wb'))
-            print('Job submittor output has %d cases'%len(job_submittor_output))
-            print('*'*50)
-    else:
-        state = MPI.Status()
-        job_submittor_input = comm.recv(source=size-1,status=state)
-        rank_cases = distribute_rank_cases(job_submittor_input,rank,size)
-        print('Rank %d has %d cases'%(rank,len(rank_cases)))
-        for case in rank_cases:
-            case_dict = copy.deepcopy(job_submittor_input[case])
-            fc_shots = job_submittor_input[case]['fc_shots']
-            clusters = job_submittor_input[case]['clusters']
-            complete_path_map = job_submittor_input[case]['complete_path_map']
-            same_total_cutting_shots = distribute_cluster_shots(total_shots=fc_shots,clusters=clusters,complete_path_map=complete_path_map)
-            for cluster_idx, cluster_circ in enumerate(job_submittor_input[case]['clusters']):
-                cluster_instances = job_submittor_input[case]['all_cluster_prob'][cluster_idx]
-                print('Cluster %d has %d instances'%(cluster_idx,len(cluster_instances)))
-                evaluator_info = get_evaluator_info(circ=cluster_circ,device_name=args.device_name,
-                fields=['device','basis_gates','coupling_map','properties','initial_layout'])
+    for case in job_submittor_input:
+        if case not in job_submittor_output:
+            cases_to_run[case] = job_submittor_input[case]
+    print('Run cases:',cases_to_run.keys())
+    print('*'*50)
+    
+    for case in cases_to_run:
+        print('submitting case ',case)
+        fc_shots = cases_to_run[case]['fc_shots']
+        clusters = cases_to_run[case]['clusters']
+        complete_path_map = cases_to_run[case]['complete_path_map']
+        same_total_cutting_shots = distribute_cluster_shots(total_shots=fc_shots,clusters=clusters,complete_path_map=complete_path_map)
 
-                if args.shots_mode == 'saturated':
-                    evaluator_info['num_shots'] = get_circ_saturated_shots(circs=[cluster_circ],accuracy=1e-1)[0]
-                elif args.shots_mode == 'sametotal':
-                    evaluator_info['num_shots'] = same_total_cutting_shots[cluster_idx]
+        for cluster_idx, cluster_circ in enumerate(clusters):
+            cluster_instances = cases_to_run[case]['all_cluster_prob'][cluster_idx]
+            evaluator_info = get_evaluator_info(circ=cluster_circ,device_name=args.device_name,
+            fields=['device','basis_gates','coupling_map','properties','initial_layout'])
+
+            if args.shots_mode == 'saturated':
+                evaluator_info['num_shots'] = get_circ_saturated_shots(circs=[cluster_circ],accuracy=1e-1)[0]
+            elif args.shots_mode == 'sametotal':
+                evaluator_info['num_shots'] = same_total_cutting_shots[cluster_idx]
+            print('Cluster %d has %d instances, %d shots each, submission history:'%(cluster_idx,len(cluster_instances),evaluator_info['num_shots']))
+
+            # if np.power(2,len(cluster_circ.qubits))<=max_experiments:
+            #     _evaluator_info = get_evaluator_info(circ=cluster_circ,device_name=args.device_name,fields=['meas_filter'])
+            #     evaluator_info.update(_evaluator_info)
             
-                max_experiments = int(evaluator_info['device'].configuration().max_experiments/3*2)
-                # if np.power(2,len(cluster_circ.qubits))<=max_experiments:
-                #     _evaluator_info = get_evaluator_info(circ=cluster_circ,device_name=args.device_name,fields=['meas_filter'])
-                #     evaluator_info.update(_evaluator_info)
-                hw_begin = time()
-                hw_probs = {}
-                cluster_instances_batch = {}
-                for init_meas in cluster_instances:
-                    if len(cluster_instances_batch)==max_experiments:
-                        hw_probs_batch = _submit_hardware_jobs(cluster_instances=cluster_instances_batch,evaluator_info=evaluator_info)
-                        hw_probs_batch_copy = copy.deepcopy(hw_probs_batch)
-                        hw_probs.update(hw_probs_batch_copy)
-                        cluster_instances_batch = {}
-                        cluster_instances_batch[init_meas] = cluster_instances[init_meas]
-                    else:
-                        cluster_instances_batch[init_meas] = cluster_instances[init_meas]
-                hw_probs_batch = _submit_hardware_jobs(cluster_instances=cluster_instances_batch,evaluator_info=evaluator_info)
-                hw_probs_batch_copy = copy.deepcopy(hw_probs_batch)
-                hw_probs.update(hw_probs_batch_copy)
-                hw_elapsed = time()-hw_begin
-                print('Hardware queue time = %.3e seconds'%hw_elapsed)
-                case_dict['all_cluster_prob'][cluster_idx] = copy.deepcopy(hw_probs)
-            rank_job_submittor_output = {case:case_dict}
-            comm.send(rank_job_submittor_output, dest=size-1)
-        print('-'*100)
+            device_max_shots = evaluator_info['device'].configuration().max_shots
+            device_max_experiments = int(evaluator_info['device'].configuration().max_experiments/3*2)
+
+            schedule = split_cluster_instances(circs=cluster_instances,shots=evaluator_info['num_shots'],max_experiments=device_max_experiments,max_shots=device_max_shots)
+            for s in schedule:
+                cluster_instances_batch, batch_shots = s
+                evaluator_info['num_shots'] = batch_shots
+                job_dict = submit_hardware_jobs(cluster_instances=cluster_instances_batch, evaluator_info=evaluator_info)
+        print('*'*50)
