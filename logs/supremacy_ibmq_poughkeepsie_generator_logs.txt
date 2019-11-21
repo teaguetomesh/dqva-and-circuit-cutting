@@ -1,0 +1,856 @@
+----------------------------------------------------------------------------------------------------
+Case (2, 3)
+Generating 1x3, 1+8+1 supremacy circuit
+solving for 2 clusters
+solving for 3 clusters
+Infeasible
+********************
+MIQCP stats:
+1 cuts, 2 clusters, max qubit = 2
+cluster 0: original input = 2.00, rho qubits = 0.00, O qubits = 1.00, d = 2.00, K = 1.00
+cluster 1: original input = 1.00, rho qubits = 1.00, O qubits = 0.00, d = 2.00, K = 1.00
+objective value: 9.030065603289177
+manually calculated objective value: 9.0
+runtime: 0.24603605270385742
+OPTIMAL
+********************
+saturated fc shots = 1024, needs 1 jobs
+Evaluator input has 1 cases: dict_keys([(2, 3)])
+----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
+Case (3, 4)
+Generating 2x2, 1+8+1 supremacy circuit
+solving for 2 clusters
+solving for 3 clusters
+********************
+MIQCP stats:
+2 cuts, 2 clusters, max qubit = 3
+cluster 0: original input = 2.00, rho qubits = 1.00, O qubits = 1.00, d = 3.00, K = 2.00
+cluster 1: original input = 2.00, rho qubits = 1.00, O qubits = 1.00, d = 3.00, K = 2.00
+objective value: 36.12355050256896
+manually calculated objective value: 36.0
+runtime: 0.040972232818603516
+OPTIMAL
+********************
+saturated fc shots = 1024, needs 1 jobs
+Evaluator input has 2 cases: dict_keys([(2, 3), (3, 4)])
+----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
+Case (3, 5)
+Generating 1x5, 1+8+1 supremacy circuit
+solving for 2 clusters
+solving for 3 clusters
+********************
+MIQCP stats:
+1 cuts, 2 clusters, max qubit = 3
+cluster 0: original input = 3.00, rho qubits = 0.00, O qubits = 1.00, d = 3.00, K = 1.00
+cluster 1: original input = 2.00, rho qubits = 1.00, O qubits = 0.00, d = 3.00, K = 1.00
+objective value: 9.030065603289177
+manually calculated objective value: 9.0
+runtime: 0.05057477951049805
+OPTIMAL
+********************
+saturated fc shots = 1024, needs 1 jobs
+Evaluator input has 3 cases: dict_keys([(2, 3), (3, 4), (3, 5)])
+----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
+Case (3, 6)
+Generating 2x3, 1+8+1 supremacy circuit
+solving for 2 clusters
+Infeasible
+solving for 3 clusters
+Infeasible
+Case (3, 6) not feasible
+----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
+Case (4, 5)
+Use existing full circuit
+solving for 2 clusters
+solving for 3 clusters
+********************
+MIQCP stats:
+1 cuts, 2 clusters, max qubit = 4
+cluster 0: original input = 2.00, rho qubits = 0.00, O qubits = 1.00, d = 2.00, K = 1.00
+cluster 1: original input = 3.00, rho qubits = 1.00, O qubits = 0.00, d = 4.00, K = 1.00
+objective value: 9.030065603289154
+manually calculated objective value: 8.999999999999979
+runtime: 0.04897308349609375
+OPTIMAL
+********************
+saturated fc shots = 1024, needs 1 jobs
+Evaluator input has 4 cases: dict_keys([(2, 3), (3, 4), (3, 5), (4, 5)])
+----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
+Case (4, 6)
+Use existing full circuit
+solving for 2 clusters
+solving for 3 clusters
+********************
+MIQCP stats:
+2 cuts, 2 clusters, max qubit = 4
+cluster 0: original input = 4.00, rho qubits = 0.00, O qubits = 2.00, d = 4.00, K = 2.00
+cluster 1: original input = 2.00, rho qubits = 2.00, O qubits = 0.00, d = 4.00, K = 2.00
+objective value: 45.15558793742226
+manually calculated objective value: 45.0
+runtime: 0.0984499454498291
+OPTIMAL
+********************
+saturated fc shots = 1024, needs 1 jobs
+Evaluator input has 5 cases: dict_keys([(2, 3), (3, 4), (3, 5), (4, 5), (4, 6)])
+----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
+Case (4, 7)
+Generating 1x7, 1+8+1 supremacy circuit
+solving for 2 clusters
+solving for 3 clusters
+********************
+MIQCP stats:
+1 cuts, 2 clusters, max qubit = 4
+cluster 0: original input = 4.00, rho qubits = 0.00, O qubits = 1.00, d = 4.00, K = 1.00
+cluster 1: original input = 3.00, rho qubits = 1.00, O qubits = 0.00, d = 4.00, K = 1.00
+objective value: 9.030065603289177
+manually calculated objective value: 9.0
+runtime: 0.02744603157043457
+OPTIMAL
+********************
+saturated fc shots = 2048, needs 1 jobs
+Evaluator input has 6 cases: dict_keys([(2, 3), (3, 4), (3, 5), (4, 5), (4, 6), (4, 7)])
+----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
+Case (4, 8)
+Generating 2x4, 1+8+1 supremacy circuit
+solving for 2 clusters
+Infeasible
+solving for 3 clusters
+********************
+MIQCP stats:
+4 cuts, 3 clusters, max qubit = 4
+cluster 0: original input = 3.00, rho qubits = 1.00, O qubits = 2.00, d = 4.00, K = 3.00
+cluster 1: original input = 2.00, rho qubits = 2.00, O qubits = 1.00, d = 4.00, K = 3.00
+cluster 2: original input = 3.00, rho qubits = 1.00, O qubits = 1.00, d = 4.00, K = 2.00
+objective value: 180.16075799762916
+manually calculated objective value: 180.0
+runtime: 0.2670269012451172
+OPTIMAL
+********************
+saturated fc shots = 2048, needs 1 jobs
+Evaluator input has 7 cases: dict_keys([(2, 3), (3, 4), (3, 5), (4, 5), (4, 6), (4, 7), (4, 8)])
+----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
+Case (4, 9)
+Generating 3x3, 1+8+1 supremacy circuit
+solving for 2 clusters
+Infeasible
+solving for 3 clusters
+Infeasible
+Case (4, 9) not feasible
+----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
+Case (5, 6)
+Use existing full circuit
+solving for 2 clusters
+solving for 3 clusters
+********************
+MIQCP stats:
+2 cuts, 2 clusters, max qubit = 5
+cluster 0: original input = 4.00, rho qubits = 1.00, O qubits = 1.00, d = 5.00, K = 2.00
+cluster 1: original input = 2.00, rho qubits = 1.00, O qubits = 1.00, d = 3.00, K = 2.00
+objective value: 36.12355050256896
+manually calculated objective value: 36.0
+runtime: 0.08183693885803223
+OPTIMAL
+********************
+saturated fc shots = 1024, needs 1 jobs
+Evaluator input has 8 cases: dict_keys([(2, 3), (3, 4), (3, 5), (4, 5), (4, 6), (4, 7), (4, 8), (5, 6)])
+----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
+Case (5, 7)
+Use existing full circuit
+solving for 2 clusters
+solving for 3 clusters
+********************
+MIQCP stats:
+1 cuts, 2 clusters, max qubit = 5
+cluster 0: original input = 4.00, rho qubits = 1.00, O qubits = 0.00, d = 5.00, K = 1.00
+cluster 1: original input = 3.00, rho qubits = 0.00, O qubits = 1.00, d = 3.00, K = 1.00
+objective value: 9.03006560328916
+manually calculated objective value: 9.0
+runtime: 0.04599595069885254
+OPTIMAL
+********************
+saturated fc shots = 2048, needs 1 jobs
+Evaluator input has 9 cases: dict_keys([(2, 3), (3, 4), (3, 5), (4, 5), (4, 6), (4, 7), (4, 8), (5, 6), (5, 7)])
+----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
+Case (5, 8)
+Use existing full circuit
+solving for 2 clusters
+Infeasible
+solving for 3 clusters
+********************
+MIQCP stats:
+4 cuts, 3 clusters, max qubit = 5
+cluster 0: original input = 3.00, rho qubits = 1.00, O qubits = 2.00, d = 4.00, K = 3.00
+cluster 1: original input = 3.00, rho qubits = 2.00, O qubits = 1.00, d = 5.00, K = 3.00
+cluster 2: original input = 2.00, rho qubits = 1.00, O qubits = 1.00, d = 3.00, K = 2.00
+objective value: 180.16075799762916
+manually calculated objective value: 180.0
+runtime: 0.24161982536315918
+OPTIMAL
+********************
+saturated fc shots = 3072, needs 1 jobs
+Evaluator input has 10 cases: dict_keys([(2, 3), (3, 4), (3, 5), (4, 5), (4, 6), (4, 7), (4, 8), (5, 6), (5, 7), (5, 8)])
+----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
+Case (5, 9)
+Use existing full circuit
+solving for 2 clusters
+Infeasible
+solving for 3 clusters
+********************
+MIQCP stats:
+5 cuts, 3 clusters, max qubit = 5
+cluster 0: original input = 3.00, rho qubits = 2.00, O qubits = 1.00, d = 5.00, K = 3.00
+cluster 1: original input = 4.00, rho qubits = 1.00, O qubits = 3.00, d = 5.00, K = 4.00
+cluster 2: original input = 2.00, rho qubits = 2.00, O qubits = 1.00, d = 4.00, K = 3.00
+objective value: 378.653499176593
+manually calculated objective value: 377.99999999999994
+runtime: 0.3076620101928711
+OPTIMAL
+********************
+saturated fc shots = 4096, needs 1 jobs
+Evaluator input has 11 cases: dict_keys([(2, 3), (3, 4), (3, 5), (4, 5), (4, 6), (4, 7), (4, 8), (5, 6), (5, 7), (5, 8), (5, 9)])
+----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
+Case (5, 10)
+Generating 2x5, 1+8+1 supremacy circuit
+solving for 2 clusters
+Infeasible
+solving for 3 clusters
+********************
+MIQCP stats:
+4 cuts, 3 clusters, max qubit = 5
+cluster 0: original input = 4.00, rho qubits = 0.00, O qubits = 2.00, d = 4.00, K = 2.00
+cluster 1: original input = 3.00, rho qubits = 2.00, O qubits = 2.00, d = 5.00, K = 4.00
+cluster 2: original input = 3.00, rho qubits = 2.00, O qubits = 0.00, d = 5.00, K = 2.00
+objective value: 370.1588825849221
+manually calculated objective value: 369.0
+runtime: 0.46731019020080566
+OPTIMAL
+********************
+saturated fc shots = 7168, needs 1 jobs
+Evaluator input has 12 cases: dict_keys([(2, 3), (3, 4), (3, 5), (4, 5), (4, 6), (4, 7), (4, 8), (5, 6), (5, 7), (5, 8), (5, 9), (5, 10)])
+----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
+Case (5, 12)
+Generating 3x4, 1+8+1 supremacy circuit
+solving for 2 clusters
+Infeasible
+solving for 3 clusters
+Infeasible
+Case (5, 12) not feasible
+----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
+Case (6, 7)
+Use existing full circuit
+solving for 2 clusters
+solving for 3 clusters
+********************
+MIQCP stats:
+1 cuts, 2 clusters, max qubit = 6
+cluster 0: original input = 2.00, rho qubits = 0.00, O qubits = 1.00, d = 2.00, K = 1.00
+cluster 1: original input = 5.00, rho qubits = 1.00, O qubits = 0.00, d = 6.00, K = 1.00
+objective value: 9.030065603289177
+manually calculated objective value: 9.0
+runtime: 0.03850603103637695
+OPTIMAL
+********************
+saturated fc shots = 2048, needs 1 jobs
+Evaluator input has 13 cases: dict_keys([(2, 3), (3, 4), (3, 5), (4, 5), (4, 6), (4, 7), (4, 8), (5, 6), (5, 7), (5, 8), (5, 9), (5, 10), (6, 7)])
+----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
+Case (6, 8)
+Use existing full circuit
+solving for 2 clusters
+solving for 3 clusters
+********************
+MIQCP stats:
+2 cuts, 2 clusters, max qubit = 6
+cluster 0: original input = 5.00, rho qubits = 1.00, O qubits = 1.00, d = 6.00, K = 2.00
+cluster 1: original input = 3.00, rho qubits = 1.00, O qubits = 1.00, d = 4.00, K = 2.00
+objective value: 36.12355050256896
+manually calculated objective value: 36.0
+runtime: 0.09539103507995605
+OPTIMAL
+********************
+saturated fc shots = 2048, needs 1 jobs
+Evaluator input has 14 cases: dict_keys([(2, 3), (3, 4), (3, 5), (4, 5), (4, 6), (4, 7), (4, 8), (5, 6), (5, 7), (5, 8), (5, 9), (5, 10), (6, 7), (6, 8)])
+----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
+Case (6, 9)
+Use existing full circuit
+solving for 2 clusters
+solving for 3 clusters
+********************
+MIQCP stats:
+3 cuts, 2 clusters, max qubit = 6
+cluster 0: original input = 5.00, rho qubits = 1.00, O qubits = 2.00, d = 6.00, K = 3.00
+cluster 1: original input = 4.00, rho qubits = 2.00, O qubits = 1.00, d = 6.00, K = 3.00
+objective value: 162.0989827463447
+manually calculated objective value: 162.0
+runtime: 0.09988093376159668
+OPTIMAL
+********************
+saturated fc shots = 4096, needs 1 jobs
+Evaluator input has 15 cases: dict_keys([(2, 3), (3, 4), (3, 5), (4, 5), (4, 6), (4, 7), (4, 8), (5, 6), (5, 7), (5, 8), (5, 9), (5, 10), (6, 7), (6, 8), (6, 9)])
+----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
+Case (6, 10)
+Use existing full circuit
+solving for 2 clusters
+solving for 3 clusters
+********************
+MIQCP stats:
+2 cuts, 2 clusters, max qubit = 6
+cluster 0: original input = 5.00, rho qubits = 1.00, O qubits = 1.00, d = 6.00, K = 2.00
+cluster 1: original input = 5.00, rho qubits = 1.00, O qubits = 1.00, d = 6.00, K = 2.00
+objective value: 36.12355050256896
+manually calculated objective value: 36.0
+runtime: 0.12813782691955566
+OPTIMAL
+********************
+saturated fc shots = 9216, needs 1 jobs
+Evaluator input has 16 cases: dict_keys([(2, 3), (3, 4), (3, 5), (4, 5), (4, 6), (4, 7), (4, 8), (5, 6), (5, 7), (5, 8), (5, 9), (5, 10), (6, 7), (6, 8), (6, 9), (6, 10)])
+----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
+Case (6, 12)
+Use existing full circuit
+solving for 2 clusters
+Infeasible
+solving for 3 clusters
+********************
+MIQCP stats:
+6 cuts, 3 clusters, max qubit = 6
+cluster 0: original input = 4.00, rho qubits = 2.00, O qubits = 2.00, d = 6.00, K = 4.00
+cluster 1: original input = 4.00, rho qubits = 2.00, O qubits = 2.00, d = 6.00, K = 4.00
+cluster 2: original input = 4.00, rho qubits = 2.00, O qubits = 2.00, d = 6.00, K = 4.00
+objective value: 975.0098839425
+manually calculated objective value: 972.0000000000006
+runtime: 0.5414760112762451
+OPTIMAL
+********************
+saturated fc shots = 24576, needs 1 jobs
+Evaluator input has 17 cases: dict_keys([(2, 3), (3, 4), (3, 5), (4, 5), (4, 6), (4, 7), (4, 8), (5, 6), (5, 7), (5, 8), (5, 9), (5, 10), (6, 7), (6, 8), (6, 9), (6, 10), (6, 12)])
+----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
+Case (6, 14)
+Generating 2x7, 1+8+1 supremacy circuit
+solving for 2 clusters
+Infeasible
+solving for 3 clusters
+********************
+MIQCP stats:
+4 cuts, 3 clusters, max qubit = 6
+cluster 0: original input = 5.00, rho qubits = 1.00, O qubits = 1.00, d = 6.00, K = 2.00
+cluster 1: original input = 4.00, rho qubits = 2.00, O qubits = 2.00, d = 6.00, K = 4.00
+cluster 2: original input = 5.00, rho qubits = 1.00, O qubits = 1.00, d = 6.00, K = 2.00
+objective value: 361.1268451500688
+manually calculated objective value: 360.0
+runtime: 0.5323259830474854
+OPTIMAL
+********************
+current diff: 0.2378725001242506 current shots: 50176
+saturated fc shots = 92160, needs 1 jobs
+Evaluator input has 18 cases: dict_keys([(2, 3), (3, 4), (3, 5), (4, 5), (4, 6), (4, 7), (4, 8), (5, 6), (5, 7), (5, 8), (5, 9), (5, 10), (6, 7), (6, 8), (6, 9), (6, 10), (6, 12), (6, 14)])
+----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
+Case (7, 8)
+Use existing full circuit
+solving for 2 clusters
+solving for 3 clusters
+********************
+MIQCP stats:
+2 cuts, 2 clusters, max qubit = 7
+cluster 0: original input = 6.00, rho qubits = 1.00, O qubits = 1.00, d = 7.00, K = 2.00
+cluster 1: original input = 2.00, rho qubits = 1.00, O qubits = 1.00, d = 3.00, K = 2.00
+objective value: 36.12353562477174
+manually calculated objective value: 35.999984780367726
+runtime: 0.1354389190673828
+OPTIMAL
+********************
+saturated fc shots = 2048, needs 1 jobs
+Evaluator input has 19 cases: dict_keys([(2, 3), (3, 4), (3, 5), (4, 5), (4, 6), (4, 7), (4, 8), (5, 6), (5, 7), (5, 8), (5, 9), (5, 10), (6, 7), (6, 8), (6, 9), (6, 10), (6, 12), (6, 14), (7, 8)])
+----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
+Case (7, 9)
+Use existing full circuit
+solving for 2 clusters
+solving for 3 clusters
+********************
+MIQCP stats:
+3 cuts, 2 clusters, max qubit = 7
+cluster 0: original input = 4.00, rho qubits = 1.00, O qubits = 2.00, d = 5.00, K = 3.00
+cluster 1: original input = 5.00, rho qubits = 2.00, O qubits = 1.00, d = 7.00, K = 3.00
+objective value: 162.0989827463447
+manually calculated objective value: 162.0
+runtime: 0.26808714866638184
+OPTIMAL
+********************
+saturated fc shots = 4096, needs 1 jobs
+Evaluator input has 20 cases: dict_keys([(2, 3), (3, 4), (3, 5), (4, 5), (4, 6), (4, 7), (4, 8), (5, 6), (5, 7), (5, 8), (5, 9), (5, 10), (6, 7), (6, 8), (6, 9), (6, 10), (6, 12), (6, 14), (7, 8), (7, 9)])
+----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
+Case (7, 10)
+Use existing full circuit
+solving for 2 clusters
+solving for 3 clusters
+********************
+MIQCP stats:
+2 cuts, 2 clusters, max qubit = 7
+cluster 0: original input = 6.00, rho qubits = 1.00, O qubits = 1.00, d = 7.00, K = 2.00
+cluster 1: original input = 4.00, rho qubits = 1.00, O qubits = 1.00, d = 5.00, K = 2.00
+objective value: 36.12355050256896
+manually calculated objective value: 36.0
+runtime: 0.23492884635925293
+OPTIMAL
+********************
+saturated fc shots = 9216, needs 1 jobs
+Evaluator input has 21 cases: dict_keys([(2, 3), (3, 4), (3, 5), (4, 5), (4, 6), (4, 7), (4, 8), (5, 6), (5, 7), (5, 8), (5, 9), (5, 10), (6, 7), (6, 8), (6, 9), (6, 10), (6, 12), (6, 14), (7, 8), (7, 9), (7, 10)])
+----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
+Case (7, 12)
+Use existing full circuit
+solving for 2 clusters
+Infeasible
+solving for 3 clusters
+********************
+MIQCP stats:
+5 cuts, 3 clusters, max qubit = 7
+cluster 0: original input = 4.00, rho qubits = 3.00, O qubits = 1.00, d = 7.00, K = 4.00
+cluster 1: original input = 7.00, rho qubits = 0.00, O qubits = 4.00, d = 7.00, K = 4.00
+cluster 2: original input = 1.00, rho qubits = 2.00, O qubits = 0.00, d = 3.00, K = 2.00
+objective value: 767.3489573469615
+manually calculated objective value: 765.0
+runtime: 0.5461921691894531
+OPTIMAL
+********************
+saturated fc shots = 25600, needs 1 jobs
+Evaluator input has 22 cases: dict_keys([(2, 3), (3, 4), (3, 5), (4, 5), (4, 6), (4, 7), (4, 8), (5, 6), (5, 7), (5, 8), (5, 9), (5, 10), (6, 7), (6, 8), (6, 9), (6, 10), (6, 12), (6, 14), (7, 8), (7, 9), (7, 10), (7, 12)])
+----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
+Case (7, 14)
+Use existing full circuit
+solving for 2 clusters
+Infeasible
+solving for 3 clusters
+********************
+MIQCP stats:
+4 cuts, 3 clusters, max qubit = 7
+cluster 0: original input = 6.00, rho qubits = 1.00, O qubits = 1.00, d = 7.00, K = 2.00
+cluster 1: original input = 3.00, rho qubits = 1.00, O qubits = 2.00, d = 4.00, K = 3.00
+cluster 2: original input = 5.00, rho qubits = 2.00, O qubits = 1.00, d = 7.00, K = 3.00
+objective value: 180.16075799762916
+manually calculated objective value: 180.0
+runtime: 0.6204578876495361
+OPTIMAL
+********************
+current diff: 0.2427820640912472 current shots: 50176
+saturated fc shots = 93184, needs 1 jobs
+Evaluator input has 23 cases: dict_keys([(2, 3), (3, 4), (3, 5), (4, 5), (4, 6), (4, 7), (4, 8), (5, 6), (5, 7), (5, 8), (5, 9), (5, 10), (6, 7), (6, 8), (6, 9), (6, 10), (6, 12), (6, 14), (7, 8), (7, 9), (7, 10), (7, 12), (7, 14)])
+----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
+Case (7, 16)
+Generating 4x4, 1+8+1 supremacy circuit
+solving for 2 clusters
+Infeasible
+solving for 3 clusters
+Infeasible
+Case (7, 16) not feasible
+----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
+Case (7, 18)
+Generating 3x6, 1+8+1 supremacy circuit
+solving for 2 clusters
+Infeasible
+solving for 3 clusters
+Infeasible
+Case (7, 18) not feasible
+----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
+Case (8, 9)
+Use existing full circuit
+solving for 2 clusters
+solving for 3 clusters
+********************
+MIQCP stats:
+2 cuts, 2 clusters, max qubit = 8
+cluster 0: original input = 6.00, rho qubits = 2.00, O qubits = -0.00, d = 8.00, K = 2.00
+cluster 1: original input = 3.00, rho qubits = -0.00, O qubits = 2.00, d = 3.00, K = 2.00
+objective value: 45.15558793742226
+manually calculated objective value: 45.0
+runtime: 0.22142696380615234
+OPTIMAL
+********************
+saturated fc shots = 4096, needs 1 jobs
+Evaluator input has 24 cases: dict_keys([(2, 3), (3, 4), (3, 5), (4, 5), (4, 6), (4, 7), (4, 8), (5, 6), (5, 7), (5, 8), (5, 9), (5, 10), (6, 7), (6, 8), (6, 9), (6, 10), (6, 12), (6, 14), (7, 8), (7, 9), (7, 10), (7, 12), (7, 14), (8, 9)])
+----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
+Case (8, 10)
+Use existing full circuit
+solving for 2 clusters
+solving for 3 clusters
+********************
+MIQCP stats:
+2 cuts, 2 clusters, max qubit = 8
+cluster 0: original input = 5.00, rho qubits = 1.00, O qubits = 1.00, d = 6.00, K = 2.00
+cluster 1: original input = 5.00, rho qubits = 1.00, O qubits = 1.00, d = 6.00, K = 2.00
+objective value: 36.12355050256896
+manually calculated objective value: 36.0
+runtime: 0.18346905708312988
+OPTIMAL
+********************
+saturated fc shots = 7168, needs 1 jobs
+Evaluator input has 25 cases: dict_keys([(2, 3), (3, 4), (3, 5), (4, 5), (4, 6), (4, 7), (4, 8), (5, 6), (5, 7), (5, 8), (5, 9), (5, 10), (6, 7), (6, 8), (6, 9), (6, 10), (6, 12), (6, 14), (7, 8), (7, 9), (7, 10), (7, 12), (7, 14), (8, 9), (8, 10)])
+----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
+Case (8, 12)
+Use existing full circuit
+solving for 2 clusters
+solving for 3 clusters
+********************
+MIQCP stats:
+5 cuts, 3 clusters, max qubit = 8
+cluster 0: original input = 3.00, rho qubits = 1.00, O qubits = 2.00, d = 4.00, K = 3.00
+cluster 1: original input = 4.00, rho qubits = 1.00, O qubits = 2.00, d = 5.00, K = 3.00
+cluster 2: original input = 5.00, rho qubits = 3.00, O qubits = 1.00, d = 8.00, K = 4.00
+objective value: 758.0193921129979
+manually calculated objective value: 756.0
+runtime: 0.7765440940856934
+OPTIMAL
+********************
+saturated fc shots = 24576, needs 1 jobs
+Evaluator input has 26 cases: dict_keys([(2, 3), (3, 4), (3, 5), (4, 5), (4, 6), (4, 7), (4, 8), (5, 6), (5, 7), (5, 8), (5, 9), (5, 10), (6, 7), (6, 8), (6, 9), (6, 10), (6, 12), (6, 14), (7, 8), (7, 9), (7, 10), (7, 12), (7, 14), (8, 9), (8, 10), (8, 12)])
+----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
+Case (8, 14)
+Use existing full circuit
+solving for 2 clusters
+solving for 3 clusters
+********************
+MIQCP stats:
+2 cuts, 2 clusters, max qubit = 8
+cluster 0: original input = 8.00, rho qubits = 0.00, O qubits = 2.00, d = 8.00, K = 2.00
+cluster 1: original input = 6.00, rho qubits = 2.00, O qubits = 0.00, d = 8.00, K = 2.00
+objective value: 45.15558793742226
+manually calculated objective value: 45.0
+runtime: 0.1074378490447998
+OPTIMAL
+********************
+current diff: 0.24124215911105099 current shots: 50176
+saturated fc shots = 92160, needs 1 jobs
+Evaluator input has 27 cases: dict_keys([(2, 3), (3, 4), (3, 5), (4, 5), (4, 6), (4, 7), (4, 8), (5, 6), (5, 7), (5, 8), (5, 9), (5, 10), (6, 7), (6, 8), (6, 9), (6, 10), (6, 12), (6, 14), (7, 8), (7, 9), (7, 10), (7, 12), (7, 14), (8, 9), (8, 10), (8, 12), (8, 14)])
+----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
+Case (8, 16)
+Use existing full circuit
+solving for 2 clusters
+Infeasible
+solving for 3 clusters
+********************
+MIQCP stats:
+7 cuts, 3 clusters, max qubit = 8
+cluster 0: original input = 4.00, rho qubits = 3.00, O qubits = 1.00, d = 7.00, K = 4.00
+cluster 1: original input = 6.00, rho qubits = 2.00, O qubits = 3.00, d = 8.00, K = 5.00
+cluster 2: original input = 6.00, rho qubits = 2.00, O qubits = 3.00, d = 8.00, K = 5.00
+objective value: 2600.926387534849
+manually calculated objective value: 2592.0
+runtime: 0.6120071411132812
+OPTIMAL
+********************
+current diff: 1.047372549914964 current shots: 50176
+current diff: 0.49975249637994223 current shots: 101376
+current diff: 0.29210143754534057 current shots: 152576
+current diff: 0.19261864117061536 current shots: 203776
+current diff: 0.13569211789570046 current shots: 254976
+current diff: 0.10207407652949428 current shots: 306176
+saturated fc shots = 310272, needs 1 jobs
+Evaluator input has 28 cases: dict_keys([(2, 3), (3, 4), (3, 5), (4, 5), (4, 6), (4, 7), (4, 8), (5, 6), (5, 7), (5, 8), (5, 9), (5, 10), (6, 7), (6, 8), (6, 9), (6, 10), (6, 12), (6, 14), (7, 8), (7, 9), (7, 10), (7, 12), (7, 14), (8, 9), (8, 10), (8, 12), (8, 14), (8, 16)])
+----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
+Case (8, 18)
+Use existing full circuit
+solving for 2 clusters
+Infeasible
+solving for 3 clusters
+Infeasible
+Case (8, 18) not feasible
+----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
+Case (8, 20)
+Generating 4x5, 1+8+1 supremacy circuit
+solving for 2 clusters
+Infeasible
+solving for 3 clusters
+Infeasible
+Case (8, 20) not feasible
+----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
+Case (9, 10)
+Use existing full circuit
+solving for 2 clusters
+solving for 3 clusters
+********************
+MIQCP stats:
+2 cuts, 2 clusters, max qubit = 9
+cluster 0: original input = 8.00, rho qubits = 1.00, O qubits = 1.00, d = 9.00, K = 2.00
+cluster 1: original input = 2.00, rho qubits = 1.00, O qubits = 1.00, d = 3.00, K = 2.00
+objective value: 36.12353478477772
+manually calculated objective value: 35.99998392108484
+runtime: 0.2775399684906006
+OPTIMAL
+********************
+saturated fc shots = 8192, needs 1 jobs
+Evaluator input has 29 cases: dict_keys([(2, 3), (3, 4), (3, 5), (4, 5), (4, 6), (4, 7), (4, 8), (5, 6), (5, 7), (5, 8), (5, 9), (5, 10), (6, 7), (6, 8), (6, 9), (6, 10), (6, 12), (6, 14), (7, 8), (7, 9), (7, 10), (7, 12), (7, 14), (8, 9), (8, 10), (8, 12), (8, 14), (8, 16), (9, 10)])
+----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
+Case (9, 12)
+Use existing full circuit
+solving for 2 clusters
+solving for 3 clusters
+********************
+MIQCP stats:
+4 cuts, 3 clusters, max qubit = 9
+cluster 0: original input = 8.00, rho qubits = 1.00, O qubits = 2.00, d = 9.00, K = 3.00
+cluster 1: original input = 3.00, rho qubits = 1.00, O qubits = 2.00, d = 4.00, K = 3.00
+cluster 2: original input = 1.00, rho qubits = 2.00, O qubits = -0.00, d = 3.00, K = 2.00
+objective value: 144.1816320059937
+manually calculated objective value: 143.99999999999997
+runtime: 0.4988560676574707
+OPTIMAL
+********************
+saturated fc shots = 25600, needs 1 jobs
+Evaluator input has 30 cases: dict_keys([(2, 3), (3, 4), (3, 5), (4, 5), (4, 6), (4, 7), (4, 8), (5, 6), (5, 7), (5, 8), (5, 9), (5, 10), (6, 7), (6, 8), (6, 9), (6, 10), (6, 12), (6, 14), (7, 8), (7, 9), (7, 10), (7, 12), (7, 14), (8, 9), (8, 10), (8, 12), (8, 14), (8, 16), (9, 10), (9, 12)])
+----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
+Case (9, 14)
+Use existing full circuit
+solving for 2 clusters
+solving for 3 clusters
+********************
+MIQCP stats:
+2 cuts, 2 clusters, max qubit = 9
+cluster 0: original input = 6.00, rho qubits = 1.00, O qubits = 1.00, d = 7.00, K = 2.00
+cluster 1: original input = 8.00, rho qubits = 1.00, O qubits = 1.00, d = 9.00, K = 2.00
+objective value: 36.12355050256896
+manually calculated objective value: 36.0
+runtime: 0.08786201477050781
+OPTIMAL
+********************
+current diff: 0.23347851094773076 current shots: 50176
+saturated fc shots = 91136, needs 1 jobs
+Evaluator input has 31 cases: dict_keys([(2, 3), (3, 4), (3, 5), (4, 5), (4, 6), (4, 7), (4, 8), (5, 6), (5, 7), (5, 8), (5, 9), (5, 10), (6, 7), (6, 8), (6, 9), (6, 10), (6, 12), (6, 14), (7, 8), (7, 9), (7, 10), (7, 12), (7, 14), (8, 9), (8, 10), (8, 12), (8, 14), (8, 16), (9, 10), (9, 12), (9, 14)])
+----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
+Case (9, 16)
+Use existing full circuit
+solving for 2 clusters
+Infeasible
+solving for 3 clusters
+********************
+MIQCP stats:
+6 cuts, 3 clusters, max qubit = 9
+cluster 0: original input = 3.00, rho qubits = 2.00, O qubits = 2.00, d = 5.00, K = 4.00
+cluster 1: original input = 5.00, rho qubits = 3.00, O qubits = 1.00, d = 8.00, K = 4.00
+cluster 2: original input = 8.00, rho qubits = 1.00, O qubits = 3.00, d = 9.00, K = 4.00
+objective value: 1137.478220444401
+manually calculated objective value: 1133.9999999999993
+runtime: 0.7395679950714111
+OPTIMAL
+********************
+current diff: 1.0485761048507731 current shots: 50176
+current diff: 0.5009740326912591 current shots: 101376
+current diff: 0.29355392294221955 current shots: 152576
+current diff: 0.19287712727918466 current shots: 203776
+current diff: 0.13536572850510206 current shots: 254976
+current diff: 0.10077938503836303 current shots: 306176
+saturated fc shots = 308224, needs 1 jobs
+Evaluator input has 32 cases: dict_keys([(2, 3), (3, 4), (3, 5), (4, 5), (4, 6), (4, 7), (4, 8), (5, 6), (5, 7), (5, 8), (5, 9), (5, 10), (6, 7), (6, 8), (6, 9), (6, 10), (6, 12), (6, 14), (7, 8), (7, 9), (7, 10), (7, 12), (7, 14), (8, 9), (8, 10), (8, 12), (8, 14), (8, 16), (9, 10), (9, 12), (9, 14), (9, 16)])Rank 2 has 2 cases
+Evaluating fc state vector
+Evaluating fc qasm, 1024 shots
+Evaluating fc hardware, 1024 shots
+Calculating measurement filter, 20-qubit calibration circuits * 64 * 8.192e+03 shots. Rank 0 has 2 cases
+Evaluating fc state vector
+Evaluating fc qasm, 1024 shots
+Evaluating fc hardware, 1024 shots
+Calculating measurement filter, 20-qubit calibration circuits * 8 * 8.192e+03 shots. Rank 1 has 2 cases
+Evaluating fc state vector
+Evaluating fc qasm, 1024 shots
+Evaluating fc hardware, 1024 shots
+Calculating measurement filter, 20-qubit calibration circuits * 32 * 8.192e+03 shots. Rank 4 has 2 cases
+Evaluating fc state vector
+Evaluating fc qasm, 2048 shots
+Evaluating fc hardware, 2048 shots
+Calculating measurement filter, 20-qubit calibration circuits * 128 * 8.192e+03 shots. Rank 6 has 2 cases
+Evaluating fc state vector
+Evaluating fc qasm, 2048 shots
+Evaluating fc hardware, 2048 shots
+Calculating measurement filter, 20-qubit calibration circuits * 128 * 8.192e+03 shots. Rank 9 has 2 cases
+Evaluating fc state vector
+Evaluating fc qasm, 2048 shots
+Evaluating fc hardware, 2048 shots
+Calculating measurement filter, 20-qubit calibration circuits * 256 * 8.192e+03 shots. Rank 3 has 2 cases
+Evaluating fc state vector
+Evaluating fc qasm, 2048 shots
+Evaluating fc hardware, 2048 shots
+Calculating measurement filter, 20-qubit calibration circuits * 256 * 8.192e+03 shots. Rank 5 has 2 cases
+Evaluating fc state vector
+Evaluating fc qasm, 4096 shots
+Evaluating fc hardware, 4096 shots
+Calculating measurement filter, 20-qubit calibration circuits * 512 * 8.192e+03 shots. Rank 7 has 2 cases
+Evaluating fc state vector
+Evaluating fc qasm, 4096 shots
+Evaluating fc hardware, 4096 shots
+Calculating measurement filter, 20-qubit calibration circuits * 512 * 8.192e+03 shots. Rank 15 has 1 cases
+Evaluating fc state vector
+Evaluating fc qasm, 8192 shots
+Evaluating fc hardware, 8192 shots
+Submitted 1 * 8192 = 8192 shots to hardware
+Execute on hardware, 1.003e+03 seconds
+----------------------------------------------------------------------------------------------------
+Rank 16 has 1 cases
+Evaluating fc state vector
+Evaluating fc qasm, 25600 shots
+Evaluating fc hardware, 25600 shots
+Submitted 4 * 6400 = 25600 shots to hardware
+Execute on hardware, 3.073e+03 seconds
+----------------------------------------------------------------------------------------------------
+Rank 13 has 1 cases
+Evaluating fc state vector
+Evaluating fc qasm, 92160 shots
+Evaluating fc hardware, 92160 shots
+Submitted 12 * 7680 = 92160 shots to hardware
+Execute on hardware, 5.480e+03 seconds
+----------------------------------------------------------------------------------------------------
+Rank 17 has 1 cases
+Evaluating fc state vector
+Evaluating fc qasm, 91136 shots
+Evaluating fc hardware, 91136 shots
+Submitted 16 * 5696 = 91136 shots to hardware
+Execute on hardware, 5.622e+03 seconds
+----------------------------------------------------------------------------------------------------
+Rank 11 has 2 cases
+Evaluating fc state vector
+Evaluating fc qasm, 93184 shots
+Evaluating fc hardware, 93184 shots
+Submitted 13 * 7168 = 93184 shots to hardware
+Execute on hardware, 5.813e+03 seconds
+Evaluating fc state vector
+Evaluating fc qasm, 4096 shots
+Evaluating fc hardware, 4096 shots
+Calculating measurement filter, 20-qubit calibration circuits * 512 * 8.192e+03 shots. Rank 14 has 1 cases
+Evaluating fc state vector
+Evaluating fc qasm, 310272 shots
+Evaluating fc hardware, 310272 shots
+Submitted 48 * 6464 = 310272 shots to hardware
+Execute on hardware, 1.060e+04 seconds
+----------------------------------------------------------------------------------------------------
+Rank 18 has 1 cases
+Evaluating fc state vector
+Evaluating fc qasm, 308224 shots
+Evaluating fc hardware, 308224 shots
+Submitted 43 * 7168 = 308224 shots to hardware
+Execute on hardware, 1.096e+04 seconds
+----------------------------------------------------------------------------------------------------
+Error checking job status using websocket, retrying using HTTP.
+2.127e+02 seconds
+Submitted 1 * 1024 = 1024 shots to hardware
+Mitigation for 3 qubit circuit
+Mitigation for 3 qubit circuit took 9.404e-03 seconds
+Execute on hardware, 3.000e+04 seconds
+Evaluating fc state vector
+Evaluating fc qasm, 1024 shots
+Evaluating fc hardware, 1024 shots
+Calculating measurement filter, 20-qubit calibration circuits * 16 * 8.192e+03 shots. Rank 19 has 1 cases
+Evaluating fc state vector
+Evaluating fc qasm, 1228800 shots
+Evaluating fc hardware, 1228800 shots
+Submitted 150 * 8192 = 1228800 shots to hardware
+Execute on hardware, 3.018e+04 seconds
+----------------------------------------------------------------------------------------------------
+Rank 10 has 2 cases
+Evaluating fc state vector
+Evaluating fc qasm, 9216 shots
+Evaluating fc hardware, 9216 shots
+Submitted 2 * 4608 = 9216 shots to hardware
+Execute on hardware, 4.132e+02 seconds
+Evaluating fc state vector
+Evaluating fc qasm, 25600 shots
+Evaluating fc hardware, 25600 shots
+Submitted 4 * 6400 = 25600 shots to hardware
+Execute on hardware, 2.986e+04 seconds
+----------------------------------------------------------------------------------------------------
+Rank 12 has 2 cases
+Evaluating fc state vector
+Evaluating fc qasm, 7168 shots
+Evaluating fc hardware, 7168 shots
+Submitted 1 * 7168 = 7168 shots to hardware
+Execute on hardware, 9.374e+02 seconds
+Evaluating fc state vector
+Evaluating fc qasm, 24576 shots
+Evaluating fc hardware, 24576 shots
+Submitted 3 * 8192 = 24576 shots to hardware
+Execute on hardware, 2.942e+04 seconds
+----------------------------------------------------------------------------------------------------
+1.358e+03 seconds
+Submitted 1 * 1024 = 1024 shots to hardware
+Mitigation for 5 qubit circuit
+Mitigation for 5 qubit circuit took 2.742e-02 seconds
+Traceback (most recent call last):
+  File "generate_evaluator_input.py", line 187, in <module>
+    fc_evaluations = evaluate_full_circ(circ=full_circ,total_shots=fc_shots,device_name=args.device_name,fields=['sv_noiseless','qasm','hw'])
+  File "generate_evaluator_input.py", line 60, in evaluate_full_circ
+    hw_fc = evaluate_circ(circ=circ,backend='hardware',evaluator_info=evaluator_info)
+  File "/n/fs/weit-proj/circuit_cutting/mitigation/helper_fun.py", line 219, in evaluate_circ
+    assert sum(list(hw_counts.values())) == evaluator_info['num_shots']
+AssertionError
+Rank 8 has 2 cases
+Evaluating fc state vector
+Evaluating fc qasm, 24576 shots
+Evaluating fc hardware, 24576 shots
+Submitted 3 * 8192 = 24576 shots to hardware
+Execute on hardware, 1.441e+03 seconds
+Evaluating fc state vector
+Evaluating fc qasm, 92160 shots
+Evaluating fc hardware, 92160 shots
+Submitted 12 * 7680 = 92160 shots to hardware
+Execute on hardware, 2.910e+04 seconds
+----------------------------------------------------------------------------------------------------
+2.034e+03 seconds
+Submitted 1 * 1024 = 1024 shots to hardware
+Mitigation for 6 qubit circuit
+Mitigation for 6 qubit circuit took 9.094e-02 seconds
+Traceback (most recent call last):
+  File "generate_evaluator_input.py", line 187, in <module>
+    fc_evaluations = evaluate_full_circ(circ=full_circ,total_shots=fc_shots,device_name=args.device_name,fields=['sv_noiseless','qasm','hw'])
+  File "generate_evaluator_input.py", line 60, in evaluate_full_circ
+    hw_fc = evaluate_circ(circ=circ,backend='hardware',evaluator_info=evaluator_info)
+  File "/n/fs/weit-proj/circuit_cutting/mitigation/helper_fun.py", line 219, in evaluate_circ
+    assert sum(list(hw_counts.values())) == evaluator_info['num_shots']
+AssertionError
+4.202e+03 seconds
+Submitted 1 * 2048 = 2048 shots to hardware
+Mitigation for 7 qubit circuit
+Mitigation for 7 qubit circuit took 6.164e-01 seconds
+Execute on hardware, 2.640e+04 seconds
+Evaluating fc state vector
+Evaluating fc qasm, 2048 shots
+Evaluating fc hardware, 2048 shots
+Calculating measurement filter, 20-qubit calibration circuits * 256 * 8.192e+03 shots. 5.330e+03 seconds
+Submitted 1 * 2048 = 2048 shots to hardware
+Mitigation for 7 qubit circuit
+Mitigation for 7 qubit circuit took 1.102e+00 seconds
+Execute on hardware, 2.531e+04 seconds
+Evaluating fc state vector
+Evaluating fc qasm, 3072 shots
+Evaluating fc hardware, 3072 shots
+Calculating measurement filter, 20-qubit calibration circuits * 256 * 8.192e+03 shots. 

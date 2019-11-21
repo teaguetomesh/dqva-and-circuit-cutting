@@ -182,6 +182,7 @@ def evaluate_circ(circ, backend, evaluator_info):
             noisy_prob[reversed_state] = noisy_counts[state]/evaluator_info['num_shots']
         return noisy_prob
     elif backend == 'hardware':
+        jobs = []
         qc=apply_measurement(circ)
 
         mapped_circuit = transpile(qc,
@@ -196,35 +197,46 @@ def evaluate_circ(circ, backend, evaluator_info):
         max_shots=device_max_shots,
         max_experiments=device_max_experiments)
         
-        hw_counts = {}
         for s in schedule:
             num_experiments, num_shots = s
             mapped_circuit_l = [mapped_circuit for i in range(num_experiments)]
             qobj = assemble(mapped_circuit_l, backend=evaluator_info['device'], shots=num_shots)
             print('Submitted %d * %d = %d shots to hardware'%(num_experiments,num_shots,num_experiments*num_shots))
-            job = evaluator_info['device'].run(qobj)
-            hw_result = job.result()
-            if 'meas_filter' in evaluator_info:
-                print('Mitigation for %d qubit circuit'%(len(circ.qubits)))
-                mitigation_begin = time()
-                hw_result = evaluator_info['meas_filter'].apply(hw_result)
-                print('Mitigation for %d qubit circuit took %.3e seconds'%(len(circ.qubits),time()-mitigation_begin))
-            for idx in range(len(mapped_circuit_l)):
-                experiment_hw_counts = hw_result.get_counts(idx)
-                for state in experiment_hw_counts:
-                    if state not in hw_counts:
-                        hw_counts[state] = experiment_hw_counts[state]
-                    else:
-                        hw_counts[state] += experiment_hw_counts[state]
-        assert sum(list(hw_counts.values())) == evaluator_info['num_shots']
-        
-        hw_prob = [0 for x in range(np.power(2,len(circ.qubits)))]
-        for state in hw_counts:
-            reversed_state = reverseBits(int(state,2),len(circ.qubits))
-            hw_prob[reversed_state] = hw_counts[state]/evaluator_info['num_shots']
-        return hw_prob
+            # job = evaluator_info['device'].run(qobj)
+            job = Aer.get_backend('qasm_simulator').run(qobj)
+            jobs.append({'job':job,'circ':circ,'mapped_circuit_l':mapped_circuit_l,'evaluator_info':evaluator_info})
+        return jobs
     else:
         raise Exception('Illegal backend :',backend)
+
+def accumulate_jobs(jobs):
+    hw_counts = {}
+    for item in jobs:
+        job = item['job']
+        circ = item['circ']
+        mapped_circuit_l = item['mapped_circuit_l']
+        evaluator_info = item['evaluator_info']
+        hw_result = job.result()
+        if 'meas_filter' in evaluator_info:
+            print('Mitigation for %d qubit circuit'%(len(circ.qubits)))
+            mitigation_begin = time()
+            hw_result = evaluator_info['meas_filter'].apply(hw_result)
+            print('Mitigation for %d qubit circuit took %.3e seconds'%(len(circ.qubits),time()-mitigation_begin))
+        for idx in range(len(mapped_circuit_l)):
+            experiment_hw_counts = hw_result.get_counts(idx)
+            for state in experiment_hw_counts:
+                if state not in hw_counts:
+                    hw_counts[state] = experiment_hw_counts[state]
+                else:
+                    hw_counts[state] += experiment_hw_counts[state]
+    print('Actual shots : %d, expexted shots : %d'%(sum(list(hw_counts.values())),evaluator_info['num_shots']))
+    assert sum(list(hw_counts.values())) == evaluator_info['num_shots']
+    
+    hw_prob = [0 for x in range(np.power(2,len(circ.qubits)))]
+    for state in hw_counts:
+        reversed_state = reverseBits(int(state,2),len(circ.qubits))
+        hw_prob[reversed_state] = hw_counts[state]/evaluator_info['num_shots']
+    return hw_prob
 
 def get_bprop():
     public_provider = IBMQ.get_provider('ibm-q')
