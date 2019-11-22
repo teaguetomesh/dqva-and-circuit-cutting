@@ -61,8 +61,8 @@ def submit_hardware_jobs(cluster_instances, evaluator_info):
         mapped_circuits[init_meas] = mapped_circuit
 
     qobj = assemble(list(mapped_circuits.values()), backend=evaluator_info['device'], shots=batch_shots)
-    # job = evaluator_info['device'].run(qobj)
-    job = execute(list(mapped_circuits.values()), backend=Aer.get_backend('qasm_simulator'), shots=batch_shots)
+    job = evaluator_info['device'].run(qobj)
+    # job = execute(list(mapped_circuits.values()), backend=Aer.get_backend('qasm_simulator'), shots=batch_shots)
     job_dict = {'job':job,'mapped_circuits':mapped_circuits,'evaluator_info':evaluator_info}
     return job_dict
 

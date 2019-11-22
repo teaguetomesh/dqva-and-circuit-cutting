@@ -2,7 +2,7 @@ from qiskit.converters import circuit_to_dag, dag_to_circuit
 from qiskit.extensions.standard import HGate, SGate, SdgGate, XGate
 from qiskit.circuit.classicalregister import ClassicalRegister
 from qiskit import QuantumCircuit
-from qiskit import Aer, IBMQ, execute
+from qiskit import Aer, execute
 from qiskit.compiler import transpile
 from qiskit.providers.aer import noise
 import pickle
