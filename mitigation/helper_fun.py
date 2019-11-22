@@ -222,7 +222,7 @@ def readout_mitigation(device,initial_layout):
             qubit_list.append(q)
     meas_calibs, state_labels = complete_meas_cal(qubit_list=qubit_list, qr=qr, circlabel='mcal')
     num_shots = device.configuration().max_shots
-    # print('Calculating measurement filter, %d-qubit calibration circuits * %d * %.3e shots.'%(len(meas_calibs[0].qubits),len(meas_calibs),num_shots))
+    print('Calculating measurement filter, %d-qubit calibration circuits * %d * %.3e shots.'%(len(meas_calibs[0].qubits),len(meas_calibs),num_shots))
     assert len(meas_calibs)<=device.configuration().max_experiments/3*2
 
     # Execute the calibration circuits

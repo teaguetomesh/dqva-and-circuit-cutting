@@ -9,7 +9,6 @@ from helper_fun import evaluate_circ, get_evaluator_info, get_circ_saturated_sho
 import argparse
 from qiskit import IBMQ
 import copy
-import random
 import math
 from qiskit.ignis.mitigation.measurement import CompleteMeasFitter
 
@@ -88,9 +87,13 @@ def evaluate_full_circ(circ, total_shots, device_name, fields):
         hw_evaluator_info = get_evaluator_info(circ=circ,device_name=device_name,
         fields=['device','basis_gates','coupling_map','properties','initial_layout'])
         hw_evaluator_info['num_shots'] = total_shots
+        submission_begin = time()
         hw_jobs = evaluate_circ(circ=circ,backend='hardware',evaluator_info=hw_evaluator_info)
+        print('job object turnaround time =',time()-submission_begin)
         if np.power(2,len(circ.qubits))<hw_evaluator_info['device'].configuration().max_experiments/3*2:
+            submission_begin = time()
             meas_filter_job, state_labels, qubit_list = readout_mitigation(device=hw_evaluator_info['device'],initial_layout=hw_evaluator_info['initial_layout'])
+            print('job object turnaround time =',time()-submission_begin)
             fc_evaluations['meas_filter'] = (meas_filter_job, state_labels, qubit_list)
     else:
         hw_jobs = uniform_prob
