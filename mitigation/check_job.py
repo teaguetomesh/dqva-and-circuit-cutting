@@ -34,7 +34,7 @@ if __name__ == '__main__':
             num_qubits = len(evaluator_info['properties'].qubits)
             if num_qubits==20:
                 print('%s: %d-qubit, max %d jobs * %d shots'%(x,num_qubits,x.configuration().max_experiments,x.configuration().max_shots))
-                limit = 100 if str(x)=='ibmq_boeblingen' else 50
+                limit = 20 if str(x)=='ibmq_boeblingen' else 20
                 for job in x.jobs(limit=limit):
                     if args.cancel_jobs and job.status() not in terminal_status:
                         print(job.creation_date(),job.status(),job.queue_position(),job.job_id())
