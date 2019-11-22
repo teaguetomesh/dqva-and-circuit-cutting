@@ -149,8 +149,6 @@ if __name__ == '__main__':
                 continue
             
             case = (cluster_max_qubit,full_circuit_size)
-            if case not in [(4,8)]:
-                continue
             if case in evaluator_input:
                 continue
             
