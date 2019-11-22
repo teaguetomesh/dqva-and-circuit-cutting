@@ -300,7 +300,7 @@ if __name__ == '__main__':
 
     input_file = get_filename(device_name=args.device_name,circuit_type=args.circuit_type,shots_mode=args.shots_mode,evaluation_method=args.evaluation_method)
     filename = input_file.replace('uniter_input','plotter_input')
-    print('Reconstructing %s'%input_file)
+    print('-'*50,'Reconstructing %s'%input_file,'-'*50)
 
     uniter_output = {}
     evaluator_output = pickle.load(open(input_file, 'rb' ) )

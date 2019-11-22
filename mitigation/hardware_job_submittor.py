@@ -50,7 +50,6 @@ def split_cluster_instances(circs,shots,max_experiments,max_shots):
         raise Exception('This condition should not happen')
 
 def submit_hardware_jobs(cluster_instances, evaluator_info):
-    print('Submitted %d circuits to hardware, %d shots'%(len(cluster_instances),evaluator_info['num_shots']))
     mapped_circuits = {}
     for init_meas in cluster_instances:
         circ = cluster_instances[init_meas]
@@ -61,45 +60,46 @@ def submit_hardware_jobs(cluster_instances, evaluator_info):
         initial_layout=evaluator_info['initial_layout'])
         mapped_circuits[init_meas] = mapped_circuit
 
-    hw_counts = {}
-    for init_meas in mapped_circuits:
-        hw_counts[init_meas] = {}
-
     qobj = assemble(list(mapped_circuits.values()), backend=evaluator_info['device'], shots=batch_shots)
     # job = evaluator_info['device'].run(qobj)
     job = Aer.get_backend('qasm_simulator').run(qobj)
     job_dict = {'job':job,'mapped_circuits':mapped_circuits,'evaluator_info':evaluator_info}
     return job_dict
 
-    # hw_results = job.result()
+def accumulate_cluster_jobs(cluster_job_dict):
+    hw_counts = {}
+    for job_dict in cluster_job_dict:
+        mapped_circuits = job_dict['mapped_circuits']
+        job = job_dict['job']
+        print(job.job_id())
+        evaluator_info = job_dict['evaluator_info']
+        hw_results = job.result()
 
-    # if 'meas_filter' in evaluator_info:
-    #     print('Mitigation for %d * %d-qubit circuit'%(len(cluster_instances),len(circ.qubits)))
-    #     mitigation_begin = time()
-    #     mitigated_results = evaluator_info['meas_filter'].apply(hw_results)
-    #     mitigation_time = time() - mitigation_begin
-    #     print('Mitigation for %d * %d-qubit circuit took %.3e seconds'%(len(cluster_instances),len(circ.qubits),mitigation_time))
-    #     for init_meas in mapped_circuits:
-    #         hw_count = mitigated_results.get_counts(mapped_circuits[init_meas])
-    #         hw_counts[init_meas] = update_counts(cumulated=hw_counts[init_meas], batch=hw_count)
-    # else:
-    #     for init_meas in mapped_circuits:
-    #         hw_count = hw_results.get_counts(mapped_circuits[init_meas])
-    #         # print('batch {} counts:'.format(init_meas),hw_count)
-    #         # print('cumulative {} counts:'.format(init_meas),hw_counts[init_meas])
-    #         hw_counts[init_meas] = update_counts(cumulated=hw_counts[init_meas], batch=hw_count)
-    # remaining_shots -= batch_shots
+        if 'meas_filter' in evaluator_info:
+            print('Mitigation for %d * %d-qubit circuit'%(len(cluster_instances),len(circ.qubits)))
+            mitigation_begin = time()
+            hw_results = evaluator_info['meas_filter'].apply(hw_results)
+            mitigation_time = time() - mitigation_begin
+            print('Mitigation for %d * %d-qubit circuit took %.3e seconds'%(len(cluster_instances),len(circ.qubits),mitigation_time))
+        for init_meas in mapped_circuits:
+            hw_count = hw_results.get_counts(mapped_circuits[init_meas])
+            try:
+                hw_counts[init_meas] = update_counts(cumulated=hw_counts[init_meas], batch=hw_count)
+            except:
+                hw_counts[init_meas] = update_counts(cumulated={}, batch=hw_count)
+    # [print(x,hw_counts[x],sum(hw_counts[x].values())) for x in hw_counts]
     
-    # hw_probs = {}
-    # for init_meas in hw_counts:
-    #     circ = cluster_instances[init_meas]
-    #     hw_count = hw_counts[init_meas]
-    #     hw_prob = [0 for x in range(np.power(2,len(circ.qubits)))]
-    #     for state in hw_count:
-    #         reversed_state = reverseBits(int(state,2),len(circ.qubits))
-    #         hw_prob[reversed_state] = hw_count[state]/evaluator_info['num_shots']
-    #     hw_probs[init_meas] = hw_prob
-    # return hw_probs
+    hw_probs = {}
+    for init_meas in hw_counts:
+        hw_count = hw_counts[init_meas]
+        num_qubits = len(list(hw_count.keys())[0])
+        num_shots = sum(hw_count.values())
+        hw_prob = [0 for x in range(np.power(2,num_qubits))]
+        for state in hw_count:
+            reversed_state = reverseBits(int(state,2),num_qubits)
+            hw_prob[reversed_state] = hw_count[state]/num_shots
+        hw_probs[init_meas] = hw_prob
+    return hw_probs
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='MPI evaluator.')
@@ -128,8 +128,10 @@ if __name__ == '__main__':
     print('Run cases:',cases_to_run.keys())
     print('*'*50)
     
+    all_submitted_jobs = {}
     for case in cases_to_run:
         print('submitting case ',case)
+        all_submitted_jobs[case] = {}
         fc_shots = cases_to_run[case]['fc_shots']
         clusters = cases_to_run[case]['clusters']
         complete_path_map = cases_to_run[case]['complete_path_map']
@@ -154,8 +156,26 @@ if __name__ == '__main__':
             device_max_experiments = int(evaluator_info['device'].configuration().max_experiments/3*2)
 
             schedule = split_cluster_instances(circs=cluster_instances,shots=evaluator_info['num_shots'],max_experiments=device_max_experiments,max_shots=device_max_shots)
+
+            all_submitted_jobs[case][cluster_idx] = []
             for s in schedule:
                 cluster_instances_batch, batch_shots = s
-                evaluator_info['num_shots'] = batch_shots
+                evaluator_info['num_shots'] = batch_shots*5
                 job_dict = submit_hardware_jobs(cluster_instances=cluster_instances_batch, evaluator_info=evaluator_info)
+                print('Submitted %d circuits to hardware, %d shots. job_id ='%(len(cluster_instances_batch),evaluator_info['num_shots']),job_dict['job'].job_id())
+                all_submitted_jobs[case][cluster_idx].append(job_dict)
         print('*'*50)
+    print('-'*100)
+            
+    for case in all_submitted_jobs:
+        for cluster_idx in all_submitted_jobs[case]:
+            cluster_job_dict = all_submitted_jobs[case][cluster_idx]
+            print('Retrieving case {} cluster {:d} has {:d} jobs'.format(case,cluster_idx,len(cluster_job_dict)))
+            hw_probs = accumulate_cluster_jobs(cluster_job_dict=cluster_job_dict)
+            cases_to_run[case]['all_cluster_prob'][cluster_idx] = hw_probs
+        case_dict = cases_to_run[case]
+        job_submittor_output.update({case:case_dict})
+        pickle.dump(job_submittor_output, open('%s'%filename,'wb'))
+        print('Job submittor output has %d cases'%len(job_submittor_output))
+        print('*'*50)
+    print('-'*100)
