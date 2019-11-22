@@ -15,7 +15,6 @@ from mpi4py import MPI
 import argparse
 from helper_fun import evaluate_circ, get_evaluator_info, get_circ_saturated_shots, distribute_cluster_shots
 import datetime as dt
-import os
 
 def find_cluster_O_rho_qubits(complete_path_map,cluster_idx):
     O_qubits = []
@@ -182,8 +181,6 @@ if __name__ == '__main__':
                     for cluster_idx in evaluator_output[case]['all_cluster_prob']:
                         evaluator_output[case]['all_cluster_prob'][cluster_idx].update(rank_results[case][cluster_idx])
         dirname = './benchmark_data/{}'.format(args.circuit_type)
-        if not os.path.exists(dirname):
-            os.mkdir(dirname)
         filename = get_filename(device_name=args.device_name,circuit_type=args.circuit_type,shots_mode=args.shots_mode,evaluation_method=args.evaluation_method)
         pickle.dump(evaluator_output, open('%s'%filename,'wb'))
         print('-'*100)

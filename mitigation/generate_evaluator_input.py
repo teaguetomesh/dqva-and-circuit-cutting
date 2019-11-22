@@ -5,13 +5,13 @@ import numpy as np
 from qcg.generators import gen_supremacy, gen_hwea, gen_BV, gen_qft, gen_sycamore
 import MIQCP_searcher as searcher
 import cutter
-from helper_fun import evaluate_circ, get_evaluator_info, get_circ_saturated_shots, accumulate_jobs
+from helper_fun import evaluate_circ, get_evaluator_info, get_circ_saturated_shots, readout_mitigation, reverseBits
 import argparse
 from qiskit import IBMQ
 import copy
 import random
 import math
-from mpi4py import MPI
+from qiskit.ignis.mitigation.measurement import CompleteMeasFitter
 
 def gen_secret(num_qubit):
     num_digit = num_qubit-1
@@ -20,9 +20,44 @@ def gen_secret(num_qubit):
     num_with_zeros = str(num).zfill(num_digit)
     return num_with_zeros
 
+def accumulate_jobs(jobs,meas_filter):
+    hw_counts = {}
+    if meas_filter != None:
+        meas_filter_job, state_labels, qubit_list = meas_filter
+        print('Meas filter job id {}'.format(meas_filter_job.job_id()))
+        cal_results = meas_filter_job.result()
+        meas_fitter = CompleteMeasFitter(cal_results, state_labels, qubit_list=qubit_list, circlabel='mcal')
+        meas_filter = meas_fitter.filter
+    for item in jobs:
+        job = item['job']
+        circ = item['circ']
+        mapped_circuit_l = item['mapped_circuit_l']
+        evaluator_info = item['evaluator_info']
+        print('job_id : {}'.format(job.job_id()))
+        hw_result = job.result()
+        if meas_filter != None:
+            print('Mitigation for %d qubit circuit'%(len(circ.qubits)))
+            mitigation_begin = time()
+            # hw_result = meas_filter.apply(hw_result)
+            print('Mitigation for %d qubit circuit took %.3e seconds'%(len(circ.qubits),time()-mitigation_begin))
+        for idx in range(len(mapped_circuit_l)):
+            experiment_hw_counts = hw_result.get_counts(idx)
+            for state in experiment_hw_counts:
+                if state not in hw_counts:
+                    hw_counts[state] = experiment_hw_counts[state]
+                else:
+                    hw_counts[state] += experiment_hw_counts[state]
+    # Note that after mitigation, total number of shots may not be an integer anymore. Checking its sum does not make sense
+    hw_prob = [0 for x in range(np.power(2,len(circ.qubits)))]
+    for state in hw_counts:
+        reversed_state = reverseBits(int(state,2),len(circ.qubits))
+        hw_prob[reversed_state] = hw_counts[state]/evaluator_info['num_shots']
+    return hw_prob
+
 def evaluate_full_circ(circ, total_shots, device_name, fields):
     uniform_p = 1.0/np.power(2,len(circ.qubits))
     uniform_prob = [uniform_p for i in range(np.power(2,len(circ.qubits)))]
+    fc_evaluations = {}
 
     if 'sv_noiseless' in fields:
         print('Evaluating fc state vector')
@@ -49,36 +84,23 @@ def evaluate_full_circ(circ, total_shots, device_name, fields):
         qasm_noisy_fc = uniform_prob
 
     if 'hw' in fields:
-        print('Evaluating fc hardware, %d shots'%total_shots)
+        print('Evaluating fc hardware, %d shots, submission history:'%total_shots)
         hw_evaluator_info = get_evaluator_info(circ=circ,device_name=device_name,
         fields=['device','basis_gates','coupling_map','properties','initial_layout'])
         hw_evaluator_info['num_shots'] = total_shots
-        # if np.power(2,len(circ.qubits))<hw_evaluator_info['device'].configuration().max_experiments/3*2:
-        #     _evaluator_info = get_evaluator_info(circ=circ,device_name=device_name,fields=['meas_filter'])
-        #     hw_evaluator_info.update(_evaluator_info)
         hw_jobs = evaluate_circ(circ=circ,backend='hardware',evaluator_info=hw_evaluator_info)
+        if np.power(2,len(circ.qubits))<hw_evaluator_info['device'].configuration().max_experiments/3*2:
+            meas_filter_job, state_labels, qubit_list = readout_mitigation(device=hw_evaluator_info['device'],initial_layout=hw_evaluator_info['initial_layout'])
+            fc_evaluations['meas_filter'] = (meas_filter_job, state_labels, qubit_list)
     else:
         hw_jobs = uniform_prob
 
-    fc_evaluations = {'sv_noiseless':sv_noiseless_fc,
+    fc_evaluations.update({'sv_noiseless':sv_noiseless_fc,
     'qasm':qasm_noiseless_fc,
     'qasm+noise':qasm_noisy_fc,
-    'hw':hw_jobs}
+    'hw':hw_jobs})
 
     return fc_evaluations
-
-def distribute_rank_cases(evaluator_input,rank,size):
-    num_workers = size - 1
-    count = int(len(evaluator_input)/num_workers)
-    remainder = len(evaluator_input) % num_workers
-    if rank<remainder:
-        rank_cases_start = rank * (count + 1)
-        rank_cases_stop = rank_cases_start + count + 1
-    else:
-        rank_cases_start = rank * count + remainder
-        rank_cases_stop = rank_cases_start + (count - 1) + 1
-    rank_cases = list(evaluator_input.keys())[rank_cases_start:rank_cases_stop]
-    return rank_cases
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='generate evaluator inputs')
@@ -94,6 +116,9 @@ if __name__ == '__main__':
     print('-'*50,'Generator %s %s'%(args.device_name,args.circuit_type),'-'*50)
     
     dirname = './benchmark_data'
+    if not os.path.exists(dirname):
+        os.mkdir(dirname)
+    dirname = './benchmark_data/%s'%args.circuit_type
     if not os.path.exists(dirname):
         os.mkdir(dirname)
 
@@ -121,7 +146,8 @@ if __name__ == '__main__':
                 continue
             
             case = (cluster_max_qubit,full_circuit_size)
-            if case not in [(4,6)]:
+            print(case)
+            if case not in [(4,8),(6,12)]:
                 continue
             if case in evaluator_input:
                 continue
@@ -156,7 +182,7 @@ if __name__ == '__main__':
             else:
                 m.print_stat()
                 clusters, complete_path_map, K, d = cutter.cut_circuit(full_circ, positions)
-                fc_shots = get_circ_saturated_shots(circs=[full_circ],accuracy=1e-1)[0]
+                fc_shots = get_circ_saturated_shots(circs=[full_circ],accuracy=1e-2)[0]
                 num_jobs = math.ceil(fc_shots/device_max_shots/device_max_experiments)
                 if num_jobs>10:
                     print('Case {} needs {} jobs'.format(case,num_jobs))
@@ -180,7 +206,12 @@ if __name__ == '__main__':
         fc_evaluations = evaluate_full_circ(circ=full_circ,total_shots=fc_shots,device_name=args.device_name,fields=fields_to_run)
         cases_to_run[case]['fc_evaluations'] = fc_evaluations
         hw_jobs = fc_evaluations['hw']
-        print('Submitting case {} has job id {}'.format(case,[x['job'].job_id() for x in hw_jobs]))
+        print('Submitting case {} has job ids {}'.format(case,[x['job'].job_id() for x in hw_jobs]))
+        try:
+            meas_filter_job, _, _ = fc_evaluations['meas_filter']
+            print('Meas_filter job id {}'.format(meas_filter_job.job_id()))
+        except:
+            meas_filter_job = None
         print('*'*50)
     print('Submitted %d cases to hw'%(len(cases_to_run)))
     print('-'*100)
@@ -190,11 +221,19 @@ if __name__ == '__main__':
             evaluator_input.update({case:case_dict})
         else:
             hw_jobs = cases_to_run[case]['fc_evaluations']['hw']
-            print('Retrieving case {} has job id {}'.format(case,[x['job'].job_id() for x in hw_jobs]))
+            print('Retrieving case {}'.format(case))
+            try:
+                meas_filter = cases_to_run[case]['fc_evaluations']['meas_filter']
+                meas_filter_job, _, _ = meas_filter
+            except:
+                meas_filter = None
             execute_begin = time()
-            hw_prob = accumulate_jobs(jobs=hw_jobs)
-            print('Execute on hardware, %.3e seconds'%(time()-execute_begin))
-            cases_to_run[case]['fc_evaluations']['hw'] = hw_prob
+            hw_prob = accumulate_jobs(jobs=hw_jobs,meas_filter=meas_filter)
+            print('Execute on hardware took %.3e seconds'%(time()-execute_begin))
+            
+            cases_to_run[case]['fc_evaluations'] = {'sv_noiseless':cases_to_run[case]['fc_evaluations']['sv_noiseless'],'qasm':cases_to_run[case]['fc_evaluations']['qasm'],
+            'qasm+noise':cases_to_run[case]['fc_evaluations']['qasm+noise'],'hw':hw_prob}
+
             case_dict = copy.deepcopy(cases_to_run[case])
             evaluator_input.update({case:case_dict})
         print('Dump evaluator_input with %d cases'%(len(evaluator_input)))
