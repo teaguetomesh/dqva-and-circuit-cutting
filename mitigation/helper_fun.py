@@ -32,7 +32,8 @@ def cross_entropy(target,obs):
     obs = [abs(x) if x!=0 else epsilon for x in obs]
     sum_of_prob = sum(obs)
     obs = [x/sum_of_prob for x in obs]
-    assert abs(sum(obs)-1) <= 1e-10
+    if abs(sum(obs)-1) > 1e-10:
+        print('sum of obs =',sum(obs))
     h = 0
     for p,q in zip(target,obs):
         if p==0 or q<=0:
@@ -47,7 +48,8 @@ def fidelity(target,obs):
     obs = [abs(x) if x!=0 else epsilon for x in obs]
     sum_of_prob = sum(obs)
     obs = [x/sum_of_prob for x in obs]
-    assert abs(sum(obs)-1) <= 1e-10
+    if abs(sum(obs)-1) > 1e-10:
+        print('sum of obs =',sum(obs))
     fidelity = 0
     for t,o in zip(target,obs):
         if t!= 0:
@@ -73,6 +75,9 @@ def get_circ_saturated_shots(circs,accuracy):
     for circ_idx, circ in enumerate(circs):
         ground_truth = evaluate_circ(circ=circ,backend='statevector_simulator',evaluator_info=None)
         min_ce = cross_entropy(target=ground_truth,obs=ground_truth)
+        if abs(min_ce) <1e-10:
+            saturated_shots.append(max(1024,int(np.power(2,len(circ.qubits)))))
+            continue
         qasm_prob = [0 for i in ground_truth]
         shots_increment = 1024
         evaluator_info = {}
@@ -83,10 +88,7 @@ def get_circ_saturated_shots(circs,accuracy):
             qasm_prob_batch = evaluate_circ(circ=circ,backend='noiseless_qasm_simulator',evaluator_info=evaluator_info)
             qasm_prob = [(x*(counter-1)+y)/counter for x,y in zip(qasm_prob,qasm_prob_batch)]
             ce = cross_entropy(target=ground_truth,obs=qasm_prob)
-            if min_ce != 0:
-                diff = abs((ce-min_ce)/min_ce)
-            else:
-                diff = abs(ce-min_ce)
+            diff = abs((ce-min_ce)/min_ce)
             if counter%50==49:
                 print('current diff:',diff,'current shots:',int(counter*shots_increment))
             if diff < accuracy:
@@ -174,7 +176,6 @@ def evaluate_circ(circ, backend, evaluator_info):
         coupling_map=evaluator_info['coupling_map'],
         basis_gates=evaluator_info['basis_gates'],
         shots=evaluator_info['num_shots']).result()
-        assert 'meas_filter' not in evaluator_info
         noisy_counts = noisy_qasm_result.get_counts(qc)
         noisy_prob = [0 for x in range(np.power(2,len(circ.qubits)))]
         for state in noisy_counts:
