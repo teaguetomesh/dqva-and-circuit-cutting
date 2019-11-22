@@ -182,7 +182,7 @@ if __name__ == '__main__':
             else:
                 m.print_stat()
                 clusters, complete_path_map, K, d = cutter.cut_circuit(full_circ, positions)
-                fc_shots = get_circ_saturated_shots(circs=[full_circ],accuracy=1e-2)[0]
+                fc_shots = get_circ_saturated_shots(circs=[full_circ],accuracy=1e-1)[0]
                 num_jobs = math.ceil(fc_shots/device_max_shots/device_max_experiments)
                 if num_jobs>10:
                     print('Case {} needs {} jobs'.format(case,num_jobs))

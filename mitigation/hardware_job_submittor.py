@@ -152,7 +152,7 @@ if __name__ == '__main__':
             fields=['device','basis_gates','coupling_map','properties','initial_layout'])
 
             if args.shots_mode == 'saturated':
-                evaluator_info['num_shots'] = get_circ_saturated_shots(circs=[cluster_circ],accuracy=1e-2)[0]
+                evaluator_info['num_shots'] = get_circ_saturated_shots(circs=[cluster_circ],accuracy=1e-1)[0]
             elif args.shots_mode == 'sametotal':
                 evaluator_info['num_shots'] = same_total_cutting_shots[cluster_idx]
             print('Cluster %d has %d instances, %d shots each, submission history:'%(cluster_idx,len(cluster_instances),evaluator_info['num_shots']))
