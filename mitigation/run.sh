@@ -9,17 +9,17 @@ python hardware_job_submittor.py --device-name $DEVICE_NAME --circuit-type $CIRC
 python uniter_prob.py --device-name $DEVICE_NAME --circuit-type $CIRCUIT_TYPE --shots-mode saturated --evaluation-method hardware 2>&1 | tee ./logs/$CIRCUIT_TYPE\_saturated_$DEVICE_NAME\_uniter_logs.txt
 } &
 P1=$!
-# wait $P1
+wait $P1
 
-{
-mpiexec -n 2 python evaluator_prob.py --device-name $DEVICE_NAME --circuit-type $CIRCUIT_TYPE --shots-mode sametotal --evaluation-method hardware
-python hardware_job_submittor.py --device-name $DEVICE_NAME --circuit-type $CIRCUIT_TYPE --shots-mode sametotal 2>&1 | tee ./logs/$CIRCUIT_TYPE\_sametotal_$DEVICE_NAME\_hw_job_submittor_logs.txt
-python uniter_prob.py --device-name $DEVICE_NAME --circuit-type $CIRCUIT_TYPE --shots-mode sametotal --evaluation-method hardware 2>&1 | tee ./logs/$CIRCUIT_TYPE\_sametotal_$DEVICE_NAME\_uniter_logs.txt
-} &
-P2=$!
+# {
+# mpiexec -n 2 python evaluator_prob.py --device-name $DEVICE_NAME --circuit-type $CIRCUIT_TYPE --shots-mode sametotal --evaluation-method hardware
+# python hardware_job_submittor.py --device-name $DEVICE_NAME --circuit-type $CIRCUIT_TYPE --shots-mode sametotal 2>&1 | tee ./logs/$CIRCUIT_TYPE\_sametotal_$DEVICE_NAME\_hw_job_submittor_logs.txt
+# python uniter_prob.py --device-name $DEVICE_NAME --circuit-type $CIRCUIT_TYPE --shots-mode sametotal --evaluation-method hardware 2>&1 | tee ./logs/$CIRCUIT_TYPE\_sametotal_$DEVICE_NAME\_uniter_logs.txt
+# } &
+# P2=$!
 
-wait $P1 $P2
-echo "$CIRCUIT_TYPE on $DEVICE_NAME DONE"
+# wait $P1 $P2
+# echo "$CIRCUIT_TYPE on $DEVICE_NAME DONE"
 
 # echo "Running saturated noisy qasm evaluator"
 # mpiexec -n 5 python evaluator_prob.py --device-name $DEVICE_NAME --circuit-type $CIRCUIT_TYPE --shots-mode saturated --evaluation-method noisy_qasm_simulator

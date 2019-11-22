@@ -38,7 +38,7 @@ def accumulate_jobs(jobs,meas_filter):
         if meas_filter != None:
             print('Mitigation for %d qubit circuit'%(len(circ.qubits)))
             mitigation_begin = time()
-            # hw_result = meas_filter.apply(hw_result)
+            hw_result = meas_filter.apply(hw_result)
             print('Mitigation for %d qubit circuit took %.3e seconds'%(len(circ.qubits),time()-mitigation_begin))
         for idx in range(len(mapped_circuit_l)):
             experiment_hw_counts = hw_result.get_counts(idx)
@@ -146,8 +146,7 @@ if __name__ == '__main__':
                 continue
             
             case = (cluster_max_qubit,full_circuit_size)
-            print(case)
-            if case not in [(4,8),(6,12)]:
+            if case not in [(4,8)]:
                 continue
             if case in evaluator_input:
                 continue

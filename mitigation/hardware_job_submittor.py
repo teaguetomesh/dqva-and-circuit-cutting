@@ -5,7 +5,7 @@ from qiskit.compiler import transpile, assemble
 from helper_fun import get_evaluator_info, apply_measurement, reverseBits, get_circ_saturated_shots, distribute_cluster_shots, readout_mitigation
 from time import time
 import copy
-from qiskit import Aer
+from qiskit import Aer, execute
 from qiskit.ignis.mitigation.measurement import CompleteMeasFitter
 
 def update_counts(cumulated, batch):
@@ -62,7 +62,7 @@ def submit_hardware_jobs(cluster_instances, evaluator_info):
 
     qobj = assemble(list(mapped_circuits.values()), backend=evaluator_info['device'], shots=batch_shots)
     # job = evaluator_info['device'].run(qobj)
-    job = Aer.get_backend('qasm_simulator').run(qobj)
+    job = execute(list(mapped_circuits.values()), backend=Aer.get_backend('qasm_simulator'), shots=batch_shots)
     job_dict = {'job':job,'mapped_circuits':mapped_circuits,'evaluator_info':evaluator_info}
     return job_dict
 
