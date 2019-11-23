@@ -43,7 +43,7 @@ if __name__ == '__main__':
                 if args.cancel_jobs:
                     [print('Warning!!! Cancelling jobs! 5 seconds count down') for i in range(5)]
                     time.sleep(5)
-                    for job in x.jobs(limit=50,status='QUEUED'):
+                    for job in x.jobs(limit=100,status='QUEUED'):
                         print(job.creation_date(),job.status(),job.queue_position(),job.job_id())
                         job.cancel()
                         print('cancelled')
