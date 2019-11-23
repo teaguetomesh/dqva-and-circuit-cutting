@@ -75,7 +75,8 @@ def get_circ_saturated_shots(circs,accuracy):
     for circ_idx, circ in enumerate(circs):
         ground_truth = evaluate_circ(circ=circ,backend='statevector_simulator',evaluator_info=None)
         min_ce = cross_entropy(target=ground_truth,obs=ground_truth)
-        if abs(min_ce) < 0.5:
+        print('minimum ce =',min_ce)
+        if abs(min_ce) < 1:
             num_shots = max(1024,int(np.power(2,len(circ.qubits))))
             num_shots = min(8192,num_shots)
             saturated_shots.append(num_shots)
