@@ -8,9 +8,9 @@ from qiskit.visualization import plot_gate_map, plot_error_map
 import datetime
 from datetime import timedelta
 
-def format_time():
+def format_time(hours):
     t = datetime.datetime.now(datetime.timezone.utc)
-    delta = timedelta(days=0,seconds=0,microseconds=0,milliseconds=0,minutes=0,hours=5,weeks=0)
+    delta = timedelta(days=0,seconds=0,microseconds=0,milliseconds=0,minutes=0,hours=hours,weeks=0)
     t = t - delta
     s = t.strftime('%Y-%m-%dT%H:%M:%S.%f')
     tail = s[-7:]
@@ -25,7 +25,6 @@ if __name__ == '__main__':
 
     provider = load_IBMQ()
 
-    past_5_hrs = format_time()
     terminal_status = [JobStatus['DONE'],JobStatus['CANCELLED'],JobStatus['ERROR']]
 
     for x in provider.backends():
@@ -34,14 +33,17 @@ if __name__ == '__main__':
             num_qubits = len(evaluator_info['properties'].qubits)
             if num_qubits==20:
                 print('%s: %d-qubit, max %d jobs * %d shots'%(x,num_qubits,x.configuration().max_experiments,x.configuration().max_shots))
-                limit = 20 if str(x)=='ibmq_boeblingen' else 20
-                for job in x.jobs(limit=limit):
-                    if args.cancel_jobs and job.status() not in terminal_status:
+                print('Most recently QUEUED:')
+                for job in x.jobs(limit=5):
+                    if job.creation_date()>format_time(hours=24) and job.status()==JobStatus['QUEUED']:
                         print(job.creation_date(),job.status(),job.queue_position(),job.job_id())
-                        job.cancel()
-                        print('cancelled')
-                    if job.status() not in terminal_status:
-                        print(job.creation_date(),job.status(),job.queue_position(),job.job_id())
-                    elif job.creation_date()>past_5_hrs:
+                print('Most recently DONE:')
+                for job in x.jobs(limit=5,status=JobStatus['DONE']):
+                    if job.creation_date()>format_time(hours=24):
                         print(job.creation_date(),job.status(),job.error_message(),job.job_id())
+                # for job in x.jobs(limit=10):
+                #     if args.cancel_jobs and job.status() not in terminal_status:
+                #         print(job.creation_date(),job.status(),job.queue_position(),job.job_id())
+                #         job.cancel()
+                #         print('cancelled')
                 print('-'*100)
