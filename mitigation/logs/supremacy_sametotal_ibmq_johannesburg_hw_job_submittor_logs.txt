@@ -1,0 +1,462 @@
+-------------------------------------------------- Job Submittor sametotal supremacy ibmq_johannesburg --------------------------------------------------
+Run cases: dict_keys([(2, 3), (3, 4), (3, 5), (4, 5), (4, 6), (4, 7), (4, 8), (5, 6), (5, 7), (5, 8), (5, 9), (5, 10), (6, 7), (6, 8), (6, 9), (6, 10), (6, 12), (6, 14), (7, 8), (7, 9), (7, 10), (7, 12), (7, 14), (8, 9), (8, 10), (8, 12), (8, 14), (8, 16), (9, 10), (9, 12), (9, 14), (9, 16), (9, 18)])
+**************************************************
+submitting case  (2, 3)
+Cluster 0 has 3 instances, 342 shots each, submission history:
+Calculating measurement filter, 20-qubit calibration circuits * 4 * 8.192e+03 shots.
+Meas_filter job id 5dd86945fa67c10018ceb871
+Submitted 3 circuits to hardware, 342 shots. job_id = 5dd86947a903af00180aff60
+Cluster 1 has 6 instances, 171 shots each, submission history:
+Calculating measurement filter, 20-qubit calibration circuits * 4 * 8.192e+03 shots.
+Meas_filter job id 5dd869487218c40018b60cf0
+Submitted 6 circuits to hardware, 171 shots. job_id = 5dd8694af5613200186ad529
+**************************************************
+submitting case  (3, 4)
+Cluster 0 has 18 instances, 57 shots each, submission history:
+Calculating measurement filter, 20-qubit calibration circuits * 8 * 8.192e+03 shots.
+Meas_filter job id 5dd8694c8aa7e00018b8f76f
+Submitted 18 circuits to hardware, 57 shots. job_id = 5dd8694efa67c10018ceb874
+Cluster 1 has 18 instances, 57 shots each, submission history:
+Calculating measurement filter, 20-qubit calibration circuits * 8 * 8.192e+03 shots.
+Meas_filter job id 5dd86950a903af00180aff61
+Submitted 18 circuits to hardware, 57 shots. job_id = 5dd869532efcfc00184eb3e0
+**************************************************
+submitting case  (3, 5)
+Cluster 0 has 3 instances, 342 shots each, submission history:
+Calculating measurement filter, 20-qubit calibration circuits * 8 * 8.192e+03 shots.
+Meas_filter job id 5dd86955a903af00180aff63
+Submitted 3 circuits to hardware, 342 shots. job_id = 5dd8695697300300184d451b
+Cluster 1 has 6 instances, 171 shots each, submission history:
+Calculating measurement filter, 20-qubit calibration circuits * 8 * 8.192e+03 shots.
+Meas_filter job id 5dd86958fa67c10018ceb875
+Submitted 6 circuits to hardware, 171 shots. job_id = 5dd8695a97300300184d451c
+**************************************************
+submitting case  (4, 5)
+Cluster 0 has 3 instances, 342 shots each, submission history:
+Calculating measurement filter, 20-qubit calibration circuits * 4 * 8.192e+03 shots.
+Meas_filter job id 5dd8695b97300300184d451d
+Submitted 3 circuits to hardware, 342 shots. job_id = 5dd8695c2efcfc00184eb3e2
+Cluster 1 has 6 instances, 171 shots each, submission history:
+Calculating measurement filter, 20-qubit calibration circuits * 16 * 8.192e+03 shots.
+Meas_filter job id 5dd8695e7b80db00183160d3
+Submitted 6 circuits to hardware, 171 shots. job_id = 5dd8696097300300184d451e
+**************************************************
+submitting case  (4, 6)
+Cluster 0 has 9 instances, 114 shots each, submission history:
+Calculating measurement filter, 20-qubit calibration circuits * 16 * 8.192e+03 shots.
+Meas_filter job id 5dd86963f5613200186ad52f
+Submitted 9 circuits to hardware, 114 shots. job_id = 5dd86975d4872d00185a5b0f
+Cluster 1 has 36 instances, 29 shots each, submission history:
+Calculating measurement filter, 20-qubit calibration circuits * 16 * 8.192e+03 shots.
+Meas_filter job id 5dd869872efcfc00184eb3e7
+Submitted 36 circuits to hardware, 29 shots. job_id = 5dd86992fa67c10018ceb876
+**************************************************
+submitting case  (4, 7)
+Cluster 0 has 3 instances, 683 shots each, submission history:
+Calculating measurement filter, 20-qubit calibration circuits * 16 * 8.192e+03 shots.
+Meas_filter job id 5dd869957b80db00183160d4
+Submitted 3 circuits to hardware, 683 shots. job_id = 5dd86996fa67c10018ceb877
+Cluster 1 has 6 instances, 342 shots each, submission history:
+Calculating measurement filter, 20-qubit calibration circuits * 16 * 8.192e+03 shots.
+Meas_filter job id 5dd86999d4872d00185a5b12
+Submitted 6 circuits to hardware, 342 shots. job_id = 5dd8699aaf2f73001805dad6
+**************************************************
+submitting case  (4, 8)
+Cluster 0 has 54 instances, 57 shots each, submission history:
+Calculating measurement filter, 20-qubit calibration circuits * 16 * 8.192e+03 shots.
+Meas_filter job id 5dd8699c2efcfc00184eb3ed
+Submitted 54 circuits to hardware, 57 shots. job_id = 5dd869a8d4872d00185a5b15
+Cluster 1 has 18 instances, 171 shots each, submission history:
+Calculating measurement filter, 20-qubit calibration circuits * 16 * 8.192e+03 shots.
+Meas_filter job id 5dd869aaa903af00180aff6c
+Submitted 18 circuits to hardware, 171 shots. job_id = 5dd869b097300300184d4523
+Cluster 2 has 108 instances, 29 shots each, submission history:
+Calculating measurement filter, 20-qubit calibration circuits * 16 * 8.192e+03 shots.
+Meas_filter job id 5dd869b2d4872d00185a5b17
+Submitted 108 circuits to hardware, 29 shots. job_id = 5dd869be8aa7e00018b8f77d
+**************************************************
+submitting case  (5, 6)
+Cluster 0 has 18 instances, 57 shots each, submission history:
+Calculating measurement filter, 20-qubit calibration circuits * 32 * 8.192e+03 shots.
+Meas_filter job id 5dd869c17218c40018b60cf8
+Submitted 18 circuits to hardware, 57 shots. job_id = 5dd869c7f5613200186ad53b
+Cluster 1 has 18 instances, 57 shots each, submission history:
+Calculating measurement filter, 20-qubit calibration circuits * 8 * 8.192e+03 shots.
+Meas_filter job id 5dd869c9af2f73001805dade
+Submitted 18 circuits to hardware, 57 shots. job_id = 5dd869cc8aa7e00018b8f77f
+**************************************************
+submitting case  (5, 7)
+Cluster 0 has 6 instances, 342 shots each, submission history:
+Calculating measurement filter, 20-qubit calibration circuits * 32 * 8.192e+03 shots.
+Meas_filter job id 5dd869cef5613200186ad53c
+Submitted 6 circuits to hardware, 342 shots. job_id = 5dd869d0fa67c10018ceb882
+Cluster 1 has 3 instances, 683 shots each, submission history:
+Calculating measurement filter, 20-qubit calibration circuits * 8 * 8.192e+03 shots.
+Meas_filter job id 5dd869d2d4872d00185a5b1d
+Submitted 3 circuits to hardware, 683 shots. job_id = 5dd869d47b80db00183160da
+**************************************************
+submitting case  (5, 8)
+Cluster 0 has 54 instances, 38 shots each, submission history:
+Calculating measurement filter, 20-qubit calibration circuits * 16 * 8.192e+03 shots.
+Meas_filter job id 5dd869d6af2f73001805dae1
+Submitted 54 circuits to hardware, 38 shots. job_id = 5dd869e17218c40018b60cff
+Cluster 1 has 108 instances, 19 shots each, submission history:
+Calculating measurement filter, 20-qubit calibration circuits * 32 * 8.192e+03 shots.
+Meas_filter job id 5dd869e4af2f73001805dae3
+Submitted 108 circuits to hardware, 19 shots. job_id = 5dd86a04a903af00180aff74
+Cluster 2 has 18 instances, 114 shots each, submission history:
+Calculating measurement filter, 20-qubit calibration circuits * 8 * 8.192e+03 shots.
+Meas_filter job id 5dd86a06a903af00180aff75
+Submitted 18 circuits to hardware, 114 shots. job_id = 5dd86a09a903af00180aff76
+**************************************************
+submitting case  (5, 9)
+Cluster 0 has 108 instances, 38 shots each, submission history:
+Calculating measurement filter, 20-qubit calibration circuits * 32 * 8.192e+03 shots.
+Meas_filter job id 5dd86a0cf5613200186ad542
+Submitted 108 circuits to hardware, 38 shots. job_id = 5dd86a2c2efcfc00184eb3fd
+Cluster 1 has 108 instances, 38 shots each, submission history:
+Calculating measurement filter, 20-qubit calibration circuits * 16 * 8.192e+03 shots.
+Meas_filter job id 5dd86a2ed4872d00185a5b24
+Submitted 108 circuits to hardware, 38 shots. job_id = 5dd86a3afa67c10018ceb88b
+Cluster 2 has 162 instances, 26 shots each, submission history:
+Calculating measurement filter, 20-qubit calibration circuits * 32 * 8.192e+03 shots.
+Meas_filter job id 5dd86a3c7b80db00183160e0
+Submitted 162 circuits to hardware, 26 shots. job_id = 5dd86a682efcfc00184eb402
+**************************************************
+submitting case  (5, 10)
+Cluster 0 has 9 instances, 911 shots each, submission history:
+Calculating measurement filter, 20-qubit calibration circuits * 16 * 8.192e+03 shots.
+Meas_filter job id 5dd86a6a8aa7e00018b8f78a
+Submitted 9 circuits to hardware, 911 shots. job_id = 5dd86a6cd4872d00185a5b2a
+Cluster 1 has 324 instances, 26 shots each, submission history:
+Calculating measurement filter, 20-qubit calibration circuits * 32 * 8.192e+03 shots.
+Meas_filter job id 5dd86a6f8aa7e00018b8f78b
+Submitted 324 circuits to hardware, 26 shots. job_id = 5dd86aca97300300184d4534
+Cluster 2 has 36 instances, 228 shots each, submission history:
+Calculating measurement filter, 20-qubit calibration circuits * 32 * 8.192e+03 shots.
+Meas_filter job id 5dd86acd7b80db00183160e5
+Submitted 36 circuits to hardware, 228 shots. job_id = 5dd86ad92efcfc00184eb408
+**************************************************
+submitting case  (6, 7)
+Cluster 0 has 3 instances, 683 shots each, submission history:
+Calculating measurement filter, 20-qubit calibration circuits * 4 * 8.192e+03 shots.
+Meas_filter job id 5dd86adb7b80db00183160e6
+Submitted 3 circuits to hardware, 683 shots. job_id = 5dd86addd4872d00185a5b2e
+Cluster 1 has 6 instances, 342 shots each, submission history:
+Calculating measurement filter, 20-qubit calibration circuits * 64 * 8.192e+03 shots.
+Meas_filter job id 5dd86ae0af2f73001805daf2
+Submitted 6 circuits to hardware, 342 shots. job_id = 5dd86ae2d4872d00185a5b2f
+**************************************************
+submitting case  (6, 8)
+Cluster 0 has 18 instances, 171 shots each, submission history:
+Calculating measurement filter, 20-qubit calibration circuits * 64 * 8.192e+03 shots.
+Meas_filter job id 5dd86ae58aa7e00018b8f78d
+Submitted 18 circuits to hardware, 171 shots. job_id = 5dd86aed7b80db00183160e8
+Cluster 1 has 18 instances, 171 shots each, submission history:
+Calculating measurement filter, 20-qubit calibration circuits * 16 * 8.192e+03 shots.
+Meas_filter job id 5dd86aef97300300184d4535
+Submitted 18 circuits to hardware, 171 shots. job_id = 5dd86af2f5613200186ad54e
+**************************************************
+submitting case  (6, 9)
+Cluster 0 has 54 instances, 76 shots each, submission history:
+Calculating measurement filter, 20-qubit calibration circuits * 64 * 8.192e+03 shots.
+Meas_filter job id 5dd86af62efcfc00184eb40b
+Submitted 54 circuits to hardware, 76 shots. job_id = 5dd86b09f5613200186ad550
+Cluster 1 has 108 instances, 38 shots each, submission history:
+Calculating measurement filter, 20-qubit calibration circuits * 64 * 8.192e+03 shots.
+Meas_filter job id 5dd86b0c97300300184d4538
+Submitted 108 circuits to hardware, 38 shots. job_id = 5dd86b307218c40018b60d0f
+**************************************************
+submitting case  (6, 10)
+Cluster 0 has 18 instances, 456 shots each, submission history:
+Calculating measurement filter, 20-qubit calibration circuits * 64 * 8.192e+03 shots.
+Meas_filter job id 5dd86b34af2f73001805daf9
+Submitted 18 circuits to hardware, 456 shots. job_id = 5dd86b3b7218c40018b60d12
+Cluster 1 has 18 instances, 456 shots each, submission history:
+Calculating measurement filter, 20-qubit calibration circuits * 64 * 8.192e+03 shots.
+Meas_filter job id 5dd86b3ef5613200186ad553
+Submitted 18 circuits to hardware, 456 shots. job_id = 5dd86b457218c40018b60d13
+**************************************************
+submitting case  (6, 12)
+Cluster 0 has 324 instances, 76 shots each, submission history:
+Calculating measurement filter, 20-qubit calibration circuits * 64 * 8.192e+03 shots.
+Meas_filter job id 5dd86b49d4872d00185a5b35
+Submitted 324 circuits to hardware, 76 shots. job_id = 5dd86baf97300300184d4541
+Cluster 1 has 324 instances, 76 shots each, submission history:
+Calculating measurement filter, 20-qubit calibration circuits * 64 * 8.192e+03 shots.
+Meas_filter job id 5dd86bb27218c40018b60d1c
+Submitted 324 circuits to hardware, 76 shots. job_id = 5dd86c15fa67c10018ceb89c
+Cluster 2 has 324 instances, 76 shots each, submission history:
+Calculating measurement filter, 20-qubit calibration circuits * 64 * 8.192e+03 shots.
+Meas_filter job id 5dd86c1897300300184d4543
+Submitted 324 circuits to hardware, 76 shots. job_id = 5dd86c7dfa67c10018ceb8a1
+**************************************************
+submitting case  (6, 14)
+Cluster 0 has 18 instances, 5462 shots each, submission history:
+Calculating measurement filter, 20-qubit calibration circuits * 64 * 8.192e+03 shots.
+Meas_filter job id 5dd86c808aa7e00018b8f79e
+Submitted 18 circuits to hardware, 5462 shots. job_id = 5dd86c882efcfc00184eb419
+Cluster 1 has 324 instances, 304 shots each, submission history:
+Calculating measurement filter, 20-qubit calibration circuits * 64 * 8.192e+03 shots.
+Meas_filter job id 5dd86c8baf2f73001805db0e
+Submitted 324 circuits to hardware, 304 shots. job_id = 5dd86cecf5613200186ad55d
+Cluster 2 has 18 instances, 5462 shots each, submission history:
+Calculating measurement filter, 20-qubit calibration circuits * 64 * 8.192e+03 shots.
+Meas_filter job id 5dd86cefa903af00180aff8c
+Submitted 18 circuits to hardware, 5462 shots. job_id = 5dd86cf6fa67c10018ceb8a5
+**************************************************
+submitting case  (7, 8)
+Cluster 0 has 18 instances, 114 shots each, submission history:
+Calculating measurement filter, 20-qubit calibration circuits * 128 * 8.192e+03 shots.
+Meas_filter job id 5dd86cfcd4872d00185a5b42
+Submitted 18 circuits to hardware, 114 shots. job_id = 5dd86d03af2f73001805db12
+Cluster 1 has 18 instances, 114 shots each, submission history:
+Calculating measurement filter, 20-qubit calibration circuits * 8 * 8.192e+03 shots.
+Meas_filter job id 5dd86d057218c40018b60d27
+Submitted 18 circuits to hardware, 114 shots. job_id = 5dd86d08a903af00180aff8e
+**************************************************
+submitting case  (7, 9)
+Cluster 0 has 54 instances, 76 shots each, submission history:
+Calculating measurement filter, 20-qubit calibration circuits * 32 * 8.192e+03 shots.
+Meas_filter job id 5dd86d0bf5613200186ad560
+Submitted 54 circuits to hardware, 76 shots. job_id = 5dd86d19af2f73001805db15
+Cluster 1 has 108 instances, 38 shots each, submission history:
+Calculating measurement filter, 20-qubit calibration circuits * 128 * 8.192e+03 shots.
+Meas_filter job id 5dd86d1dd4872d00185a5b44
+Submitted 108 circuits to hardware, 38 shots. job_id = 5dd86d47af2f73001805db17
+**************************************************
+submitting case  (7, 10)
+Cluster 0 has 18 instances, 512 shots each, submission history:
+Calculating measurement filter, 20-qubit calibration circuits * 128 * 8.192e+03 shots.
+Meas_filter job id 5dd86d4b7218c40018b60d2c
+Submitted 18 circuits to hardware, 512 shots. job_id = 5dd86d53d4872d00185a5b47
+Cluster 1 has 18 instances, 512 shots each, submission history:
+Calculating measurement filter, 20-qubit calibration circuits * 32 * 8.192e+03 shots.
+Meas_filter job id 5dd86d56f5613200186ad566
+Submitted 18 circuits to hardware, 512 shots. job_id = 5dd86d5c97300300184d4552
+**************************************************
+submitting case  (7, 12)
+Cluster 0 has 648 instances, 38 shots each, submission history:
+Calculating measurement filter, 20-qubit calibration circuits * 128 * 8.192e+03 shots.
+Meas_filter job id 5dd86d612efcfc00184eb42d
+Submitted 600 circuits to hardware, 38 shots. job_id = 5dd86e447218c40018b60d34
+Submitted 48 circuits to hardware, 38 shots. job_id = 5dd86e587218c40018b60d37
+Cluster 1 has 36 instances, 683 shots each, submission history:
+Calculating measurement filter, 20-qubit calibration circuits * 8 * 8.192e+03 shots.
+Meas_filter job id 5dd86e5b7b80db0018316111
+Submitted 36 circuits to hardware, 683 shots. job_id = 5dd86e5ef5613200186ad571
+Cluster 2 has 81 instances, 304 shots each, submission history:
+Calculating measurement filter, 20-qubit calibration circuits * 128 * 8.192e+03 shots.
+Meas_filter job id 5dd86e63fa67c10018ceb8b2
+Submitted 81 circuits to hardware, 304 shots. job_id = 5dd86e7faf2f73001805db21
+**************************************************
+submitting case  (7, 14)
+Cluster 0 has 18 instances, 5689 shots each, submission history:
+Calculating measurement filter, 20-qubit calibration circuits * 128 * 8.192e+03 shots.
+Meas_filter job id 5dd86e83d4872d00185a5b4d
+Submitted 18 circuits to hardware, 5689 shots. job_id = 5dd86e8caf2f73001805db22
+Cluster 1 has 108 instances, 949 shots each, submission history:
+Calculating measurement filter, 20-qubit calibration circuits * 128 * 8.192e+03 shots.
+Meas_filter job id 5dd86e918aa7e00018b8f7af
+Submitted 108 circuits to hardware, 949 shots. job_id = 5dd86ebbd4872d00185a5b52
+Cluster 2 has 54 instances, 1897 shots each, submission history:
+Calculating measurement filter, 20-qubit calibration circuits * 16 * 8.192e+03 shots.
+Meas_filter job id 5dd86ebea903af00180aff9c
+Submitted 54 circuits to hardware, 1897 shots. job_id = 5dd86ec9d4872d00185a5b55
+**************************************************
+submitting case  (8, 9)
+Cluster 0 has 36 instances, 114 shots each, submission history:
+Calculating measurement filter, 20-qubit calibration circuits * 256 * 8.192e+03 shots.
+Meas_filter job id 5dd86ed1fa67c10018ceb8b8
+Submitted 36 circuits to hardware, 114 shots. job_id = 5dd86ee3d4872d00185a5b57
+Cluster 1 has 9 instances, 456 shots each, submission history:
+Calculating measurement filter, 20-qubit calibration circuits * 8 * 8.192e+03 shots.
+Meas_filter job id 5dd86ee697300300184d4561
+Submitted 9 circuits to hardware, 456 shots. job_id = 5dd86ee82efcfc00184eb43c
+**************************************************
+submitting case  (8, 10)
+Cluster 0 has 18 instances, 399 shots each, submission history:
+Calculating measurement filter, 20-qubit calibration circuits * 64 * 8.192e+03 shots.
+Meas_filter job id 5dd86eebaf2f73001805db25
+Submitted 18 circuits to hardware, 399 shots. job_id = 5dd86ef27218c40018b60d43
+Cluster 1 has 18 instances, 399 shots each, submission history:
+Calculating measurement filter, 20-qubit calibration circuits * 64 * 8.192e+03 shots.
+Meas_filter job id 5dd86ef6a903af00180affa0
+Submitted 18 circuits to hardware, 399 shots. job_id = 5dd86efd2efcfc00184eb43f
+**************************************************
+submitting case  (8, 12)
+Cluster 0 has 54 instances, 475 shots each, submission history:
+Calculating measurement filter, 20-qubit calibration circuits * 16 * 8.192e+03 shots.
+Meas_filter job id 5dd86f00d4872d00185a5b5a
+Submitted 54 circuits to hardware, 475 shots. job_id = 5dd86f0b7b80db0018316120
+Cluster 1 has 648 instances, 40 shots each, submission history:
+Calculating measurement filter, 20-qubit calibration circuits * 256 * 8.192e+03 shots.
+Meas_filter job id 5dd86f15a903af00180affa5
+Submitted 600 circuits to hardware, 40 shots. job_id = 5dd87028f5613200186ad581
+Submitted 48 circuits to hardware, 40 shots. job_id = 5dd8703f7218c40018b60d4d
+Cluster 2 has 54 instances, 475 shots each, submission history:
+Calculating measurement filter, 20-qubit calibration circuits * 32 * 8.192e+03 shots.
+Meas_filter job id 5dd87042f5613200186ad582
+Submitted 54 circuits to hardware, 475 shots. job_id = 5dd87050af2f73001805db2f
+**************************************************
+submitting case  (8, 14)
+Cluster 0 has 9 instances, 10696 shots each, submission history:
+Calculating measurement filter, 20-qubit calibration circuits * 256 * 8.192e+03 shots.
+Meas_filter job id 5dd8705aa903af00180affad
+Submitted 9 circuits to hardware, 8192 shots. job_id = 5dd8705f7b80db001831612a
+Submitted 9 circuits to hardware, 2504 shots. job_id = 5dd870648aa7e00018b8f7c1
+Cluster 1 has 36 instances, 2674 shots each, submission history:
+Calculating measurement filter, 20-qubit calibration circuits * 256 * 8.192e+03 shots.
+Meas_filter job id 5dd8706b7b80db001831612b
+Submitted 36 circuits to hardware, 2674 shots. job_id = 5dd8707d8aa7e00018b8f7c2
+**************************************************
+submitting case  (8, 16)
+Cluster 0 has 648 instances, 460 shots each, submission history:
+Calculating measurement filter, 20-qubit calibration circuits * 128 * 8.192e+03 shots.
+Meas_filter job id 5dd870822efcfc00184eb448
+Submitted 600 circuits to hardware, 460 shots. job_id = 5dd8714d2efcfc00184eb44d
+Submitted 48 circuits to hardware, 460 shots. job_id = 5dd8715f2efcfc00184eb44e
+Cluster 1 has 972 instances, 307 shots each, submission history:
+Calculating measurement filter, 20-qubit calibration circuits * 256 * 8.192e+03 shots.
+Meas_filter job id 5dd87166a903af00180affbc
+Submitted 600 circuits to hardware, 307 shots. job_id = 5dd872578aa7e00018b8f7ce
+Submitted 372 circuits to hardware, 307 shots. job_id = 5dd872efd4872d00185a5b73
+Cluster 2 has 972 instances, 307 shots each, submission history:
+Calculating measurement filter, 20-qubit calibration circuits * 256 * 8.192e+03 shots.
+Meas_filter job id 5dd872f78aa7e00018b8f7d3
+Submitted 600 circuits to hardware, 307 shots. job_id = 5dd873d3f5613200186ad59d
+Submitted 372 circuits to hardware, 307 shots. job_id = 5dd8745baf2f73001805db4b
+**************************************************
+submitting case  (9, 10)
+Cluster 0 has 18 instances, 456 shots each, submission history:
+Calculating measurement filter, 20-qubit calibration circuits * 512 * 8.192e+03 shots.
+Meas_filter job id 5dd874697218c40018b60d6a
+Submitted 18 circuits to hardware, 456 shots. job_id = 5dd87472d4872d00185a5b7d
+Cluster 1 has 18 instances, 456 shots each, submission history:
+Calculating measurement filter, 20-qubit calibration circuits * 8 * 8.192e+03 shots.
+Meas_filter job id 5dd8747597300300184d4582
+Submitted 18 circuits to hardware, 456 shots. job_id = 5dd874782efcfc00184eb45e
+**************************************************
+submitting case  (9, 12)
+Cluster 0 has 54 instances, 456 shots each, submission history:
+Calculating measurement filter, 20-qubit calibration circuits * 512 * 8.192e+03 shots.
+Meas_filter job id 5dd8748dd4872d00185a5b7e
+Submitted 54 circuits to hardware, 456 shots. job_id = 5dd874abfa67c10018ceb8e7
+Cluster 1 has 36 instances, 683 shots each, submission history:
+Calculating measurement filter, 20-qubit calibration circuits * 8 * 8.192e+03 shots.
+Meas_filter job id 5dd874add4872d00185a5b7f
+Submitted 36 circuits to hardware, 683 shots. job_id = 5dd874b1d4872d00185a5b80
+Cluster 2 has 54 instances, 456 shots each, submission history:
+Calculating measurement filter, 20-qubit calibration circuits * 16 * 8.192e+03 shots.
+Meas_filter job id 5dd874b32efcfc00184eb462
+Submitted 54 circuits to hardware, 456 shots. job_id = 5dd874b97218c40018b60d6e
+**************************************************
+submitting case  (9, 14)
+Cluster 0 has 18 instances, 5348 shots each, submission history:
+Calculating measurement filter, 20-qubit calibration circuits * 128 * 8.192e+03 shots.
+Meas_filter job id 5dd874be7b80db001831614f
+Submitted 18 circuits to hardware, 5348 shots. job_id = 5dd874c6fa67c10018ceb8e9
+Cluster 1 has 18 instances, 5348 shots each, submission history:
+Calculating measurement filter, 20-qubit calibration circuits * 512 * 8.192e+03 shots.
+Meas_filter job id 5dd874d4f5613200186ad5a1
+Submitted 18 circuits to hardware, 5348 shots. job_id = 5dd874e12efcfc00184eb465
+**************************************************
+submitting case  (9, 16)
+Cluster 0 has 324 instances, 930 shots each, submission history:
+Calculating measurement filter, 20-qubit calibration circuits * 32 * 8.192e+03 shots.
+Meas_filter job id 5dd874e497300300184d4587
+Submitted 324 circuits to hardware, 930 shots. job_id = 5dd87506f5613200186ad5a4
+Cluster 1 has 648 instances, 465 shots each, submission history:
+Calculating measurement filter, 20-qubit calibration circuits * 256 * 8.192e+03 shots.
+Meas_filter job id 5dd8750e7b80db0018316152
+Submitted 600 circuits to hardware, 465 shots. job_id = 5dd875fc7b80db0018316155
+Submitted 48 circuits to hardware, 465 shots. job_id = 5dd87610d4872d00185a5b88
+Cluster 2 has 162 instances, 1859 shots each, submission history:
+Calculating measurement filter, 20-qubit calibration circuits * 512 * 8.192e+03 shots.
+Meas_filter job id 5dd8761ef5613200186ad5aa
+Submitted 162 circuits to hardware, 1859 shots. job_id = 5dd8766a2efcfc00184eb469
+**************************************************
+submitting case  (9, 18)
+Cluster 0 has 486 instances, 2398 shots each, submission history:
+Calculating measurement filter, 20-qubit calibration circuits * 256 * 8.192e+03 shots.
+Meas_filter job id 5dd876728aa7e00018b8f7e3
+Submitted 486 circuits to hardware, 2398 shots. job_id = 5dd877267b80db0018316159
+Cluster 1 has 216 instances, 5395 shots each, submission history:
+Calculating measurement filter, 20-qubit calibration circuits * 512 * 8.192e+03 shots.
+Meas_filter job id 5dd87734fa67c10018ceb8f0
+Submitted 216 circuits to hardware, 5395 shots. job_id = 5dd877ac7b80db001831615b
+Cluster 2 has 324 instances, 3597 shots each, submission history:
+Calculating measurement filter, 20-qubit calibration circuits * 128 * 8.192e+03 shots.
+Meas_filter job id 5dd877b17b80db001831615c
+Submitted 324 circuits to hardware, 3597 shots. job_id = 5dd87824fa67c10018ceb8f2
+**************************************************
+----------------------------------------------------------------------------------------------------
+Retrieving case (2, 3) cluster 0 has 1 jobs
+Meas filter job id 5dd86945fa67c10018ceb871
+5dd86947a903af00180aff60
+Mitigation for 3 * 2-qubit circuit
+Mitigation for 3 * 2-qubit circuit took 5.617e-01 seconds
+Retrieving case (2, 3) cluster 1 has 1 jobs
+Meas filter job id 5dd869487218c40018b60cf0
+5dd8694af5613200186ad529
+Mitigation for 6 * 2-qubit circuit
+Mitigation for 6 * 2-qubit circuit took 5.391e-01 seconds
+Job submittor output has 1 cases
+**************************************************
+Retrieving case (3, 4) cluster 0 has 1 jobs
+Meas filter job id 5dd8694c8aa7e00018b8f76f
+5dd8694efa67c10018ceb874
+Mitigation for 18 * 3-qubit circuit
+Mitigation for 18 * 3-qubit circuit took 5.521e-01 seconds
+Retrieving case (3, 4) cluster 1 has 1 jobs
+Meas filter job id 5dd86950a903af00180aff61
+5dd869532efcfc00184eb3e0
+Mitigation for 18 * 3-qubit circuit
+Mitigation for 18 * 3-qubit circuit took 5.547e-01 seconds
+Job submittor output has 2 cases
+**************************************************
+Retrieving case (3, 5) cluster 0 has 1 jobs
+Meas filter job id 5dd86955a903af00180aff63
+5dd8695697300300184d451b
+Mitigation for 3 * 3-qubit circuit
+Mitigation for 3 * 3-qubit circuit took 5.515e-01 seconds
+Retrieving case (3, 5) cluster 1 has 1 jobs
+Meas filter job id 5dd86958fa67c10018ceb875
+5dd8695a97300300184d451c
+Mitigation for 6 * 3-qubit circuit
+Mitigation for 6 * 3-qubit circuit took 5.595e-01 seconds
+Job submittor output has 3 cases
+**************************************************
+Retrieving case (4, 5) cluster 0 has 1 jobs
+Meas filter job id 5dd8695b97300300184d451d
+5dd8695c2efcfc00184eb3e2
+Mitigation for 3 * 2-qubit circuit
+Mitigation for 3 * 2-qubit circuit took 5.640e-01 seconds
+Retrieving case (4, 5) cluster 1 has 1 jobs
+Meas filter job id 5dd8695e7b80db00183160d3
+5dd8696097300300184d451e
+Mitigation for 6 * 4-qubit circuit
+Mitigation for 6 * 4-qubit circuit took 5.627e-01 seconds
+Job submittor output has 4 cases
+**************************************************
+Retrieving case (4, 6) cluster 0 has 1 jobs
+Meas filter job id 5dd86963f5613200186ad52f
+5dd86975d4872d00185a5b0f
+Mitigation for 9 * 4-qubit circuit
+Mitigation for 9 * 4-qubit circuit took 4.908e-01 seconds
+Retrieving case (4, 6) cluster 1 has 1 jobs
+Meas filter job id 5dd869872efcfc00184eb3e7
+5dd86992fa67c10018ceb876
+Mitigation for 36 * 4-qubit circuit
+Mitigation for 36 * 4-qubit circuit took 6.704e-01 seconds
+Job submittor output has 5 cases
+**************************************************
+Retrieving case (4, 7) cluster 0 has 1 jobs
+Meas filter job id 5dd869957b80db00183160d4
+5dd86996fa67c10018ceb877
+Mitigation for 3 * 4-qubit circuit
+Mitigation for 3 * 4-qubit circuit took 5.574e-01 seconds
+Retrieving case (4, 7) cluster 1 has 1 jobs
+Meas filter job id 5dd86999d4872d00185a5b12
+5dd8699aaf2f73001805dad6
+Mitigation for 6 * 4-qubit circuit

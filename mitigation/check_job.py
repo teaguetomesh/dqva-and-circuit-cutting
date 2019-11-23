@@ -7,6 +7,7 @@ import argparse
 from qiskit.visualization import plot_gate_map, plot_error_map
 import datetime
 from datetime import timedelta
+import time
 
 def format_time(hours):
     t = datetime.datetime.now(datetime.timezone.utc)
@@ -34,16 +35,16 @@ if __name__ == '__main__':
             if num_qubits==20:
                 print('%s: %d-qubit, max %d jobs * %d shots'%(x,num_qubits,x.configuration().max_experiments,x.configuration().max_shots))
                 print('Most recently QUEUED:')
-                for job in x.jobs(limit=5):
-                    if job.creation_date()>format_time(hours=24) and job.status()==JobStatus['QUEUED']:
-                        print(job.creation_date(),job.status(),job.queue_position(),job.job_id())
+                for job in x.jobs(limit=5,status='QUEUED'):
+                    print(job.creation_date(),job.status(),job.queue_position(),job.job_id())
                 print('Most recently DONE:')
                 for job in x.jobs(limit=5,status=JobStatus['DONE']):
-                    if job.creation_date()>format_time(hours=24):
-                        print(job.creation_date(),job.status(),job.error_message(),job.job_id())
-                # for job in x.jobs(limit=10):
-                #     if args.cancel_jobs and job.status() not in terminal_status:
-                #         print(job.creation_date(),job.status(),job.queue_position(),job.job_id())
-                #         job.cancel()
-                #         print('cancelled')
+                    print(job.creation_date(),job.status(),job.error_message(),job.job_id())
+                if args.cancel_jobs:
+                    [print('Warning!!! Cancelling jobs! 5 seconds count down') for i in range(5)]
+                    time.sleep(5)
+                    for job in x.jobs(limit=50,status='QUEUED'):
+                        print(job.creation_date(),job.status(),job.queue_position(),job.job_id())
+                        job.cancel()
+                        print('cancelled')
                 print('-'*100)

@@ -76,7 +76,9 @@ def get_circ_saturated_shots(circs,accuracy):
         ground_truth = evaluate_circ(circ=circ,backend='statevector_simulator',evaluator_info=None)
         min_ce = cross_entropy(target=ground_truth,obs=ground_truth)
         if abs(min_ce) <1e-10:
-            saturated_shots.append(max(1024,int(np.power(2,len(circ.qubits)))))
+            num_shots = max(1024,int(np.power(2,len(circ.qubits))))
+            num_shots = min(8192,num_shots)
+            saturated_shots.append(num_shots)
             continue
         qasm_prob = [0 for i in ground_truth]
         shots_increment = 1024
