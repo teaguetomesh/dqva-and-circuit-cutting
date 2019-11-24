@@ -97,9 +97,6 @@ if __name__ == '__main__':
             case = (cluster_max_qubit,full_circuit_size)
             if case in evaluator_input:
                 continue
-
-            if case not in [(2,3),(4,8),(8,12)]:
-                continue
             
             print('-'*100)
             print('Case',case)
