@@ -230,32 +230,34 @@ def plot_fid_bar(best_cc,circuit_type):
     opacity = 0.8
 
     if circuit_type == 'supremacy':
-        vanilla = [best_cc[fc]['hw_fc_ce'] for fc in best_cc]
+        std = [best_cc[fc]['hw_fc_ce'] for fc in best_cc]
         cutting = [best_cc[fc]['cutting_ce'] for fc in best_cc]
         plt.ylabel('\u0394H')
         plt.title('\u0394H Reduction')
     elif circuit_type == 'bv' or circuit_type=='hwea':
-        vanilla = [best_cc[fc]['hw_fc_fid'] for fc in best_cc]
+        std = [best_cc[fc]['hw_fc_fid'] for fc in best_cc]
         cutting = [best_cc[fc]['cutting_fid'] for fc in best_cc]
         plt.ylim(0,1)
         plt.ylabel('Fidelity')
         plt.title('Fidelity Improvement')
     else:
-        vanilla = None
+        std = None
         cutting = None
+    fc_sizes, std = zip(*sorted(zip(list(best_cc.keys()),std)))
+    fc_sizes, cutting = zip(*sorted(zip(list(best_cc.keys()),cutting)))
 
-    rects1 = plt.bar(index, vanilla, bar_width,
+    rects1 = plt.bar(index, std, bar_width,
     alpha=opacity,
     color='b',
-    label='Vanilla')
+    label='Standard Mode')
 
     rects2 = plt.bar(index + bar_width, cutting, bar_width,
     alpha=opacity,
     color='g',
-    label='Cutting')
+    label='Cutting Mode')
 
     plt.xlabel('Full circuit size')
-    plt.xticks(index + bar_width, list(best_cc.keys()))
+    plt.xticks(index + bar_width, fc_sizes)
     plt.legend()
 
     plt.tight_layout()
