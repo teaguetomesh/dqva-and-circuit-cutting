@@ -302,11 +302,24 @@ if __name__ == '__main__':
     filename = input_file.replace('uniter_input','plotter_input')
     print('-'*50,'Reconstructing %s'%input_file,'-'*50)
 
-    uniter_output = {}
+    try:
+        f = open(filename,'rb')
+        uniter_output = {}
+        while 1:
+            try:
+                uniter_output.update(pickle.load(f))
+            except (EOFError):
+                break
+        f.close()
+    except:
+        uniter_output = {}
+
     evaluator_output = pickle.load(open(input_file, 'rb' ) )
     for case in evaluator_output:
         print('case {}'.format(case))
-        uniter_output[case] = copy.deepcopy(evaluator_output[case])
+        if case in uniter_output:
+            continue
+        case_dict = copy.deepcopy(evaluator_output[case])
         evaluations = evaluator_output[case]['fc_evaluations']
         
         uniter_begin = time()
@@ -326,18 +339,14 @@ if __name__ == '__main__':
         fc_fid = fidelity(target=evaluations['sv_noiseless'],obs=evaluations['qasm+noise'])
         cutting_fid = fidelity(target=evaluations['sv_noiseless'],obs=evaluations['cutting'])
         fid_percent_change = 100*(cutting_fid-fc_fid)/fc_fid
-        print('reconstruction distance = {:.3f}, ce percent reduction = {:.3f}, fidelity improvement = {:.3f}, time = {:.3e}'.format(distance,ce_percent_change,fid_percent_change,uniter_time))
-        # print(fc_ce>=ground_truth_ce)
-        # print(cutting_ce>=ground_truth_ce)
-        # print(ce_percent_change<=100+1e-5)
-        # print(fc_ce,cutting_ce,ground_truth_ce)
+        print('reconstruction distance = {:.3f}, ce percent reduction = {:.3f}, fidelity improvement = {:.3f}, time = {:.3e}'.format(distance,ce_percent_change,fid_percent_change,uniter_time),flush=True)
         assert fc_ce+1e-5>=ground_truth_ce and cutting_ce+1e-5>=ground_truth_ce and (ce_percent_change<=100+1e-5 or math.isnan(ce_percent_change))
 
-        uniter_output[case]['evaluations'] = copy.deepcopy(evaluations)
-        uniter_output[case]['ce_percent_reduction'] = copy.deepcopy(ce_percent_change)
-        uniter_output[case]['fid_percent_improvement'] = copy.deepcopy(fid_percent_change)
-        uniter_output[case]['uniter_time'] = copy.deepcopy(uniter_time)
-        del uniter_output[case]['fc_evaluations']
-        pickle.dump(uniter_output, open('%s'%filename,'wb'))
-        print('Reconstruction output has %d cases'%(len(uniter_output)))
+        case_dict['evaluations'] = copy.deepcopy(evaluations)
+        case_dict['ce_percent_reduction'] = copy.deepcopy(ce_percent_change)
+        case_dict['fid_percent_improvement'] = copy.deepcopy(fid_percent_change)
+        case_dict['uniter_time'] = copy.deepcopy(uniter_time)
+        uniter_output.update({case:case_dict})
+        pickle.dump({case:case_dict}, open('%s'%filename,'ab'))
+        print('Reconstruction output has %d cases'%(len(uniter_output)),flush=True)
         print('-'*100)

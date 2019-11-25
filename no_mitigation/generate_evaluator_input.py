@@ -76,7 +76,7 @@ if __name__ == '__main__':
     try:
         f = open('./benchmark_data/evaluator_input_{}_{}.p'.format(args.device_name,args.circuit_type),'rb')
         evaluator_input = pickle.load(f)
-        print('Existing cases:',evaluator_input.keys())
+        print('Existing cases:',evaluator_input.keys(),flush=True)
     except:
         evaluator_input = {}
 
@@ -95,11 +95,17 @@ if __name__ == '__main__':
                 continue
             
             case = (cluster_max_qubit,full_circuit_size)
+            print(case)
             if case in evaluator_input:
+                print('Case existed, skip')
+                continue
+
+            if full_circuit_size>=5:
+                print('Case too large, skip')
                 continue
             
             print('-'*100)
-            print('Case',case,flush=True)
+            print('Case',case)
 
             if full_circuit_size in full_circs:
                 print('Use existing full circuit')
@@ -138,9 +144,10 @@ if __name__ == '__main__':
                 print('%d cases to run:'%(len(cases_to_run)),cases_to_run.keys())
                 print('-'*100)
 
+    print('All cases to run:',cases_to_run.keys(),flush=True)
     fields_to_run = ['sv_noiseless','qasm','qasm+noise']
     for case in cases_to_run:
-        print('Running case {}'.format(case))
+        print('Running case {}'.format(case),flush=True)
         full_circ = cases_to_run[case]['full_circ']
         fc_shots = cases_to_run[case]['fc_shots']
         fc_evaluations = evaluate_full_circ(circ=full_circ,total_shots=fc_shots,device_name=args.device_name,fields=fields_to_run)

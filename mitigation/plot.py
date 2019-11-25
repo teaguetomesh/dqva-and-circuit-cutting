@@ -2,6 +2,7 @@ import pickle
 import glob
 import matplotlib
 import matplotlib.pyplot as plt
+import matplotlib.patheffects as path_effects
 import numpy as np
 from helper_fun import cross_entropy, fidelity
 import os
@@ -39,7 +40,7 @@ def heatmap(data, row_labels, col_labels, ax=None,
 
     # Create colorbar
     cbar = ax.figure.colorbar(im, ax=ax, **cbar_kw)
-    cbar.ax.set_ylabel(cbarlabel, rotation=-90, va="bottom")
+    cbar.ax.set_ylabel(cbarlabel, rotation=-90, va="bottom",size=18)
 
     # We want to show all ticks...
     ax.set_xticks(np.arange(data.shape[1]))
@@ -58,7 +59,9 @@ def heatmap(data, row_labels, col_labels, ax=None,
 
     # Turn spines off and create white grid.
     for edge, spine in ax.spines.items():
-        spine.set_visible(False)
+        spine.set_visible(True)
+        spine.set_linewidth(3)
+        spine.set_color('0.9')
 
     ax.set_xticks(np.arange(data.shape[1]+1)-.5, minor=True)
     ax.set_yticks(np.arange(data.shape[0]+1)-.5, minor=True)
@@ -120,9 +123,11 @@ def annotate_heatmap(im, data=None, valfmt="{x:.2f}",
     texts = []
     for i in range(data.shape[0]):
         for j in range(data.shape[1]):
-            kw.update(color=textcolors[int(im.norm(data[i, j]) > threshold)])
-            text_to_fill = valfmt(data[i, j], None) if data[i, j]!=0 else 'DNE'
-            text = im.axes.text(j, i, text_to_fill, **kw)
+            # kw.update(color=textcolors[int(im.norm(data[i, j]) > threshold)])
+            text_to_fill = valfmt(data[i, j], None) if data[i, j]!=0 else '-'
+            text = im.axes.text(j, i, text_to_fill, fontsize=14, color='white', **kw)
+            text.set_path_effects([path_effects.Stroke(linewidth=2, foreground='black'),
+                       path_effects.Normal()])
             texts.append(text)
 
     return texts
@@ -212,11 +217,13 @@ def plot_heatmap(plotter_input,hw_qubits,fc_qubits,circuit_type,figname):
 
     fig, ax = plt.subplots(figsize=(10,10))
 
-    im, cbar = heatmap(reduction_map, fc_qubits_unique, hw_qubits_unique, ax=ax,
-                    cmap="YlGn", cbarlabel="Cross Entropy Loss Reduction [%]" if circuit_type == 'supremacy' or circuit_type == 'qft' else "Fidelity Improvement [%]")
+    data =np.ma.masked_where(reduction_map==0, reduction_map)
+
+    im, cbar = heatmap(data, fc_qubits_unique, hw_qubits_unique, ax=ax,
+                    cmap="YlGn", cbarlabel="\u0394H Reduction, higher is better [%]" if circuit_type == 'supremacy' or circuit_type == 'qft' else "Fidelity Improvement [%]")
     texts = annotate_heatmap(im, valfmt="{x:.1f}")
-    ax.set_xlabel('Hardware qubits')
-    ax.set_ylabel('Full circuit qubits')
+    ax.set_xlabel('Hardware qubits',fontsize=18,labelpad=10)
+    ax.set_ylabel('Full circuit qubits',fontsize=18,labelpad=10)
 
     metric_type = 'ce' if (circuit_type == 'supremacy' or circuit_type == 'qft') else 'fid'
     fig.tight_layout()
@@ -253,12 +260,12 @@ def plot_fid_bar(saturated_best_cc,sametotal_best_cc,circuit_type,figname):
     opacity = 0.8
 
     if circuit_type == 'supremacy':
-        plt.ylabel('\u0394H')
-        plt.title('\u0394H Reduction')
+        plt.ylabel('\u0394H, lower is better',size=12)
+        # plt.title('\u0394H Reduction')
     elif circuit_type == 'bv' or circuit_type=='hwea':
         plt.ylim(0,1)
-        plt.ylabel('Fidelity')
-        plt.title('Fidelity Improvement')
+        plt.ylabel('Fidelity, higher is better',size=12)
+        # plt.title('Fidelity Improvement')
     else:
         std = None
         cutting = None
@@ -278,12 +285,12 @@ def plot_fid_bar(saturated_best_cc,sametotal_best_cc,circuit_type,figname):
     color='r',
     label='Cutting Mode, Sametotal')
 
-    plt.xlabel('Full circuit size')
+    plt.xlabel('Full circuit size',size=12)
     plt.xticks(index + bar_width, all_fc_size)
     plt.legend()
 
     plt.tight_layout()
-    plt.savefig('%s_improvement.png'%figname[:-2],dpi=400)
+    plt.savefig('%sng'%figname[:-2],dpi=400)
     plt.close()
 
 def read_data(filename):
@@ -350,7 +357,7 @@ def read_data(filename):
             raise Exception('Illegal circuit type:',circuit_type)
     [print(best_cc[fc]) for fc in best_cc]
     # plot_tradeoff(best_cc,circuit_type,figname)
-    # plot_heatmap(plotter_input,hw_qubits,fc_qubits,circuit_type,figname)
+    plot_heatmap(plotter_input,hw_qubits,fc_qubits,circuit_type,figname)
     return best_cc, hw_qubits, fc_qubits
 
 def get_filename(device_name,circuit_type,shots_mode,evaluation_method):

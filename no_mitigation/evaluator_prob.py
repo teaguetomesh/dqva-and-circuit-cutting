@@ -164,14 +164,14 @@ if __name__ == '__main__':
             evaluator_output = pickle.load(f)
         except:
             evaluator_output = {}
-        print('Existing cases:',evaluator_output.keys())
+        print('Existing cases:',evaluator_output.keys(),flush=True)
 
         evaluator_input = pickle.load(open(input_file, 'rb' ))
         cases_to_run = {}
         for case in evaluator_input:
             if case not in evaluator_output:
                 cases_to_run[case] = copy.deepcopy(evaluator_input[case])
-        print('Cases to run:',cases_to_run.keys())
+        print('Cases to run:',cases_to_run.keys(),flush=True)
 
         for i in range(num_workers):
             comm.send(cases_to_run, dest=i)
@@ -239,7 +239,7 @@ if __name__ == '__main__':
                         rank_quantum_time[case] += elapsed_time
                         print('rank {} runs case {}, cluster_{} {}_qubits * {}_instances on {} QUANTUM SIMULATOR, {} shots = {}, quantum time  = {:.3e}'.format(
                                 rank,case,cluster_idx,len(clusters[cluster_idx].qubits),
-                                len(rank_combinations[case][cluster_idx]),args.device_name,args.shots_mode,evaluator_info['num_shots'],elapsed_time))
+                                len(rank_combinations[case][cluster_idx]),args.device_name,args.shots_mode,evaluator_info['num_shots'],elapsed_time),flush=True)
                     else:
                         raise Exception('Illegal evaluation method:',args.evaluation_method)
                     rank_results[case][cluster_idx] = cluster_prob

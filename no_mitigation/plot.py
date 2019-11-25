@@ -2,6 +2,7 @@ import pickle
 import glob
 import matplotlib
 import matplotlib.pyplot as plt
+import matplotlib.patheffects as path_effects
 import numpy as np
 from helper_fun import cross_entropy, fidelity
 import os
@@ -39,7 +40,7 @@ def heatmap(data, row_labels, col_labels, ax=None,
 
     # Create colorbar
     cbar = ax.figure.colorbar(im, ax=ax, **cbar_kw)
-    cbar.ax.set_ylabel(cbarlabel, rotation=-90, va="bottom")
+    cbar.ax.set_ylabel(cbarlabel, rotation=-90, va="bottom",size=18)
 
     # We want to show all ticks...
     ax.set_xticks(np.arange(data.shape[1]))
@@ -58,7 +59,9 @@ def heatmap(data, row_labels, col_labels, ax=None,
 
     # Turn spines off and create white grid.
     for edge, spine in ax.spines.items():
-        spine.set_visible(False)
+        spine.set_visible(True)
+        spine.set_linewidth(3)
+        spine.set_color('0.9')
 
     ax.set_xticks(np.arange(data.shape[1]+1)-.5, minor=True)
     ax.set_yticks(np.arange(data.shape[0]+1)-.5, minor=True)
@@ -120,9 +123,11 @@ def annotate_heatmap(im, data=None, valfmt="{x:.2f}",
     texts = []
     for i in range(data.shape[0]):
         for j in range(data.shape[1]):
-            kw.update(color=textcolors[int(im.norm(data[i, j]) > threshold)])
-            text_to_fill = valfmt(data[i, j], None) if data[i, j]!=0 else 'DNE'
-            text = im.axes.text(j, i, text_to_fill, **kw)
+            # kw.update(color=textcolors[int(im.norm(data[i, j]) > threshold)])
+            text_to_fill = valfmt(data[i, j], None) if data[i, j]!=0 else '-'
+            text = im.axes.text(j, i, text_to_fill, fontsize=14, color='white', **kw)
+            text.set_path_effects([path_effects.Stroke(linewidth=2, foreground='black'),
+                       path_effects.Normal()])
             texts.append(text)
 
     return texts
@@ -148,52 +153,6 @@ def plot_tradeoff(best_cc,circuit_type,figname):
     plt.savefig('%s_tradeoff.png'%figname[:-2],dpi=400)
     plt.close()
 
-def plot_3d_bar(plotter_input,hw_qubits,fc_qubits):
-    searcher_times = [plotter_input[case]['searcher_time'] for case in plotter_input]
-    classical_times = [plotter_input[case]['classical_time'] for case in plotter_input]
-    quantum_times = [plotter_input[case]['quantum_time'] for case in plotter_input]
-    uniter_times = [plotter_input[case]['uniter_time'] for case in plotter_input]
-    ce_percent_changes = [plotter_input[case]['ce_percent_reduction'] for case in plotter_input]
-    fid_percent_changes = [plotter_input[case]['fid_percent_improvement'] for case in plotter_input]
-    fig_scale = 4.5
-    fig = plt.figure(figsize=(3*fig_scale,2*fig_scale))
-    ax1 = fig.add_subplot(231, projection='3d')
-    ax1.bar3d(hw_qubits, fc_qubits, np.zeros(len(plotter_input)), dx, dy, searcher_times)
-    ax1.set_xlabel('hardware qubits')
-    ax1.set_ylabel('full circuit qubits')
-    ax1.set_zlabel('searcher time (seconds)')
-    ax1 = fig.add_subplot(232, projection='3d')
-    ax1.bar3d(hw_qubits, fc_qubits, np.zeros(len(plotter_input)), dx, dy, classical_times)
-    ax1.set_zlim3d(0, 1.2*max(classical_times)+1)
-    ax1.set_xlabel('hardware qubits')
-    ax1.set_ylabel('full circuit qubits')
-    ax1.set_zlabel('classical evaluator time (seconds)')
-    ax1 = fig.add_subplot(233, projection='3d')
-    ax1.bar3d(hw_qubits, fc_qubits, np.zeros(len(plotter_input)), dx, dy, quantum_times)
-    ax1.set_zlim3d(0, 1.2*max(quantum_times)+1)
-    ax1.set_xlabel('hardware qubits')
-    ax1.set_ylabel('full circuit qubits')
-    ax1.set_zlabel('quantum evaluator time (seconds)')
-    ax1 = fig.add_subplot(234, projection='3d')
-    ax1.bar3d(hw_qubits, fc_qubits, np.zeros(len(plotter_input)), dx, dy, uniter_times)
-    ax1.set_xlabel('hardware qubits')
-    ax1.set_ylabel('full circuit qubits')
-    ax1.set_zlabel('reconstructor time (seconds)')
-    ax1 = fig.add_subplot(235, projection='3d')
-    ax1.bar3d(hw_qubits, fc_qubits, np.zeros(len(plotter_input)), dx, dy, ce_percent_changes)
-    ax1.set_zlim3d(min(0,1.2*min(ce_percent_changes)), max(0,1.2*max(ce_percent_changes)))
-    ax1.set_xlabel('hardware qubits')
-    ax1.set_ylabel('full circuit qubits')
-    ax1.set_zlabel('cross entropy gap reduction due to cutting (%)')
-    ax1 = fig.add_subplot(236, projection='3d')
-    ax1.bar3d(hw_qubits, fc_qubits, np.zeros(len(plotter_input)), dx, dy, fid_percent_changes)
-    ax1.set_zlim3d(min(0,1.2*min(fid_percent_changes)), max(0,1.2*max(fid_percent_changes)))
-    ax1.set_xlabel('hardware qubits')
-    ax1.set_ylabel('full circuit qubits')
-    ax1.set_zlabel('Fidelity improvement due to cutting (%)')
-    plt.savefig('%s.png'%figname[:-2],dpi=400)
-    plt.close()
-
 def plot_heatmap(plotter_input,hw_qubits,fc_qubits,circuit_type,figname):
     hw_qubits_unique = list(np.unique(hw_qubits))
     fc_qubits_unique = list(np.unique(fc_qubits))
@@ -212,11 +171,13 @@ def plot_heatmap(plotter_input,hw_qubits,fc_qubits,circuit_type,figname):
 
     fig, ax = plt.subplots(figsize=(10,10))
 
-    im, cbar = heatmap(reduction_map, fc_qubits_unique, hw_qubits_unique, ax=ax,
-                    cmap="YlGn", cbarlabel="Cross Entropy Loss Reduction [%]" if circuit_type == 'supremacy' or circuit_type == 'qft' else "Fidelity Improvement [%]")
+    data =np.ma.masked_where(reduction_map==0, reduction_map)
+
+    im, cbar = heatmap(data, fc_qubits_unique, hw_qubits_unique, ax=ax,
+                    cmap="YlGn", cbarlabel="\u0394H Reduction, higher is better [%]" if circuit_type == 'supremacy' or circuit_type == 'qft' else "Fidelity Improvement [%]")
     texts = annotate_heatmap(im, valfmt="{x:.1f}")
-    ax.set_xlabel('Hardware qubits')
-    ax.set_ylabel('Full circuit qubits')
+    ax.set_xlabel('Hardware qubits',fontsize=18,labelpad=10)
+    ax.set_ylabel('Full circuit qubits',fontsize=18,labelpad=10)
 
     metric_type = 'ce' if (circuit_type == 'supremacy' or circuit_type == 'qft') else 'fid'
     fig.tight_layout()
@@ -238,13 +199,13 @@ def plot_fid_bar(saturated_best_cc,sametotal_best_cc,circuit_type,figname):
             has_std = True
             saturated_cutting.append(saturated_best_cc[fc_size]['cutting_ce'] if circuit_type=='supremacy' else saturated_best_cc[fc_size]['cutting_fid'])
         else:
-            saturated_cutting.append(0)
+            saturated_cutting.append(-1)
         if fc_size in sametotal_best_cc:
             if not has_std:
                 std.append(sametotal_best_cc[fc_size]['qasm_noise_ce'] if circuit_type=='supremacy' else sametotal_best_cc[fc_size]['qasm_noise_fid'])
             sametotal_cutting.append(sametotal_best_cc[fc_size]['cutting_ce'] if circuit_type=='supremacy' else sametotal_best_cc[fc_size]['cutting_fid'])
         else:
-            sametotal_cutting.append(0)
+            sametotal_cutting.append(-1)
 
     n_groups = len(all_fc_size)
     fig, ax = plt.subplots()
@@ -273,7 +234,7 @@ def plot_fid_bar(saturated_best_cc,sametotal_best_cc,circuit_type,figname):
     color='g',
     label='Cutting Mode, Saturated')
 
-    rects3 = plt.bar(index + 2*bar_width, sametotal_cutting, bar_width,
+    rects3 = plt.bar(index + bar_width + bar_width, sametotal_cutting, bar_width,
     alpha=opacity,
     color='r',
     label='Cutting Mode, Sametotal')
@@ -288,7 +249,13 @@ def plot_fid_bar(saturated_best_cc,sametotal_best_cc,circuit_type,figname):
 
 def read_data(filename):
     f = open(filename, 'rb' )
-    plotter_input = pickle.load(f)
+    plotter_input = {}
+    while 1:
+        try:
+            plotter_input.update(pickle.load(f))
+        except (EOFError):
+            break
+    f.close()
     circuit_type = filename.split('/')[2]
     figname = './plots/'+filename.split('/')[-1].replace('_plotter_input','')
     print('plotting',figname)
