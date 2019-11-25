@@ -278,14 +278,12 @@ def reconstruct(complete_path_map, full_circ, cluster_circs, cluster_sim_probs):
     # print('reconstruction len = ', len(reconstructed_prob),'probabilities sum = ', sum(reconstructed_prob))
     return reconstructed_prob
 
-def get_filename(device_name,circuit_type,shots_mode,evaluation_method):
-    dirname = './benchmark_data/{}/'.format(circuit_type)
+def get_filename(device_name,evaluation_method):
+    dirname = './benchmark_data/bv/'
     if evaluation_method == 'statevector_simulator':
-        filename = 'classical_uniter_input_{}_{}.p'.format(device_name,circuit_type)
+        filename = 'classical_uniter_input_{}_bv.p'.format(device_name)
     elif evaluation_method == 'noisy_qasm_simulator':
-        filename = 'quantum_uniter_input_{}_{}_{}.p'.format(device_name,circuit_type,shots_mode)
-    elif evaluation_method == 'hardware':
-        filename = 'hardware_uniter_input_{}_{}_{}.p'.format(device_name,circuit_type,shots_mode)
+        filename = 'quantum_uniter_input_{}_bv.p'.format(device_name)
     else:
         raise Exception('Illegal evaluation method :',evaluation_method)
     return dirname+filename
@@ -293,21 +291,19 @@ def get_filename(device_name,circuit_type,shots_mode,evaluation_method):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Uniter')
     parser.add_argument('--device-name', metavar='S', type=str,help='which evaluator device output file to reconstruct')
-    parser.add_argument('--circuit-type', metavar='S', type=str,help='which circuit input file to run')
-    parser.add_argument('--shots-mode', metavar='S', type=str,help='saturated/sametotal shots mode')
     parser.add_argument('--evaluation-method', metavar='S', type=str,help='which evaluator backend file to reconstruct')
     args = parser.parse_args()
 
-    input_file = get_filename(device_name=args.device_name,circuit_type=args.circuit_type,shots_mode=args.shots_mode,evaluation_method=args.evaluation_method)
+    input_file = get_filename(device_name=args.device_name,evaluation_method=args.evaluation_method)
     filename = input_file.replace('uniter_input','plotter_input')
-    print('-'*50,'Reconstructing %s'%input_file,'-'*50)
+    print('-'*50,'Reconstructing %s'%input_file,'-'*50,flush=True)
 
     uniter_output = {}
     evaluator_output = pickle.load(open(input_file, 'rb' ) )
     for case in evaluator_output:
         print('case {}'.format(case))
         uniter_output[case] = copy.deepcopy(evaluator_output[case])
-        evaluations = evaluator_output[case]['fc_evaluations']
+        evaluations = {}
         
         uniter_begin = time()
         reconstructed_prob = reconstruct(complete_path_map=evaluator_output[case]['complete_path_map'],
@@ -315,29 +311,12 @@ if __name__ == '__main__':
         cluster_sim_probs=evaluator_output[case]['all_cluster_prob'])
         uniter_time = time()-uniter_begin
         evaluations['cutting'] = reconstructed_prob
-        
-        ground_truth_ce = cross_entropy(target=evaluations['sv_noiseless'],obs=evaluations['sv_noiseless'])
-        fc_ce = cross_entropy(target=evaluations['sv_noiseless'],obs=evaluations['qasm+noise'])
-        cutting_ce = cross_entropy(target=evaluations['sv_noiseless'],obs=evaluations['cutting'])
-        ce_percent_change = 100*(fc_ce-cutting_ce)/(fc_ce-ground_truth_ce)
-        distance = wasserstein_distance(evaluations['sv_noiseless'],evaluations['cutting'])
 
-        ground_truth_fid = fidelity(target=evaluations['sv_noiseless'],obs=evaluations['sv_noiseless'])
-        fc_fid = fidelity(target=evaluations['sv_noiseless'],obs=evaluations['qasm+noise'])
-        cutting_fid = fidelity(target=evaluations['sv_noiseless'],obs=evaluations['cutting'])
-        fid_percent_change = 100*(cutting_fid-fc_fid)/fc_fid
-        print('reconstruction distance = {:.3f}, ce percent reduction = {:.3f}, fidelity improvement = {:.3f}, time = {:.3e}'.format(distance,ce_percent_change,fid_percent_change,uniter_time))
-        # print(fc_ce>=ground_truth_ce)
-        # print(cutting_ce>=ground_truth_ce)
-        # print(ce_percent_change<=100+1e-5)
-        # print(fc_ce,cutting_ce,ground_truth_ce)
-        assert fc_ce+1e-5>=ground_truth_ce and cutting_ce+1e-5>=ground_truth_ce and (ce_percent_change<=100+1e-5 or math.isnan(ce_percent_change))
+        cutting_fid = reconstructed_prob[-1]
+        print('reconstruction fidelity = {:.3f}, time = {:.3e}'.format(cutting_fid,uniter_time))
 
         uniter_output[case]['evaluations'] = copy.deepcopy(evaluations)
-        uniter_output[case]['ce_percent_reduction'] = copy.deepcopy(ce_percent_change)
-        uniter_output[case]['fid_percent_improvement'] = copy.deepcopy(fid_percent_change)
         uniter_output[case]['uniter_time'] = copy.deepcopy(uniter_time)
-        del uniter_output[case]['fc_evaluations']
         pickle.dump(uniter_output, open('%s'%filename,'wb'))
         print('Reconstruction output has %d cases'%(len(uniter_output)))
         print('-'*100)

@@ -92,7 +92,7 @@ def get_circ_saturated_shots(circs,accuracy,circuit_type=None):
             ce = cross_entropy(target=ground_truth,obs=qasm_prob)
             diff = abs((ce-min_ce)/min_ce)
             if counter%50==49:
-                print('current diff:',diff,'current shots:',int(counter*shots_increment))
+                print('current diff:',diff,'current shots:',int(counter*shots_increment),flush=True)
             if diff < accuracy:
                 saturated_shots.append(int(counter*shots_increment))
                 # print('circ %d saturated shots = %d, ce difference = %.3f'%(circ_idx,saturated_shots[-1],diff))
