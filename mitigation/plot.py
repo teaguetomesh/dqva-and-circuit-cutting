@@ -234,14 +234,14 @@ def plot_fid_bar(saturated_best_cc,sametotal_best_cc,circuit_type,figname):
     for fc_size in all_fc_size:
         has_std = False
         if fc_size in saturated_best_cc:
-            std.append(saturated_best_cc[fc_size]['qasm_noise_ce'] if circuit_type=='supremacy' else saturated_best_cc[fc_size]['qasm_noise_fid'])
+            std.append(saturated_best_cc[fc_size]['hw_ce'] if circuit_type=='supremacy' else saturated_best_cc[fc_size]['hw_fid'])
             has_std = True
             saturated_cutting.append(saturated_best_cc[fc_size]['cutting_ce'] if circuit_type=='supremacy' else saturated_best_cc[fc_size]['cutting_fid'])
         else:
             saturated_cutting.append(0)
         if fc_size in sametotal_best_cc:
             if not has_std:
-                std.append(sametotal_best_cc[fc_size]['qasm_noise_ce'] if circuit_type=='supremacy' else sametotal_best_cc[fc_size]['qasm_noise_fid'])
+                std.append(sametotal_best_cc[fc_size]['hw_ce'] if circuit_type=='supremacy' else sametotal_best_cc[fc_size]['hw_fid'])
             sametotal_cutting.append(sametotal_best_cc[fc_size]['cutting_ce'] if circuit_type=='supremacy' else sametotal_best_cc[fc_size]['cutting_fid'])
         else:
             sametotal_cutting.append(0)
@@ -311,7 +311,7 @@ def read_data(filename):
         obs= plotter_input[case]['evaluations']['cutting'])
         ce_percent_change = 100*(hw_ce - cutting_ce)/(hw_ce - ground_truth_ce)
         assert ce_percent_change <= 100+1e-10 and ce_percent_change == plotter_input[case]['ce_percent_reduction']
-        plotter_input[case]['ce_comparisons'] = (qasm_noise_ce-ground_truth_ce,cutting_ce-ground_truth_ce)
+        plotter_input[case]['ce_comparisons'] = (hw_ce-ground_truth_ce,cutting_ce-ground_truth_ce)
 
         ground_truth_fid = fidelity(target=plotter_input[case]['evaluations']['sv_noiseless'],
         obs= plotter_input[case]['evaluations']['sv_noiseless'])
@@ -327,7 +327,7 @@ def read_data(filename):
         if circuit_type == 'bv' or circuit_type=='hwea':
             assert fid_percent_change == plotter_input[case]['fid_percent_improvement']
             assert abs(ground_truth_fid-1)<1e-10 and abs(qasm_fid-1)<1e-10 and qasm_noise_fid<=1 and qasm_noise_fid<=1 and cutting_fid<=1
-        plotter_input[case]['fid_comparisons'] = (qasm_noise_fid,cutting_fid)
+        plotter_input[case]['fid_comparisons'] = (hw_fid,cutting_fid)
 
         print('case {}: ce percentage reduction = {:.3f}, fidelity improvement = {:.3f}, reconstruction time: {:.3e}'.format(case,ce_percent_change,fid_percent_change,plotter_input[case]['uniter_time']))
     print('*'*50)
@@ -337,15 +337,15 @@ def read_data(filename):
         ce_percent = plotter_input[case]['ce_percent_reduction']
         fid_percent = plotter_input[case]['fid_percent_improvement']
         uniter_time = plotter_input[case]['uniter_time']
-        qasm_noise_fid, cutting_fid = plotter_input[case]['fid_comparisons']
-        qasm_noise_ce, cutting_ce = plotter_input[case]['ce_comparisons']
+        hw_fid, cutting_fid = plotter_input[case]['fid_comparisons']
+        hw_ce, cutting_ce = plotter_input[case]['ce_comparisons']
         hw, fc = case
         if circuit_type == 'supremacy':
             if (fc in best_cc and ce_percent>best_cc[fc]['ce_percent']) or (fc not in best_cc):
-                best_cc[fc] = {'ce_percent':ce_percent,'uniter_time':uniter_time,'best_case':case,'qasm_noise_ce':qasm_noise_ce,'cutting_ce':cutting_ce}
+                best_cc[fc] = {'ce_percent':ce_percent,'uniter_time':uniter_time,'best_case':case,'hw_ce':hw_ce,'cutting_ce':cutting_ce}
         elif circuit_type == 'bv' or circuit_type=='hwea':
             if (fc in best_cc and fid_percent>best_cc[fc]['fid_percent']) or (fc not in best_cc):
-                best_cc[fc] = {'fid_percent':fid_percent,'uniter_time':uniter_time,'best_case':case,'qasm_noise_fid':qasm_noise_fid,'cutting_fid':cutting_fid}
+                best_cc[fc] = {'fid_percent':fid_percent,'uniter_time':uniter_time,'best_case':case,'hw_fid':hw_fid,'cutting_fid':cutting_fid}
         else:
             raise Exception('Illegal circuit type:',circuit_type)
     [print(best_cc[fc]) for fc in best_cc]
@@ -393,5 +393,7 @@ if __name__ == '__main__':
     else:
         evaluation_header = None
     figname = '{}/{}_{}_improvement.png'.format(dirname,evaluation_header,args.device_name)
+    print(saturated_best_cc)
+    print(sametotal_best_cc)
     plot_fid_bar(saturated_best_cc=saturated_best_cc, sametotal_best_cc=sametotal_best_cc,circuit_type=args.circuit_type,figname=figname)
     print('-'*100)
