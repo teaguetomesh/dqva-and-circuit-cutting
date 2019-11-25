@@ -42,7 +42,6 @@ if __name__ == '__main__':
 
     # NOTE: toggle circuits to benchmark
     dimension_l = [[1,21],[1,22],[1,23],[1,24],[1,25]]
-    dimension_l = [[1,7],[1,8],[1,9]]
     full_circs = {}
     cases_to_run = {}
     for dimension in dimension_l:
@@ -85,7 +84,7 @@ for case in cases_to_run:
     print('Running case {}'.format(case))
     full_circ = cases_to_run[case]['full_circ']
     evaluator_input[case] = copy.deepcopy(cases_to_run[case])
-    print('Dump evaluator_input with %d cases'%(len(evaluator_input)))
+    print('Dump evaluator_input with %d cases'%(len(evaluator_input)),flush=True)
     pickle.dump(evaluator_input,open('./benchmark_data/evaluator_input_{}_bv.p'.format(args.device_name),'wb'))
     print('*'*50)
 print('-'*100)

@@ -1,5 +1,0 @@
--------------------------------------------------- Reconstructing ./benchmark_data/supremacy/quantum_uniter_input_ibmq_boeblingen_supremacy_saturated.p --------------------------------------------------
-case (5, 10)
-reconstruction distance = 0.000, ce percent reduction = 78.209, fidelity improvement = 0.000, time = 7.184e-02
-Reconstruction output has 1 cases
-----------------------------------------------------------------------------------------------------

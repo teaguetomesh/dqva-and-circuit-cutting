@@ -1,0 +1,35 @@
+-------------------------------------------------- Reconstructing ./benchmark_data/bv/quantum_uniter_input_ibmq_boeblingen_bv.p --------------------------------------------------
+cacase (11, 21)
+reconstruction fidelity = 1.000, time = 1.018e+02
+Reconstruction output has 1 cases
+----------------------------------------------------------------------------------------------------
+case (12, 22)
+reconstruction fidelity = 1.000, time = 2.202e+02
+Reconstruction output has 2 cases
+----------------------------------------------------------------------------------------------------
+case (12, 23)
+reconstruction fidelity = 1.000, time = 8.713e+01
+Reconstruction output has 3 cases
+----------------------------------------------------------------------------------------------------
+case (13, 24)
+reconstruction fidelity = 1.000, time = 1.798e+02
+Reconstruction output has 4 cases
+----------------------------------------------------------------------------------------------------
+case (13, 25)
+reconstruction fidelity = 1.000, time = 3.687e+02
+Reconstruction output has 5 cases
+----------------------------------------------------------------------------------------------------
+case (14, 26)
+reconstruction fidelity = 1.000, time = 7.669e+02
+Reconstruction output has 6 cases
+----------------------------------------------------------------------------------------------------
+case (14, 27)
+reconstruction fidelity = 1.000, time = 1.567e+03
+Reconstruction output has 7 cases
+----------------------------------------------------------------------------------------------------
+case (15, 28)
+reconstruction fidelity = 1.000, time = 3.260e+03
+Traceback (most recent call last):
+  File "uniter_prob.py", line 320, in <module>
+    pickle.dump(uniter_output, open('%s'%filename,'wb'))
+MemoryError

@@ -298,11 +298,18 @@ if __name__ == '__main__':
     filename = input_file.replace('uniter_input','plotter_input')
     print('-'*50,'Reconstructing %s'%input_file,'-'*50,flush=True)
 
-    uniter_output = {}
+    try:
+        f = open(filename,'rb')
+        uniter_output = pickle.load(f)
+    except:
+        uniter_output = {}
+
     evaluator_output = pickle.load(open(input_file, 'rb' ) )
     for case in evaluator_output:
-        print('case {}'.format(case))
-        uniter_output[case] = copy.deepcopy(evaluator_output[case])
+        print('case {}'.format(case),flush=True)
+        if case in uniter_output:
+            continue
+        case_dict = copy.deepcopy(evaluator_output[case])
         evaluations = {}
         
         uniter_begin = time()
@@ -313,10 +320,11 @@ if __name__ == '__main__':
         evaluations['cutting'] = reconstructed_prob
 
         cutting_fid = reconstructed_prob[-1]
-        print('reconstruction fidelity = {:.3f}, time = {:.3e}'.format(cutting_fid,uniter_time))
+        print('reconstruction fidelity = {:.3f}, time = {:.3e}'.format(cutting_fid,uniter_time),flush=True)
 
-        uniter_output[case]['evaluations'] = copy.deepcopy(evaluations)
-        uniter_output[case]['uniter_time'] = copy.deepcopy(uniter_time)
-        pickle.dump(uniter_output, open('%s'%filename,'wb'))
-        print('Reconstruction output has %d cases'%(len(uniter_output)))
+        case_dict['evaluations'] = copy.deepcopy(evaluations)
+        case_dict['uniter_time'] = copy.deepcopy(uniter_time)
+        uniter_output.update({case:case_dict})
+        pickle.dump({case:case_dict}, open('%s'%filename,'ab'))
+        print('Reconstruction output has %d cases'%(len(uniter_output)),flush=True)
         print('-'*100)

@@ -164,7 +164,7 @@ if __name__ == '__main__':
         for case in evaluator_input:
             if case not in evaluator_output:
                 cases_to_run[case] = copy.deepcopy(evaluator_input[case])
-        print('Cases to run:',cases_to_run.keys())
+        print('Cases to run:',cases_to_run.keys(),flush=True)
 
         for i in range(num_workers):
             comm.send(cases_to_run, dest=i)

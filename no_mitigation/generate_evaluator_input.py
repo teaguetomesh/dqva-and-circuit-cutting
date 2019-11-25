@@ -84,7 +84,7 @@ if __name__ == '__main__':
     device_size = len(evaluator_info['properties'].qubits)
 
     # NOTE: toggle circuits to benchmark
-    dimension_l = [[2,5],[3,4],[2,7],[4,4],[3,6],[4,5]]
+    dimension_l = [[1,3],[2,2],[1,5],[2,3],[1,7],[2,4],[3,3],[2,5],[3,4],[2,7],[4,4],[3,6],[4,5]]
     full_circs = {}
     cases_to_run = {}
     for cluster_max_qubit in range(args.min_qubit,args.max_qubit+1):
@@ -96,9 +96,6 @@ if __name__ == '__main__':
             
             case = (cluster_max_qubit,full_circuit_size)
             if case in evaluator_input:
-                continue
-
-            if full_circuit_size >=14:
                 continue
             
             print('-'*100)
