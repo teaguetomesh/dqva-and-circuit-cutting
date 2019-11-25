@@ -40,7 +40,7 @@ if __name__ == '__main__':
                 limit = 5 if str(x)=='ibmq_poughkeepsie' else 5
                 total_queued = 0
                 for job in x.jobs(limit=200,status='QUEUED'):
-                    if total_queued < 5:
+                    if total_queued < 100:
                         print(job.creation_date(),job.status(),job.queue_position(),job.job_id())
                     total_queued += 1
                 print('Total queued = {:d}. Time stamp: {}'.format(total_queued,time_now))

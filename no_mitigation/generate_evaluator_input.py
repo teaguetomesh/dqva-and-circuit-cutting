@@ -84,7 +84,7 @@ if __name__ == '__main__':
     device_size = len(evaluator_info['properties'].qubits)
 
     # NOTE: toggle circuits to benchmark
-    dimension_l = [[1,3],[2,2],[1,5],[2,3],[1,7],[2,4],[3,3],[2,5],[3,4],[2,7],[4,4],[3,6],[4,5]]
+    dimension_l = [[2,5],[3,4],[2,7],[4,4],[3,6],[4,5]]
     full_circs = {}
     cases_to_run = {}
     for cluster_max_qubit in range(args.min_qubit,args.max_qubit+1):
@@ -97,13 +97,16 @@ if __name__ == '__main__':
             case = (cluster_max_qubit,full_circuit_size)
             if case in evaluator_input:
                 continue
+
+            if full_circuit_size >=14:
+                continue
             
             print('-'*100)
-            print('Case',case)
+            print('Case',case,flush=True)
 
             if full_circuit_size in full_circs:
                 print('Use existing full circuit')
-                full_circ = full_circs[full_circuit_size]
+                full_circ, fc_shots = full_circs[full_circuit_size]
             else:
                 if args.circuit_type == 'supremacy':
                     full_circ = gen_supremacy(i,j,8)
@@ -115,7 +118,7 @@ if __name__ == '__main__':
                     full_circ = gen_qft(width=i*j, barriers=False)
                 elif args.circuit_type == 'sycamore':
                     full_circ = gen_sycamore(i,j,8)
-                full_circs[full_circuit_size] = full_circ
+                fc_shots = None
             
             searcher_begin = time()
             hardness, positions, ancilla, d, num_cluster, m = searcher.find_cuts(circ=full_circ,num_clusters=range(2,min(len(full_circ.qubits),args.max_clusters)+1),hw_max_qubit=cluster_max_qubit,evaluator_weight=1)
@@ -128,8 +131,10 @@ if __name__ == '__main__':
             else:
                 m.print_stat()
                 clusters, complete_path_map, K, d = cutter.cut_circuit(full_circ, positions)
-                fc_shots = get_circ_saturated_shots(circs=[full_circ],accuracy=1e-1,circuit_type=args.circuit_type)[0]
-                print('saturated fc shots = %d'%(fc_shots))
+                if fc_shots == None:
+                    fc_shots = get_circ_saturated_shots(circs=[full_circ],accuracy=1e-1,circuit_type=args.circuit_type)[0]
+                full_circs[full_circuit_size] = full_circ, fc_shots
+                print('saturated fc shots = %d'%(fc_shots),flush=True)
                 case_dict = {'full_circ':full_circ,'fc_shots':fc_shots,'searcher_time':searcher_time,
                 'clusters':clusters,'complete_path_map':complete_path_map}
                 cases_to_run[case] = copy.deepcopy(case_dict)

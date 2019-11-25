@@ -212,6 +212,8 @@ def plot_heatmap(plotter_input,hw_qubits,fc_qubits,circuit_type,figname):
 
     fig, ax = plt.subplots(figsize=(10,10))
 
+    print(reduction_map)
+
     im, cbar = heatmap(reduction_map, fc_qubits_unique, hw_qubits_unique, ax=ax,
                     cmap="YlGn", cbarlabel="Cross Entropy Loss Reduction [%]" if circuit_type == 'supremacy' or circuit_type == 'qft' else "Fidelity Improvement [%]")
     texts = annotate_heatmap(im, valfmt="{x:.1f}")
@@ -224,6 +226,8 @@ def plot_heatmap(plotter_input,hw_qubits,fc_qubits,circuit_type,figname):
     plt.close()
 
 def plot_fid_bar(saturated_best_cc,sametotal_best_cc,circuit_type,figname):
+    print(sametotal_best_cc)
+    print(saturated_best_cc)
     sametotal_fc_size = list(sametotal_best_cc.keys())
     saturated_fc_size = list(saturated_best_cc.keys())
     all_fc_size = list(set().union(sametotal_fc_size,saturated_fc_size))
@@ -238,13 +242,13 @@ def plot_fid_bar(saturated_best_cc,sametotal_best_cc,circuit_type,figname):
             has_std = True
             saturated_cutting.append(saturated_best_cc[fc_size]['cutting_ce'] if circuit_type=='supremacy' else saturated_best_cc[fc_size]['cutting_fid'])
         else:
-            saturated_cutting.append(-1)
+            saturated_cutting.append(0)
         if fc_size in sametotal_best_cc:
             if not has_std:
                 std.append(sametotal_best_cc[fc_size]['qasm_noise_ce'] if circuit_type=='supremacy' else sametotal_best_cc[fc_size]['qasm_noise_fid'])
             sametotal_cutting.append(sametotal_best_cc[fc_size]['cutting_ce'] if circuit_type=='supremacy' else sametotal_best_cc[fc_size]['cutting_fid'])
         else:
-            sametotal_cutting.append(-1)
+            sametotal_cutting.append(0)
 
     n_groups = len(all_fc_size)
     fig, ax = plt.subplots()
@@ -273,10 +277,13 @@ def plot_fid_bar(saturated_best_cc,sametotal_best_cc,circuit_type,figname):
     color='g',
     label='Cutting Mode, Saturated')
 
-    rects3 = plt.bar(index + bar_width + bar_width, sametotal_cutting, bar_width,
+    rects3 = plt.bar(index + 2*bar_width, sametotal_cutting, bar_width,
     alpha=opacity,
     color='r',
     label='Cutting Mode, Sametotal')
+
+    print(saturated_cutting)
+    print(sametotal_cutting)
 
     plt.xlabel('Full circuit size')
     plt.xticks(index + bar_width, all_fc_size)
