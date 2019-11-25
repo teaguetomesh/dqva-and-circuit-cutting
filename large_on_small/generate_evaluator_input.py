@@ -20,9 +20,6 @@ def gen_secret(num_qubit):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='generate evaluator inputs')
-    parser.add_argument('--min-qubit', metavar='N', type=int,help='Benchmark minimum number of HW qubits')
-    parser.add_argument('--max-qubit', metavar='N', type=int,help='Benchmark maximum number of HW qubits')
-    parser.add_argument('--max-clusters', metavar='N', type=int,help='max number of clusters to split into')
     parser.add_argument('--device-name', metavar='S',type=str,help='IBM device')
     args = parser.parse_args()
     
@@ -44,52 +41,51 @@ if __name__ == '__main__':
     device_size = len(evaluator_info['properties'].qubits)
 
     # NOTE: toggle circuits to benchmark
-    dimension_l = [[1,21],[1,22]]
+    dimension_l = [[1,21],[1,22],[1,23],[1,24],[1,25]]
+    dimension_l = [[1,7],[1,8],[1,9]]
     full_circs = {}
     cases_to_run = {}
-    for cluster_max_qubit in range(args.min_qubit,args.max_qubit+1):
-        for dimension in dimension_l:
-            i,j = dimension
-            full_circuit_size = i*j
-            if full_circuit_size<=cluster_max_qubit or (cluster_max_qubit-1)*args.max_clusters<full_circuit_size:
-                continue
-            
-            case = (cluster_max_qubit,full_circuit_size)
-            if case in evaluator_input:
-                continue
-            
+    for dimension in dimension_l:
+        i,j = dimension
+        full_circuit_size = i*j
+        cluster_max_qubit = math.ceil((full_circuit_size+1)/2)
+        
+        case = (cluster_max_qubit,full_circuit_size)
+        if case in evaluator_input:
+            continue
+        
+        print('-'*100)
+        print('Case',case,flush=True)
+
+        if full_circuit_size in full_circs:
+            print('Use existing full circuit')
+            full_circ = full_circs[full_circuit_size]
+        else:
+            full_circ = gen_BV(gen_secret(i*j),barriers=False)
+        
+        searcher_begin = time()
+        hardness, positions, ancilla, d, num_cluster, m = searcher.find_cuts(circ=full_circ,num_clusters=[2],hw_max_qubit=cluster_max_qubit,evaluator_weight=0)
+        searcher_time = time() - searcher_begin
+        
+        if m == None:
+            print('Case {} not feasible'.format(case))
             print('-'*100)
-            print('Case',case,flush=True)
+            continue
+        else:
+            m.print_stat()
+            clusters, complete_path_map, K, d = cutter.cut_circuit(full_circ, positions)
+            full_circs[full_circuit_size] = full_circ
+            case_dict = {'full_circ':full_circ,'searcher_time':searcher_time,
+            'clusters':clusters,'complete_path_map':complete_path_map}
+            cases_to_run[case] = copy.deepcopy(case_dict)
+            print('%d cases to run:'%(len(cases_to_run)),cases_to_run.keys())
+            print('-'*100)
 
-            if full_circuit_size in full_circs:
-                print('Use existing full circuit')
-                full_circ = full_circs[full_circuit_size]
-            else:
-                full_circ = gen_BV(gen_secret(i*j),barriers=False)
-            
-            searcher_begin = time()
-            hardness, positions, ancilla, d, num_cluster, m = searcher.find_cuts(circ=full_circ,num_clusters=range(2,min(len(full_circ.qubits),args.max_clusters)+1),hw_max_qubit=cluster_max_qubit,evaluator_weight=1)
-            searcher_time = time() - searcher_begin
-            
-            if m == None:
-                print('Case {} not feasible'.format(case))
-                print('-'*100)
-                continue
-            else:
-                m.print_stat()
-                clusters, complete_path_map, K, d = cutter.cut_circuit(full_circ, positions)
-                full_circs[full_circuit_size] = full_circ
-                case_dict = {'full_circ':full_circ,'searcher_time':searcher_time,
-                'clusters':clusters,'complete_path_map':complete_path_map}
-                cases_to_run[case] = copy.deepcopy(case_dict)
-                print('%d cases to run:'%(len(cases_to_run)),cases_to_run.keys())
-                print('-'*100)
-
-    for case in cases_to_run:
-        print('Running case {}'.format(case))
-        full_circ = cases_to_run[case]['full_circ']
-        evaluator_input[case] = copy.deepcopy(cases_to_run[case])
-        print('Dump evaluator_input with %d cases'%(len(evaluator_input)))
-        pickle.dump(evaluator_input,open('./benchmark_data/evaluator_input_{}_bv.p'.format(args.device_name),'wb'))
-        print('*'*50)
-    print('-'*100)
+for case in cases_to_run:
+    print('Running case {}'.format(case))
+    full_circ = cases_to_run[case]['full_circ']
+    evaluator_input[case] = copy.deepcopy(cases_to_run[case])
+    print('Dump evaluator_input with %d cases'%(len(evaluator_input)))
+    pickle.dump(evaluator_input,open('./benchmark_data/evaluator_input_{}_bv.p'.format(args.device_name),'wb'))
+    print('*'*50)
+print('-'*100)
