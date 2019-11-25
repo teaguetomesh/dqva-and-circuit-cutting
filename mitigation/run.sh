@@ -19,20 +19,3 @@ P2=$!
 
 wait $P1 $P2
 echo "$CIRCUIT_TYPE on $DEVICE_NAME DONE"
-
-# echo "Running saturated noisy qasm evaluator"
-# mpiexec -n 5 python evaluator_prob.py --device-name $DEVICE_NAME --circuit-type $CIRCUIT_TYPE --shots-mode saturated --evaluation-method noisy_qasm_simulator
-# echo "Running reconstruction"
-# python uniter_prob.py --device-name $DEVICE_NAME --circuit-type $CIRCUIT_TYPE --shots-mode saturated --evaluation-method noisy_qasm_simulator 2>&1 | tee ./logs/$CIRCUIT_TYPE_uniter_logs.txt
-
-# echo "Running sametotal noisy qasm evaluator"
-# mpiexec -n 5 python evaluator_prob.py --device-name $DEVICE_NAME --circuit-type $CIRCUIT_TYPE --shots-mode sametotal --evaluation-method noisy_qasm_simulator
-# echo "Running reconstruction"
-# python uniter_prob.py --device-name $DEVICE_NAME --circuit-type $CIRCUIT_TYPE --shots-mode sametotal --evaluation-method noisy_qasm_simulator 2>&1 | tee ./logs/$CIRCUIT_TYPE_uniter_logs.txt
-
-# echo "Running statevector evaluator"
-# mpiexec -n 5 python evaluator_prob.py --device-name $DEVICE_NAME --circuit-type $CIRCUIT_TYPE --evaluation-method statevector_simulator
-# echo "Running reconstruction"
-# python uniter_prob.py --device-name $DEVICE_NAME --circuit-type $CIRCUIT_TYPE --evaluation-method statevector_simulator 2>&1 | tee ./logs/$CIRCUIT_TYPE_uniter_logs.txt
-
-# python plot.py

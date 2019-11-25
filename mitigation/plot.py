@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from helper_fun import cross_entropy, fidelity
 import os
+import argparse
 
 def heatmap(data, row_labels, col_labels, ax=None,
             cbar_kw={}, cbarlabel="", **kwargs):
@@ -126,7 +127,7 @@ def annotate_heatmap(im, data=None, valfmt="{x:.2f}",
 
     return texts
 
-def plot_tradeoff(best_cc,circuit_type):
+def plot_tradeoff(best_cc,circuit_type,figname):
     plt.figure(figsize=(10,5))
     plt.subplot(121)
     plt.xlabel('Number of qubits')
@@ -193,7 +194,7 @@ def plot_3d_bar(plotter_input,hw_qubits,fc_qubits):
     plt.savefig('%s.png'%figname[:-2],dpi=400)
     plt.close()
 
-def plot_heatmap(plotter_input,hw_qubits,fc_qubits,circuit_type):
+def plot_heatmap(plotter_input,hw_qubits,fc_qubits,circuit_type,figname):
     hw_qubits_unique = list(np.unique(hw_qubits))
     fc_qubits_unique = list(np.unique(fc_qubits))
     fc_qubits_unique.sort(reverse=True)
@@ -213,7 +214,7 @@ def plot_heatmap(plotter_input,hw_qubits,fc_qubits,circuit_type):
 
     im, cbar = heatmap(reduction_map, fc_qubits_unique, hw_qubits_unique, ax=ax,
                     cmap="YlGn", cbarlabel="Cross Entropy Loss Reduction [%]" if circuit_type == 'supremacy' or circuit_type == 'qft' else "Fidelity Improvement [%]")
-    texts = annotate_heatmap(im, valfmt="{x:.3f} %")
+    texts = annotate_heatmap(im, valfmt="{x:.1f}")
     ax.set_xlabel('Hardware qubits')
     ax.set_ylabel('Full circuit qubits')
 
@@ -222,121 +223,175 @@ def plot_heatmap(plotter_input,hw_qubits,fc_qubits,circuit_type):
     plt.savefig('{}_{}_map.png'.format(figname[:-2],metric_type),dpi=1000)
     plt.close()
 
-def plot_fid_bar(best_cc,circuit_type):
-    n_groups = len(best_cc)
+def plot_fid_bar(saturated_best_cc,sametotal_best_cc,circuit_type,figname):
+    sametotal_fc_size = list(sametotal_best_cc.keys())
+    saturated_fc_size = list(saturated_best_cc.keys())
+    all_fc_size = list(set().union(sametotal_fc_size,saturated_fc_size))
+    all_fc_size.sort()
+    std = []
+    saturated_cutting = []
+    sametotal_cutting = []
+    for fc_size in all_fc_size:
+        has_std = False
+        if fc_size in saturated_best_cc:
+            std.append(saturated_best_cc[fc_size]['qasm_noise_ce'] if circuit_type=='supremacy' else saturated_best_cc[fc_size]['qasm_noise_fid'])
+            has_std = True
+            saturated_cutting.append(saturated_best_cc[fc_size]['cutting_ce'] if circuit_type=='supremacy' else saturated_best_cc[fc_size]['cutting_fid'])
+        else:
+            saturated_cutting.append(0)
+        if fc_size in sametotal_best_cc:
+            if not has_std:
+                std.append(sametotal_best_cc[fc_size]['qasm_noise_ce'] if circuit_type=='supremacy' else sametotal_best_cc[fc_size]['qasm_noise_fid'])
+            sametotal_cutting.append(sametotal_best_cc[fc_size]['cutting_ce'] if circuit_type=='supremacy' else sametotal_best_cc[fc_size]['cutting_fid'])
+        else:
+            sametotal_cutting.append(0)
+
+    n_groups = len(all_fc_size)
     fig, ax = plt.subplots()
     index = np.arange(n_groups)
-    bar_width = 0.35
+    bar_width = 0.2
     opacity = 0.8
 
     if circuit_type == 'supremacy':
-        std = [best_cc[fc]['hw_fc_ce'] for fc in best_cc]
-        cutting = [best_cc[fc]['cutting_ce'] for fc in best_cc]
         plt.ylabel('\u0394H')
         plt.title('\u0394H Reduction')
     elif circuit_type == 'bv' or circuit_type=='hwea':
-        std = [best_cc[fc]['hw_fc_fid'] for fc in best_cc]
-        cutting = [best_cc[fc]['cutting_fid'] for fc in best_cc]
         plt.ylim(0,1)
         plt.ylabel('Fidelity')
         plt.title('Fidelity Improvement')
     else:
         std = None
         cutting = None
-    fc_sizes, std = zip(*sorted(zip(list(best_cc.keys()),std)))
-    fc_sizes, cutting = zip(*sorted(zip(list(best_cc.keys()),cutting)))
 
     rects1 = plt.bar(index, std, bar_width,
     alpha=opacity,
     color='b',
     label='Standard Mode')
 
-    rects2 = plt.bar(index + bar_width, cutting, bar_width,
+    rects2 = plt.bar(index + bar_width, saturated_cutting, bar_width,
     alpha=opacity,
     color='g',
-    label='Cutting Mode')
+    label='Cutting Mode, Saturated')
+
+    rects3 = plt.bar(index + 2*bar_width, sametotal_cutting, bar_width,
+    alpha=opacity,
+    color='r',
+    label='Cutting Mode, Sametotal')
 
     plt.xlabel('Full circuit size')
-    plt.xticks(index + bar_width, fc_sizes)
+    plt.xticks(index + bar_width, all_fc_size)
     plt.legend()
 
     plt.tight_layout()
     plt.savefig('%s_improvement.png'%figname[:-2],dpi=400)
     plt.close()
 
+def read_data(filename):
+    f = open(filename, 'rb' )
+    plotter_input = pickle.load(f)
+    circuit_type = filename.split('/')[2]
+    figname = './plots/'+filename.split('/')[-1].replace('_plotter_input','')
+    print('plotting',figname)
+
+    hw_qubits = [case[0] for case in plotter_input]
+    fc_qubits = [case[1] for case in plotter_input]
+    dx = [0.2 for x in plotter_input]
+    dy = [0.2 for x in plotter_input]
+
+    for case in plotter_input:
+        ground_truth_ce = cross_entropy(target=plotter_input[case]['evaluations']['sv_noiseless'],
+        obs= plotter_input[case]['evaluations']['sv_noiseless'])
+        qasm_ce = cross_entropy(target=plotter_input[case]['evaluations']['sv_noiseless'],
+        obs= plotter_input[case]['evaluations']['qasm'])
+        qasm_noise_ce = cross_entropy(target=plotter_input[case]['evaluations']['sv_noiseless'],
+        obs= plotter_input[case]['evaluations']['qasm+noise'])
+        hw_ce = cross_entropy(target=plotter_input[case]['evaluations']['sv_noiseless'],
+        obs= plotter_input[case]['evaluations']['hw'])
+        cutting_ce = cross_entropy(target=plotter_input[case]['evaluations']['sv_noiseless'],
+        obs= plotter_input[case]['evaluations']['cutting'])
+        ce_percent_change = 100*(hw_ce - cutting_ce)/(hw_ce - ground_truth_ce)
+        assert ce_percent_change <= 100+1e-10 and ce_percent_change == plotter_input[case]['ce_percent_reduction']
+        plotter_input[case]['ce_comparisons'] = (qasm_noise_ce-ground_truth_ce,cutting_ce-ground_truth_ce)
+
+        ground_truth_fid = fidelity(target=plotter_input[case]['evaluations']['sv_noiseless'],
+        obs= plotter_input[case]['evaluations']['sv_noiseless'])
+        qasm_fid = fidelity(target=plotter_input[case]['evaluations']['sv_noiseless'],
+        obs= plotter_input[case]['evaluations']['qasm'])
+        qasm_noise_fid = fidelity(target=plotter_input[case]['evaluations']['sv_noiseless'],
+        obs= plotter_input[case]['evaluations']['qasm+noise'])
+        hw_fid = fidelity(target=plotter_input[case]['evaluations']['sv_noiseless'],
+        obs= plotter_input[case]['evaluations']['hw'])
+        cutting_fid = fidelity(target=plotter_input[case]['evaluations']['sv_noiseless'],
+        obs= plotter_input[case]['evaluations']['cutting'])
+        fid_percent_change = 100*(cutting_fid-hw_fid)/hw_fid
+        if circuit_type == 'bv' or circuit_type=='hwea':
+            assert fid_percent_change == plotter_input[case]['fid_percent_improvement']
+            assert abs(ground_truth_fid-1)<1e-10 and abs(qasm_fid-1)<1e-10 and qasm_noise_fid<=1 and qasm_noise_fid<=1 and cutting_fid<=1
+        plotter_input[case]['fid_comparisons'] = (qasm_noise_fid,cutting_fid)
+
+        print('case {}: ce percentage reduction = {:.3f}, fidelity improvement = {:.3f}, reconstruction time: {:.3e}'.format(case,ce_percent_change,fid_percent_change,plotter_input[case]['uniter_time']))
+    print('*'*50)
+
+    best_cc = {}
+    for case in plotter_input:
+        ce_percent = plotter_input[case]['ce_percent_reduction']
+        fid_percent = plotter_input[case]['fid_percent_improvement']
+        uniter_time = plotter_input[case]['uniter_time']
+        qasm_noise_fid, cutting_fid = plotter_input[case]['fid_comparisons']
+        qasm_noise_ce, cutting_ce = plotter_input[case]['ce_comparisons']
+        hw, fc = case
+        if circuit_type == 'supremacy':
+            if (fc in best_cc and ce_percent>best_cc[fc]['ce_percent']) or (fc not in best_cc):
+                best_cc[fc] = {'ce_percent':ce_percent,'uniter_time':uniter_time,'best_case':case,'qasm_noise_ce':qasm_noise_ce,'cutting_ce':cutting_ce}
+        elif circuit_type == 'bv' or circuit_type=='hwea':
+            if (fc in best_cc and fid_percent>best_cc[fc]['fid_percent']) or (fc not in best_cc):
+                best_cc[fc] = {'fid_percent':fid_percent,'uniter_time':uniter_time,'best_case':case,'qasm_noise_fid':qasm_noise_fid,'cutting_fid':cutting_fid}
+        else:
+            raise Exception('Illegal circuit type:',circuit_type)
+    [print(best_cc[fc]) for fc in best_cc]
+    # plot_tradeoff(best_cc,circuit_type,figname)
+    # plot_heatmap(plotter_input,hw_qubits,fc_qubits,circuit_type,figname)
+    return best_cc, hw_qubits, fc_qubits
+
+def get_filename(device_name,circuit_type,shots_mode,evaluation_method):
+    dirname = './benchmark_data/{}/'.format(circuit_type)
+    if evaluation_method == 'statevector_simulator':
+        filename = 'classical_plotter_input_{}_{}.p'.format(device_name,circuit_type)
+    elif evaluation_method == 'noisy_qasm_simulator':
+        filename = 'quantum_plotter_input_{}_{}_{}.p'.format(device_name,circuit_type,shots_mode)
+    elif evaluation_method == 'hardware':
+        filename = 'hardware_plotter_input_{}_{}_{}.p'.format(device_name,circuit_type,shots_mode)
+    else:
+        raise Exception('Illegal evaluation method :',evaluation_method)
+    return dirname+filename
 
 if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description='MPI evaluator.')
+    parser.add_argument('--device-name', metavar='S', type=str,help='which evaluator device input file to run')
+    parser.add_argument('--circuit-type', metavar='S', type=str,help='which circuit input file to run')
+    parser.add_argument('--evaluation-method', metavar='S', type=str,help='which evaluator backend to use')
+    args = parser.parse_args()
+
+    assert args.circuit_type in ['supremacy','hwea','bv','qft','sycamore']
+
+    saturated_filename = get_filename(device_name=args.device_name,circuit_type=args.circuit_type,shots_mode='saturated',evaluation_method=args.evaluation_method)
+    sametotal_filename = get_filename(device_name=args.device_name,circuit_type=args.circuit_type,shots_mode='sametotal',evaluation_method=args.evaluation_method)
+
     dirname = './plots'
     if not os.path.exists(dirname):
         os.mkdir(dirname)
 
-    all_files = glob.glob('./benchmark_data/*/*_plotter_input_*.p')
-    for filename in all_files:
-        f = open(filename, 'rb' )
-        plotter_input = pickle.load(f)
-        circuit_type = filename.split('/')[2]
-        figname = './plots/'+filename.split('/')[-1].replace('_plotter_input','')
-        print('plotting',figname)
+    saturated_best_cc, hw_qubits, fc_qubits = read_data(filename=saturated_filename)
+    sametotal_best_cc, hw_qubits, fc_qubits = read_data(filename=sametotal_filename)
 
-        hw_qubits = [case[0] for case in plotter_input]
-        fc_qubits = [case[1] for case in plotter_input]
-        dx = [0.2 for x in plotter_input]
-        dy = [0.2 for x in plotter_input]
-
-        for case in plotter_input:
-            ground_truth_ce = cross_entropy(target=plotter_input[case]['evaluations']['sv_noiseless'],
-            obs= plotter_input[case]['evaluations']['sv_noiseless'])
-            qasm_ce = cross_entropy(target=plotter_input[case]['evaluations']['sv_noiseless'],
-            obs= plotter_input[case]['evaluations']['qasm'])
-            qasm_noise_ce = cross_entropy(target=plotter_input[case]['evaluations']['sv_noiseless'],
-            obs= plotter_input[case]['evaluations']['qasm+noise'])
-            hw_fc_ce = cross_entropy(target=plotter_input[case]['evaluations']['sv_noiseless'],
-            obs= plotter_input[case]['evaluations']['hw'])
-            cutting_ce = cross_entropy(target=plotter_input[case]['evaluations']['sv_noiseless'],
-            obs= plotter_input[case]['evaluations']['cutting'])
-            ce_percent_change = 100*(hw_fc_ce - cutting_ce)/(hw_fc_ce - ground_truth_ce)
-            assert ce_percent_change <= 100+1e-10 and ce_percent_change == plotter_input[case]['ce_percent_reduction']
-            plotter_input[case]['ce_comparisons'] = (hw_fc_ce-ground_truth_ce,cutting_ce-ground_truth_ce)
-
-            ground_truth_fid = fidelity(target=plotter_input[case]['evaluations']['sv_noiseless'],
-            obs= plotter_input[case]['evaluations']['sv_noiseless'])
-            qasm_fid = fidelity(target=plotter_input[case]['evaluations']['sv_noiseless'],
-            obs= plotter_input[case]['evaluations']['qasm'])
-            qasm_noise_fid = fidelity(target=plotter_input[case]['evaluations']['sv_noiseless'],
-            obs= plotter_input[case]['evaluations']['qasm+noise'])
-            hw_fc_fid = fidelity(target=plotter_input[case]['evaluations']['sv_noiseless'],
-            obs= plotter_input[case]['evaluations']['hw'])
-            cutting_fid = fidelity(target=plotter_input[case]['evaluations']['sv_noiseless'],
-            obs= plotter_input[case]['evaluations']['cutting'])
-            fid_percent_change = 100*(cutting_fid-hw_fc_fid)/hw_fc_fid
-            if circuit_type == 'bv' or circuit_type=='hwea':
-                assert fid_percent_change == plotter_input[case]['fid_percent_improvement']
-                assert abs(ground_truth_fid-1)<1e-10 and abs(qasm_fid-1)<1e-10 and qasm_noise_fid<=1 and hw_fc_fid<=1 and cutting_fid<=1
-            plotter_input[case]['fid_comparisons'] = (hw_fc_fid,cutting_fid)
-
-            print('case {}: ce percentage reduction = {:.3f}, fidelity improvement = {:.3f}, reconstruction time: {:.3e}'.format(case,ce_percent_change,fid_percent_change,plotter_input[case]['uniter_time']))
-        print('*'*50)
-
-        best_cc = {}
-        for case in plotter_input:
-            ce_percent = plotter_input[case]['ce_percent_reduction']
-            fid_percent = plotter_input[case]['fid_percent_improvement']
-            uniter_time = plotter_input[case]['uniter_time']
-            hw_fc_fid, cutting_fid = plotter_input[case]['fid_comparisons']
-            hw_fc_ce, cutting_ce = plotter_input[case]['ce_comparisons']
-            hw, fc = case
-            if circuit_type == 'supremacy':
-                if (fc in best_cc and ce_percent>best_cc[fc]['ce_percent']) or (fc not in best_cc):
-                    best_cc[fc] = {'ce_percent':ce_percent,'uniter_time':uniter_time,'best_case':case,'hw_fc_ce':hw_fc_ce,'cutting_ce':cutting_ce}
-            elif circuit_type == 'bv' or circuit_type=='hwea':
-                if (fc in best_cc and fid_percent>best_cc[fc]['fid_percent']) or (fc not in best_cc):
-                    best_cc[fc] = {'fid_percent':fid_percent,'uniter_time':uniter_time,'best_case':case,'hw_fc_fid':hw_fc_fid,'cutting_fid':cutting_fid}
-            else:
-                raise Exception('Illegal circuit type:',circuit_type)
-        [print(best_cc[fc]) for fc in best_cc]
-
-        plot_tradeoff(best_cc,circuit_type)
-        plot_3d_bar(plotter_input,hw_qubits,fc_qubits)
-        plot_heatmap(plotter_input,hw_qubits,fc_qubits,circuit_type)
-        plot_fid_bar(best_cc,circuit_type)
-        print('-'*100)
+    if args.evaluation_method == 'noisy_qasm_simulator':
+        evaluation_header = 'quantum'
+    elif args.evaluation_method == 'statevector_simulator':
+        evaluation_header = 'classical'
+    elif args.evaluation_method == 'hardware':
+        evaluation_header = 'hardware'
+    else:
+        evaluation_header = None
+    figname = '{}/{}_{}_improvement.png'.format(dirname,evaluation_header,args.device_name)
+    plot_fid_bar(saturated_best_cc=saturated_best_cc, sametotal_best_cc=sametotal_best_cc,circuit_type=args.circuit_type,figname=figname)
+    print('-'*100)
