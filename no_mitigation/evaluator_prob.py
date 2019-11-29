@@ -9,11 +9,12 @@ import pickle
 import itertools
 import copy
 import numpy as np
+import math
 import progressbar as pb
 from time import time
 from mpi4py import MPI
 import argparse
-from helper_fun import evaluate_circ, get_evaluator_info, get_circ_saturated_shots, distribute_cluster_shots
+from helper_fun import evaluate_circ, get_evaluator_info, get_circ_saturated_shots
 import datetime as dt
 
 def find_cluster_O_rho_qubits(complete_path_map,cluster_idx):
@@ -209,7 +210,6 @@ if __name__ == '__main__':
             clusters = evaluator_input[case]['clusters']
             complete_path_map = evaluator_input[case]['complete_path_map']
             fc_shots = evaluator_input[case]['fc_shots']
-            same_total_cutting_shots = distribute_cluster_shots(total_shots=fc_shots,clusters=clusters,complete_path_map=complete_path_map)
             for cluster_idx in range(len(rank_combinations[case])):
                 if len(rank_combinations[case][cluster_idx]) > 0:
                     if args.evaluation_method == 'statevector_simulator':
@@ -230,7 +230,7 @@ if __name__ == '__main__':
                         if args.shots_mode == 'saturated':
                             evaluator_info['num_shots'] = get_circ_saturated_shots(circs=[clusters[cluster_idx]],accuracy=1e-1)[0]
                         elif args.shots_mode == 'sametotal':
-                            evaluator_info['num_shots'] = same_total_cutting_shots[cluster_idx]
+                            evaluator_info['num_shots'] = math.ceil(fc_shots/len(rank_combinations[case][cluster_idx]))
                         cluster_prob = evaluate_cluster(complete_path_map=complete_path_map,
                         cluster_circ=clusters[cluster_idx],
                         combinations=rank_combinations[case][cluster_idx],

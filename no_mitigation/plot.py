@@ -135,19 +135,19 @@ def annotate_heatmap(im, data=None, valfmt="{x:.2f}",
 def plot_tradeoff(best_cc,circuit_type,figname):
     plt.figure(figsize=(10,5))
     plt.subplot(121)
-    plt.xlabel('Number of qubits')
+    plt.xlabel('Number of qubits',size=12)
     if circuit_type == 'supremacy':
         plt.plot([fc for fc in best_cc], [best_cc[fc]['ce_percent'] for fc in best_cc], 'bX')
-        plt.ylabel('Cross entropy reduction (%)')
+        plt.ylabel('\u0394H reduction (%)',size=12)
         plt.ylim(0,100)
     elif circuit_type == 'bv' or circuit_type=='hwea':
         plt.plot([fc for fc in best_cc], [best_cc[fc]['fid_percent'] for fc in best_cc], 'bX')
-        plt.ylabel('Fidelity improvement (%)')
+        plt.ylabel('Fidelity improvement (%)',size=12)
     plt.xticks([x for x in best_cc])
     plt.subplot(122)
     plt.plot([fc for fc in best_cc], [best_cc[fc]['uniter_time'] for fc in best_cc], 'r*')
-    plt.xlabel('Number of qubits')
-    plt.ylabel('Reconstruction time (s)')
+    plt.xlabel('Number of qubits',size=12)
+    plt.ylabel('Reconstruction time (s)',size=12)
     plt.xticks([x for x in best_cc])
     plt.tight_layout()
     plt.savefig('%s_tradeoff.png'%figname[:-2],dpi=400)
@@ -214,37 +214,37 @@ def plot_fid_bar(saturated_best_cc,sametotal_best_cc,circuit_type,figname):
     opacity = 0.8
 
     if circuit_type == 'supremacy':
-        plt.ylabel('\u0394H')
-        plt.title('\u0394H Reduction')
+        ax.set_ylabel('\u0394H, lower is better',size=12)
+        # plt.title('\u0394H Reduction')
     elif circuit_type == 'bv' or circuit_type=='hwea':
-        plt.ylim(0,1)
-        plt.ylabel('Fidelity')
-        plt.title('Fidelity Improvement')
+        ax.set_ylim(0,1)
+        ax.set_ylabel('Fidelity, higher is better',size=12)
+        # plt.title('Fidelity Improvement')
     else:
         std = None
         cutting = None
 
-    rects1 = plt.bar(index, std, bar_width,
+    rects1 = ax.bar(index, std, bar_width,
     alpha=opacity,
     color='b',
     label='Standard Mode')
 
-    rects2 = plt.bar(index + bar_width, saturated_cutting, bar_width,
+    rects2 = ax.bar(index + bar_width, saturated_cutting, bar_width,
     alpha=opacity,
     color='g',
     label='Cutting Mode, Saturated')
 
-    rects3 = plt.bar(index + bar_width + bar_width, sametotal_cutting, bar_width,
+    rects3 = ax.bar(index + bar_width + bar_width, sametotal_cutting, bar_width,
     alpha=opacity,
     color='r',
     label='Cutting Mode, Sametotal')
 
-    plt.xlabel('Full circuit size')
+    ax.set_xlabel('Full circuit size',size=12)
     plt.xticks(index + bar_width, all_fc_size)
     plt.legend()
 
     plt.tight_layout()
-    plt.savefig('%s_improvement.png'%figname[:-2],dpi=400)
+    plt.savefig('%s_%s.png'%(figname[:-4],circuit_type),dpi=400)
     plt.close()
 
 def read_data(filename):

@@ -41,12 +41,12 @@ if __name__ == '__main__':
     device_size = len(evaluator_info['properties'].qubits)
 
     # NOTE: toggle circuits to benchmark
-    dimension_l = [[1,21],[1,22],[1,23],[1,24],[1,25]]
+    # dimension_l = [[1,21],[1,22],[1,23],[1,24],[1,25],[1,26],[1,27],[1,28],[1,29],[1,30]]
+    dimension_l = np.arange(10,30)
     full_circs = {}
     cases_to_run = {}
     for dimension in dimension_l:
-        i,j = dimension
-        full_circuit_size = i*j
+        full_circuit_size = dimension
         cluster_max_qubit = math.ceil((full_circuit_size+1)/2)
         
         case = (cluster_max_qubit,full_circuit_size)
@@ -60,7 +60,7 @@ if __name__ == '__main__':
             print('Use existing full circuit')
             full_circ = full_circs[full_circuit_size]
         else:
-            full_circ = gen_BV(gen_secret(i*j),barriers=False)
+            full_circ = gen_BV(gen_secret(full_circuit_size),barriers=False)
         
         searcher_begin = time()
         hardness, positions, ancilla, d, num_cluster, m = searcher.find_cuts(circ=full_circ,num_clusters=[2],hw_max_qubit=cluster_max_qubit,evaluator_weight=0)
@@ -80,11 +80,11 @@ if __name__ == '__main__':
             print('%d cases to run:'%(len(cases_to_run)),cases_to_run.keys())
             print('-'*100)
 
-for case in cases_to_run:
-    print('Running case {}'.format(case))
-    full_circ = cases_to_run[case]['full_circ']
-    evaluator_input[case] = copy.deepcopy(cases_to_run[case])
-    print('Dump evaluator_input with %d cases'%(len(evaluator_input)),flush=True)
-    pickle.dump(evaluator_input,open('./benchmark_data/evaluator_input_{}_bv.p'.format(args.device_name),'wb'))
-    print('*'*50)
-print('-'*100)
+    for case in cases_to_run:
+        print('Running case {}'.format(case))
+        full_circ = cases_to_run[case]['full_circ']
+        evaluator_input[case] = copy.deepcopy(cases_to_run[case])
+        print('Dump evaluator_input with %d cases'%(len(evaluator_input)),flush=True)
+        pickle.dump(evaluator_input,open('./benchmark_data/evaluator_input_{}_bv.p'.format(args.device_name),'wb'))
+        print('*'*50)
+    print('-'*100)

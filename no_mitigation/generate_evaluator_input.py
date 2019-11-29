@@ -19,6 +19,7 @@ def gen_secret(num_qubit):
     return num_with_zeros
 
 def evaluate_full_circ(circ, total_shots, device_name, fields):
+    print('evaluate fc starts here')
     uniform_p = 1.0/np.power(2,len(circ.qubits))
     uniform_prob = [uniform_p for i in range(np.power(2,len(circ.qubits)))]
     fc_evaluations = {}
@@ -50,6 +51,7 @@ def evaluate_full_circ(circ, total_shots, device_name, fields):
     fc_evaluations.update({'sv_noiseless':sv_noiseless_fc,
     'qasm':qasm_noiseless_fc,
     'qasm+noise':qasm_noisy_fc})
+    print('evaluate fc ends here')
 
     return fc_evaluations
 
@@ -100,8 +102,8 @@ if __name__ == '__main__':
                 print('Case existed, skip')
                 continue
 
-            if full_circuit_size>=5:
-                print('Case too large, skip')
+            if full_circuit_size >=12:
+                print('fc = %d, skip'%full_circuit_size)
                 continue
             
             print('-'*100)

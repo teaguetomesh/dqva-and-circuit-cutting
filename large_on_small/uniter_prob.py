@@ -10,6 +10,7 @@ from scipy.stats import wasserstein_distance
 import argparse
 from helper_fun import cross_entropy, fidelity
 import copy
+import os.path
 
 def find_cuts_pairs(complete_path_map):
     O_rho_pairs = []
@@ -298,10 +299,16 @@ if __name__ == '__main__':
     filename = input_file.replace('uniter_input','plotter_input')
     print('-'*50,'Reconstructing %s'%input_file,'-'*50,flush=True)
 
-    try:
+    if os.path.isfile(filename):
         f = open(filename,'rb')
-        uniter_output = pickle.load(f)
-    except:
+        uniter_output = {}
+        while 1:
+            try:
+                uniter_output.update(pickle.load(f))
+            except (EOFError):
+                break
+        f.close()
+    else:
         uniter_output = {}
 
     evaluator_output = pickle.load(open(input_file, 'rb' ) )
@@ -309,7 +316,7 @@ if __name__ == '__main__':
         print('case {}'.format(case),flush=True)
         if case in uniter_output:
             continue
-        case_dict = copy.deepcopy(evaluator_output[case])
+        case_dict = {}
         evaluations = {}
         
         uniter_begin = time()
@@ -322,7 +329,7 @@ if __name__ == '__main__':
         cutting_fid = reconstructed_prob[-1]
         print('reconstruction fidelity = {:.3f}, time = {:.3e}'.format(cutting_fid,uniter_time),flush=True)
 
-        case_dict['evaluations'] = copy.deepcopy(evaluations)
+        case_dict['cutting_fid'] = copy.deepcopy(cutting_fid)
         case_dict['uniter_time'] = copy.deepcopy(uniter_time)
         uniter_output.update({case:case_dict})
         pickle.dump({case:case_dict}, open('%s'%filename,'ab'))

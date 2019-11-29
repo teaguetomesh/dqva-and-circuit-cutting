@@ -77,7 +77,7 @@ def get_circ_saturated_shots(circs,accuracy,circuit_type=None):
         min_ce = cross_entropy(target=ground_truth,obs=ground_truth)
         if circuit_type == 'hwea' or circuit_type == 'bv':
             num_shots = max(1024,int(np.power(2,len(circ.qubits))))
-            num_shots = min(8192,num_shots)
+            num_shots = min(num_shots,np.power(2,17))
             saturated_shots.append(num_shots)
             continue
         qasm_prob = [0 for i in ground_truth]
@@ -92,8 +92,8 @@ def get_circ_saturated_shots(circs,accuracy,circuit_type=None):
             ce = cross_entropy(target=ground_truth,obs=qasm_prob)
             diff = abs((ce-min_ce)/min_ce)
             if counter%50==49:
-                print('current diff:',diff,'current shots:',int(counter*shots_increment),flush=True)
-            if diff < accuracy:
+                print('current diff:',diff,'current shots:',int(counter*shots_increment))
+            if diff < accuracy or (int(counter*shots_increment) > 5*np.power(2,len(circ.qubits)) and counter>50):
                 saturated_shots.append(int(counter*shots_increment))
                 # print('circ %d saturated shots = %d, ce difference = %.3f'%(circ_idx,saturated_shots[-1],diff))
                 break

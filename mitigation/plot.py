@@ -133,21 +133,22 @@ def annotate_heatmap(im, data=None, valfmt="{x:.2f}",
     return texts
 
 def plot_tradeoff(best_cc,circuit_type,figname):
+    print(figname)
     plt.figure(figsize=(10,5))
     plt.subplot(121)
-    plt.xlabel('Number of qubits')
+    plt.xlabel('Number of qubits',size=12)
     if circuit_type == 'supremacy':
         plt.plot([fc for fc in best_cc], [best_cc[fc]['ce_percent'] for fc in best_cc], 'bX')
-        plt.ylabel('Cross entropy reduction (%)')
-        plt.ylim(0,100)
+        plt.ylabel('\u0394H reduction, higher is better (%)',size=12)
+        # plt.ylim(0,100)
     elif circuit_type == 'bv' or circuit_type=='hwea':
         plt.plot([fc for fc in best_cc], [best_cc[fc]['fid_percent'] for fc in best_cc], 'bX')
-        plt.ylabel('Fidelity improvement (%)')
+        plt.ylabel('Fidelity improvement (%)',size=12)
     plt.xticks([x for x in best_cc])
     plt.subplot(122)
     plt.plot([fc for fc in best_cc], [best_cc[fc]['uniter_time'] for fc in best_cc], 'r*')
-    plt.xlabel('Number of qubits')
-    plt.ylabel('Reconstruction time (s)')
+    plt.xlabel('Number of qubits',size=12)
+    plt.ylabel('Reconstruction time, lower is better (s)',size=12)
     plt.xticks([x for x in best_cc])
     plt.tight_layout()
     plt.savefig('%s_tradeoff.png'%figname[:-2],dpi=400)
@@ -356,7 +357,7 @@ def read_data(filename):
         else:
             raise Exception('Illegal circuit type:',circuit_type)
     [print(best_cc[fc]) for fc in best_cc]
-    # plot_tradeoff(best_cc,circuit_type,figname)
+    plot_tradeoff(best_cc,circuit_type,figname)
     plot_heatmap(plotter_input,hw_qubits,fc_qubits,circuit_type,figname)
     return best_cc, hw_qubits, fc_qubits
 

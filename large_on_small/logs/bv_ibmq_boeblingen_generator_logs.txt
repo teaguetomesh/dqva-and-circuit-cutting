@@ -1,19 +1,4 @@
-Existing cases: dict_keys([(11, 21), (12, 22), (12, 23), (13, 24), (13, 25)])
-----------------------------------------------------------------------------------------------------
-Case (14, 26)
-solving for 2 clusters
-********************
-MIQCP stats:
-1 cuts, 2 clusters, max qubit = 14
-cluster 0: original input = 13.00, rho qubits = 0.00, O qubits = 1.00, d = 13.00, K = 1.00
-cluster 1: original input = 13.00, rho qubits = 1.00, O qubits = 0.00, d = 14.00, K = 1.00
-objective value: 538499933.0200653
-manually calculated objective value: 536870912.0
-runtime: 0.1392359733581543
-OPTIMAL
-********************
-1 cases to run: dict_keys([(14, 26)])
-----------------------------------------------------------------------------------------------------
+Existing cases: dict_keys([(6, 10), (6, 11), (7, 12), (7, 13), (8, 14), (8, 15), (9, 16), (9, 17), (10, 18), (10, 19), (11, 20), (11, 21), (12, 22), (12, 23), (13, 24), (13, 25), (14, 26)])
 ----------------------------------------------------------------------------------------------------
 Case (14, 27)
 solving for 2 clusters
@@ -24,10 +9,10 @@ cluster 0: original input = 14.00, rho qubits = 0.00, O qubits = 1.00, d = 14.00
 cluster 1: original input = 13.00, rho qubits = 1.00, O qubits = 0.00, d = 14.00, K = 1.00
 objective value: 1077068581.7196655
 manually calculated objective value: 1073741824.0
-runtime: 0.10102009773254395
+runtime: 0.10890007019042969
 OPTIMAL
 ********************
-2 cases to run: dict_keys([(14, 26), (14, 27)])
+1 cases to run: dict_keys([(14, 27)])
 ----------------------------------------------------------------------------------------------------
 ----------------------------------------------------------------------------------------------------
 Case (15, 28)
@@ -39,10 +24,10 @@ cluster 0: original input = 14.00, rho qubits = 0.00, O qubits = 1.00, d = 14.00
 cluster 1: original input = 14.00, rho qubits = 1.00, O qubits = 0.00, d = 15.00, K = 1.00
 objective value: 2154268560.843582
 manually calculated objective value: 2147483648.0
-runtime: 0.11903595924377441
+runtime: 0.13600611686706543
 OPTIMAL
 ********************
-3 cases to run: dict_keys([(14, 26), (14, 27), (15, 28)])
+2 cases to run: dict_keys([(14, 27), (15, 28)])
 ----------------------------------------------------------------------------------------------------
 ----------------------------------------------------------------------------------------------------
 Case (15, 29)
@@ -54,39 +39,18 @@ cluster 0: original input = 15.00, rho qubits = 0.00, O qubits = 1.00, d = 15.00
 cluster 1: original input = 14.00, rho qubits = 1.00, O qubits = 0.00, d = 15.00, K = 1.00
 objective value: 4308787805.7895355
 manually calculated objective value: 4294967296.0
-runtime: 0.1238560676574707
+runtime: 0.13047289848327637
 OPTIMAL
 ********************
-4 cases to run: dict_keys([(14, 26), (14, 27), (15, 28), (15, 29)])
+3 cases to run: dict_keys([(14, 27), (15, 28), (15, 29)])
 ----------------------------------------------------------------------------------------------------
-----------------------------------------------------------------------------------------------------
-Case (16, 30)
-solving for 2 clusters
-********************
-MIQCP stats:
-1 cuts, 2 clusters, max qubit = 16
-cluster 0: original input = 15.00, rho qubits = 0.00, O qubits = 1.00, d = 15.00, K = 1.00
-cluster 1: original input = 15.00, rho qubits = 1.00, O qubits = 0.00, d = 16.00, K = 1.00
-objective value: 8618052672.55429
-manually calculated objective value: 8589934592.0
-runtime: 0.20377492904663086
-OPTIMAL
-********************
-5 cases to run: dict_keys([(14, 26), (14, 27), (15, 28), (15, 29), (16, 30)])
-----------------------------------------------------------------------------------------------------
-Running case (14, 26)
-Dump evaluator_input with 6 cases
-**************************************************
 Running case (14, 27)
-Dump evaluator_input with 7 cases
+Dump evaluator_input with 18 cases
 **************************************************
 Running case (15, 28)
-Dump evaluator_input with 8 cases
+Dump evaluator_input with 19 cases
 **************************************************
 Running case (15, 29)
-Dump evaluator_input with 9 cases
-**************************************************
-Running case (16, 30)
-Dump evaluator_input with 10 cases
+Dump evaluator_input with 20 cases
 **************************************************
 ----------------------------------------------------------------------------------------------------
