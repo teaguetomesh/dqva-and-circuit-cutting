@@ -3,9 +3,9 @@ import os
 from time import time
 import numpy as np
 from qcg.generators import gen_supremacy, gen_hwea, gen_BV, gen_qft, gen_sycamore
-import MIQCP_searcher as searcher
-import cutter
-from helper_fun import evaluate_circ, get_evaluator_info, get_circ_saturated_shots, reverseBits
+import utils.MIQCP_searcher as searcher
+import utils.cutter as cutter
+from utils.helper_fun import evaluate_circ, get_evaluator_info, get_circ_saturated_shots, reverseBits
 import argparse
 from qiskit import IBMQ
 import copy
@@ -23,12 +23,9 @@ if __name__ == '__main__':
     parser.add_argument('--device-name', metavar='S',type=str,help='IBM device')
     args = parser.parse_args()
     
-    dirname = './benchmark_data'
+    dirname = './large_on_small/benchmark_data/bv'
     if not os.path.exists(dirname):
-        os.mkdir(dirname)
-    dirname = './benchmark_data/bv'
-    if not os.path.exists(dirname):
-        os.mkdir(dirname)
+        os.makedirs(dirname)
 
     try:
         f = open('./benchmark_data/evaluator_input_{}_bv.p'.format(args.device_name),'rb')
@@ -85,6 +82,6 @@ if __name__ == '__main__':
         full_circ = cases_to_run[case]['full_circ']
         evaluator_input[case] = copy.deepcopy(cases_to_run[case])
         print('Dump evaluator_input with %d cases'%(len(evaluator_input)),flush=True)
-        pickle.dump(evaluator_input,open('./benchmark_data/evaluator_input_{}_bv.p'.format(args.device_name),'wb'))
+        pickle.dump(evaluator_input,open('{}/evaluator_input_{}_bv.p'.format(dirname,args.device_name),'wb'))
         print('*'*50)
     print('-'*100)

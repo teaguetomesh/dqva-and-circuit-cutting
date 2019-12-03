@@ -5,7 +5,7 @@ from gurobipy import *
 import networkx as nx
 from qcg.generators import gen_supremacy, gen_hwea
 import numpy as np
-import cutter
+import utils.cutter as cutter
 
 class Basic_Model(object):
     def __init__(self, n_vertices, edges, node_ids, id_nodes, k, hw_max_qubit, evaluator_weight):

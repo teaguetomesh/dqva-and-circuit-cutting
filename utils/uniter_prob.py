@@ -4,11 +4,10 @@ import math
 import pickle
 import glob
 from time import time
-import progressbar as pb
 from qiskit.quantum_info.states.measures import state_fidelity
 from scipy.stats import wasserstein_distance
 import argparse
-from helper_fun import cross_entropy, fidelity
+from utils.helper_fun import cross_entropy, fidelity
 import copy
 import os.path
 
@@ -254,7 +253,6 @@ def reconstruct(complete_path_map, full_circ, cluster_circs, cluster_sim_probs):
     # [print('cluster %d' % cluster_idx,correspondence_map[cluster_idx],'\n') for cluster_idx in correspondence_map]
     cluster_O_qubit_positions = find_cluster_O_qubit_positions(O_rho_pairs, cluster_circs)
 
-    # bar = pb.ProgressBar(max_value=len(combinations))
     collapsed_cluster_prob = [{} for c in cluster_circs]
     for i,s in enumerate(combinations):
         # print('s_{} = {}'.format(i,s))
@@ -271,7 +269,6 @@ def reconstruct(complete_path_map, full_circ, cluster_circs, cluster_sim_probs):
             # print('cluster %d collapsed = '%cluster_idx,kronecker_term)
             summation_term = np.kron(summation_term,kronecker_term)
         reconstructed_prob += summation_term
-        # bar.update(i)
         # print('-'*100)
     # print()
     reconstructed_prob = [x/scaling_factor for x in reconstructed_prob]
