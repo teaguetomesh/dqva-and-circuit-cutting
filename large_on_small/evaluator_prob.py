@@ -9,11 +9,10 @@ import pickle
 import itertools
 import copy
 import numpy as np
-import progressbar as pb
 from time import time
 from mpi4py import MPI
 import argparse
-from helper_fun import evaluate_circ, get_evaluator_info, get_circ_saturated_shots, distribute_cluster_shots
+from utils.helper_fun import evaluate_circ, get_evaluator_info, get_circ_saturated_shots, distribute_cluster_shots
 import datetime as dt
 
 def find_cluster_O_rho_qubits(complete_path_map,cluster_idx):
