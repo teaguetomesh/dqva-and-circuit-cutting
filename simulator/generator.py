@@ -3,9 +3,9 @@ import os
 from time import time
 import numpy as np
 from qcg.generators import gen_supremacy, gen_hwea, gen_BV, gen_qft, gen_sycamore
-import MIQCP_searcher as searcher
-import cutter
-from helper_fun import evaluate_circ, get_evaluator_info, get_circ_saturated_shots, reverseBits
+import utils.MIQCP_searcher as searcher
+import utils.cutter as cutter
+from utils.helper_fun import evaluate_circ, get_evaluator_info, get_circ_saturated_shots, reverseBits, get_filename, read_file, factor_int
 import argparse
 from qiskit import IBMQ
 import copy
@@ -66,44 +66,30 @@ if __name__ == '__main__':
 
     assert args.circuit_type in ['supremacy','hwea','bv','qft','sycamore']
 
-    print('-'*50,'Generator %s %s'%(args.device_name,args.circuit_type),'-'*50)
-    
-    dirname = './benchmark_data'
+    dirname, evaluator_input_filename = get_filename(experiment_name='simulator',circuit_type=args.circuit_type,device_name=args.device_name,field='evaluator_input',evaluation_method=None,shots_mode=None)
     if not os.path.exists(dirname):
-        os.mkdir(dirname)
-    dirname = './benchmark_data/%s'%args.circuit_type
-    if not os.path.exists(dirname):
-        os.mkdir(dirname)
+        os.makedirs(dirname)
 
-    try:
-        f = open('./benchmark_data/evaluator_input_{}_{}.p'.format(args.device_name,args.circuit_type),'rb')
-        evaluator_input = pickle.load(f)
-        print('Existing cases:',evaluator_input.keys(),flush=True)
-    except:
-        evaluator_input = {}
+    print('-'*50,'Generator','-'*50,flush=True)
+    evaluator_input = read_file(dirname+evaluator_input_filename)
+    print('Existing cases:',evaluator_input.keys())
 
     evaluator_info = get_evaluator_info(circ=None,device_name=args.device_name,fields=['properties','device'])
     device_size = len(evaluator_info['properties'].qubits)
 
     # NOTE: toggle circuits to benchmark
-    dimension_l = [[1,3],[2,2],[1,5],[2,3],[1,7],[2,4],[3,3],[2,5],[3,4],[2,7],[4,4],[3,6],[4,5]]
+    dimension_l = np.arange(8,10)
     full_circs = {}
     cases_to_run = {}
     for cluster_max_qubit in range(args.min_qubit,args.max_qubit+1):
         for dimension in dimension_l:
-            i,j = dimension
+            i,j = factor_int(dimension)
             full_circuit_size = i*j
             if full_circuit_size<=cluster_max_qubit or full_circuit_size>device_size or (cluster_max_qubit-1)*args.max_clusters<full_circuit_size:
                 continue
             
             case = (cluster_max_qubit,full_circuit_size)
-            print(case)
             if case in evaluator_input:
-                print('Case existed, skip')
-                continue
-
-            if full_circuit_size >=12:
-                print('fc = %d, skip'%full_circuit_size)
                 continue
             
             print('-'*100)
@@ -147,15 +133,17 @@ if __name__ == '__main__':
                 print('-'*100)
 
     print('All cases to run:',cases_to_run.keys(),flush=True)
+    counter = len(evaluator_input.keys())
     fields_to_run = ['sv_noiseless','qasm','qasm+noise']
     for case in cases_to_run:
         print('Running case {}'.format(case),flush=True)
-        full_circ = cases_to_run[case]['full_circ']
-        fc_shots = cases_to_run[case]['fc_shots']
+        case_dict = copy.deepcopy(cases_to_run[case])
+        full_circ = case_dict['full_circ']
+        fc_shots = case_dict['fc_shots']
         fc_evaluations = evaluate_full_circ(circ=full_circ,total_shots=fc_shots,device_name=args.device_name,fields=fields_to_run)
-        cases_to_run[case]['fc_evaluations'] = fc_evaluations
-        evaluator_input[case] = copy.deepcopy(cases_to_run[case])
-        print('Dump evaluator_input with %d cases'%(len(evaluator_input)))
-        pickle.dump(evaluator_input,open('./benchmark_data/evaluator_input_{}_{}.p'.format(args.device_name,args.circuit_type),'wb'))
+        case_dict['fc_evaluations'] = fc_evaluations
+        pickle.dump({case:case_dict},open(dirname+evaluator_input_filename,'ab'))
+        counter += 1
+        print('Dump evaluator_input with %d cases'%(counter))
         print('*'*50)
     print('-'*100)
