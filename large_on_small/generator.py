@@ -5,7 +5,7 @@ import numpy as np
 from qcg.generators import gen_supremacy, gen_hwea, gen_BV, gen_qft, gen_sycamore
 import utils.MIQCP_searcher as searcher
 import utils.cutter as cutter
-from utils.helper_fun import evaluate_circ, get_evaluator_info, get_circ_saturated_shots, reverseBits
+from utils.helper_fun import get_evaluator_info, get_filename, read_file
 import argparse
 from qiskit import IBMQ
 import copy
@@ -19,27 +19,23 @@ def gen_secret(num_qubit):
     return num_with_zeros
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='generate evaluator inputs')
+    parser = argparse.ArgumentParser(description='Generator')
     parser.add_argument('--device-name', metavar='S',type=str,help='IBM device')
     args = parser.parse_args()
+
+    dirname, evaluator_input_filename = get_filename(experiment_name='large_on_small',circuit_type='bv',
+    device_name=args.device_name,field='evaluator_input')
+    filename = dirname + evaluator_input_filename
     
-    dirname = './large_on_small/benchmark_data/bv'
     if not os.path.exists(dirname):
         os.makedirs(dirname)
 
-    try:
-        f = open('./benchmark_data/evaluator_input_{}_bv.p'.format(args.device_name),'rb')
-        evaluator_input = pickle.load(f)
-        print('Existing cases:',evaluator_input.keys())
-    except:
-        evaluator_input = {}
+    evaluator_input = read_file(filename=filename)
+    print('Existing cases:',evaluator_input.keys())
 
     evaluator_info = get_evaluator_info(circ=None,device_name=args.device_name,fields=['properties','device'])
-    device_size = len(evaluator_info['properties'].qubits)
 
-    # NOTE: toggle circuits to benchmark
-    # dimension_l = [[1,21],[1,22],[1,23],[1,24],[1,25],[1,26],[1,27],[1,28],[1,29],[1,30]]
-    dimension_l = np.arange(8,9)
+    dimension_l = np.arange(8,10)
     full_circs = {}
     cases_to_run = {}
     for dimension in dimension_l:
@@ -73,15 +69,7 @@ if __name__ == '__main__':
             full_circs[full_circuit_size] = full_circ
             case_dict = {'full_circ':full_circ,'searcher_time':searcher_time,
             'clusters':clusters,'complete_path_map':complete_path_map}
+            pickle.dump({case:case_dict},open(filename,'ab'))
             cases_to_run[case] = copy.deepcopy(case_dict)
             print('%d cases to run:'%(len(cases_to_run)),cases_to_run.keys())
             print('-'*100)
-
-    for case in cases_to_run:
-        print('Running case {}'.format(case))
-        full_circ = cases_to_run[case]['full_circ']
-        evaluator_input[case] = copy.deepcopy(cases_to_run[case])
-        print('Dump evaluator_input with %d cases'%(len(evaluator_input)),flush=True)
-        pickle.dump(evaluator_input,open('{}/evaluator_input_{}_bv.p'.format(dirname,args.device_name),'wb'))
-        print('*'*50)
-    print('-'*100)

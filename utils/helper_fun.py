@@ -15,6 +15,52 @@ import datetime as dt
 import pickle
 import copy
 from time import time
+import os
+
+def get_filename(experiment_name,circuit_type,device_name,evaluation_method=None,field=None):
+    dirname = './{}/benchmark_data/{}/'.format(experiment_name,circuit_type)
+    if field == 'evaluator_input':
+        evaluator_input_filename = 'evaluator_input_{}.p'.format(device_name)
+        return dirname, evaluator_input_filename
+    elif field == 'job_submittor_input':
+        job_submittor_input_filename = 'job_submittor_input_{}.p'.format(device_name)
+        return dirname, job_submittor_input_filename
+    elif field == 'uniter_input':
+        if evaluation_method == 'statevector_simulator':
+            uniter_input_filename = 'classical_uniter_input_{}.p'.format(device_name)
+        elif evaluation_method == 'noisy_qasm_simulator':
+            uniter_input_filename = 'quantum_uniter_input_{}.p'.format(device_name)
+        elif evaluation_method == 'hardware':
+            uniter_input_filename = 'hw_uniter_input_{}.p'.format(device_name)
+        else:
+            raise Exception('Illegal evaluation method :',evaluation_method)
+        return dirname, uniter_input_filename
+    else:
+        raise Exception('Illegal filename field :',field)
+
+def read_file(filename):
+    if os.path.isfile(filename):
+        f = open(filename,'rb')
+        file_content = {}
+        while 1:
+            try:
+                file_content.update(pickle.load(f))
+            except (EOFError):
+                break
+        f.close()
+    else:
+        file_content = {}
+    return file_content
+
+def factor_int(n):
+    nsqrt = math.ceil(math.sqrt(n))
+    val = nsqrt
+    while 1:
+        co_val = int(n/val)
+        if val*co_val == n:
+            return val, co_val
+        else:
+            val -= 1
 
 def load_IBMQ():
     token = '9056ff772ff2e0f19de847fc8980b6e0121b561832de7dfb72bb23b085c1dc4a62cde82392f7d74e655465a9d997dd970858a568434f1b97038e70bf44b6c8a6'

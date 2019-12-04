@@ -3,7 +3,7 @@ import glob
 import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
-from helper_fun import cross_entropy, fidelity
+from utils.helper_fun import cross_entropy, fidelity
 import os
 from scipy import optimize
 
