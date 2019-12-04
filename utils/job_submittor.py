@@ -2,7 +2,7 @@ import numpy as np
 import pickle
 import argparse
 from qiskit.compiler import transpile, assemble
-from utils.helper_fun import get_evaluator_info, apply_measurement, reverseBits, get_circ_saturated_shots, distribute_cluster_shots, readout_mitigation
+from utils.helper_fun import get_filename, read_file
 from time import time
 import copy
 from qiskit import Aer, execute
@@ -123,71 +123,19 @@ if __name__ == '__main__':
     assert args.shots_mode in ['saturated','sametotal']
     
     print('-'*50,'Job Submittor','-'*50)
-    input_file = './benchmark_data/{}/job_submittor_input_{}_{}_{}.p'.format(args.circuit_type,args.device_name,args.circuit_type,args.shots_mode)
-    job_submittor_input = pickle.load(open(input_file, 'rb' ))
-    cases_to_run = {}
-    filename = input_file.replace('job_submittor_input','hardware_uniter_input')
-    try:
-        f = open('%s'%filename,'rb')
-        job_submittor_output = pickle.load(f)
-        print('Existing cases:',job_submittor_output.keys())
-    except:
-        job_submittor_output = {}
-    for case in job_submittor_input:
-        if case not in job_submittor_output:
-            cases_to_run[case] = job_submittor_input[case]
-    print('Run cases:',cases_to_run.keys())
-    print('*'*50)
-    
-    all_submitted_jobs = {}
-    for case in cases_to_run:
-        print('submitting case ',case)
-        all_submitted_jobs[case] = {}
-        fc_shots = cases_to_run[case]['fc_shots']
-        clusters = cases_to_run[case]['clusters']
-        complete_path_map = cases_to_run[case]['complete_path_map']
-        same_total_cutting_shots = distribute_cluster_shots(total_shots=fc_shots,clusters=clusters,complete_path_map=complete_path_map)
 
-        for cluster_idx, cluster_circ in enumerate(clusters):
-            cluster_instances = cases_to_run[case]['all_cluster_prob'][cluster_idx]
-            evaluator_info = get_evaluator_info(circ=cluster_circ,device_name=args.device_name,
-            fields=['device','basis_gates','coupling_map','properties','initial_layout'])
+    dirname, job_submittor_input_filename = get_filename(experiment_name=args.experiment_name,
+    circuit_type=args.circuit_type,
+    device_name=args.device_name,
+    evaluation_method=None,field='job_submittor_input')
+    job_submittor_input_filename = dirname+job_submittor_input_filename
+    job_submittor_input = read_file(filename=job_submittor_input_filename)
 
-            if args.shots_mode == 'saturated':
-                evaluator_info['num_shots'] = get_circ_saturated_shots(circs=[cluster_circ],accuracy=1e-1)[0]
-            elif args.shots_mode == 'sametotal':
-                evaluator_info['num_shots'] = same_total_cutting_shots[cluster_idx]
-            print('Cluster %d has %d instances, %d shots each, submission history:'%(cluster_idx,len(cluster_instances),evaluator_info['num_shots']))
-            
-            device_max_shots = evaluator_info['device'].configuration().max_shots
-            device_max_experiments = int(evaluator_info['device'].configuration().max_experiments/3*2)
+    dirname, uniter_input_filename = get_filename(experiment_name=args.experiment_name,
+    circuit_type=args.circuit_type,
+    device_name=args.device_name,
+    evaluation_method=args.evaluation_method,shots_mode=args.shots_mode,field='uniter_input')
+    uniter_input_filename = dirname+uniter_input_filename
+    uniter_input = read_file(filename=uniter_input_filename)
 
-            all_submitted_jobs[case][cluster_idx] = {'jobs':[],'meas_filter':None}
-            if np.power(2,len(cluster_circ.qubits))<=device_max_experiments:
-                meas_filter_job, state_labels, qubit_list = readout_mitigation(device=evaluator_info['device'],initial_layout=evaluator_info['initial_layout'])
-                all_submitted_jobs[case][cluster_idx]['meas_filter'] = (meas_filter_job, state_labels, qubit_list)
-                print('Meas_filter job id {}'.format(meas_filter_job.job_id()))
-
-            schedule = split_cluster_instances(circs=cluster_instances,shots=evaluator_info['num_shots'],max_experiments=device_max_experiments,max_shots=device_max_shots)
-
-            for s in schedule:
-                cluster_instances_batch, batch_shots = s
-                evaluator_info['num_shots'] = batch_shots
-                job_dict = submit_hardware_jobs(cluster_instances=cluster_instances_batch, evaluator_info=evaluator_info)
-                print('Submitted %d circuits to hardware, %d shots. job_id ='%(len(cluster_instances_batch),evaluator_info['num_shots']),job_dict['job'].job_id())
-                all_submitted_jobs[case][cluster_idx]['jobs'].append(job_dict)
-        print('*'*50)
-    print('-'*100)
-            
-    for case in all_submitted_jobs:
-        for cluster_idx in all_submitted_jobs[case]:
-            cluster_job_dict = all_submitted_jobs[case][cluster_idx]['jobs']
-            print('Retrieving case {} cluster {:d} has {:d} jobs'.format(case,cluster_idx,len(cluster_job_dict)))
-            hw_probs = accumulate_cluster_jobs(cluster_job_dict=cluster_job_dict,cluster_meas_filter=all_submitted_jobs[case][cluster_idx]['meas_filter'])
-            cases_to_run[case]['all_cluster_prob'][cluster_idx] = hw_probs
-        case_dict = cases_to_run[case]
-        job_submittor_output.update({case:case_dict})
-        pickle.dump(job_submittor_output, open('%s'%filename,'wb'))
-        print('Job submittor output has %d cases'%len(job_submittor_output))
-        print('*'*50)
-    print('-'*100)
+    print(job_submittor_input.keys())

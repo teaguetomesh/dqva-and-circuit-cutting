@@ -17,7 +17,7 @@ import copy
 from time import time
 import os
 
-def get_filename(experiment_name,circuit_type,device_name,evaluation_method=None,field=None):
+def get_filename(experiment_name,circuit_type,device_name,field,evaluation_method=None,shots_mode=None):
     dirname = './{}/benchmark_data/{}/'.format(experiment_name,circuit_type)
     if field == 'evaluator_input':
         evaluator_input_filename = 'evaluator_input_{}.p'.format(device_name)
@@ -27,13 +27,14 @@ def get_filename(experiment_name,circuit_type,device_name,evaluation_method=None
         return dirname, job_submittor_input_filename
     elif field == 'uniter_input':
         if evaluation_method == 'statevector_simulator':
-            uniter_input_filename = 'classical_uniter_input_{}.p'.format(device_name)
+            uniter_input_filename = 'classical_uniter_input_{}_'.format(device_name)
         elif evaluation_method == 'noisy_qasm_simulator':
-            uniter_input_filename = 'quantum_uniter_input_{}.p'.format(device_name)
+            uniter_input_filename = 'quantum_uniter_input_{}_'.format(device_name)
         elif evaluation_method == 'hardware':
-            uniter_input_filename = 'hw_uniter_input_{}.p'.format(device_name)
+            uniter_input_filename = 'hw_uniter_input_{}_'.format(device_name)
         else:
             raise Exception('Illegal evaluation method :',evaluation_method)
+        uniter_input_filename += shots_mode + '.p'
         return dirname, uniter_input_filename
     else:
         raise Exception('Illegal filename field :',field)
