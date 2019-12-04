@@ -1,9 +1,8 @@
 import pickle
 import argparse
 from utils.helper_fun import get_filename, read_file
-
-def scheduler(job_submittor_input):
-
+from qiskit.compiler import transpile, assemble
+    
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Job Submittor')
@@ -34,4 +33,11 @@ if __name__ == '__main__':
     uniter_input = read_file(filename=uniter_input_filename)
 
     print(job_submittor_input.keys())
-    print(job_submittor_input[(5,8)]['all_cluster_prob'].keys())
+    print(job_submittor_input[(5,8)].keys())
+
+    for case in job_submittor_input:
+        if case not in uniter_input:
+            clusters = job_submittor_input[case]['all_cluster_prob']
+            for cluster_idx in clusters:
+                cluster_instances = clusters[cluster_idx]
+                
