@@ -4,7 +4,7 @@ import matplotlib
 import matplotlib.pyplot as plt
 import matplotlib.patheffects as path_effects
 import numpy as np
-from helper_fun import cross_entropy, fidelity
+from utils.helper_fun import cross_entropy, fidelity, get_filename, read_file
 import os
 import argparse
 
@@ -248,14 +248,7 @@ def plot_fid_bar(saturated_best_cc,sametotal_best_cc,circuit_type,figname):
     plt.close()
 
 def read_data(filename):
-    f = open(filename, 'rb' )
-    plotter_input = {}
-    while 1:
-        try:
-            plotter_input.update(pickle.load(f))
-        except (EOFError):
-            break
-    f.close()
+    plotter_input = read_file(filename)
     circuit_type = filename.split('/')[2]
     figname = './plots/'+filename.split('/')[-1].replace('_plotter_input','')
     print('plotting',figname)
@@ -266,29 +259,28 @@ def read_data(filename):
     dy = [0.2 for x in plotter_input]
 
     for case in plotter_input:
-        ground_truth_ce = cross_entropy(target=plotter_input[case]['evaluations']['sv_noiseless'],
-        obs= plotter_input[case]['evaluations']['sv_noiseless'])
-        qasm_ce = cross_entropy(target=plotter_input[case]['evaluations']['sv_noiseless'],
-        obs= plotter_input[case]['evaluations']['qasm'])
-        qasm_noise_ce = cross_entropy(target=plotter_input[case]['evaluations']['sv_noiseless'],
-        obs= plotter_input[case]['evaluations']['qasm+noise'])
-        cutting_ce = cross_entropy(target=plotter_input[case]['evaluations']['sv_noiseless'],
-        obs= plotter_input[case]['evaluations']['cutting'])
+        ground_truth_ce = cross_entropy(target=plotter_input[case]['fc_evaluations']['sv_noiseless'],
+        obs= plotter_input[case]['fc_evaluations']['sv_noiseless'])
+        qasm_ce = cross_entropy(target=plotter_input[case]['fc_evaluations']['sv_noiseless'],
+        obs= plotter_input[case]['fc_evaluations']['qasm'])
+        qasm_noise_ce = cross_entropy(target=plotter_input[case]['fc_evaluations']['sv_noiseless'],
+        obs= plotter_input[case]['fc_evaluations']['qasm+noise'])
+        cutting_ce = cross_entropy(target=plotter_input[case]['fc_evaluations']['sv_noiseless'],
+        obs= plotter_input[case]['cutting'])
         ce_percent_change = 100*(qasm_noise_ce - cutting_ce)/(qasm_noise_ce - ground_truth_ce)
-        assert ce_percent_change <= 100+1e-10 and ce_percent_change == plotter_input[case]['ce_percent_reduction']
+        assert ce_percent_change <= 100+1e-10
         plotter_input[case]['ce_comparisons'] = (qasm_noise_ce-ground_truth_ce,cutting_ce-ground_truth_ce)
 
-        ground_truth_fid = fidelity(target=plotter_input[case]['evaluations']['sv_noiseless'],
-        obs= plotter_input[case]['evaluations']['sv_noiseless'])
-        qasm_fid = fidelity(target=plotter_input[case]['evaluations']['sv_noiseless'],
-        obs= plotter_input[case]['evaluations']['qasm'])
-        qasm_noise_fid = fidelity(target=plotter_input[case]['evaluations']['sv_noiseless'],
-        obs= plotter_input[case]['evaluations']['qasm+noise'])
-        cutting_fid = fidelity(target=plotter_input[case]['evaluations']['sv_noiseless'],
-        obs= plotter_input[case]['evaluations']['cutting'])
+        ground_truth_fid = fidelity(target=plotter_input[case]['fc_evaluations']['sv_noiseless'],
+        obs= plotter_input[case]['fc_evaluations']['sv_noiseless'])
+        qasm_fid = fidelity(target=plotter_input[case]['fc_evaluations']['sv_noiseless'],
+        obs= plotter_input[case]['fc_evaluations']['qasm'])
+        qasm_noise_fid = fidelity(target=plotter_input[case]['fc_evaluations']['sv_noiseless'],
+        obs= plotter_input[case]['fc_evaluations']['qasm+noise'])
+        cutting_fid = fidelity(target=plotter_input[case]['fc_evaluations']['sv_noiseless'],
+        obs= plotter_input[case]['cutting'])
         fid_percent_change = 100*(cutting_fid-qasm_noise_fid)/qasm_noise_fid
         if circuit_type == 'bv' or circuit_type=='hwea':
-            assert fid_percent_change == plotter_input[case]['fid_percent_improvement']
             assert abs(ground_truth_fid-1)<1e-10 and abs(qasm_fid-1)<1e-10 and qasm_noise_fid<=1 and qasm_noise_fid<=1 and cutting_fid<=1
         plotter_input[case]['fid_comparisons'] = (qasm_noise_fid,cutting_fid)
 
@@ -316,16 +308,6 @@ def read_data(filename):
     plot_heatmap(plotter_input,hw_qubits,fc_qubits,circuit_type,figname)
     return best_cc, hw_qubits, fc_qubits
 
-def get_filename(device_name,circuit_type,shots_mode,evaluation_method):
-    dirname = './benchmark_data/{}/'.format(circuit_type)
-    if evaluation_method == 'statevector_simulator':
-        filename = 'classical_plotter_input_{}_{}.p'.format(device_name,circuit_type)
-    elif evaluation_method == 'noisy_qasm_simulator':
-        filename = 'quantum_plotter_input_{}_{}_{}.p'.format(device_name,circuit_type,shots_mode)
-    else:
-        raise Exception('Illegal evaluation method :',evaluation_method)
-    return dirname+filename
-
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='MPI evaluator.')
     parser.add_argument('--device-name', metavar='S', type=str,help='which evaluator device input file to run')
@@ -335,15 +317,14 @@ if __name__ == '__main__':
 
     assert args.circuit_type in ['supremacy','hwea','bv','qft','sycamore']
 
-    saturated_filename = get_filename(device_name=args.device_name,circuit_type=args.circuit_type,shots_mode='saturated',evaluation_method=args.evaluation_method)
-    sametotal_filename = get_filename(device_name=args.device_name,circuit_type=args.circuit_type,shots_mode='sametotal',evaluation_method=args.evaluation_method)
-
-    dirname = './plots'
+    dirname, saturated_filename = get_filename(experiment_name='simulator',circuit_type=args.circuit_type,device_name=args.device_name,field='plotter_input',evaluation_method=args.evaluation_method,shots_mode='saturated')
+    saturated_best_cc, hw_qubits, fc_qubits = read_data(filename=dirname+saturated_filename)
+    dirname, sametotal_filename = get_filename(experiment_name='simulator',circuit_type=args.circuit_type,device_name=args.device_name,field='plotter_input',evaluation_method=args.evaluation_method,shots_mode='sametotal')
+    sametotal_best_cc, hw_qubits, fc_qubits = read_data(filename=dirname+sametotal_filename)
+    
+    dirname = get_filename(experiment_name='simulator',circuit_type=args.circuit_type,device_name=args.device_name,field='plotter_output',evaluation_method=args.evaluation_method,shots_mode=None)
     if not os.path.exists(dirname):
         os.mkdir(dirname)
-
-    saturated_best_cc, hw_qubits, fc_qubits = read_data(filename=saturated_filename)
-    sametotal_best_cc, hw_qubits, fc_qubits = read_data(filename=sametotal_filename)
 
     if args.evaluation_method == 'noisy_qasm_simulator':
         evaluation_header = 'quantum'
