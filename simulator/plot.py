@@ -132,7 +132,7 @@ def annotate_heatmap(im, data=None, valfmt="{x:.2f}",
 
     return texts
 
-def plot_tradeoff(best_cc,circuit_type,figname):
+def plot_tradeoff(best_cc,circuit_type,filename):
     plt.figure(figsize=(10,5))
     plt.subplot(121)
     plt.xlabel('Number of qubits',size=12)
@@ -145,15 +145,15 @@ def plot_tradeoff(best_cc,circuit_type,figname):
         plt.ylabel('Fidelity improvement (%)',size=12)
     plt.xticks([x for x in best_cc])
     plt.subplot(122)
-    plt.plot([fc for fc in best_cc], [best_cc[fc]['uniter_time'] for fc in best_cc], 'r*')
+    plt.plot([fc for fc in best_cc], [best_cc[fc]['reconstructor_time'] for fc in best_cc], 'r*')
     plt.xlabel('Number of qubits',size=12)
     plt.ylabel('Reconstruction time (s)',size=12)
     plt.xticks([x for x in best_cc])
     plt.tight_layout()
-    plt.savefig('%s_tradeoff.png'%figname[:-2],dpi=400)
+    plt.savefig('%s_tradeoff.png'%filename[:-2],dpi=400)
     plt.close()
 
-def plot_heatmap(plotter_input,hw_qubits,fc_qubits,circuit_type,figname):
+def plot_heatmap(plotter_input,hw_qubits,fc_qubits,circuit_type,filename):
     hw_qubits_unique = list(np.unique(hw_qubits))
     fc_qubits_unique = list(np.unique(fc_qubits))
     fc_qubits_unique.sort(reverse=True)
@@ -179,12 +179,11 @@ def plot_heatmap(plotter_input,hw_qubits,fc_qubits,circuit_type,figname):
     ax.set_xlabel('Hardware qubits',fontsize=18,labelpad=10)
     ax.set_ylabel('Full circuit qubits',fontsize=18,labelpad=10)
 
-    metric_type = 'ce' if (circuit_type == 'supremacy' or circuit_type == 'qft') else 'fid'
     fig.tight_layout()
-    plt.savefig('{}_{}_map.png'.format(figname[:-2],metric_type),dpi=1000)
+    plt.savefig('%s_heatmap.png'%filename[:-2],dpi=400)
     plt.close()
 
-def plot_fid_bar(saturated_best_cc,sametotal_best_cc,circuit_type,figname):
+def plot_fid_bar(saturated_best_cc,sametotal_best_cc,circuit_type,dirname,device_name):
     sametotal_fc_size = list(sametotal_best_cc.keys())
     saturated_fc_size = list(saturated_best_cc.keys())
     all_fc_size = list(set().union(sametotal_fc_size,saturated_fc_size))
@@ -244,14 +243,12 @@ def plot_fid_bar(saturated_best_cc,sametotal_best_cc,circuit_type,figname):
     plt.legend()
 
     plt.tight_layout()
-    plt.savefig('%s_%s.png'%(figname[:-4],circuit_type),dpi=400)
+    plt.savefig('%s/%s_shots_comparison.png'%(dirname,device_name),dpi=400)
     plt.close()
 
-def read_data(filename):
+def process_data(filename,circuit_type):
     plotter_input = read_file(filename)
-    circuit_type = filename.split('/')[2]
-    figname = './plots/'+filename.split('/')[-1].replace('_plotter_input','')
-    print('plotting',figname)
+    print('Processing',filename)
 
     hw_qubits = [case[0] for case in plotter_input]
     fc_qubits = [case[1] for case in plotter_input]
@@ -270,6 +267,7 @@ def read_data(filename):
         ce_percent_change = 100*(qasm_noise_ce - cutting_ce)/(qasm_noise_ce - ground_truth_ce)
         assert ce_percent_change <= 100+1e-10
         plotter_input[case]['ce_comparisons'] = (qasm_noise_ce-ground_truth_ce,cutting_ce-ground_truth_ce)
+        plotter_input[case]['ce_percent_reduction'] = ce_percent_change
 
         ground_truth_fid = fidelity(target=plotter_input[case]['fc_evaluations']['sv_noiseless'],
         obs= plotter_input[case]['fc_evaluations']['sv_noiseless'])
@@ -283,30 +281,30 @@ def read_data(filename):
         if circuit_type == 'bv' or circuit_type=='hwea':
             assert abs(ground_truth_fid-1)<1e-10 and abs(qasm_fid-1)<1e-10 and qasm_noise_fid<=1 and qasm_noise_fid<=1 and cutting_fid<=1
         plotter_input[case]['fid_comparisons'] = (qasm_noise_fid,cutting_fid)
+        plotter_input[case]['fid_percent_improvement'] = fid_percent_change
 
-        print('case {}: ce percentage reduction = {:.3f}, fidelity improvement = {:.3f}, reconstruction time: {:.3e}'.format(case,ce_percent_change,fid_percent_change,plotter_input[case]['uniter_time']))
-    print('*'*50)
+        print('case {}: ce percentage reduction = {:.3f}, fidelity improvement = {:.3f}, reconstruction time: {:.3e}'.format(case,ce_percent_change,fid_percent_change,plotter_input[case]['reconstructor_time']))
+    print('*'*25,'Best Cases','*'*25)
 
     best_cc = {}
     for case in plotter_input:
         ce_percent = plotter_input[case]['ce_percent_reduction']
         fid_percent = plotter_input[case]['fid_percent_improvement']
-        uniter_time = plotter_input[case]['uniter_time']
+        reconstructor_time = plotter_input[case]['reconstructor_time']
         qasm_noise_fid, cutting_fid = plotter_input[case]['fid_comparisons']
         qasm_noise_ce, cutting_ce = plotter_input[case]['ce_comparisons']
         hw, fc = case
         if circuit_type == 'supremacy':
             if (fc in best_cc and ce_percent>best_cc[fc]['ce_percent']) or (fc not in best_cc):
-                best_cc[fc] = {'ce_percent':ce_percent,'uniter_time':uniter_time,'best_case':case,'qasm_noise_ce':qasm_noise_ce,'cutting_ce':cutting_ce}
+                best_cc[fc] = {'ce_percent':ce_percent,'reconstructor_time':reconstructor_time,'best_case':case,'qasm_noise_ce':qasm_noise_ce,'cutting_ce':cutting_ce}
         elif circuit_type == 'bv' or circuit_type=='hwea':
             if (fc in best_cc and fid_percent>best_cc[fc]['fid_percent']) or (fc not in best_cc):
-                best_cc[fc] = {'fid_percent':fid_percent,'uniter_time':uniter_time,'best_case':case,'qasm_noise_fid':qasm_noise_fid,'cutting_fid':cutting_fid}
+                best_cc[fc] = {'fid_percent':fid_percent,'reconstructor_time':reconstructor_time,'best_case':case,'qasm_noise_fid':qasm_noise_fid,'cutting_fid':cutting_fid}
         else:
             raise Exception('Illegal circuit type:',circuit_type)
     [print(best_cc[fc]) for fc in best_cc]
-    plot_tradeoff(best_cc,circuit_type,figname)
-    plot_heatmap(plotter_input,hw_qubits,fc_qubits,circuit_type,figname)
-    return best_cc, hw_qubits, fc_qubits
+    print('*'*50)
+    return plotter_input, best_cc, hw_qubits, fc_qubits
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='MPI evaluator.')
@@ -317,21 +315,17 @@ if __name__ == '__main__':
 
     assert args.circuit_type in ['supremacy','hwea','bv','qft','sycamore']
 
-    dirname, saturated_filename = get_filename(experiment_name='simulator',circuit_type=args.circuit_type,device_name=args.device_name,field='plotter_input',evaluation_method=args.evaluation_method,shots_mode='saturated')
-    saturated_best_cc, hw_qubits, fc_qubits = read_data(filename=dirname+saturated_filename)
-    dirname, sametotal_filename = get_filename(experiment_name='simulator',circuit_type=args.circuit_type,device_name=args.device_name,field='plotter_input',evaluation_method=args.evaluation_method,shots_mode='sametotal')
-    sametotal_best_cc, hw_qubits, fc_qubits = read_data(filename=dirname+sametotal_filename)
-    
-    dirname = get_filename(experiment_name='simulator',circuit_type=args.circuit_type,device_name=args.device_name,field='plotter_output',evaluation_method=args.evaluation_method,shots_mode=None)
-    if not os.path.exists(dirname):
-        os.mkdir(dirname)
+    print('-'*50,'Plot','-'*50,flush=True)
 
-    if args.evaluation_method == 'noisy_qasm_simulator':
-        evaluation_header = 'quantum'
-    elif args.evaluation_method == 'statevector_simulator':
-        evaluation_header = 'classical'
-    else:
-        evaluation_header = None
-    figname = '{}/{}_{}_improvement.png'.format(dirname,evaluation_header,args.device_name)
-    plot_fid_bar(saturated_best_cc=saturated_best_cc, sametotal_best_cc=sametotal_best_cc,circuit_type=args.circuit_type,figname=figname)
+    dirname, saturated_filename = get_filename(experiment_name='simulator',circuit_type=args.circuit_type,device_name=args.device_name,field='plotter_input',evaluation_method=args.evaluation_method,shots_mode='saturated')
+    saturated_plotter_input, saturated_best_cc, saturated_hw_qubits, saturated_fc_qubits = process_data(filename=dirname+saturated_filename,circuit_type=args.circuit_type)
+    plot_tradeoff(best_cc=saturated_best_cc,circuit_type=args.circuit_type,filename=dirname+saturated_filename)
+    plot_heatmap(plotter_input=saturated_plotter_input,hw_qubits=saturated_hw_qubits,fc_qubits=saturated_fc_qubits,circuit_type=args.circuit_type,filename=dirname+saturated_filename)
+
+    dirname, sametotal_filename = get_filename(experiment_name='simulator',circuit_type=args.circuit_type,device_name=args.device_name,field='plotter_input',evaluation_method=args.evaluation_method,shots_mode='sametotal')
+    sametotal_plotter_input, sametotal_best_cc, sametotal_hw_qubits, sametotal_fc_qubits = process_data(filename=dirname+sametotal_filename,circuit_type=args.circuit_type)
+    plot_tradeoff(best_cc=sametotal_best_cc,circuit_type=args.circuit_type,filename=dirname+sametotal_filename)
+    plot_heatmap(plotter_input=sametotal_plotter_input,hw_qubits=sametotal_hw_qubits,fc_qubits=sametotal_fc_qubits,circuit_type=args.circuit_type,filename=dirname+sametotal_filename)
+    
+    plot_fid_bar(saturated_best_cc=saturated_best_cc, sametotal_best_cc=sametotal_best_cc,circuit_type=args.circuit_type,dirname=dirname,device_name=args.device_name)
     print('-'*100)

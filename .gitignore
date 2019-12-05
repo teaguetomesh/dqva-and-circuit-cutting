@@ -6,8 +6,8 @@ gurobi.log
 
 .DS_Store
 *.pdf
-benchmark_data
-no_mitigation/benchmark_data/
+*.p
+
 
 
 .DS_Store

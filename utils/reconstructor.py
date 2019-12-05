@@ -287,14 +287,14 @@ if __name__ == '__main__':
     uniter_input = read_file(dirname+uniter_input_filename)
     dirname, plotter_input_filename = get_filename(experiment_name=args.experiment_name,circuit_type=args.circuit_type,device_name=args.device_name,field='plotter_input',evaluation_method=args.evaluation_method,shots_mode=args.shots_mode)
     plotter_input = read_file(dirname+plotter_input_filename)
-    print('-'*50,'Reconstructor %s'%(dirname+uniter_input_filename),'-'*50,flush=True)
+    print('-'*50,'Reconstructor','-'*50,flush=True)
     print('Existing cases:',plotter_input.keys())
 
     counter = len(plotter_input.keys())
     for case in uniter_input:
-        print('case {}'.format(case),flush=True)
         if case in plotter_input:
             continue
+        print('case {}'.format(case),flush=True)
         case_dict = copy.deepcopy(uniter_input[case])
         
         uniter_begin = time()
@@ -302,7 +302,7 @@ if __name__ == '__main__':
         full_circ=uniter_input[case]['full_circ'], cluster_circs=uniter_input[case]['clusters'],
         cluster_sim_probs=uniter_input[case]['all_cluster_prob'])
         uniter_time = time()-uniter_begin
-        case_dict['uniter_time'] = uniter_time
+        case_dict['reconstructor_time'] = uniter_time
         case_dict['cutting'] = reconstructed_prob
 
         pickle.dump({case:case_dict}, open('%s'%(dirname+plotter_input_filename),'ab'))
