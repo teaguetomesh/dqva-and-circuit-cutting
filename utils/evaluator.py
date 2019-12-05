@@ -156,6 +156,12 @@ if __name__ == '__main__':
             output_filename = dirname + uniter_input_filename
             evaluator_output = read_file(output_filename)
         print('Existing cases:',evaluator_output.keys())
+        total_cases = 0
+        for case in evaluator_input:
+            if case in evaluator_output:
+                continue
+            else:
+                total_cases += 1
         counter = len(evaluator_output.keys())
         for case in evaluator_input:
             if case in evaluator_output:
@@ -171,6 +177,8 @@ if __name__ == '__main__':
                 for i in range(num_workers):
                     state = MPI.Status()
                     rank_results, rank_classical_time, rank_quantum_time = comm.recv(source=MPI.ANY_SOURCE,status=state)
+                    case_dict['quantum_time'] = max(case_dict['quantum_time'],rank_quantum_time)
+                    case_dict['classical_time'] = max(case_dict['classical_time'],rank_classical_time)
                     for cluster_idx in rank_results:
                         if cluster_idx in case_dict['all_cluster_prob']:
                             case_dict['all_cluster_prob'][cluster_idx].update(rank_results[cluster_idx])
@@ -178,7 +186,7 @@ if __name__ == '__main__':
                             case_dict['all_cluster_prob'][cluster_idx] = rank_results[cluster_idx]
                 pickle.dump({case:case_dict}, open(output_filename,'ab'))
                 counter += 1
-                print('Rank MASTER dumped case {}, total {:d} cases'.format(case,counter))
+                print('Rank MASTER dumped case {}, {:d}/{:d} cases'.format(case,counter,total_cases))
                 print('-'*100)
         for i in range(num_workers):
             comm.send('DONE', dest=i)
@@ -227,17 +235,16 @@ if __name__ == '__main__':
                         print('rank {} runs case {}, cluster_{} {}_qubits * {}_instances on {} QUANTUM SIMULATOR, {} shots = {}, quantum time  = {:.3e}'.format(
                             rank,case,cluster_idx,len(clusters[cluster_idx].qubits),
                             len(rank_combinations[cluster_idx]),args.device_name,args.shots_mode,evaluator_info['num_shots'],elapsed_time),flush=True)
-                    # elif args.evaluation_method == 'hardware':
-                    #     quantum_evaluator_begin = time()
-                    #     cluster_prob = evaluate_cluster(complete_path_map=complete_path_map,
-                    #     cluster_circ=clusters[cluster_idx],
-                    #     combinations=rank_combinations[case][cluster_idx],
-                    #     backend='hardware',evaluator_info=None)
-                    #     elapsed_time = time()-quantum_evaluator_begin
-                    #     rank_quantum_time[case] += elapsed_time
-                    #     print('case {}, cluster_{} {}_qubits * {}_instances on {} QUANTUM HARDWARE, {} shots'.format(
-                    #             case,cluster_idx,len(clusters[cluster_idx].qubits),
-                    #             len(rank_combinations[case][cluster_idx]),args.device_name,args.shots_mode))
+                    elif args.evaluation_method == 'hardware':
+                        quantum_evaluator_begin = time()
+                        cluster_prob = evaluate_cluster(complete_path_map=complete_path_map,
+                        cluster_circ=clusters[cluster_idx],
+                        combinations=rank_combinations[cluster_idx],
+                        backend='hardware',evaluator_info=None)
+                        elapsed_time = time()-quantum_evaluator_begin
+                        print('case {}, cluster_{} {}_qubits * {}_instances on {} QUANTUM HARDWARE, {} shots'.format(
+                            case,cluster_idx,len(clusters[cluster_idx].qubits),
+                            len(rank_combinations[cluster_idx]),args.device_name,args.shots_mode),flush=True)
                     else:
                         raise Exception('Illegal evaluation method:',args.evaluation_method)
                     rank_results[cluster_idx] = cluster_prob
