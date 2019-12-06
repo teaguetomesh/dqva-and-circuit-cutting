@@ -3,9 +3,9 @@ import os
 from time import time
 import numpy as np
 from qcg.generators import gen_supremacy, gen_hwea, gen_BV, gen_qft, gen_sycamore
-import MIQCP_searcher as searcher
-import cutter
-from helper_fun import evaluate_circ, get_evaluator_info, get_circ_saturated_shots, readout_mitigation, reverseBits
+import utils.MIQCP_searcher as searcher
+import utils.cutter as cutter
+from utils.helper_fun import evaluate_circ, get_evaluator_info, get_circ_saturated_shots, readout_mitigation, reverseBits, get_filename, read_file, factor_int
 import argparse
 from qiskit import IBMQ
 import copy
@@ -116,21 +116,13 @@ if __name__ == '__main__':
 
     assert args.circuit_type in ['supremacy','hwea','bv','qft','sycamore']
 
-    print('-'*50,'Generator %s %s'%(args.device_name,args.circuit_type),'-'*50)
-    
-    dirname = './benchmark_data'
+    dirname, evaluator_input_filename = get_filename(experiment_name='hardware',circuit_type=args.circuit_type,device_name=args.device_name,field='evaluator_input',evaluation_method=None,shots_mode=None)
     if not os.path.exists(dirname):
-        os.mkdir(dirname)
-    dirname = './benchmark_data/%s'%args.circuit_type
-    if not os.path.exists(dirname):
-        os.mkdir(dirname)
+        os.makedirs(dirname)
 
-    try:
-        f = open('./benchmark_data/evaluator_input_{}_{}.p'.format(args.device_name,args.circuit_type),'rb')
-        evaluator_input = pickle.load(f)
-        print('Existing cases:',evaluator_input.keys())
-    except:
-        evaluator_input = {}
+    print('-'*50,'Generator','-'*50,flush=True)
+    evaluator_input = read_file(dirname+evaluator_input_filename)
+    print('Existing cases:',evaluator_input.keys())
 
     evaluator_info = get_evaluator_info(circ=None,device_name=args.device_name,fields=['properties','device'])
     device_size = len(evaluator_info['properties'].qubits)
@@ -138,12 +130,12 @@ if __name__ == '__main__':
     device_max_experiments = int(evaluator_info['device'].configuration().max_experiments/2)
 
     # NOTE: toggle circuits to benchmark
-    dimension_l = [[1,3],[2,2],[1,5],[2,3],[1,7],[2,4],[3,3],[2,5],[3,4],[2,7],[4,4],[3,6],[4,5]]
+    dimension_l = np.arange(8,10)
     full_circs = {}
     cases_to_run = {}
     for cluster_max_qubit in range(args.min_qubit,args.max_qubit+1):
         for dimension in dimension_l:
-            i,j = dimension
+            i,j = factor_int(dimension)
             full_circuit_size = i*j
             if full_circuit_size<=cluster_max_qubit or full_circuit_size>device_size or (cluster_max_qubit-1)*args.max_clusters<full_circuit_size:
                 continue
@@ -194,6 +186,8 @@ if __name__ == '__main__':
                 cases_to_run[case] = copy.deepcopy(case_dict)
                 print('%d cases to run:'%(len(cases_to_run)),cases_to_run.keys())
                 print('-'*100)
+    
+    print('All cases to run:',cases_to_run.keys(),flush=True)
     for case in cases_to_run:
         fc_jobs = math.ceil(cases_to_run[case]['fc_shots']/device_max_shots/device_max_experiments)
         print('case {} needs {} fc jobs'.format(case,fc_jobs))
@@ -207,35 +201,34 @@ if __name__ == '__main__':
         cases_to_run[case]['fc_evaluations'] = fc_evaluations
         hw_jobs = fc_evaluations['hw']
         print('Submitting case {} has job ids {}'.format(case,[x['job'].job_id() for x in hw_jobs]))
-        try:
+        if 'meas_filter' in fc_evaluations:
             meas_filter_job, _, _ = fc_evaluations['meas_filter']
             print('Meas_filter job id {}'.format(meas_filter_job.job_id()))
-        except:
+        else:
             meas_filter_job = None
         print('*'*50)
     print('Submitted %d cases to hw'%(len(cases_to_run)))
     print('-'*100)
+    
+    counter = len(evaluator_input.keys())
     for case in cases_to_run:
-        if 'hw' not in fields_to_run:
-            case_dict = copy.deepcopy(cases_to_run[case])
-            evaluator_input.update({case:case_dict})
+        hw_jobs = cases_to_run[case]['fc_evaluations']['hw']
+        print('Retrieving case {}'.format(case))
+        if 'meas_filter' in cases_to_run[case]['fc_evaluations']:
+            meas_filter = cases_to_run[case]['fc_evaluations']['meas_filter']
+            meas_filter_job, _, _ = meas_filter
         else:
-            hw_jobs = cases_to_run[case]['fc_evaluations']['hw']
-            print('Retrieving case {}'.format(case))
-            try:
-                meas_filter = cases_to_run[case]['fc_evaluations']['meas_filter']
-                meas_filter_job, _, _ = meas_filter
-            except:
-                meas_filter = None
-            execute_begin = time()
-            hw_prob = accumulate_jobs(jobs=hw_jobs,meas_filter=meas_filter)
-            print('Execute on hardware took %.3e seconds'%(time()-execute_begin))
-            
-            cases_to_run[case]['fc_evaluations'] = {'sv_noiseless':cases_to_run[case]['fc_evaluations']['sv_noiseless'],'qasm':cases_to_run[case]['fc_evaluations']['qasm'],
-            'qasm+noise':cases_to_run[case]['fc_evaluations']['qasm+noise'],'hw':hw_prob}
+            meas_filter = None
+        execute_begin = time()
+        hw_prob = accumulate_jobs(jobs=hw_jobs,meas_filter=meas_filter)
+        print('Execute on hardware took %.3e seconds'%(time()-execute_begin))
+        
+        cases_to_run[case]['fc_evaluations'] = {'sv_noiseless':cases_to_run[case]['fc_evaluations']['sv_noiseless'],'qasm':cases_to_run[case]['fc_evaluations']['qasm'],
+        'qasm+noise':cases_to_run[case]['fc_evaluations']['qasm+noise'],'hw':hw_prob}
 
-            case_dict = copy.deepcopy(cases_to_run[case])
-            evaluator_input.update({case:case_dict})
-        print('Dump evaluator_input with %d cases'%(len(evaluator_input)))
-        pickle.dump(evaluator_input,open('./benchmark_data/evaluator_input_{}_{}.p'.format(args.device_name,args.circuit_type),'wb'))
+        case_dict = copy.deepcopy(cases_to_run[case])
+        pickle.dump({case:case_dict},open(dirname+evaluator_input_filename,'ab'))
+        counter += 1
+        print('Dump evaluator_input with %d cases'%(counter))
+        print('*'*50)
     print('-'*100)

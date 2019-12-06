@@ -263,8 +263,8 @@ def evaluate_circ(circ, backend, evaluator_info):
             mapped_circuit_l = [mapped_circuit for i in range(num_experiments)]
             qobj = assemble(mapped_circuit_l, backend=evaluator_info['device'], shots=num_shots)
             print('Submitted %d * %d = %d shots to hardware'%(num_experiments,num_shots,num_experiments*num_shots))
-            job = evaluator_info['device'].run(qobj)
-            # job = execute(mapped_circuit_l, backend=Aer.get_backend('qasm_simulator'), shots=num_shots)
+            # job = evaluator_info['device'].run(qobj)
+            job = Aer.get_backend('qasm_simulator').run(qobj)
             jobs.append({'job':job,'circ':circ,'mapped_circuit_l':mapped_circuit_l,'evaluator_info':evaluator_info})
         return jobs
     else:
@@ -291,8 +291,8 @@ def readout_mitigation(device,initial_layout):
     # Execute the calibration circuits
     meas_calibs_transpiled = transpile(meas_calibs, backend=device)
     qobj = assemble(meas_calibs_transpiled, backend=device, shots=num_shots)
-    job = device.run(qobj)
-    # job = execute(meas_calibs_transpiled, backend=Aer.get_backend('qasm_simulator'), shots=num_shots)
+    # job = device.run(qobj)
+    job = Aer.get_backend('qasm_simulator').run(qobj)
     return job, state_labels, qubit_list
 
 def get_evaluator_info(circ,device_name,fields):

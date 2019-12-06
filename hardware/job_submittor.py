@@ -2,7 +2,7 @@ import numpy as np
 import pickle
 import argparse
 from qiskit.compiler import transpile, assemble
-from helper_fun import get_evaluator_info, apply_measurement, reverseBits, get_circ_saturated_shots, distribute_cluster_shots, readout_mitigation
+from utils.helper_fun import get_evaluator_info, apply_measurement, reverseBits, get_circ_saturated_shots, distribute_cluster_shots, readout_mitigation, get_filename, read_file
 from time import time
 import copy
 from qiskit import Aer, execute
@@ -61,8 +61,8 @@ def submit_hardware_jobs(cluster_instances, evaluator_info):
         mapped_circuits[init_meas] = mapped_circuit
 
     qobj = assemble(list(mapped_circuits.values()), backend=evaluator_info['device'], shots=batch_shots)
-    job = evaluator_info['device'].run(qobj)
-    # job = execute(list(mapped_circuits.values()), backend=Aer.get_backend('qasm_simulator'), shots=batch_shots)
+    # job = evaluator_info['device'].run(qobj)
+    job = Aer.get_backend('qasm_simulator').run(qobj)
     job_dict = {'job':job,'mapped_circuits':mapped_circuits,'evaluator_info':evaluator_info}
     return job_dict
 
@@ -119,23 +119,24 @@ if __name__ == '__main__':
 
     assert args.circuit_type in ['supremacy','hwea','bv','qft','sycamore']
     assert args.shots_mode in ['saturated','sametotal']
+
+    dirname, job_submittor_input_filename = get_filename(experiment_name='hardware',circuit_type=args.circuit_type,device_name=args.device_name,field='job_submittor_input',evaluation_method=None,shots_mode=None)
     
-    print('-'*50,'Job Submittor %s %s %s'%(args.shots_mode,args.circuit_type,args.device_name),'-'*50)
-    input_file = './benchmark_data/{}/job_submittor_input_{}_{}_{}.p'.format(args.circuit_type,args.device_name,args.circuit_type,args.shots_mode)
-    job_submittor_input = pickle.load(open(input_file, 'rb' ))
+    print('-'*50,'Job Submittor','-'*50)
+    job_submittor_input = read_file(dirname+job_submittor_input_filename)
+    dirname, uniter_input_filename = get_filename(experiment_name='hardware',circuit_type=args.circuit_type,device_name=args.device_name,field='uniter_input',evaluation_method='hardware',shots_mode=args.shots_mode)
+    job_submittor_output = read_file(dirname+uniter_input_filename)
+    print('Existing cases:',job_submittor_output.keys())
     cases_to_run = {}
-    filename = input_file.replace('job_submittor_input','hardware_uniter_input')
-    try:
-        f = open('%s'%filename,'rb')
-        job_submittor_output = pickle.load(f)
-        print('Existing cases:',job_submittor_output.keys())
-    except:
-        job_submittor_output = {}
     for case in job_submittor_input:
         if case not in job_submittor_output:
-            cases_to_run[case] = job_submittor_input[case]
+            cases_to_run[case] = copy.deepcopy(job_submittor_input[case])
     print('Run cases:',cases_to_run.keys())
     print('*'*50)
+
+    evaluator_info = get_evaluator_info(circ=None,device_name=args.device_name,fields=['properties','device'])
+    device_max_shots = evaluator_info['device'].configuration().max_shots
+    device_max_experiments = int(evaluator_info['device'].configuration().max_experiments/2)
     
     all_submitted_jobs = {}
     for case in cases_to_run:
@@ -156,9 +157,6 @@ if __name__ == '__main__':
             elif args.shots_mode == 'sametotal':
                 evaluator_info['num_shots'] = same_total_cutting_shots[cluster_idx]
             print('Cluster %d has %d instances, %d shots each, submission history:'%(cluster_idx,len(cluster_instances),evaluator_info['num_shots']))
-            
-            device_max_shots = evaluator_info['device'].configuration().max_shots
-            device_max_experiments = int(evaluator_info['device'].configuration().max_experiments/3*2)
 
             all_submitted_jobs[case][cluster_idx] = {'jobs':[],'meas_filter':None}
             if np.power(2,len(cluster_circ.qubits))<=device_max_experiments:
@@ -184,8 +182,7 @@ if __name__ == '__main__':
             hw_probs = accumulate_cluster_jobs(cluster_job_dict=cluster_job_dict,cluster_meas_filter=all_submitted_jobs[case][cluster_idx]['meas_filter'])
             cases_to_run[case]['all_cluster_prob'][cluster_idx] = hw_probs
         case_dict = cases_to_run[case]
-        job_submittor_output.update({case:case_dict})
-        pickle.dump(job_submittor_output, open('%s'%filename,'wb'))
+        pickle.dump({case:case_dict}, open(dirname+uniter_input_filename,'ab'))
         print('Job submittor output has %d cases'%len(job_submittor_output))
         print('*'*50)
     print('-'*100)
