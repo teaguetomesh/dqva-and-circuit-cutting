@@ -5,7 +5,7 @@ import numpy as np
 from qcg.generators import gen_supremacy, gen_hwea, gen_BV, gen_qft, gen_sycamore
 import utils.MIQCP_searcher as searcher
 import utils.cutter as cutter
-from utils.helper_fun import evaluate_circ, get_evaluator_info, get_circ_saturated_shots, reverseBits, get_filename, read_file
+from utils.helper_fun import get_evaluator_info, get_filename, read_file
 import argparse
 from qiskit import IBMQ
 import copy

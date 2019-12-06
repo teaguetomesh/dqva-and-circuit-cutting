@@ -139,12 +139,14 @@ def get_circ_saturated_shots(circs,device_name):
         
         qasm_noise_evaluator_info = get_evaluator_info(circ=circ,device_name=device_name,
         fields=['device','basis_gates','coupling_map','properties','initial_layout','noise_model'])
-        qasm_noise_evaluator_info['num_shots'] = 1024
+        qasm_noise_evaluator_info['num_shots'] = shots_increment
+        device_max_shots = qasm_noise_evaluator_info['device'].configuration().max_shots
+        device_max_experiments = int(qasm_noise_evaluator_info['device'].configuration().max_experiments/3*2)
         ce_list = []
         counter = 0
         noisy_qasm_prob = [0 for i in range(np.power(2,len(circ.qubits)))]
         while 1:
-            counter += 1.0
+            counter += 1
             noisy_qasm_prob_batch = evaluate_circ(circ=circ,backend='noisy_qasm_simulator',evaluator_info=qasm_noise_evaluator_info)
             noisy_qasm_prob = [(x*(counter-1)+y)/counter for x,y in zip(noisy_qasm_prob,noisy_qasm_prob_batch)]
             assert abs(sum(noisy_qasm_prob)-1)<1e-5
@@ -155,9 +157,9 @@ def get_circ_saturated_shots(circs,device_name):
                 second_derivative = (ce_list[-1]+ce_list[-3]-2*ce_list[-2])/(np.power(shots_increment,2))
                 if counter%10==9:
                     print('current shots = %d, second-derivative = %.3e'%(num_shots,second_derivative))
-                if second_derivative <= 1e-10:
+                if abs(second_derivative) < 1e-9 or num_shots/device_max_experiments/device_max_shots>=10:
                     saturated_shots.append(num_shots)
-                    print('cross entropy list:',['%.3e'%x for x in ce_list])
+                    # print('cross entropy list:',['%.3e'%x for x in ce_list])
                     break
     return saturated_shots
 

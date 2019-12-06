@@ -127,10 +127,10 @@ if __name__ == '__main__':
     evaluator_info = get_evaluator_info(circ=None,device_name=args.device_name,fields=['properties','device'])
     device_size = len(evaluator_info['properties'].qubits)
     device_max_shots = evaluator_info['device'].configuration().max_shots
-    device_max_experiments = int(evaluator_info['device'].configuration().max_experiments/2)
+    device_max_experiments = int(evaluator_info['device'].configuration().max_experiments/3*2)
 
     # NOTE: toggle circuits to benchmark
-    dimension_l = np.arange(8,10)
+    dimension_l = np.arange(8,9)
     full_circs = {}
     cases_to_run = {}
     for cluster_max_qubit in range(args.min_qubit,args.max_qubit+1):
@@ -174,7 +174,7 @@ if __name__ == '__main__':
             else:
                 m.print_stat()
                 clusters, complete_path_map, K, d = cutter.cut_circuit(full_circ, positions)
-                fc_shots = get_circ_saturated_shots(circs=[full_circ],accuracy=1e-1,circuit_type=args.circuit_type)[0]
+                fc_shots = get_circ_saturated_shots(circs=[full_circ],device_name=args.device_name)[0]
                 num_jobs = math.ceil(fc_shots/device_max_shots/device_max_experiments)
                 if num_jobs>10:
                     print('Case {} needs {} jobs'.format(case,num_jobs))
