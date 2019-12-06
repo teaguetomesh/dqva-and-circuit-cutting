@@ -222,7 +222,7 @@ if __name__ == '__main__':
                         fields=['device','basis_gates','coupling_map','properties','initial_layout','noise_model'])
                         quantum_evaluator_begin = time()
                         if args.shots_mode == 'saturated':
-                            evaluator_info['num_shots'] = get_circ_saturated_shots(circs=[clusters[cluster_idx]],accuracy=1e-1)[0]
+                            evaluator_info['num_shots'] = get_circ_saturated_shots(circs=[clusters[cluster_idx]],device_name=args.device_name)[0]
                         elif args.shots_mode == 'sametotal':
                             same_total_cutting_shots = distribute_cluster_shots(total_shots=case_dict['fc_shots'],clusters=clusters,complete_path_map=complete_path_map)
                             evaluator_info['num_shots'] = same_total_cutting_shots[cluster_idx]

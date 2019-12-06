@@ -78,7 +78,7 @@ if __name__ == '__main__':
     device_size = len(evaluator_info['properties'].qubits)
 
     # NOTE: toggle circuits to benchmark
-    dimension_l = np.arange(8,10)
+    dimension_l = np.arange(8,9)
     full_circs = {}
     cases_to_run = {}
     for cluster_max_qubit in range(args.min_qubit,args.max_qubit+1):
@@ -123,7 +123,7 @@ if __name__ == '__main__':
                 m.print_stat()
                 clusters, complete_path_map, K, d = cutter.cut_circuit(full_circ, positions)
                 if fc_shots == None:
-                    fc_shots = get_circ_saturated_shots(circs=[full_circ],accuracy=1e-1,circuit_type=args.circuit_type)[0]
+                    fc_shots = get_circ_saturated_shots(circs=[full_circ],device_name=args.device_name)[0]
                 full_circs[full_circuit_size] = full_circ, fc_shots
                 print('saturated fc shots = %d'%(fc_shots),flush=True)
                 case_dict = {'full_circ':full_circ,'fc_shots':fc_shots,'searcher_time':searcher_time,
