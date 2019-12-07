@@ -2,7 +2,7 @@ import numpy as np
 import pickle
 import argparse
 from qiskit.compiler import transpile, assemble
-from utils.helper_fun import get_evaluator_info, apply_measurement, reverseBits, get_circ_saturated_shots, distribute_cluster_shots, readout_mitigation, get_filename, read_file
+from utils.helper_fun import get_evaluator_info, apply_measurement, reverseBits, get_circ_saturated_shots, distribute_cluster_shots, readout_mitigation, get_filename, read_file, schedule_job
 from time import time
 import copy
 from qiskit import Aer, execute
@@ -16,51 +16,17 @@ def update_counts(cumulated, batch):
             cumulated[state] = cumulated[state] + batch[state]
     return cumulated
 
-def split_cluster_instances(circs,shots,max_experiments,max_shots):
-    if len(circs)<=max_experiments and shots<=max_shots:
-        current_schedule = [(circs,shots)]
-        return current_schedule
-    elif len(circs)>max_experiments and shots<=max_shots:
-        current_instances = {}
-        next_instances = {}
-        for init_meas in circs:
-            if len(current_instances) < max_experiments:
-                current_instances[init_meas] = circs[init_meas]
-            else:
-                next_instances[init_meas] = circs[init_meas]
-        current_schedule = [(current_instances,shots)]
-        next_schedule = split_cluster_instances(circs=next_instances,shots=shots,max_experiments=max_experiments,max_shots=max_shots)
-        return current_schedule + next_schedule
-    elif len(circs)<=max_experiments and shots>max_shots:
-        current_schedule = [(circs,max_shots)]
-        next_schedule = split_cluster_instances(circs=circs,shots=shots-max_shots,max_experiments=max_experiments,max_shots=max_shots)
-        return current_schedule + next_schedule
-    elif len(circs)>max_experiments and shots>max_shots:
-        left_circs = {}
-        right_circs = {}
-        for init_meas in circs:
-            if len(left_circs) < max_experiments:
-                left_circs[init_meas] = circs[init_meas]
-            else:
-                right_circs[init_meas] = circs[init_meas]
-        left_schedule = split_cluster_instances(circs=left_circs,shots=shots,max_experiments=max_experiments,max_shots=max_shots)
-        right_schedule = split_cluster_instances(circs=right_circs,shots=shots,max_experiments=max_experiments,max_shots=max_shots)
-        return left_schedule + right_schedule
-    else:
-        raise Exception('This condition should not happen')
-
 def submit_hardware_jobs(cluster_instances, evaluator_info):
-    mapped_circuits = {}
-    for init_meas in cluster_instances:
-        circ = cluster_instances[init_meas]
+    mapped_circuits = []
+    for circ in cluster_instances:
         qc=apply_measurement(circ)
         mapped_circuit = transpile(qc,
         backend=evaluator_info['device'], basis_gates=evaluator_info['basis_gates'],
         coupling_map=evaluator_info['coupling_map'],backend_properties=evaluator_info['properties'],
         initial_layout=evaluator_info['initial_layout'])
-        mapped_circuits[init_meas] = mapped_circuit
+        mapped_circuits.append(mapped_circuit)
 
-    qobj = assemble(list(mapped_circuits.values()), backend=evaluator_info['device'], shots=batch_shots)
+    qobj = assemble(mapped_circuits, backend=evaluator_info['device'], shots=evaluator_info['num_shots'])
     # job = evaluator_info['device'].run(qobj)
     job = Aer.get_backend('qasm_simulator').run(qobj)
     job_dict = {'job':job,'mapped_circuits':mapped_circuits,'evaluator_info':evaluator_info}
@@ -164,10 +130,11 @@ if __name__ == '__main__':
                 all_submitted_jobs[case][cluster_idx]['meas_filter'] = (meas_filter_job, state_labels, qubit_list)
                 print('Meas_filter job id {}'.format(meas_filter_job.job_id()))
 
-            schedule = split_cluster_instances(circs=cluster_instances,shots=evaluator_info['num_shots'],max_experiments=device_max_experiments,max_shots=device_max_shots)
+            schedule = schedule_job(circs=cluster_instances,shots=evaluator_info['num_shots'],max_experiments=device_max_experiments,max_shots=device_max_shots)
 
             for s in schedule:
-                cluster_instances_batch, batch_shots = s
+                cluster_instances_batch = s['circs']
+                batch_shots = s['shots']
                 evaluator_info['num_shots'] = batch_shots
                 job_dict = submit_hardware_jobs(cluster_instances=cluster_instances_batch, evaluator_info=evaluator_info)
                 print('Submitted %d circuits to hardware, %d shots. job_id ='%(len(cluster_instances_batch),evaluator_info['num_shots']),job_dict['job'].job_id())

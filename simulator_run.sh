@@ -1,8 +1,7 @@
 CIRCUIT_TYPE="$1"
 DEVICE_NAME="$2"
 
-rm -r ./simulator/logs
-mkdir ./simulator/logs
+[ -d "/simulator/logs/" ] && mkdir ./simulator/logs
 
 python -m simulator.generator --min-qubit 5 --max-qubit 5 --max-clusters 5 --device-name $DEVICE_NAME --circuit-type $CIRCUIT_TYPE 2>&1 | tee -a ./simulator/logs/$CIRCUIT_TYPE\_$DEVICE_NAME\_logs.txt
 

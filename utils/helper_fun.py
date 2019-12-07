@@ -171,22 +171,44 @@ def distribute_cluster_shots(total_shots,clusters,complete_path_map):
         cluster_shots.append(math.ceil(total_shots/num_instances))
     return cluster_shots
 
-def split_shots(total_shots,max_shots,max_experiments):
-    if total_shots > max_shots*max_experiments:
-        current_schedule = (max_experiments,max_shots)
-        next_schedule = split_shots(total_shots=total_shots-max_shots*max_experiments,max_shots=max_shots,max_experiments=max_experiments)
-        next_schedule.insert(0,current_schedule)
-        return next_schedule
-    elif total_shots == max_shots*max_experiments:
-        return [(max_experiments,max_shots)]
-    else:
-        for num_experiments in range(1,max_experiments+1):
-            equally_divided_shots = int(total_shots/num_experiments)
-            if total_shots%num_experiments==0 and equally_divided_shots<=max_shots:
-                return [(num_experiments,equally_divided_shots)]
+def schedule_job(circs,shots,max_experiments,max_shots):
+    if len(circs)==0 or shots==0:
+        return []
+    elif len(circs)<=max_experiments and shots<=max_shots:
+        current_schedule = {'circs':circs,'shots':shots,'reps':1}
+        return [current_schedule]
+    elif len(circs)>max_experiments and shots<=max_shots:
+        curr_circs = {}
+        next_circs = {}
+        for init_meas in circs:
+            if len(curr_circs)<max_experiments:
+                curr_circs[init_meas] = circs[init_meas]
             else:
-                continue
-        return None
+                next_circs[init_meas] = circs[init_meas]
+        current_schedule = {'circs':curr_circs,'shots':shots,'reps':1}
+        next_schedule = schedule_job(circs=next_circs,shots=shots,max_experiments=max_experiments,max_shots=max_shots)
+        return [current_schedule]+next_schedule
+    elif len(circs)<=max_experiments and shots>max_shots:
+        shots_repetitions_required = int(shots/max_shots)
+        repetitions_allowed = int(max_experiments/len(circs))
+        reps = min(shots_repetitions_required,repetitions_allowed)
+        remaining_shots = shots - max_shots*reps
+        current_schedule = {'circs':circs,'shots':max_shots,'reps':reps}
+        next_schedule = schedule_job(circs=circs,shots=remaining_shots,max_experiments=max_experiments,max_shots=max_shots)
+        return [current_schedule]+next_schedule
+    elif len(circs)>max_experiments and shots>max_shots:
+        left_circs = {}
+        right_circs = {}
+        for init_meas in circs:
+            if len(left_circs) < max_experiments:
+                left_circs[init_meas] = circs[init_meas]
+            else:
+                right_circs[init_meas] = circs[init_meas]
+        left_schedule = schedule_job(circs=left_circs,shots=shots,max_experiments=max_experiments,max_shots=max_shots)
+        right_schedule = schedule_job(circs=right_circs,shots=shots,max_experiments=max_experiments,max_shots=max_shots)
+        return left_schedule + right_schedule
+    else:
+        raise Exception('This condition should not happen')
 
 def apply_measurement(circ):
     c = ClassicalRegister(len(circ.qubits), 'c')
@@ -260,16 +282,18 @@ def evaluate_circ(circ, backend, evaluator_info):
         device_max_shots = evaluator_info['device'].configuration().max_shots
         device_max_experiments = int(evaluator_info['device'].configuration().max_experiments/2)
 
-        schedule = split_shots(total_shots=evaluator_info['num_shots'],max_shots=device_max_shots,max_experiments=device_max_experiments)
+        schedule = schedule_job(circs={'fc':mapped_circuit},shots=evaluator_info['num_shots'],max_experiments=device_max_experiments,max_shots=device_max_shots)
         
         for s in schedule:
-            num_experiments, num_shots = s
-            mapped_circuit_l = [mapped_circuit for i in range(num_experiments)]
-            qobj = assemble(mapped_circuit_l, backend=evaluator_info['device'], shots=num_shots)
-            print('Submitted %d * %d = %d shots to hardware'%(num_experiments,num_shots,num_experiments*num_shots))
+            circs_l = []
+            for init_meas in s['circs']:
+                reps_l = [s['circs'][init_meas] for i in range(s['reps'])]
+                circs_l += reps_l
+            qobj = assemble(circs_l, backend=evaluator_info['device'], shots=s['shots'])
+            print('Submitted %d * %d = %d shots to hardware'%(len(circs_l),s['shots'],len(s['circs'])*s['shots']))
             # job = evaluator_info['device'].run(qobj)
             job = Aer.get_backend('qasm_simulator').run(qobj)
-            jobs.append({'job':job,'circ':circ,'mapped_circuit_l':mapped_circuit_l,'evaluator_info':evaluator_info})
+            jobs.append({'job':job,'circ':circ,'mapped_circuit_l':s['circs'],'evaluator_info':evaluator_info})
         return jobs
     else:
         raise Exception('Illegal backend :',backend)

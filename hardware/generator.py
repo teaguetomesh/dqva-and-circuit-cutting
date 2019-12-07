@@ -5,7 +5,7 @@ import numpy as np
 from qcg.generators import gen_supremacy, gen_hwea, gen_BV, gen_qft, gen_sycamore
 import utils.MIQCP_searcher as searcher
 import utils.cutter as cutter
-from utils.helper_fun import evaluate_circ, get_evaluator_info, get_circ_saturated_shots, readout_mitigation, reverseBits, get_filename, read_file, factor_int
+from utils.helper_fun import evaluate_circ, get_evaluator_info, get_circ_saturated_shots, readout_mitigation, reverseBits, get_filename, read_file, factor_int, schedule_job
 import argparse
 from qiskit import IBMQ
 import copy
@@ -35,7 +35,6 @@ def accumulate_jobs(jobs,meas_filter):
         print('job_id : {}'.format(job.job_id()))
         hw_result = job.result()
         if meas_filter != None:
-            print('Mitigation for %d qubit circuit'%(len(circ.qubits)))
             mitigation_begin = time()
             hw_result = meas_filter.apply(hw_result)
             print('Mitigation for %d qubit circuit took %.3e seconds'%(len(circ.qubits),time()-mitigation_begin))
@@ -175,7 +174,8 @@ if __name__ == '__main__':
                 m.print_stat()
                 clusters, complete_path_map, K, d = cutter.cut_circuit(full_circ, positions)
                 fc_shots = get_circ_saturated_shots(circs=[full_circ],device_name=args.device_name)[0]
-                num_jobs = math.ceil(fc_shots/device_max_shots/device_max_experiments)
+                schedule = schedule_job(circs={'fc':full_circ},shots=fc_shots,max_experiments=device_max_experiments,max_shots=device_max_shots)
+                num_jobs = len(schedule)
                 if num_jobs>10:
                     print('Case {} needs {} jobs'.format(case,num_jobs))
                     print('-'*100)
