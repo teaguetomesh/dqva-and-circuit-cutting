@@ -189,7 +189,8 @@ if __name__ == '__main__':
     
     print('All cases to run:',cases_to_run.keys(),flush=True)
     for case in cases_to_run:
-        fc_jobs = math.ceil(cases_to_run[case]['fc_shots']/device_max_shots/device_max_experiments)
+        schedule = schedule_job(circs={'fc':cases_to_run[case]['full_circ']},shots=cases_to_run[case]['fc_shots'],max_experiments=device_max_experiments,max_shots=device_max_shots)
+        fc_jobs = len(schedule)
         print('case {} needs {} fc jobs'.format(case,fc_jobs))
     print('-'*100)
 

@@ -155,7 +155,7 @@ def get_circ_saturated_shots(circs,device_name):
             if len(ce_list)>=3:
                 num_shots = int((len(ce_list)-1)*shots_increment)
                 second_derivative = (ce_list[-1]+ce_list[-3]-2*ce_list[-2])/(np.power(shots_increment,2))
-                if counter%10==9:
+                if counter%20==19:
                     print('current shots = %d, second-derivative = %.3e'%(num_shots,second_derivative))
                 if abs(second_derivative) < 1e-9 or num_shots/device_max_experiments/device_max_shots>=10:
                     saturated_shots.append(num_shots)
@@ -290,7 +290,7 @@ def evaluate_circ(circ, backend, evaluator_info):
                 reps_l = [s['circs'][init_meas] for i in range(s['reps'])]
                 circs_l += reps_l
             qobj = assemble(circs_l, backend=evaluator_info['device'], shots=s['shots'])
-            print('Submitted %d * %d = %d shots to hardware'%(len(circs_l),s['shots'],len(s['circs'])*s['shots']))
+            print('Submitted full circuit %d shots, %d reps to hardware'%(s['shots'],s['reps']))
             # job = evaluator_info['device'].run(qobj)
             job = Aer.get_backend('qasm_simulator').run(qobj)
             jobs.append({'job':job,'circ':circ,'mapped_circuit_l':s['circs'],'evaluator_info':evaluator_info})

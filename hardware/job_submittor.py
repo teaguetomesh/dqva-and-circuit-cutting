@@ -16,20 +16,23 @@ def update_counts(cumulated, batch):
             cumulated[state] = cumulated[state] + batch[state]
     return cumulated
 
-def submit_hardware_jobs(cluster_instances, evaluator_info):
+def submit_hardware_jobs(schedule, evaluator_info):
+    circs = schedule['circs']
+    reps = schedule['reps']
     mapped_circuits = []
-    for circ in cluster_instances:
-        qc=apply_measurement(circ)
+    for init_meas in circs:
+        qc=apply_measurement(circs[init_meas])
         mapped_circuit = transpile(qc,
         backend=evaluator_info['device'], basis_gates=evaluator_info['basis_gates'],
         coupling_map=evaluator_info['coupling_map'],backend_properties=evaluator_info['properties'],
         initial_layout=evaluator_info['initial_layout'])
-        mapped_circuits.append(mapped_circuit)
+        reps_l = [mapped_circuit for i in range(reps)]
+        mapped_circuits += reps_l
 
     qobj = assemble(mapped_circuits, backend=evaluator_info['device'], shots=evaluator_info['num_shots'])
     # job = evaluator_info['device'].run(qobj)
     job = Aer.get_backend('qasm_simulator').run(qobj)
-    job_dict = {'job':job,'mapped_circuits':mapped_circuits,'evaluator_info':evaluator_info}
+    job_dict = {'job':job,'schedule':schedule}
     return job_dict
 
 def accumulate_cluster_jobs(cluster_job_dict,cluster_meas_filter):
@@ -44,24 +47,25 @@ def accumulate_cluster_jobs(cluster_job_dict,cluster_meas_filter):
         num_qubits_mitigated = -1
     hw_counts = {}
     for job_dict in cluster_job_dict:
-        mapped_circuits = job_dict['mapped_circuits']
         job = job_dict['job']
+        schedule = job_dict['schedule']
         print(job.job_id())
-        evaluator_info = job_dict['evaluator_info']
         hw_results = job.result()
-        mapped_circuit = list(mapped_circuits.values())[0]
 
         if cluster_meas_filter != None:
-            print('Mitigation for %d * %d-qubit circuit'%(len(mapped_circuits),num_qubits_mitigated))
             mitigation_begin = time()
             hw_results = meas_filter.apply(hw_results)
             mitigation_time = time() - mitigation_begin
-            print('Mitigation for %d * %d-qubit circuit took %.3e seconds'%(len(mapped_circuits),num_qubits_mitigated,mitigation_time))
-        for init_meas in mapped_circuits:
-            hw_count = hw_results.get_counts(mapped_circuits[init_meas])
-            try:
+            print('Mitigation for %d * %d-qubit circuit took %.3e seconds'%(len(schedule['circs'])*schedule['reps'],num_qubits_mitigated,mitigation_time))
+        for idx, init_meas in enumerate(list(schedule['circs'].keys())):
+            start_idx = idx*schedule['reps']
+            end_idx = start_idx + schedule['reps'] - 1
+            hw_count = {}
+            for i in range(start_idx,end_idx+1):
+                hw_count = update_counts(cumulated=hw_count, batch=hw_results.get_counts(i))
+            if init_meas in hw_counts:
                 hw_counts[init_meas] = update_counts(cumulated=hw_counts[init_meas], batch=hw_count)
-            except:
+            else:
                 hw_counts[init_meas] = update_counts(cumulated={}, batch=hw_count)
     
     hw_probs = {}
@@ -133,11 +137,9 @@ if __name__ == '__main__':
             schedule = schedule_job(circs=cluster_instances,shots=evaluator_info['num_shots'],max_experiments=device_max_experiments,max_shots=device_max_shots)
 
             for s in schedule:
-                cluster_instances_batch = s['circs']
-                batch_shots = s['shots']
-                evaluator_info['num_shots'] = batch_shots
-                job_dict = submit_hardware_jobs(cluster_instances=cluster_instances_batch, evaluator_info=evaluator_info)
-                print('Submitted %d circuits to hardware, %d shots. job_id ='%(len(cluster_instances_batch),evaluator_info['num_shots']),job_dict['job'].job_id())
+                evaluator_info['num_shots'] = s['shots']
+                job_dict = submit_hardware_jobs(schedule=s, evaluator_info=evaluator_info)
+                print('Submitted %d circs, %d shots, %d reps to hardware'%(len(s['circs']),s['shots'],s['reps']))
                 all_submitted_jobs[case][cluster_idx]['jobs'].append(job_dict)
         print('*'*50)
     print('-'*100)
