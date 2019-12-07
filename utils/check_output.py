@@ -17,7 +17,7 @@ if __name__ == '__main__':
     plotter_input = read_file(dirname+plotter_input_filename)
     print(plotter_input.keys())
 
-    case = (5,8)
+    case = (4,13)
     plotter_input = plotter_input[case]
 
     d1 = plotter_input['fc_evaluations']['sv_noiseless']

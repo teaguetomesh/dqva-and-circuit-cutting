@@ -17,4 +17,4 @@ python -m utils.reconstructor --experiment-name hardware --device-name $DEVICE_N
 
 python -m hardware.plot --device-name $DEVICE_NAME --circuit-type $CIRCUIT_TYPE --evaluation-method hardware 2>&1 | tee -a ./hardware/logs/$CIRCUIT_TYPE\_$DEVICE_NAME\_logs.txt
 
-python -m utils.check_output --experiment-name hardware --device-name $DEVICE_NAME --circuit-type $CIRCUIT_TYPE --shots-mode saturated --evaluation-method hardware
+# python -m utils.check_output --experiment-name hardware --device-name $DEVICE_NAME --circuit-type $CIRCUIT_TYPE --shots-mode saturated --evaluation-method hardware

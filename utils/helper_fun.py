@@ -131,7 +131,7 @@ def find_cluster_O_rho_qubits(complete_path_map,cluster_idx):
     return O_qubits, rho_qubits
 
 def get_circ_saturated_shots(circs,device_name):
-    shots_increment = 512
+    shots_increment = 1024
     saturated_shots = []
     for circ_idx, circ in enumerate(circs):
         ground_truth = evaluate_circ(circ=circ,backend='statevector_simulator',evaluator_info=None)
@@ -152,12 +152,14 @@ def get_circ_saturated_shots(circs,device_name):
             assert abs(sum(noisy_qasm_prob)-1)<1e-5
             noisy_qasm_ce = cross_entropy(target=ground_truth,obs=noisy_qasm_prob)
             ce_list.append(noisy_qasm_ce)
+            print(noisy_qasm_ce)
             if len(ce_list)>=3:
                 num_shots = int((len(ce_list)-1)*shots_increment)
+                first_derivative = (ce_list[-1]+ce_list[-3])/(2*shots_increment)
                 second_derivative = (ce_list[-1]+ce_list[-3]-2*ce_list[-2])/(np.power(shots_increment,2))
                 if counter%20==19:
-                    print('current shots = %d, second-derivative = %.3e'%(num_shots,second_derivative))
-                if abs(second_derivative) < 1e-9 or num_shots/device_max_experiments/device_max_shots>=10:
+                    print('current shots = %d, second-derivative = %.3e'%(num_shots,second_derivative),flush=True)
+                if (abs(second_derivative) < 1e-9 and abs(first_derivative)<1e-1) or num_shots/device_max_experiments/device_max_shots>=10:
                     saturated_shots.append(num_shots)
                     # print('cross entropy list:',['%.3e'%x for x in ce_list])
                     break
@@ -189,13 +191,27 @@ def schedule_job(circs,shots,max_experiments,max_shots):
         next_schedule = schedule_job(circs=next_circs,shots=shots,max_experiments=max_experiments,max_shots=max_shots)
         return [current_schedule]+next_schedule
     elif len(circs)<=max_experiments and shots>max_shots:
-        shots_repetitions_required = int(shots/max_shots)
+        batch_shots = max_shots
+        while 1:
+            if shots%batch_shots == 0:
+                break
+            else:
+                batch_shots -= 1024
+        shots_repetitions_required = int(shots/batch_shots)
         repetitions_allowed = int(max_experiments/len(circs))
-        reps = min(shots_repetitions_required,repetitions_allowed)
-        remaining_shots = shots - max_shots*reps
-        current_schedule = {'circs':circs,'shots':max_shots,'reps':reps}
-        next_schedule = schedule_job(circs=circs,shots=remaining_shots,max_experiments=max_experiments,max_shots=max_shots)
-        return [current_schedule]+next_schedule
+        if shots_repetitions_required <= repetitions_allowed:
+            reps = shots_repetitions_required
+            remaining_shots = shots - reps*batch_shots
+            assert remaining_shots==0
+            current_schedule = {'circs':circs,'shots':batch_shots,'reps':reps}
+            return [current_schedule]
+        else:
+            min_shots_repetitions_required = int(shots/max_shots)
+            reps = min(repetitions_allowed,min_shots_repetitions_required)
+            remaining_shots = shots - reps*max_shots
+            current_schedule = {'circs':circs,'shots':max_shots,'reps':reps}
+            next_schedule = schedule_job(circs=circs,shots=remaining_shots,max_experiments=max_experiments,max_shots=max_shots)
+            return [current_schedule]+next_schedule
     elif len(circs)>max_experiments and shots>max_shots:
         left_circs = {}
         right_circs = {}
@@ -280,7 +296,7 @@ def evaluate_circ(circ, backend, evaluator_info):
         initial_layout=evaluator_info['initial_layout'])
 
         device_max_shots = evaluator_info['device'].configuration().max_shots
-        device_max_experiments = int(evaluator_info['device'].configuration().max_experiments/2)
+        device_max_experiments = int(evaluator_info['device'].configuration().max_experiments/3*2)
 
         schedule = schedule_job(circs={'fc':mapped_circuit},shots=evaluator_info['num_shots'],max_experiments=device_max_experiments,max_shots=device_max_shots)
         

@@ -106,7 +106,7 @@ if __name__ == '__main__':
 
     evaluator_info = get_evaluator_info(circ=None,device_name=args.device_name,fields=['properties','device'])
     device_max_shots = evaluator_info['device'].configuration().max_shots
-    device_max_experiments = int(evaluator_info['device'].configuration().max_experiments/2)
+    device_max_experiments = int(evaluator_info['device'].configuration().max_experiments/3*2)
     
     all_submitted_jobs = {}
     for case in cases_to_run:
