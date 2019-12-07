@@ -152,7 +152,6 @@ def get_circ_saturated_shots(circs,device_name):
             assert abs(sum(noisy_qasm_prob)-1)<1e-5
             noisy_qasm_ce = cross_entropy(target=ground_truth,obs=noisy_qasm_prob)
             ce_list.append(noisy_qasm_ce)
-            print(noisy_qasm_ce)
             if len(ce_list)>=3:
                 num_shots = int((len(ce_list)-1)*shots_increment)
                 first_derivative = (ce_list[-1]+ce_list[-3])/(2*shots_increment)
