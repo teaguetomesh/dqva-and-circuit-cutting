@@ -17,7 +17,7 @@ if __name__ == '__main__':
     plotter_input = read_file(dirname+plotter_input_filename)
     print(plotter_input.keys())
 
-    case = (4,13)
+    case = (5,14)
     plotter_input = plotter_input[case]
 
     d1 = plotter_input['fc_evaluations']['sv_noiseless']
@@ -49,7 +49,7 @@ if __name__ == '__main__':
 
     plt.figure(figsize=(10,5))
     plt.subplot(221)
-    plt.bar(x,height=d1[:plot_range],label='ground truth, fid = %.3e, \u0394H = %.3e'%(fidelity(d1,d1),cross_entropy(d1,d1)))
+    plt.bar(x,height=d1[:plot_range],label='ground truth, fid = %.3e, \u0394H = %.3e'%(fidelity(d1,d1),cross_entropy(d1,d1)-cross_entropy(d1,d1)))
     plt.ylim(0,y_lim)
     plt.xlabel('quantum state')
     plt.ylabel('probability')
@@ -57,24 +57,25 @@ if __name__ == '__main__':
 
 
     plt.subplot(222)
-    plt.bar(x,height=d4[:plot_range],label='cutting mode, fid = %.3e, \u0394H = %.3e'%(fidelity(d1,d4),cross_entropy(d1,d4)))
+    plt.bar(x,height=d4[:plot_range],label='cutting mode, fid = %.3e, \u0394H = %.3e'%(fidelity(d1,d4),cross_entropy(d1,d4)-cross_entropy(d1,d1)))
     plt.ylim(0,y_lim)
     plt.xlabel('quantum state')
     plt.ylabel('probability')
     plt.legend()
 
     plt.subplot(223)
-    plt.bar(x,height=d3[:plot_range],label='standard mode, fid = %.3e, \u0394H = %.3e'%(fidelity(d1,d3),cross_entropy(d1,d3)))
+    plt.bar(x,height=d3[:plot_range],label='standard mode, fid = %.3e, \u0394H = %.3e'%(fidelity(d1,d3),cross_entropy(d1,d3)-cross_entropy(d1,d1)))
     plt.ylim(0,y_lim)
     plt.xlabel('quantum state')
     plt.ylabel('probability')
     plt.legend()
 
     plt.subplot(224)
-    plt.bar(x,height=d2[:plot_range],label='noiseless qasm, fid = %.3e, \u0394H = %.3e'%(fidelity(d1,d2),cross_entropy(d1,d2)))
+    plt.bar(x,height=d2[:plot_range],label='noiseless qasm, fid = %.3e, \u0394H = %.3e'%(fidelity(d1,d2),cross_entropy(d1,d2)-cross_entropy(d1,d1)))
     plt.ylim(0,y_lim)
     plt.xlabel('quantum state')
     plt.ylabel('probability')
+    plt.suptitle('Case {}'.format(case))
     plt.legend()
     plt.savefig('%s/check_output_eg.png'%dirname,dpi=400)
     plt.close()

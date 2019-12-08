@@ -1,0 +1,88 @@
+import numpy as np
+import matplotlib.pyplot as plt
+from qcg.generators import gen_supremacy, gen_hwea, gen_BV, gen_qft, gen_sycamore
+from utils.helper_fun import evaluate_circ, get_evaluator_info, factor_int, cross_entropy
+import argparse
+import os
+
+def calculate_delta_H(circ,min_ce,accumulated_prob,counter,shots_increment,evaluation_method):
+    if evaluation_method == 'noisy_qasm_simulator':
+        qasm_noise_evaluator_info = get_evaluator_info(circ=circ,device_name='ibmq_boeblingen',
+        fields=['device','basis_gates','coupling_map','properties','initial_layout','noise_model'])
+        qasm_noise_evaluator_info['num_shots'] = shots_increment
+        prob_batch = evaluate_circ(circ=circ,backend='noisy_qasm_simulator',evaluator_info=qasm_noise_evaluator_info)
+    elif evaluation_method == 'qasm_simulator':
+        qasm_evaluator_info = {'num_shots':shots_increment}
+        prob_batch = evaluate_circ(circ=circ,backend='noiseless_qasm_simulator',evaluator_info=qasm_evaluator_info)
+    else:
+        raise Exception('Illegal evaluation method:',evaluation_method)
+    accumulated_prob = [(x*(counter-1)+y)/counter for x,y in zip(accumulated_prob,prob_batch)]
+    accumulated_ce = cross_entropy(target=ground_truth,obs=accumulated_prob) - min_ce
+    return accumulated_ce, accumulated_prob
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description='Decay experiment')
+    parser.add_argument('--first-derivative', metavar='N', type=float,help='First derivative cutoff')
+    parser.add_argument('--second-derivative', metavar='N', type=float,help='Second derivative cutoff')
+    args = parser.parse_args()
+
+    dirname = './decay/%.1e__%.1e_decays'%(args.first_derivative,args.second_derivative)
+    if not os.path.exists(dirname):
+        os.makedirs(dirname)
+
+    for full_circ_size in range(8,10):
+        print('%d qubit full circuit'%full_circ_size)
+        i, j = factor_int(full_circ_size)
+        circ = gen_supremacy(i,j,8)
+        ground_truth = evaluate_circ(circ=circ,backend='statevector_simulator',evaluator_info=None)
+        min_ce = cross_entropy(target=ground_truth,obs=ground_truth)
+        shots_increment = 1024
+
+        noiseless_accumulated_prob = [0 for i in range(np.power(2,len(circ.qubits)))]
+        noisy_accumulated_prob = [0 for i in range(np.power(2,len(circ.qubits)))]
+        noiseless_delta_H_l = []
+        noisy_delta_H_l = []
+        counter = 1
+        max_counter = max(20,int(10*np.power(2,full_circ_size)/shots_increment))
+        cutoff = max_counter
+        while 1:
+            if counter>cutoff+10:
+                break
+            print('Counter %d, shots = %d'%(counter,counter*shots_increment))
+            noiseless_accumulated_ce, noiseless_accumulated_prob = calculate_delta_H(circ=circ,min_ce=min_ce,accumulated_prob=noiseless_accumulated_prob,
+            counter=counter,shots_increment=shots_increment,evaluation_method='qasm_simulator')
+            noiseless_delta_H_l.append(noiseless_accumulated_ce)
+            
+            noisy_accumulated_ce, noisy_accumulated_prob = calculate_delta_H(circ=circ,min_ce=min_ce,accumulated_prob=noisy_accumulated_prob,
+            counter=counter,shots_increment=shots_increment,evaluation_method='noisy_qasm_simulator')
+            noisy_delta_H_l.append(noisy_accumulated_ce)
+            
+            if len(noiseless_delta_H_l)>=3:
+                first_derivative = (noiseless_delta_H_l[-1]+noiseless_delta_H_l[-3])/(2*shots_increment)
+                second_derivative = (noiseless_delta_H_l[-1]+noiseless_delta_H_l[-3]-2*noiseless_delta_H_l[-2])/(np.power(shots_increment,2))
+                print('noiseless \u0394H = %.3f, first derivative = %.3e, second derivative = %.3e'%(noiseless_accumulated_ce,first_derivative,second_derivative))
+
+                first_derivative = (noisy_delta_H_l[-1]+noisy_delta_H_l[-3])/(2*shots_increment)
+                second_derivative = (noisy_delta_H_l[-1]+noisy_delta_H_l[-3]-2*noisy_delta_H_l[-2])/(np.power(shots_increment,2))
+                print('noisy \u0394H = %.3f, first derivative = %.3e, second derivative = %.3e'%(noisy_accumulated_ce,first_derivative,second_derivative))
+
+                if abs(first_derivative)<args.first_derivative and abs(second_derivative)<args.second_derivative and noiseless_accumulated_ce<noisy_accumulated_ce and cutoff==max_counter:
+                    print('*'*50,'SATURATED','*'*50)
+                    cutoff = counter
+            print('-'*50)
+            counter += 1
+        
+        plot_start = max(1,cutoff-50)
+        xvals = range(plot_start,len(noisy_delta_H_l)+1)
+        shots = [x*shots_increment for x in xvals]
+        plt.figure()
+        plt.axvline(x=cutoff,label='saturated cutoff',color='k',linestyle='--')
+        plt.plot(xvals,noiseless_delta_H_l[plot_start-1:],label='noiseless')
+        plt.plot(xvals,noisy_delta_H_l[plot_start-1:],label='noisy')
+        plt.xticks(ticks=xvals,labels=xvals)
+        plt.ylabel('\u0394H')
+        plt.xlabel('shots [*1024]')
+        plt.title('%d qubit full circuit'%full_circ_size)
+        plt.legend()
+        plt.savefig('%s/%d_decay.png'%(dirname,full_circ_size),dpi=400)
+        plt.close()
