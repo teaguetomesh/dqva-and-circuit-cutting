@@ -8,10 +8,8 @@ from qiskit.compiler import transpile, assemble
 from qiskit.providers.aer import noise
 import numpy as np
 import math
-from datetime import datetime
 from qiskit.providers.models import BackendProperties
 from qiskit.ignis.mitigation.measurement import complete_meas_cal
-import datetime as dt
 import pickle
 import copy
 from time import time
@@ -82,6 +80,7 @@ def load_IBMQ():
         IBMQ.save_account(token)
         IBMQ.load_account()
     elif IBMQ.active_account() == None:
+        # TODO: report warning triggered by load_account()
         IBMQ.load_account()
     provider = IBMQ.get_provider(hub='ibm-q-ornl', group='bes-qis', project='argonne')
     return provider

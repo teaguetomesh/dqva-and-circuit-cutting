@@ -67,11 +67,11 @@ def cut_edges(original_dag, positions):
         cut_in_node, cut_out_node = find_io_node(cut_dag, cut_qubit)
         
         cut_dag._multi_graph.add_edge(nodes_before_cut[len(nodes_before_cut)-1], original_out_node,
-        name="%s[%s]" % (wire[0].name, wire[1]), wire=wire)
+        name="%s[%s]" % (wire.register.name, wire.index), wire=wire)
         cut_dag._multi_graph.add_edge(cut_in_node, nodes_after_cut[0],
-        name="%s[%s]" % (cut_qubit[0].name, cut_qubit[1]), wire=cut_qubit)
+        name="%s[%s]" % (cut_qubit.register.name, cut_qubit.index), wire=cut_qubit)
         cut_dag._multi_graph.add_edge(nodes_after_cut[len(nodes_after_cut)-1], cut_out_node,
-        name="%s[%s]" % (cut_qubit[0].name, cut_qubit[1]), wire=cut_qubit)
+        name="%s[%s]" % (cut_qubit.register.name, cut_qubit.index), wire=cut_qubit)
         
         edge_key = find_edge_key(cut_dag._multi_graph, nodes_after_cut[len(nodes_after_cut)-1], original_out_node, wire)
         cut_dag._multi_graph.remove_edge(nodes_after_cut[len(nodes_after_cut)-1], original_out_node, key=edge_key)
@@ -94,7 +94,7 @@ def cut_edges(original_dag, positions):
                 edge_key = find_edge_key(cut_dag._multi_graph, nodes_after_cut[idx], nodes_after_cut[idx+1], wire)
                 cut_dag._multi_graph.remove_edge(nodes_after_cut[idx], nodes_after_cut[idx+1], key=edge_key)
                 cut_dag._multi_graph.add_edge(nodes_after_cut[idx], nodes_after_cut[idx+1],
-                name="%s[%s]" % (cut_qubit[0].name, cut_qubit[1]), wire=cut_qubit)
+                name="%s[%s]" % (cut_qubit.register.name, cut_qubit.index), wire=cut_qubit)
     for input_qubit in path_map:
         path_map[input_qubit].append(input_qubit)
         path_map[input_qubit] = path_map[input_qubit][::-1]

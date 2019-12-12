@@ -13,4 +13,6 @@ conda install gurobi
 ```
 
 ## TODO
-- [ ] Update searcher to be compatible with Qiskit 0.14
+- [x] Update to be compatible with Qiskit 0.14
+- [ ] Report IBMQ.load_account() warning
+- [ ] Report Qiskit incompatibility with Python 3.8
