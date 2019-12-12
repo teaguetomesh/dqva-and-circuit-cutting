@@ -6,9 +6,11 @@ A circuit cutting project
 ```
 conda create -n venv python=3.7
 conda activate venv
-pip install numpy qiskit matplotlib
+pip install numpy qiskit matplotlib nxpd pydot pillow progressbar2 jupyterlab
 conda install -c conda-forge mpich-mpicc
-conda install -c conda-forge jupyterlab
 pip install mpi4py
 conda install gurobi
 ```
+
+## TODO
+- [ ] Update searcher to be compatible with Qiskit 0.14

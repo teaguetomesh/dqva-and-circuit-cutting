@@ -48,11 +48,11 @@ if __name__ == '__main__':
     if rank == size-1:
         a = 1e-1
         r = 1e-1
-        length = 2
+        length = 5
         first_derivatives = [a * r ** (n - 1) for n in range(1, length + 1)]
         a = 1e-1
         r = 1e-1
-        length = 2
+        length = 10
         second_derivatives = [a * r ** (n - 1) for n in range(1, length + 1)]
         combinations = list(itertools.product(first_derivatives, second_derivatives))
         for i in range(num_workers):
@@ -67,7 +67,10 @@ if __name__ == '__main__':
             if not os.path.exists(dirname):
                 os.makedirs(dirname)
 
-            for full_circ_size in range(8,9):
+            for full_circ_size in range(3,19):
+                fig_name = '%s/%d_decay.png'%(dirname,full_circ_size)
+                if os.path.isfile(fig_name):
+                    continue
                 print('%d qubit full circuit'%full_circ_size)
                 i, j = factor_int(full_circ_size)
                 circ = gen_supremacy(i,j,8)
@@ -80,7 +83,7 @@ if __name__ == '__main__':
                 noiseless_delta_H_l = []
                 noisy_delta_H_l = []
                 counter = 1
-                max_counter = max(20,int(10*np.power(2,full_circ_size)/shots_increment))
+                max_counter = max(20,int(20*np.power(2,full_circ_size)/shots_increment))
                 cutoff = max_counter
                 found_saturation = False
                 while 1:
@@ -125,5 +128,5 @@ if __name__ == '__main__':
                 plt.xlabel('shots [*1024]')
                 plt.title('%d qubit full circuit'%full_circ_size)
                 plt.legend()
-                plt.savefig('%s/%d_decay.png'%(dirname,full_circ_size),dpi=400)
+                plt.savefig(fig_name,dpi=400)
                 plt.close()
