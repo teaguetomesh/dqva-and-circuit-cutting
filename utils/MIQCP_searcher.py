@@ -8,7 +8,7 @@ import numpy as np
 import utils.cutter as cutter
 
 class Basic_Model(object):
-    def __init__(self, n_vertices, edges, node_ids, id_nodes, k, hw_max_qubit, evaluator_runtime_params, reconstructor_runtime_params):
+    def __init__(self, n_vertices, edges, node_ids, id_nodes, k, hw_max_qubit, reconstructor_runtime_params, reconstructor_weight=0):
         self.check_graph(n_vertices, edges)
         self.n_vertices = n_vertices
         self.edges = edges
@@ -17,8 +17,8 @@ class Basic_Model(object):
         self.id_nodes = id_nodes
         self.k = k
         self.hw_max_qubit = hw_max_qubit
-        self.evaluator_runtime_params = evaluator_runtime_params
         self.reconstructor_runtime_params = reconstructor_runtime_params
+        self.reconstructor_weight = reconstructor_weight
         self.verbosity = 0
 
         self.model = Model('cut_searching')
@@ -97,7 +97,6 @@ class Basic_Model(object):
             self.model.addConstr(cluster_original_qubit ==
             quicksum([self.node_qubits[id_nodes[i]]*self.node_vars[cluster][i]
             for i in range(self.n_vertices)]))
-            # self.model.addConstr(cluster_original_qubit >= 0.1)
             
             cluster_rho_qubits = self.model.addVar(lb=0, ub=self.hw_max_qubit, vtype=GRB.INTEGER, name='cluster_rho_qubits_%d'%cluster)
             self.model.addConstr(cluster_rho_qubits ==
@@ -115,31 +114,32 @@ class Basic_Model(object):
             list_of_cluster_O.append(cluster_O_qubits)
             
             lb = 0
-            ub = self.hw_max_qubit*(np.log(2)/evaluator_runtime_params[1]+1)
-            ptx, ptf = self.pwl_exp(params=evaluator_runtime_params,lb=lb,ub=ub)
-            evaluator_time_exponent = self.model.addVar(lb=lb,ub=ub,vtype=GRB.CONTINUOUS, name='evaluator_cost_exponent_%d'%cluster)
-            self.model.addConstr(evaluator_time_exponent == cluster_d+np.log(2)/evaluator_runtime_params[1]*cluster_rho_qubits)
-            self.model.setPWLObj(evaluator_time_exponent, ptx, ptf)
+            ub = self.hw_max_qubit*np.log(6)
+            ptx, ptf = self.pwl_exp(params=[1,1],lb=lb,ub=ub,weight=1-self.reconstructor_weight)
+            evaluator_cost_exponent = self.model.addVar(lb=lb,ub=ub,vtype=GRB.CONTINUOUS, name='evaluator_cost_exponent_%d'%cluster)
+            self.model.addConstr(evaluator_cost_exponent == np.log(6)*cluster_rho_qubits+np.log(3)*cluster_O_qubits)
+            self.model.setPWLObj(evaluator_cost_exponent, ptx, ptf)
 
             if len(list_of_cluster_d)>1:
                 lb = 0
                 ub = np.log(2)/reconstructor_runtime_params[1]*20
-                ptx, ptf = self.pwl_exp(params=reconstructor_runtime_params,lb=lb,ub=ub)
-                uniter_time_exponent = self.model.addVar(lb=lb,ub=ub,vtype=GRB.CONTINUOUS, name='uniter_cost_exponent_%d'%cluster)
-                self.model.addConstr(uniter_time_exponent == np.log(2)*total_num_cuts/2/reconstructor_runtime_params[1]+quicksum(list_of_cluster_d)-quicksum(list_of_cluster_O))
-                self.model.setPWLObj(uniter_time_exponent, ptx, ptf)
+                ptx, ptf = self.pwl_exp(params=reconstructor_runtime_params,lb=lb,ub=ub,weight=self.reconstructor_weight)
+                reconstructor_time_exponent = self.model.addVar(lb=lb,ub=ub,vtype=GRB.CONTINUOUS, name='reconstructor_time_exponent_%d'%cluster)
+                self.model.addConstr(reconstructor_time_exponent == np.log(2)*total_num_cuts/2/reconstructor_runtime_params[1]+quicksum(list_of_cluster_d)-quicksum(list_of_cluster_O))
+                self.model.setPWLObj(reconstructor_time_exponent, ptx, ptf)
 
         self.model.update()
     
-    def pwl_exp(self, params, lb, ub):
+    def pwl_exp(self, params, lb, ub, weight=1):
+        # Piecewise linear approximation of w*p_0*e^(p_1*x)
         ptx = []
         ptf = []
 
-        num_pt = 400
+        num_pt = 500
 
         for i in range(num_pt):
             x = (ub-lb)/(num_pt-1)*i+lb
-            y = params[0]*np.exp(params[1]*x)
+            y = weight*params[0]*np.exp(params[1]*x)
             ptx.append(x)
             ptf.append(y)
         return ptx, ptf
@@ -204,25 +204,25 @@ class Basic_Model(object):
         print('%d cuts, %d clusters, max qubit = %d'%(len(self.cut_edges),self.k,self.hw_max_qubit))
 
         evaluator_cost_verify = 0
-        uniter_cost_verify = 0
-        evaluator_runtime_params = self.evaluator_runtime_params
+        reconstructor_cost_verify = 0
         reconstructor_runtime_params = self.reconstructor_runtime_params
+        reconstructor_weight = self.reconstructor_weight
         for i in range(self.k):
             cluster_input = self.model.getVarByName('cluster_input_%d'%i)
             cluster_rho_qubits = self.model.getVarByName('cluster_rho_qubits_%d'%i)
             cluster_O_qubits = self.model.getVarByName('cluster_O_qubits_%d'%i)
             cluster_d = self.model.getVarByName('cluster_d_%d'%i)
             cluster_K = self.model.getVarByName('cluster_K_%d'%i)
-            evaluator_cost_verify += np.power(2,cluster_rho_qubits.X)*evaluator_runtime_params[0]*np.exp(evaluator_runtime_params[1]*cluster_d.X)
+            evaluator_cost_verify += np.power(6,cluster_rho_qubits.X)*np.power(3,cluster_O_qubits.X)
             print('cluster %d: original input = %.2f, \u03C1_qubits = %.2f, O_qubits = %.2f, d = %.2f, K = %.2f' % 
             (i,cluster_input.X,cluster_rho_qubits.X,cluster_O_qubits.X,cluster_d.X,cluster_K.X))
             if i>0:
-                uniter_cost_exponent = self.model.getVarByName('uniter_cost_exponent_%d'%i)
-                # print('uniter cost exponent = ',uniter_cost_exponent.X)
-                uniter_cost_verify += np.power(2,uniter_cost_exponent.X)
+                reconstructor_time_exponent = self.model.getVarByName('reconstructor_time_exponent_%d'%i)
+                reconstructor_cost_verify += reconstructor_runtime_params[0]*np.exp(reconstructor_runtime_params[1]*reconstructor_time_exponent.X)
 
-        print('objective value:', self.objective)
-        print('manually calculated objective value:', evaluator_cost_verify+uniter_cost_verify)
+        print('objective value = %.3e'%self.objective)
+        print('manually calculated objective value: %.3e'%((1-reconstructor_weight)*evaluator_cost_verify+reconstructor_weight*reconstructor_cost_verify))
+        print('evaluator_cost = %d, reconstructor_cost = %.3e, reconstructor_weight = %.3e'%(evaluator_cost_verify,reconstructor_cost_verify,reconstructor_weight))
         # print('mip gap:', self.mip_gap)
         print('runtime:', self.runtime)
 
@@ -311,7 +311,7 @@ def circ_stripping(circ):
             stripped_dag.apply_operation_back(op=vertex.op, qargs=vertex.qargs)
     return dag_to_circuit(stripped_dag)
 
-def find_cuts(circ, evaluator_runtime_params, reconstructor_runtime_params, num_clusters = range(1,5), hw_max_qubit=20):
+def find_cuts(circ, reconstructor_runtime_params, reconstructor_weight, num_clusters = range(1,5), hw_max_qubit=20):
     min_objective = float('inf')
     best_positions = None
     best_ancilla = None
@@ -328,8 +328,8 @@ def find_cuts(circ, evaluator_runtime_params, reconstructor_runtime_params, num_
                     id_nodes=id_nodes,
                     k=num_cluster,
                     hw_max_qubit=hw_max_qubit,
-                    evaluator_runtime_params=evaluator_runtime_params,
-                    reconstructor_runtime_params=reconstructor_runtime_params)
+                    reconstructor_runtime_params=reconstructor_runtime_params,
+                    reconstructor_weight=reconstructor_weight)
 
         m = Basic_Model(**kwargs)
         feasible = m.solve()
