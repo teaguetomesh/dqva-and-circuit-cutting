@@ -125,7 +125,7 @@ class Basic_Model(object):
                 ub = np.log(2)/reconstructor_runtime_params[1]*20
                 ptx, ptf = self.pwl_exp(params=reconstructor_runtime_params,lb=lb,ub=ub,weight=self.reconstructor_weight)
                 reconstructor_time_exponent = self.model.addVar(lb=lb,ub=ub,vtype=GRB.CONTINUOUS, name='reconstructor_time_exponent_%d'%cluster)
-                self.model.addConstr(reconstructor_time_exponent == np.log(2)*total_num_cuts/2/reconstructor_runtime_params[1]+quicksum(list_of_cluster_d)-quicksum(list_of_cluster_O))
+                self.model.addConstr(reconstructor_time_exponent == np.log(4)*total_num_cuts/2/reconstructor_runtime_params[1]+quicksum(list_of_cluster_d)-quicksum(list_of_cluster_O))
                 self.model.setPWLObj(reconstructor_time_exponent, ptx, ptf)
 
         self.model.update()
@@ -207,6 +207,7 @@ class Basic_Model(object):
         reconstructor_cost_verify = 0
         reconstructor_runtime_params = self.reconstructor_runtime_params
         reconstructor_weight = self.reconstructor_weight
+        accumulated_kron_length = 0
         for i in range(self.k):
             cluster_input = self.model.getVarByName('cluster_input_%d'%i)
             cluster_rho_qubits = self.model.getVarByName('cluster_rho_qubits_%d'%i)
@@ -214,11 +215,11 @@ class Basic_Model(object):
             cluster_d = self.model.getVarByName('cluster_d_%d'%i)
             cluster_K = self.model.getVarByName('cluster_K_%d'%i)
             evaluator_cost_verify += np.power(6,cluster_rho_qubits.X)*np.power(3,cluster_O_qubits.X)
+            accumulated_kron_length += cluster_d.X-cluster_O_qubits.X
             print('cluster %d: original input = %.2f, \u03C1_qubits = %.2f, O_qubits = %.2f, d = %.2f, K = %.2f' % 
             (i,cluster_input.X,cluster_rho_qubits.X,cluster_O_qubits.X,cluster_d.X,cluster_K.X))
             if i>0:
-                reconstructor_time_exponent = self.model.getVarByName('reconstructor_time_exponent_%d'%i)
-                reconstructor_cost_verify += reconstructor_runtime_params[0]*np.exp(reconstructor_runtime_params[1]*reconstructor_time_exponent.X)
+                reconstructor_cost_verify += np.power(4,len(self.cut_edges))*reconstructor_runtime_params[0]*np.exp(reconstructor_runtime_params[1]*accumulated_kron_length)
 
         print('objective value = %.3e'%self.objective)
         print('manually calculated objective value: %.3e'%((1-reconstructor_weight)*evaluator_cost_verify+reconstructor_weight*reconstructor_cost_verify))
