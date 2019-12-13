@@ -270,13 +270,16 @@ def cuts_parser(cuts, circ):
     dag = circuit_to_dag(circ)
     positions = []
     for position in cuts:
-        # print('position:',position)
         source, dest = position
-        source_qargs = [x.split(']')[0]+']' for x in source.split(' ')]
-        dest_qargs = [x.split(']')[0]+']' for x in dest.split(' ')]
-        # print(source_qargs)
-        # print(dest_qargs)
-        qubit_cut = list(set(source_qargs).intersection(set(dest_qargs)))
+        source_qargs = [(x.split(']')[0]+']',int(x.split(']')[1])) for x in source.split(' ')]
+        dest_qargs = [(x.split(']')[0]+']',int(x.split(']')[1])) for x in dest.split(' ')]
+        qubit_cut = []
+        for source_qarg in source_qargs:
+            source_qubit, source_multi_Q_gate_idx = source_qarg
+            for dest_qarg in dest_qargs:
+                dest_qubit, dest_multi_Q_gate_idx = dest_qarg
+                if source_qubit==dest_qubit and dest_multi_Q_gate_idx == source_multi_Q_gate_idx+1:
+                    qubit_cut.append(source_qubit)
         if len(qubit_cut)>1:
             raise Exception('one cut is cutting on multiple qubits')
         for x in source.split(' '):
