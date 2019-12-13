@@ -8,66 +8,65 @@ import numpy as np
 import utils.cutter as cutter
 
 class Basic_Model(object):
-    def __init__(self, n_vertices, edges, node_ids, id_nodes, k, hw_max_qubit, reconstructor_runtime_params, reconstructor_weight=0):
+    def __init__(self, n_vertices, edges, vertex_ids, id_vertices, num_cluster, cluster_max_qubit, reconstructor_runtime_params, reconstructor_weight=0):
         self.check_graph(n_vertices, edges)
         self.n_vertices = n_vertices
         self.edges = edges
         self.n_edges = len(edges)
-        self.node_ids = node_ids
-        self.id_nodes = id_nodes
-        self.k = k
-        self.hw_max_qubit = hw_max_qubit
+        self.vertex_ids = vertex_ids
+        self.id_vertices = id_vertices
+        self.num_cluster = num_cluster
+        self.cluster_max_qubit = cluster_max_qubit
         self.reconstructor_runtime_params = reconstructor_runtime_params
         self.reconstructor_weight = reconstructor_weight
-        self.verbosity = 0
 
         self.model = Model('cut_searching')
         self.model.params.OutputFlag = 0
         # self.model.params.NodeLimit = 50
         # self.model.params.MIPGap = 0.5
 
-        self.node_qubits = {}
-        for node in self.node_ids:
+        self.vertex_weight = {}
+        for node in self.vertex_ids:
             qargs = node.split(' ')
             num_in_qubits = 0
             for qarg in qargs:
                 if int(qarg.split(']')[1]) == 0:
                     num_in_qubits += 1
-            self.node_qubits[node] = num_in_qubits
+            self.vertex_weight[node] = num_in_qubits
 
-        # Indicate if a node is in some cluster
-        self.node_vars = []
-        for i in range(k):
-            cluster_vars = []
+        # Indicate if a vertex is in some cluster
+        self.vertex_y = []
+        for i in range(num_cluster):
+            cluster_y = []
             for j in range(n_vertices):
                 j_in_i = self.model.addVar(lb=0.0, ub=1.0, vtype=GRB.BINARY)
-                cluster_vars.append(j_in_i)
-            self.node_vars.append(cluster_vars)
+                cluster_y.append(j_in_i)
+            self.vertex_y.append(cluster_y)
 
         # Indicate if an edge has one and only one vertex in some cluster
-        self.edge_vars = []
-        for i in range(k):
-            cluster_vars = []
+        self.edge_x = []
+        for i in range(num_cluster):
+            cluster_x = []
             for j in range(self.n_edges):
                 v = self.model.addVar(lb=0.0, ub=1.0, vtype=GRB.BINARY)
-                cluster_vars.append(v)
-            self.edge_vars.append(cluster_vars)
+                cluster_x.append(v)
+            self.edge_x.append(cluster_x)
         
         # constraint: each vertex in exactly one cluster
         for v in range(n_vertices):
-            self.model.addConstr(quicksum([self.node_vars[i][v] for i in range(k)]), GRB.EQUAL, 1)
+            self.model.addConstr(quicksum([self.vertex_y[i][v] for i in range(num_cluster)]), GRB.EQUAL, 1)
         
         # constraint: edge_var=1 indicates one and only one vertex of an edge is in cluster
         # edge_var[cluster][edge] = node_var[cluster][u] XOR node_var[cluster][v]
-        for i in range(k):
+        for i in range(num_cluster):
             for e in range(self.n_edges):
                 u, v = self.edges[e]
-                u_node_var = self.node_vars[i][u]
-                v_node_var = self.node_vars[i][v]
-                self.model.addConstr(self.edge_vars[i][e] <= u_node_var+v_node_var)
-                self.model.addConstr(self.edge_vars[i][e] >= u_node_var-v_node_var)
-                self.model.addConstr(self.edge_vars[i][e] >= v_node_var-u_node_var)
-                self.model.addConstr(self.edge_vars[i][e] <= 2-u_node_var-v_node_var)
+                u_vertex_y = self.vertex_y[i][u]
+                v_vertex_y = self.vertex_y[i][v]
+                self.model.addConstr(self.edge_x[i][e] <= u_vertex_y+v_vertex_y)
+                self.model.addConstr(self.edge_x[i][e] >= u_vertex_y-v_vertex_y)
+                self.model.addConstr(self.edge_x[i][e] >= v_vertex_y-u_vertex_y)
+                self.model.addConstr(self.edge_x[i][e] <= 2-u_vertex_y-v_vertex_y)
 
         # Better (but not best) symmetry-breaking constraints
         #   Force small-numbered vertices into small-numbered clusters:
@@ -75,46 +74,42 @@ class Basic_Model(object):
         #     v1: in c0 or c1
         #     v2: in c0 or c1 or c2
         #     ....
-        for c in range(k):
-            self.model.addConstr(quicksum([self.node_vars[j][c] for j in range(c+1,k)]) == 0)
+        for vertex in range(num_cluster):
+            self.model.addConstr(quicksum([self.vertex_y[cluster][vertex] for cluster in range(vertex+1,num_cluster)]) == 0)
         
         # Objective function
         lb = 0
         ub = 50
-        total_num_cuts = self.model.addVar(lb=lb, ub=ub, vtype=GRB.INTEGER, name='total_num_cuts')
-        self.model.addConstr(total_num_cuts == 
+        double_total_num_cuts = self.model.addVar(lb=0, ub=40, vtype=GRB.INTEGER, name='double_total_num_cuts')
+        self.model.addConstr(double_total_num_cuts == 
         quicksum(
-            [self.edge_vars[cluster][i] for i in range(self.n_edges) for cluster in range(k)]
+            [self.edge_x[cluster][i] for i in range(self.n_edges) for cluster in range(num_cluster)]
             ))
         list_of_cluster_d = []
         list_of_cluster_O = []
-        for cluster in range(k):
-            cluster_K = self.model.addVar(lb=0, ub=30, vtype=GRB.INTEGER, name='cluster_K_%d'%cluster)
-            self.model.addConstr(cluster_K == 
-            quicksum([self.edge_vars[cluster][i] for i in range(self.n_edges)]))
-            
-            cluster_original_qubit = self.model.addVar(lb=0, ub=self.hw_max_qubit, vtype=GRB.INTEGER, name='cluster_input_%d'%cluster)
+        for cluster in range(num_cluster):
+            cluster_original_qubit = self.model.addVar(lb=0, ub=self.cluster_max_qubit, vtype=GRB.INTEGER, name='cluster_input_%d'%cluster)
             self.model.addConstr(cluster_original_qubit ==
-            quicksum([self.node_qubits[id_nodes[i]]*self.node_vars[cluster][i]
+            quicksum([self.vertex_weight[id_vertices[i]]*self.vertex_y[cluster][i]
             for i in range(self.n_vertices)]))
             
-            cluster_rho_qubits = self.model.addVar(lb=0, ub=self.hw_max_qubit, vtype=GRB.INTEGER, name='cluster_rho_qubits_%d'%cluster)
+            cluster_rho_qubits = self.model.addVar(lb=0, ub=self.cluster_max_qubit, vtype=GRB.INTEGER, name='cluster_rho_qubits_%d'%cluster)
             self.model.addConstr(cluster_rho_qubits ==
-            quicksum([self.edge_vars[cluster][i] * self.node_vars[cluster][self.edges[i][1]]
+            quicksum([self.edge_x[cluster][i] * self.vertex_y[cluster][self.edges[i][1]]
             for i in range(self.n_edges)]))
 
-            cluster_O_qubits = self.model.addVar(lb=0, ub=self.hw_max_qubit, vtype=GRB.INTEGER, name='cluster_O_qubits_%d'%cluster)
+            cluster_O_qubits = self.model.addVar(lb=0, ub=self.cluster_max_qubit, vtype=GRB.INTEGER, name='cluster_O_qubits_%d'%cluster)
             self.model.addConstr(cluster_O_qubits ==
-            quicksum([self.edge_vars[cluster][i] * self.node_vars[cluster][self.edges[i][0]]
+            quicksum([self.edge_x[cluster][i] * self.vertex_y[cluster][self.edges[i][0]]
             for i in range(self.n_edges)]))
 
-            cluster_d = self.model.addVar(lb=1, ub=self.hw_max_qubit, vtype=GRB.INTEGER, name='cluster_d_%d'%cluster)
+            cluster_d = self.model.addVar(lb=0.1, ub=self.cluster_max_qubit, vtype=GRB.INTEGER, name='cluster_d_%d'%cluster)
             self.model.addConstr(cluster_d == cluster_original_qubit + cluster_rho_qubits)
             list_of_cluster_d.append(cluster_d)
             list_of_cluster_O.append(cluster_O_qubits)
             
             lb = 0
-            ub = self.hw_max_qubit*np.log(6)
+            ub = self.cluster_max_qubit*np.log(6)
             ptx, ptf = self.pwl_exp(params=[1,1],lb=lb,ub=ub,weight=1-self.reconstructor_weight)
             evaluator_cost_exponent = self.model.addVar(lb=lb,ub=ub,vtype=GRB.CONTINUOUS, name='evaluator_cost_exponent_%d'%cluster)
             self.model.addConstr(evaluator_cost_exponent == np.log(6)*cluster_rho_qubits+np.log(3)*cluster_O_qubits)
@@ -125,7 +120,7 @@ class Basic_Model(object):
                 ub = np.log(2)/reconstructor_runtime_params[1]*20
                 ptx, ptf = self.pwl_exp(params=reconstructor_runtime_params,lb=lb,ub=ub,weight=self.reconstructor_weight)
                 reconstructor_time_exponent = self.model.addVar(lb=lb,ub=ub,vtype=GRB.CONTINUOUS, name='reconstructor_time_exponent_%d'%cluster)
-                self.model.addConstr(reconstructor_time_exponent == np.log(4)*total_num_cuts/2/reconstructor_runtime_params[1]+quicksum(list_of_cluster_d)-quicksum(list_of_cluster_O))
+                self.model.addConstr(reconstructor_time_exponent == np.log(4)*double_total_num_cuts/2/reconstructor_runtime_params[1]+quicksum(list_of_cluster_d)-quicksum(list_of_cluster_O))
                 self.model.setPWLObj(reconstructor_time_exponent, ptx, ptf)
 
         self.model.update()
@@ -155,7 +150,7 @@ class Basic_Model(object):
             assert(u < n_vertices)
     
     def solve(self):
-        print('solving for %d clusters'%self.k)
+        print('solving for %d clusters'%self.num_cluster)
         # print('model has %d variables, %d linear constraints,%d quadratic constraints, %d general constraints'
         # % (self.model.NumVars,self.model.NumConstrs, self.model.NumQConstrs, self.model.NumGenConstrs))
         try:
@@ -173,26 +168,27 @@ class Basic_Model(object):
             self.objective = self.model.ObjVal
 
             clusters = []
-            for i in range(self.k):
+            for i in range(self.num_cluster):
                 cluster = []
                 for j in range(self.n_vertices):
-                    if abs(self.node_vars[i][j].x) > 1e-4:
-                        cluster.append(self.id_nodes[j])
+                    if abs(self.vertex_y[i][j].x) > 1e-4:
+                        cluster.append(self.id_vertices[j])
                 clusters.append(cluster)
             self.clusters = clusters
 
             cut_edges_idx = []
             cut_edges = []
-            for i in range(self.k):
+            for i in range(self.num_cluster):
                 for j in range(self.n_edges):
-                    if abs(self.edge_vars[i][j].x) > 1e-4 and j not in cut_edges_idx:
+                    if abs(self.edge_x[i][j].x) > 1e-4 and j not in cut_edges_idx:
                         cut_edges_idx.append(j)
                         u, v = self.edges[j]
-                        cut_edges.append((self.id_nodes[u], self.id_nodes[v]))
+                        cut_edges.append((self.id_vertices[u], self.id_vertices[v]))
             self.cut_edges = cut_edges
             return True
         else:
             print('Infeasible')
+            print(self.model.nodecount,self.model.Status)
             return False
     
     def print_stat(self):
@@ -200,15 +196,15 @@ class Basic_Model(object):
         print('MIQCP stats:')
         # print('node count:', self.node_count)
         # print('%d vertices %d edges graph. Max qubit = %d'%
-        # (self.n_vertices, self.n_edges, self.hw_max_qubit))
-        print('%d cuts, %d clusters, max qubit = %d'%(len(self.cut_edges),self.k,self.hw_max_qubit))
+        # (self.n_vertices, self.n_edges, self.cluster_max_qubit))
+        print('%d cuts, %d clusters, max qubit = %d'%(len(self.cut_edges),self.num_cluster,self.cluster_max_qubit))
 
         evaluator_cost_verify = 0
         reconstructor_cost_verify = 0
         reconstructor_runtime_params = self.reconstructor_runtime_params
         reconstructor_weight = self.reconstructor_weight
         accumulated_kron_length = 0
-        for i in range(self.k):
+        for i in range(self.num_cluster):
             cluster_input = self.model.getVarByName('cluster_input_%d'%i)
             cluster_rho_qubits = self.model.getVarByName('cluster_rho_qubits_%d'%i)
             cluster_O_qubits = self.model.getVarByName('cluster_O_qubits_%d'%i)
@@ -216,8 +212,8 @@ class Basic_Model(object):
             cluster_K = self.model.getVarByName('cluster_K_%d'%i)
             evaluator_cost_verify += np.power(6,cluster_rho_qubits.X)*np.power(3,cluster_O_qubits.X)
             accumulated_kron_length += cluster_d.X-cluster_O_qubits.X
-            print('cluster %d: original input = %.2f, \u03C1_qubits = %.2f, O_qubits = %.2f, d = %.2f, K = %.2f' % 
-            (i,cluster_input.X,cluster_rho_qubits.X,cluster_O_qubits.X,cluster_d.X,cluster_K.X))
+            print('cluster %d: original input = %.2f, \u03C1_qubits = %.2f, O_qubits = %.2f, d = %.2f' % 
+            (i,cluster_input.X,cluster_rho_qubits.X,cluster_O_qubits.X,cluster_d.X))
             if i>0:
                 reconstructor_cost_verify += np.power(4,len(self.cut_edges))*reconstructor_runtime_params[0]*np.exp(reconstructor_runtime_params[1]*accumulated_kron_length)
 
@@ -238,7 +234,7 @@ def read_circ(circ):
     edges = []
     node_name_ids = {}
     id_node_names = {}
-    node_ids = {}
+    vertex_ids = {}
     curr_node_id = 0
     qubit_gate_idx = {}
     for qubit in dag.qubits():
@@ -251,16 +247,16 @@ def read_circ(circ):
                                                 arg1.register.name, arg1.index,qubit_gate_idx[arg1])
         qubit_gate_idx[arg0] += 1
         qubit_gate_idx[arg1] += 1
-        if vertex_name not in node_name_ids and id(vertex) not in node_ids:
+        if vertex_name not in node_name_ids and id(vertex) not in vertex_ids:
             node_name_ids[vertex_name] = curr_node_id
             id_node_names[curr_node_id] = vertex_name
-            node_ids[id(vertex)] = curr_node_id
+            vertex_ids[id(vertex)] = curr_node_id
             curr_node_id += 1
 
     for u, v, _ in dag.edges():
         if u.type == 'op' and v.type == 'op':
-            u_id = node_ids[id(u)]
-            v_id = node_ids[id(v)]
+            u_id = vertex_ids[id(u)]
+            v_id = vertex_ids[id(v)]
             edges.append((u_id, v_id))
             
     n_vertices = len(list(dag.topological_op_nodes()))
@@ -315,7 +311,7 @@ def circ_stripping(circ):
             stripped_dag.apply_operation_back(op=vertex.op, qargs=vertex.qargs)
     return dag_to_circuit(stripped_dag)
 
-def find_cuts(circ, reconstructor_runtime_params, reconstructor_weight, num_clusters = range(1,5), hw_max_qubit=20):
+def find_cuts(circ, reconstructor_runtime_params, reconstructor_weight, num_clusters = range(1,5), cluster_max_qubit=20):
     min_objective = float('inf')
     best_positions = None
     best_ancilla = None
@@ -323,15 +319,15 @@ def find_cuts(circ, reconstructor_runtime_params, reconstructor_weight, num_clus
     best_num_cluster = None
     best_model = None
     stripped_circ = circ_stripping(circ)
-    n_vertices, edges, node_ids, id_nodes = read_circ(stripped_circ)
+    n_vertices, edges, vertex_ids, id_vertices = read_circ(stripped_circ)
 
     for num_cluster in num_clusters:
         kwargs = dict(n_vertices=n_vertices,
                     edges=edges,
-                    node_ids=node_ids,
-                    id_nodes=id_nodes,
-                    k=num_cluster,
-                    hw_max_qubit=hw_max_qubit,
+                    vertex_ids=vertex_ids,
+                    id_vertices=id_vertices,
+                    num_cluster=num_cluster,
+                    cluster_max_qubit=cluster_max_qubit,
                     reconstructor_runtime_params=reconstructor_runtime_params,
                     reconstructor_weight=reconstructor_weight)
 
@@ -347,7 +343,7 @@ def find_cuts(circ, reconstructor_runtime_params, reconstructor_weight, num_clus
             best_ancilla = []
             best_d = []
             best_model = m
-            for i in range(m.k):
+            for i in range(m.num_cluster):
                 cluster_rho_qubits = m.model.getVarByName('cluster_rho_qubits_%d'%i)
                 cluster_d = m.model.getVarByName('cluster_d_%d'%i)
                 best_ancilla.append(cluster_rho_qubits.X)
@@ -357,7 +353,7 @@ def find_cuts(circ, reconstructor_runtime_params, reconstructor_weight, num_clus
 
 if __name__ == '__main__':
     circ = gen_supremacy(1,3,4)
-    hardness, positions, K, d, num_cluster, m = find_cuts(circ,num_clusters=[2],hw_max_qubit=2)
+    hardness, positions, K, d, num_cluster, m = find_cuts(circ,num_clusters=[2],cluster_max_qubit=2)
     m.print_stat()
     fragments, complete_path_map, K, d = cutter.cut_circuit(circ, positions)
     print('Testing in cutter:')

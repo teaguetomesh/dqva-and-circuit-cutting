@@ -9,6 +9,7 @@ conda activate venv
 pip install numpy qiskit matplotlib nxpd pydot pillow progressbar2 jupyterlab
 conda install -c conda-forge mpich-mpicc
 pip install mpi4py
+conda config --add channels http://conda.anaconda.org/gurobi
 conda install gurobi
 ```
 
