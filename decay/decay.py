@@ -23,7 +23,7 @@ def find_rank_combinations(combinations,rank,size):
     rank_combinations = combinations[combinations_start:combinations_stop]
     return rank_combinations
 
-def calculate_delta_H(circ,min_ce,ground_truth,accumulated_prob,counter,shots_increment,evaluation_method):
+def calculate_delta_H(circ,ground_truth,accumulated_prob,counter,shots_increment,evaluation_method):
     if evaluation_method == 'noisy_qasm_simulator':
         qasm_noise_evaluator_info = get_evaluator_info(circ=circ,device_name='ibmq_boeblingen',
         fields=['device','basis_gates','coupling_map','properties','initial_layout','noise_model'])
@@ -35,7 +35,7 @@ def calculate_delta_H(circ,min_ce,ground_truth,accumulated_prob,counter,shots_in
     else:
         raise Exception('Illegal evaluation method:',evaluation_method)
     accumulated_prob = [(x*(counter-1)+y)/counter for x,y in zip(accumulated_prob,prob_batch)]
-    accumulated_ce = cross_entropy(target=ground_truth,obs=accumulated_prob) - min_ce
+    accumulated_ce = cross_entropy(target=ground_truth,obs=accumulated_prob)
     return accumulated_ce, accumulated_prob
 
 if __name__ == '__main__':
@@ -75,7 +75,6 @@ if __name__ == '__main__':
                 i, j = factor_int(full_circ_size)
                 circ = gen_supremacy(i,j,8)
                 ground_truth = evaluate_circ(circ=circ,backend='statevector_simulator',evaluator_info=None)
-                min_ce = cross_entropy(target=ground_truth,obs=ground_truth)
                 shots_increment = 1024
 
                 noiseless_accumulated_prob = [0 for i in range(np.power(2,len(circ.qubits)))]
@@ -92,11 +91,11 @@ if __name__ == '__main__':
                     elif not found_saturation and counter>max_counter:
                         break
                     print('Counter %d, shots = %d'%(counter,counter*shots_increment))
-                    noiseless_accumulated_ce, noiseless_accumulated_prob = calculate_delta_H(circ=circ,min_ce=min_ce,ground_truth=ground_truth,
+                    noiseless_accumulated_ce, noiseless_accumulated_prob = calculate_delta_H(circ=circ,ground_truth=ground_truth,
                     accumulated_prob=noiseless_accumulated_prob,counter=counter,shots_increment=shots_increment,evaluation_method='qasm_simulator')
                     noiseless_delta_H_l.append(noiseless_accumulated_ce)
                     
-                    noisy_accumulated_ce, noisy_accumulated_prob = calculate_delta_H(circ=circ,min_ce=min_ce,ground_truth=ground_truth,
+                    noisy_accumulated_ce, noisy_accumulated_prob = calculate_delta_H(circ=circ,ground_truth=ground_truth,
                     accumulated_prob=noisy_accumulated_prob,counter=counter,shots_increment=shots_increment,evaluation_method='noisy_qasm_simulator')
                     noisy_delta_H_l.append(noisy_accumulated_ce)
                     

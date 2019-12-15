@@ -8,7 +8,6 @@ from qiskit.compiler import transpile, assemble
 from qiskit.providers.aer import noise
 import numpy as np
 import math
-from qiskit.providers.models import BackendProperties
 from qiskit.ignis.mitigation.measurement import complete_meas_cal
 import pickle
 import copy
@@ -95,10 +94,10 @@ def cross_entropy(target,obs):
         print('sum of obs =',sum(obs))
     h = 0
     for p,q in zip(target,obs):
-        if p==0 or q<=0:
+        if p==0:
             h += 0
         else:
-            h += -p*np.log(q)
+            h += p*np.log(p/q)
     return h
 
 def fidelity(target,obs):
@@ -134,7 +133,6 @@ def get_circ_saturated_shots(circs,device_name):
     saturated_shots = []
     for circ_idx, circ in enumerate(circs):
         ground_truth = evaluate_circ(circ=circ,backend='statevector_simulator',evaluator_info=None)
-        min_ce = cross_entropy(target=ground_truth,obs=ground_truth)
         
         qasm_noise_evaluator_info = get_evaluator_info(circ=circ,device_name=device_name,
         fields=['device','basis_gates','coupling_map','properties','initial_layout','noise_model'])
@@ -242,7 +240,8 @@ def evaluate_circ(circ, backend, evaluator_info):
     if backend == 'statevector_simulator':
         # print('using statevector simulator')
         backend = Aer.get_backend('statevector_simulator')
-        job = execute(circ, backend=backend)
+        backend_options = {'max_parallel_experiments':os.cpu_count()}
+        job = execute(circ, backend=backend,backend_options=backend_options)
         result = job.result()
         outputstate = result.get_statevector(circ)
         outputstate_ordered = [0 for sv in outputstate]
@@ -254,10 +253,11 @@ def evaluate_circ(circ, backend, evaluator_info):
     elif backend == 'noiseless_qasm_simulator':
         # print('using noiseless qasm simulator %d shots'%num_shots)
         backend = Aer.get_backend('qasm_simulator')
+        backend_options = {'max_parallel_experiments':os.cpu_count()}
         qc = apply_measurement(circ)
 
         num_shots = evaluator_info['num_shots']
-        noiseless_qasm_result = execute(qc, backend, shots=num_shots).result()
+        noiseless_qasm_result = execute(qc, backend, shots=num_shots,backend_options=backend_options).result()
         noiseless_counts = noiseless_qasm_result.get_counts(qc)
         noiseless_prob = [0 for x in range(np.power(2,len(circ.qubits)))]
         for state in noiseless_counts:
@@ -267,6 +267,7 @@ def evaluate_circ(circ, backend, evaluator_info):
     elif backend == 'noisy_qasm_simulator':
         # print('using noisy qasm simulator {} shots'.format(num_shots))
         backend = Aer.get_backend('qasm_simulator')
+        backend_options = {'max_parallel_experiments':os.cpu_count()}
         qc=apply_measurement(circ)
         mapped_circuit = transpile(qc,
         backend=evaluator_info['device'], basis_gates=evaluator_info['basis_gates'], 
@@ -277,7 +278,7 @@ def evaluate_circ(circ, backend, evaluator_info):
         noise_model=evaluator_info['noise_model'],
         coupling_map=evaluator_info['coupling_map'],
         basis_gates=evaluator_info['basis_gates'],
-        shots=evaluator_info['num_shots']).result()
+        shots=evaluator_info['num_shots'],backend_options=backend_options).result()
         noisy_counts = noisy_qasm_result.get_counts(qc)
         noisy_prob = [0 for x in range(np.power(2,len(circ.qubits)))]
         for state in noisy_counts:
