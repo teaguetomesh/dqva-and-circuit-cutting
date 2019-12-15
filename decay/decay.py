@@ -67,7 +67,7 @@ if __name__ == '__main__':
             if not os.path.exists(dirname):
                 os.makedirs(dirname)
 
-            for full_circ_size in range(3,19):
+            for full_circ_size in range(3,16):
                 fig_name = '%s/%d_decay.png'%(dirname,full_circ_size)
                 if os.path.isfile(fig_name):
                     continue
