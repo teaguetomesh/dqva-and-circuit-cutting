@@ -1,4 +1,5 @@
 import numpy as np
+import math
 import matplotlib.pyplot as plt
 from qcg.generators import gen_supremacy, gen_hwea, gen_BV, gen_qft, gen_sycamore
 from utils.helper_fun import evaluate_circ, get_evaluator_info, factor_int, cross_entropy
@@ -38,6 +39,33 @@ def calculate_delta_H(circ,ground_truth,accumulated_prob,counter,shots_increment
     accumulated_ce = cross_entropy(target=ground_truth,obs=accumulated_prob)
     return accumulated_ce, accumulated_prob
 
+def get_xticks(xvals):
+    if len(xvals)<=10:
+        return xvals
+    else:
+        x_ticks = []
+        step = math.ceil(len(xvals)/10)
+        for idx, x in enumerate(xvals):
+            if idx%step==0 or idx==len(xvals)-1:
+                x_ticks.append(x)
+        return x_ticks
+
+def make_plot(noisy_delta_H_l,noiseless_delta_H_l,cutoff):
+    xvals = range(1,len(noisy_delta_H_l)+1)
+    plt.figure()
+    if len(noisy_delta_H_l)>=cutoff:
+        plt.axvline(x=cutoff,label='saturated cutoff',color='k',linestyle='--')
+    plt.plot(xvals,noiseless_delta_H_l,label='noiseless')
+    plt.plot(xvals,noisy_delta_H_l,label='noisy')
+    x_ticks = get_xticks(xvals)
+    plt.xticks(ticks=x_ticks,labels=x_ticks)
+    plt.ylabel('\u0394H')
+    plt.xlabel('shots [*%d]'%shots_increment)
+    plt.title('%d qubit full circuit'%full_circ_size)
+    plt.legend()
+    plt.savefig(fig_name,dpi=400)
+    plt.close()
+
 if __name__ == '__main__':
     comm = MPI.COMM_WORLD
     rank = comm.Get_rank()
@@ -48,11 +76,11 @@ if __name__ == '__main__':
     if rank == size-1:
         a = 1e-1
         r = 1e-1
-        length = 5
+        length = 2
         first_derivatives = [a * r ** (n - 1) for n in range(1, length + 1)]
-        a = 1e-1
+        a = 1e-9
         r = 1e-1
-        length = 10
+        length = 5
         second_derivatives = [a * r ** (n - 1) for n in range(1, length + 1)]
         combinations = list(itertools.product(first_derivatives, second_derivatives))
         for i in range(num_workers):
@@ -67,7 +95,7 @@ if __name__ == '__main__':
             if not os.path.exists(dirname):
                 os.makedirs(dirname)
 
-            for full_circ_size in range(3,16):
+            for full_circ_size in range(3,4):
                 fig_name = '%s/%d_decay.png'%(dirname,full_circ_size)
                 if os.path.isfile(fig_name):
                     continue
@@ -102,11 +130,11 @@ if __name__ == '__main__':
                     if len(noiseless_delta_H_l)>=3:
                         first_derivative = (noiseless_delta_H_l[-1]+noiseless_delta_H_l[-3])/(2*shots_increment)
                         second_derivative = (noiseless_delta_H_l[-1]+noiseless_delta_H_l[-3]-2*noiseless_delta_H_l[-2])/(np.power(shots_increment,2))
-                        print('noiseless \u0394H = %.3f, first derivative = %.3e, second derivative = %.3e'%(noiseless_accumulated_ce,first_derivative,second_derivative))
+                        print('noiseless \u0394H = %.3f, first derivative = %.3e, second derivative = %.3e'%(noiseless_accumulated_ce,first_derivative,second_derivative),flush=True)
 
                         first_derivative = (noisy_delta_H_l[-1]+noisy_delta_H_l[-3])/(2*shots_increment)
                         second_derivative = (noisy_delta_H_l[-1]+noisy_delta_H_l[-3]-2*noisy_delta_H_l[-2])/(np.power(shots_increment,2))
-                        print('noisy \u0394H = %.3f, first derivative = %.3e, second derivative = %.3e'%(noisy_accumulated_ce,first_derivative,second_derivative))
+                        print('noisy \u0394H = %.3f, first derivative = %.3e, second derivative = %.3e'%(noisy_accumulated_ce,first_derivative,second_derivative),flush=True)
 
                         if abs(first_derivative)<first_derivative_threshold and abs(second_derivative)<second_derivative_threshold and noiseless_accumulated_ce<noisy_accumulated_ce and not found_saturation:
                             print('*'*50,'SATURATED','*'*50)
@@ -115,17 +143,5 @@ if __name__ == '__main__':
                     print('-'*50)
                     counter += 1
                 
-                plot_start = max(1,cutoff-20)
-                xvals = range(plot_start,len(noisy_delta_H_l)+1)
-                shots = [x*shots_increment for x in xvals]
-                plt.figure()
-                plt.axvline(x=cutoff,label='saturated cutoff',color='k',linestyle='--')
-                plt.plot(xvals,noiseless_delta_H_l[plot_start-1:],label='noiseless')
-                plt.plot(xvals,noisy_delta_H_l[plot_start-1:],label='noisy')
-                plt.xticks(ticks=xvals,labels=xvals)
-                plt.ylabel('\u0394H')
-                plt.xlabel('shots [*1024]')
-                plt.title('%d qubit full circuit'%full_circ_size)
-                plt.legend()
-                plt.savefig(fig_name,dpi=400)
-                plt.close()
+                    make_plot(noisy_delta_H_l,noiseless_delta_H_l,cutoff)
+                make_plot(noisy_delta_H_l,noiseless_delta_H_l,cutoff)

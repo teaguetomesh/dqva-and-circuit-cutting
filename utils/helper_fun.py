@@ -236,6 +236,14 @@ def reverseBits(num,bitSize):
     reverse = reverse + (bitSize - len(reverse))*'0'
     return int(reverse,2)
 
+def combine_dict(dict_a, dict_sum):
+    for key in dict_a:
+        if key in dict_sum:
+            dict_sum[key] = dict_sum[key]+dict_a[key]
+        else:
+            dict_sum[key] = dict_a[key]
+    return dict_sum
+
 def evaluate_circ(circ, backend, evaluator_info):
     if backend == 'statevector_simulator':
         # print('using statevector simulator')
@@ -258,7 +266,9 @@ def evaluate_circ(circ, backend, evaluator_info):
 
         num_shots = evaluator_info['num_shots']
         noiseless_qasm_result = execute(qc, backend, shots=num_shots,backend_options=backend_options).result()
-        noiseless_counts = noiseless_qasm_result.get_counts(qc)
+        
+        noiseless_counts = noiseless_qasm_result.get_counts(0)
+        assert sum(noiseless_counts.values())>=num_shots
         noiseless_prob = [0 for x in range(np.power(2,len(circ.qubits)))]
         for state in noiseless_counts:
             reversed_state = reverseBits(int(state,2),len(circ.qubits))
@@ -273,17 +283,21 @@ def evaluate_circ(circ, backend, evaluator_info):
         backend=evaluator_info['device'], basis_gates=evaluator_info['basis_gates'], 
         coupling_map=evaluator_info['coupling_map'],backend_properties=evaluator_info['properties'],
         initial_layout=evaluator_info['initial_layout'])
+        
+        num_shots = evaluator_info['num_shots']
         noisy_qasm_result = execute(experiments=mapped_circuit,
         backend=backend,
         noise_model=evaluator_info['noise_model'],
         coupling_map=evaluator_info['coupling_map'],
         basis_gates=evaluator_info['basis_gates'],
-        shots=evaluator_info['num_shots'],backend_options=backend_options).result()
-        noisy_counts = noisy_qasm_result.get_counts(qc)
+        shots=num_shots,backend_options=backend_options).result()
+
+        noisy_counts = noisy_qasm_result.get_counts(0)
+        assert sum(noisy_counts.values())>=num_shots
         noisy_prob = [0 for x in range(np.power(2,len(circ.qubits)))]
         for state in noisy_counts:
             reversed_state = reverseBits(int(state,2),len(circ.qubits))
-            noisy_prob[reversed_state] = noisy_counts[state]/evaluator_info['num_shots']
+            noisy_prob[reversed_state] = noisy_counts[state]/num_shots
         return noisy_prob
     elif backend == 'hardware':
         jobs = []
