@@ -76,11 +76,11 @@ if __name__ == '__main__':
     if rank == size-1:
         a = 1e-1
         r = 1e-1
-        length = 2
-        first_derivatives = [a * r ** (n - 1) for n in range(1, length + 1)]
-        a = 1e-9
-        r = 1e-1
         length = 5
+        first_derivatives = [a * r ** (n - 1) for n in range(1, length + 1)]
+        a = 1e-1
+        r = 1e-1
+        length = 10
         second_derivatives = [a * r ** (n - 1) for n in range(1, length + 1)]
         combinations = list(itertools.product(first_derivatives, second_derivatives))
         for i in range(num_workers):
