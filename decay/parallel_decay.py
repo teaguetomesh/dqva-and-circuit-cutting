@@ -136,7 +136,7 @@ if __name__ == '__main__':
                         second_derivative = (noisy_delta_H_l[-1]+noisy_delta_H_l[-3]-2*noisy_delta_H_l[-2])/(np.power(shots_increment,2))
                         print('noisy \u0394H = %.3f, first derivative = %.3e, second derivative = %.3e'%(noisy_accumulated_ce,first_derivative,second_derivative),flush=True)
 
-                        if abs(first_derivative)<first_derivative_threshold and abs(second_derivative)<second_derivative_threshold and noiseless_accumulated_ce<noisy_accumulated_ce and not found_saturation:
+                        if abs(first_derivative)<first_derivative_threshold and abs(second_derivative)<second_derivative_threshold and not found_saturation:
                             print('*'*50,'SATURATED','*'*50)
                             cutoff = counter
                             found_saturation = True
