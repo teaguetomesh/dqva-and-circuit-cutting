@@ -50,7 +50,7 @@ def get_xticks(xvals):
                 x_ticks.append(x)
         return x_ticks
 
-def make_plot(noisy_delta_H_l,noiseless_delta_H_l,cutoff):
+def make_plot(noisy_delta_H_l,noiseless_delta_H_l,cutoff,full_circ_size,shots_increment):
     xvals = range(1,len(noisy_delta_H_l)+1)
     plt.figure()
     if len(noisy_delta_H_l)>=cutoff:
@@ -66,87 +66,89 @@ def make_plot(noisy_delta_H_l,noiseless_delta_H_l,cutoff):
     plt.savefig(fig_name,dpi=400)
     plt.close()
 
+def find_saturation(circuit,first_derivative_threshold,second_derivative_threshold):
+    full_circ_size = len(circuit.qubits)
+    shots_increment = max(1024,np.power(2,full_circ_size))
+    shots_increment = min(shots_increment,8192)
+    print('%d qubit full circuit, shots increment = %d'%(full_circ_size,shots_increment))
+    ground_truth = evaluate_circ(circ=circuit,backend='statevector_simulator',evaluator_info=None)
+    noiseless_accumulated_prob = [0 for i in range(np.power(2,full_circ_size))]
+    noisy_accumulated_prob = [0 for i in range(np.power(2,full_circ_size))]
+    noiseless_delta_H_l = []
+    noisy_delta_H_l = []
+    counter = 1
+    max_counter = max(20,int(20*np.power(2,full_circ_size)/shots_increment))
+    cutoff = max_counter
+    found_saturation = False
+
+    while 1:
+        if found_saturation and counter>cutoff+10:
+            break
+        elif not found_saturation and counter>max_counter:
+            break
+        print('Counter %d, shots = %d'%(counter,counter*shots_increment))
+        noiseless_accumulated_ce, noiseless_accumulated_prob = calculate_delta_H(circ=circuit,ground_truth=ground_truth,
+        accumulated_prob=noiseless_accumulated_prob,counter=counter,shots_increment=shots_increment,evaluation_method='qasm_simulator')
+        noiseless_delta_H_l.append(noiseless_accumulated_ce)
+        
+        noisy_accumulated_ce, noisy_accumulated_prob = calculate_delta_H(circ=circuit,ground_truth=ground_truth,
+        accumulated_prob=noisy_accumulated_prob,counter=counter,shots_increment=shots_increment,evaluation_method='noisy_qasm_simulator')
+        noisy_delta_H_l.append(noisy_accumulated_ce)
+        
+        if len(noiseless_delta_H_l)>=3:
+            first_derivative = (noiseless_delta_H_l[-1]+noiseless_delta_H_l[-3])/(2*shots_increment)
+            second_derivative = (noiseless_delta_H_l[-1]+noiseless_delta_H_l[-3]-2*noiseless_delta_H_l[-2])/(np.power(shots_increment,2))
+            print('noiseless \u0394H = %.3f, first derivative = %.3e, second derivative = %.3e'%(noiseless_accumulated_ce,first_derivative,second_derivative),flush=True)
+
+            first_derivative = (noisy_delta_H_l[-1]+noisy_delta_H_l[-3])/(2*shots_increment)
+            second_derivative = (noisy_delta_H_l[-1]+noisy_delta_H_l[-3]-2*noisy_delta_H_l[-2])/(np.power(shots_increment,2))
+            print('noisy \u0394H = %.3f, first derivative = %.3e, second derivative = %.3e'%(noisy_accumulated_ce,first_derivative,second_derivative),flush=True)
+
+            if abs(first_derivative)<first_derivative_threshold and abs(second_derivative)<second_derivative_threshold and not found_saturation:
+                print('*'*50,'SATURATED','*'*50)
+                cutoff = counter
+                found_saturation = True
+        print('-'*50)
+        counter += 1
+    
+        make_plot(noisy_delta_H_l,noiseless_delta_H_l,cutoff,full_circ_size,shots_increment)
+    return noisy_delta_H_l, noiseless_delta_H_l, cutoff, shots_increment, found_saturation
+
 if __name__ == '__main__':
     comm = MPI.COMM_WORLD
     rank = comm.Get_rank()
     size = comm.Get_size()
 
-    num_workers = size - 1
+    num_workers = size
 
-    if rank == size-1:
-        a = 1e-1
-        r = 1e-1
-        length = 5
-        first_derivatives = [a * r ** (n - 1) for n in range(1, length + 1)]
-        a = 1e-1
-        r = 1e-1
-        length = 10
-        second_derivatives = [a * r ** (n - 1) for n in range(1, length + 1)]
-        combinations = list(itertools.product(first_derivatives, second_derivatives))
-        for i in range(num_workers):
-            comm.send(combinations, dest=i)
-    else:
-        state = MPI.Status()
-        combinations = comm.recv(source=size-1,status=state)
-        rank_combinations = find_rank_combinations(combinations,rank,size)
-        for combination in rank_combinations:
-            first_derivative_threshold, second_derivative_threshold = combination
-            dirname = './decay/%.1e__%.1e_decays'%(first_derivative_threshold,second_derivative_threshold)
-            combination_converged = True
-            if not os.path.exists(dirname):
-                os.makedirs(dirname)
+    a = 1e-1
+    r = 1e-1
+    length = 5
+    first_derivatives = [a * r ** (n - 1) for n in range(1, length + 1)]
+    a = 1e-1
+    r = 1e-1
+    length = 10
+    second_derivatives = [a * r ** (n - 1) for n in range(1, length + 1)]
+    combinations = list(itertools.product(first_derivatives, second_derivatives))
+    
+    rank_combinations = find_rank_combinations(combinations,rank,size)
+    for combination in rank_combinations:
+        first_derivative_threshold, second_derivative_threshold = combination
+        dirname = './decay/%.1e__%.1e_decays'%(first_derivative_threshold,second_derivative_threshold)
+        if not os.path.exists(dirname):
+            os.makedirs(dirname)
 
-            for full_circ_size in range(3,16):
-                if not combination_converged:
-                    break
-                fig_name = '%s/%d_decay.png'%(dirname,full_circ_size)
-                if os.path.isfile(fig_name):
-                    continue
-                print('%d qubit full circuit'%full_circ_size)
-                i, j = factor_int(full_circ_size)
-                circ = gen_supremacy(i,j,8)
-                ground_truth = evaluate_circ(circ=circ,backend='statevector_simulator',evaluator_info=None)
-                shots_increment = max(1024,np.power(2,len(circ.qubits)))
-                shots_increment = min(shots_increment,8192)
-
-                noiseless_accumulated_prob = [0 for i in range(np.power(2,len(circ.qubits)))]
-                noisy_accumulated_prob = [0 for i in range(np.power(2,len(circ.qubits)))]
-                noiseless_delta_H_l = []
-                noisy_delta_H_l = []
-                counter = 1
-                max_counter = max(20,int(20*np.power(2,full_circ_size)/shots_increment))
-                cutoff = max_counter
-                found_saturation = False
-                while 1:
-                    if found_saturation and counter>cutoff+10:
-                        break
-                    elif not found_saturation and counter>max_counter:
-                        combination_converged = False
-                        break
-                    print('Counter %d, shots = %d'%(counter,counter*shots_increment))
-                    noiseless_accumulated_ce, noiseless_accumulated_prob = calculate_delta_H(circ=circ,ground_truth=ground_truth,
-                    accumulated_prob=noiseless_accumulated_prob,counter=counter,shots_increment=shots_increment,evaluation_method='qasm_simulator')
-                    noiseless_delta_H_l.append(noiseless_accumulated_ce)
-                    
-                    noisy_accumulated_ce, noisy_accumulated_prob = calculate_delta_H(circ=circ,ground_truth=ground_truth,
-                    accumulated_prob=noisy_accumulated_prob,counter=counter,shots_increment=shots_increment,evaluation_method='noisy_qasm_simulator')
-                    noisy_delta_H_l.append(noisy_accumulated_ce)
-                    
-                    if len(noiseless_delta_H_l)>=3:
-                        first_derivative = (noiseless_delta_H_l[-1]+noiseless_delta_H_l[-3])/(2*shots_increment)
-                        second_derivative = (noiseless_delta_H_l[-1]+noiseless_delta_H_l[-3]-2*noiseless_delta_H_l[-2])/(np.power(shots_increment,2))
-                        print('noiseless \u0394H = %.3f, first derivative = %.3e, second derivative = %.3e'%(noiseless_accumulated_ce,first_derivative,second_derivative),flush=True)
-
-                        first_derivative = (noisy_delta_H_l[-1]+noisy_delta_H_l[-3])/(2*shots_increment)
-                        second_derivative = (noisy_delta_H_l[-1]+noisy_delta_H_l[-3]-2*noisy_delta_H_l[-2])/(np.power(shots_increment,2))
-                        print('noisy \u0394H = %.3f, first derivative = %.3e, second derivative = %.3e'%(noisy_accumulated_ce,first_derivative,second_derivative),flush=True)
-
-                        if abs(first_derivative)<first_derivative_threshold and abs(second_derivative)<second_derivative_threshold and not found_saturation:
-                            print('*'*50,'SATURATED','*'*50)
-                            cutoff = counter
-                            found_saturation = True
-                    print('-'*50)
-                    counter += 1
-                
-                    make_plot(noisy_delta_H_l,noiseless_delta_H_l,cutoff)
-                make_plot(noisy_delta_H_l,noiseless_delta_H_l,cutoff)
+        for full_circ_size in range(3,16):
+            fig_name = '%s/%d_decay.png'%(dirname,full_circ_size)
+            if os.path.isfile(fig_name):
+                continue
+            i, j = factor_int(full_circ_size)
+            circ = gen_supremacy(i,j,8)
+            
+            noisy_delta_H_l, noiseless_delta_H_l, cutoff, shots_increment, found_saturation = find_saturation(circuit=circ,
+            first_derivative_threshold=first_derivative_threshold,second_derivative_threshold=second_derivative_threshold)
+            
+            make_plot(noisy_delta_H_l,noiseless_delta_H_l,cutoff,full_circ_size,shots_increment)
+            
+            if not found_saturation:
+                break
