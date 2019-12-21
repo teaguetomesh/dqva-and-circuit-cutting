@@ -70,6 +70,7 @@ def find_saturation(circuit,first_derivative_threshold,second_derivative_thresho
     full_circ_size = len(circuit.qubits)
     shots_increment = max(1024,np.power(2,full_circ_size))
     shots_increment = min(shots_increment,8192)
+    shots_increment = int(shots_increment)
     print('%d qubit full circuit, shots increment = %d'%(full_circ_size,shots_increment))
     ground_truth = evaluate_circ(circ=circuit,backend='statevector_simulator',evaluator_info=None)
     noiseless_accumulated_prob = [0 for i in range(np.power(2,full_circ_size))]
