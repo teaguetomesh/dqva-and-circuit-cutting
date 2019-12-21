@@ -7,9 +7,10 @@ import argparse
 import os
 import itertools
 from mpi4py import MPI
+import glob
 
 def find_rank_combinations(combinations,rank,size):
-    num_workers = size - 1
+    num_workers = size
     rank_combinations = []
 
     count = int(len(combinations)/num_workers)
@@ -50,7 +51,7 @@ def get_xticks(xvals):
                 x_ticks.append(x)
         return x_ticks
 
-def make_plot(noisy_delta_H_l,noiseless_delta_H_l,cutoff,full_circ_size,shots_increment):
+def make_plot(noisy_delta_H_l,noiseless_delta_H_l,cutoff,full_circ_size,shots_increment,dirname,intermediate):
     xvals = range(1,len(noisy_delta_H_l)+1)
     plt.figure()
     if len(noisy_delta_H_l)>=cutoff:
@@ -63,10 +64,13 @@ def make_plot(noisy_delta_H_l,noiseless_delta_H_l,cutoff,full_circ_size,shots_in
     plt.xlabel('shots [*%d]'%shots_increment)
     plt.title('%d qubit full circuit'%full_circ_size)
     plt.legend()
-    plt.savefig(fig_name,dpi=400)
+    if intermediate:
+        plt.savefig('%s/intermediate.png'%dirname,dpi=400)
+    else:
+        plt.savefig('%s/%d_decay.png'%(dirname,full_circ_size),dpi=400)
     plt.close()
 
-def find_saturation(circuit,first_derivative_threshold,second_derivative_threshold):
+def find_saturation(circuit,first_derivative_threshold,second_derivative_threshold,dirname):
     full_circ_size = len(circuit.qubits)
     shots_increment = max(1024,np.power(2,full_circ_size))
     shots_increment = min(shots_increment,8192)
@@ -112,7 +116,8 @@ def find_saturation(circuit,first_derivative_threshold,second_derivative_thresho
         print('-'*50)
         counter += 1
     
-        make_plot(noisy_delta_H_l,noiseless_delta_H_l,cutoff,full_circ_size,shots_increment)
+        make_plot(noisy_delta_H_l=noisy_delta_H_l,noiseless_delta_H_l=noiseless_delta_H_l,
+        cutoff=cutoff,full_circ_size=full_circ_size,shots_increment=shots_increment,dirname=dirname,intermediate=True)
     return noisy_delta_H_l, noiseless_delta_H_l, cutoff, shots_increment, found_saturation
 
 if __name__ == '__main__':
@@ -124,11 +129,11 @@ if __name__ == '__main__':
 
     a = 1e-1
     r = 1e-1
-    length = 5
+    length = 2
     first_derivatives = [a * r ** (n - 1) for n in range(1, length + 1)]
     a = 1e-1
     r = 1e-1
-    length = 10
+    length = 5
     second_derivatives = [a * r ** (n - 1) for n in range(1, length + 1)]
     combinations = list(itertools.product(first_derivatives, second_derivatives))
     
@@ -138,18 +143,27 @@ if __name__ == '__main__':
         dirname = './decay/%.1e__%.1e_decays'%(first_derivative_threshold,second_derivative_threshold)
         if not os.path.exists(dirname):
             os.makedirs(dirname)
-
-        for full_circ_size in range(3,16):
-            fig_name = '%s/%d_decay.png'%(dirname,full_circ_size)
-            if os.path.isfile(fig_name):
-                continue
-            i, j = factor_int(full_circ_size)
-            circ = gen_supremacy(i,j,8)
-            
-            noisy_delta_H_l, noiseless_delta_H_l, cutoff, shots_increment, found_saturation = find_saturation(circuit=circ,
-            first_derivative_threshold=first_derivative_threshold,second_derivative_threshold=second_derivative_threshold)
-            
-            make_plot(noisy_delta_H_l,noiseless_delta_H_l,cutoff,full_circ_size,shots_increment)
-            
-            if not found_saturation:
+        fig_names = glob.glob('%s/*.png'%dirname)
+        diverged = False
+        for fig_name in fig_names:
+            if 'diverged' in fig_name:
+                diverged = True
                 break
+        if diverged:
+            break
+        else:
+            for full_circ_size in range(3,6):
+                fig_name = '%s/%d_decay.png'%(dirname,full_circ_size)
+                if os.path.isfile(fig_name):
+                    continue
+                i, j = factor_int(full_circ_size)
+                circ = gen_supremacy(i,j,8)
+                
+                noisy_delta_H_l, noiseless_delta_H_l, cutoff, shots_increment, found_saturation = find_saturation(circuit=circ,
+                first_derivative_threshold=first_derivative_threshold,second_derivative_threshold=second_derivative_threshold,dirname=dirname)
+                
+                make_plot(noisy_delta_H_l=noisy_delta_H_l,noiseless_delta_H_l=noiseless_delta_H_l,
+                cutoff=cutoff,full_circ_size=full_circ_size,shots_increment=shots_increment,dirname=dirname,intermediate=False)
+                
+                if not found_saturation:
+                    break
