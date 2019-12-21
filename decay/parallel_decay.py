@@ -92,10 +92,13 @@ if __name__ == '__main__':
         for combination in rank_combinations:
             first_derivative_threshold, second_derivative_threshold = combination
             dirname = './decay/%.1e__%.1e_decays'%(first_derivative_threshold,second_derivative_threshold)
+            combination_converged = True
             if not os.path.exists(dirname):
                 os.makedirs(dirname)
 
             for full_circ_size in range(3,16):
+                if not combination_converged:
+                    break
                 fig_name = '%s/%d_decay.png'%(dirname,full_circ_size)
                 if os.path.isfile(fig_name):
                     continue
@@ -103,7 +106,8 @@ if __name__ == '__main__':
                 i, j = factor_int(full_circ_size)
                 circ = gen_supremacy(i,j,8)
                 ground_truth = evaluate_circ(circ=circ,backend='statevector_simulator',evaluator_info=None)
-                shots_increment = 8192
+                shots_increment = max(1024,np.power(2,len(circ.qubits)))
+                shots_increment = min(shots_increment,8192)
 
                 noiseless_accumulated_prob = [0 for i in range(np.power(2,len(circ.qubits)))]
                 noisy_accumulated_prob = [0 for i in range(np.power(2,len(circ.qubits)))]
@@ -117,6 +121,7 @@ if __name__ == '__main__':
                     if found_saturation and counter>cutoff+10:
                         break
                     elif not found_saturation and counter>max_counter:
+                        combination_converged = False
                         break
                     print('Counter %d, shots = %d'%(counter,counter*shots_increment))
                     noiseless_accumulated_ce, noiseless_accumulated_prob = calculate_delta_H(circ=circ,ground_truth=ground_truth,
