@@ -66,8 +66,10 @@ def make_plot(noisy_delta_H_l,noiseless_delta_H_l,cutoff,full_circ_size,shots_in
     plt.legend()
     if intermediate:
         plt.savefig('%s/intermediate.png'%dirname,dpi=400)
-    else:
+    elif len(noisy_delta_H_l)>cutoff:
         plt.savefig('%s/%d_decay.png'%(dirname,full_circ_size),dpi=400)
+    else:
+        plt.savefig('%s/%d_diverged.png'%(dirname,full_circ_size),dpi=400)
     plt.close()
 
 def find_saturation(circuit,first_derivative_threshold,second_derivative_threshold,dirname):
