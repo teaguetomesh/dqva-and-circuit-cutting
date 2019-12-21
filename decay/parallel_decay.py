@@ -103,7 +103,7 @@ if __name__ == '__main__':
                 i, j = factor_int(full_circ_size)
                 circ = gen_supremacy(i,j,8)
                 ground_truth = evaluate_circ(circ=circ,backend='statevector_simulator',evaluator_info=None)
-                shots_increment = 1024
+                shots_increment = 8192
 
                 noiseless_accumulated_prob = [0 for i in range(np.power(2,len(circ.qubits)))]
                 noisy_accumulated_prob = [0 for i in range(np.power(2,len(circ.qubits)))]
