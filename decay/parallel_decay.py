@@ -154,7 +154,7 @@ if __name__ == '__main__':
         if diverged:
             break
         else:
-            for full_circ_size in range(3,11):
+            for full_circ_size in range(3,12):
                 fig_name = '%s/%d_decay.png'%(dirname,full_circ_size)
                 if os.path.isfile(fig_name):
                     continue
