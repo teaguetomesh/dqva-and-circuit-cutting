@@ -248,8 +248,7 @@ def evaluate_circ(circ, backend, evaluator_info):
     if backend == 'statevector_simulator':
         # print('using statevector simulator')
         backend = Aer.get_backend('statevector_simulator')
-        backend_options = {'max_parallel_experiments':os.cpu_count()}
-        backend_options = {'max_parallel_experiments':1}
+        backend_options = {'max_parallel_threads':1}
         job = execute(circ, backend=backend,backend_options=backend_options)
         result = job.result()
         outputstate = result.get_statevector(circ)
@@ -262,8 +261,7 @@ def evaluate_circ(circ, backend, evaluator_info):
     elif backend == 'noiseless_qasm_simulator':
         # print('using noiseless qasm simulator %d shots'%num_shots)
         backend = Aer.get_backend('qasm_simulator')
-        backend_options = {'max_parallel_experiments':os.cpu_count()}
-        backend_options = {'max_parallel_experiments':1}
+        backend_options = {'max_parallel_threads':1}
         qc = apply_measurement(circ)
 
         num_shots = evaluator_info['num_shots']
@@ -279,8 +277,7 @@ def evaluate_circ(circ, backend, evaluator_info):
     elif backend == 'noisy_qasm_simulator':
         # print('using noisy qasm simulator {} shots'.format(num_shots))
         backend = Aer.get_backend('qasm_simulator')
-        backend_options = {'max_parallel_experiments':os.cpu_count()}
-        backend_options = {'max_parallel_experiments':1}
+        backend_options = {'max_parallel_threads':1}
         qc=apply_measurement(circ)
         mapped_circuit = transpile(qc,
         backend=evaluator_info['device'], basis_gates=evaluator_info['basis_gates'], 
