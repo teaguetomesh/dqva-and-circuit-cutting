@@ -131,11 +131,11 @@ if __name__ == '__main__':
 
     a = 1e-1
     r = 1e-1
-    length = 5
+    length = 4
     first_derivatives = [a * r ** (n - 1) for n in range(1, length + 1)]
     a = 1e-1
     r = 1e-1
-    length = 10
+    length = 9
     second_derivatives = [a * r ** (n - 1) for n in range(1, length + 1)]
     combinations = list(itertools.product(first_derivatives, second_derivatives))
     
@@ -154,7 +154,7 @@ if __name__ == '__main__':
         if diverged:
             break
         else:
-            for full_circ_size in range(3,16):
+            for full_circ_size in range(3,17):
                 fig_name = '%s/%d_decay.png'%(dirname,full_circ_size)
                 if os.path.isfile(fig_name):
                     continue
