@@ -89,7 +89,7 @@ def find_saturation(circuit,first_derivative_threshold,second_derivative_thresho
     found_saturation = False
 
     while 1:
-        if found_saturation and counter>cutoff+10:
+        if found_saturation and counter>cutoff+5:
             break
         elif not found_saturation and counter>max_counter:
             break
@@ -154,7 +154,7 @@ if __name__ == '__main__':
         if diverged:
             break
         else:
-            for full_circ_size in range(3,17):
+            for full_circ_size in range(3,21):
                 fig_name = '%s/%d_decay.png'%(dirname,full_circ_size)
                 if os.path.isfile(fig_name):
                     continue
