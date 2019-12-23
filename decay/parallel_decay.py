@@ -26,12 +26,7 @@ def find_rank_combinations(combinations,rank,size):
     return rank_combinations
 
 def calculate_delta_H(circ,ground_truth,accumulated_prob,counter,shots_increment,evaluation_method):
-    if evaluation_method == 'noisy_qasm_simulator':
-        qasm_noise_evaluator_info = get_evaluator_info(circ=circ,device_name='ibmq_boeblingen',
-        fields=['device','basis_gates','coupling_map','properties','initial_layout','noise_model'])
-        qasm_noise_evaluator_info['num_shots'] = shots_increment
-        prob_batch = evaluate_circ(circ=circ,backend='noisy_qasm_simulator',evaluator_info=qasm_noise_evaluator_info)
-    elif evaluation_method == 'qasm_simulator':
+    if evaluation_method == 'qasm_simulator':
         qasm_evaluator_info = {'num_shots':shots_increment}
         prob_batch = evaluate_circ(circ=circ,backend='noiseless_qasm_simulator',evaluator_info=qasm_evaluator_info)
     else:
@@ -51,13 +46,12 @@ def get_xticks(xvals):
                 x_ticks.append(x)
         return x_ticks
 
-def make_plot(noisy_delta_H_l,noiseless_delta_H_l,cutoff,full_circ_size,shots_increment,dirname,intermediate):
-    xvals = range(1,len(noisy_delta_H_l)+1)
+def make_plot(noiseless_delta_H_l,cutoff,full_circ_size,shots_increment,dirname,intermediate):
+    xvals = range(1,len(noiseless_delta_H_l)+1)
     plt.figure()
-    if len(noisy_delta_H_l)>=cutoff:
+    if len(noiseless_delta_H_l)>=cutoff:
         plt.axvline(x=cutoff,label='saturated cutoff',color='k',linestyle='--')
     plt.plot(xvals,noiseless_delta_H_l,label='noiseless')
-    plt.plot(xvals,noisy_delta_H_l,label='noisy')
     x_ticks = get_xticks(xvals)
     plt.xticks(ticks=x_ticks,labels=x_ticks)
     plt.ylabel('\u0394H')
@@ -66,7 +60,7 @@ def make_plot(noisy_delta_H_l,noiseless_delta_H_l,cutoff,full_circ_size,shots_in
     plt.legend()
     if intermediate:
         plt.savefig('%s/intermediate.png'%dirname,dpi=400)
-    elif len(noisy_delta_H_l)>cutoff:
+    elif len(noiseless_delta_H_l)>cutoff:
         plt.savefig('%s/%d_decay.png'%(dirname,full_circ_size),dpi=400)
     else:
         plt.savefig('%s/%d_diverged.png'%(dirname,full_circ_size),dpi=400)
@@ -74,15 +68,11 @@ def make_plot(noisy_delta_H_l,noiseless_delta_H_l,cutoff,full_circ_size,shots_in
 
 def find_saturation(circuit,first_derivative_threshold,second_derivative_threshold,dirname):
     full_circ_size = len(circuit.qubits)
-    shots_increment = max(1024,np.power(2,full_circ_size))
-    shots_increment = min(shots_increment,8192)
-    shots_increment = int(shots_increment)
+    shots_increment = 1024
     print('%d qubit full circuit, shots increment = %d'%(full_circ_size,shots_increment))
     ground_truth = evaluate_circ(circ=circuit,backend='statevector_simulator',evaluator_info=None)
     noiseless_accumulated_prob = [0 for i in range(np.power(2,full_circ_size))]
-    noisy_accumulated_prob = [0 for i in range(np.power(2,full_circ_size))]
     noiseless_delta_H_l = []
-    noisy_delta_H_l = []
     counter = 1
     max_counter = max(20,int(20*np.power(2,full_circ_size)/shots_increment))
     cutoff = max_counter
@@ -98,18 +88,10 @@ def find_saturation(circuit,first_derivative_threshold,second_derivative_thresho
         accumulated_prob=noiseless_accumulated_prob,counter=counter,shots_increment=shots_increment,evaluation_method='qasm_simulator')
         noiseless_delta_H_l.append(noiseless_accumulated_ce)
         
-        noisy_accumulated_ce, noisy_accumulated_prob = calculate_delta_H(circ=circuit,ground_truth=ground_truth,
-        accumulated_prob=noisy_accumulated_prob,counter=counter,shots_increment=shots_increment,evaluation_method='noisy_qasm_simulator')
-        noisy_delta_H_l.append(noisy_accumulated_ce)
-        
         if len(noiseless_delta_H_l)>=3:
             first_derivative = (noiseless_delta_H_l[-1]+noiseless_delta_H_l[-3])/(2*shots_increment)
             second_derivative = (noiseless_delta_H_l[-1]+noiseless_delta_H_l[-3]-2*noiseless_delta_H_l[-2])/(np.power(shots_increment,2))
             print('noiseless \u0394H = %.3f, first derivative = %.3e, second derivative = %.3e'%(noiseless_accumulated_ce,first_derivative,second_derivative),flush=True)
-
-            first_derivative = (noisy_delta_H_l[-1]+noisy_delta_H_l[-3])/(2*shots_increment)
-            second_derivative = (noisy_delta_H_l[-1]+noisy_delta_H_l[-3]-2*noisy_delta_H_l[-2])/(np.power(shots_increment,2))
-            print('noisy \u0394H = %.3f, first derivative = %.3e, second derivative = %.3e'%(noisy_accumulated_ce,first_derivative,second_derivative),flush=True)
 
             if abs(first_derivative)<first_derivative_threshold and abs(second_derivative)<second_derivative_threshold and not found_saturation:
                 print('*'*50,'SATURATED','*'*50)
@@ -118,9 +100,9 @@ def find_saturation(circuit,first_derivative_threshold,second_derivative_thresho
         print('-'*50)
         counter += 1
     
-        make_plot(noisy_delta_H_l=noisy_delta_H_l,noiseless_delta_H_l=noiseless_delta_H_l,
-        cutoff=cutoff,full_circ_size=full_circ_size,shots_increment=shots_increment,dirname=dirname,intermediate=True)
-    return noisy_delta_H_l, noiseless_delta_H_l, cutoff, shots_increment, found_saturation
+        make_plot(noiseless_delta_H_l=noiseless_delta_H_l,cutoff=cutoff,
+        full_circ_size=full_circ_size,shots_increment=shots_increment,dirname=dirname,intermediate=True)
+    return noiseless_delta_H_l, cutoff, shots_increment, found_saturation
 
 if __name__ == '__main__':
     comm = MPI.COMM_WORLD
@@ -161,11 +143,11 @@ if __name__ == '__main__':
                 i, j = factor_int(full_circ_size)
                 circ = gen_supremacy(i,j,8)
                 
-                noisy_delta_H_l, noiseless_delta_H_l, cutoff, shots_increment, found_saturation = find_saturation(circuit=circ,
+                noiseless_delta_H_l, cutoff, shots_increment, found_saturation = find_saturation(circuit=circ,
                 first_derivative_threshold=first_derivative_threshold,second_derivative_threshold=second_derivative_threshold,dirname=dirname)
                 
-                make_plot(noisy_delta_H_l=noisy_delta_H_l,noiseless_delta_H_l=noiseless_delta_H_l,
-                cutoff=cutoff,full_circ_size=full_circ_size,shots_increment=shots_increment,dirname=dirname,intermediate=False)
+                make_plot(noiseless_delta_H_l=noiseless_delta_H_l,cutoff=cutoff,
+                full_circ_size=full_circ_size,shots_increment=shots_increment,dirname=dirname,intermediate=False)
                 
                 if not found_saturation:
                     break
