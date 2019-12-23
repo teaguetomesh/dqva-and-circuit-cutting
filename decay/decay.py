@@ -47,7 +47,7 @@ if __name__ == '__main__':
     if rank == size-1:
         full_circ_sizes = []
         decay_dict = read_file(filename='./decay/decay.p')
-        for full_circ_size in range(3,10):
+        for full_circ_size in range(3,21):
             if full_circ_size not in decay_dict:
                 full_circ_sizes.append(full_circ_size)
         for i in range(num_workers):
