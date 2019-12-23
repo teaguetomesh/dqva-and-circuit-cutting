@@ -129,36 +129,37 @@ def find_cluster_O_rho_qubits(complete_path_map,cluster_idx):
     return O_qubits, rho_qubits
 
 def get_circ_saturated_shots(circs,device_name):
-    shots_increment = 1024
     saturated_shots = []
     for circ_idx, circ in enumerate(circs):
+        full_circ_size = len(circ.qubits)
         ground_truth = evaluate_circ(circ=circ,backend='statevector_simulator',evaluator_info=None)
+        shots_increment = max(1024,np.power(2,full_circ_size))
+        shots_increment = min(shots_increment,8192)
+        shots_increment = int(shots_increment)
         
-        qasm_noise_evaluator_info = get_evaluator_info(circ=circ,device_name=device_name,
-        fields=['device','basis_gates','coupling_map','properties','initial_layout','noise_model'])
-        qasm_noise_evaluator_info['num_shots'] = shots_increment
-        device_max_shots = qasm_noise_evaluator_info['device'].configuration().max_shots
-        device_max_experiments = int(qasm_noise_evaluator_info['device'].configuration().max_experiments/3*2)
-        ce_list = []
-        counter = 0
-        noisy_qasm_prob = [0 for i in range(np.power(2,len(circ.qubits)))]
+        qasm_evaluator_info = get_evaluator_info(circ=circ,device_name=device_name,
+        fields=['device','basis_gates','coupling_map','properties','initial_layout'])
+        qasm_evaluator_info['num_shots'] = shots_increment
+        device_max_shots = qasm_evaluator_info['device'].configuration().max_shots
+        device_max_experiments = int(qasm_evaluator_info['device'].configuration().max_experiments/3*2)
+        ce_l = []
+        counter = 1
+        accumulated_prob = [0 for i in range(np.power(2,len(circ.qubits)))]
         while 1:
-            counter += 1
-            noisy_qasm_prob_batch = evaluate_circ(circ=circ,backend='noisy_qasm_simulator',evaluator_info=qasm_noise_evaluator_info)
-            noisy_qasm_prob = [(x*(counter-1)+y)/counter for x,y in zip(noisy_qasm_prob,noisy_qasm_prob_batch)]
-            assert abs(sum(noisy_qasm_prob)-1)<1e-5
-            noisy_qasm_ce = cross_entropy(target=ground_truth,obs=noisy_qasm_prob)
-            ce_list.append(noisy_qasm_ce)
-            if len(ce_list)>=3:
-                num_shots = int((len(ce_list)-1)*shots_increment)
-                first_derivative = (ce_list[-1]+ce_list[-3])/(2*shots_increment)
-                second_derivative = (ce_list[-1]+ce_list[-3]-2*ce_list[-2])/(np.power(shots_increment,2))
-                if counter%20==19:
-                    print('current shots = %d, second-derivative = %.3e'%(num_shots,second_derivative),flush=True)
-                if (abs(second_derivative) < 1e-9 and abs(first_derivative)<1e-1) or num_shots/device_max_experiments/device_max_shots>=10:
-                    saturated_shots.append(num_shots)
-                    # print('cross entropy list:',['%.3e'%x for x in ce_list])
+            noiseless_prob_batch = evaluate_circ(circ=circ,backend='noiseless_qasm_simulator',evaluator_info=qasm_evaluator_info)
+            accumulated_prob = [(x*(counter-1)+y)/counter for x,y in zip(accumulated_prob,noiseless_prob_batch)]
+            assert abs(sum(accumulated_prob)-1)<1e-5
+            accumulated_ce = cross_entropy(target=ground_truth,obs=accumulated_prob)
+            ce_l.append(accumulated_ce)
+            if len(ce_l)>=3:
+                accumulated_shots = int((len(ce_l)-1)*shots_increment)
+                first_derivative = (ce_l[-1]+ce_l[-3])/(2*shots_increment)
+                second_derivative = (ce_l[-1]+ce_l[-3]-2*ce_l[-2])/(np.power(shots_increment,2))
+                if (abs(first_derivative)<1e-4 and abs(second_derivative) < 1e-10) or accumulated_shots/device_max_experiments/device_max_shots>10:
+                    saturated_shots.append(accumulated_shots)
+                    print('%d qubit circuit saturated shots = %d'%(full_circ_size,accumulated_shots))
                     break
+            counter += 1
     return saturated_shots
 
 def distribute_cluster_shots(total_shots,clusters,complete_path_map):

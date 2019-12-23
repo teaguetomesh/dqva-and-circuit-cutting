@@ -49,7 +49,7 @@ if __name__ == '__main__':
     parser.add_argument('--second-derivative', metavar='N', type=float,help='Second derivative threshold')
     args = parser.parse_args()
 
-    decay_dict = read_file(filename='./decay/decay.p')
+    decay_dict = read_file(filename='./decay/decay.pickle')
 
     for full_circ_size in decay_dict:
         ce_l = decay_dict[full_circ_size]['ce_l']

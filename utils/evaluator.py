@@ -156,12 +156,6 @@ if __name__ == '__main__':
             output_filename = dirname + uniter_input_filename
             evaluator_output = read_file(output_filename)
         print('Existing cases:',evaluator_output.keys())
-        total_cases = 0
-        for case in evaluator_input:
-            if case in evaluator_output:
-                continue
-            else:
-                total_cases += 1
         counter = len(evaluator_output.keys())
         for case in evaluator_input:
             if case in evaluator_output:
@@ -186,7 +180,7 @@ if __name__ == '__main__':
                             case_dict['all_cluster_prob'][cluster_idx] = rank_results[cluster_idx]
                 pickle.dump({case:case_dict}, open(output_filename,'ab'))
                 counter += 1
-                print('Rank MASTER dumped case {}, {:d}/{:d} cases'.format(case,counter,total_cases))
+                print('Rank MASTER dumped case {}, {:d}/{:d} cases'.format(case,counter,len(evaluator_input)))
                 print('-'*100)
         for i in range(num_workers):
             comm.send('DONE', dest=i)
