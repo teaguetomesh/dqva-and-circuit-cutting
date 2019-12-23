@@ -8,6 +8,7 @@ import os
 import itertools
 from mpi4py import MPI
 import glob
+from time import time
 
 def find_rank_combinations(combinations,rank,size):
     num_workers = size
@@ -78,7 +79,9 @@ def find_saturation(circuit,first_derivative_threshold,second_derivative_thresho
     shots_increment = min(shots_increment,8192)
     shots_increment = int(shots_increment)
     print('%d qubit full circuit, shots increment = %d'%(full_circ_size,shots_increment))
+    ground_truth_begin = time()
     ground_truth = evaluate_circ(circ=circuit,backend='statevector_simulator',evaluator_info=None)
+    ground_truth_time = time() - ground_truth_begin
     noiseless_accumulated_prob = [0 for i in range(np.power(2,full_circ_size))]
     noisy_accumulated_prob = [0 for i in range(np.power(2,full_circ_size))]
     noiseless_delta_H_l = []
@@ -88,19 +91,26 @@ def find_saturation(circuit,first_derivative_threshold,second_derivative_thresho
     cutoff = max_counter
     found_saturation = False
 
+    noiseless_time = 0
+    noisy_time = 0
+
     while 1:
         if found_saturation and counter>cutoff+5:
             break
         elif not found_saturation and counter>max_counter:
             break
         print('Counter %d, shots = %d'%(counter,counter*shots_increment))
+        noiseless_begin = time()
         noiseless_accumulated_ce, noiseless_accumulated_prob = calculate_delta_H(circ=circuit,ground_truth=ground_truth,
         accumulated_prob=noiseless_accumulated_prob,counter=counter,shots_increment=shots_increment,evaluation_method='qasm_simulator')
         noiseless_delta_H_l.append(noiseless_accumulated_ce)
+        noiseless_time += time() - noiseless_begin
         
+        noisy_begin = time()
         noisy_accumulated_ce, noisy_accumulated_prob = calculate_delta_H(circ=circuit,ground_truth=ground_truth,
         accumulated_prob=noisy_accumulated_prob,counter=counter,shots_increment=shots_increment,evaluation_method='noisy_qasm_simulator')
         noisy_delta_H_l.append(noisy_accumulated_ce)
+        noisy_time += time() - noisy_begin
         
         if len(noiseless_delta_H_l)>=3:
             first_derivative = (noiseless_delta_H_l[-1]+noiseless_delta_H_l[-3])/(2*shots_increment)
@@ -120,6 +130,7 @@ def find_saturation(circuit,first_derivative_threshold,second_derivative_thresho
     
         make_plot(noisy_delta_H_l=noisy_delta_H_l,noiseless_delta_H_l=noiseless_delta_H_l,
         cutoff=cutoff,full_circ_size=full_circ_size,shots_increment=shots_increment,dirname=dirname,intermediate=True)
+    print('SV time = %.3f, noiseless time = %.3f, noisy time = %.3f'%(ground_truth_time,noiseless_time,noisy_time))
     return noisy_delta_H_l, noiseless_delta_H_l, cutoff, shots_increment, found_saturation
 
 if __name__ == '__main__':
@@ -131,11 +142,11 @@ if __name__ == '__main__':
 
     a = 1e-1
     r = 1e-1
-    length = 3
+    length = 1
     first_derivatives = [a * r ** (n - 1) for n in range(1, length + 1)]
-    a = 1e-1
+    a = 1e-3
     r = 1e-1
-    length = 9
+    length = 1
     second_derivatives = [a * r ** (n - 1) for n in range(1, length + 1)]
     combinations = list(itertools.product(first_derivatives, second_derivatives))
     
@@ -154,7 +165,7 @@ if __name__ == '__main__':
         if diverged:
             break
         else:
-            for full_circ_size in range(3,5):
+            for full_circ_size in range(12,13):
                 fig_name = '%s/%d_decay.png'%(dirname,full_circ_size)
                 if os.path.isfile(fig_name):
                     continue
