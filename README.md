@@ -14,7 +14,7 @@ conda install gurobi
 ```
 
 ## Qiskit paralllel test notes:
-- ```max_parallel_threads``` changes the ```parallel_state_update``` metadata, has little runtime effect
+- ```max_parallel_threads``` changes the ```parallel_state_update``` metadata, but does not affect runtime
 - ```max_parallel_experiments``` affects the ```parallel_experiments``` metadata, helps when there are multiple circuits
 - ```max_parallel_shots``` does not change the ```parallel_shots``` parameter, does not affect runtime
 
