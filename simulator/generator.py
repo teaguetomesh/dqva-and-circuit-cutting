@@ -78,7 +78,7 @@ if __name__ == '__main__':
     device_size = len(evaluator_info['properties'].qubits)
 
     # NOTE: toggle circuits to benchmark
-    dimension_l = np.arange(3,6)
+    dimension_l = np.arange(3,11)
     cases_to_run = {}
     counter = 1
     total_cases = (args.max_qubit-args.min_qubit+1)*len(dimension_l)
