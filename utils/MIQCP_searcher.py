@@ -186,7 +186,6 @@ class Basic_Model(object):
             return True
         else:
             print('Infeasible')
-            print(self.model.nodecount,self.model.Status)
             return False
     
     def print_stat(self):

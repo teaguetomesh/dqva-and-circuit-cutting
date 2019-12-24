@@ -78,7 +78,7 @@ if __name__ == '__main__':
     device_size = len(evaluator_info['properties'].qubits)
 
     # NOTE: toggle circuits to benchmark
-    dimension_l = np.arange(3,10)
+    dimension_l = np.arange(3,6)
     cases_to_run = {}
     counter = 1
     total_cases = (args.max_qubit-args.min_qubit+1)*len(dimension_l)
@@ -86,10 +86,14 @@ if __name__ == '__main__':
         for dimension in dimension_l:
             i,j = factor_int(dimension)
             full_circuit_size = i*j
+            case = (cluster_max_qubit,full_circuit_size)
             if full_circuit_size<=cluster_max_qubit or full_circuit_size>device_size or (cluster_max_qubit-1)*args.max_clusters<full_circuit_size:
+                print('Case {} skipped'.format(case))
+                print('%d/%d cases'%(counter,total_cases))
+                counter += 1
+                print('-'*100)
                 continue
             
-            case = (cluster_max_qubit,full_circuit_size)
             if case in evaluator_input:
                 print('Case {} exists'.format(case))
                 print('%d/%d cases'%(counter,total_cases))
@@ -132,6 +136,7 @@ if __name__ == '__main__':
                         print('Case {} added'.format(case))
                         print('%d/%d cases'%(counter,total_cases))
                         counter += 1
+                        evaluator_input = read_file(dirname+evaluator_input_filename)
                         print('-'*100)
                 else:
                     print('Generate new full circuit')
@@ -172,4 +177,5 @@ if __name__ == '__main__':
                         print('Case {} added'.format(case))
                         print('%d/%d cases'%(counter,total_cases))
                         counter += 1
+                        evaluator_input = read_file(dirname+evaluator_input_filename)
                         print('-'*100)
