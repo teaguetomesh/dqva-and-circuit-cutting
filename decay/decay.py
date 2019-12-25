@@ -27,6 +27,7 @@ def calculate_delta_H(circ,ground_truth,accumulated_prob,counter,shots_increment
     else:
         raise Exception('Illegal evaluation method:',evaluation_method)
     accumulated_prob = [(x*(counter-1)+y)/counter for x,y in zip(accumulated_prob,prob_batch)]
+    assert abs(sum(accumulated_prob)-1)<1e-10
     accumulated_ce = cross_entropy(target=ground_truth,obs=accumulated_prob)
     return accumulated_ce, accumulated_prob
 
@@ -79,15 +80,13 @@ if __name__ == '__main__':
     else:
         state = MPI.Status()
         full_circ_sizes = comm.recv(source=size-1,status=state)
-        print('Rank %d runs :'%rank,full_circ_sizes)
+        print('Rank %d runs :'%rank,full_circ_sizes,flush=True)
         rank_decay_dict = {}
         for full_circ_size in full_circ_sizes:
             i, j = factor_int(full_circ_size)
             circ = gen_supremacy(i,j,8)
 
-            shots_increment = max(1024,np.power(2,full_circ_size))
-            shots_increment = min(shots_increment,8192)
-            shots_increment = int(shots_increment)
+            shots_increment = 1024
         
             noiseless_delta_H_l = noiseless_decay(circuit=circ,shots_increment=shots_increment)
             rank_decay_dict[full_circ_size] = {'ce_l':noiseless_delta_H_l,'shots_increment':shots_increment}
