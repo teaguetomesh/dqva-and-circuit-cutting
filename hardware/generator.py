@@ -20,7 +20,6 @@ def gen_secret(num_qubit):
     return num_with_zeros
 
 def accumulate_jobs(jobs,meas_filter):
-    print(type(jobs),flush=True)
     hw_counts = {}
     if meas_filter != None:
         meas_filter_job, state_labels, qubit_list = meas_filter
@@ -28,10 +27,7 @@ def accumulate_jobs(jobs,meas_filter):
         cal_results = meas_filter_job.result()
         meas_fitter = CompleteMeasFitter(cal_results, state_labels, qubit_list=qubit_list, circlabel='mcal')
         meas_filter = meas_fitter.filter
-    else:
-        print('NO meas filter',flush=True)
     for item in jobs:
-        print(item.keys(),flush=True)
         job = item['job']
         circ = item['circ']
         mapped_circuit_l = item['mapped_circuit_l']
@@ -190,7 +186,7 @@ if __name__ == '__main__':
     device_max_experiments = int(evaluator_info['device'].configuration().max_experiments/3*2)
 
     # NOTE: toggle circuits to benchmark
-    dimension_l = np.arange(3,5)
+    dimension_l = np.arange(10,11)
     counter = 1
     total_cases = (args.max_qubit-args.min_qubit+1)*len(dimension_l)
     cases_to_run = {}
@@ -211,7 +207,7 @@ if __name__ == '__main__':
                 case_dict = generate_case_dict(case=case,args=args,cluster_max_qubit=cluster_max_qubit,case_dict=case_dict)
                 if case_dict!=None:
                     print('Case {} added to evaluator_input'.format(case))
-                    # pickle.dump({case:case_dict},open(dirname+evaluator_input_filename,'ab'))
+                    pickle.dump({case:case_dict},open(dirname+evaluator_input_filename,'ab'))
                     evaluator_input = read_file(dirname+evaluator_input_filename)
             elif fc_in_dict(case=case,dictionary=cases_to_run) != {}:
                 print('Use currently running full circuit')
@@ -220,15 +216,12 @@ if __name__ == '__main__':
                 if case_dict!=None:
                     print('Case {} added in cases to run, with currently running full circuit'.format(case))
                     cases_to_run[case] = case_dict
-                    print(case_dict['fc_evaluations'].keys())
-                    print(type(cases_to_run[case]['fc_evaluations']['hw'][0]))
             else:
                 print('Generate new circuit')
                 case_dict = generate_case_dict(case=case,args=args,cluster_max_qubit=cluster_max_qubit,case_dict={})
                 if case_dict!=None:
                     print('Case {} added in cases to run'.format(case))
                     cases_to_run[case] = case_dict
-                    print(case_dict.keys())
             print('%d/%d cases'%(counter,total_cases))
             counter += 1
             print('-'*100)
@@ -236,10 +229,7 @@ if __name__ == '__main__':
     counter = 1
     for case in cases_to_run:
         hw_jobs = cases_to_run[case]['fc_evaluations']['hw']
-        print(type(hw_jobs[0]))
         print('Retrieving case {}'.format(case),flush=True)
-        print(cases_to_run[case].keys())
-        print(cases_to_run[case]['fc_evaluations'].keys())
         if 'meas_filter' in cases_to_run[case]['fc_evaluations']:
             meas_filter = cases_to_run[case]['fc_evaluations']['meas_filter']
         else:
@@ -247,12 +237,14 @@ if __name__ == '__main__':
         execute_begin = time()
         hw_prob = accumulate_jobs(jobs=hw_jobs,meas_filter=meas_filter)
         print('Execute on hardware took %.3e seconds'%(time()-execute_begin))
-        
-        cases_to_run[case]['fc_evaluations'] = {'sv_noiseless':cases_to_run[case]['fc_evaluations']['sv_noiseless'],'qasm':cases_to_run[case]['fc_evaluations']['qasm'],
-        'qasm+noise':cases_to_run[case]['fc_evaluations']['qasm+noise'],'hw':hw_prob}
 
-        case_dict = copy.deepcopy(cases_to_run[case])
-        # pickle.dump({case:case_dict},open(dirname+evaluator_input_filename,'ab'))
+        case_dict = {}
+        for key in cases_to_run[case]:
+            if key != 'fc_evaluations':
+                case_dict[key] = cases_to_run[case][key]
+        case_dict['fc_evaluations'] = {'sv_noiseless':cases_to_run[case]['fc_evaluations']['sv_noiseless'],'qasm':cases_to_run[case]['fc_evaluations']['qasm'],
+        'qasm+noise':cases_to_run[case]['fc_evaluations']['qasm+noise'],'hw':hw_prob}
+        pickle.dump({case:case_dict},open(dirname+evaluator_input_filename,'ab'))
         print('Retrieved %d/%d cases'%(counter,len(cases_to_run)),flush=True)
         counter += 1
         print('*'*50)
