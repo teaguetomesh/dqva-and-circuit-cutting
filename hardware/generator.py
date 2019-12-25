@@ -20,14 +20,18 @@ def gen_secret(num_qubit):
     return num_with_zeros
 
 def accumulate_jobs(jobs,meas_filter):
+    print(type(jobs),flush=True)
     hw_counts = {}
     if meas_filter != None:
         meas_filter_job, state_labels, qubit_list = meas_filter
-        print('Meas filter job id {}'.format(meas_filter_job.job_id()))
+        print('Meas filter job id {}'.format(meas_filter_job.job_id()),flush=True)
         cal_results = meas_filter_job.result()
         meas_fitter = CompleteMeasFitter(cal_results, state_labels, qubit_list=qubit_list, circlabel='mcal')
         meas_filter = meas_fitter.filter
+    else:
+        print('NO meas filter',flush=True)
     for item in jobs:
+        print(item.keys(),flush=True)
         job = item['job']
         circ = item['circ']
         mapped_circuit_l = item['mapped_circuit_l']
@@ -104,6 +108,63 @@ def evaluate_full_circ(circ, total_shots, device_name, fields):
 
     return fc_evaluations
 
+def fc_in_dict(case,dictionary):
+    for key in dictionary:
+        if case[1] == key[1]:
+            case_dict = dictionary[key]
+            return case_dict
+    return {}
+
+def generate_case_dict(case,args,cluster_max_qubit,case_dict):
+    if 'full_circ' in case_dict:
+        full_circ = case_dict['full_circ']
+    else:
+        i,j = factor_int(case[1])
+        if args.circuit_type == 'supremacy':
+            full_circ = gen_supremacy(i,j,8)
+        elif args.circuit_type == 'hwea':
+            full_circ = gen_hwea(i*j,1)
+        elif args.circuit_type == 'bv':
+            full_circ = gen_BV(gen_secret(i*j),barriers=False)
+        elif args.circuit_type == 'qft':
+            full_circ = gen_qft(width=i*j, barriers=False)
+        elif args.circuit_type == 'sycamore':
+            full_circ = gen_sycamore(i,j,8)
+        case_dict['full_circ'] = full_circ
+    searcher_begin = time()
+    hardness, positions, ancilla, d, num_cluster, m = searcher.find_cuts(circ=full_circ,reconstructor_runtime_params=[4.275e-9,6.863e-1],reconstructor_weight=0,
+    num_clusters=range(2,min(len(full_circ.qubits),args.max_clusters)+1),cluster_max_qubit=cluster_max_qubit)
+    searcher_time = time() - searcher_begin
+    case_dict['searcher_time'] = searcher_time
+
+    if m == None:
+        print('Case {} NOT feasible'.format(case))
+        return None
+    else:
+        m.print_stat()
+        clusters, complete_path_map, K, d = cutter.cut_circuit(full_circ, positions)
+        case_dict['clusters'] = clusters
+        case_dict['complete_path_map'] = complete_path_map
+        if 'fc_shots' not in case_dict:
+            fc_shots = get_circ_saturated_shots(circs=[full_circ],device_name=args.device_name)[0]
+            case_dict['fc_shots'] = fc_shots
+        if 'fc_evaluations' not in case_dict:
+            schedule = schedule_job(circs={'fc':full_circ},shots=fc_shots,max_experiments=device_max_experiments,max_shots=device_max_shots)
+            if len(schedule)>10:
+                print('Case {} requires {:d} jobs, skipped'.format(case,len(schedule)))
+                return None
+            else:
+                print('saturated fc shots = %d, needs %d jobs'%(case_dict['fc_shots'],len(schedule)))
+                fields_to_run = ['sv_noiseless','qasm','hw']
+                case_dict['fc_evaluations'] = evaluate_full_circ(circ=full_circ,total_shots=fc_shots,device_name=args.device_name,fields=fields_to_run)
+                hw_jobs = case_dict['fc_evaluations']['hw']
+                print('Submitting case {} has job ids :'.format(case))
+                [print(x['job'].job_id()) for x in hw_jobs]
+                if 'meas_filter' in case_dict['fc_evaluations']:
+                    meas_filter_job, _, _ = case_dict['fc_evaluations']['meas_filter']
+                    print('Meas_filter job id {}'.format(meas_filter_job.job_id()))
+        return case_dict
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='generate evaluator inputs')
     parser.add_argument('--min-qubit', metavar='N', type=int,help='Benchmark minimum number of HW qubits')
@@ -129,7 +190,7 @@ if __name__ == '__main__':
     device_max_experiments = int(evaluator_info['device'].configuration().max_experiments/3*2)
 
     # NOTE: toggle circuits to benchmark
-    dimension_l = np.arange(3,11)
+    dimension_l = np.arange(3,5)
     counter = 1
     total_cases = (args.max_qubit-args.min_qubit+1)*len(dimension_l)
     cases_to_run = {}
@@ -141,110 +202,44 @@ if __name__ == '__main__':
             print('-'*100)
             print('Case {}'.format(case))
             if full_circuit_size<=cluster_max_qubit or full_circuit_size>device_size or (cluster_max_qubit-1)*args.max_clusters<full_circuit_size:
-                print('Case {} skipped'.format(case))
-                print('%d/%d cases'%(counter,total_cases))
-                counter += 1
-                print('-'*100)
-                continue
-            
-            if case in evaluator_input:
-                print('Case {} exists'.format(case))
-                print('%d/%d cases'%(counter,total_cases))
-                counter += 1
-                print('-'*100)
-                continue
+                print('Case {} impossible, skipped'.format(case))
+            elif case in evaluator_input:
+                print('Case {} already exists'.format(case))
+            elif fc_in_dict(case=case,dictionary=evaluator_input) != {}:
+                print('Use existing full circuit results')
+                case_dict = fc_in_dict(case=case,dictionary=evaluator_input)
+                case_dict = generate_case_dict(case=case,args=args,cluster_max_qubit=cluster_max_qubit,case_dict=case_dict)
+                if case_dict!=None:
+                    print('Case {} added to evaluator_input'.format(case))
+                    # pickle.dump({case:case_dict},open(dirname+evaluator_input_filename,'ab'))
+                    evaluator_input = read_file(dirname+evaluator_input_filename)
+            elif fc_in_dict(case=case,dictionary=cases_to_run) != {}:
+                print('Use currently running full circuit')
+                case_dict = fc_in_dict(case=case,dictionary=cases_to_run)
+                case_dict = generate_case_dict(case=case,args=args,cluster_max_qubit=cluster_max_qubit,case_dict=case_dict)
+                if case_dict!=None:
+                    print('Case {} added in cases to run, with currently running full circuit'.format(case))
+                    cases_to_run[case] = case_dict
+                    print(case_dict['fc_evaluations'].keys())
+                    print(type(cases_to_run[case]['fc_evaluations']['hw'][0]))
             else:
-                case_dict = {}
-                for existing_case in evaluator_input:
-                    if full_circuit_size == existing_case[1]:
-                        case_dict['full_circ'] = evaluator_input[existing_case]['full_circ']
-                        case_dict['fc_shots'] = evaluator_input[existing_case]['fc_shots']
-                        case_dict['fc_evaluations'] = evaluator_input[existing_case]['fc_evaluations']
-                        break
-                    else:
-                        continue
-                if case_dict != {}:
-                    print('Use existing full circuit')
-                    full_circ = case_dict['full_circ']
-                    
-                    searcher_begin = time()
-                    hardness, positions, ancilla, d, num_cluster, m = searcher.find_cuts(circ=full_circ,reconstructor_runtime_params=[4.275e-9,6.863e-1],reconstructor_weight=0,
-                    num_clusters=range(2,min(len(full_circ.qubits),args.max_clusters)+1),cluster_max_qubit=cluster_max_qubit)
-                    searcher_time = time() - searcher_begin
-                    if m == None:
-                        print('Case {} is not feasible'.format(case))
-                        print('%d/%d cases'%(counter,total_cases))
-                        counter += 1
-                        print('-'*100)
-                        continue
-                    else:
-                        m.print_stat()
-                        clusters, complete_path_map, K, d = cutter.cut_circuit(full_circ, positions)
-                        case_dict['searcher_time'] = searcher_time
-                        case_dict['clusters'] = clusters
-                        case_dict['complete_path_map'] = complete_path_map
-                        pickle.dump({case:case_dict},open(dirname+evaluator_input_filename,'ab'))
-                        print('Case {} added'.format(case))
-                        print('%d/%d cases'%(counter,total_cases))
-                        counter += 1
-                        evaluator_input = read_file(dirname+evaluator_input_filename)
-                        print('-'*100)
-                else:
-                    print('Generate new full circuit')
-                    if args.circuit_type == 'supremacy':
-                        full_circ = gen_supremacy(i,j,8)
-                    elif args.circuit_type == 'hwea':
-                        full_circ = gen_hwea(i*j,1)
-                    elif args.circuit_type == 'bv':
-                        full_circ = gen_BV(gen_secret(i*j),barriers=False)
-                    elif args.circuit_type == 'qft':
-                        full_circ = gen_qft(width=i*j, barriers=False)
-                    elif args.circuit_type == 'sycamore':
-                        full_circ = gen_sycamore(i,j,8)
-                    searcher_begin = time()
-                    hardness, positions, ancilla, d, num_cluster, m = searcher.find_cuts(circ=full_circ,reconstructor_runtime_params=[4.275e-9,6.863e-1],reconstructor_weight=0,
-                    num_clusters=range(2,min(len(full_circ.qubits),args.max_clusters)+1),cluster_max_qubit=cluster_max_qubit)
-                    searcher_time = time() - searcher_begin
-                    if m == None:
-                        print('Case {} is not feasible'.format(case))
-                        print('%d/%d cases'%(counter,total_cases))
-                        counter += 1
-                        print('-'*100)
-                        continue
-                    else:
-                        m.print_stat()
-                        clusters, complete_path_map, K, d = cutter.cut_circuit(full_circ, positions)
-                        fc_shots = get_circ_saturated_shots(circs=[full_circ],device_name=args.device_name)[0]
-                        schedule = schedule_job(circs={'fc':full_circ},shots=fc_shots,max_experiments=device_max_experiments,max_shots=device_max_shots)
-                        num_jobs = len(schedule)
-                        if num_jobs>10:
-                            print('Case {} needs {} jobs, skipped'.format(case,num_jobs))
-                            print('%d/%d cases'%(counter,total_cases))
-                            counter += 1
-                            print('-'*100)
-                            continue
-                        else:
-                            print('saturated fc shots = %d, needs %d jobs'%(fc_shots,num_jobs))
-                            case_dict = {'full_circ':full_circ,'fc_shots':fc_shots,'searcher_time':searcher_time,
-                            'clusters':clusters,'complete_path_map':complete_path_map}
-                            fields_to_run = ['sv_noiseless','qasm','hw']
-                            fc_evaluations = evaluate_full_circ(circ=full_circ,total_shots=fc_shots,device_name=args.device_name,fields=fields_to_run)
-                            case_dict['fc_evaluations'] = fc_evaluations
-                            cases_to_run[case] = case_dict
-                            hw_jobs = fc_evaluations['hw']
-                            print('Submitting case {} has job ids :'.format(case))
-                            [print(x['job'].job_id()) for x in hw_jobs]
-                            if 'meas_filter' in fc_evaluations:
-                                meas_filter_job, _, _ = fc_evaluations['meas_filter']
-                                print('Meas_filter job id {}'.format(meas_filter_job.job_id()))
-                            print('%d/%d cases'%(counter,total_cases))
-                            counter += 1
-                            print('-'*100)
+                print('Generate new circuit')
+                case_dict = generate_case_dict(case=case,args=args,cluster_max_qubit=cluster_max_qubit,case_dict={})
+                if case_dict!=None:
+                    print('Case {} added in cases to run'.format(case))
+                    cases_to_run[case] = case_dict
+                    print(case_dict.keys())
+            print('%d/%d cases'%(counter,total_cases))
+            counter += 1
+            print('-'*100)
     
     counter = 1
     for case in cases_to_run:
         hw_jobs = cases_to_run[case]['fc_evaluations']['hw']
-        print('Retrieving case {}'.format(case))
+        print(type(hw_jobs[0]))
+        print('Retrieving case {}'.format(case),flush=True)
+        print(cases_to_run[case].keys())
+        print(cases_to_run[case]['fc_evaluations'].keys())
         if 'meas_filter' in cases_to_run[case]['fc_evaluations']:
             meas_filter = cases_to_run[case]['fc_evaluations']['meas_filter']
         else:
@@ -257,8 +252,8 @@ if __name__ == '__main__':
         'qasm+noise':cases_to_run[case]['fc_evaluations']['qasm+noise'],'hw':hw_prob}
 
         case_dict = copy.deepcopy(cases_to_run[case])
-        pickle.dump({case:case_dict},open(dirname+evaluator_input_filename,'ab'))
-        print('Retrieved %d/%d cases'%(counter,len(cases_to_run)))
+        # pickle.dump({case:case_dict},open(dirname+evaluator_input_filename,'ab'))
+        print('Retrieved %d/%d cases'%(counter,len(cases_to_run)),flush=True)
         counter += 1
         print('*'*50)
     print('-'*100)

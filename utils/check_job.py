@@ -37,10 +37,10 @@ if __name__ == '__main__':
             if num_qubits==20:
                 print('%s: %d-qubit, max %d jobs * %d shots'%(x,num_qubits,x.configuration().max_experiments,x.configuration().max_shots))
                 print('Most recently QUEUED:')
-                limit = 5 if str(x)=='ibmq_poughkeepsie' else 5
+                limit = 100 if str(x)=='ibmq_boeblingen' else 5
                 total_queued = 0
                 for job in x.jobs(limit=200,status='QUEUED'):
-                    if total_queued < 5:
+                    if total_queued < 100:
                         print(job.creation_date(),job.status(),job.queue_position(),job.job_id())
                     total_queued += 1
                 print('Total queued = {:d}. Time stamp: {}'.format(total_queued,time_now))
