@@ -5,7 +5,7 @@ import os
 from mpi4py import MPI
 import pickle
 
-def find_rank_tasks(tasks,rank,num_workers):
+def _find_rank_tasks(tasks,rank,num_workers):
     rank_tasks = []
 
     count = int(len(tasks)/num_workers)
@@ -18,6 +18,13 @@ def find_rank_tasks(tasks,rank,num_workers):
         tasks_stop = tasks_start + (count - 1) + 1
 
     rank_tasks = tasks[tasks_start:tasks_stop]
+    return rank_tasks
+
+def find_rank_tasks(tasks,rank,num_workers):
+    rank_tasks = []
+    for task_idx, task in enumerate(tasks):
+        if task_idx%num_workers==rank:
+            rank_tasks.append(task)
     return rank_tasks
 
 def calculate_delta_H(circ,ground_truth,accumulated_prob,counter,shots_increment,evaluation_method):
@@ -56,7 +63,7 @@ if __name__ == '__main__':
     if rank == size-1:
         full_circ_sizes = []
         decay_dict = read_file(filename='./decay/decay.pickle')
-        for full_circ_size in range(3,21):
+        for full_circ_size in range(3,11):
             if full_circ_size not in decay_dict:
                 full_circ_sizes.append(full_circ_size)
         rearranged_fc_sizes = []
