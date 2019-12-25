@@ -90,8 +90,7 @@ def cross_entropy(target,obs):
     obs = [abs(x) if x!=0 else epsilon for x in obs]
     sum_of_prob = sum(obs)
     obs = [x/sum_of_prob for x in obs]
-    if abs(sum(obs)-1) > 1e-10:
-        print('sum of obs =',sum(obs))
+    assert abs(sum(obs)-1) < 1e-10
     h = 0
     for p,q in zip(target,obs):
         if p==0:
@@ -133,9 +132,7 @@ def get_circ_saturated_shots(circs,device_name):
     for circ_idx, circ in enumerate(circs):
         full_circ_size = len(circ.qubits)
         ground_truth = evaluate_circ(circ=circ,backend='statevector_simulator',evaluator_info=None)
-        shots_increment = max(1024,np.power(2,full_circ_size))
-        shots_increment = min(shots_increment,8192)
-        shots_increment = int(shots_increment)
+        shots_increment = 1024
         
         qasm_evaluator_info = get_evaluator_info(circ=circ,device_name=device_name,
         fields=['device','basis_gates','coupling_map','properties','initial_layout'])
@@ -157,7 +154,7 @@ def get_circ_saturated_shots(circs,device_name):
                 second_derivative = (ce_l[-1]+ce_l[-3]-2*ce_l[-2])/(np.power(shots_increment,2))
                 if (abs(first_derivative)<1e-4 and abs(second_derivative) < 1e-10) or accumulated_shots/device_max_experiments/device_max_shots>10:
                     saturated_shots.append(accumulated_shots)
-                    print('%d qubit circuit saturated shots = %d'%(full_circ_size,accumulated_shots))
+                    print('%d qubit circuit saturated shots = %d, \u0394H = %.3e'%(full_circ_size,accumulated_shots,ce_l[-2]))
                     break
             counter += 1
     return saturated_shots

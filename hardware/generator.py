@@ -186,7 +186,7 @@ if __name__ == '__main__':
     device_max_experiments = int(evaluator_info['device'].configuration().max_experiments/3*2)
 
     # NOTE: toggle circuits to benchmark
-    dimension_l = np.arange(10,11)
+    dimension_l = np.arange(9,11)
     counter = 1
     total_cases = (args.max_qubit-args.min_qubit+1)*len(dimension_l)
     cases_to_run = {}

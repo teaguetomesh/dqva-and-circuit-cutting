@@ -35,8 +35,8 @@ def find_saturation(ce_l,derivative_thresholds,shots_increment):
     assert len(ce_l)>=3
     first_derivative_threshold, second_derivative_threshold = derivative_thresholds
     for cutoff in range(1,len(ce_l)-1):
-        first_derivative = (ce_l[cutoff-1]+ce_l[cutoff+1])/(2*shots_increment)
-        second_derivative = (ce_l[cutoff-1]+ce_l[cutoff+1]-2*ce_l[cutoff])/(np.power(shots_increment,2))
+        first_derivative = (ce_l[cutoff+1]-ce_l[cutoff-1])/(2*shots_increment)
+        second_derivative = (ce_l[cutoff+1]+ce_l[cutoff-1]-2*ce_l[cutoff])/(2*np.power(shots_increment,2))
         # print('\u0394H = %.3f, first derivative = %.3e, second derivative = %.3e'%(ce_l[cutoff],first_derivative,second_derivative),flush=True)
 
         if abs(first_derivative)<first_derivative_threshold and abs(second_derivative)<second_derivative_threshold:

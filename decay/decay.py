@@ -58,7 +58,7 @@ if __name__ == '__main__':
             rank_decay_dict = comm.recv(source=i,status=state)
             decay_dict.update(rank_decay_dict)
         print('Decay results have :',decay_dict.keys())
-        pickle.dump(decay_dict,open('./decay/decay.p','wb'))
+        pickle.dump(decay_dict,open('./decay/decay.pickle','wb'))
     else:
         state = MPI.Status()
         full_circ_sizes = comm.recv(source=size-1,status=state)

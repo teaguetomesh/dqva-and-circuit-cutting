@@ -103,10 +103,10 @@ def annotate_heatmap(im, data=None, valfmt="{x:.2f}",
         data = im.get_array()
 
     # Normalize the threshold to the images color range.
-    if threshold is not None:
-        threshold = im.norm(threshold)
-    else:
-        threshold = im.norm(data.max())/2.
+    # if threshold is not None:
+    #     threshold = im.norm(threshold)
+    # else:
+    #     threshold = im.norm(data.max())/2.0
 
     # Set default alignment to center, but allow it to be
     # overwritten by textkw.
