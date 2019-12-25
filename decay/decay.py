@@ -7,9 +7,17 @@ import pickle
 
 def find_rank_tasks(tasks,rank,num_workers):
     rank_tasks = []
-    for task_idx, task in enumerate(tasks):
-        if task_idx%num_workers==rank:
-            rank_tasks.append(task)
+
+    count = int(len(tasks)/num_workers)
+    remainder = len(tasks) % num_workers
+    if rank<remainder:
+        tasks_start = rank * (count + 1)
+        tasks_stop = tasks_start + count + 1
+    else:
+        tasks_start = rank * count + remainder
+        tasks_stop = tasks_start + (count - 1) + 1
+
+    rank_tasks = tasks[tasks_start:tasks_stop]
     return rank_tasks
 
 def calculate_delta_H(circ,ground_truth,accumulated_prob,counter,shots_increment,evaluation_method):
@@ -46,12 +54,21 @@ if __name__ == '__main__':
 
     if rank == size-1:
         full_circ_sizes = []
-        decay_dict = read_file(filename='./decay/decay.p')
+        decay_dict = read_file(filename='./decay/decay.pickle')
         for full_circ_size in range(3,21):
             if full_circ_size not in decay_dict:
                 full_circ_sizes.append(full_circ_size)
+        rearranged_fc_sizes = []
+        while len(full_circ_sizes)>0:
+            if len(full_circ_sizes)>=2:
+                head = full_circ_sizes.pop(0)
+                tail = full_circ_sizes.pop(-1)
+                rearranged_fc_sizes.append(head)
+                rearranged_fc_sizes.append(tail)
+            else:
+                rearranged_fc_sizes.append(full_circ_sizes.pop(0))
         for i in range(num_workers):
-            rank_tasks = find_rank_tasks(tasks=full_circ_sizes,rank=i,num_workers=num_workers)
+            rank_tasks = find_rank_tasks(tasks=rearranged_fc_sizes,rank=i,num_workers=num_workers)
             comm.send(rank_tasks, dest=i)
         for i in range(num_workers):
             state = MPI.Status()
