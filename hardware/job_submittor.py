@@ -30,8 +30,8 @@ def submit_hardware_jobs(schedule, evaluator_info):
         mapped_circuits += reps_l
 
     qobj = assemble(mapped_circuits, backend=evaluator_info['device'], shots=evaluator_info['num_shots'])
-    # job = evaluator_info['device'].run(qobj)
-    job = Aer.get_backend('qasm_simulator').run(qobj)
+    job = evaluator_info['device'].run(qobj)
+    # job = Aer.get_backend('qasm_simulator').run(qobj)
     job_dict = {'job':job,'schedule':schedule}
     return job_dict
 
