@@ -247,7 +247,7 @@ def evaluate_circ(circ, backend, evaluator_info):
         # print('using statevector simulator')
         backend = Aer.get_backend('statevector_simulator')
         backend_options = {'max_parallel_threads':1}
-        job = execute(circ, backend=backend,backend_options=None)
+        job = execute(circ, backend=backend,backend_options=backend_options)
         result = job.result()
         outputstate = result.get_statevector(circ)
         outputstate_ordered = [0 for sv in outputstate]
@@ -263,7 +263,7 @@ def evaluate_circ(circ, backend, evaluator_info):
         qc = apply_measurement(circ)
 
         num_shots = evaluator_info['num_shots']
-        noiseless_qasm_result = execute(qc, backend, shots=num_shots,backend_options=None).result()
+        noiseless_qasm_result = execute(qc, backend, shots=num_shots,backend_options=backend_options).result()
         
         noiseless_counts = noiseless_qasm_result.get_counts(0)
         assert sum(noiseless_counts.values())>=num_shots
@@ -288,7 +288,7 @@ def evaluate_circ(circ, backend, evaluator_info):
         noise_model=evaluator_info['noise_model'],
         coupling_map=evaluator_info['coupling_map'],
         basis_gates=evaluator_info['basis_gates'],
-        shots=num_shots,backend_options=None).result()
+        shots=num_shots,backend_options=backend_options).result()
 
         noisy_counts = noisy_qasm_result.get_counts(0)
         assert sum(noisy_counts.values())>=num_shots
