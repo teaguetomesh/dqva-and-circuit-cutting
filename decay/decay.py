@@ -46,12 +46,12 @@ def noiseless_decay(circuit,shots_increment):
     noiseless_accumulated_prob = [0 for i in range(np.power(2,full_circ_size))]
     noiseless_delta_H_l = []
     max_counter = max(20,int(20*np.power(2,full_circ_size)/shots_increment))
-    max_counter = min(max_counter,1000)
+    max_counter = min(max_counter,5000)
     for counter in range(1,max_counter+1):
         noiseless_accumulated_ce, noiseless_accumulated_prob = calculate_delta_H(circ=circuit,ground_truth=ground_truth,
         accumulated_prob=noiseless_accumulated_prob,counter=counter,shots_increment=shots_increment,evaluation_method='qasm_simulator')
         noiseless_delta_H_l.append(noiseless_accumulated_ce)
-        if full_circ_size>=15 and counter%10==0:
+        if full_circ_size>=15 and counter%50==0:
             time_elapsed = time()-decay_begin
             eta = time_elapsed/counter*max_counter-time_elapsed
             print('%d qubit circuit, counter %d/%d, ETA = %.1e'%(full_circ_size,counter,max_counter,eta),flush=True)
