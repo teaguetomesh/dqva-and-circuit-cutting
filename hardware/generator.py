@@ -144,6 +144,8 @@ def generate_case_dict(case,args,cluster_max_qubit,case_dict):
         if 'fc_shots' not in case_dict:
             fc_shots = get_circ_saturated_shots(circs=[full_circ],device_name=args.device_name)[0]
             case_dict['fc_shots'] = fc_shots
+        else:
+            fc_shots = case_dict['fc_shots']
         if 'fc_evaluations' not in case_dict:
             schedule = schedule_job(circs={'fc':full_circ},shots=fc_shots,max_experiments=device_max_experiments,max_shots=device_max_shots)
             if len(schedule)>10:

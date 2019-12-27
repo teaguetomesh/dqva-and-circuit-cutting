@@ -151,8 +151,8 @@ def get_circ_saturated_shots(circs,device_name):
             if len(ce_l)>=3:
                 accumulated_shots = int((len(ce_l)-1)*shots_increment)
                 first_derivative = (ce_l[-1]+ce_l[-3])/(2*shots_increment)
-                second_derivative = (ce_l[-1]+ce_l[-3]-2*ce_l[-2])/(np.power(shots_increment,2))
-                if (abs(first_derivative)<1e-4 and abs(second_derivative) < 1e-10) or accumulated_shots/device_max_experiments/device_max_shots>10:
+                second_derivative = (ce_l[-1]+ce_l[-3]-2*ce_l[-2])/(2*np.power(shots_increment,2))
+                if (abs(first_derivative)<1e-6 and abs(second_derivative) < 1e-10) or accumulated_shots/device_max_experiments/device_max_shots>1:
                     saturated_shots.append(accumulated_shots)
                     print('%d qubit circuit saturated shots = %d, \u0394H = %.3e'%(full_circ_size,accumulated_shots,ce_l[-2]))
                     break

@@ -19,7 +19,7 @@ def make_plot(ce_l,cutoff,full_circ_size,shots_increment,derivative_thresholds):
     first_derivative_threshold, second_derivative_threshold = derivative_thresholds
     xvals = range(1,len(ce_l)+1)
     plt.figure()
-    plt.axvline(x=cutoff,label='saturated cutoff' if len(ce_l)>cutoff else 'diverged cutoff',color='k',linestyle='--')
+    plt.axvline(x=cutoff,label='saturated cutoff' if len(ce_l)>cutoff+2 else 'diverged cutoff',color='k',linestyle='--')
     plt.plot(xvals,ce_l,label='noiseless')
     x_ticks = get_xticks(xvals=xvals,compulsory=cutoff)
     plt.xticks(ticks=x_ticks,labels=x_ticks)
