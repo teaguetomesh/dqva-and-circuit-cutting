@@ -266,9 +266,9 @@ def process_data(filename,circuit_type):
         obs= plotter_input[case]['fc_evaluations']['hw'])
         cutting_ce = cross_entropy(target=plotter_input[case]['fc_evaluations']['sv_noiseless'],
         obs= plotter_input[case]['cutting'])
-        ce_percent_change = 100*(hw_ce - cutting_ce)/(hw_ce - ground_truth_ce)
+        ce_percent_change = 100*(hw_ce - cutting_ce)/hw_ce
         assert ce_percent_change <= 100+1e-10
-        plotter_input[case]['ce_comparisons'] = (hw_ce-ground_truth_ce,cutting_ce-ground_truth_ce)
+        plotter_input[case]['ce_comparisons'] = (hw_ce,cutting_ce)
         plotter_input[case]['ce_percent_reduction'] = ce_percent_change
 
         ground_truth_fid = fidelity(target=plotter_input[case]['fc_evaluations']['sv_noiseless'],

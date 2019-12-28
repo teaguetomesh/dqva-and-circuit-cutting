@@ -168,6 +168,8 @@ def distribute_cluster_shots(total_shots,clusters,complete_path_map):
     return cluster_shots
 
 def schedule_job(circs,shots,max_experiments,max_shots):
+    # print('%d circuits, %d shots each, %d max_experiments, %d max_shots'%(len(circs),shots,max_experiments,max_shots))
+    shots = 1024*math.ceil(shots/1024)
     if len(circs)==0 or shots==0:
         return []
     elif len(circs)<=max_experiments and shots<=max_shots:
@@ -318,9 +320,9 @@ def evaluate_circ(circ, backend, evaluator_info):
                 circs_l += reps_l
             qobj = assemble(circs_l, backend=evaluator_info['device'], shots=s['shots'])
             print('Submitted full circuit %d shots, %d reps to hardware'%(s['shots'],s['reps']))
-            # job = evaluator_info['device'].run(qobj)
-            job = Aer.get_backend('qasm_simulator').run(qobj)
-            jobs.append({'job':job,'circ':circ,'mapped_circuit_l':s['circs'],'evaluator_info':evaluator_info})
+            job = evaluator_info['device'].run(qobj)
+            # job = Aer.get_backend('qasm_simulator').run(qobj)
+            jobs.append({'job':job,'circ':circ,'mapped_circuit_l':circs_l,'evaluator_info':evaluator_info})
         return jobs
     else:
         raise Exception('Illegal backend :',backend)
@@ -346,8 +348,8 @@ def readout_mitigation(device,initial_layout):
     # Execute the calibration circuits
     meas_calibs_transpiled = transpile(meas_calibs, backend=device)
     qobj = assemble(meas_calibs_transpiled, backend=device, shots=num_shots)
-    # job = device.run(qobj)
-    job = Aer.get_backend('qasm_simulator').run(qobj)
+    job = device.run(qobj)
+    # job = Aer.get_backend('qasm_simulator').run(qobj)
     return job, state_labels, qubit_list
 
 def get_evaluator_info(circ,device_name,fields):

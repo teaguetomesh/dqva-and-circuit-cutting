@@ -5,7 +5,7 @@ import numpy as np
 from qcg.generators import gen_supremacy, gen_hwea, gen_BV, gen_qft, gen_sycamore
 import utils.MIQCP_searcher as searcher
 import utils.cutter as cutter
-from utils.helper_fun import evaluate_circ, get_evaluator_info, get_circ_saturated_shots, readout_mitigation, reverseBits, get_filename, read_file, factor_int, schedule_job
+from utils.helper_fun import evaluate_circ, get_evaluator_info, get_circ_saturated_shots, readout_mitigation, reverseBits, get_filename, read_file, factor_int, schedule_job, cross_entropy
 import argparse
 from qiskit import IBMQ
 import copy
@@ -188,7 +188,7 @@ if __name__ == '__main__':
     device_max_experiments = int(evaluator_info['device'].configuration().max_experiments/3*2)
 
     # NOTE: toggle circuits to benchmark
-    dimension_l = np.arange(9,11)
+    dimension_l = np.arange(3,11)
     counter = 1
     total_cases = (args.max_qubit-args.min_qubit+1)*len(dimension_l)
     cases_to_run = {}
@@ -247,6 +247,9 @@ if __name__ == '__main__':
         case_dict['fc_evaluations'] = {'sv_noiseless':cases_to_run[case]['fc_evaluations']['sv_noiseless'],'qasm':cases_to_run[case]['fc_evaluations']['qasm'],
         'qasm+noise':cases_to_run[case]['fc_evaluations']['qasm+noise'],'hw':hw_prob}
         pickle.dump({case:case_dict},open(dirname+evaluator_input_filename,'ab'))
+        qasm_ce = cross_entropy(target=case_dict['fc_evaluations']['sv_noiseless'],obs=case_dict['fc_evaluations']['qasm'])
+        hw_ce = cross_entropy(target=case_dict['fc_evaluations']['sv_noiseless'],obs=case_dict['fc_evaluations']['hw'])
+        print('qasm \u0394H = %.3e, hw \u0394H = %.3e'%(qasm_ce,hw_ce))
         print('Retrieved %d/%d cases'%(counter,len(cases_to_run)),flush=True)
         counter += 1
         print('*'*50)
