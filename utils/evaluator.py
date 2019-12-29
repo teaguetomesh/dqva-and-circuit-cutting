@@ -94,10 +94,10 @@ def evaluate_cluster(complete_path_map, cluster_circ, combinations, backend, eva
         # print(inits, meas)
         # print(cluster_circ_inst)
         if backend=='statevector_simulator':
-            cluster_inst_prob = evaluate_circ(circ=cluster_circ_inst,backend=backend,evaluator_info=None)
+            cluster_inst_prob = evaluate_circ(circ=cluster_circ_inst,evaluator_info=None,fields=['sv'])['sv']
             cluster_prob[(tuple(inits),tuple(meas))] = cluster_inst_prob
         elif backend=='noisy_qasm_simulator':
-            cluster_inst_prob = evaluate_circ(circ=cluster_circ_inst,backend=backend,evaluator_info=evaluator_info)
+            cluster_inst_prob = evaluate_circ(circ=cluster_circ_inst,evaluator_info=evaluator_info,fields=['qasm+noise'])['qasm+noise']
             cluster_prob[(tuple(inits),tuple(meas))] = cluster_inst_prob
         elif backend=='hardware':
             cluster_prob[(tuple(inits),tuple(meas))] = cluster_circ_inst

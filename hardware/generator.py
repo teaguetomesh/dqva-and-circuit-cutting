@@ -5,7 +5,7 @@ import numpy as np
 from qcg.generators import gen_supremacy, gen_hwea, gen_BV, gen_qft, gen_sycamore
 import utils.MIQCP_searcher as searcher
 import utils.cutter as cutter
-from utils.helper_fun import evaluate_circ, get_evaluator_info, get_circ_saturated_shots, readout_mitigation, reverseBits, get_filename, read_file, factor_int, schedule_job, cross_entropy
+from utils.helper_fun import evaluate_circ, get_evaluator_info, get_circ_saturated_shots, reverseBits, get_filename, read_file, factor_int, schedule_job, cross_entropy
 import argparse
 from qiskit import IBMQ
 import copy
@@ -52,58 +52,6 @@ def accumulate_jobs(jobs,meas_filter):
         hw_prob[reversed_state] = hw_counts[state]/evaluator_info['num_shots']
     return hw_prob
 
-def evaluate_full_circ(circ, total_shots, device_name, fields):
-    uniform_p = 1.0/np.power(2,len(circ.qubits))
-    uniform_prob = [uniform_p for i in range(np.power(2,len(circ.qubits)))]
-    fc_evaluations = {}
-
-    if 'sv_noiseless' in fields:
-        print('Evaluating fc state vector')
-        sv_noiseless_fc = evaluate_circ(circ=circ,backend='statevector_simulator',evaluator_info=None)
-    else:
-        sv_noiseless_fc = uniform_prob
-    
-    if 'qasm' in fields:
-        print('Evaluating fc qasm, %d shots'%total_shots)
-        qasm_evaluator_info = {'num_shots':total_shots}
-        qasm_noiseless_fc = evaluate_circ(circ=circ,backend='noiseless_qasm_simulator',evaluator_info=qasm_evaluator_info)
-    else:
-        qasm_noiseless_fc = uniform_prob
-
-    if 'qasm+noise' in fields:
-        print('Evaluating fc qasm + noise, %d shots'%total_shots)
-        qasm_noise_evaluator_info = get_evaluator_info(circ=circ,device_name=device_name,
-        fields=['device','basis_gates','coupling_map','properties','initial_layout','noise_model'])
-        qasm_noise_evaluator_info['num_shots'] = total_shots
-        execute_begin = time()
-        qasm_noisy_fc = evaluate_circ(circ=circ,backend='noisy_qasm_simulator',evaluator_info=qasm_noise_evaluator_info)
-        print('%.3e seconds'%(time()-execute_begin))
-    else:
-        qasm_noisy_fc = uniform_prob
-
-    if 'hw' in fields:
-        print('Evaluating fc hardware, %d shots, submission history:'%total_shots)
-        hw_evaluator_info = get_evaluator_info(circ=circ,device_name=device_name,
-        fields=['device','basis_gates','coupling_map','properties','initial_layout'])
-        hw_evaluator_info['num_shots'] = total_shots
-        submission_begin = time()
-        hw_jobs = evaluate_circ(circ=circ,backend='hardware',evaluator_info=hw_evaluator_info)
-        print('job object turnaround time =',time()-submission_begin)
-        if np.power(2,len(circ.qubits))<hw_evaluator_info['device'].configuration().max_experiments/3*2:
-            submission_begin = time()
-            meas_filter_job, state_labels, qubit_list = readout_mitigation(device=hw_evaluator_info['device'],initial_layout=hw_evaluator_info['initial_layout'])
-            print('job object turnaround time =',time()-submission_begin)
-            fc_evaluations['meas_filter'] = (meas_filter_job, state_labels, qubit_list)
-    else:
-        hw_jobs = uniform_prob
-
-    fc_evaluations.update({'sv_noiseless':sv_noiseless_fc,
-    'qasm':qasm_noiseless_fc,
-    'qasm+noise':qasm_noisy_fc,
-    'hw':hw_jobs})
-
-    return fc_evaluations
-
 def fc_in_dict(case,dictionary):
     for key in dictionary:
         if case[1] == key[1]:
@@ -111,9 +59,23 @@ def fc_in_dict(case,dictionary):
             return case_dict
     return {}
 
-def generate_case_dict(case,args,cluster_max_qubit,case_dict):
-    if 'full_circ' in case_dict:
+def generate_case_dict(case,args,cluster_max_qubit,case_dict,debug):
+    if case_dict!={}:
         full_circ = case_dict['full_circ']
+        searcher_begin = time()
+        hardness, positions, ancilla, d, num_cluster, m = searcher.find_cuts(circ=full_circ,reconstructor_runtime_params=[4.275e-9,6.863e-1],reconstructor_weight=0,
+        num_clusters=range(2,min(len(full_circ.qubits),args.max_clusters)+1),cluster_max_qubit=cluster_max_qubit)
+        searcher_time = time() - searcher_begin
+        case_dict['searcher_time'] = copy.deepcopy(searcher_time)
+        if m == None:
+            print('Case {} NOT feasible'.format(case))
+            return None
+        else:
+            m.print_stat()
+            clusters, complete_path_map, K, d = cutter.cut_circuit(full_circ, positions)
+            case_dict['clusters'] = copy.deepcopy(clusters)
+            case_dict['complete_path_map'] = copy.deepcopy(complete_path_map)
+            return case_dict
     else:
         i,j = factor_int(case[1])
         if args.circuit_type == 'supremacy':
@@ -126,42 +88,36 @@ def generate_case_dict(case,args,cluster_max_qubit,case_dict):
             full_circ = gen_qft(width=i*j, barriers=False)
         elif args.circuit_type == 'sycamore':
             full_circ = gen_sycamore(i,j,8)
-        case_dict['full_circ'] = full_circ
-    searcher_begin = time()
-    hardness, positions, ancilla, d, num_cluster, m = searcher.find_cuts(circ=full_circ,reconstructor_runtime_params=[4.275e-9,6.863e-1],reconstructor_weight=0,
-    num_clusters=range(2,min(len(full_circ.qubits),args.max_clusters)+1),cluster_max_qubit=cluster_max_qubit)
-    searcher_time = time() - searcher_begin
-    case_dict['searcher_time'] = searcher_time
-
-    if m == None:
-        print('Case {} NOT feasible'.format(case))
-        return None
-    else:
-        m.print_stat()
-        clusters, complete_path_map, K, d = cutter.cut_circuit(full_circ, positions)
-        case_dict['clusters'] = clusters
-        case_dict['complete_path_map'] = complete_path_map
-        if 'fc_shots' not in case_dict:
-            fc_shots = get_circ_saturated_shots(circs=[full_circ],device_name=args.device_name)[0]
-            case_dict['fc_shots'] = fc_shots
+        case_dict['full_circ'] = copy.deepcopy(full_circ)
+        searcher_begin = time()
+        hardness, positions, ancilla, d, num_cluster, m = searcher.find_cuts(circ=full_circ,reconstructor_runtime_params=[4.275e-9,6.863e-1],reconstructor_weight=0,
+        num_clusters=range(2,min(len(full_circ.qubits),args.max_clusters)+1),cluster_max_qubit=cluster_max_qubit)
+        searcher_time = time() - searcher_begin
+        case_dict['searcher_time'] = copy.deepcopy(searcher_time)
+        if m == None:
+            print('Case {} NOT feasible'.format(case))
+            return None
         else:
-            fc_shots = case_dict['fc_shots']
-        if 'fc_evaluations' not in case_dict:
+            fc_shots = get_circ_saturated_shots(circs=[full_circ],device_name=args.device_name)[0]
+            case_dict['fc_shots'] = copy.deepcopy(fc_shots)
+            m.print_stat()
+            clusters, complete_path_map, K, d = cutter.cut_circuit(full_circ, positions)
+            case_dict['clusters'] = copy.deepcopy(clusters)
+            case_dict['complete_path_map'] = copy.deepcopy(complete_path_map)
             schedule = schedule_job(circs={'fc':full_circ},shots=fc_shots,max_experiments=device_max_experiments,max_shots=device_max_shots)
-            if len(schedule)>10:
+            if len(schedule)>5:
                 print('Case {} requires {:d} jobs, skipped'.format(case,len(schedule)))
                 return None
             else:
                 print('saturated fc shots = %d, needs %d jobs'%(case_dict['fc_shots'],len(schedule)))
-                fields_to_run = ['sv_noiseless','qasm','hw']
-                case_dict['fc_evaluations'] = evaluate_full_circ(circ=full_circ,total_shots=fc_shots,device_name=args.device_name,fields=fields_to_run)
-                hw_jobs = case_dict['fc_evaluations']['hw']
+                fields_to_run = ['sv','qasm','hw']
+                case_dict['fc_evaluations'] = evaluate_circ(circ=full_circ,total_shots=fc_shots,device_name=args.device_name,fields=fields_to_run,debug=debug)
                 print('Submitting case {} has job ids :'.format(case))
-                [print(x['job'].job_id()) for x in hw_jobs]
+                [print(x['job'].job_id()) for x in case_dict['fc_evaluations']['hw']]
                 if 'meas_filter' in case_dict['fc_evaluations']:
                     meas_filter_job, _, _ = case_dict['fc_evaluations']['meas_filter']
                     print('Meas_filter job id {}'.format(meas_filter_job.job_id()))
-        return case_dict
+                return case_dict
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='generate evaluator inputs')
@@ -170,9 +126,12 @@ if __name__ == '__main__':
     parser.add_argument('--max-clusters', metavar='N', type=int,help='max number of clusters to split into')
     parser.add_argument('--device-name', metavar='S',type=str,help='IBM device')
     parser.add_argument('--circuit-type', metavar='S', type=str,help='which circuit input file to run')
+    parser.add_argument('--debug', metavar='N', type=int,help='debug mode')
     args = parser.parse_args()
 
     assert args.circuit_type in ['supremacy','hwea','bv','qft','sycamore']
+    assert args.debug in [0,1]
+    args.debug = True if args.debug==1 else False
 
     dirname, evaluator_input_filename = get_filename(experiment_name='hardware',circuit_type=args.circuit_type,device_name=args.device_name,field='evaluator_input',evaluation_method=None,shots_mode=None)
     if not os.path.exists(dirname):
@@ -188,7 +147,7 @@ if __name__ == '__main__':
     device_max_experiments = int(evaluator_info['device'].configuration().max_experiments/3*2)
 
     # NOTE: toggle circuits to benchmark
-    dimension_l = np.arange(3,16)
+    dimension_l = np.arange(3,6)
     counter = 1
     total_cases = (args.max_qubit-args.min_qubit+1)*len(dimension_l)
     cases_to_run = {}
@@ -206,7 +165,7 @@ if __name__ == '__main__':
             elif fc_in_dict(case=case,dictionary=evaluator_input) != {}:
                 print('Use existing full circuit results')
                 case_dict = fc_in_dict(case=case,dictionary=evaluator_input)
-                case_dict = generate_case_dict(case=case,args=args,cluster_max_qubit=cluster_max_qubit,case_dict=case_dict)
+                case_dict = generate_case_dict(case=case,args=args,cluster_max_qubit=cluster_max_qubit,case_dict=case_dict,debug=args.debug)
                 if case_dict!=None:
                     print('Case {} added to evaluator_input'.format(case))
                     pickle.dump({case:case_dict},open(dirname+evaluator_input_filename,'ab'))
@@ -214,13 +173,13 @@ if __name__ == '__main__':
             elif fc_in_dict(case=case,dictionary=cases_to_run) != {}:
                 print('Use currently running full circuit')
                 case_dict = fc_in_dict(case=case,dictionary=cases_to_run)
-                case_dict = generate_case_dict(case=case,args=args,cluster_max_qubit=cluster_max_qubit,case_dict=case_dict)
+                case_dict = generate_case_dict(case=case,args=args,cluster_max_qubit=cluster_max_qubit,case_dict=case_dict,debug=args.debug)
                 if case_dict!=None:
                     print('Case {} added in cases to run, with currently running full circuit'.format(case))
                     cases_to_run[case] = case_dict
             else:
                 print('Generate new circuit')
-                case_dict = generate_case_dict(case=case,args=args,cluster_max_qubit=cluster_max_qubit,case_dict={})
+                case_dict = generate_case_dict(case=case,args=args,cluster_max_qubit=cluster_max_qubit,case_dict={},debug=args.debug)
                 if case_dict!=None:
                     print('Case {} added in cases to run'.format(case))
                     cases_to_run[case] = case_dict

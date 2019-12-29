@@ -16,7 +16,7 @@ def update_counts(cumulated, batch):
             cumulated[state] = cumulated[state] + batch[state]
     return cumulated
 
-def submit_hardware_jobs(schedule, evaluator_info):
+def submit_hardware_jobs(schedule, evaluator_info,debug=True):
     circs = schedule['circs']
     reps = schedule['reps']
     mapped_circuits = []
@@ -30,8 +30,10 @@ def submit_hardware_jobs(schedule, evaluator_info):
         mapped_circuits += reps_l
 
     qobj = assemble(mapped_circuits, backend=evaluator_info['device'], shots=evaluator_info['num_shots'])
-    job = evaluator_info['device'].run(qobj)
-    # job = Aer.get_backend('qasm_simulator').run(qobj)
+    if debug:
+        job = Aer.get_backend('qasm_simulator').run(qobj)
+    else:
+        job = evaluator_info['device'].run(qobj)
     job_dict = {'job':job,'schedule':schedule}
     return job_dict
 
@@ -130,7 +132,7 @@ if __name__ == '__main__':
 
             all_submitted_jobs[case][cluster_idx] = {'jobs':[],'meas_filter':None}
             if np.power(2,len(cluster_circ.qubits))<=device_max_experiments:
-                meas_filter_job, state_labels, qubit_list = readout_mitigation(device=evaluator_info['device'],initial_layout=evaluator_info['initial_layout'])
+                meas_filter_job, state_labels, qubit_list = readout_mitigation(device=evaluator_info['device'],initial_layout=evaluator_info['initial_layout'],debug=True)
                 all_submitted_jobs[case][cluster_idx]['meas_filter'] = (meas_filter_job, state_labels, qubit_list)
                 print('Meas_filter job id {}'.format(meas_filter_job.job_id()))
 
@@ -138,7 +140,7 @@ if __name__ == '__main__':
 
             for s in schedule:
                 evaluator_info['num_shots'] = s['shots']
-                job_dict = submit_hardware_jobs(schedule=s, evaluator_info=evaluator_info)
+                job_dict = submit_hardware_jobs(schedule=s, evaluator_info=evaluator_info, debug=True)
                 print('Submitted %d circs, %d shots, %d reps to hardware'%(len(s['circs']),s['shots'],s['reps']))
                 all_submitted_jobs[case][cluster_idx]['jobs'].append(job_dict)
         print('*'*50)

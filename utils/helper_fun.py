@@ -131,7 +131,7 @@ def get_circ_saturated_shots(circs,device_name):
     saturated_shots = []
     for circ_idx, circ in enumerate(circs):
         full_circ_size = len(circ.qubits)
-        ground_truth = evaluate_circ(circ=circ,backend='statevector_simulator',evaluator_info=None)
+        ground_truth = evaluate_circ(circ=circ,evaluator_info=None,fields=['sv'])['sv']
         shots_increment = 1024
         
         qasm_evaluator_info = get_evaluator_info(circ=circ,device_name=device_name,
@@ -143,7 +143,7 @@ def get_circ_saturated_shots(circs,device_name):
         counter = 1
         accumulated_prob = [0 for i in range(np.power(2,len(circ.qubits)))]
         while 1:
-            noiseless_prob_batch = evaluate_circ(circ=circ,backend='noiseless_qasm_simulator',evaluator_info=qasm_evaluator_info)
+            noiseless_prob_batch = evaluate_circ(circ=circ,evaluator_info=qasm_evaluator_info,fields=['qasm'])['qasm']
             accumulated_prob = [(x*(counter-1)+y)/counter for x,y in zip(accumulated_prob,noiseless_prob_batch)]
             assert abs(sum(accumulated_prob)-1)<1e-5
             accumulated_ce = cross_entropy(target=ground_truth,obs=accumulated_prob)
@@ -244,74 +244,76 @@ def combine_dict(dict_a, dict_sum):
             dict_sum[key] = dict_a[key]
     return dict_sum
 
-def evaluate_circ(circ, backend, evaluator_info):
-    if backend == 'statevector_simulator':
-        # print('using statevector simulator')
+def evaluate_circ(circ, evaluator_info, fields, debug=True):
+    uniform_p = 1.0/np.power(2,len(circ.qubits))
+    uniform_prob = [uniform_p for i in range(np.power(2,len(circ.qubits)))]
+    fc_evaluations= {'sv':uniform_prob,'qasm':uniform_prob,'qasm+noise':uniform_prob,'hw':uniform_prob}
+
+    if 'sv' in fields:
         backend = Aer.get_backend('statevector_simulator')
         backend_options = {'max_parallel_threads':1}
-        job = execute(circ, backend=backend,backend_options=backend_options)
-        result = job.result()
+        result = execute(circ, backend=backend,backend_options=backend_options).result()
         outputstate = result.get_statevector(circ)
-        outputstate_ordered = [0 for sv in outputstate]
+        sv_prob = [0 for sv in outputstate]
         for i, sv in enumerate(outputstate):
             reverse_i = reverseBits(i,len(circ.qubits))
-            outputstate_ordered[reverse_i] = sv
-        sv_prob = [np.power(np.absolute(x),2) for x in outputstate_ordered]
-        return sv_prob
-    elif backend == 'noiseless_qasm_simulator':
-        # print('using noiseless qasm simulator %d shots'%num_shots)
+            sv_prob[reverse_i] = np.power(np.absolute(sv),2)
+        fc_evaluations['sv'] = sv_prob
+    elif 'qasm' in fields:
         backend = Aer.get_backend('qasm_simulator')
         backend_options = {'max_parallel_threads':1}
         qc = apply_measurement(circ)
-
         num_shots = evaluator_info['num_shots']
-        noiseless_qasm_result = execute(qc, backend, shots=num_shots,backend_options=backend_options).result()
-        
+
+        noiseless_qasm_result = execute(qc, backend=backend, shots=num_shots,backend_options=backend_options).result()
         noiseless_counts = noiseless_qasm_result.get_counts(0)
-        assert sum(noiseless_counts.values())>=num_shots
-        noiseless_prob = [0 for x in range(np.power(2,len(circ.qubits)))]
+
+        qasm_prob = [0 for x in range(np.power(2,len(circ.qubits)))]
         for state in noiseless_counts:
             reversed_state = reverseBits(int(state,2),len(circ.qubits))
-            noiseless_prob[reversed_state] = noiseless_counts[state]/num_shots
-        return noiseless_prob
-    elif backend == 'noisy_qasm_simulator':
-        # print('using noisy qasm simulator {} shots'.format(num_shots))
+            qasm_prob[reversed_state] = noiseless_counts[state]/num_shots
+        fc_evaluations['qasm'] = qasm_prob
+    elif 'qasm+noise' in fields:
         backend = Aer.get_backend('qasm_simulator')
         backend_options = {'max_parallel_threads':1}
         qc=apply_measurement(circ)
+        num_shots = evaluator_info['num_shots']
         mapped_circuit = transpile(qc,
         backend=evaluator_info['device'], basis_gates=evaluator_info['basis_gates'], 
         coupling_map=evaluator_info['coupling_map'],backend_properties=evaluator_info['properties'],
         initial_layout=evaluator_info['initial_layout'])
-        
-        num_shots = evaluator_info['num_shots']
+    
         noisy_qasm_result = execute(experiments=mapped_circuit,
         backend=backend,
         noise_model=evaluator_info['noise_model'],
         coupling_map=evaluator_info['coupling_map'],
         basis_gates=evaluator_info['basis_gates'],
         shots=num_shots,backend_options=backend_options).result()
-
         noisy_counts = noisy_qasm_result.get_counts(0)
-        assert sum(noisy_counts.values())>=num_shots
-        noisy_prob = [0 for x in range(np.power(2,len(circ.qubits)))]
+
+        qasm_noise_prob = [0 for x in range(np.power(2,len(circ.qubits)))]
         for state in noisy_counts:
             reversed_state = reverseBits(int(state,2),len(circ.qubits))
-            noisy_prob[reversed_state] = noisy_counts[state]/num_shots
-        return noisy_prob
-    elif backend == 'hardware':
-        jobs = []
+            qasm_noise_prob[reversed_state] = noisy_counts[state]/num_shots
+        fc_evaluations['qasm+noise'] = qasm_noise_prob
+    elif 'hw' in fields:
+        if debug:
+            backend = Aer.get_backend('qasm_simulator')
+        else:
+            backend = evaluator_info['device']
         qc=apply_measurement(circ)
-
+        num_shots = evaluator_info['num_shots']
         mapped_circuit = transpile(qc,
         backend=evaluator_info['device'], basis_gates=evaluator_info['basis_gates'],
         coupling_map=evaluator_info['coupling_map'],backend_properties=evaluator_info['properties'],
         initial_layout=evaluator_info['initial_layout'])
 
+        jobs = []
+
         device_max_shots = evaluator_info['device'].configuration().max_shots
         device_max_experiments = int(evaluator_info['device'].configuration().max_experiments/3*2)
 
-        schedule = schedule_job(circs={'fc':mapped_circuit},shots=evaluator_info['num_shots'],max_experiments=device_max_experiments,max_shots=device_max_shots)
+        schedule = schedule_job(circs={'fc':mapped_circuit},shots=num_shots,max_experiments=device_max_experiments,max_shots=device_max_shots)
         
         for s in schedule:
             circs_l = []
@@ -320,15 +322,18 @@ def evaluate_circ(circ, backend, evaluator_info):
                 circs_l += reps_l
             qobj = assemble(circs_l, backend=evaluator_info['device'], shots=s['shots'])
             print('Submitted full circuit %d shots, %d reps to hardware'%(s['shots'],s['reps']))
-            job = evaluator_info['device'].run(qobj)
-            # job = Aer.get_backend('qasm_simulator').run(qobj)
+            job = backend.run(qobj)
             jobs.append({'job':job,'circ':circ,'mapped_circuit_l':circs_l,'evaluator_info':evaluator_info})
-        return jobs
+        fc_evaluations['hw'] = jobs
+        if np.power(2,len(circ.qubits))<evaluator_info['device'].configuration().max_experiments/3*2:
+            meas_filter_job, state_labels, qubit_list = readout_mitigation(device=evaluator_info['device'],initial_layout=evaluator_info['initial_layout'],debug=debug)
+            fc_evaluations['meas_filter'] = (meas_filter_job, state_labels, qubit_list)
     else:
-        raise Exception('Illegal backend :',backend)
+        raise Exception('Illegal fields :',fields)
+    return fc_evaluations
 
 # Entangled readout mitigation
-def readout_mitigation(device,initial_layout):
+def readout_mitigation(device,initial_layout,debug=True):
     filter_begin = time()
     properties = device.properties()
     num_qubits = len(properties.qubits)
@@ -348,8 +353,10 @@ def readout_mitigation(device,initial_layout):
     # Execute the calibration circuits
     meas_calibs_transpiled = transpile(meas_calibs, backend=device)
     qobj = assemble(meas_calibs_transpiled, backend=device, shots=num_shots)
-    job = device.run(qobj)
-    # job = Aer.get_backend('qasm_simulator').run(qobj)
+    if debug:
+        job = Aer.get_backend('qasm_simulator').run(qobj)
+    else:
+        job = device.run(qobj)
     return job, state_labels, qubit_list
 
 def get_evaluator_info(circ,device_name,fields):
