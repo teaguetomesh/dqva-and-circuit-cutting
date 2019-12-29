@@ -15,7 +15,7 @@ from time import time
 import os
 
 def get_filename(experiment_name,circuit_type,device_name,field,evaluation_method=None,shots_mode=None):
-    dirname = './{}/benchmark_data/{}/'.format(experiment_name,circuit_type)
+    dirname = './{}/benchmark_data/{}_{}/'.format(experiment_name,circuit_type,device_name)
     if field == 'evaluator_input':
         evaluator_input_filename = 'evaluator_input_{}.p'.format(device_name)
         return dirname, evaluator_input_filename

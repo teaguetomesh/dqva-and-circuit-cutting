@@ -2699,3 +2699,85 @@ case (9, 10): ce percentage reduction = 8.433, fidelity improvement = 0.000, rec
 {'ce_percent': 8.43345143347555, 'reconstructor_time': 0.02043628692626953, 'best_case': (9, 10), 'hw_ce': 0.3906109949343806, 'cutting_ce': 0.357669006382774}
 **************************************************
 ----------------------------------------------------------------------------------------------------
+-------------------------------------------------- Plot --------------------------------------------------
+Processing ./hardware/benchmark_data/supremacy_ibmq_boeblingen/hw_plotter_input_ibmq_boeblingen_saturated.p
+case (2, 3): ce percentage reduction = 67.251, fidelity improvement = -0.000, reconstruction time: 5.677e-04
+case (2, 4): ce percentage reduction = 87.530, fidelity improvement = -0.000, reconstruction time: 1.976e-03
+case (2, 5): ce percentage reduction = 82.854, fidelity improvement = -0.000, reconstruction time: 5.782e-04
+case (3, 4): ce percentage reduction = 91.072, fidelity improvement = -0.000, reconstruction time: 1.919e-03
+case (3, 5): ce percentage reduction = 76.619, fidelity improvement = 0.000, reconstruction time: 5.715e-04
+case (3, 6): ce percentage reduction = 49.773, fidelity improvement = 0.000, reconstruction time: 2.776e-03
+case (3, 7): ce percentage reduction = -301.427, fidelity improvement = -0.000, reconstruction time: 1.089e-03
+case (3, 8): ce percentage reduction = -0.807, fidelity improvement = -0.000, reconstruction time: 6.655e-03
+case (4, 5): ce percentage reduction = 84.896, fidelity improvement = -0.000, reconstruction time: 5.724e-04
+case (4, 6): ce percentage reduction = 49.671, fidelity improvement = 0.000, reconstruction time: 2.829e-03
+case (4, 7): ce percentage reduction = -294.990, fidelity improvement = 0.000, reconstruction time: 1.086e-03
+case (4, 8): ce percentage reduction = -6.552, fidelity improvement = -0.000, reconstruction time: 6.464e-03
+case (4, 9): ce percentage reduction = -4.789, fidelity improvement = -0.000, reconstruction time: 8.600e-03
+case (4, 10): ce percentage reduction = 4.716, fidelity improvement = -0.000, reconstruction time: 2.082e-02
+case (5, 6): ce percentage reduction = 47.287, fidelity improvement = 0.000, reconstruction time: 2.830e-03
+case (5, 7): ce percentage reduction = -319.336, fidelity improvement = 0.000, reconstruction time: 1.084e-03
+case (5, 8): ce percentage reduction = -3.841, fidelity improvement = -0.000, reconstruction time: 6.505e-03
+case (5, 9): ce percentage reduction = -12.126, fidelity improvement = -0.000, reconstruction time: 8.533e-03
+case (5, 10): ce percentage reduction = 1.392, fidelity improvement = -0.000, reconstruction time: 2.045e-02
+case (6, 7): ce percentage reduction = -333.998, fidelity improvement = -0.000, reconstruction time: 1.123e-03
+case (6, 8): ce percentage reduction = -13.872, fidelity improvement = 0.000, reconstruction time: 6.619e-03
+case (6, 9): ce percentage reduction = -8.978, fidelity improvement = 0.000, reconstruction time: 8.602e-03
+case (6, 10): ce percentage reduction = -5.842, fidelity improvement = -0.000, reconstruction time: 2.105e-02
+case (7, 8): ce percentage reduction = -9.070, fidelity improvement = -0.000, reconstruction time: 6.420e-03
+case (7, 9): ce percentage reduction = -14.191, fidelity improvement = -0.000, reconstruction time: 8.466e-03
+case (7, 10): ce percentage reduction = -13.919, fidelity improvement = -0.000, reconstruction time: 2.074e-02
+case (8, 9): ce percentage reduction = -5.491, fidelity improvement = -0.000, reconstruction time: 9.223e-03
+case (8, 10): ce percentage reduction = 7.489, fidelity improvement = -0.000, reconstruction time: 2.084e-02
+case (9, 10): ce percentage reduction = 2.201, fidelity improvement = 0.000, reconstruction time: 2.026e-02
+************************* Best Cases *************************
+{'ce_percent': 67.25103353910845, 'reconstructor_time': 0.0005676746368408203, 'best_case': (2, 3), 'hw_ce': 0.015140032569834417, 'cutting_ce': 0.0049582041884631296}
+{'ce_percent': 91.07191171608697, 'reconstructor_time': 0.0019185543060302734, 'best_case': (3, 4), 'hw_ce': 0.21744581198089957, 'cutting_ce': 0.01941375406332624}
+{'ce_percent': 84.89561841543411, 'reconstructor_time': 0.0005724430084228516, 'best_case': (4, 5), 'hw_ce': 0.11864738693773351, 'cutting_ce': 0.01792095406319165}
+{'ce_percent': 49.772718635098805, 'reconstructor_time': 0.0027761459350585938, 'best_case': (3, 6), 'hw_ce': 0.5243898042571169, 'cutting_ce': 0.26338674243307675}
+{'ce_percent': -294.9900457017559, 'reconstructor_time': 0.0010862350463867188, 'best_case': (4, 7), 'hw_ce': 0.06244904820302677, 'cutting_ce': 0.246667524037447}
+{'ce_percent': -0.8074099288991792, 'reconstructor_time': 0.0066547393798828125, 'best_case': (3, 8), 'hw_ce': 0.45385054354349297, 'cutting_ce': 0.457514977894426}
+{'ce_percent': -4.788983863826194, 'reconstructor_time': 0.008600234985351562, 'best_case': (4, 9), 'hw_ce': 0.437433275837256, 'cutting_ce': 0.4583818848321085}
+{'ce_percent': 7.4890944001404804, 'reconstructor_time': 0.020836591720581055, 'best_case': (8, 10), 'hw_ce': 0.3906109949343806, 'cutting_ce': 0.3613577687864169}
+**************************************************
+Processing ./hardware/benchmark_data/supremacy_ibmq_boeblingen/hw_plotter_input_ibmq_boeblingen_sametotal.p
+case (2, 3): ce percentage reduction = 21.696, fidelity improvement = 0.000, reconstruction time: 6.006e-04
+case (2, 4): ce percentage reduction = 84.392, fidelity improvement = 0.000, reconstruction time: 1.971e-03
+case (2, 5): ce percentage reduction = 70.524, fidelity improvement = 0.000, reconstruction time: 5.803e-04
+case (3, 4): ce percentage reduction = 79.260, fidelity improvement = -0.000, reconstruction time: 1.968e-03
+case (3, 5): ce percentage reduction = 85.097, fidelity improvement = 0.000, reconstruction time: 5.865e-04
+case (3, 6): ce percentage reduction = 53.587, fidelity improvement = 0.000, reconstruction time: 2.811e-03
+case (3, 7): ce percentage reduction = -140.411, fidelity improvement = 0.000, reconstruction time: 1.102e-03
+case (3, 8): ce percentage reduction = -12.057, fidelity improvement = 0.000, reconstruction time: 6.505e-03
+case (4, 5): ce percentage reduction = 75.882, fidelity improvement = -0.000, reconstruction time: 5.801e-04
+case (4, 6): ce percentage reduction = 54.014, fidelity improvement = 0.000, reconstruction time: 2.794e-03
+case (4, 7): ce percentage reduction = -258.699, fidelity improvement = -0.000, reconstruction time: 1.089e-03
+case (4, 8): ce percentage reduction = -1.406, fidelity improvement = -0.000, reconstruction time: 6.375e-03
+case (4, 9): ce percentage reduction = 1.391, fidelity improvement = -0.000, reconstruction time: 8.525e-03
+case (4, 10): ce percentage reduction = -1.021, fidelity improvement = -0.000, reconstruction time: 2.044e-02
+case (5, 6): ce percentage reduction = 53.950, fidelity improvement = 0.000, reconstruction time: 2.829e-03
+case (5, 7): ce percentage reduction = -129.867, fidelity improvement = 0.000, reconstruction time: 1.096e-03
+case (5, 8): ce percentage reduction = -12.703, fidelity improvement = 0.000, reconstruction time: 6.523e-03
+case (5, 9): ce percentage reduction = -11.971, fidelity improvement = 0.000, reconstruction time: 8.674e-03
+case (5, 10): ce percentage reduction = -5.661, fidelity improvement = -0.000, reconstruction time: 2.108e-02
+case (6, 7): ce percentage reduction = -154.981, fidelity improvement = -0.000, reconstruction time: 1.131e-03
+case (6, 8): ce percentage reduction = -0.314, fidelity improvement = 0.000, reconstruction time: 6.447e-03
+case (6, 9): ce percentage reduction = -8.070, fidelity improvement = -0.000, reconstruction time: 8.598e-03
+case (6, 10): ce percentage reduction = -1.355, fidelity improvement = -0.000, reconstruction time: 2.065e-02
+case (7, 8): ce percentage reduction = -3.944, fidelity improvement = -0.000, reconstruction time: 6.374e-03
+case (7, 9): ce percentage reduction = -23.454, fidelity improvement = 0.000, reconstruction time: 8.690e-03
+case (7, 10): ce percentage reduction = -23.706, fidelity improvement = 0.000, reconstruction time: 2.033e-02
+case (8, 9): ce percentage reduction = 1.375, fidelity improvement = -0.000, reconstruction time: 8.525e-03
+case (8, 10): ce percentage reduction = 8.180, fidelity improvement = -0.000, reconstruction time: 2.154e-02
+case (9, 10): ce percentage reduction = 8.433, fidelity improvement = 0.000, reconstruction time: 2.044e-02
+************************* Best Cases *************************
+{'ce_percent': 21.695943101337132, 'reconstructor_time': 0.0006005764007568359, 'best_case': (2, 3), 'hw_ce': 0.015140032569834417, 'cutting_ce': 0.011855259717959232}
+{'ce_percent': 84.39209456922384, 'reconstructor_time': 0.001971006393432617, 'best_case': (2, 4), 'hw_ce': 0.21744581198089957, 'cutting_ce': 0.033938736697162145}
+{'ce_percent': 85.09666524008294, 'reconstructor_time': 0.0005865097045898438, 'best_case': (3, 5), 'hw_ce': 0.11864738693773351, 'cutting_ce': 0.01768241725922453}
+{'ce_percent': 54.013673717342826, 'reconstructor_time': 0.002793550491333008, 'best_case': (4, 6), 'hw_ce': 0.5243898042571169, 'cutting_ce': 0.24114760637866503}
+{'ce_percent': -129.86678593171857, 'reconstructor_time': 0.0010955333709716797, 'best_case': (5, 7), 'hw_ce': 0.06244904820302677, 'cutting_ce': 0.14354961994924728}
+{'ce_percent': -0.3136986238890118, 'reconstructor_time': 0.006447315216064453, 'best_case': (6, 8), 'hw_ce': 0.45385054354349297, 'cutting_ce': 0.4552742664531017}
+{'ce_percent': 1.3911746589479117, 'reconstructor_time': 0.008524894714355469, 'best_case': (4, 9), 'hw_ce': 0.437433275837256, 'cutting_ce': 0.4313478149540024}
+{'ce_percent': 8.43345143347555, 'reconstructor_time': 0.02043628692626953, 'best_case': (9, 10), 'hw_ce': 0.3906109949343806, 'cutting_ce': 0.357669006382774}
+**************************************************
+----------------------------------------------------------------------------------------------------
