@@ -8,7 +8,6 @@ import utils.cutter as cutter
 from utils.helper_fun import evaluate_circ, get_evaluator_info, get_circ_saturated_shots, reverseBits, get_filename, read_file, factor_int
 import argparse
 from qiskit import IBMQ
-import copy
 import math
 
 def gen_secret(num_qubit):
@@ -70,30 +69,27 @@ def generate_case_dict(case,args,cluster_max_qubit,case_dict):
         print('Generate new circuit')
         i,j = factor_int(case[1])
         if args.circuit_type == 'supremacy':
-            full_circ = gen_supremacy(i,j,8)
+            case_dict['full_circ'] = gen_supremacy(i,j,8)
         elif args.circuit_type == 'hwea':
-            full_circ = gen_hwea(i*j,1)
+            case_dict['full_circ'] = gen_hwea(i*j,1)
         elif args.circuit_type == 'bv':
-            full_circ = gen_BV(gen_secret(i*j),barriers=False)
+            case_dict['full_circ'] = gen_BV(gen_secret(i*j),barriers=False)
         elif args.circuit_type == 'qft':
-            full_circ = gen_qft(width=i*j, barriers=False)
+            case_dict['full_circ'] = gen_qft(width=i*j, barriers=False)
         elif args.circuit_type == 'sycamore':
-            full_circ = gen_sycamore(i,j,8)
-        case_dict['full_circ'] = full_circ
+            case_dict['full_circ'] = gen_sycamore(i,j,8)
+        full_circ = case_dict['full_circ']
     searcher_begin = time()
     hardness, positions, ancilla, d, num_cluster, m = searcher.find_cuts(circ=full_circ,reconstructor_runtime_params=[4.275e-9,6.863e-1],reconstructor_weight=0,
     num_clusters=range(2,min(len(full_circ.qubits),args.max_clusters)+1),cluster_max_qubit=cluster_max_qubit)
-    searcher_time = time() - searcher_begin
-    case_dict['searcher_time'] = searcher_time
+    case_dict['searcher_time'] = time() - searcher_begin
 
     if m == None:
         print('Case {} NOT feasible'.format(case))
         return None
     else:
         m.print_stat()
-        clusters, complete_path_map, K, d = cutter.cut_circuit(full_circ, positions)
-        case_dict['clusters'] = clusters
-        case_dict['complete_path_map'] = complete_path_map
+        case_dict['clusters'], case_dict['complete_path_map'], K, d = cutter.cut_circuit(full_circ, positions)
         if 'fc_shots' not in case_dict:
             fc_shots = get_circ_saturated_shots(circs=[full_circ],device_name=args.device_name)[0]
             case_dict['fc_shots'] = fc_shots
@@ -128,7 +124,7 @@ if __name__ == '__main__':
     device_size = len(evaluator_info['properties'].qubits)
 
     # NOTE: toggle circuits to benchmark
-    dimension_l = np.arange(3,16)
+    dimension_l = np.arange(9,11)
     counter = 1
     total_cases = (args.max_qubit-args.min_qubit+1)*len(dimension_l)
     for cluster_max_qubit in range(args.min_qubit,args.max_qubit+1):
