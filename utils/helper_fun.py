@@ -343,8 +343,8 @@ def evaluate_circ(circ, backend, evaluator_info):
                 reps_l = [s['circs'][init_meas] for i in range(s['reps'])]
                 circs_l += reps_l
             qobj = assemble(circs_l, backend=evaluator_info['device'], shots=s['shots'])
-            job = evaluator_info['device'].run(qobj)
-            # job = Aer.get_backend('qasm_simulator').run(qobj)
+            # job = evaluator_info['device'].run(qobj)
+            job = Aer.get_backend('qasm_simulator').run(qobj)
             jobs.append({'job':job,'circ':circ,'mapped_circuit_l':circs_l,'evaluator_info':evaluator_info})
             print('Submitted {:d} reps * {:d} shots to hardware, job_id = {}'.format(s['reps'],s['shots'],job.job_id()))
         return jobs
@@ -371,8 +371,8 @@ def readout_mitigation(device,initial_layout):
     # Execute the calibration circuits
     meas_calibs_transpiled = transpile(meas_calibs, backend=device)
     qobj = assemble(meas_calibs_transpiled, backend=device, shots=num_shots)
-    job = device.run(qobj)
-    # job = Aer.get_backend('qasm_simulator').run(qobj)
+    # job = device.run(qobj)
+    job = Aer.get_backend('qasm_simulator').run(qobj)
     print('Submitted measurement filter, {:d} calibration circuits * {:d} shots, job_id = {}'.format(len(meas_calibs),num_shots,job.job_id()))
     return job, state_labels, qubit_list
 

@@ -111,7 +111,7 @@ if __name__ == '__main__':
     print('Existing cases:',evaluator_input.keys())
     
     # NOTE: toggle circuits to benchmark
-    dimension_l = np.arange(3,11)
+    dimension_l = np.arange(3,16)
     cases_to_run = []
     full_circ_sizes = []
     for cluster_max_qubit in range(args.min_qubit,args.max_qubit+1):
@@ -139,11 +139,11 @@ if __name__ == '__main__':
         hw_jobs = full_circ_info[full_circ_size]['fc_evaluations']['hw']
         if 'meas_filter' in full_circ_info[full_circ_size]['fc_evaluations']:
             meas_filter = full_circ_info[full_circ_size]['fc_evaluations']['meas_filter']
+            del full_circ_info[full_circ_size]['fc_evaluations']['meas_filter']
         else:
             meas_filter = None
         hw_prob = accumulate_jobs(jobs=hw_jobs,meas_filter=meas_filter)
         full_circ_info[full_circ_size]['fc_evaluations']['hw'] = hw_prob
-        del full_circ_info[full_circ_size]['fc_evaluations']['meas_filter']
         print('*'*50)
 
     evaluator_info = get_evaluator_info(circ=None,device_name=args.device_name,fields=['properties','device'])
