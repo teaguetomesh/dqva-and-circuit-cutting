@@ -100,7 +100,7 @@ def evaluate_cluster(complete_path_map, cluster_circ, combinations, backend, eva
             cluster_inst_prob = evaluate_circ(circ=cluster_circ_inst,backend=backend,evaluator_info=evaluator_info)
             cluster_prob[(tuple(inits),tuple(meas))] = cluster_inst_prob
         elif backend=='hardware':
-            cluster_prob[(tuple(inits),tuple(meas))] = cluster_circ_inst
+            cluster_prob[(tuple(inits),tuple(meas))] = copy.deepcopy(cluster_circ_inst)
         else:
             raise Exception('Illegal backend:',backend)
     return cluster_prob
