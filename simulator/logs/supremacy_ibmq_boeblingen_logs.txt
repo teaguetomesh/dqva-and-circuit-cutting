@@ -1,0 +1,1037 @@
+-------------------------------------------------- Generator --------------------------------------------------
+Existing cases : dict_keys([])
+----------------------------------------------------------------------------------------------------
+Case (5, 9)
+Generate new circuit
+Generating 3x3, 1+8+1 supremacy circuit
+Using license file /home/weit/gurobi.lic
+Academic license - for non-commercial use only
+/home/weit/anaconda3/envs/cc-env/lib/python3.7/site-packages/qiskit/providers/models/backendconfiguration.py:337: UserWarning: `dt` and `dtm` now have units of seconds(s) rather than nanoseconds(ns).
+  warnings.warn('`dt` and `dtm` now have units of seconds(s) rather '
+solving for 2 clusters
+Infeasible
+solving for 3 clusters
+solving for 4 clusters
+solving for 5 clusters
+********************
+MIQCP stats:
+6 cuts, 4 clusters, max qubit = 5
+cluster 0: original input = 3.00, ρ_qubits = 2.00, O_qubits = 1.00, d = 5.00
+cluster 1: original input = 4.00, ρ_qubits = 1.00, O_qubits = 2.00, d = 5.00
+cluster 2: original input = 2.00, ρ_qubits = 1.00, O_qubits = 2.00, d = 3.00
+cluster 3: original input = 0.00, ρ_qubits = 2.00, O_qubits = 1.00, d = 2.00
+objective value = 3.240e+02
+manually calculated objective value: 3.240e+02
+evaluator_cost = 324, reconstructor_cost = 1.481e-02, reconstructor_weight = 0.000e+00
+runtime: 0.3270590305328369
+OPTIMAL
+********************
+9 qubit circuit saturated shots = 342016, ΔH = 9.289e-04
+evaluate fc starts here
+Evaluating fc state vector
+Evaluating fc qasm, 342016 shots
+Evaluating fc qasm + noise, 342016 shots
+3.405e+00 seconds
+evaluate fc ends here
+Case (5, 9) added to evaluator_input
+1/4 cases
+----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
+Case (5, 10)
+Generate new circuit
+Generating 2x5, 1+8+1 supremacy circuit
+solving for 2 clusters
+Infeasible
+solving for 3 clusters
+solving for 4 clusters
+solving for 5 clusters
+********************
+MIQCP stats:
+7 cuts, 5 clusters, max qubit = 5
+cluster 0: original input = 4.00, ρ_qubits = 1.00, O_qubits = 2.00, d = 5.00
+cluster 1: original input = 1.00, ρ_qubits = 1.00, O_qubits = 2.00, d = 2.00
+cluster 2: original input = 2.00, ρ_qubits = 1.00, O_qubits = 3.00, d = 3.00
+cluster 3: original input = 0.00, ρ_qubits = 2.00, O_qubits = 0.00, d = 2.00
+cluster 4: original input = 3.00, ρ_qubits = 2.00, O_qubits = -0.00, d = 5.00
+objective value = 3.420e+02
+manually calculated objective value: 3.420e+02
+evaluator_cost = 341, reconstructor_cost = 7.024e-02, reconstructor_weight = 0.000e+00
+runtime: 0.3008291721343994
+OPTIMAL
+********************
+10 qubit circuit saturated shots = 515072, ΔH = 9.951e-04
+evaluate fc starts here
+Evaluating fc state vector
+Evaluating fc qasm, 515072 shots
+Evaluating fc qasm + noise, 515072 shots
+1.411e+01 seconds
+evaluate fc ends here
+Case (5, 10) added to evaluator_input
+2/4 cases
+----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
+Case (6, 9)
+Use existing full circuit results
+solving for 2 clusters
+solving for 3 clusters
+solving for 4 clusters
+solving for 5 clusters
+********************
+MIQCP stats:
+3 cuts, 2 clusters, max qubit = 6
+cluster 0: original input = 5.00, ρ_qubits = 1.00, O_qubits = 2.00, d = 6.00
+cluster 1: original input = 4.00, ρ_qubits = 2.00, O_qubits = 1.00, d = 6.00
+objective value = 1.620e+02
+manually calculated objective value: 1.620e+02
+evaluator_cost = 161, reconstructor_cost = 1.317e-04, reconstructor_weight = 0.000e+00
+runtime: 0.09416007995605469
+OPTIMAL
+********************
+Case (6, 9) added to evaluator_input
+3/4 cases
+----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
+Case (6, 10)
+Use existing full circuit results
+solving for 2 clusters
+solving for 3 clusters
+solving for 4 clusters
+solving for 5 clusters
+********************
+MIQCP stats:
+2 cuts, 2 clusters, max qubit = 6
+cluster 0: original input = 5.00, ρ_qubits = 1.00, O_qubits = 1.00, d = 6.00
+cluster 1: original input = 5.00, ρ_qubits = 1.00, O_qubits = 1.00, d = 6.00
+objective value = 3.600e+01
+manually calculated objective value: 3.600e+01
+evaluator_cost = 36, reconstructor_cost = 6.541e-05, reconstructor_weight = 0.000e+00
+runtime: 0.09413790702819824
+OPTIMAL
+********************
+Case (6, 10) added to evaluator_input
+4/4 cases
+----------------------------------------------------------------------------------------------------
+-------------------------------------------------- Evaluator --------------------------------------------------
+Existing cases: dict_keys([])
+Running case: (5, 9)
+5 qubit circuit saturated shots = 18432, ΔH = 9.487e-04
+rank 13 runs case (5, 9), cluster_0 5_qubits * 5_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 18432, quantum time  = 3.673e+00
+5 qubit circuit saturated shots = 12288, ΔH = 9.247e-04
+rank 6 runs case (5, 9), cluster_0 5_qubits * 6_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 12288, quantum time  = 3.368e+00
+5 qubit circuit saturated shots = 15360, ΔH = 8.277e-04
+rank 11 runs case (5, 9), cluster_0 5_qubits * 5_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 15360, quantum time  = 3.210e+00
+5 qubit circuit saturated shots = 12288, ΔH = 9.478e-04
+rank 8 runs case (5, 9), cluster_0 5_qubits * 5_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 12288, quantum time  = 3.163e+00
+5 qubit circuit saturated shots = 15360, ΔH = 1.012e-03
+rank 0 runs case (5, 9), cluster_0 5_qubits * 6_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 15360, quantum time  = 3.543e+00
+5 qubit circuit saturated shots = 12288, ΔH = 8.807e-04
+rank 12 runs case (5, 9), cluster_0 5_qubits * 5_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 12288, quantum time  = 2.965e+00
+5 qubit circuit saturated shots = 13312, ΔH = 9.495e-04
+rank 16 runs case (5, 9), cluster_0 5_qubits * 5_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 13312, quantum time  = 3.456e+00
+5 qubit circuit saturated shots = 15360, ΔH = 9.055e-04
+rank 1 runs case (5, 9), cluster_0 5_qubits * 6_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 15360, quantum time  = 3.522e+00
+5 qubit circuit saturated shots = 15360, ΔH = 9.533e-04
+rank 15 runs case (5, 9), cluster_0 5_qubits * 5_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 15360, quantum time  = 3.299e+00
+5 qubit circuit saturated shots = 14336, ΔH = 9.652e-04
+rank 10 runs case (5, 9), cluster_0 5_qubits * 5_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 14336, quantum time  = 3.006e+00
+5 qubit circuit saturated shots = 16384, ΔH = 9.572e-04
+rank 5 runs case (5, 9), cluster_0 5_qubits * 6_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 16384, quantum time  = 3.698e+00
+5 qubit circuit saturated shots = 18432, ΔH = 1.052e-03
+rank 17 runs case (5, 9), cluster_0 5_qubits * 5_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 18432, quantum time  = 3.387e+00
+5 qubit circuit saturated shots = 17408, ΔH = 1.009e-03
+rank 14 runs case (5, 9), cluster_0 5_qubits * 5_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 17408, quantum time  = 3.591e+00
+5 qubit circuit saturated shots = 14336, ΔH = 1.088e-03
+rank 7 runs case (5, 9), cluster_0 5_qubits * 6_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 14336, quantum time  = 3.722e+00
+5 qubit circuit saturated shots = 20480, ΔH = 1.083e-03
+rank 19 runs case (5, 9), cluster_0 5_qubits * 5_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 20480, quantum time  = 3.680e+00
+5 qubit circuit saturated shots = 17408, ΔH = 1.096e-03
+rank 18 runs case (5, 9), cluster_0 5_qubits * 5_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 17408, quantum time  = 3.809e+00
+5 qubit circuit saturated shots = 18432, ΔH = 9.591e-04
+rank 3 runs case (5, 9), cluster_0 5_qubits * 6_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 18432, quantum time  = 3.898e+00
+5 qubit circuit saturated shots = 17408, ΔH = 9.947e-04
+rank 4 runs case (5, 9), cluster_0 5_qubits * 6_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 17408, quantum time  = 3.746e+00
+5 qubit circuit saturated shots = 22528, ΔH = 1.028e-03
+rank 9 runs case (5, 9), cluster_0 5_qubits * 5_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 22528, quantum time  = 3.830e+00
+5 qubit circuit saturated shots = 18432, ΔH = 9.480e-04
+rank 2 runs case (5, 9), cluster_0 5_qubits * 6_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 18432, quantum time  = 4.014e+00
+5 qubit circuit saturated shots = 11264, ΔH = 1.061e-03
+rank 16 runs case (5, 9), cluster_1 5_qubits * 2_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 11264, quantum time  = 1.503e+00
+5 qubit circuit saturated shots = 18432, ΔH = 1.057e-03
+rank 13 runs case (5, 9), cluster_1 5_qubits * 3_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 18432, quantum time  = 2.270e+00
+5 qubit circuit saturated shots = 12288, ΔH = 1.022e-03
+rank 0 runs case (5, 9), cluster_1 5_qubits * 3_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 12288, quantum time  = 1.926e+00
+5 qubit circuit saturated shots = 14336, ΔH = 8.276e-04
+rank 17 runs case (5, 9), cluster_1 5_qubits * 2_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 14336, quantum time  = 1.791e+00
+5 qubit circuit saturated shots = 14336, ΔH = 8.608e-04
+rank 8 runs case (5, 9), cluster_1 5_qubits * 3_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 14336, quantum time  = 2.104e+00
+5 qubit circuit saturated shots = 16384, ΔH = 1.077e-03
+rank 6 runs case (5, 9), cluster_1 5_qubits * 3_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 16384, quantum time  = 2.334e+00
+5 qubit circuit saturated shots = 13312, ΔH = 9.677e-04
+rank 19 runs case (5, 9), cluster_1 5_qubits * 2_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 13312, quantum time  = 1.679e+00
+5 qubit circuit saturated shots = 18432, ΔH = 9.394e-04
+rank 15 runs case (5, 9), cluster_1 5_qubits * 2_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 18432, quantum time  = 1.997e+00
+5 qubit circuit saturated shots = 12288, ΔH = 1.073e-03
+rank 10 runs case (5, 9), cluster_1 5_qubits * 3_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 12288, quantum time  = 2.030e+00
+5 qubit circuit saturated shots = 20480, ΔH = 1.057e-03
+rank 11 runs case (5, 9), cluster_1 5_qubits * 3_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 20480, quantum time  = 2.408e+00
+5 qubit circuit saturated shots = 14336, ΔH = 9.443e-04
+rank 5 runs case (5, 9), cluster_1 5_qubits * 3_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 14336, quantum time  = 2.113e+00
+5 qubit circuit saturated shots = 17408, ΔH = 1.090e-03
+rank 12 runs case (5, 9), cluster_1 5_qubits * 3_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 17408, quantum time  = 2.326e+00
+5 qubit circuit saturated shots = 15360, ΔH = 1.002e-03
+rank 14 runs case (5, 9), cluster_1 5_qubits * 2_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 15360, quantum time  = 1.965e+00
+5 qubit circuit saturated shots = 14336, ΔH = 9.400e-04
+rank 18 runs case (5, 9), cluster_1 5_qubits * 2_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 14336, quantum time  = 1.811e+00
+5 qubit circuit saturated shots = 11264, ΔH = 1.049e-03
+rank 7 runs case (5, 9), cluster_1 5_qubits * 3_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 11264, quantum time  = 2.004e+00
+5 qubit circuit saturated shots = 14336, ΔH = 9.725e-04
+rank 9 runs case (5, 9), cluster_1 5_qubits * 3_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 14336, quantum time  = 1.920e+00
+3 qubit circuit saturated shots = 8192, ΔH = 4.219e-04
+rank 16 runs case (5, 9), cluster_2 3_qubits * 2_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 8192, quantum time  = 8.367e-01
+5 qubit circuit saturated shots = 17408, ΔH = 9.435e-04
+rank 1 runs case (5, 9), cluster_1 5_qubits * 3_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 17408, quantum time  = 2.520e+00
+5 qubit circuit saturated shots = 17408, ΔH = 9.734e-04
+rank 3 runs case (5, 9), cluster_1 5_qubits * 3_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 17408, quantum time  = 2.308e+00
+3 qubit circuit saturated shots = 5120, ΔH = 7.271e-04
+rank 17 runs case (5, 9), cluster_2 3_qubits * 2_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 5120, quantum time  = 7.051e-01
+3 qubit circuit saturated shots = 8192, ΔH = 6.852e-04
+rank 13 runs case (5, 9), cluster_2 3_qubits * 3_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 8192, quantum time  = 9.686e-01
+5 qubit circuit saturated shots = 20480, ΔH = 9.738e-04
+rank 4 runs case (5, 9), cluster_1 5_qubits * 3_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 20480, quantum time  = 2.535e+00
+3 qubit circuit saturated shots = 7168, ΔH = 6.322e-04
+rank 19 runs case (5, 9), cluster_2 3_qubits * 2_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 7168, quantum time  = 7.662e-01
+3 qubit circuit saturated shots = 5120, ΔH = 9.841e-04
+rank 8 runs case (5, 9), cluster_2 3_qubits * 3_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 5120, quantum time  = 8.297e-01
+3 qubit circuit saturated shots = 5120, ΔH = 8.058e-05
+rank 15 runs case (5, 9), cluster_2 3_qubits * 2_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 5120, quantum time  = 7.255e-01
+3 qubit circuit saturated shots = 6144, ΔH = 3.224e-04
+rank 0 runs case (5, 9), cluster_2 3_qubits * 3_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 6144, quantum time  = 9.803e-01
+3 qubit circuit saturated shots = 6144, ΔH = 8.637e-04
+rank 6 runs case (5, 9), cluster_2 3_qubits * 3_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 6144, quantum time  = 9.338e-01
+3 qubit circuit saturated shots = 4096, ΔH = 2.967e-04
+rank 10 runs case (5, 9), cluster_2 3_qubits * 3_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 4096, quantum time  = 7.822e-01
+3 qubit circuit saturated shots = 5120, ΔH = 4.756e-04
+rank 11 runs case (5, 9), cluster_2 3_qubits * 3_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 5120, quantum time  = 8.028e-01
+3 qubit circuit saturated shots = 4096, ΔH = 9.491e-04
+rank 14 runs case (5, 9), cluster_2 3_qubits * 2_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 4096, quantum time  = 6.901e-01
+3 qubit circuit saturated shots = 6144, ΔH = 1.036e-03
+rank 5 runs case (5, 9), cluster_2 3_qubits * 3_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 6144, quantum time  = 8.595e-01
+3 qubit circuit saturated shots = 5120, ΔH = 7.379e-04
+rank 12 runs case (5, 9), cluster_2 3_qubits * 3_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 5120, quantum time  = 8.445e-01
+3 qubit circuit saturated shots = 3072, ΔH = 8.100e-04
+rank 7 runs case (5, 9), cluster_2 3_qubits * 3_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 3072, quantum time  = 7.529e-01
+5 qubit circuit saturated shots = 22528, ΔH = 1.105e-03
+rank 2 runs case (5, 9), cluster_1 5_qubits * 3_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 22528, quantum time  = 2.649e+00
+3 qubit circuit saturated shots = 6144, ΔH = 6.662e-04
+rank 18 runs case (5, 9), cluster_2 3_qubits * 2_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 6144, quantum time  = 8.167e-01
+3 qubit circuit saturated shots = 6144, ΔH = 5.290e-04
+rank 9 runs case (5, 9), cluster_2 3_qubits * 3_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 6144, quantum time  = 9.493e-01
+3 qubit circuit saturated shots = 6144, ΔH = 8.856e-04
+rank 1 runs case (5, 9), cluster_2 3_qubits * 3_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 6144, quantum time  = 8.880e-01
+3 qubit circuit saturated shots = 5120, ΔH = 5.088e-04
+rank 3 runs case (5, 9), cluster_2 3_qubits * 3_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 5120, quantum time  = 8.610e-01
+2 qubit circuit saturated shots = 2048, ΔH = 9.062e-05
+rank 16 runs case (5, 9), cluster_3 2_qubits * 5_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 2048, quantum time  = 1.003e+00
+3 qubit circuit saturated shots = 4096, ΔH = 3.496e-04
+rank 4 runs case (5, 9), cluster_2 3_qubits * 3_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 4096, quantum time  = 7.979e-01
+2 qubit circuit saturated shots = 2048, ΔH = 6.304e-05
+rank 13 runs case (5, 9), cluster_3 2_qubits * 5_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 2048, quantum time  = 8.963e-01
+2 qubit circuit saturated shots = 5120, ΔH = 2.188e-04
+rank 17 runs case (5, 9), cluster_3 2_qubits * 5_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 5120, quantum time  = 9.842e-01
+2 qubit circuit saturated shots = 2048, ΔH = 7.768e-05
+rank 8 runs case (5, 9), cluster_3 2_qubits * 5_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 2048, quantum time  = 9.193e-01
+2 qubit circuit saturated shots = 4096, ΔH = 6.304e-05
+rank 15 runs case (5, 9), cluster_3 2_qubits * 5_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 4096, quantum time  = 9.712e-01
+2 qubit circuit saturated shots = 2048, ΔH = 4.205e-04
+rank 19 runs case (5, 9), cluster_3 2_qubits * 5_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 2048, quantum time  = 1.012e+00
+2 qubit circuit saturated shots = 2048, ΔH = 2.277e-05
+rank 11 runs case (5, 9), cluster_3 2_qubits * 5_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 2048, quantum time  = 8.836e-01
+2 qubit circuit saturated shots = 3072, ΔH = 5.584e-05
+rank 10 runs case (5, 9), cluster_3 2_qubits * 5_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 3072, quantum time  = 1.003e+00
+2 qubit circuit saturated shots = 2048, ΔH = 6.414e-05
+rank 0 runs case (5, 9), cluster_3 2_qubits * 6_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 2048, quantum time  = 1.134e+00
+2 qubit circuit saturated shots = 2048, ΔH = 4.749e-04
+rank 5 runs case (5, 9), cluster_3 2_qubits * 6_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 2048, quantum time  = 1.022e+00
+2 qubit circuit saturated shots = 4096, ΔH = 7.580e-04
+rank 12 runs case (5, 9), cluster_3 2_qubits * 5_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 4096, quantum time  = 1.003e+00
+2 qubit circuit saturated shots = 3072, ΔH = 1.014e-05
+rank 6 runs case (5, 9), cluster_3 2_qubits * 6_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 3072, quantum time  = 1.065e+00
+3 qubit circuit saturated shots = 6144, ΔH = 5.009e-04
+rank 2 runs case (5, 9), cluster_2 3_qubits * 3_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 6144, quantum time  = 9.983e-01
+2 qubit circuit saturated shots = 5120, ΔH = 3.356e-04
+rank 14 runs case (5, 9), cluster_3 2_qubits * 5_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 5120, quantum time  = 1.023e+00
+2 qubit circuit saturated shots = 3072, ΔH = -2.220e-16
+rank 18 runs case (5, 9), cluster_3 2_qubits * 5_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 3072, quantum time  = 9.903e-01
+2 qubit circuit saturated shots = 5120, ΔH = 6.529e-06
+rank 7 runs case (5, 9), cluster_3 2_qubits * 6_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 5120, quantum time  = 1.188e+00
+2 qubit circuit saturated shots = 3072, ΔH = 2.418e-04
+rank 9 runs case (5, 9), cluster_3 2_qubits * 5_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 3072, quantum time  = 9.128e-01
+2 qubit circuit saturated shots = 2048, ΔH = 5.191e-05
+rank 3 runs case (5, 9), cluster_3 2_qubits * 6_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 2048, quantum time  = 1.030e+00
+2 qubit circuit saturated shots = 4096, ΔH = 2.886e-04
+rank 1 runs case (5, 9), cluster_3 2_qubits * 6_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 4096, quantum time  = 1.060e+00
+2 qubit circuit saturated shots = 4096, ΔH = 4.628e-05
+rank 4 runs case (5, 9), cluster_3 2_qubits * 6_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 4096, quantum time  = 1.132e+00
+2 qubit circuit saturated shots = 8192, ΔH = 7.580e-04
+rank 2 runs case (5, 9), cluster_3 2_qubits * 6_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 8192, quantum time  = 1.193e+00
+Rank MASTER dumped case (5, 9), 1/4 cases
+----------------------------------------------------------------------------------------------------
+Running case: (5, 10)
+5 qubit circuit saturated shots = 10240, ΔH = 9.261e-04
+rank 19 runs case (5, 10), cluster_0 5_qubits * 2_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 10240, quantum time  = 1.863e+00
+5 qubit circuit saturated shots = 12288, ΔH = 1.045e-03
+rank 15 runs case (5, 10), cluster_0 5_qubits * 2_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 12288, quantum time  = 2.004e+00
+5 qubit circuit saturated shots = 11264, ΔH = 8.112e-04
+rank 18 runs case (5, 10), cluster_0 5_qubits * 2_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 11264, quantum time  = 1.995e+00
+5 qubit circuit saturated shots = 15360, ΔH = 9.526e-04
+rank 17 runs case (5, 10), cluster_0 5_qubits * 2_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 15360, quantum time  = 2.073e+00
+5 qubit circuit saturated shots = 15360, ΔH = 9.709e-04
+rank 14 runs case (5, 10), cluster_0 5_qubits * 2_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 15360, quantum time  = 2.094e+00
+5 qubit circuit saturated shots = 15360, ΔH = 1.108e-03
+rank 16 runs case (5, 10), cluster_0 5_qubits * 2_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 15360, quantum time  = 2.110e+00
+5 qubit circuit saturated shots = 12288, ΔH = 9.886e-04
+rank 4 runs case (5, 10), cluster_0 5_qubits * 3_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 12288, quantum time  = 2.200e+00
+5 qubit circuit saturated shots = 11264, ΔH = 1.068e-03
+rank 3 runs case (5, 10), cluster_0 5_qubits * 3_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 11264, quantum time  = 2.228e+00
+5 qubit circuit saturated shots = 12288, ΔH = 8.447e-04
+rank 10 runs case (5, 10), cluster_0 5_qubits * 3_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 12288, quantum time  = 2.253e+00
+5 qubit circuit saturated shots = 13312, ΔH = 9.718e-04
+rank 9 runs case (5, 10), cluster_0 5_qubits * 3_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 13312, quantum time  = 2.310e+00
+5 qubit circuit saturated shots = 12288, ΔH = 1.034e-03
+rank 0 runs case (5, 10), cluster_0 5_qubits * 3_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 12288, quantum time  = 2.315e+00
+5 qubit circuit saturated shots = 11264, ΔH = 7.556e-04
+rank 1 runs case (5, 10), cluster_0 5_qubits * 3_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 11264, quantum time  = 2.441e+00
+5 qubit circuit saturated shots = 16384, ΔH = 9.352e-04
+rank 7 runs case (5, 10), cluster_0 5_qubits * 3_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 16384, quantum time  = 2.458e+00
+5 qubit circuit saturated shots = 15360, ΔH = 1.045e-03
+rank 12 runs case (5, 10), cluster_0 5_qubits * 3_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 15360, quantum time  = 2.437e+00
+5 qubit circuit saturated shots = 15360, ΔH = 9.563e-04
+rank 8 runs case (5, 10), cluster_0 5_qubits * 3_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 15360, quantum time  = 2.481e+00
+5 qubit circuit saturated shots = 17408, ΔH = 1.005e-03
+rank 11 runs case (5, 10), cluster_0 5_qubits * 3_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 17408, quantum time  = 2.512e+00
+5 qubit circuit saturated shots = 18432, ΔH = 9.781e-04
+rank 5 runs case (5, 10), cluster_0 5_qubits * 3_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 18432, quantum time  = 2.645e+00
+5 qubit circuit saturated shots = 18432, ΔH = 9.429e-04
+rank 13 runs case (5, 10), cluster_0 5_qubits * 3_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 18432, quantum time  = 2.615e+00
+2 qubit circuit saturated shots = 4096, ΔH = 4.674e-04
+rank 19 runs case (5, 10), cluster_1 2_qubits * 2_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 4096, quantum time  = 5.627e-01
+5 qubit circuit saturated shots = 21504, ΔH = 9.638e-04
+rank 6 runs case (5, 10), cluster_0 5_qubits * 3_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 21504, quantum time  = 2.756e+00
+5 qubit circuit saturated shots = 23552, ΔH = 1.047e-03
+rank 2 runs case (5, 10), cluster_0 5_qubits * 3_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 23552, quantum time  = 2.837e+00
+2 qubit circuit saturated shots = 5120, ΔH = 6.031e-04
+rank 17 runs case (5, 10), cluster_1 2_qubits * 2_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 5120, quantum time  = 4.897e-01
+2 qubit circuit saturated shots = 4096, ΔH = 3.561e-04
+rank 15 runs case (5, 10), cluster_1 2_qubits * 2_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 4096, quantum time  = 5.916e-01
+2 qubit circuit saturated shots = 3072, ΔH = 8.056e-04
+rank 14 runs case (5, 10), cluster_1 2_qubits * 2_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 3072, quantum time  = 5.881e-01
+2 qubit circuit saturated shots = 4096, ΔH = 3.716e-04
+rank 16 runs case (5, 10), cluster_1 2_qubits * 2_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 4096, quantum time  = 6.236e-01
+2 qubit circuit saturated shots = 4096, ΔH = 1.198e-04
+rank 18 runs case (5, 10), cluster_1 2_qubits * 2_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 4096, quantum time  = 6.681e-01
+2 qubit circuit saturated shots = 6144, ΔH = 4.809e-04
+rank 9 runs case (5, 10), cluster_1 2_qubits * 3_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 6144, quantum time  = 5.602e-01
+2 qubit circuit saturated shots = 5120, ΔH = 2.046e-04
+rank 4 runs case (5, 10), cluster_1 2_qubits * 3_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 5120, quantum time  = 8.001e-01
+2 qubit circuit saturated shots = 4096, ΔH = 2.903e-04
+rank 3 runs case (5, 10), cluster_1 2_qubits * 3_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 4096, quantum time  = 7.858e-01
+2 qubit circuit saturated shots = 3072, ΔH = 2.898e-04
+rank 7 runs case (5, 10), cluster_1 2_qubits * 3_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 3072, quantum time  = 6.456e-01
+2 qubit circuit saturated shots = 3072, ΔH = 1.941e-04
+rank 11 runs case (5, 10), cluster_1 2_qubits * 3_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 3072, quantum time  = 6.155e-01
+2 qubit circuit saturated shots = 7168, ΔH = 2.589e-04
+rank 10 runs case (5, 10), cluster_1 2_qubits * 3_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 7168, quantum time  = 8.095e-01
+2 qubit circuit saturated shots = 2048, ΔH = 3.890e-04
+rank 1 runs case (5, 10), cluster_1 2_qubits * 3_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 2048, quantum time  = 6.377e-01
+2 qubit circuit saturated shots = 5120, ΔH = 3.320e-04
+rank 0 runs case (5, 10), cluster_1 2_qubits * 3_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 5120, quantum time  = 7.545e-01
+2 qubit circuit saturated shots = 5120, ΔH = 6.415e-04
+rank 12 runs case (5, 10), cluster_1 2_qubits * 3_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 5120, quantum time  = 7.219e-01
+2 qubit circuit saturated shots = 6144, ΔH = 7.666e-04
+rank 8 runs case (5, 10), cluster_1 2_qubits * 3_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 6144, quantum time  = 7.485e-01
+2 qubit circuit saturated shots = 4096, ΔH = 4.967e-04
+rank 13 runs case (5, 10), cluster_1 2_qubits * 3_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 4096, quantum time  = 6.532e-01
+2 qubit circuit saturated shots = 4096, ΔH = 5.427e-04
+rank 5 runs case (5, 10), cluster_1 2_qubits * 3_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 4096, quantum time  = 6.766e-01
+2 qubit circuit saturated shots = 5120, ΔH = 2.337e-04
+rank 6 runs case (5, 10), cluster_1 2_qubits * 3_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 5120, quantum time  = 5.736e-01
+2 qubit circuit saturated shots = 2048, ΔH = 2.922e-04
+rank 2 runs case (5, 10), cluster_1 2_qubits * 3_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 2048, quantum time  = 5.764e-01
+5 qubit circuit saturated shots = 15360, ΔH = 9.549e-04
+rank 17 runs case (5, 10), cluster_2 5_qubits * 1_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 15360, quantum time  = 8.597e-01
+5 qubit circuit saturated shots = 16384, ΔH = 1.023e-03
+rank 19 runs case (5, 10), cluster_2 5_qubits * 1_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 16384, quantum time  = 1.369e+00
+5 qubit circuit saturated shots = 15360, ΔH = 9.179e-04
+rank 16 runs case (5, 10), cluster_2 5_qubits * 1_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 15360, quantum time  = 1.371e+00
+5 qubit circuit saturated shots = 14336, ΔH = 1.028e-03
+rank 14 runs case (5, 10), cluster_2 5_qubits * 2_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 14336, quantum time  = 1.536e+00
+5 qubit circuit saturated shots = 15360, ΔH = 8.756e-04
+rank 18 runs case (5, 10), cluster_2 5_qubits * 1_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 15360, quantum time  = 1.479e+00
+5 qubit circuit saturated shots = 17408, ΔH = 9.152e-04
+rank 15 runs case (5, 10), cluster_2 5_qubits * 2_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 17408, quantum time  = 1.697e+00
+5 qubit circuit saturated shots = 12288, ΔH = 9.847e-04
+rank 9 runs case (5, 10), cluster_2 5_qubits * 2_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 12288, quantum time  = 1.520e+00
+5 qubit circuit saturated shots = 12288, ΔH = 8.401e-04
+rank 7 runs case (5, 10), cluster_2 5_qubits * 2_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 12288, quantum time  = 1.547e+00
+5 qubit circuit saturated shots = 12288, ΔH = 9.108e-04
+rank 10 runs case (5, 10), cluster_2 5_qubits * 2_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 12288, quantum time  = 1.547e+00
+5 qubit circuit saturated shots = 15360, ΔH = 1.008e-03
+rank 6 runs case (5, 10), cluster_2 5_qubits * 2_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 15360, quantum time  = 1.490e+00
+5 qubit circuit saturated shots = 17408, ΔH = 8.753e-04
+rank 4 runs case (5, 10), cluster_2 5_qubits * 2_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 17408, quantum time  = 1.822e+00
+5 qubit circuit saturated shots = 17408, ΔH = 8.530e-04
+rank 11 runs case (5, 10), cluster_2 5_qubits * 2_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 17408, quantum time  = 1.779e+00
+5 qubit circuit saturated shots = 15360, ΔH = 1.084e-03
+rank 1 runs case (5, 10), cluster_2 5_qubits * 2_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 15360, quantum time  = 1.791e+00
+5 qubit circuit saturated shots = 16384, ΔH = 9.924e-04
+rank 8 runs case (5, 10), cluster_2 5_qubits * 2_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 16384, quantum time  = 1.767e+00
+5 qubit circuit saturated shots = 18432, ΔH = 9.735e-04
+rank 12 runs case (5, 10), cluster_2 5_qubits * 2_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 18432, quantum time  = 1.824e+00
+5 qubit circuit saturated shots = 14336, ΔH = 9.325e-04
+rank 5 runs case (5, 10), cluster_2 5_qubits * 2_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 14336, quantum time  = 1.746e+00
+3 qubit circuit saturated shots = 4096, ΔH = 5.970e-05
+rank 17 runs case (5, 10), cluster_3 3_qubits * 8_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 4096, quantum time  = 1.431e+00
+5 qubit circuit saturated shots = 17408, ΔH = 9.910e-04
+rank 2 runs case (5, 10), cluster_2 5_qubits * 2_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 17408, quantum time  = 1.791e+00
+5 qubit circuit saturated shots = 19456, ΔH = 1.031e-03
+rank 0 runs case (5, 10), cluster_2 5_qubits * 2_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 19456, quantum time  = 2.043e+00
+5 qubit circuit saturated shots = 24576, ΔH = 1.067e-03
+rank 3 runs case (5, 10), cluster_2 5_qubits * 2_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 24576, quantum time  = 2.230e+00
+5 qubit circuit saturated shots = 23552, ΔH = 1.049e-03
+rank 13 runs case (5, 10), cluster_2 5_qubits * 2_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 23552, quantum time  = 2.283e+00
+3 qubit circuit saturated shots = 2048, ΔH = 2.937e-04
+rank 19 runs case (5, 10), cluster_3 3_qubits * 8_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 2048, quantum time  = 1.524e+00
+2 qubit circuit saturated shots = 6144, ΔH = 2.471e-04
+rank 17 runs case (5, 10), cluster_4 2_qubits * 1_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 6144, quantum time  = 4.165e-01
+3 qubit circuit saturated shots = 4096, ΔH = 2.011e-04
+rank 16 runs case (5, 10), cluster_3 3_qubits * 8_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 4096, quantum time  = 1.569e+00
+3 qubit circuit saturated shots = 3072, ΔH = 2.674e-04
+rank 14 runs case (5, 10), cluster_3 3_qubits * 8_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 3072, quantum time  = 1.531e+00
+3 qubit circuit saturated shots = 3072, ΔH = 1.200e-04
+rank 18 runs case (5, 10), cluster_3 3_qubits * 8_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 3072, quantum time  = 1.510e+00
+3 qubit circuit saturated shots = 3072, ΔH = 1.445e-04
+rank 15 runs case (5, 10), cluster_3 3_qubits * 8_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 3072, quantum time  = 1.539e+00
+2 qubit circuit saturated shots = 3072, ΔH = 7.867e-04
+rank 19 runs case (5, 10), cluster_4 2_qubits * 1_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 3072, quantum time  = 4.109e-01
+3 qubit circuit saturated shots = 2048, ΔH = 2.022e-04
+rank 10 runs case (5, 10), cluster_3 3_qubits * 8_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 2048, quantum time  = 1.377e+00
+3 qubit circuit saturated shots = 6144, ΔH = 1.191e-04
+rank 9 runs case (5, 10), cluster_3 3_qubits * 8_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 6144, quantum time  = 1.625e+00
+3 qubit circuit saturated shots = 4096, ΔH = 7.946e-04
+rank 6 runs case (5, 10), cluster_3 3_qubits * 8_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 4096, quantum time  = 1.339e+00
+3 qubit circuit saturated shots = 5120, ΔH = 8.288e-04
+rank 7 runs case (5, 10), cluster_3 3_qubits * 8_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 5120, quantum time  = 1.549e+00
+3 qubit circuit saturated shots = 3072, ΔH = 3.154e-04
+rank 11 runs case (5, 10), cluster_3 3_qubits * 8_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 3072, quantum time  = 1.396e+00
+3 qubit circuit saturated shots = 4096, ΔH = 1.893e-04
+rank 4 runs case (5, 10), cluster_3 3_qubits * 8_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 4096, quantum time  = 1.509e+00
+2 qubit circuit saturated shots = 5120, ΔH = 7.135e-05
+rank 16 runs case (5, 10), cluster_4 2_qubits * 1_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 5120, quantum time  = 4.947e-01
+3 qubit circuit saturated shots = 2048, ΔH = 4.344e-04
+rank 12 runs case (5, 10), cluster_3 3_qubits * 8_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 2048, quantum time  = 1.507e+00
+2 qubit circuit saturated shots = 4096, ΔH = 1.872e-04
+rank 18 runs case (5, 10), cluster_4 2_qubits * 1_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 4096, quantum time  = 4.717e-01
+3 qubit circuit saturated shots = 5120, ΔH = 1.637e-04
+rank 8 runs case (5, 10), cluster_3 3_qubits * 8_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 5120, quantum time  = 1.592e+00
+2 qubit circuit saturated shots = 3072, ΔH = 1.239e-04
+rank 15 runs case (5, 10), cluster_4 2_qubits * 2_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 3072, quantum time  = 4.914e-01
+3 qubit circuit saturated shots = 4096, ΔH = 2.391e-04
+rank 5 runs case (5, 10), cluster_3 3_qubits * 8_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 4096, quantum time  = 1.583e+00
+2 qubit circuit saturated shots = 2048, ΔH = 1.322e-04
+rank 6 runs case (5, 10), cluster_4 2_qubits * 2_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 2048, quantum time  = 3.751e-01
+2 qubit circuit saturated shots = 5120, ΔH = 2.878e-04
+rank 14 runs case (5, 10), cluster_4 2_qubits * 2_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 5120, quantum time  = 6.124e-01
+2 qubit circuit saturated shots = 4096, ΔH = 1.164e-04
+rank 9 runs case (5, 10), cluster_4 2_qubits * 2_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 4096, quantum time  = 5.375e-01
+2 qubit circuit saturated shots = 5120, ΔH = 7.127e-04
+rank 10 runs case (5, 10), cluster_4 2_qubits * 2_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 5120, quantum time  = 5.650e-01
+2 qubit circuit saturated shots = 3072, ΔH = 4.593e-04
+rank 7 runs case (5, 10), cluster_4 2_qubits * 2_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 3072, quantum time  = 4.685e-01
+3 qubit circuit saturated shots = 4096, ΔH = 2.305e-04
+rank 3 runs case (5, 10), cluster_3 3_qubits * 8_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 4096, quantum time  = 1.549e+00
+3 qubit circuit saturated shots = 5120, ΔH = 7.301e-04
+rank 2 runs case (5, 10), cluster_3 3_qubits * 8_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 5120, quantum time  = 1.686e+00
+3 qubit circuit saturated shots = 10240, ΔH = 6.735e-04
+rank 1 runs case (5, 10), cluster_3 3_qubits * 9_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 10240, quantum time  = 1.998e+00
+2 qubit circuit saturated shots = 4096, ΔH = 5.687e-04
+rank 11 runs case (5, 10), cluster_4 2_qubits * 2_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 4096, quantum time  = 5.181e-01
+3 qubit circuit saturated shots = 4096, ΔH = 1.442e-04
+rank 0 runs case (5, 10), cluster_3 3_qubits * 9_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 4096, quantum time  = 1.814e+00
+2 qubit circuit saturated shots = 4096, ΔH = 7.718e-04
+rank 4 runs case (5, 10), cluster_4 2_qubits * 2_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 4096, quantum time  = 5.408e-01
+3 qubit circuit saturated shots = 5120, ΔH = 2.538e-04
+rank 13 runs case (5, 10), cluster_3 3_qubits * 8_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 5120, quantum time  = 1.576e+00
+2 qubit circuit saturated shots = 4096, ΔH = 8.411e-04
+rank 12 runs case (5, 10), cluster_4 2_qubits * 2_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 4096, quantum time  = 5.344e-01
+2 qubit circuit saturated shots = 4096, ΔH = 2.725e-04
+rank 8 runs case (5, 10), cluster_4 2_qubits * 2_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 4096, quantum time  = 5.277e-01
+2 qubit circuit saturated shots = 4096, ΔH = 4.147e-04
+rank 5 runs case (5, 10), cluster_4 2_qubits * 2_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 4096, quantum time  = 5.114e-01
+2 qubit circuit saturated shots = 4096, ΔH = 1.238e-04
+rank 3 runs case (5, 10), cluster_4 2_qubits * 2_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 4096, quantum time  = 5.136e-01
+2 qubit circuit saturated shots = 4096, ΔH = 4.517e-04
+rank 2 runs case (5, 10), cluster_4 2_qubits * 2_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 4096, quantum time  = 5.324e-01
+2 qubit circuit saturated shots = 5120, ΔH = 5.867e-04
+rank 1 runs case (5, 10), cluster_4 2_qubits * 2_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 5120, quantum time  = 5.547e-01
+2 qubit circuit saturated shots = 6144, ΔH = 9.871e-05
+rank 0 runs case (5, 10), cluster_4 2_qubits * 2_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 6144, quantum time  = 6.512e-01
+2 qubit circuit saturated shots = 5120, ΔH = 8.879e-04
+rank 13 runs case (5, 10), cluster_4 2_qubits * 2_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 5120, quantum time  = 5.819e-01
+Rank MASTER dumped case (5, 10), 2/4 cases
+----------------------------------------------------------------------------------------------------
+Running case: (6, 9)
+6 qubit circuit saturated shots = 27648, ΔH = 1.022e-03
+rank 17 runs case (6, 9), cluster_0 6_qubits * 2_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 27648, quantum time  = 2.413e+00
+6 qubit circuit saturated shots = 26624, ΔH = 1.050e-03
+rank 6 runs case (6, 9), cluster_0 6_qubits * 3_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 26624, quantum time  = 2.696e+00
+6 qubit circuit saturated shots = 24576, ΔH = 9.969e-04
+rank 16 runs case (6, 9), cluster_0 6_qubits * 2_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 24576, quantum time  = 2.702e+00
+6 qubit circuit saturated shots = 23552, ΔH = 9.465e-04
+rank 14 runs case (6, 9), cluster_0 6_qubits * 2_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 23552, quantum time  = 2.811e+00
+6 qubit circuit saturated shots = 27648, ΔH = 9.412e-04
+rank 15 runs case (6, 9), cluster_0 6_qubits * 2_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 27648, quantum time  = 2.955e+00
+6 qubit circuit saturated shots = 27648, ΔH = 1.055e-03
+rank 18 runs case (6, 9), cluster_0 6_qubits * 2_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 27648, quantum time  = 2.956e+00
+6 qubit circuit saturated shots = 25600, ΔH = 9.809e-04
+rank 12 runs case (6, 9), cluster_0 6_qubits * 3_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 25600, quantum time  = 3.101e+00
+6 qubit circuit saturated shots = 30720, ΔH = 9.723e-04
+rank 19 runs case (6, 9), cluster_0 6_qubits * 2_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 30720, quantum time  = 3.132e+00
+6 qubit circuit saturated shots = 26624, ΔH = 1.014e-03
+rank 9 runs case (6, 9), cluster_0 6_qubits * 3_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 26624, quantum time  = 3.162e+00
+6 qubit circuit saturated shots = 28672, ΔH = 1.067e-03
+rank 10 runs case (6, 9), cluster_0 6_qubits * 3_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 28672, quantum time  = 3.262e+00
+6 qubit circuit saturated shots = 27648, ΔH = 1.039e-03
+rank 8 runs case (6, 9), cluster_0 6_qubits * 3_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 27648, quantum time  = 3.306e+00
+6 qubit circuit saturated shots = 29696, ΔH = 1.023e-03
+rank 3 runs case (6, 9), cluster_0 6_qubits * 3_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 29696, quantum time  = 3.515e+00
+6 qubit circuit saturated shots = 30720, ΔH = 9.846e-04
+rank 7 runs case (6, 9), cluster_0 6_qubits * 3_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 30720, quantum time  = 3.495e+00
+6 qubit circuit saturated shots = 31744, ΔH = 9.950e-04
+rank 5 runs case (6, 9), cluster_0 6_qubits * 3_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 31744, quantum time  = 3.630e+00
+6 qubit circuit saturated shots = 32768, ΔH = 1.049e-03
+rank 4 runs case (6, 9), cluster_0 6_qubits * 3_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 32768, quantum time  = 3.649e+00
+6 qubit circuit saturated shots = 32768, ΔH = 9.905e-04
+rank 13 runs case (6, 9), cluster_0 6_qubits * 3_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 32768, quantum time  = 3.641e+00
+6 qubit circuit saturated shots = 34816, ΔH = 1.066e-03
+rank 2 runs case (6, 9), cluster_0 6_qubits * 3_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 34816, quantum time  = 3.673e+00
+6 qubit circuit saturated shots = 31744, ΔH = 1.048e-03
+rank 0 runs case (6, 9), cluster_0 6_qubits * 3_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 31744, quantum time  = 3.761e+00
+6 qubit circuit saturated shots = 36864, ΔH = 1.013e-03
+rank 1 runs case (6, 9), cluster_0 6_qubits * 3_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 36864, quantum time  = 3.835e+00
+6 qubit circuit saturated shots = 44032, ΔH = 1.010e-03
+rank 11 runs case (6, 9), cluster_0 6_qubits * 3_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 44032, quantum time  = 4.114e+00
+6 qubit circuit saturated shots = 27648, ΔH = 9.857e-04
+rank 14 runs case (6, 9), cluster_1 6_qubits * 5_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 27648, quantum time  = 3.603e+00
+6 qubit circuit saturated shots = 38912, ΔH = 8.208e-04
+rank 6 runs case (6, 9), cluster_1 6_qubits * 6_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 38912, quantum time  = 3.821e+00
+6 qubit circuit saturated shots = 29696, ΔH = 1.063e-03
+rank 13 runs case (6, 9), cluster_1 6_qubits * 5_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 29696, quantum time  = 4.215e+00
+6 qubit circuit saturated shots = 41984, ΔH = 7.997e-04
+rank 8 runs case (6, 9), cluster_1 6_qubits * 5_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 41984, quantum time  = 4.953e+00
+6 qubit circuit saturated shots = 49152, ΔH = 7.605e-04
+rank 9 runs case (6, 9), cluster_1 6_qubits * 5_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 49152, quantum time  = 5.488e+00
+6 qubit circuit saturated shots = 43008, ΔH = 6.208e-04
+rank 7 runs case (6, 9), cluster_1 6_qubits * 6_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 43008, quantum time  = 5.315e+00
+6 qubit circuit saturated shots = 53248, ΔH = 5.697e-04
+rank 19 runs case (6, 9), cluster_1 6_qubits * 5_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 53248, quantum time  = 5.835e+00
+6 qubit circuit saturated shots = 53248, ΔH = 5.141e-04
+rank 10 runs case (6, 9), cluster_1 6_qubits * 5_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 53248, quantum time  = 5.763e+00
+6 qubit circuit saturated shots = 45056, ΔH = 8.162e-04
+rank 11 runs case (6, 9), cluster_1 6_qubits * 5_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 45056, quantum time  = 4.994e+00
+6 qubit circuit saturated shots = 82944, ΔH = 4.986e-04
+rank 17 runs case (6, 9), cluster_1 6_qubits * 5_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 82944, quantum time  = 6.927e+00
+6 qubit circuit saturated shots = 68608, ΔH = 5.971e-04
+rank 16 runs case (6, 9), cluster_1 6_qubits * 5_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 68608, quantum time  = 6.800e+00
+6 qubit circuit saturated shots = 62464, ΔH = 5.133e-04
+rank 0 runs case (6, 9), cluster_1 6_qubits * 6_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 62464, quantum time  = 6.808e+00
+6 qubit circuit saturated shots = 90112, ΔH = 2.471e-04
+rank 15 runs case (6, 9), cluster_1 6_qubits * 5_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 90112, quantum time  = 8.053e+00
+6 qubit circuit saturated shots = 75776, ΔH = 4.887e-04
+rank 2 runs case (6, 9), cluster_1 6_qubits * 6_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 75776, quantum time  = 7.740e+00
+6 qubit circuit saturated shots = 80896, ΔH = 3.780e-04
+rank 3 runs case (6, 9), cluster_1 6_qubits * 6_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 80896, quantum time  = 8.175e+00
+6 qubit circuit saturated shots = 82944, ΔH = 4.922e-04
+rank 4 runs case (6, 9), cluster_1 6_qubits * 6_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 82944, quantum time  = 8.288e+00
+6 qubit circuit saturated shots = 110592, ΔH = 2.284e-04
+rank 18 runs case (6, 9), cluster_1 6_qubits * 5_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 110592, quantum time  = 9.486e+00
+6 qubit circuit saturated shots = 103424, ΔH = 3.240e-04
+rank 1 runs case (6, 9), cluster_1 6_qubits * 6_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 103424, quantum time  = 9.566e+00
+6 qubit circuit saturated shots = 136192, ΔH = 2.163e-04
+rank 12 runs case (6, 9), cluster_1 6_qubits * 5_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 136192, quantum time  = 1.106e+01
+6 qubit circuit saturated shots = 268288, ΔH = 1.669e-04
+rank 5 runs case (6, 9), cluster_1 6_qubits * 6_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 268288, quantum time  = 2.059e+01
+Rank MASTER dumped case (6, 9), 3/4 cases
+----------------------------------------------------------------------------------------------------
+Running case: (6, 10)
+6 qubit circuit saturated shots = 22528, ΔH = 1.078e-03
+rank 7 runs case (6, 10), cluster_0 6_qubits * 1_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 22528, quantum time  = 2.059e+00
+6 qubit circuit saturated shots = 24576, ΔH = 1.013e-03
+rank 1 runs case (6, 10), cluster_0 6_qubits * 1_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 24576, quantum time  = 2.284e+00
+6 qubit circuit saturated shots = 27648, ΔH = 1.001e-03
+rank 8 runs case (6, 10), cluster_0 6_qubits * 1_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 27648, quantum time  = 2.363e+00
+6 qubit circuit saturated shots = 28672, ΔH = 9.868e-04
+rank 15 runs case (6, 10), cluster_0 6_qubits * 1_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 28672, quantum time  = 2.474e+00
+6 qubit circuit saturated shots = 28672, ΔH = 9.671e-04
+rank 9 runs case (6, 10), cluster_0 6_qubits * 1_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 28672, quantum time  = 2.523e+00
+6 qubit circuit saturated shots = 26624, ΔH = 9.785e-04
+rank 16 runs case (6, 10), cluster_0 6_qubits * 1_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 26624, quantum time  = 2.521e+00
+6 qubit circuit saturated shots = 30720, ΔH = 1.098e-03
+rank 0 runs case (6, 10), cluster_0 6_qubits * 1_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 30720, quantum time  = 2.573e+00
+6 qubit circuit saturated shots = 30720, ΔH = 1.066e-03
+rank 17 runs case (6, 10), cluster_0 6_qubits * 1_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 30720, quantum time  = 2.539e+00
+6 qubit circuit saturated shots = 30720, ΔH = 9.575e-04
+rank 14 runs case (6, 10), cluster_0 6_qubits * 1_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 30720, quantum time  = 2.624e+00
+6 qubit circuit saturated shots = 32768, ΔH = 1.032e-03
+rank 2 runs case (6, 10), cluster_0 6_qubits * 1_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 32768, quantum time  = 2.732e+00
+6 qubit circuit saturated shots = 33792, ΔH = 9.826e-04
+rank 11 runs case (6, 10), cluster_0 6_qubits * 1_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 33792, quantum time  = 2.805e+00
+6 qubit circuit saturated shots = 35840, ΔH = 9.865e-04
+rank 10 runs case (6, 10), cluster_0 6_qubits * 1_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 35840, quantum time  = 2.818e+00
+6 qubit circuit saturated shots = 37888, ΔH = 1.027e-03
+rank 3 runs case (6, 10), cluster_0 6_qubits * 1_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 37888, quantum time  = 2.925e+00
+6 qubit circuit saturated shots = 38912, ΔH = 1.016e-03
+rank 12 runs case (6, 10), cluster_0 6_qubits * 1_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 38912, quantum time  = 2.944e+00
+6 qubit circuit saturated shots = 36864, ΔH = 1.008e-03
+rank 4 runs case (6, 10), cluster_0 6_qubits * 1_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 36864, quantum time  = 3.121e+00
+6 qubit circuit saturated shots = 43008, ΔH = 1.009e-03
+rank 13 runs case (6, 10), cluster_0 6_qubits * 1_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 43008, quantum time  = 3.174e+00
+6 qubit circuit saturated shots = 34816, ΔH = 1.015e-03
+rank 6 runs case (6, 10), cluster_0 6_qubits * 1_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 34816, quantum time  = 3.249e+00
+6 qubit circuit saturated shots = 50176, ΔH = 9.938e-04
+rank 5 runs case (6, 10), cluster_0 6_qubits * 1_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 50176, quantum time  = 3.642e+00
+6 qubit circuit saturated shots = 28672, ΔH = 1.023e-03
+rank 8 runs case (6, 10), cluster_1 6_qubits * 1_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 28672, quantum time  = 2.169e+00
+6 qubit circuit saturated shots = 35840, ΔH = 9.811e-04
+rank 7 runs case (6, 10), cluster_1 6_qubits * 1_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 35840, quantum time  = 2.552e+00
+6 qubit circuit saturated shots = 26624, ΔH = 9.852e-04
+rank 9 runs case (6, 10), cluster_1 6_qubits * 1_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 26624, quantum time  = 2.111e+00
+6 qubit circuit saturated shots = 27648, ΔH = 1.012e-03
+rank 16 runs case (6, 10), cluster_1 6_qubits * 1_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 27648, quantum time  = 2.222e+00
+6 qubit circuit saturated shots = 23552, ΔH = 1.036e-03
+rank 10 runs case (6, 10), cluster_1 6_qubits * 1_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 23552, quantum time  = 1.983e+00
+6 qubit circuit saturated shots = 30720, ΔH = 1.017e-03
+rank 15 runs case (6, 10), cluster_1 6_qubits * 1_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 30720, quantum time  = 2.344e+00
+6 qubit circuit saturated shots = 33792, ΔH = 1.021e-03
+rank 0 runs case (6, 10), cluster_1 6_qubits * 1_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 33792, quantum time  = 2.613e+00
+6 qubit circuit saturated shots = 34816, ΔH = 1.063e-03
+rank 17 runs case (6, 10), cluster_1 6_qubits * 1_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 34816, quantum time  = 2.620e+00
+6 qubit circuit saturated shots = 39936, ΔH = 9.655e-04
+rank 1 runs case (6, 10), cluster_1 6_qubits * 1_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 39936, quantum time  = 2.958e+00
+6 qubit circuit saturated shots = 34816, ΔH = 1.014e-03
+rank 2 runs case (6, 10), cluster_1 6_qubits * 1_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 34816, quantum time  = 2.606e+00
+6 qubit circuit saturated shots = 34816, ΔH = 1.031e-03
+rank 14 runs case (6, 10), cluster_1 6_qubits * 1_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 34816, quantum time  = 2.697e+00
+6 qubit circuit saturated shots = 33792, ΔH = 1.047e-03
+rank 11 runs case (6, 10), cluster_1 6_qubits * 1_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 33792, quantum time  = 2.525e+00
+6 qubit circuit saturated shots = 30720, ΔH = 1.036e-03
+rank 3 runs case (6, 10), cluster_1 6_qubits * 1_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 30720, quantum time  = 2.479e+00
+6 qubit circuit saturated shots = 27648, ΔH = 9.747e-04
+rank 6 runs case (6, 10), cluster_1 6_qubits * 1_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 27648, quantum time  = 2.297e+00
+6 qubit circuit saturated shots = 32768, ΔH = 9.985e-04
+rank 13 runs case (6, 10), cluster_1 6_qubits * 1_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 32768, quantum time  = 2.526e+00
+6 qubit circuit saturated shots = 37888, ΔH = 9.843e-04
+rank 4 runs case (6, 10), cluster_1 6_qubits * 1_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 37888, quantum time  = 2.790e+00
+6 qubit circuit saturated shots = 36864, ΔH = 1.045e-03
+rank 5 runs case (6, 10), cluster_1 6_qubits * 1_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 36864, quantum time  = 2.511e+00
+6 qubit circuit saturated shots = 48128, ΔH = 1.046e-03
+rank 12 runs case (6, 10), cluster_1 6_qubits * 1_instances on ibmq_boeblingen QUANTUM SIMULATOR, saturated shots = 48128, quantum time  = 3.333e+00
+/home/weit/anaconda3/envs/cc-env/lib/python3.7/site-packages/qiskit/providers/models/backendconfiguration.py:337: UserWarning: `dt` and `dtm` now have units of seconds(s) rather than nanoseconds(ns).
+  warnings.warn('`dt` and `dtm` now have units of seconds(s) rather '
+/home/weit/anaconda3/envs/cc-env/lib/python3.7/site-packages/qiskit/providers/models/backendconfiguration.py:337: UserWarning: `dt` and `dtm` now have units of seconds(s) rather than nanoseconds(ns).
+  warnings.warn('`dt` and `dtm` now have units of seconds(s) rather '
+/home/weit/anaconda3/envs/cc-env/lib/python3.7/site-packages/qiskit/providers/models/backendconfiguration.py:337: UserWarning: `dt` and `dtm` now have units of seconds(s) rather than nanoseconds(ns).
+  warnings.warn('`dt` and `dtm` now have units of seconds(s) rather '
+/home/weit/anaconda3/envs/cc-env/lib/python3.7/site-packages/qiskit/providers/models/backendconfiguration.py:337: UserWarning: `dt` and `dtm` now have units of seconds(s) rather than nanoseconds(ns).
+  warnings.warn('`dt` and `dtm` now have units of seconds(s) rather '
+/home/weit/anaconda3/envs/cc-env/lib/python3.7/site-packages/qiskit/providers/models/backendconfiguration.py:337: UserWarning: `dt` and `dtm` now have units of seconds(s) rather than nanoseconds(ns).
+  warnings.warn('`dt` and `dtm` now have units of seconds(s) rather '
+/home/weit/anaconda3/envs/cc-env/lib/python3.7/site-packages/qiskit/providers/models/backendconfiguration.py:337: UserWarning: `dt` and `dtm` now have units of seconds(s) rather than nanoseconds(ns).
+  warnings.warn('`dt` and `dtm` now have units of seconds(s) rather '
+/home/weit/anaconda3/envs/cc-env/lib/python3.7/site-packages/qiskit/providers/models/backendconfiguration.py:337: UserWarning: `dt` and `dtm` now have units of seconds(s) rather than nanoseconds(ns).
+  warnings.warn('`dt` and `dtm` now have units of seconds(s) rather '
+/home/weit/anaconda3/envs/cc-env/lib/python3.7/site-packages/qiskit/providers/models/backendconfiguration.py:337: UserWarning: `dt` and `dtm` now have units of seconds(s) rather than nanoseconds(ns).
+  warnings.warn('`dt` and `dtm` now have units of seconds(s) rather '
+/home/weit/anaconda3/envs/cc-env/lib/python3.7/site-packages/qiskit/providers/models/backendconfiguration.py:337: UserWarning: `dt` and `dtm` now have units of seconds(s) rather than nanoseconds(ns).
+  warnings.warn('`dt` and `dtm` now have units of seconds(s) rather '
+/home/weit/anaconda3/envs/cc-env/lib/python3.7/site-packages/qiskit/providers/models/backendconfiguration.py:337: UserWarning: `dt` and `dtm` now have units of seconds(s) rather than nanoseconds(ns).
+  warnings.warn('`dt` and `dtm` now have units of seconds(s) rather '
+/home/weit/anaconda3/envs/cc-env/lib/python3.7/site-packages/qiskit/providers/models/backendconfiguration.py:337: UserWarning: `dt` and `dtm` now have units of seconds(s) rather than nanoseconds(ns).
+  warnings.warn('`dt` and `dtm` now have units of seconds(s) rather '
+/home/weit/anaconda3/envs/cc-env/lib/python3.7/site-packages/qiskit/providers/models/backendconfiguration.py:337: UserWarning: `dt` and `dtm` now have units of seconds(s) rather than nanoseconds(ns).
+  warnings.warn('`dt` and `dtm` now have units of seconds(s) rather '
+/home/weit/anaconda3/envs/cc-env/lib/python3.7/site-packages/qiskit/providers/models/backendconfiguration.py:337: UserWarning: `dt` and `dtm` now have units of seconds(s) rather than nanoseconds(ns).
+  warnings.warn('`dt` and `dtm` now have units of seconds(s) rather '
+/home/weit/anaconda3/envs/cc-env/lib/python3.7/site-packages/qiskit/providers/models/backendconfiguration.py:337: UserWarning: `dt` and `dtm` now have units of seconds(s) rather than nanoseconds(ns).
+  warnings.warn('`dt` and `dtm` now have units of seconds(s) rather '
+/home/weit/anaconda3/envs/cc-env/lib/python3.7/site-packages/qiskit/providers/models/backendconfiguration.py:337: UserWarning: `dt` and `dtm` now have units of seconds(s) rather than nanoseconds(ns).
+  warnings.warn('`dt` and `dtm` now have units of seconds(s) rather '
+/home/weit/anaconda3/envs/cc-env/lib/python3.7/site-packages/qiskit/providers/models/backendconfiguration.py:337: UserWarning: `dt` and `dtm` now have units of seconds(s) rather than nanoseconds(ns).
+  warnings.warn('`dt` and `dtm` now have units of seconds(s) rather '
+/home/weit/anaconda3/envs/cc-env/lib/python3.7/site-packages/qiskit/providers/models/backendconfiguration.py:337: UserWarning: `dt` and `dtm` now have units of seconds(s) rather than nanoseconds(ns).
+  warnings.warn('`dt` and `dtm` now have units of seconds(s) rather '
+/home/weit/anaconda3/envs/cc-env/lib/python3.7/site-packages/qiskit/providers/models/backendconfiguration.py:337: UserWarning: `dt` and `dtm` now have units of seconds(s) rather than nanoseconds(ns).
+  warnings.warn('`dt` and `dtm` now have units of seconds(s) rather '
+Rank MASTER dumped case (6, 10), 4/4 cases
+----------------------------------------------------------------------------------------------------
+/home/weit/anaconda3/envs/cc-env/lib/python3.7/site-packages/qiskit/providers/models/backendconfiguration.py:337: UserWarning: `dt` and `dtm` now have units of seconds(s) rather than nanoseconds(ns).
+  warnings.warn('`dt` and `dtm` now have units of seconds(s) rather '
+/home/weit/anaconda3/envs/cc-env/lib/python3.7/site-packages/qiskit/providers/models/backendconfiguration.py:337: UserWarning: `dt` and `dtm` now have units of seconds(s) rather than nanoseconds(ns).
+  warnings.warn('`dt` and `dtm` now have units of seconds(s) rather '
+-------------------------------------------------- Reconstructor --------------------------------------------------
+Existing cases: dict_keys([])
+case (5, 9)
+Reconstruction output has 1 cases
+----------------------------------------------------------------------------------------------------
+case (5, 10)
+Reconstruction output has 2 cases
+----------------------------------------------------------------------------------------------------
+case (6, 9)
+Reconstruction output has 3 cases
+----------------------------------------------------------------------------------------------------
+case (6, 10)
+Reconstruction output has 4 cases
+----------------------------------------------------------------------------------------------------
+-------------------------------------------------- Evaluator --------------------------------------------------
+Existing cases: dict_keys([])
+Running case: (5, 9)
+rank 11 runs case (5, 9), cluster_0 5_qubits * 5_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 3167, quantum time  = 4.205e+00
+rank 10 runs case (5, 9), cluster_0 5_qubits * 5_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 3167, quantum time  = 3.806e+00
+rank 18 runs case (5, 9), cluster_0 5_qubits * 5_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 3167, quantum time  = 3.582e+00
+rank 17 runs case (5, 9), cluster_0 5_qubits * 5_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 3167, quantum time  = 4.894e+00
+rank 16 runs case (5, 9), cluster_0 5_qubits * 5_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 3167, quantum time  = 5.033e+00
+rank 19 runs case (5, 9), cluster_0 5_qubits * 5_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 3167, quantum time  = 5.347e+00
+rank 2 runs case (5, 9), cluster_0 5_qubits * 6_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 3167, quantum time  = 5.305e+00
+rank 14 runs case (5, 9), cluster_0 5_qubits * 5_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 3167, quantum time  = 5.427e+00
+rank 15 runs case (5, 9), cluster_0 5_qubits * 5_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 3167, quantum time  = 5.546e+00
+rank 9 runs case (5, 9), cluster_0 5_qubits * 5_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 3167, quantum time  = 5.563e+00
+rank 8 runs case (5, 9), cluster_0 5_qubits * 5_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 3167, quantum time  = 5.778e+00
+rank 13 runs case (5, 9), cluster_0 5_qubits * 5_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 3167, quantum time  = 5.572e+00
+rank 3 runs case (5, 9), cluster_0 5_qubits * 6_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 3167, quantum time  = 5.778e+00
+rank 7 runs case (5, 9), cluster_0 5_qubits * 6_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 3167, quantum time  = 5.800e+00
+rank 4 runs case (5, 9), cluster_0 5_qubits * 6_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 3167, quantum time  = 6.075e+00
+rank 12 runs case (5, 9), cluster_0 5_qubits * 5_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 3167, quantum time  = 6.069e+00
+rank 18 runs case (5, 9), cluster_1 5_qubits * 2_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 6334, quantum time  = 9.197e-01
+rank 0 runs case (5, 9), cluster_0 5_qubits * 6_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 3167, quantum time  = 6.519e+00
+rank 16 runs case (5, 9), cluster_1 5_qubits * 2_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 6334, quantum time  = 1.084e+00
+rank 6 runs case (5, 9), cluster_0 5_qubits * 6_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 3167, quantum time  = 7.283e+00
+rank 17 runs case (5, 9), cluster_1 5_qubits * 2_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 6334, quantum time  = 1.463e+00
+rank 19 runs case (5, 9), cluster_1 5_qubits * 2_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 6334, quantum time  = 1.272e+00
+rank 5 runs case (5, 9), cluster_0 5_qubits * 6_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 3167, quantum time  = 7.787e+00
+rank 1 runs case (5, 9), cluster_0 5_qubits * 6_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 3167, quantum time  = 7.970e+00
+rank 11 runs case (5, 9), cluster_1 5_qubits * 3_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 6334, quantum time  = 3.731e+00
+rank 10 runs case (5, 9), cluster_1 5_qubits * 3_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 6334, quantum time  = 3.273e+00
+rank 15 runs case (5, 9), cluster_1 5_qubits * 2_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 6334, quantum time  = 2.158e+00
+rank 19 runs case (5, 9), cluster_2 3_qubits * 2_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 6334, quantum time  = 6.193e-01
+rank 18 runs case (5, 9), cluster_2 3_qubits * 2_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 6334, quantum time  = 1.843e+00
+rank 17 runs case (5, 9), cluster_2 3_qubits * 2_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 6334, quantum time  = 4.305e-01
+rank 14 runs case (5, 9), cluster_1 5_qubits * 2_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 6334, quantum time  = 2.828e+00
+rank 7 runs case (5, 9), cluster_1 5_qubits * 3_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 6334, quantum time  = 3.237e+00
+rank 9 runs case (5, 9), cluster_1 5_qubits * 3_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 6334, quantum time  = 3.181e+00
+rank 2 runs case (5, 9), cluster_1 5_qubits * 3_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 6334, quantum time  = 3.580e+00
+rank 15 runs case (5, 9), cluster_2 3_qubits * 2_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 6334, quantum time  = 8.126e-01
+rank 8 runs case (5, 9), cluster_1 5_qubits * 3_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 6334, quantum time  = 3.319e+00
+rank 12 runs case (5, 9), cluster_1 5_qubits * 3_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 6334, quantum time  = 3.012e+00
+rank 16 runs case (5, 9), cluster_2 3_qubits * 2_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 6334, quantum time  = 1.191e+00
+rank 0 runs case (5, 9), cluster_1 5_qubits * 3_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 6334, quantum time  = 3.301e+00
+rank 4 runs case (5, 9), cluster_1 5_qubits * 3_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 6334, quantum time  = 3.872e+00
+rank 14 runs case (5, 9), cluster_2 3_qubits * 2_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 6334, quantum time  = 1.083e+00
+rank 13 runs case (5, 9), cluster_1 5_qubits * 3_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 6334, quantum time  = 4.601e+00
+rank 3 runs case (5, 9), cluster_1 5_qubits * 3_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 6334, quantum time  = 4.750e+00
+rank 12 runs case (5, 9), cluster_2 3_qubits * 3_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 6334, quantum time  = 1.151e+00
+rank 5 runs case (5, 9), cluster_1 5_qubits * 3_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 6334, quantum time  = 2.647e+00
+rank 11 runs case (5, 9), cluster_2 3_qubits * 3_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 6334, quantum time  = 2.447e+00
+rank 18 runs case (5, 9), cluster_3 2_qubits * 5_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 3167, quantum time  = 2.197e+00
+rank 10 runs case (5, 9), cluster_2 3_qubits * 3_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 6334, quantum time  = 2.599e+00
+rank 7 runs case (5, 9), cluster_2 3_qubits * 3_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 6334, quantum time  = 2.315e+00
+rank 2 runs case (5, 9), cluster_2 3_qubits * 3_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 6334, quantum time  = 2.158e+00
+rank 15 runs case (5, 9), cluster_3 2_qubits * 5_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 3167, quantum time  = 2.407e+00
+rank 19 runs case (5, 9), cluster_3 2_qubits * 5_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 3167, quantum time  = 2.798e+00
+rank 17 runs case (5, 9), cluster_3 2_qubits * 5_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 3167, quantum time  = 3.213e+00
+rank 9 runs case (5, 9), cluster_2 3_qubits * 3_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 6334, quantum time  = 1.972e+00
+rank 6 runs case (5, 9), cluster_1 5_qubits * 3_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 6334, quantum time  = 4.656e+00
+rank 0 runs case (5, 9), cluster_2 3_qubits * 3_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 6334, quantum time  = 1.469e+00
+rank 8 runs case (5, 9), cluster_2 3_qubits * 3_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 6334, quantum time  = 2.292e+00
+rank 13 runs case (5, 9), cluster_2 3_qubits * 3_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 6334, quantum time  = 1.626e+00
+rank 1 runs case (5, 9), cluster_1 5_qubits * 3_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 6334, quantum time  = 4.943e+00
+rank 4 runs case (5, 9), cluster_2 3_qubits * 3_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 6334, quantum time  = 1.992e+00
+rank 16 runs case (5, 9), cluster_3 2_qubits * 5_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 3167, quantum time  = 2.982e+00
+rank 3 runs case (5, 9), cluster_2 3_qubits * 3_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 6334, quantum time  = 1.741e+00
+rank 12 runs case (5, 9), cluster_3 2_qubits * 5_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 3167, quantum time  = 2.418e+00
+rank 5 runs case (5, 9), cluster_2 3_qubits * 3_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 6334, quantum time  = 2.640e+00
+rank 2 runs case (5, 9), cluster_3 2_qubits * 6_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 3167, quantum time  = 1.868e+00
+rank 14 runs case (5, 9), cluster_3 2_qubits * 5_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 3167, quantum time  = 3.807e+00
+rank 11 runs case (5, 9), cluster_3 2_qubits * 5_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 3167, quantum time  = 2.838e+00
+rank 7 runs case (5, 9), cluster_3 2_qubits * 6_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 3167, quantum time  = 2.891e+00
+rank 10 runs case (5, 9), cluster_3 2_qubits * 5_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 3167, quantum time  = 3.281e+00
+rank 9 runs case (5, 9), cluster_3 2_qubits * 5_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 3167, quantum time  = 2.546e+00
+rank 6 runs case (5, 9), cluster_2 3_qubits * 3_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 6334, quantum time  = 2.562e+00
+rank 0 runs case (5, 9), cluster_3 2_qubits * 6_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 3167, quantum time  = 2.572e+00
+rank 1 runs case (5, 9), cluster_2 3_qubits * 3_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 6334, quantum time  = 1.931e+00
+rank 13 runs case (5, 9), cluster_3 2_qubits * 5_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 3167, quantum time  = 2.363e+00
+rank 3 runs case (5, 9), cluster_3 2_qubits * 6_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 3167, quantum time  = 2.712e+00
+rank 4 runs case (5, 9), cluster_3 2_qubits * 6_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 3167, quantum time  = 2.676e+00
+rank 8 runs case (5, 9), cluster_3 2_qubits * 5_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 3167, quantum time  = 3.291e+00
+rank 1 runs case (5, 9), cluster_3 2_qubits * 6_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 3167, quantum time  = 1.360e+00
+rank 5 runs case (5, 9), cluster_3 2_qubits * 6_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 3167, quantum time  = 3.065e+00
+rank 6 runs case (5, 9), cluster_3 2_qubits * 6_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 3167, quantum time  = 2.776e+00
+Rank MASTER dumped case (5, 9), 1/4 cases
+----------------------------------------------------------------------------------------------------
+Running case: (5, 10)
+rank 14 runs case (5, 10), cluster_0 5_qubits * 2_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 9539, quantum time  = 2.472e+00
+rank 18 runs case (5, 10), cluster_0 5_qubits * 2_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 9539, quantum time  = 2.297e+00
+rank 16 runs case (5, 10), cluster_0 5_qubits * 2_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 9539, quantum time  = 2.412e+00
+rank 4 runs case (5, 10), cluster_0 5_qubits * 3_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 9539, quantum time  = 3.000e+00
+rank 15 runs case (5, 10), cluster_0 5_qubits * 2_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 9539, quantum time  = 3.179e+00
+rank 9 runs case (5, 10), cluster_0 5_qubits * 3_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 9539, quantum time  = 3.138e+00
+rank 17 runs case (5, 10), cluster_0 5_qubits * 2_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 9539, quantum time  = 2.329e+00
+rank 12 runs case (5, 10), cluster_0 5_qubits * 3_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 9539, quantum time  = 2.981e+00
+rank 1 runs case (5, 10), cluster_0 5_qubits * 3_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 9539, quantum time  = 3.825e+00
+rank 13 runs case (5, 10), cluster_0 5_qubits * 3_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 9539, quantum time  = 3.767e+00
+rank 19 runs case (5, 10), cluster_0 5_qubits * 2_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 9539, quantum time  = 3.085e+00
+rank 11 runs case (5, 10), cluster_0 5_qubits * 3_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 9539, quantum time  = 4.064e+00
+rank 15 runs case (5, 10), cluster_1 2_qubits * 2_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 9539, quantum time  = 6.332e-01
+rank 3 runs case (5, 10), cluster_0 5_qubits * 3_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 9539, quantum time  = 4.582e+00
+rank 2 runs case (5, 10), cluster_0 5_qubits * 3_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 9539, quantum time  = 4.254e+00
+rank 18 runs case (5, 10), cluster_1 2_qubits * 2_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 9539, quantum time  = 7.693e-01
+rank 0 runs case (5, 10), cluster_0 5_qubits * 3_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 9539, quantum time  = 4.667e+00
+rank 6 runs case (5, 10), cluster_0 5_qubits * 3_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 9539, quantum time  = 4.836e+00
+rank 14 runs case (5, 10), cluster_1 2_qubits * 2_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 9539, quantum time  = 1.553e+00
+rank 19 runs case (5, 10), cluster_1 2_qubits * 2_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 9539, quantum time  = 6.143e-01
+rank 5 runs case (5, 10), cluster_0 5_qubits * 3_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 9539, quantum time  = 4.720e+00
+rank 7 runs case (5, 10), cluster_0 5_qubits * 3_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 9539, quantum time  = 4.330e+00
+rank 1 runs case (5, 10), cluster_1 2_qubits * 3_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 9539, quantum time  = 9.139e-01
+rank 10 runs case (5, 10), cluster_0 5_qubits * 3_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 9539, quantum time  = 4.450e+00
+rank 8 runs case (5, 10), cluster_0 5_qubits * 3_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 9539, quantum time  = 4.711e+00
+rank 16 runs case (5, 10), cluster_1 2_qubits * 2_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 9539, quantum time  = 1.065e+00
+rank 9 runs case (5, 10), cluster_1 2_qubits * 3_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 9539, quantum time  = 1.126e+00
+rank 17 runs case (5, 10), cluster_1 2_qubits * 2_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 9539, quantum time  = 1.314e+00
+rank 12 runs case (5, 10), cluster_1 2_qubits * 3_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 9539, quantum time  = 1.673e+00
+rank 4 runs case (5, 10), cluster_1 2_qubits * 3_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 9539, quantum time  = 2.166e+00
+rank 6 runs case (5, 10), cluster_1 2_qubits * 3_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 9539, quantum time  = 1.535e+00
+rank 13 runs case (5, 10), cluster_1 2_qubits * 3_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 9539, quantum time  = 2.509e+00
+rank 19 runs case (5, 10), cluster_2 5_qubits * 1_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 14308, quantum time  = 1.760e+00
+rank 11 runs case (5, 10), cluster_1 2_qubits * 3_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 9539, quantum time  = 2.181e+00
+rank 2 runs case (5, 10), cluster_1 2_qubits * 3_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 9539, quantum time  = 1.889e+00
+rank 18 runs case (5, 10), cluster_2 5_qubits * 1_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 14308, quantum time  = 2.143e+00
+rank 0 runs case (5, 10), cluster_1 2_qubits * 3_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 9539, quantum time  = 2.029e+00
+rank 7 runs case (5, 10), cluster_1 2_qubits * 3_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 9539, quantum time  = 2.383e+00
+rank 16 runs case (5, 10), cluster_2 5_qubits * 1_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 14308, quantum time  = 1.347e+00
+rank 3 runs case (5, 10), cluster_1 2_qubits * 3_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 9539, quantum time  = 2.495e+00
+rank 17 runs case (5, 10), cluster_2 5_qubits * 1_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 14308, quantum time  = 6.843e-01
+rank 5 runs case (5, 10), cluster_1 2_qubits * 3_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 9539, quantum time  = 2.584e+00
+rank 1 runs case (5, 10), cluster_2 5_qubits * 2_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 14308, quantum time  = 3.149e+00
+rank 15 runs case (5, 10), cluster_2 5_qubits * 2_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 14308, quantum time  = 3.810e+00
+rank 10 runs case (5, 10), cluster_1 2_qubits * 3_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 9539, quantum time  = 1.828e+00
+rank 8 runs case (5, 10), cluster_1 2_qubits * 3_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 9539, quantum time  = 2.144e+00
+rank 14 runs case (5, 10), cluster_2 5_qubits * 2_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 14308, quantum time  = 2.906e+00
+rank 0 runs case (5, 10), cluster_2 5_qubits * 2_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 14308, quantum time  = 2.618e+00
+rank 9 runs case (5, 10), cluster_2 5_qubits * 2_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 14308, quantum time  = 2.988e+00
+rank 2 runs case (5, 10), cluster_2 5_qubits * 2_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 14308, quantum time  = 3.137e+00
+rank 12 runs case (5, 10), cluster_2 5_qubits * 2_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 14308, quantum time  = 3.586e+00
+rank 11 runs case (5, 10), cluster_2 5_qubits * 2_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 14308, quantum time  = 2.925e+00
+rank 7 runs case (5, 10), cluster_2 5_qubits * 2_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 14308, quantum time  = 2.983e+00
+rank 13 runs case (5, 10), cluster_2 5_qubits * 2_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 14308, quantum time  = 3.433e+00
+rank 6 runs case (5, 10), cluster_2 5_qubits * 2_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 14308, quantum time  = 3.691e+00
+rank 4 runs case (5, 10), cluster_2 5_qubits * 2_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 14308, quantum time  = 3.933e+00
+rank 3 runs case (5, 10), cluster_2 5_qubits * 2_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 14308, quantum time  = 3.577e+00
+rank 18 runs case (5, 10), cluster_3 3_qubits * 8_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 3180, quantum time  = 4.727e+00
+rank 5 runs case (5, 10), cluster_2 5_qubits * 2_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 14308, quantum time  = 3.761e+00
+rank 8 runs case (5, 10), cluster_2 5_qubits * 2_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 14308, quantum time  = 3.532e+00
+rank 19 runs case (5, 10), cluster_3 3_qubits * 8_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 3180, quantum time  = 5.642e+00
+rank 18 runs case (5, 10), cluster_4 2_qubits * 1_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 14308, quantum time  = 9.704e-01
+rank 10 runs case (5, 10), cluster_2 5_qubits * 2_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 14308, quantum time  = 3.938e+00
+rank 19 runs case (5, 10), cluster_4 2_qubits * 1_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 14308, quantum time  = 3.193e-01
+rank 17 runs case (5, 10), cluster_3 3_qubits * 8_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 3180, quantum time  = 6.666e+00
+rank 16 runs case (5, 10), cluster_3 3_qubits * 8_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 3180, quantum time  = 7.511e+00
+rank 1 runs case (5, 10), cluster_3 3_qubits * 9_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 3180, quantum time  = 7.555e+00
+rank 17 runs case (5, 10), cluster_4 2_qubits * 1_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 14308, quantum time  = 7.976e-01
+rank 16 runs case (5, 10), cluster_4 2_qubits * 1_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 14308, quantum time  = 3.621e-01
+rank 15 runs case (5, 10), cluster_3 3_qubits * 8_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 3180, quantum time  = 7.140e+00
+rank 3 runs case (5, 10), cluster_3 3_qubits * 8_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 3180, quantum time  = 4.736e+00
+rank 2 runs case (5, 10), cluster_3 3_qubits * 8_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 3180, quantum time  = 5.545e+00
+rank 14 runs case (5, 10), cluster_3 3_qubits * 8_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 3180, quantum time  = 7.856e+00
+rank 7 runs case (5, 10), cluster_3 3_qubits * 8_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 3180, quantum time  = 5.604e+00
+rank 11 runs case (5, 10), cluster_3 3_qubits * 8_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 3180, quantum time  = 6.116e+00
+rank 6 runs case (5, 10), cluster_3 3_qubits * 8_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 3180, quantum time  = 5.432e+00
+rank 12 runs case (5, 10), cluster_3 3_qubits * 8_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 3180, quantum time  = 6.298e+00
+rank 9 runs case (5, 10), cluster_3 3_qubits * 8_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 3180, quantum time  = 6.800e+00
+rank 7 runs case (5, 10), cluster_4 2_qubits * 2_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 14308, quantum time  = 5.515e-01
+rank 13 runs case (5, 10), cluster_3 3_qubits * 8_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 3180, quantum time  = 6.302e+00
+rank 2 runs case (5, 10), cluster_4 2_qubits * 2_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 14308, quantum time  = 7.074e-01
+rank 15 runs case (5, 10), cluster_4 2_qubits * 2_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 14308, quantum time  = 8.078e-01
+rank 3 runs case (5, 10), cluster_4 2_qubits * 2_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 14308, quantum time  = 1.435e+00
+rank 0 runs case (5, 10), cluster_3 3_qubits * 9_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 3180, quantum time  = 7.789e+00
+rank 11 runs case (5, 10), cluster_4 2_qubits * 2_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 14308, quantum time  = 1.005e+00
+rank 1 runs case (5, 10), cluster_4 2_qubits * 2_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 14308, quantum time  = 1.752e+00
+rank 9 runs case (5, 10), cluster_4 2_qubits * 2_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 14308, quantum time  = 6.814e-01
+rank 14 runs case (5, 10), cluster_4 2_qubits * 2_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 14308, quantum time  = 1.241e+00
+rank 5 runs case (5, 10), cluster_3 3_qubits * 8_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 3180, quantum time  = 5.694e+00
+rank 10 runs case (5, 10), cluster_3 3_qubits * 8_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 3180, quantum time  = 5.263e+00
+rank 12 runs case (5, 10), cluster_4 2_qubits * 2_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 14308, quantum time  = 8.976e-01
+rank 4 runs case (5, 10), cluster_3 3_qubits * 8_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 3180, quantum time  = 6.877e+00
+rank 6 runs case (5, 10), cluster_4 2_qubits * 2_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 14308, quantum time  = 1.706e+00
+rank 13 runs case (5, 10), cluster_4 2_qubits * 2_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 14308, quantum time  = 1.368e+00
+rank 4 runs case (5, 10), cluster_4 2_qubits * 2_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 14308, quantum time  = 4.172e-01
+rank 0 runs case (5, 10), cluster_4 2_qubits * 2_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 14308, quantum time  = 1.407e+00
+rank 8 runs case (5, 10), cluster_3 3_qubits * 8_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 3180, quantum time  = 7.849e+00
+rank 5 runs case (5, 10), cluster_4 2_qubits * 2_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 14308, quantum time  = 1.519e+00
+rank 10 runs case (5, 10), cluster_4 2_qubits * 2_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 14308, quantum time  = 1.276e+00
+rank 8 runs case (5, 10), cluster_4 2_qubits * 2_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 14308, quantum time  = 1.291e+00
+Rank MASTER dumped case (5, 10), 2/4 cases
+----------------------------------------------------------------------------------------------------
+Running case: (6, 9)
+rank 15 runs case (6, 9), cluster_0 6_qubits * 2_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 6334, quantum time  = 2.079e+00
+rank 12 runs case (6, 9), cluster_0 6_qubits * 3_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 6334, quantum time  = 2.520e+00
+rank 18 runs case (6, 9), cluster_0 6_qubits * 2_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 6334, quantum time  = 3.234e+00
+rank 16 runs case (6, 9), cluster_0 6_qubits * 2_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 6334, quantum time  = 3.045e+00
+rank 5 runs case (6, 9), cluster_0 6_qubits * 3_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 6334, quantum time  = 3.031e+00
+rank 7 runs case (6, 9), cluster_0 6_qubits * 3_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 6334, quantum time  = 3.326e+00
+rank 19 runs case (6, 9), cluster_0 6_qubits * 2_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 6334, quantum time  = 2.938e+00
+rank 17 runs case (6, 9), cluster_0 6_qubits * 2_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 6334, quantum time  = 2.895e+00
+rank 14 runs case (6, 9), cluster_0 6_qubits * 2_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 6334, quantum time  = 3.643e+00
+rank 2 runs case (6, 9), cluster_0 6_qubits * 3_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 6334, quantum time  = 3.682e+00
+rank 0 runs case (6, 9), cluster_0 6_qubits * 3_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 6334, quantum time  = 3.552e+00
+rank 3 runs case (6, 9), cluster_0 6_qubits * 3_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 6334, quantum time  = 3.822e+00
+rank 1 runs case (6, 9), cluster_0 6_qubits * 3_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 6334, quantum time  = 4.029e+00
+rank 13 runs case (6, 9), cluster_0 6_qubits * 3_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 6334, quantum time  = 4.287e+00
+rank 9 runs case (6, 9), cluster_0 6_qubits * 3_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 6334, quantum time  = 4.139e+00
+rank 4 runs case (6, 9), cluster_0 6_qubits * 3_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 6334, quantum time  = 4.173e+00
+rank 6 runs case (6, 9), cluster_0 6_qubits * 3_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 6334, quantum time  = 4.668e+00
+rank 8 runs case (6, 9), cluster_0 6_qubits * 3_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 6334, quantum time  = 4.954e+00
+rank 11 runs case (6, 9), cluster_0 6_qubits * 3_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 6334, quantum time  = 5.543e+00
+rank 10 runs case (6, 9), cluster_0 6_qubits * 3_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 6334, quantum time  = 5.908e+00
+rank 17 runs case (6, 9), cluster_1 6_qubits * 5_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 3167, quantum time  = 6.658e+00
+rank 19 runs case (6, 9), cluster_1 6_qubits * 5_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 3167, quantum time  = 6.684e+00
+rank 15 runs case (6, 9), cluster_1 6_qubits * 5_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 3167, quantum time  = 7.508e+00
+rank 18 runs case (6, 9), cluster_1 6_qubits * 5_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 3167, quantum time  = 7.119e+00
+rank 12 runs case (6, 9), cluster_1 6_qubits * 5_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 3167, quantum time  = 7.094e+00
+rank 2 runs case (6, 9), cluster_1 6_qubits * 6_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 3167, quantum time  = 6.772e+00
+rank 7 runs case (6, 9), cluster_1 6_qubits * 6_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 3167, quantum time  = 8.266e+00
+rank 14 runs case (6, 9), cluster_1 6_qubits * 5_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 3167, quantum time  = 8.039e+00
+rank 13 runs case (6, 9), cluster_1 6_qubits * 5_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 3167, quantum time  = 7.298e+00
+rank 9 runs case (6, 9), cluster_1 6_qubits * 5_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 3167, quantum time  = 7.332e+00
+rank 16 runs case (6, 9), cluster_1 6_qubits * 5_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 3167, quantum time  = 8.208e+00
+rank 5 runs case (6, 9), cluster_1 6_qubits * 6_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 3167, quantum time  = 8.174e+00
+rank 4 runs case (6, 9), cluster_1 6_qubits * 6_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 3167, quantum time  = 8.206e+00
+rank 8 runs case (6, 9), cluster_1 6_qubits * 5_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 3167, quantum time  = 6.878e+00
+rank 3 runs case (6, 9), cluster_1 6_qubits * 6_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 3167, quantum time  = 9.260e+00
+rank 1 runs case (6, 9), cluster_1 6_qubits * 6_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 3167, quantum time  = 9.247e+00
+rank 10 runs case (6, 9), cluster_1 6_qubits * 5_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 3167, quantum time  = 7.549e+00
+rank 11 runs case (6, 9), cluster_1 6_qubits * 5_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 3167, quantum time  = 8.137e+00
+rank 0 runs case (6, 9), cluster_1 6_qubits * 6_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 3167, quantum time  = 1.057e+01
+rank 6 runs case (6, 9), cluster_1 6_qubits * 6_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 3167, quantum time  = 1.074e+01
+Rank MASTER dumped case (6, 9), 3/4 cases
+----------------------------------------------------------------------------------------------------
+Running case: (6, 10)
+rank 2 runs case (6, 10), cluster_0 6_qubits * 1_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 28616, quantum time  = 1.336e+00
+rank 13 runs case (6, 10), cluster_0 6_qubits * 1_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 28616, quantum time  = 1.406e+00
+rank 4 runs case (6, 10), cluster_0 6_qubits * 1_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 28616, quantum time  = 1.364e+00
+rank 5 runs case (6, 10), cluster_0 6_qubits * 1_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 28616, quantum time  = 1.710e+00
+rank 0 runs case (6, 10), cluster_0 6_qubits * 1_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 28616, quantum time  = 2.042e+00
+rank 1 runs case (6, 10), cluster_0 6_qubits * 1_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 28616, quantum time  = 2.538e+00
+rank 8 runs case (6, 10), cluster_0 6_qubits * 1_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 28616, quantum time  = 1.961e+00
+rank 17 runs case (6, 10), cluster_0 6_qubits * 1_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 28616, quantum time  = 2.206e+00
+rank 6 runs case (6, 10), cluster_0 6_qubits * 1_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 28616, quantum time  = 2.587e+00
+rank 3 runs case (6, 10), cluster_0 6_qubits * 1_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 28616, quantum time  = 2.577e+00
+rank 7 runs case (6, 10), cluster_0 6_qubits * 1_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 28616, quantum time  = 2.535e+00
+rank 16 runs case (6, 10), cluster_0 6_qubits * 1_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 28616, quantum time  = 2.586e+00
+rank 12 runs case (6, 10), cluster_0 6_qubits * 1_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 28616, quantum time  = 2.474e+00
+rank 14 runs case (6, 10), cluster_0 6_qubits * 1_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 28616, quantum time  = 2.682e+00
+rank 9 runs case (6, 10), cluster_0 6_qubits * 1_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 28616, quantum time  = 2.765e+00
+rank 11 runs case (6, 10), cluster_0 6_qubits * 1_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 28616, quantum time  = 2.076e+00
+rank 10 runs case (6, 10), cluster_0 6_qubits * 1_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 28616, quantum time  = 2.864e+00
+rank 15 runs case (6, 10), cluster_0 6_qubits * 1_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 28616, quantum time  = 3.177e+00
+rank 2 runs case (6, 10), cluster_1 6_qubits * 1_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 28616, quantum time  = 1.968e+00
+rank 0 runs case (6, 10), cluster_1 6_qubits * 1_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 28616, quantum time  = 1.874e+00
+rank 16 runs case (6, 10), cluster_1 6_qubits * 1_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 28616, quantum time  = 1.448e+00
+rank 9 runs case (6, 10), cluster_1 6_qubits * 1_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 28616, quantum time  = 1.645e+00
+rank 3 runs case (6, 10), cluster_1 6_qubits * 1_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 28616, quantum time  = 1.790e+00
+rank 13 runs case (6, 10), cluster_1 6_qubits * 1_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 28616, quantum time  = 2.524e+00
+rank 1 runs case (6, 10), cluster_1 6_qubits * 1_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 28616, quantum time  = 2.428e+00
+rank 8 runs case (6, 10), cluster_1 6_qubits * 1_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 28616, quantum time  = 2.260e+00
+rank 5 runs case (6, 10), cluster_1 6_qubits * 1_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 28616, quantum time  = 2.550e+00
+rank 7 runs case (6, 10), cluster_1 6_qubits * 1_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 28616, quantum time  = 2.002e+00
+rank 4 runs case (6, 10), cluster_1 6_qubits * 1_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 28616, quantum time  = 2.980e+00
+rank 6 runs case (6, 10), cluster_1 6_qubits * 1_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 28616, quantum time  = 2.403e+00
+rank 17 runs case (6, 10), cluster_1 6_qubits * 1_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 28616, quantum time  = 2.913e+00
+rank 11 runs case (6, 10), cluster_1 6_qubits * 1_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 28616, quantum time  = 1.692e+00
+rank 12 runs case (6, 10), cluster_1 6_qubits * 1_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 28616, quantum time  = 2.425e+00
+rank 10 runs case (6, 10), cluster_1 6_qubits * 1_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 28616, quantum time  = 1.692e+00
+rank 15 runs case (6, 10), cluster_1 6_qubits * 1_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 28616, quantum time  = 2.710e+00
+rank 14 runs case (6, 10), cluster_1 6_qubits * 1_instances on ibmq_boeblingen QUANTUM SIMULATOR, sametotal shots = 28616, quantum time  = 2.633e+00
+/home/weit/anaconda3/envs/cc-env/lib/python3.7/site-packages/qiskit/providers/models/backendconfiguration.py:337: UserWarning: `dt` and `dtm` now have units of seconds(s) rather than nanoseconds(ns).
+  warnings.warn('`dt` and `dtm` now have units of seconds(s) rather '
+/home/weit/anaconda3/envs/cc-env/lib/python3.7/site-packages/qiskit/providers/models/backendconfiguration.py:337: UserWarning: `dt` and `dtm` now have units of seconds(s) rather than nanoseconds(ns).
+  warnings.warn('`dt` and `dtm` now have units of seconds(s) rather '
+/home/weit/anaconda3/envs/cc-env/lib/python3.7/site-packages/qiskit/providers/models/backendconfiguration.py:337: UserWarning: `dt` and `dtm` now have units of seconds(s) rather than nanoseconds(ns).
+  warnings.warn('`dt` and `dtm` now have units of seconds(s) rather '
+/home/weit/anaconda3/envs/cc-env/lib/python3.7/site-packages/qiskit/providers/models/backendconfiguration.py:337: UserWarning: `dt` and `dtm` now have units of seconds(s) rather than nanoseconds(ns).
+  warnings.warn('`dt` and `dtm` now have units of seconds(s) rather '
+/home/weit/anaconda3/envs/cc-env/lib/python3.7/site-packages/qiskit/providers/models/backendconfiguration.py:337: UserWarning: `dt` and `dtm` now have units of seconds(s) rather than nanoseconds(ns).
+  warnings.warn('`dt` and `dtm` now have units of seconds(s) rather '
+/home/weit/anaconda3/envs/cc-env/lib/python3.7/site-packages/qiskit/providers/models/backendconfiguration.py:337: UserWarning: `dt` and `dtm` now have units of seconds(s) rather than nanoseconds(ns).
+  warnings.warn('`dt` and `dtm` now have units of seconds(s) rather '
+Rank MASTER dumped case (6, 10), 4/4 cases
+----------------------------------------------------------------------------------------------------
+/home/weit/anaconda3/envs/cc-env/lib/python3.7/site-packages/qiskit/providers/models/backendconfiguration.py:337: UserWarning: `dt` and `dtm` now have units of seconds(s) rather than nanoseconds(ns).
+  warnings.warn('`dt` and `dtm` now have units of seconds(s) rather '
+/home/weit/anaconda3/envs/cc-env/lib/python3.7/site-packages/qiskit/providers/models/backendconfiguration.py:337: UserWarning: `dt` and `dtm` now have units of seconds(s) rather than nanoseconds(ns).
+  warnings.warn('`dt` and `dtm` now have units of seconds(s) rather '
+/home/weit/anaconda3/envs/cc-env/lib/python3.7/site-packages/qiskit/providers/models/backendconfiguration.py:337: UserWarning: `dt` and `dtm` now have units of seconds(s) rather than nanoseconds(ns).
+  warnings.warn('`dt` and `dtm` now have units of seconds(s) rather '
+/home/weit/anaconda3/envs/cc-env/lib/python3.7/site-packages/qiskit/providers/models/backendconfiguration.py:337: UserWarning: `dt` and `dtm` now have units of seconds(s) rather than nanoseconds(ns).
+  warnings.warn('`dt` and `dtm` now have units of seconds(s) rather '
+/home/weit/anaconda3/envs/cc-env/lib/python3.7/site-packages/qiskit/providers/models/backendconfiguration.py:337: UserWarning: `dt` and `dtm` now have units of seconds(s) rather than nanoseconds(ns).
+  warnings.warn('`dt` and `dtm` now have units of seconds(s) rather '
+/home/weit/anaconda3/envs/cc-env/lib/python3.7/site-packages/qiskit/providers/models/backendconfiguration.py:337: UserWarning: `dt` and `dtm` now have units of seconds(s) rather than nanoseconds(ns).
+  warnings.warn('`dt` and `dtm` now have units of seconds(s) rather '
+/home/weit/anaconda3/envs/cc-env/lib/python3.7/site-packages/qiskit/providers/models/backendconfiguration.py:337: UserWarning: `dt` and `dtm` now have units of seconds(s) rather than nanoseconds(ns).
+  warnings.warn('`dt` and `dtm` now have units of seconds(s) rather '
+/home/weit/anaconda3/envs/cc-env/lib/python3.7/site-packages/qiskit/providers/models/backendconfiguration.py:337: UserWarning: `dt` and `dtm` now have units of seconds(s) rather than nanoseconds(ns).
+  warnings.warn('`dt` and `dtm` now have units of seconds(s) rather '
+/home/weit/anaconda3/envs/cc-env/lib/python3.7/site-packages/qiskit/providers/models/backendconfiguration.py:337: UserWarning: `dt` and `dtm` now have units of seconds(s) rather than nanoseconds(ns).
+  warnings.warn('`dt` and `dtm` now have units of seconds(s) rather '
+/home/weit/anaconda3/envs/cc-env/lib/python3.7/site-packages/qiskit/providers/models/backendconfiguration.py:337: UserWarning: `dt` and `dtm` now have units of seconds(s) rather than nanoseconds(ns).
+  warnings.warn('`dt` and `dtm` now have units of seconds(s) rather '
+/home/weit/anaconda3/envs/cc-env/lib/python3.7/site-packages/qiskit/providers/models/backendconfiguration.py:337: UserWarning: `dt` and `dtm` now have units of seconds(s) rather than nanoseconds(ns).
+  warnings.warn('`dt` and `dtm` now have units of seconds(s) rather '
+/home/weit/anaconda3/envs/cc-env/lib/python3.7/site-packages/qiskit/providers/models/backendconfiguration.py:337: UserWarning: `dt` and `dtm` now have units of seconds(s) rather than nanoseconds(ns).
+  warnings.warn('`dt` and `dtm` now have units of seconds(s) rather '
+/home/weit/anaconda3/envs/cc-env/lib/python3.7/site-packages/qiskit/providers/models/backendconfiguration.py:337: UserWarning: `dt` and `dtm` now have units of seconds(s) rather than nanoseconds(ns).
+  warnings.warn('`dt` and `dtm` now have units of seconds(s) rather '
+/home/weit/anaconda3/envs/cc-env/lib/python3.7/site-packages/qiskit/providers/models/backendconfiguration.py:337: UserWarning: `dt` and `dtm` now have units of seconds(s) rather than nanoseconds(ns).
+  warnings.warn('`dt` and `dtm` now have units of seconds(s) rather '
+-------------------------------------------------- Reconstructor --------------------------------------------------
+Existing cases: dict_keys([])
+case (5, 9)
+Reconstruction output has 1 cases
+----------------------------------------------------------------------------------------------------
+case (5, 10)
+Reconstruction output has 2 cases
+----------------------------------------------------------------------------------------------------
+case (6, 9)
+Reconstruction output has 3 cases
+----------------------------------------------------------------------------------------------------
+case (6, 10)
+Reconstruction output has 4 cases
+----------------------------------------------------------------------------------------------------
+-------------------------------------------------- Plot --------------------------------------------------
+Processing ./simulator/benchmark_data/supremacy_ibmq_boeblingen/quantum_plotter_input_ibmq_boeblingen_saturated.p
+case (5, 9): ce percentage reduction = 1.173, fidelity improvement = -0.000, reconstruction time: 1.287e+00
+case (5, 10): ce percentage reduction = 5.718, fidelity improvement = 0.000, reconstruction time: 6.591e+00
+case (6, 9): ce percentage reduction = 11.577, fidelity improvement = 0.000, reconstruction time: 1.881e-02
+case (6, 10): ce percentage reduction = 15.369, fidelity improvement = 0.000, reconstruction time: 7.181e-03
+************************* Best Cases *************************
+{'ce_percent': 11.5773840345071, 'reconstructor_time': 0.018808364868164062, 'best_case': (6, 9), 'qasm_noise_ce': 0.11250443363093166, 'cutting_ce': 0.09947936329363154}
+{'ce_percent': 15.36901280856451, 'reconstructor_time': 0.007180929183959961, 'best_case': (6, 10), 'qasm_noise_ce': 0.13628426819139636, 'cutting_ce': 0.11533872155700224}
+**************************************************
+Processing ./simulator/benchmark_data/supremacy_ibmq_boeblingen/quantum_plotter_input_ibmq_boeblingen_sametotal.p
+case (5, 9): ce percentage reduction = 1.386, fidelity improvement = -0.000, reconstruction time: 3.905e+00
+case (5, 10): ce percentage reduction = 7.687, fidelity improvement = -0.000, reconstruction time: 1.691e+01
+case (6, 9): ce percentage reduction = 4.236, fidelity improvement = -0.000, reconstruction time: 5.039e-02
+case (6, 10): ce percentage reduction = 13.498, fidelity improvement = -0.000, reconstruction time: 5.112e-02
+************************* Best Cases *************************
+{'ce_percent': 4.236301520027006, 'reconstructor_time': 0.050391435623168945, 'best_case': (6, 9), 'qasm_noise_ce': 0.11250443363093166, 'cutting_ce': 0.10773840659892672}
+{'ce_percent': 13.49810486918332, 'reconstructor_time': 0.051115989685058594, 'best_case': (6, 10), 'qasm_noise_ce': 0.13628426819139636, 'cutting_ce': 0.11788847475072263}
+**************************************************
+----------------------------------------------------------------------------------------------------
