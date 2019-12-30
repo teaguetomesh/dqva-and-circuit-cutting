@@ -191,7 +191,7 @@ if __name__ == '__main__':
             if rank_input == 'DONE':
                 break
             case = list(rank_input.keys())[0]
-            case_dict = rank_input[case]
+            case_dict = copy.deepcopy(rank_input[case])
             rank_combinations = find_rank_combinations(case_dict,rank,size)
             rank_results = {}
             rank_classical_time = 0
