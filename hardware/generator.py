@@ -177,8 +177,8 @@ if __name__ == '__main__':
             case_dict['searcher_time'] = searcher_time
             case_dict['clusters'] = copy.deepcopy(clusters)
             case_dict['complete_path_map'] = copy.deepcopy(complete_path_map)
-
-        pickle.dump({case:case_dict},open(dirname+evaluator_input_filename,'ab'))
+            pickle.dump({case:case_dict},open(dirname+evaluator_input_filename,'ab'))
+            
         print('%d/%d cases'%(counter,total_cases))
         counter += 1
         print('-'*100)
