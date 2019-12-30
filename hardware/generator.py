@@ -50,7 +50,7 @@ def evaluate_full_circ(circ, total_shots, device_name, fields):
     uniform_prob = [uniform_p for i in range(np.power(2,len(circ.qubits)))]
     fc_evaluations = {}
 
-    if 'sv_noiseless' in fields:
+    if 'sv' in fields:
         print('Evaluating fc state vector')
         sv_noiseless_fc = evaluate_circ(circ=circ,backend='statevector_simulator',evaluator_info=None)
     else:
@@ -111,7 +111,7 @@ if __name__ == '__main__':
     print('Existing cases:',evaluator_input.keys())
     
     # NOTE: toggle circuits to benchmark
-    dimension_l = np.arange(3,16)
+    dimension_l = np.arange(3,13)
     cases_to_run = []
     full_circ_sizes = []
     for cluster_max_qubit in range(args.min_qubit,args.max_qubit+1):
@@ -129,7 +129,7 @@ if __name__ == '__main__':
     for full_circ_size in full_circ_sizes:
         full_circ = generate_circ(dimension=full_circ_size,circuit_type=args.circuit_type)
         fc_shots = get_circ_saturated_shots(circs=[full_circ],device_name=args.device_name)[0]
-        fields_to_run = ['sv_noiseless','qasm','hw']
+        fields_to_run = ['sv','qasm','hw']
         fc_evaluations = evaluate_full_circ(circ=full_circ,total_shots=fc_shots,device_name=args.device_name,fields=fields_to_run)
         full_circ_info[full_circ_size] = {'full_circ':full_circ,'fc_shots':fc_shots,'fc_evaluations':fc_evaluations}
         print('*'*50)
@@ -178,7 +178,7 @@ if __name__ == '__main__':
             case_dict['clusters'] = copy.deepcopy(clusters)
             case_dict['complete_path_map'] = copy.deepcopy(complete_path_map)
             pickle.dump({case:case_dict},open(dirname+evaluator_input_filename,'ab'))
-            
+
         print('%d/%d cases'%(counter,total_cases))
         counter += 1
         print('-'*100)

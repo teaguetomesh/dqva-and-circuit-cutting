@@ -124,7 +124,7 @@ if __name__ == '__main__':
     device_size = len(evaluator_info['properties'].qubits)
 
     # NOTE: toggle circuits to benchmark
-    dimension_l = np.arange(3,16)
+    dimension_l = np.arange(3,13)
     counter = 1
     total_cases = (args.max_qubit-args.min_qubit+1)*len(dimension_l)
     for cluster_max_qubit in range(args.min_qubit,args.max_qubit+1):
