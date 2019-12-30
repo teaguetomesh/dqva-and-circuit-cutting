@@ -256,30 +256,30 @@ def process_data(filename,circuit_type):
     dy = [0.2 for x in plotter_input]
 
     for case in plotter_input:
-        ground_truth_ce = cross_entropy(target=plotter_input[case]['fc_evaluations']['sv_noiseless'],
-        obs= plotter_input[case]['fc_evaluations']['sv_noiseless'])
-        qasm_ce = cross_entropy(target=plotter_input[case]['fc_evaluations']['sv_noiseless'],
+        ground_truth_ce = cross_entropy(target=plotter_input[case]['fc_evaluations']['sv'],
+        obs= plotter_input[case]['fc_evaluations']['sv'])
+        qasm_ce = cross_entropy(target=plotter_input[case]['fc_evaluations']['sv'],
         obs= plotter_input[case]['fc_evaluations']['qasm'])
-        qasm_noise_ce = cross_entropy(target=plotter_input[case]['fc_evaluations']['sv_noiseless'],
+        qasm_noise_ce = cross_entropy(target=plotter_input[case]['fc_evaluations']['sv'],
         obs= plotter_input[case]['fc_evaluations']['qasm+noise'])
-        hw_ce = cross_entropy(target=plotter_input[case]['fc_evaluations']['sv_noiseless'],
+        hw_ce = cross_entropy(target=plotter_input[case]['fc_evaluations']['sv'],
         obs= plotter_input[case]['fc_evaluations']['hw'])
-        cutting_ce = cross_entropy(target=plotter_input[case]['fc_evaluations']['sv_noiseless'],
+        cutting_ce = cross_entropy(target=plotter_input[case]['fc_evaluations']['sv'],
         obs= plotter_input[case]['cutting'])
         ce_percent_change = 100*(hw_ce - cutting_ce)/hw_ce
         assert ce_percent_change <= 100+1e-10
         plotter_input[case]['ce_comparisons'] = (hw_ce,cutting_ce)
         plotter_input[case]['ce_percent_reduction'] = ce_percent_change
 
-        ground_truth_fid = fidelity(target=plotter_input[case]['fc_evaluations']['sv_noiseless'],
-        obs= plotter_input[case]['fc_evaluations']['sv_noiseless'])
-        qasm_fid = fidelity(target=plotter_input[case]['fc_evaluations']['sv_noiseless'],
+        ground_truth_fid = fidelity(target=plotter_input[case]['fc_evaluations']['sv'],
+        obs= plotter_input[case]['fc_evaluations']['sv'])
+        qasm_fid = fidelity(target=plotter_input[case]['fc_evaluations']['sv'],
         obs= plotter_input[case]['fc_evaluations']['qasm'])
-        qasm_noise_fid = fidelity(target=plotter_input[case]['fc_evaluations']['sv_noiseless'],
+        qasm_noise_fid = fidelity(target=plotter_input[case]['fc_evaluations']['sv'],
         obs= plotter_input[case]['fc_evaluations']['qasm+noise'])
-        hw_fid = fidelity(target=plotter_input[case]['fc_evaluations']['sv_noiseless'],
+        hw_fid = fidelity(target=plotter_input[case]['fc_evaluations']['sv'],
         obs= plotter_input[case]['fc_evaluations']['hw'])
-        cutting_fid = fidelity(target=plotter_input[case]['fc_evaluations']['sv_noiseless'],
+        cutting_fid = fidelity(target=plotter_input[case]['fc_evaluations']['sv'],
         obs= plotter_input[case]['cutting'])
         fid_percent_change = 100*(cutting_fid-hw_fid)/hw_fid
         if circuit_type == 'bv' or circuit_type=='hwea':

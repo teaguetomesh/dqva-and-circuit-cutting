@@ -13,6 +13,30 @@ import pickle
 import copy
 from time import time
 import os
+from qcg.generators import gen_supremacy, gen_hwea, gen_BV, gen_qft, gen_sycamore
+
+def generate_circ(dimension,circuit_type):
+    def gen_secret(num_qubit):
+        num_digit = num_qubit-1
+        num = 2**num_digit-1
+        num = bin(num)[2:]
+        num_with_zeros = str(num).zfill(num_digit)
+        return num_with_zeros
+
+    i,j = factor_int(dimension)
+    if circuit_type == 'supremacy':
+        full_circ = gen_supremacy(i,j,8)
+    elif circuit_type == 'hwea':
+        full_circ = gen_hwea(i*j,1)
+    elif circuit_type == 'bv':
+        full_circ = gen_BV(gen_secret(i*j),barriers=False)
+    elif circuit_type == 'qft':
+        full_circ = gen_qft(width=i*j, barriers=False)
+    elif circuit_type == 'sycamore':
+        full_circ = gen_sycamore(i,j,8)
+    else:
+        raise Exception('Illegal circuit type:',circuit_type)
+    return full_circ
 
 def get_filename(experiment_name,circuit_type,device_name,field,evaluation_method=None,shots_mode=None):
     dirname = './{}/benchmark_data/{}_{}/'.format(experiment_name,circuit_type,device_name)
@@ -319,10 +343,10 @@ def evaluate_circ(circ, backend, evaluator_info):
                 reps_l = [s['circs'][init_meas] for i in range(s['reps'])]
                 circs_l += reps_l
             qobj = assemble(circs_l, backend=evaluator_info['device'], shots=s['shots'])
-            print('Submitted full circuit %d shots, %d reps to hardware'%(s['shots'],s['reps']))
-            # job = evaluator_info['device'].run(qobj)
-            job = Aer.get_backend('qasm_simulator').run(qobj)
+            job = evaluator_info['device'].run(qobj)
+            # job = Aer.get_backend('qasm_simulator').run(qobj)
             jobs.append({'job':job,'circ':circ,'mapped_circuit_l':circs_l,'evaluator_info':evaluator_info})
+            print('Submitted {:d} reps * {:d} shots to hardware, job_id = {}'.format(s['reps'],s['shots'],job.job_id()))
         return jobs
     else:
         raise Exception('Illegal backend :',backend)
@@ -342,14 +366,14 @@ def readout_mitigation(device,initial_layout):
             qubit_list.append(q)
     meas_calibs, state_labels = complete_meas_cal(qubit_list=qubit_list, qr=qr, circlabel='mcal')
     num_shots = device.configuration().max_shots
-    print('Calculating measurement filter, %d-qubit calibration circuits * %d * %.3e shots.'%(len(meas_calibs[0].qubits),len(meas_calibs),num_shots))
     assert len(meas_calibs)<=device.configuration().max_experiments/3*2
 
     # Execute the calibration circuits
     meas_calibs_transpiled = transpile(meas_calibs, backend=device)
     qobj = assemble(meas_calibs_transpiled, backend=device, shots=num_shots)
-    # job = device.run(qobj)
-    job = Aer.get_backend('qasm_simulator').run(qobj)
+    job = device.run(qobj)
+    # job = Aer.get_backend('qasm_simulator').run(qobj)
+    print('Submitted measurement filter, {:d} calibration circuits * {:d} shots, job_id = {}'.format(len(meas_calibs),num_shots,job.job_id()))
     return job, state_labels, qubit_list
 
 def get_evaluator_info(circ,device_name,fields):

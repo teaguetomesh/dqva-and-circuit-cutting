@@ -30,9 +30,10 @@ def submit_hardware_jobs(schedule, evaluator_info):
         mapped_circuits += reps_l
 
     qobj = assemble(mapped_circuits, backend=evaluator_info['device'], shots=evaluator_info['num_shots'])
-    # job = evaluator_info['device'].run(qobj)
-    job = Aer.get_backend('qasm_simulator').run(qobj)
+    job = evaluator_info['device'].run(qobj)
+    # job = Aer.get_backend('qasm_simulator').run(qobj)
     job_dict = {'job':job,'schedule':schedule}
+    print('Submitted {:d} circs, {:d} shots, {:d} reps to hardware, job_id = {}'.format(len(circs),evaluator_info['num_shots'],reps,job.job_id()))
     return job_dict
 
 def accumulate_cluster_jobs(cluster_job_dict,cluster_meas_filter):
@@ -110,7 +111,7 @@ if __name__ == '__main__':
     
     all_submitted_jobs = {}
     for case in cases_to_run:
-        print('submitting case ',case)
+        print('Submitting case ',case)
         all_submitted_jobs[case] = {}
         fc_shots = cases_to_run[case]['fc_shots']
         clusters = cases_to_run[case]['clusters']
@@ -118,6 +119,7 @@ if __name__ == '__main__':
         same_total_cutting_shots = distribute_cluster_shots(total_shots=fc_shots,clusters=clusters,complete_path_map=complete_path_map)
 
         for cluster_idx, cluster_circ in enumerate(clusters):
+            print('Cluster %d, %d qubit circuit'%(cluster_idx,len(cluster_circ.qubits)))
             cluster_instances = cases_to_run[case]['all_cluster_prob'][cluster_idx]
             evaluator_info = get_evaluator_info(circ=cluster_circ,device_name=args.device_name,
             fields=['device','basis_gates','coupling_map','properties','initial_layout'])
@@ -126,24 +128,23 @@ if __name__ == '__main__':
                 evaluator_info['num_shots'] = get_circ_saturated_shots(circs=[cluster_circ],device_name=args.device_name)[0]
             elif args.shots_mode == 'sametotal':
                 evaluator_info['num_shots'] = same_total_cutting_shots[cluster_idx]
-            print('Cluster %d has %d instances, %d shots each, submission history:'%(cluster_idx,len(cluster_instances),evaluator_info['num_shots']))
+            print('%d instances, %d shots each'%(len(cluster_instances),evaluator_info['num_shots']))
 
             all_submitted_jobs[case][cluster_idx] = {'jobs':[],'meas_filter':None}
             if np.power(2,len(cluster_circ.qubits))<=device_max_experiments:
                 meas_filter_job, state_labels, qubit_list = readout_mitigation(device=evaluator_info['device'],initial_layout=evaluator_info['initial_layout'])
                 all_submitted_jobs[case][cluster_idx]['meas_filter'] = (meas_filter_job, state_labels, qubit_list)
-                print('Meas_filter job id {}'.format(meas_filter_job.job_id()))
 
             schedule = schedule_job(circs=cluster_instances,shots=evaluator_info['num_shots'],max_experiments=device_max_experiments,max_shots=device_max_shots)
 
             for s in schedule:
                 evaluator_info['num_shots'] = s['shots']
                 job_dict = submit_hardware_jobs(schedule=s, evaluator_info=evaluator_info)
-                print('Submitted %d circs, %d shots, %d reps to hardware'%(len(s['circs']),s['shots'],s['reps']))
                 all_submitted_jobs[case][cluster_idx]['jobs'].append(job_dict)
         print('*'*50)
     print('-'*100)
             
+    counter = 1
     for case in all_submitted_jobs:
         for cluster_idx in all_submitted_jobs[case]:
             cluster_job_dict = all_submitted_jobs[case][cluster_idx]['jobs']
@@ -152,6 +153,8 @@ if __name__ == '__main__':
             cases_to_run[case]['all_cluster_prob'][cluster_idx] = hw_probs
         case_dict = cases_to_run[case]
         pickle.dump({case:case_dict}, open(dirname+uniter_input_filename,'ab'))
-        print('Job submittor output has %d cases'%len(job_submittor_output))
+        
+        print('Job submittor output has %d/%d cases'%(counter,len(cases_to_run)))
+        counter += 1
         print('*'*50)
     print('-'*100)
