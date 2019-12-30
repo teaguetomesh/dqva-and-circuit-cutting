@@ -1,0 +1,2022 @@
+-------------------------------------------------- Generator --------------------------------------------------
+Existing cases: dict_keys([])
+104 cases, 13 full circuits to run : [(2, 3), (2, 4), (2, 5), (2, 6), (2, 7), (2, 8), (2, 9), (2, 10), (2, 11), (2, 12), (2, 13), (2, 14), (2, 15), (3, 3), (3, 4), (3, 5), (3, 6), (3, 7), (3, 8), (3, 9), (3, 10), (3, 11), (3, 12), (3, 13), (3, 14), (3, 15), (4, 3), (4, 4), (4, 5), (4, 6), (4, 7), (4, 8), (4, 9), (4, 10), (4, 11), (4, 12), (4, 13), (4, 14), (4, 15), (5, 3), (5, 4), (5, 5), (5, 6), (5, 7), (5, 8), (5, 9), (5, 10), (5, 11), (5, 12), (5, 13), (5, 14), (5, 15), (6, 3), (6, 4), (6, 5), (6, 6), (6, 7), (6, 8), (6, 9), (6, 10), (6, 11), (6, 12), (6, 13), (6, 14), (6, 15), (7, 3), (7, 4), (7, 5), (7, 6), (7, 7), (7, 8), (7, 9), (7, 10), (7, 11), (7, 12), (7, 13), (7, 14), (7, 15), (8, 3), (8, 4), (8, 5), (8, 6), (8, 7), (8, 8), (8, 9), (8, 10), (8, 11), (8, 12), (8, 13), (8, 14), (8, 15), (9, 3), (9, 4), (9, 5), (9, 6), (9, 7), (9, 8), (9, 9), (9, 10), (9, 11), (9, 12), (9, 13), (9, 14), (9, 15)]
+**************************************************
+Generating 1x3, 1+8+1 supremacy circuit
+3 qubit circuit saturated shots = 4096, ΔH = 5.779e-04
+Evaluating fc state vector
+Evaluating fc qasm, 4096 shots
+Evaluating fc hardware, 4096 shots
+Submitted 1 reps * 4096 shots to hardware, job_id = 028d0bc0-a5fc-4019-bfd6-934bc1694f0d
+/home/weit/anaconda3/envs/cc-env/lib/python3.7/site-packages/qiskit/providers/models/backendconfiguration.py:337: UserWarning: `dt` and `dtm` now have units of seconds(s) rather than nanoseconds(ns).
+  warnings.warn('`dt` and `dtm` now have units of seconds(s) rather '
+Submitted measurement filter, 8 calibration circuits * 8192 shots, job_id = 6b774229-42db-43fa-96a3-6f6e0c65b8b0
+**************************************************
+Generating 2x2, 1+8+1 supremacy circuit
+4 qubit circuit saturated shots = 11264, ΔH = 9.945e-04
+Evaluating fc state vector
+Evaluating fc qasm, 11264 shots
+Evaluating fc hardware, 11264 shots
+Submitted 11 reps * 1024 shots to hardware, job_id = 38ea7d6e-4aa3-41cf-bae0-0e71b1f54e13
+Submitted measurement filter, 16 calibration circuits * 8192 shots, job_id = e63591a2-4331-44c7-bdf2-45fc61bc5ff4
+**************************************************
+Generating 1x5, 1+8+1 supremacy circuit
+5 qubit circuit saturated shots = 12288, ΔH = 9.954e-04
+Evaluating fc state vector
+Evaluating fc qasm, 12288 shots
+Evaluating fc hardware, 12288 shots
+Submitted 2 reps * 6144 shots to hardware, job_id = 633ec03f-90f5-42ee-929e-4ab00f9555a5
+Submitted measurement filter, 32 calibration circuits * 8192 shots, job_id = e6c80bf6-4ebb-488a-8ba7-13e2fd20cb96
+**************************************************
+Generating 3x2, 1+8+1 supremacy circuit
+6 qubit circuit saturated shots = 31744, ΔH = 1.024e-03
+Evaluating fc state vector
+Evaluating fc qasm, 31744 shots
+Evaluating fc hardware, 31744 shots
+Submitted 31 reps * 1024 shots to hardware, job_id = 9e252754-6742-4a29-8e50-11a11df23349
+Submitted measurement filter, 64 calibration circuits * 8192 shots, job_id = 2eccf60a-487d-4c1f-8bbc-c84fff8c2638
+**************************************************
+Generating 1x7, 1+8+1 supremacy circuit
+7 qubit circuit saturated shots = 69632, ΔH = 1.018e-03
+Evaluating fc state vector
+Evaluating fc qasm, 69632 shots
+Evaluating fc hardware, 69632 shots
+Submitted 17 reps * 4096 shots to hardware, job_id = 10ead74e-3482-46dc-909a-04ea26042fb5
+Submitted measurement filter, 128 calibration circuits * 8192 shots, job_id = c31dbe16-e477-4c5a-9164-c82a62fd12ac
+**************************************************
+Generating 2x4, 1+8+1 supremacy circuit
+8 qubit circuit saturated shots = 125952, ΔH = 1.007e-03
+Evaluating fc state vector
+Evaluating fc qasm, 125952 shots
+Evaluating fc hardware, 125952 shots
+Submitted 41 reps * 3072 shots to hardware, job_id = 3c4ffa47-0b26-4303-b34e-54a443c6b49e
+Submitted measurement filter, 256 calibration circuits * 8192 shots, job_id = e1b89c9a-6334-4a8a-a6ef-db0a780c1891
+**************************************************
+Generating 3x3, 1+8+1 supremacy circuit
+9 qubit circuit saturated shots = 234496, ΔH = 1.022e-03
+Evaluating fc state vector
+Evaluating fc qasm, 234496 shots
+Evaluating fc hardware, 234496 shots
+Submitted 229 reps * 1024 shots to hardware, job_id = 78f044cb-7850-44b9-bfb8-5f9a924b6da3
+Submitted measurement filter, 512 calibration circuits * 8192 shots, job_id = 366a3b36-7bab-424e-9772-b620f2dae4e4
+**************************************************
+Generating 2x5, 1+8+1 supremacy circuit
+10 qubit circuit saturated shots = 572416, ΔH = 1.026e-03
+Evaluating fc state vector
+Evaluating fc qasm, 572416 shots
+Evaluating fc hardware, 572416 shots
+Submitted 559 reps * 1024 shots to hardware, job_id = b833add1-1961-46ce-9745-67f44099abf9
+**************************************************
+Generating 1x11, 1+8+1 supremacy circuit
+11 qubit circuit saturated shots = 1516544, ΔH = 1.030e-03
+Evaluating fc state vector
+Evaluating fc qasm, 1516544 shots
+Evaluating fc hardware, 1516544 shots
+Submitted 185 reps * 8192 shots to hardware, job_id = bb58cedb-4c57-4dfb-9e90-cb9bd9449d7c
+Submitted 1 reps * 1024 shots to hardware, job_id = a1163df6-f092-4b43-a403-ef9eb33d24fd
+**************************************************
+Generating 4x3, 1+8+1 supremacy circuit
+12 qubit circuit saturated shots = 2441216, ΔH = 1.023e-03
+Evaluating fc state vector
+Evaluating fc qasm, 2441216 shots
+Evaluating fc hardware, 2441216 shots
+Submitted 298 reps * 8192 shots to hardware, job_id = ddb565bd-5c3a-4955-985b-a631e6dab015
+**************************************************
+Generating 1x13, 1+8+1 supremacy circuit
+13 qubit circuit saturated shots = 4916224, ΔH = 1.034e-03
+Evaluating fc state vector
+Evaluating fc qasm, 4916224 shots
+Evaluating fc hardware, 4916224 shots
+Submitted 600 reps * 8192 shots to hardware, job_id = 5ef49710-335f-4367-809b-fa71d35057b9
+Submitted 1 reps * 1024 shots to hardware, job_id = 9be214a9-011c-4dec-a281-8970da450532
+**************************************************
+Generating 2x7, 1+8+1 supremacy circuit
+14 qubit circuit saturated shots = 4916224, ΔH = 2.219e-03
+Evaluating fc state vector
+Evaluating fc qasm, 4916224 shots
+Evaluating fc hardware, 4916224 shots
+Submitted 600 reps * 8192 shots to hardware, job_id = dc5344c7-656d-43b6-9626-2fed38878049
+Submitted 1 reps * 1024 shots to hardware, job_id = 04e2f43d-cc9b-450e-a652-498f9c34aa41
+**************************************************
+Generating 3x5, 1+8+1 supremacy circuit
+15 qubit circuit saturated shots = 4916224, ΔH = 5.743e-03
+Evaluating fc state vector
+Evaluating fc qasm, 4916224 shots
+Evaluating fc hardware, 4916224 shots
+Submitted 600 reps * 8192 shots to hardware, job_id = cc9ff942-25c6-4b8a-a4d0-afc164210fdf
+Submitted 1 reps * 1024 shots to hardware, job_id = 3a4b3ab4-7e48-4a48-bf64-f8957de5ce77
+**************************************************
+Retrieving 3-qubit circuit
+Meas filter job id 6b774229-42db-43fa-96a3-6f6e0c65b8b0
+job_id : 028d0bc0-a5fc-4019-bfd6-934bc1694f0d
+Mitigation for 1 * 3 qubit circuit took 1.044e-01 seconds
+**************************************************
+Retrieving 4-qubit circuit
+Meas filter job id e63591a2-4331-44c7-bdf2-45fc61bc5ff4
+job_id : 38ea7d6e-4aa3-41cf-bae0-0e71b1f54e13
+Mitigation for 11 * 4 qubit circuit took 2.923e+00 seconds
+**************************************************
+Retrieving 5-qubit circuit
+Meas filter job id e6c80bf6-4ebb-488a-8ba7-13e2fd20cb96
+job_id : 633ec03f-90f5-42ee-929e-4ab00f9555a5
+Mitigation for 2 * 5 qubit circuit took 2.340e+00 seconds
+**************************************************
+Retrieving 6-qubit circuit
+Meas filter job id 2eccf60a-487d-4c1f-8bbc-c84fff8c2638
+job_id : 9e252754-6742-4a29-8e50-11a11df23349
+Mitigation for 31 * 6 qubit circuit took 2.609e+00 seconds
+**************************************************
+Retrieving 7-qubit circuit
+Meas filter job id c31dbe16-e477-4c5a-9164-c82a62fd12ac
+job_id : 10ead74e-3482-46dc-909a-04ea26042fb5
+Mitigation for 17 * 7 qubit circuit took 3.813e+00 seconds
+**************************************************
+Retrieving 8-qubit circuit
+Meas filter job id e1b89c9a-6334-4a8a-a6ef-db0a780c1891
+job_id : 3c4ffa47-0b26-4303-b34e-54a443c6b49e
+Mitigation for 41 * 8 qubit circuit took 2.839e+01 seconds
+**************************************************
+Retrieving 9-qubit circuit
+Meas filter job id 366a3b36-7bab-424e-9772-b620f2dae4e4
+job_id : 78f044cb-7850-44b9-bfb8-5f9a924b6da3
+Mitigation for 229 * 9 qubit circuit took 1.949e+03 seconds
+**************************************************
+Retrieving 10-qubit circuit
+job_id : b833add1-1961-46ce-9745-67f44099abf9
+**************************************************
+Retrieving 11-qubit circuit
+job_id : bb58cedb-4c57-4dfb-9e90-cb9bd9449d7c
+job_id : a1163df6-f092-4b43-a403-ef9eb33d24fd
+**************************************************
+Retrieving 12-qubit circuit
+job_id : ddb565bd-5c3a-4955-985b-a631e6dab015
+**************************************************
+Retrieving 13-qubit circuit
+job_id : 5ef49710-335f-4367-809b-fa71d35057b9
+job_id : 9be214a9-011c-4dec-a281-8970da450532
+**************************************************
+Retrieving 14-qubit circuit
+job_id : dc5344c7-656d-43b6-9626-2fed38878049
+job_id : 04e2f43d-cc9b-450e-a652-498f9c34aa41
+**************************************************
+Retrieving 15-qubit circuit
+job_id : cc9ff942-25c6-4b8a-a4d0-afc164210fdf
+job_id : 3a4b3ab4-7e48-4a48-bf64-f8957de5ce77
+**************************************************
+Case (2, 3)
+Using license file /home/weit/gurobi.lic
+Academic license - for non-commercial use only
+solving for 2 clusters
+solving for 3 clusters
+Infeasible
+********************
+MIQCP stats:
+1 cuts, 2 clusters, max qubit = 2
+cluster 0: original input = 2.00, ρ_qubits = 0.00, O_qubits = 1.00, d = 2.00
+cluster 1: original input = 1.00, ρ_qubits = 1.00, O_qubits = 0.00, d = 2.00
+objective value = 9.000e+00
+manually calculated objective value: 9.000e+00
+evaluator_cost = 9, reconstructor_cost = 1.340e-07, reconstructor_weight = 0.000e+00
+runtime: 0.00023603439331054688
+OPTIMAL
+********************
+1/104 cases
+----------------------------------------------------------------------------------------------------
+Case (2, 4)
+solving for 2 clusters
+Infeasible
+solving for 3 clusters
+Infeasible
+solving for 4 clusters
+********************
+MIQCP stats:
+4 cuts, 4 clusters, max qubit = 2
+cluster 0: original input = 2.00, ρ_qubits = 0.00, O_qubits = 2.00, d = 2.00
+cluster 1: original input = 1.00, ρ_qubits = 1.00, O_qubits = 1.00, d = 2.00
+cluster 2: original input = 1.00, ρ_qubits = 1.00, O_qubits = 1.00, d = 2.00
+cluster 3: original input = 0.00, ρ_qubits = 2.00, O_qubits = 0.00, d = 2.00
+objective value = 8.100e+01
+manually calculated objective value: 8.100e+01
+evaluator_cost = 81, reconstructor_cost = 2.353e-05, reconstructor_weight = 0.000e+00
+runtime: 0.00036406517028808594
+OPTIMAL
+********************
+2/104 cases
+----------------------------------------------------------------------------------------------------
+Case (2, 5)
+solving for 2 clusters
+Infeasible
+solving for 3 clusters
+Infeasible
+solving for 4 clusters
+solving for 5 clusters
+Infeasible
+********************
+MIQCP stats:
+3 cuts, 4 clusters, max qubit = 2
+cluster 0: original input = 2.00, ρ_qubits = 0.00, O_qubits = 1.00, d = 2.00
+cluster 1: original input = 1.00, ρ_qubits = 1.00, O_qubits = 1.00, d = 2.00
+cluster 2: original input = 1.00, ρ_qubits = 1.00, O_qubits = 1.00, d = 2.00
+cluster 3: original input = 1.00, ρ_qubits = 1.00, O_qubits = 0.00, d = 2.00
+objective value = 4.500e+01
+manually calculated objective value: 4.500e+01
+evaluator_cost = 45, reconstructor_cost = 1.168e-05, reconstructor_weight = 0.000e+00
+runtime: 0.0003409385681152344
+OPTIMAL
+********************
+3/104 cases
+----------------------------------------------------------------------------------------------------
+Case (2, 6)
+solving for 2 clusters
+Infeasible
+solving for 3 clusters
+Infeasible
+solving for 4 clusters
+Infeasible
+solving for 5 clusters
+Infeasible
+Case (2, 6) NOT feasible
+4/104 cases
+----------------------------------------------------------------------------------------------------
+Case (2, 7)
+solving for 2 clusters
+Infeasible
+solving for 3 clusters
+Infeasible
+solving for 4 clusters
+Infeasible
+solving for 5 clusters
+Infeasible
+Case (2, 7) NOT feasible
+5/104 cases
+----------------------------------------------------------------------------------------------------
+Case (2, 8)
+solving for 2 clusters
+Infeasible
+solving for 3 clusters
+Infeasible
+solving for 4 clusters
+Infeasible
+solving for 5 clusters
+Infeasible
+Case (2, 8) NOT feasible
+6/104 cases
+----------------------------------------------------------------------------------------------------
+Case (2, 9)
+solving for 2 clusters
+Infeasible
+solving for 3 clusters
+Infeasible
+solving for 4 clusters
+Infeasible
+solving for 5 clusters
+Infeasible
+Case (2, 9) NOT feasible
+7/104 cases
+----------------------------------------------------------------------------------------------------
+Case (2, 10)
+solving for 2 clusters
+Infeasible
+solving for 3 clusters
+Infeasible
+solving for 4 clusters
+Infeasible
+solving for 5 clusters
+Infeasible
+Case (2, 10) NOT feasible
+8/104 cases
+----------------------------------------------------------------------------------------------------
+Case (2, 11)
+solving for 2 clusters
+Infeasible
+solving for 3 clusters
+Infeasible
+solving for 4 clusters
+Infeasible
+solving for 5 clusters
+Infeasible
+Case (2, 11) NOT feasible
+9/104 cases
+----------------------------------------------------------------------------------------------------
+Case (2, 12)
+solving for 2 clusters
+Infeasible
+solving for 3 clusters
+Infeasible
+solving for 4 clusters
+Infeasible
+solving for 5 clusters
+Infeasible
+Case (2, 12) NOT feasible
+10/104 cases
+----------------------------------------------------------------------------------------------------
+Case (2, 13)
+solving for 2 clusters
+Infeasible
+solving for 3 clusters
+Infeasible
+solving for 4 clusters
+Infeasible
+solving for 5 clusters
+Infeasible
+Case (2, 13) NOT feasible
+11/104 cases
+----------------------------------------------------------------------------------------------------
+Case (2, 14)
+solving for 2 clusters
+Infeasible
+solving for 3 clusters
+Infeasible
+solving for 4 clusters
+Infeasible
+solving for 5 clusters
+Infeasible
+Case (2, 14) NOT feasible
+12/104 cases
+----------------------------------------------------------------------------------------------------
+Case (2, 15)
+solving for 2 clusters
+Infeasible
+solving for 3 clusters
+Infeasible
+solving for 4 clusters
+Infeasible
+solving for 5 clusters
+Infeasible
+Case (2, 15) NOT feasible
+13/104 cases
+----------------------------------------------------------------------------------------------------
+Case (3, 3)
+solving for 2 clusters
+solving for 3 clusters
+Infeasible
+********************
+MIQCP stats:
+1 cuts, 2 clusters, max qubit = 3
+cluster 0: original input = 2.00, ρ_qubits = 0.00, O_qubits = 1.00, d = 2.00
+cluster 1: original input = 1.00, ρ_qubits = 1.00, O_qubits = 0.00, d = 2.00
+objective value = 9.000e+00
+manually calculated objective value: 9.000e+00
+evaluator_cost = 9, reconstructor_cost = 1.340e-07, reconstructor_weight = 0.000e+00
+runtime: 0.003167867660522461
+OPTIMAL
+********************
+14/104 cases
+----------------------------------------------------------------------------------------------------
+Case (3, 4)
+solving for 2 clusters
+solving for 3 clusters
+solving for 4 clusters
+********************
+MIQCP stats:
+2 cuts, 2 clusters, max qubit = 3
+cluster 0: original input = 2.00, ρ_qubits = 1.00, O_qubits = 1.00, d = 3.00
+cluster 1: original input = 2.00, ρ_qubits = 1.00, O_qubits = 1.00, d = 3.00
+objective value = 3.600e+01
+manually calculated objective value: 3.600e+01
+evaluator_cost = 36, reconstructor_cost = 1.065e-06, reconstructor_weight = 0.000e+00
+runtime: 0.011313915252685547
+OPTIMAL
+********************
+15/104 cases
+----------------------------------------------------------------------------------------------------
+Case (3, 5)
+solving for 2 clusters
+solving for 3 clusters
+solving for 4 clusters
+solving for 5 clusters
+Infeasible
+********************
+MIQCP stats:
+1 cuts, 2 clusters, max qubit = 3
+cluster 0: original input = 3.00, ρ_qubits = 0.00, O_qubits = 1.00, d = 3.00
+cluster 1: original input = 2.00, ρ_qubits = 1.00, O_qubits = 0.00, d = 3.00
+objective value = 9.000e+00
+manually calculated objective value: 9.000e+00
+evaluator_cost = 9, reconstructor_cost = 5.288e-07, reconstructor_weight = 0.000e+00
+runtime: 0.00622105598449707
+OPTIMAL
+********************
+16/104 cases
+----------------------------------------------------------------------------------------------------
+Case (3, 6)
+solving for 2 clusters
+Infeasible
+solving for 3 clusters
+Infeasible
+solving for 4 clusters
+solving for 5 clusters
+********************
+MIQCP stats:
+6 cuts, 5 clusters, max qubit = 3
+cluster 0: original input = 2.00, ρ_qubits = 1.00, O_qubits = 2.00, d = 3.00
+cluster 1: original input = 2.00, ρ_qubits = 1.00, O_qubits = 2.00, d = 3.00
+cluster 2: original input = 1.00, ρ_qubits = 1.00, O_qubits = 1.00, d = 2.00
+cluster 3: original input = -0.00, ρ_qubits = 2.00, O_qubits = 0.00, d = 2.00
+cluster 4: original input = 1.00, ρ_qubits = 1.00, O_qubits = 1.00, d = 2.00
+objective value = 1.800e+02
+manually calculated objective value: 1.800e+02
+evaluator_cost = 180, reconstructor_cost = 1.823e-03, reconstructor_weight = 0.000e+00
+runtime: 0.08938312530517578
+OPTIMAL
+********************
+17/104 cases
+----------------------------------------------------------------------------------------------------
+Case (3, 7)
+solving for 2 clusters
+Infeasible
+solving for 3 clusters
+solving for 4 clusters
+solving for 5 clusters
+********************
+MIQCP stats:
+2 cuts, 3 clusters, max qubit = 3
+cluster 0: original input = 3.00, ρ_qubits = 0.00, O_qubits = 1.00, d = 3.00
+cluster 1: original input = 3.00, ρ_qubits = 0.00, O_qubits = 1.00, d = 3.00
+cluster 2: original input = 1.00, ρ_qubits = 2.00, O_qubits = 0.00, d = 3.00
+objective value = 4.200e+01
+manually calculated objective value: 4.200e+01
+evaluator_cost = 42, reconstructor_cost = 9.410e-06, reconstructor_weight = 0.000e+00
+runtime: 0.05316805839538574
+OPTIMAL
+********************
+18/104 cases
+----------------------------------------------------------------------------------------------------
+Case (3, 8)
+solving for 2 clusters
+Infeasible
+solving for 3 clusters
+Infeasible
+solving for 4 clusters
+Infeasible
+solving for 5 clusters
+********************
+MIQCP stats:
+7 cuts, 5 clusters, max qubit = 3
+cluster 0: original input = 3.00, ρ_qubits = 0.00, O_qubits = 2.00, d = 3.00
+cluster 1: original input = 1.00, ρ_qubits = 2.00, O_qubits = 1.00, d = 3.00
+cluster 2: original input = 1.00, ρ_qubits = 2.00, O_qubits = 1.00, d = 3.00
+cluster 3: original input = 2.00, ρ_qubits = 1.00, O_qubits = 3.00, d = 3.00
+cluster 4: original input = 1.00, ρ_qubits = 2.00, O_qubits = 0.00, d = 3.00
+objective value = 4.230e+02
+manually calculated objective value: 4.230e+02
+evaluator_cost = 423, reconstructor_cost = 2.186e-02, reconstructor_weight = 0.000e+00
+runtime: 0.22913217544555664
+OPTIMAL
+********************
+19/104 cases
+----------------------------------------------------------------------------------------------------
+Case (3, 9)
+solving for 2 clusters
+Infeasible
+solving for 3 clusters
+Infeasible
+solving for 4 clusters
+Infeasible
+solving for 5 clusters
+Infeasible
+Case (3, 9) NOT feasible
+20/104 cases
+----------------------------------------------------------------------------------------------------
+Case (3, 10)
+solving for 2 clusters
+Infeasible
+solving for 3 clusters
+Infeasible
+solving for 4 clusters
+Infeasible
+solving for 5 clusters
+Infeasible
+Case (3, 10) NOT feasible
+21/104 cases
+----------------------------------------------------------------------------------------------------
+Case (3, 11)
+solving for 2 clusters
+Infeasible
+solving for 3 clusters
+Infeasible
+solving for 4 clusters
+Infeasible
+solving for 5 clusters
+********************
+MIQCP stats:
+4 cuts, 5 clusters, max qubit = 3
+cluster 0: original input = 3.00, ρ_qubits = 0.00, O_qubits = 1.00, d = 3.00
+cluster 1: original input = 3.00, ρ_qubits = 0.00, O_qubits = 2.00, d = 3.00
+cluster 2: original input = 1.00, ρ_qubits = 2.00, O_qubits = 0.00, d = 3.00
+cluster 3: original input = 3.00, ρ_qubits = 0.00, O_qubits = 1.00, d = 3.00
+cluster 4: original input = 1.00, ρ_qubits = 2.00, O_qubits = 0.00, d = 3.00
+objective value = 8.700e+01
+manually calculated objective value: 8.700e+01
+evaluator_cost = 87, reconstructor_cost = 2.420e-03, reconstructor_weight = 0.000e+00
+runtime: 0.1711740493774414
+OPTIMAL
+********************
+22/104 cases
+----------------------------------------------------------------------------------------------------
+Case (3, 12)
+solving for 2 clusters
+Infeasible
+solving for 3 clusters
+Infeasible
+solving for 4 clusters
+Infeasible
+solving for 5 clusters
+Infeasible
+Case (3, 12) NOT feasible
+23/104 cases
+----------------------------------------------------------------------------------------------------
+Case (3, 13)
+solving for 2 clusters
+Infeasible
+solving for 3 clusters
+Infeasible
+solving for 4 clusters
+Infeasible
+solving for 5 clusters
+Infeasible
+Case (3, 13) NOT feasible
+24/104 cases
+----------------------------------------------------------------------------------------------------
+Case (3, 14)
+solving for 2 clusters
+Infeasible
+solving for 3 clusters
+Infeasible
+solving for 4 clusters
+Infeasible
+solving for 5 clusters
+Infeasible
+Case (3, 14) NOT feasible
+25/104 cases
+----------------------------------------------------------------------------------------------------
+Case (3, 15)
+solving for 2 clusters
+Infeasible
+solving for 3 clusters
+Infeasible
+solving for 4 clusters
+Infeasible
+solving for 5 clusters
+Infeasible
+Case (3, 15) NOT feasible
+26/104 cases
+----------------------------------------------------------------------------------------------------
+Case (4, 3)
+solving for 2 clusters
+solving for 3 clusters
+Infeasible
+********************
+MIQCP stats:
+1 cuts, 2 clusters, max qubit = 4
+cluster 0: original input = 2.00, ρ_qubits = 0.00, O_qubits = 1.00, d = 2.00
+cluster 1: original input = 1.00, ρ_qubits = 1.00, O_qubits = 0.00, d = 2.00
+objective value = 9.001e+00
+manually calculated objective value: 9.000e+00
+evaluator_cost = 9, reconstructor_cost = 1.340e-07, reconstructor_weight = 0.000e+00
+runtime: 0.0023250579833984375
+OPTIMAL
+********************
+27/104 cases
+----------------------------------------------------------------------------------------------------
+Case (4, 4)
+solving for 2 clusters
+solving for 3 clusters
+solving for 4 clusters
+********************
+MIQCP stats:
+2 cuts, 2 clusters, max qubit = 4
+cluster 0: original input = 3.00, ρ_qubits = 1.00, O_qubits = 1.00, d = 4.00
+cluster 1: original input = 1.00, ρ_qubits = 1.00, O_qubits = 1.00, d = 2.00
+objective value = 3.600e+01
+manually calculated objective value: 3.600e+01
+evaluator_cost = 36, reconstructor_cost = 1.065e-06, reconstructor_weight = 0.000e+00
+runtime: 0.0362248420715332
+OPTIMAL
+********************
+28/104 cases
+----------------------------------------------------------------------------------------------------
+Case (4, 5)
+solving for 2 clusters
+solving for 3 clusters
+solving for 4 clusters
+solving for 5 clusters
+Infeasible
+********************
+MIQCP stats:
+1 cuts, 2 clusters, max qubit = 4
+cluster 0: original input = 2.00, ρ_qubits = -0.00, O_qubits = 1.00, d = 2.00
+cluster 1: original input = 3.00, ρ_qubits = 1.00, O_qubits = -0.00, d = 4.00
+objective value = 9.001e+00
+manually calculated objective value: 9.000e+00
+evaluator_cost = 9, reconstructor_cost = 5.288e-07, reconstructor_weight = 0.000e+00
+runtime: 0.022233963012695312
+OPTIMAL
+********************
+29/104 cases
+----------------------------------------------------------------------------------------------------
+Case (4, 6)
+solving for 2 clusters
+Infeasible
+solving for 3 clusters
+solving for 4 clusters
+solving for 5 clusters
+********************
+MIQCP stats:
+4 cuts, 3 clusters, max qubit = 4
+cluster 0: original input = 3.00, ρ_qubits = 1.00, O_qubits = 2.00, d = 4.00
+cluster 1: original input = 3.00, ρ_qubits = 1.00, O_qubits = 2.00, d = 4.00
+cluster 2: original input = 0.00, ρ_qubits = 2.00, O_qubits = 0.00, d = 2.00
+objective value = 1.440e+02
+manually calculated objective value: 1.440e+02
+evaluator_cost = 144, reconstructor_cost = 8.426e-05, reconstructor_weight = 0.000e+00
+runtime: 0.09739899635314941
+OPTIMAL
+********************
+30/104 cases
+----------------------------------------------------------------------------------------------------
+Case (4, 7)
+solving for 2 clusters
+solving for 3 clusters
+solving for 4 clusters
+solving for 5 clusters
+********************
+MIQCP stats:
+1 cuts, 2 clusters, max qubit = 4
+cluster 0: original input = 4.00, ρ_qubits = -0.00, O_qubits = 1.00, d = 4.00
+cluster 1: original input = 3.00, ρ_qubits = 1.00, O_qubits = 0.00, d = 4.00
+objective value = 9.001e+00
+manually calculated objective value: 9.000e+00
+evaluator_cost = 9, reconstructor_cost = 2.086e-06, reconstructor_weight = 0.000e+00
+runtime: 0.022727012634277344
+OPTIMAL
+********************
+31/104 cases
+----------------------------------------------------------------------------------------------------
+Case (4, 8)
+solving for 2 clusters
+Infeasible
+solving for 3 clusters
+solving for 4 clusters
+solving for 5 clusters
+********************
+MIQCP stats:
+4 cuts, 3 clusters, max qubit = 4
+cluster 0: original input = 3.00, ρ_qubits = 1.00, O_qubits = 2.00, d = 4.00
+cluster 1: original input = 3.00, ρ_qubits = 1.00, O_qubits = 1.00, d = 4.00
+cluster 2: original input = 2.00, ρ_qubits = 2.00, O_qubits = 1.00, d = 4.00
+objective value = 1.800e+02
+manually calculated objective value: 1.800e+02
+evaluator_cost = 180, reconstructor_cost = 2.991e-04, reconstructor_weight = 0.000e+00
+runtime: 0.1316509246826172
+OPTIMAL
+********************
+32/104 cases
+----------------------------------------------------------------------------------------------------
+Case (4, 9)
+solving for 2 clusters
+Infeasible
+solving for 3 clusters
+Infeasible
+solving for 4 clusters
+solving for 5 clusters
+********************
+MIQCP stats:
+6 cuts, 4 clusters, max qubit = 4
+cluster 0: original input = 3.00, ρ_qubits = 1.00, O_qubits = 2.00, d = 4.00
+cluster 1: original input = 1.00, ρ_qubits = 3.00, O_qubits = 0.00, d = 4.00
+cluster 2: original input = 4.00, ρ_qubits = 0.00, O_qubits = 3.00, d = 4.00
+cluster 3: original input = 1.00, ρ_qubits = 2.00, O_qubits = 1.00, d = 3.00
+objective value = 4.050e+02
+manually calculated objective value: 4.050e+02
+evaluator_cost = 404, reconstructor_cost = 1.164e-02, reconstructor_weight = 0.000e+00
+runtime: 0.29895997047424316
+OPTIMAL
+********************
+33/104 cases
+----------------------------------------------------------------------------------------------------
+Case (4, 10)
+solving for 2 clusters
+Infeasible
+solving for 3 clusters
+Infeasible
+solving for 4 clusters
+solving for 5 clusters
+********************
+MIQCP stats:
+6 cuts, 4 clusters, max qubit = 4
+cluster 0: original input = 3.00, ρ_qubits = 1.00, O_qubits = 2.00, d = 4.00
+cluster 1: original input = 2.00, ρ_qubits = 2.00, O_qubits = 1.00, d = 4.00
+cluster 2: original input = 2.00, ρ_qubits = 2.00, O_qubits = 0.00, d = 4.00
+cluster 3: original input = 3.00, ρ_qubits = 1.00, O_qubits = 3.00, d = 4.00
+objective value = 3.600e+02
+manually calculated objective value: 3.600e+02
+evaluator_cost = 359, reconstructor_cost = 2.571e-02, reconstructor_weight = 0.000e+00
+runtime: 0.23924994468688965
+OPTIMAL
+********************
+34/104 cases
+----------------------------------------------------------------------------------------------------
+Case (4, 11)
+solving for 2 clusters
+Infeasible
+solving for 3 clusters
+Infeasible
+solving for 4 clusters
+solving for 5 clusters
+********************
+MIQCP stats:
+3 cuts, 4 clusters, max qubit = 4
+cluster 0: original input = 4.00, ρ_qubits = 0.00, O_qubits = 1.00, d = 4.00
+cluster 1: original input = 3.00, ρ_qubits = 1.00, O_qubits = 0.00, d = 4.00
+cluster 2: original input = 1.00, ρ_qubits = 1.00, O_qubits = 1.00, d = 2.00
+cluster 3: original input = 3.00, ρ_qubits = 1.00, O_qubits = 1.00, d = 4.00
+objective value = 4.500e+01
+manually calculated objective value: 4.500e+01
+evaluator_cost = 45, reconstructor_cost = 6.194e-04, reconstructor_weight = 0.000e+00
+runtime: 0.20462703704833984
+OPTIMAL
+********************
+35/104 cases
+----------------------------------------------------------------------------------------------------
+Case (4, 12)
+solving for 2 clusters
+Infeasible
+solving for 3 clusters
+Infeasible
+solving for 4 clusters
+Infeasible
+solving for 5 clusters
+Infeasible
+Case (4, 12) NOT feasible
+36/104 cases
+----------------------------------------------------------------------------------------------------
+Case (4, 13)
+solving for 2 clusters
+Infeasible
+solving for 3 clusters
+Infeasible
+solving for 4 clusters
+solving for 5 clusters
+********************
+MIQCP stats:
+3 cuts, 4 clusters, max qubit = 4
+cluster 0: original input = 4.00, ρ_qubits = 0.00, O_qubits = 1.00, d = 4.00
+cluster 1: original input = 3.00, ρ_qubits = 1.00, O_qubits = -0.00, d = 4.00
+cluster 2: original input = 3.00, ρ_qubits = 1.00, O_qubits = 1.00, d = 4.00
+cluster 3: original input = 3.00, ρ_qubits = 1.00, O_qubits = 1.00, d = 4.00
+objective value = 4.500e+01
+manually calculated objective value: 4.500e+01
+evaluator_cost = 44, reconstructor_cost = 2.345e-03, reconstructor_weight = 0.000e+00
+runtime: 0.18823790550231934
+OPTIMAL
+********************
+37/104 cases
+----------------------------------------------------------------------------------------------------
+Case (4, 14)
+solving for 2 clusters
+Infeasible
+solving for 3 clusters
+Infeasible
+solving for 4 clusters
+Infeasible
+solving for 5 clusters
+Infeasible
+Case (4, 14) NOT feasible
+38/104 cases
+----------------------------------------------------------------------------------------------------
+Case (4, 15)
+solving for 2 clusters
+Infeasible
+solving for 3 clusters
+Infeasible
+solving for 4 clusters
+Infeasible
+solving for 5 clusters
+Infeasible
+Case (4, 15) NOT feasible
+39/104 cases
+----------------------------------------------------------------------------------------------------
+Case (5, 3)
+solving for 2 clusters
+solving for 3 clusters
+Infeasible
+********************
+MIQCP stats:
+1 cuts, 2 clusters, max qubit = 5
+cluster 0: original input = 2.00, ρ_qubits = 0.00, O_qubits = 1.00, d = 2.00
+cluster 1: original input = 1.00, ρ_qubits = 1.00, O_qubits = 0.00, d = 2.00
+objective value = 9.001e+00
+manually calculated objective value: 9.000e+00
+evaluator_cost = 9, reconstructor_cost = 1.340e-07, reconstructor_weight = 0.000e+00
+runtime: 0.0020911693572998047
+OPTIMAL
+********************
+40/104 cases
+----------------------------------------------------------------------------------------------------
+Case (5, 4)
+solving for 2 clusters
+solving for 3 clusters
+solving for 4 clusters
+********************
+MIQCP stats:
+2 cuts, 2 clusters, max qubit = 5
+cluster 0: original input = 3.00, ρ_qubits = 1.00, O_qubits = 1.00, d = 4.00
+cluster 1: original input = 1.00, ρ_qubits = 1.00, O_qubits = 1.00, d = 2.00
+objective value = 3.601e+01
+manually calculated objective value: 3.600e+01
+evaluator_cost = 36, reconstructor_cost = 1.065e-06, reconstructor_weight = 0.000e+00
+runtime: 0.03569293022155762
+OPTIMAL
+********************
+41/104 cases
+----------------------------------------------------------------------------------------------------
+Case (5, 5)
+solving for 2 clusters
+solving for 3 clusters
+solving for 4 clusters
+solving for 5 clusters
+Infeasible
+********************
+MIQCP stats:
+1 cuts, 2 clusters, max qubit = 5
+cluster 0: original input = 4.00, ρ_qubits = 0.00, O_qubits = 1.00, d = 4.00
+cluster 1: original input = 1.00, ρ_qubits = 1.00, O_qubits = 0.00, d = 2.00
+objective value = 9.001e+00
+manually calculated objective value: 9.000e+00
+evaluator_cost = 9, reconstructor_cost = 5.288e-07, reconstructor_weight = 0.000e+00
+runtime: 0.02234792709350586
+OPTIMAL
+********************
+42/104 cases
+----------------------------------------------------------------------------------------------------
+Case (5, 6)
+solving for 2 clusters
+solving for 3 clusters
+solving for 4 clusters
+solving for 5 clusters
+********************
+MIQCP stats:
+2 cuts, 2 clusters, max qubit = 5
+cluster 0: original input = 2.00, ρ_qubits = 1.00, O_qubits = 1.00, d = 3.00
+cluster 1: original input = 4.00, ρ_qubits = 1.00, O_qubits = 1.00, d = 5.00
+objective value = 3.601e+01
+manually calculated objective value: 3.600e+01
+evaluator_cost = 36, reconstructor_cost = 4.201e-06, reconstructor_weight = 0.000e+00
+runtime: 0.04612994194030762
+OPTIMAL
+********************
+43/104 cases
+----------------------------------------------------------------------------------------------------
+Case (5, 7)
+solving for 2 clusters
+solving for 3 clusters
+solving for 4 clusters
+solving for 5 clusters
+********************
+MIQCP stats:
+1 cuts, 2 clusters, max qubit = 5
+cluster 0: original input = 3.00, ρ_qubits = 0.00, O_qubits = 1.00, d = 3.00
+cluster 1: original input = 4.00, ρ_qubits = 1.00, O_qubits = 0.00, d = 5.00
+objective value = 9.001e+00
+manually calculated objective value: 9.000e+00
+evaluator_cost = 9, reconstructor_cost = 2.086e-06, reconstructor_weight = 0.000e+00
+runtime: 0.03544902801513672
+OPTIMAL
+********************
+44/104 cases
+----------------------------------------------------------------------------------------------------
+Case (5, 8)
+solving for 2 clusters
+Infeasible
+solving for 3 clusters
+solving for 4 clusters
+solving for 5 clusters
+********************
+MIQCP stats:
+4 cuts, 3 clusters, max qubit = 5
+cluster 0: original input = 4.00, ρ_qubits = 1.00, O_qubits = 2.00, d = 5.00
+cluster 1: original input = 4.00, ρ_qubits = 1.00, O_qubits = 2.00, d = 5.00
+cluster 2: original input = 0.00, ρ_qubits = 2.00, O_qubits = 0.00, d = 2.00
+objective value = 1.440e+02
+manually calculated objective value: 1.440e+02
+evaluator_cost = 144, reconstructor_cost = 3.325e-04, reconstructor_weight = 0.000e+00
+runtime: 0.14464497566223145
+OPTIMAL
+********************
+45/104 cases
+----------------------------------------------------------------------------------------------------
+Case (5, 9)
+solving for 2 clusters
+Infeasible
+solving for 3 clusters
+solving for 4 clusters
+solving for 5 clusters
+********************
+MIQCP stats:
+6 cuts, 4 clusters, max qubit = 5
+cluster 0: original input = 3.00, ρ_qubits = 2.00, O_qubits = 1.00, d = 5.00
+cluster 1: original input = 4.00, ρ_qubits = 1.00, O_qubits = 2.00, d = 5.00
+cluster 2: original input = 2.00, ρ_qubits = 1.00, O_qubits = 2.00, d = 3.00
+cluster 3: original input = 0.00, ρ_qubits = 2.00, O_qubits = 1.00, d = 2.00
+objective value = 3.240e+02
+manually calculated objective value: 3.240e+02
+evaluator_cost = 324, reconstructor_cost = 1.481e-02, reconstructor_weight = 0.000e+00
+runtime: 0.3046579360961914
+OPTIMAL
+********************
+46/104 cases
+----------------------------------------------------------------------------------------------------
+Case (5, 10)
+solving for 2 clusters
+Infeasible
+solving for 3 clusters
+solving for 4 clusters
+solving for 5 clusters
+********************
+MIQCP stats:
+7 cuts, 5 clusters, max qubit = 5
+cluster 0: original input = 4.00, ρ_qubits = 1.00, O_qubits = 2.00, d = 5.00
+cluster 1: original input = 1.00, ρ_qubits = 1.00, O_qubits = 2.00, d = 2.00
+cluster 2: original input = 2.00, ρ_qubits = 1.00, O_qubits = 3.00, d = 3.00
+cluster 3: original input = 0.00, ρ_qubits = 2.00, O_qubits = 0.00, d = 2.00
+cluster 4: original input = 3.00, ρ_qubits = 2.00, O_qubits = -0.00, d = 5.00
+objective value = 3.420e+02
+manually calculated objective value: 3.420e+02
+evaluator_cost = 341, reconstructor_cost = 7.024e-02, reconstructor_weight = 0.000e+00
+runtime: 0.27387380599975586
+OPTIMAL
+********************
+47/104 cases
+----------------------------------------------------------------------------------------------------
+Case (5, 11)
+solving for 2 clusters
+Infeasible
+solving for 3 clusters
+solving for 4 clusters
+solving for 5 clusters
+********************
+MIQCP stats:
+2 cuts, 3 clusters, max qubit = 5
+cluster 0: original input = 4.00, ρ_qubits = 1.00, O_qubits = 0.00, d = 5.00
+cluster 1: original input = 4.00, ρ_qubits = 1.00, O_qubits = 0.00, d = 5.00
+cluster 2: original input = 3.00, ρ_qubits = 0.00, O_qubits = 2.00, d = 3.00
+objective value = 2.100e+01
+manually calculated objective value: 2.100e+01
+evaluator_cost = 21, reconstructor_cost = 1.953e-04, reconstructor_weight = 0.000e+00
+runtime: 0.10456395149230957
+OPTIMAL
+********************
+48/104 cases
+----------------------------------------------------------------------------------------------------
+Case (5, 12)
+solving for 2 clusters
+Infeasible
+solving for 3 clusters
+Infeasible
+solving for 4 clusters
+solving for 5 clusters
+********************
+MIQCP stats:
+8 cuts, 5 clusters, max qubit = 5
+cluster 0: original input = 3.00, ρ_qubits = 1.00, O_qubits = 2.00, d = 4.00
+cluster 1: original input = 3.00, ρ_qubits = 2.00, O_qubits = 1.00, d = 5.00
+cluster 2: original input = 3.00, ρ_qubits = 1.00, O_qubits = 2.00, d = 4.00
+cluster 3: original input = 3.00, ρ_qubits = 2.00, O_qubits = 2.00, d = 5.00
+cluster 4: original input = 0.00, ρ_qubits = 2.00, O_qubits = 1.00, d = 2.00
+objective value = 6.480e+02
+manually calculated objective value: 6.480e+02
+evaluator_cost = 648, reconstructor_cost = 1.674e+00, reconstructor_weight = 0.000e+00
+runtime: 0.6681220531463623
+OPTIMAL
+********************
+49/104 cases
+----------------------------------------------------------------------------------------------------
+Case (5, 13)
+solving for 2 clusters
+Infeasible
+solving for 3 clusters
+solving for 4 clusters
+solving for 5 clusters
+********************
+MIQCP stats:
+2 cuts, 3 clusters, max qubit = 5
+cluster 0: original input = 4.00, ρ_qubits = 1.00, O_qubits = 0.00, d = 5.00
+cluster 1: original input = 4.00, ρ_qubits = 1.00, O_qubits = 1.00, d = 5.00
+cluster 2: original input = 5.00, ρ_qubits = 0.00, O_qubits = 1.00, d = 5.00
+objective value = 2.700e+01
+manually calculated objective value: 2.700e+01
+evaluator_cost = 27, reconstructor_cost = 5.455e-04, reconstructor_weight = 0.000e+00
+runtime: 0.17045211791992188
+OPTIMAL
+********************
+50/104 cases
+----------------------------------------------------------------------------------------------------
+Case (5, 14)
+solving for 2 clusters
+Infeasible
+solving for 3 clusters
+Infeasible
+solving for 4 clusters
+Infeasible
+solving for 5 clusters
+********************
+MIQCP stats:
+8 cuts, 5 clusters, max qubit = 5
+cluster 0: original input = 3.00, ρ_qubits = 1.00, O_qubits = 2.00, d = 4.00
+cluster 1: original input = 3.00, ρ_qubits = 2.00, O_qubits = 2.00, d = 5.00
+cluster 2: original input = 3.00, ρ_qubits = 1.00, O_qubits = 3.00, d = 4.00
+cluster 3: original input = 3.00, ρ_qubits = 2.00, O_qubits = 0.00, d = 5.00
+cluster 4: original input = 2.00, ρ_qubits = 2.00, O_qubits = 1.00, d = 4.00
+objective value = 6.840e+02
+manually calculated objective value: 6.840e+02
+evaluator_cost = 684, reconstructor_cost = 4.729e+00, reconstructor_weight = 0.000e+00
+runtime: 0.5459659099578857
+OPTIMAL
+********************
+51/104 cases
+----------------------------------------------------------------------------------------------------
+Case (5, 15)
+solving for 2 clusters
+Infeasible
+solving for 3 clusters
+Infeasible
+solving for 4 clusters
+Infeasible
+solving for 5 clusters
+********************
+MIQCP stats:
+10 cuts, 5 clusters, max qubit = 5
+cluster 0: original input = 3.00, ρ_qubits = 2.00, O_qubits = 2.00, d = 5.00
+cluster 1: original input = 5.00, ρ_qubits = 0.00, O_qubits = 5.00, d = 5.00
+cluster 2: original input = 2.00, ρ_qubits = 3.00, O_qubits = 1.00, d = 5.00
+cluster 3: original input = 3.00, ρ_qubits = 2.00, O_qubits = 2.00, d = 5.00
+cluster 4: original input = 2.00, ρ_qubits = 3.00, O_qubits = 0.00, d = 5.00
+objective value = 1.755e+03
+manually calculated objective value: 1.755e+03
+evaluator_cost = 1755, reconstructor_cost = 1.374e+02, reconstructor_weight = 0.000e+00
+runtime: 1.254997968673706
+OPTIMAL
+********************
+52/104 cases
+----------------------------------------------------------------------------------------------------
+Case (6, 3)
+solving for 2 clusters
+solving for 3 clusters
+Infeasible
+********************
+MIQCP stats:
+1 cuts, 2 clusters, max qubit = 6
+cluster 0: original input = 2.00, ρ_qubits = 0.00, O_qubits = 1.00, d = 2.00
+cluster 1: original input = 1.00, ρ_qubits = 1.00, O_qubits = 0.00, d = 2.00
+objective value = 9.002e+00
+manually calculated objective value: 9.000e+00
+evaluator_cost = 9, reconstructor_cost = 1.340e-07, reconstructor_weight = 0.000e+00
+runtime: 0.0024399757385253906
+OPTIMAL
+********************
+53/104 cases
+----------------------------------------------------------------------------------------------------
+Case (6, 4)
+solving for 2 clusters
+solving for 3 clusters
+solving for 4 clusters
+********************
+MIQCP stats:
+2 cuts, 2 clusters, max qubit = 6
+cluster 0: original input = 3.00, ρ_qubits = 1.00, O_qubits = 1.00, d = 4.00
+cluster 1: original input = 1.00, ρ_qubits = 1.00, O_qubits = 1.00, d = 2.00
+objective value = 3.600e+01
+manually calculated objective value: 3.600e+01
+evaluator_cost = 36, reconstructor_cost = 1.065e-06, reconstructor_weight = 0.000e+00
+runtime: 0.03957390785217285
+OPTIMAL
+********************
+54/104 cases
+----------------------------------------------------------------------------------------------------
+Case (6, 5)
+solving for 2 clusters
+solving for 3 clusters
+solving for 4 clusters
+solving for 5 clusters
+Infeasible
+********************
+MIQCP stats:
+1 cuts, 2 clusters, max qubit = 6
+cluster 0: original input = 4.00, ρ_qubits = 0.00, O_qubits = 1.00, d = 4.00
+cluster 1: original input = 1.00, ρ_qubits = 1.00, O_qubits = 0.00, d = 2.00
+objective value = 9.002e+00
+manually calculated objective value: 9.000e+00
+evaluator_cost = 9, reconstructor_cost = 5.288e-07, reconstructor_weight = 0.000e+00
+runtime: 0.0290529727935791
+OPTIMAL
+********************
+55/104 cases
+----------------------------------------------------------------------------------------------------
+Case (6, 6)
+solving for 2 clusters
+solving for 3 clusters
+solving for 4 clusters
+solving for 5 clusters
+********************
+MIQCP stats:
+2 cuts, 2 clusters, max qubit = 6
+cluster 0: original input = 5.00, ρ_qubits = 1.00, O_qubits = 1.00, d = 6.00
+cluster 1: original input = 1.00, ρ_qubits = 1.00, O_qubits = 1.00, d = 2.00
+objective value = 3.600e+01
+manually calculated objective value: 3.600e+01
+evaluator_cost = 36, reconstructor_cost = 4.201e-06, reconstructor_weight = 0.000e+00
+runtime: 0.08631300926208496
+OPTIMAL
+********************
+56/104 cases
+----------------------------------------------------------------------------------------------------
+Case (6, 7)
+solving for 2 clusters
+solving for 3 clusters
+solving for 4 clusters
+solving for 5 clusters
+********************
+MIQCP stats:
+1 cuts, 2 clusters, max qubit = 6
+cluster 0: original input = 2.00, ρ_qubits = -0.00, O_qubits = 1.00, d = 2.00
+cluster 1: original input = 5.00, ρ_qubits = 1.00, O_qubits = 0.00, d = 6.00
+objective value = 9.002e+00
+manually calculated objective value: 9.000e+00
+evaluator_cost = 9, reconstructor_cost = 2.086e-06, reconstructor_weight = 0.000e+00
+runtime: 0.041030168533325195
+OPTIMAL
+********************
+57/104 cases
+----------------------------------------------------------------------------------------------------
+Case (6, 8)
+solving for 2 clusters
+solving for 3 clusters
+solving for 4 clusters
+solving for 5 clusters
+********************
+MIQCP stats:
+2 cuts, 2 clusters, max qubit = 6
+cluster 0: original input = 5.00, ρ_qubits = 1.00, O_qubits = 1.00, d = 6.00
+cluster 1: original input = 3.00, ρ_qubits = 1.00, O_qubits = 1.00, d = 4.00
+objective value = 3.600e+01
+manually calculated objective value: 3.600e+01
+evaluator_cost = 36, reconstructor_cost = 1.658e-05, reconstructor_weight = 0.000e+00
+runtime: 0.06372904777526855
+OPTIMAL
+********************
+58/104 cases
+----------------------------------------------------------------------------------------------------
+Case (6, 9)
+solving for 2 clusters
+solving for 3 clusters
+solving for 4 clusters
+solving for 5 clusters
+********************
+MIQCP stats:
+3 cuts, 2 clusters, max qubit = 6
+cluster 0: original input = 5.00, ρ_qubits = 1.00, O_qubits = 2.00, d = 6.00
+cluster 1: original input = 4.00, ρ_qubits = 2.00, O_qubits = 1.00, d = 6.00
+objective value = 1.620e+02
+manually calculated objective value: 1.620e+02
+evaluator_cost = 161, reconstructor_cost = 1.317e-04, reconstructor_weight = 0.000e+00
+runtime: 0.0639810562133789
+OPTIMAL
+********************
+59/104 cases
+----------------------------------------------------------------------------------------------------
+Case (6, 10)
+solving for 2 clusters
+solving for 3 clusters
+solving for 4 clusters
+solving for 5 clusters
+********************
+MIQCP stats:
+2 cuts, 2 clusters, max qubit = 6
+cluster 0: original input = 5.00, ρ_qubits = 1.00, O_qubits = 1.00, d = 6.00
+cluster 1: original input = 5.00, ρ_qubits = 1.00, O_qubits = 1.00, d = 6.00
+objective value = 3.600e+01
+manually calculated objective value: 3.600e+01
+evaluator_cost = 36, reconstructor_cost = 6.541e-05, reconstructor_weight = 0.000e+00
+runtime: 0.06087803840637207
+OPTIMAL
+********************
+60/104 cases
+----------------------------------------------------------------------------------------------------
+Case (6, 11)
+solving for 2 clusters
+solving for 3 clusters
+solving for 4 clusters
+solving for 5 clusters
+********************
+MIQCP stats:
+1 cuts, 2 clusters, max qubit = 6
+cluster 0: original input = 6.00, ρ_qubits = -0.00, O_qubits = 1.00, d = 6.00
+cluster 1: original input = 5.00, ρ_qubits = 1.00, O_qubits = -0.00, d = 6.00
+objective value = 9.002e+00
+manually calculated objective value: 9.000e+00
+evaluator_cost = 8, reconstructor_cost = 3.248e-05, reconstructor_weight = 0.000e+00
+runtime: 0.046421051025390625
+OPTIMAL
+********************
+61/104 cases
+----------------------------------------------------------------------------------------------------
+Case (6, 12)
+solving for 2 clusters
+Infeasible
+solving for 3 clusters
+solving for 4 clusters
+solving for 5 clusters
+********************
+MIQCP stats:
+8 cuts, 5 clusters, max qubit = 6
+cluster 0: original input = 5.00, ρ_qubits = 1.00, O_qubits = 2.00, d = 6.00
+cluster 1: original input = 1.00, ρ_qubits = 2.00, O_qubits = 1.00, d = 3.00
+cluster 2: original input = 5.00, ρ_qubits = 1.00, O_qubits = 3.00, d = 6.00
+cluster 3: original input = 1.00, ρ_qubits = 2.00, O_qubits = 1.00, d = 3.00
+cluster 4: original input = 0.00, ρ_qubits = 2.00, O_qubits = 1.00, d = 2.00
+objective value = 5.401e+02
+manually calculated objective value: 5.400e+02
+evaluator_cost = 540, reconstructor_cost = 1.741e+00, reconstructor_weight = 0.000e+00
+runtime: 0.5460600852966309
+OPTIMAL
+********************
+62/104 cases
+----------------------------------------------------------------------------------------------------
+Case (6, 13)
+solving for 2 clusters
+Infeasible
+solving for 3 clusters
+solving for 4 clusters
+solving for 5 clusters
+********************
+MIQCP stats:
+2 cuts, 3 clusters, max qubit = 6
+cluster 0: original input = 4.00, ρ_qubits = 1.00, O_qubits = 0.00, d = 5.00
+cluster 1: original input = 4.00, ρ_qubits = -0.00, O_qubits = 2.00, d = 4.00
+cluster 2: original input = 5.00, ρ_qubits = 1.00, O_qubits = 0.00, d = 6.00
+objective value = 2.100e+01
+manually calculated objective value: 2.100e+01
+evaluator_cost = 21, reconstructor_cost = 5.210e-04, reconstructor_weight = 0.000e+00
+runtime: 0.15274810791015625
+OPTIMAL
+********************
+63/104 cases
+----------------------------------------------------------------------------------------------------
+Case (6, 14)
+solving for 2 clusters
+Infeasible
+solving for 3 clusters
+solving for 4 clusters
+solving for 5 clusters
+********************
+MIQCP stats:
+5 cuts, 4 clusters, max qubit = 6
+cluster 0: original input = 5.00, ρ_qubits = 1.00, O_qubits = 1.00, d = 6.00
+cluster 1: original input = 3.00, ρ_qubits = 1.00, O_qubits = 2.00, d = 4.00
+cluster 2: original input = 5.00, ρ_qubits = 1.00, O_qubits = 1.00, d = 6.00
+cluster 3: original input = 1.00, ρ_qubits = 2.00, O_qubits = 1.00, d = 3.00
+objective value = 1.980e+02
+manually calculated objective value: 1.980e+02
+evaluator_cost = 198, reconstructor_cost = 8.222e-02, reconstructor_weight = 0.000e+00
+runtime: 0.3172900676727295
+OPTIMAL
+********************
+64/104 cases
+----------------------------------------------------------------------------------------------------
+Case (6, 15)
+solving for 2 clusters
+Infeasible
+solving for 3 clusters
+Infeasible
+solving for 4 clusters
+solving for 5 clusters
+********************
+MIQCP stats:
+8 cuts, 5 clusters, max qubit = 6
+cluster 0: original input = 4.00, ρ_qubits = 2.00, O_qubits = 2.00, d = 6.00
+cluster 1: original input = 3.00, ρ_qubits = 0.00, O_qubits = 3.00, d = 3.00
+cluster 2: original input = 1.00, ρ_qubits = 1.00, O_qubits = 1.00, d = 2.00
+cluster 3: original input = 4.00, ρ_qubits = 2.00, O_qubits = 2.00, d = 6.00
+cluster 4: original input = 3.00, ρ_qubits = 3.00, O_qubits = 0.00, d = 6.00
+objective value = 9.091e+02
+manually calculated objective value: 9.090e+02
+evaluator_cost = 909, reconstructor_cost = 8.432e+00, reconstructor_weight = 0.000e+00
+runtime: 0.9614150524139404
+OPTIMAL
+********************
+65/104 cases
+----------------------------------------------------------------------------------------------------
+Case (7, 3)
+solving for 2 clusters
+solving for 3 clusters
+Infeasible
+********************
+MIQCP stats:
+1 cuts, 2 clusters, max qubit = 7
+cluster 0: original input = 2.00, ρ_qubits = 0.00, O_qubits = 1.00, d = 2.00
+cluster 1: original input = 1.00, ρ_qubits = 1.00, O_qubits = 0.00, d = 2.00
+objective value = 9.002e+00
+manually calculated objective value: 9.000e+00
+evaluator_cost = 9, reconstructor_cost = 1.340e-07, reconstructor_weight = 0.000e+00
+runtime: 0.0023169517517089844
+OPTIMAL
+********************
+66/104 cases
+----------------------------------------------------------------------------------------------------
+Case (7, 4)
+solving for 2 clusters
+solving for 3 clusters
+solving for 4 clusters
+********************
+MIQCP stats:
+2 cuts, 2 clusters, max qubit = 7
+cluster 0: original input = 3.00, ρ_qubits = 1.00, O_qubits = 1.00, d = 4.00
+cluster 1: original input = 1.00, ρ_qubits = 1.00, O_qubits = 1.00, d = 2.00
+objective value = 3.601e+01
+manually calculated objective value: 3.600e+01
+evaluator_cost = 36, reconstructor_cost = 1.065e-06, reconstructor_weight = 0.000e+00
+runtime: 0.03566908836364746
+OPTIMAL
+********************
+67/104 cases
+----------------------------------------------------------------------------------------------------
+Case (7, 5)
+solving for 2 clusters
+solving for 3 clusters
+solving for 4 clusters
+solving for 5 clusters
+Infeasible
+********************
+MIQCP stats:
+1 cuts, 2 clusters, max qubit = 7
+cluster 0: original input = 4.00, ρ_qubits = 0.00, O_qubits = 1.00, d = 4.00
+cluster 1: original input = 1.00, ρ_qubits = 1.00, O_qubits = 0.00, d = 2.00
+objective value = 9.002e+00
+manually calculated objective value: 9.000e+00
+evaluator_cost = 9, reconstructor_cost = 5.288e-07, reconstructor_weight = 0.000e+00
+runtime: 0.022713899612426758
+OPTIMAL
+********************
+68/104 cases
+----------------------------------------------------------------------------------------------------
+Case (7, 6)
+solving for 2 clusters
+solving for 3 clusters
+solving for 4 clusters
+solving for 5 clusters
+********************
+MIQCP stats:
+2 cuts, 2 clusters, max qubit = 7
+cluster 0: original input = 5.00, ρ_qubits = 1.00, O_qubits = 1.00, d = 6.00
+cluster 1: original input = 1.00, ρ_qubits = 1.00, O_qubits = 1.00, d = 2.00
+objective value = 3.601e+01
+manually calculated objective value: 3.600e+01
+evaluator_cost = 36, reconstructor_cost = 4.201e-06, reconstructor_weight = 0.000e+00
+runtime: 0.07773399353027344
+OPTIMAL
+********************
+69/104 cases
+----------------------------------------------------------------------------------------------------
+Case (7, 7)
+solving for 2 clusters
+solving for 3 clusters
+solving for 4 clusters
+solving for 5 clusters
+********************
+MIQCP stats:
+1 cuts, 2 clusters, max qubit = 7
+cluster 0: original input = 2.00, ρ_qubits = -0.00, O_qubits = 1.00, d = 2.00
+cluster 1: original input = 5.00, ρ_qubits = 1.00, O_qubits = 0.00, d = 6.00
+objective value = 9.002e+00
+manually calculated objective value: 9.000e+00
+evaluator_cost = 9, reconstructor_cost = 2.086e-06, reconstructor_weight = 0.000e+00
+runtime: 0.03943991661071777
+OPTIMAL
+********************
+70/104 cases
+----------------------------------------------------------------------------------------------------
+Case (7, 8)
+solving for 2 clusters
+solving for 3 clusters
+solving for 4 clusters
+solving for 5 clusters
+********************
+MIQCP stats:
+2 cuts, 2 clusters, max qubit = 7
+cluster 0: original input = 6.00, ρ_qubits = 1.00, O_qubits = 1.00, d = 7.00
+cluster 1: original input = 2.00, ρ_qubits = 1.00, O_qubits = 1.00, d = 3.00
+objective value = 3.601e+01
+manually calculated objective value: 3.600e+01
+evaluator_cost = 35, reconstructor_cost = 1.658e-05, reconstructor_weight = 0.000e+00
+runtime: 0.09527301788330078
+OPTIMAL
+********************
+71/104 cases
+----------------------------------------------------------------------------------------------------
+Case (7, 9)
+solving for 2 clusters
+solving for 3 clusters
+solving for 4 clusters
+solving for 5 clusters
+********************
+MIQCP stats:
+3 cuts, 2 clusters, max qubit = 7
+cluster 0: original input = 6.00, ρ_qubits = 1.00, O_qubits = 2.00, d = 7.00
+cluster 1: original input = 3.00, ρ_qubits = 2.00, O_qubits = 1.00, d = 5.00
+objective value = 1.620e+02
+manually calculated objective value: 1.620e+02
+evaluator_cost = 161, reconstructor_cost = 1.317e-04, reconstructor_weight = 0.000e+00
+runtime: 0.13640904426574707
+OPTIMAL
+********************
+72/104 cases
+----------------------------------------------------------------------------------------------------
+Case (7, 10)
+solving for 2 clusters
+solving for 3 clusters
+solving for 4 clusters
+solving for 5 clusters
+********************
+MIQCP stats:
+2 cuts, 2 clusters, max qubit = 7
+cluster 0: original input = 5.00, ρ_qubits = 1.00, O_qubits = 1.00, d = 6.00
+cluster 1: original input = 5.00, ρ_qubits = 1.00, O_qubits = 1.00, d = 6.00
+objective value = 3.601e+01
+manually calculated objective value: 3.600e+01
+evaluator_cost = 36, reconstructor_cost = 6.541e-05, reconstructor_weight = 0.000e+00
+runtime: 0.06139206886291504
+OPTIMAL
+********************
+73/104 cases
+----------------------------------------------------------------------------------------------------
+Case (7, 11)
+solving for 2 clusters
+solving for 3 clusters
+solving for 4 clusters
+solving for 5 clusters
+********************
+MIQCP stats:
+1 cuts, 2 clusters, max qubit = 7
+cluster 0: original input = 7.00, ρ_qubits = -0.00, O_qubits = 1.00, d = 7.00
+cluster 1: original input = 4.00, ρ_qubits = 1.00, O_qubits = -0.00, d = 5.00
+objective value = 9.002e+00
+manually calculated objective value: 9.000e+00
+evaluator_cost = 8, reconstructor_cost = 3.248e-05, reconstructor_weight = 0.000e+00
+runtime: 0.05464005470275879
+OPTIMAL
+********************
+74/104 cases
+----------------------------------------------------------------------------------------------------
+Case (7, 12)
+solving for 2 clusters
+Infeasible
+solving for 3 clusters
+solving for 4 clusters
+solving for 5 clusters
+********************
+MIQCP stats:
+4 cuts, 3 clusters, max qubit = 7
+cluster 0: original input = 4.00, ρ_qubits = 3.00, O_qubits = 0.00, d = 7.00
+cluster 1: original input = 2.00, ρ_qubits = 0.00, O_qubits = 2.00, d = 2.00
+cluster 2: original input = 6.00, ρ_qubits = 1.00, O_qubits = 2.00, d = 7.00
+objective value = 2.790e+02
+manually calculated objective value: 2.790e+02
+evaluator_cost = 279, reconstructor_cost = 4.263e-03, reconstructor_weight = 0.000e+00
+runtime: 0.23316097259521484
+OPTIMAL
+********************
+75/104 cases
+----------------------------------------------------------------------------------------------------
+Case (7, 13)
+solving for 2 clusters
+solving for 3 clusters
+solving for 4 clusters
+solving for 5 clusters
+********************
+MIQCP stats:
+1 cuts, 2 clusters, max qubit = 7
+cluster 0: original input = 7.00, ρ_qubits = -0.00, O_qubits = 1.00, d = 7.00
+cluster 1: original input = 6.00, ρ_qubits = 1.00, O_qubits = -0.00, d = 7.00
+objective value = 9.002e+00
+manually calculated objective value: 9.000e+00
+evaluator_cost = 8, reconstructor_cost = 1.282e-04, reconstructor_weight = 0.000e+00
+runtime: 0.05498504638671875
+OPTIMAL
+********************
+76/104 cases
+----------------------------------------------------------------------------------------------------
+Case (7, 14)
+solving for 2 clusters
+Infeasible
+solving for 3 clusters
+solving for 4 clusters
+solving for 5 clusters
+********************
+MIQCP stats:
+4 cuts, 3 clusters, max qubit = 7
+cluster 0: original input = 6.00, ρ_qubits = 1.00, O_qubits = 1.00, d = 7.00
+cluster 1: original input = 5.00, ρ_qubits = 2.00, O_qubits = 1.00, d = 7.00
+cluster 2: original input = 3.00, ρ_qubits = 1.00, O_qubits = 2.00, d = 4.00
+objective value = 1.800e+02
+manually calculated objective value: 1.800e+02
+evaluator_cost = 180, reconstructor_cost = 2.042e-02, reconstructor_weight = 0.000e+00
+runtime: 0.2770371437072754
+OPTIMAL
+********************
+77/104 cases
+----------------------------------------------------------------------------------------------------
+Case (7, 15)
+solving for 2 clusters
+Infeasible
+solving for 3 clusters
+solving for 4 clusters
+solving for 5 clusters
+********************
+MIQCP stats:
+7 cuts, 4 clusters, max qubit = 7
+cluster 0: original input = 4.00, ρ_qubits = 2.00, O_qubits = 2.00, d = 6.00
+cluster 1: original input = 5.00, ρ_qubits = 2.00, O_qubits = 1.00, d = 7.00
+cluster 2: original input = 1.00, ρ_qubits = 1.00, O_qubits = 2.00, d = 2.00
+cluster 3: original input = 5.00, ρ_qubits = 2.00, O_qubits = 2.00, d = 7.00
+objective value = 8.100e+02
+manually calculated objective value: 8.100e+02
+evaluator_cost = 810, reconstructor_cost = 2.205e+00, reconstructor_weight = 0.000e+00
+runtime: 0.7932488918304443
+OPTIMAL
+********************
+78/104 cases
+----------------------------------------------------------------------------------------------------
+Case (8, 3)
+solving for 2 clusters
+solving for 3 clusters
+Infeasible
+********************
+MIQCP stats:
+1 cuts, 2 clusters, max qubit = 8
+cluster 0: original input = 2.00, ρ_qubits = 0.00, O_qubits = 1.00, d = 2.00
+cluster 1: original input = 1.00, ρ_qubits = 1.00, O_qubits = 0.00, d = 2.00
+objective value = 9.002e+00
+manually calculated objective value: 9.000e+00
+evaluator_cost = 9, reconstructor_cost = 1.340e-07, reconstructor_weight = 0.000e+00
+runtime: 0.002413034439086914
+OPTIMAL
+********************
+79/104 cases
+----------------------------------------------------------------------------------------------------
+Case (8, 4)
+solving for 2 clusters
+solving for 3 clusters
+solving for 4 clusters
+********************
+MIQCP stats:
+2 cuts, 2 clusters, max qubit = 8
+cluster 0: original input = 3.00, ρ_qubits = 1.00, O_qubits = 1.00, d = 4.00
+cluster 1: original input = 1.00, ρ_qubits = 1.00, O_qubits = 1.00, d = 2.00
+objective value = 3.601e+01
+manually calculated objective value: 3.600e+01
+evaluator_cost = 36, reconstructor_cost = 1.065e-06, reconstructor_weight = 0.000e+00
+runtime: 0.03277301788330078
+OPTIMAL
+********************
+80/104 cases
+----------------------------------------------------------------------------------------------------
+Case (8, 5)
+solving for 2 clusters
+solving for 3 clusters
+solving for 4 clusters
+solving for 5 clusters
+Infeasible
+********************
+MIQCP stats:
+1 cuts, 2 clusters, max qubit = 8
+cluster 0: original input = 4.00, ρ_qubits = -0.00, O_qubits = 1.00, d = 4.00
+cluster 1: original input = 1.00, ρ_qubits = 1.00, O_qubits = -0.00, d = 2.00
+objective value = 9.002e+00
+manually calculated objective value: 9.000e+00
+evaluator_cost = 9, reconstructor_cost = 5.288e-07, reconstructor_weight = 0.000e+00
+runtime: 0.023190975189208984
+OPTIMAL
+********************
+81/104 cases
+----------------------------------------------------------------------------------------------------
+Case (8, 6)
+solving for 2 clusters
+solving for 3 clusters
+solving for 4 clusters
+solving for 5 clusters
+********************
+MIQCP stats:
+2 cuts, 2 clusters, max qubit = 8
+cluster 0: original input = 2.00, ρ_qubits = 1.00, O_qubits = 1.00, d = 3.00
+cluster 1: original input = 4.00, ρ_qubits = 1.00, O_qubits = 1.00, d = 5.00
+objective value = 3.601e+01
+manually calculated objective value: 3.600e+01
+evaluator_cost = 36, reconstructor_cost = 4.201e-06, reconstructor_weight = 0.000e+00
+runtime: 0.08464503288269043
+OPTIMAL
+********************
+82/104 cases
+----------------------------------------------------------------------------------------------------
+Case (8, 7)
+solving for 2 clusters
+solving for 3 clusters
+solving for 4 clusters
+solving for 5 clusters
+********************
+MIQCP stats:
+1 cuts, 2 clusters, max qubit = 8
+cluster 0: original input = 6.00, ρ_qubits = -0.00, O_qubits = 1.00, d = 6.00
+cluster 1: original input = 1.00, ρ_qubits = 1.00, O_qubits = 0.00, d = 2.00
+objective value = 9.002e+00
+manually calculated objective value: 9.000e+00
+evaluator_cost = 9, reconstructor_cost = 2.086e-06, reconstructor_weight = 0.000e+00
+runtime: 0.03800797462463379
+OPTIMAL
+********************
+83/104 cases
+----------------------------------------------------------------------------------------------------
+Case (8, 8)
+solving for 2 clusters
+solving for 3 clusters
+solving for 4 clusters
+solving for 5 clusters
+********************
+MIQCP stats:
+2 cuts, 2 clusters, max qubit = 8
+cluster 0: original input = 7.00, ρ_qubits = 1.00, O_qubits = 1.00, d = 8.00
+cluster 1: original input = 1.00, ρ_qubits = 1.00, O_qubits = 1.00, d = 2.00
+objective value = 3.601e+01
+manually calculated objective value: 3.600e+01
+evaluator_cost = 36, reconstructor_cost = 1.658e-05, reconstructor_weight = 0.000e+00
+runtime: 0.10406112670898438
+OPTIMAL
+********************
+84/104 cases
+----------------------------------------------------------------------------------------------------
+Case (8, 9)
+solving for 2 clusters
+solving for 3 clusters
+solving for 4 clusters
+solving for 5 clusters
+********************
+MIQCP stats:
+2 cuts, 2 clusters, max qubit = 8
+cluster 0: original input = 6.00, ρ_qubits = 2.00, O_qubits = 0.00, d = 8.00
+cluster 1: original input = 3.00, ρ_qubits = 0.00, O_qubits = 2.00, d = 3.00
+objective value = 4.502e+01
+manually calculated objective value: 4.500e+01
+evaluator_cost = 45, reconstructor_cost = 3.293e-05, reconstructor_weight = 0.000e+00
+runtime: 0.11618399620056152
+OPTIMAL
+********************
+85/104 cases
+----------------------------------------------------------------------------------------------------
+Case (8, 10)
+solving for 2 clusters
+solving for 3 clusters
+solving for 4 clusters
+solving for 5 clusters
+********************
+MIQCP stats:
+2 cuts, 2 clusters, max qubit = 8
+cluster 0: original input = 5.00, ρ_qubits = 1.00, O_qubits = 1.00, d = 6.00
+cluster 1: original input = 5.00, ρ_qubits = 1.00, O_qubits = 1.00, d = 6.00
+objective value = 3.601e+01
+manually calculated objective value: 3.600e+01
+evaluator_cost = 36, reconstructor_cost = 6.541e-05, reconstructor_weight = 0.000e+00
+runtime: 0.07609915733337402
+OPTIMAL
+********************
+86/104 cases
+----------------------------------------------------------------------------------------------------
+Case (8, 11)
+solving for 2 clusters
+solving for 3 clusters
+solving for 4 clusters
+solving for 5 clusters
+********************
+MIQCP stats:
+1 cuts, 2 clusters, max qubit = 8
+cluster 0: original input = 8.00, ρ_qubits = -0.00, O_qubits = 1.00, d = 8.00
+cluster 1: original input = 3.00, ρ_qubits = 1.00, O_qubits = -0.00, d = 4.00
+objective value = 9.002e+00
+manually calculated objective value: 9.000e+00
+evaluator_cost = 9, reconstructor_cost = 3.248e-05, reconstructor_weight = 0.000e+00
+runtime: 0.050286054611206055
+OPTIMAL
+********************
+87/104 cases
+----------------------------------------------------------------------------------------------------
+Case (8, 12)
+solving for 2 clusters
+solving for 3 clusters
+solving for 4 clusters
+solving for 5 clusters
+********************
+MIQCP stats:
+3 cuts, 2 clusters, max qubit = 8
+cluster 0: original input = 6.00, ρ_qubits = 2.00, O_qubits = 1.00, d = 8.00
+cluster 1: original input = 6.00, ρ_qubits = 1.00, O_qubits = 2.00, d = 7.00
+objective value = 1.621e+02
+manually calculated objective value: 1.620e+02
+evaluator_cost = 162, reconstructor_cost = 1.032e-03, reconstructor_weight = 0.000e+00
+runtime: 0.12277507781982422
+OPTIMAL
+********************
+88/104 cases
+----------------------------------------------------------------------------------------------------
+Case (8, 13)
+solving for 2 clusters
+solving for 3 clusters
+solving for 4 clusters
+solving for 5 clusters
+********************
+MIQCP stats:
+1 cuts, 2 clusters, max qubit = 8
+cluster 0: original input = 8.00, ρ_qubits = -0.00, O_qubits = 1.00, d = 8.00
+cluster 1: original input = 5.00, ρ_qubits = 1.00, O_qubits = -0.00, d = 6.00
+objective value = 9.002e+00
+manually calculated objective value: 9.000e+00
+evaluator_cost = 9, reconstructor_cost = 1.282e-04, reconstructor_weight = 0.000e+00
+runtime: 0.0601811408996582
+OPTIMAL
+********************
+89/104 cases
+----------------------------------------------------------------------------------------------------
+Case (8, 14)
+solving for 2 clusters
+solving for 3 clusters
+solving for 4 clusters
+solving for 5 clusters
+********************
+MIQCP stats:
+2 cuts, 2 clusters, max qubit = 8
+cluster 0: original input = 8.00, ρ_qubits = -0.00, O_qubits = 2.00, d = 8.00
+cluster 1: original input = 6.00, ρ_qubits = 2.00, O_qubits = -0.00, d = 8.00
+objective value = 4.502e+01
+manually calculated objective value: 4.500e+01
+evaluator_cost = 44, reconstructor_cost = 1.018e-03, reconstructor_weight = 0.000e+00
+runtime: 0.1194150447845459
+OPTIMAL
+********************
+90/104 cases
+----------------------------------------------------------------------------------------------------
+Case (8, 15)
+solving for 2 clusters
+Infeasible
+solving for 3 clusters
+solving for 4 clusters
+solving for 5 clusters
+********************
+MIQCP stats:
+7 cuts, 4 clusters, max qubit = 8
+cluster 0: original input = 4.00, ρ_qubits = 2.00, O_qubits = 2.00, d = 6.00
+cluster 1: original input = 5.00, ρ_qubits = 2.00, O_qubits = 2.00, d = 7.00
+cluster 2: original input = 5.00, ρ_qubits = 2.00, O_qubits = 1.00, d = 7.00
+cluster 3: original input = 1.00, ρ_qubits = 1.00, O_qubits = 2.00, d = 2.00
+objective value = 8.103e+02
+manually calculated objective value: 8.100e+02
+evaluator_cost = 810, reconstructor_cost = 4.176e+00, reconstructor_weight = 0.000e+00
+runtime: 0.6828300952911377
+OPTIMAL
+********************
+91/104 cases
+----------------------------------------------------------------------------------------------------
+Case (9, 3)
+solving for 2 clusters
+solving for 3 clusters
+Infeasible
+********************
+MIQCP stats:
+1 cuts, 2 clusters, max qubit = 9
+cluster 0: original input = 2.00, ρ_qubits = 0.00, O_qubits = 1.00, d = 2.00
+cluster 1: original input = 1.00, ρ_qubits = 1.00, O_qubits = 0.00, d = 2.00
+objective value = 9.003e+00
+manually calculated objective value: 9.000e+00
+evaluator_cost = 9, reconstructor_cost = 1.340e-07, reconstructor_weight = 0.000e+00
+runtime: 0.0023140907287597656
+OPTIMAL
+********************
+92/104 cases
+----------------------------------------------------------------------------------------------------
+Case (9, 4)
+solving for 2 clusters
+solving for 3 clusters
+solving for 4 clusters
+********************
+MIQCP stats:
+2 cuts, 2 clusters, max qubit = 9
+cluster 0: original input = 3.00, ρ_qubits = 1.00, O_qubits = 1.00, d = 4.00
+cluster 1: original input = 1.00, ρ_qubits = 1.00, O_qubits = 1.00, d = 2.00
+objective value = 3.602e+01
+manually calculated objective value: 3.600e+01
+evaluator_cost = 36, reconstructor_cost = 1.065e-06, reconstructor_weight = 0.000e+00
+runtime: 0.031035184860229492
+OPTIMAL
+********************
+93/104 cases
+----------------------------------------------------------------------------------------------------
+Case (9, 5)
+solving for 2 clusters
+solving for 3 clusters
+solving for 4 clusters
+solving for 5 clusters
+Infeasible
+********************
+MIQCP stats:
+1 cuts, 2 clusters, max qubit = 9
+cluster 0: original input = 4.00, ρ_qubits = -0.00, O_qubits = 1.00, d = 4.00
+cluster 1: original input = 1.00, ρ_qubits = 1.00, O_qubits = -0.00, d = 2.00
+objective value = 9.003e+00
+manually calculated objective value: 9.000e+00
+evaluator_cost = 9, reconstructor_cost = 5.288e-07, reconstructor_weight = 0.000e+00
+runtime: 0.021711111068725586
+OPTIMAL
+********************
+94/104 cases
+----------------------------------------------------------------------------------------------------
+Case (9, 6)
+solving for 2 clusters
+solving for 3 clusters
+solving for 4 clusters
+solving for 5 clusters
+********************
+MIQCP stats:
+2 cuts, 2 clusters, max qubit = 9
+cluster 0: original input = 5.00, ρ_qubits = 1.00, O_qubits = 1.00, d = 6.00
+cluster 1: original input = 1.00, ρ_qubits = 1.00, O_qubits = 1.00, d = 2.00
+objective value = 3.602e+01
+manually calculated objective value: 3.600e+01
+evaluator_cost = 35, reconstructor_cost = 4.201e-06, reconstructor_weight = 0.000e+00
+runtime: 0.05483102798461914
+OPTIMAL
+********************
+95/104 cases
+----------------------------------------------------------------------------------------------------
+Case (9, 7)
+solving for 2 clusters
+solving for 3 clusters
+solving for 4 clusters
+solving for 5 clusters
+********************
+MIQCP stats:
+1 cuts, 2 clusters, max qubit = 9
+cluster 0: original input = 6.00, ρ_qubits = -0.00, O_qubits = 1.00, d = 6.00
+cluster 1: original input = 1.00, ρ_qubits = 1.00, O_qubits = -0.00, d = 2.00
+objective value = 9.003e+00
+manually calculated objective value: 9.000e+00
+evaluator_cost = 9, reconstructor_cost = 2.086e-06, reconstructor_weight = 0.000e+00
+runtime: 0.03783583641052246
+OPTIMAL
+********************
+96/104 cases
+----------------------------------------------------------------------------------------------------
+Case (9, 8)
+solving for 2 clusters
+solving for 3 clusters
+solving for 4 clusters
+solving for 5 clusters
+********************
+MIQCP stats:
+2 cuts, 2 clusters, max qubit = 9
+cluster 0: original input = 7.00, ρ_qubits = 1.00, O_qubits = 1.00, d = 8.00
+cluster 1: original input = 1.00, ρ_qubits = 1.00, O_qubits = 1.00, d = 2.00
+objective value = 3.602e+01
+manually calculated objective value: 3.600e+01
+evaluator_cost = 36, reconstructor_cost = 1.658e-05, reconstructor_weight = 0.000e+00
+runtime: 0.06508684158325195
+OPTIMAL
+********************
+97/104 cases
+----------------------------------------------------------------------------------------------------
+Case (9, 9)
+solving for 2 clusters
+solving for 3 clusters
+solving for 4 clusters
+solving for 5 clusters
+********************
+MIQCP stats:
+2 cuts, 2 clusters, max qubit = 9
+cluster 0: original input = 8.00, ρ_qubits = 1.00, O_qubits = 1.00, d = 9.00
+cluster 1: original input = 1.00, ρ_qubits = 1.00, O_qubits = 1.00, d = 2.00
+objective value = 3.602e+01
+manually calculated objective value: 3.600e+01
+evaluator_cost = 36, reconstructor_cost = 3.293e-05, reconstructor_weight = 0.000e+00
+runtime: 0.1256570816040039
+OPTIMAL
+********************
+98/104 cases
+----------------------------------------------------------------------------------------------------
+Case (9, 10)
+solving for 2 clusters
+solving for 3 clusters
+solving for 4 clusters
+solving for 5 clusters
+********************
+MIQCP stats:
+2 cuts, 2 clusters, max qubit = 9
+cluster 0: original input = 8.00, ρ_qubits = 1.00, O_qubits = 1.00, d = 9.00
+cluster 1: original input = 2.00, ρ_qubits = 1.00, O_qubits = 1.00, d = 3.00
+objective value = 3.602e+01
+manually calculated objective value: 3.600e+01
+evaluator_cost = 36, reconstructor_cost = 6.541e-05, reconstructor_weight = 0.000e+00
+runtime: 0.14176392555236816
+OPTIMAL
+********************
+99/104 cases
+----------------------------------------------------------------------------------------------------
+Case (9, 11)
+solving for 2 clusters
+solving for 3 clusters
+solving for 4 clusters
+solving for 5 clusters
+********************
+MIQCP stats:
+1 cuts, 2 clusters, max qubit = 9
+cluster 0: original input = 8.00, ρ_qubits = 1.00, O_qubits = 0.00, d = 9.00
+cluster 1: original input = 3.00, ρ_qubits = 0.00, O_qubits = 1.00, d = 3.00
+objective value = 9.003e+00
+manually calculated objective value: 9.000e+00
+evaluator_cost = 9, reconstructor_cost = 3.248e-05, reconstructor_weight = 0.000e+00
+runtime: 0.05680990219116211
+OPTIMAL
+********************
+100/104 cases
+----------------------------------------------------------------------------------------------------
+Case (9, 12)
+solving for 2 clusters
+solving for 3 clusters
+solving for 4 clusters
+solving for 5 clusters
+********************
+MIQCP stats:
+3 cuts, 2 clusters, max qubit = 9
+cluster 0: original input = 6.00, ρ_qubits = 2.00, O_qubits = 1.00, d = 8.00
+cluster 1: original input = 6.00, ρ_qubits = 1.00, O_qubits = 2.00, d = 7.00
+objective value = 1.621e+02
+manually calculated objective value: 1.620e+02
+evaluator_cost = 162, reconstructor_cost = 1.032e-03, reconstructor_weight = 0.000e+00
+runtime: 0.1595609188079834
+OPTIMAL
+********************
+101/104 cases
+----------------------------------------------------------------------------------------------------
+Case (9, 13)
+solving for 2 clusters
+solving for 3 clusters
+solving for 4 clusters
+solving for 5 clusters
+********************
+MIQCP stats:
+1 cuts, 2 clusters, max qubit = 9
+cluster 0: original input = 8.00, ρ_qubits = 1.00, O_qubits = 0.00, d = 9.00
+cluster 1: original input = 5.00, ρ_qubits = 0.00, O_qubits = 1.00, d = 5.00
+objective value = 9.003e+00
+manually calculated objective value: 9.000e+00
+evaluator_cost = 9, reconstructor_cost = 1.282e-04, reconstructor_weight = 0.000e+00
+runtime: 0.05945706367492676
+OPTIMAL
+********************
+102/104 cases
+----------------------------------------------------------------------------------------------------
+Case (9, 14)
+solving for 2 clusters
+solving for 3 clusters
+solving for 4 clusters
+solving for 5 clusters
+********************
+MIQCP stats:
+2 cuts, 2 clusters, max qubit = 9
+cluster 0: original input = 6.00, ρ_qubits = 1.00, O_qubits = 1.00, d = 7.00
+cluster 1: original input = 8.00, ρ_qubits = 1.00, O_qubits = 1.00, d = 9.00
+objective value = 3.602e+01
+manually calculated objective value: 3.600e+01
+evaluator_cost = 36, reconstructor_cost = 1.018e-03, reconstructor_weight = 0.000e+00
+runtime: 0.0784909725189209
+OPTIMAL
+********************
+103/104 cases
+----------------------------------------------------------------------------------------------------
+Case (9, 15)
+solving for 2 clusters
+solving for 3 clusters
+solving for 4 clusters
+solving for 5 clusters
+********************
+MIQCP stats:
+3 cuts, 2 clusters, max qubit = 9
+cluster 0: original input = 8.00, ρ_qubits = 1.00, O_qubits = 2.00, d = 9.00
+cluster 1: original input = 7.00, ρ_qubits = 2.00, O_qubits = 1.00, d = 9.00
+objective value = 1.621e+02
+manually calculated objective value: 1.620e+02
+evaluator_cost = 162, reconstructor_cost = 8.090e-03, reconstructor_weight = 0.000e+00
+runtime: 0.1595919132232666
+OPTIMAL
+********************
+104/104 cases
+----------------------------------------------------------------------------------------------------
+-------------------------------------------------- Reconstructor --------------------------------------------------
+Existing cases: dict_keys([])
+-------------------------------------------------- Reconstructor --------------------------------------------------
+Existing cases: dict_keys([])
