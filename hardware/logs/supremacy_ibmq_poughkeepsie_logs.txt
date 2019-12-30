@@ -1,0 +1,175 @@
+-------------------------------------------------- Generator --------------------------------------------------
+Existing cases: dict_keys([])
+64 cases, 8 full circuits to run : [(2, 3), (2, 4), (2, 5), (2, 6), (2, 7), (2, 8), (2, 9), (2, 10), (3, 3), (3, 4), (3, 5), (3, 6), (3, 7), (3, 8), (3, 9), (3, 10), (4, 3), (4, 4), (4, 5), (4, 6), (4, 7), (4, 8), (4, 9), (4, 10), (5, 3), (5, 4), (5, 5), (5, 6), (5, 7), (5, 8), (5, 9), (5, 10), (6, 3), (6, 4), (6, 5), (6, 6), (6, 7), (6, 8), (6, 9), (6, 10), (7, 3), (7, 4), (7, 5), (7, 6), (7, 7), (7, 8), (7, 9), (7, 10), (8, 3), (8, 4), (8, 5), (8, 6), (8, 7), (8, 8), (8, 9), (8, 10), (9, 3), (9, 4), (9, 5), (9, 6), (9, 7), (9, 8), (9, 9), (9, 10)]
+**************************************************
+Generating 1x3, 1+8+1 supremacy circuit
+3 qubit circuit saturated shots = 9216, ΔH = 8.210e-04
+Evaluating fc state vector
+Evaluating fc qasm, 9216 shots
+Evaluating fc hardware, 9216 shots
+Submitted 3 reps * 3072 shots to hardware, job_id = 5e099e97e7977f001127c7fc
+/home/weit/anaconda3/envs/cc-env/lib/python3.7/site-packages/qiskit/providers/models/backendconfiguration.py:337: UserWarning: `dt` and `dtm` now have units of seconds(s) rather than nanoseconds(ns).
+  warnings.warn('`dt` and `dtm` now have units of seconds(s) rather '
+Submitted measurement filter, 8 calibration circuits * 8192 shots, job_id = 5e099e98b548320011260009
+**************************************************
+Generating 2x2, 1+8+1 supremacy circuit
+4 qubit circuit saturated shots = 7168, ΔH = 7.554e-04
+Evaluating fc state vector
+Evaluating fc qasm, 7168 shots
+Evaluating fc hardware, 7168 shots
+Submitted 1 reps * 7168 shots to hardware, job_id = 5e099e9b39e98100125549bb
+Submitted measurement filter, 16 calibration circuits * 8192 shots, job_id = 5e099e9defb76e0011437b26
+**************************************************
+Generating 1x5, 1+8+1 supremacy circuit
+5 qubit circuit saturated shots = 24576, ΔH = 1.033e-03
+Evaluating fc state vector
+Evaluating fc qasm, 24576 shots
+Evaluating fc hardware, 24576 shots
+Submitted 3 reps * 8192 shots to hardware, job_id = 5e099ea07272e100112dd144
+Submitted measurement filter, 32 calibration circuits * 8192 shots, job_id = 5e099ea2b54832001126000a
+**************************************************
+Generating 3x2, 1+8+1 supremacy circuit
+6 qubit circuit saturated shots = 23552, ΔH = 9.964e-04
+Evaluating fc state vector
+Evaluating fc qasm, 23552 shots
+Evaluating fc hardware, 23552 shots
+Submitted 23 reps * 1024 shots to hardware, job_id = 5e099ea6ee2824001150c501
+Submitted measurement filter, 64 calibration circuits * 8192 shots, job_id = 5e099ea8e7977f001127c800
+**************************************************
+Generating 1x7, 1+8+1 supremacy circuit
+7 qubit circuit saturated shots = 109568, ΔH = 1.025e-03
+Evaluating fc state vector
+Evaluating fc qasm, 109568 shots
+Evaluating fc hardware, 109568 shots
+Submitted 107 reps * 1024 shots to hardware, job_id = 5e099eb25879b80012ec761a
+Submitted measurement filter, 128 calibration circuits * 8192 shots, job_id = 5e099eb5b54832001126000e
+**************************************************
+Generating 2x4, 1+8+1 supremacy circuit
+8 qubit circuit saturated shots = 151552, ΔH = 9.662e-04
+Evaluating fc state vector
+Evaluating fc qasm, 151552 shots
+Evaluating fc hardware, 151552 shots
+Submitted 37 reps * 4096 shots to hardware, job_id = 5e099ec55879b80012ec761c
+Submitted measurement filter, 256 calibration circuits * 8192 shots, job_id = 5e099ec9efb76e0011437b29
+**************************************************
+Generating 3x3, 1+8+1 supremacy circuit
+9 qubit circuit saturated shots = 259072, ΔH = 1.026e-03
+Evaluating fc state vector
+Evaluating fc qasm, 259072 shots
+Evaluating fc hardware, 259072 shots
+Submitted 253 reps * 1024 shots to hardware, job_id = 5e099ee9e7977f001127c804
+Submitted measurement filter, 512 calibration circuits * 8192 shots, job_id = 5e099ef0efb76e0011437b2b
+**************************************************
+Generating 2x5, 1+8+1 supremacy circuit
+10 qubit circuit saturated shots = 615424, ΔH = 1.068e-03
+Evaluating fc state vector
+Evaluating fc qasm, 615424 shots
+Evaluating fc hardware, 615424 shots
+Submitted 75 reps * 8192 shots to hardware, job_id = 5e099f33b548320011260011
+Submitted 1 reps * 1024 shots to hardware, job_id = 5e099f35b548320011260012
+**************************************************
+Retrieving 3-qubit circuit
+Meas filter job id 5e099e98b548320011260009
+job_id : 5e099e97e7977f001127c7fc
+Mitigation for 3 * 3 qubit circuit took 1.725e-01 seconds
+**************************************************
+Retrieving 4-qubit circuit
+Meas filter job id 5e099e9defb76e0011437b26
+job_id : 5e099e9b39e98100125549bb
+Mitigation for 1 * 4 qubit circuit took 1.759e-02 seconds
+**************************************************
+Retrieving 5-qubit circuit
+Meas filter job id 5e099ea2b54832001126000a
+job_id : 5e099ea07272e100112dd144
+Mitigation for 3 * 5 qubit circuit took 1.816e-01 seconds
+**************************************************
+Retrieving 6-qubit circuit
+Meas filter job id 5e099ea8e7977f001127c800
+job_id : 5e099ea6ee2824001150c501
+Mitigation for 23 * 6 qubit circuit took 2.772e-01 seconds
+**************************************************
+Retrieving 7-qubit circuit
+Meas filter job id 5e099eb5b54832001126000e
+job_id : 5e099eb25879b80012ec761a
+Mitigation for 107 * 7 qubit circuit took 9.509e+00 seconds
+**************************************************
+Retrieving 8-qubit circuit
+Meas filter job id 5e099ec9efb76e0011437b29
+job_id : 5e099ec55879b80012ec761c
+Mitigation for 37 * 8 qubit circuit took 2.529e+01 seconds
+**************************************************
+Retrieving 9-qubit circuit
+Meas filter job id 5e099ef0efb76e0011437b2b
+job_id : 5e099ee9e7977f001127c804
+Traceback (most recent call last):
+  File "/home/weit/anaconda3/envs/cc-env/lib/python3.7/runpy.py", line 193, in _run_module_as_main
+    "__main__", mod_spec)
+  File "/home/weit/anaconda3/envs/cc-env/lib/python3.7/runpy.py", line 85, in _run_code
+    exec(code, run_globals)
+  File "/home/weit/circuit_cutting/hardware/generator.py", line 146, in <module>
+    del full_circ_info[full_circ_size]['fc_evaluations']['meas_filter']
+KeyError: 'meas_filter'
+Mitigation for 253 * 9 qubit circuit took 5.106e+02 seconds
+**************************************************
+Retrieving 10-qubit circuit
+job_id : 5e099f33b548320011260011
+job_id : 5e099f35b548320011260012
+/home/weit/anaconda3/envs/cc-env/lib/python3.7/site-packages/qiskit/providers/models/backendconfiguration.py:337: UserWarning: `dt` and `dtm` now have units of seconds(s) rather than nanoseconds(ns).
+  warnings.warn('`dt` and `dtm` now have units of seconds(s) rather '
+-------------------------------------------------- Job Submittor --------------------------------------------------
+Existing cases: dict_keys([])
+Run cases: dict_keys([])
+**************************************************
+----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
+-------------------------------------------------- Reconstructor --------------------------------------------------
+Existing cases: dict_keys([])
+/home/weit/anaconda3/envs/cc-env/lib/python3.7/site-packages/qiskit/providers/models/backendconfiguration.py:337: UserWarning: `dt` and `dtm` now have units of seconds(s) rather than nanoseconds(ns).
+  warnings.warn('`dt` and `dtm` now have units of seconds(s) rather '
+-------------------------------------------------- Job Submittor --------------------------------------------------
+Existing cases: dict_keys([])
+Run cases: dict_keys([])
+**************************************************
+----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
+-------------------------------------------------- Reconstructor --------------------------------------------------
+Existing cases: dict_keys([])
+-------------------------------------------------- Plot --------------------------------------------------
+/home/weit/circuit_cutting/hardware/plot.py:39: UserWarning: Attempting to set identical left == right == -0.5 results in singular transformations; automatically expanding.
+  im = ax.imshow(data, **kwargs)
+/home/weit/circuit_cutting/hardware/plot.py:39: UserWarning: Attempting to set identical bottom == top == -0.5 results in singular transformations; automatically expanding.
+  im = ax.imshow(data, **kwargs)
+Traceback (most recent call last):
+  File "/home/weit/anaconda3/envs/cc-env/lib/python3.7/runpy.py", line 193, in _run_module_as_main
+    "__main__", mod_spec)
+  File "/home/weit/anaconda3/envs/cc-env/lib/python3.7/runpy.py", line 85, in _run_code
+    exec(code, run_globals)
+  File "/home/weit/circuit_cutting/hardware/plot.py", line 334, in <module>
+    plot_fid_bar(saturated_best_cc=saturated_best_cc, sametotal_best_cc=sametotal_best_cc,circuit_type=args.circuit_type,dirname=dirname,device_name=args.device_name)
+  File "/home/weit/circuit_cutting/hardware/plot.py", line 243, in plot_fid_bar
+    plt.legend()
+  File "/home/weit/anaconda3/envs/cc-env/lib/python3.7/site-packages/matplotlib/pyplot.py", line 2685, in legend
+    return gca().legend(*args, **kwargs)
+  File "/home/weit/anaconda3/envs/cc-env/lib/python3.7/site-packages/matplotlib/axes/_axes.py", line 406, in legend
+    self.legend_ = mlegend.Legend(self, handles, labels, **kwargs)
+  File "/home/weit/anaconda3/envs/cc-env/lib/python3.7/site-packages/matplotlib/legend.py", line 575, in __init__
+    self._init_legend_box(handles, labels, markerfirst)
+  File "/home/weit/anaconda3/envs/cc-env/lib/python3.7/site-packages/matplotlib/legend.py", line 833, in _init_legend_box
+    fontsize, handlebox))
+  File "/home/weit/anaconda3/envs/cc-env/lib/python3.7/site-packages/matplotlib/legend_handler.py", line 115, in legend_artist
+    fontsize, handlebox.get_transform())
+  File "/home/weit/anaconda3/envs/cc-env/lib/python3.7/site-packages/matplotlib/legend_handler.py", line 299, in create_artists
+    self.update_prop(p, orig_handle, legend)
+  File "/home/weit/anaconda3/envs/cc-env/lib/python3.7/site-packages/matplotlib/legend_handler.py", line 72, in update_prop
+    self._update_prop(legend_handle, orig_handle)
+  File "/home/weit/anaconda3/envs/cc-env/lib/python3.7/site-packages/matplotlib/legend_handler.py", line 65, in _update_prop
+    self._update_prop_func(legend_handle, orig_handle)
+  File "/home/weit/anaconda3/envs/cc-env/lib/python3.7/site-packages/matplotlib/legend_handler.py", line 38, in update_from_first_child
+    tgt.update_from(src.get_children()[0])
+IndexError: list index out of range
+Processing ./hardware/benchmark_data/supremacy_ibmq_poughkeepsie/hw_plotter_input_ibmq_poughkeepsie_saturated.p
+************************* Best Cases *************************
+**************************************************
+Processing ./hardware/benchmark_data/supremacy_ibmq_poughkeepsie/hw_plotter_input_ibmq_poughkeepsie_sametotal.p
+************************* Best Cases *************************
+**************************************************
