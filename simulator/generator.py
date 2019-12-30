@@ -23,7 +23,7 @@ def evaluate_full_circ(circ, total_shots, device_name, fields):
     uniform_prob = [uniform_p for i in range(np.power(2,len(circ.qubits)))]
     fc_evaluations = {}
 
-    if 'sv_noiseless' in fields:
+    if 'sv' in fields:
         print('Evaluating fc state vector')
         sv_noiseless_fc = evaluate_circ(circ=circ,backend='statevector_simulator',evaluator_info=None)
     else:
@@ -47,7 +47,7 @@ def evaluate_full_circ(circ, total_shots, device_name, fields):
     else:
         qasm_noisy_fc = uniform_prob
 
-    fc_evaluations.update({'sv_noiseless':sv_noiseless_fc,
+    fc_evaluations.update({'sv':sv_noiseless_fc,
     'qasm':qasm_noiseless_fc,
     'qasm+noise':qasm_noisy_fc})
     print('evaluate fc ends here')
@@ -96,7 +96,7 @@ def generate_case_dict(case,args,cluster_max_qubit,case_dict):
         else:
             fc_shots = case_dict['fc_shots']
         if 'fc_evaluations' not in case_dict:
-            fields_to_run = ['sv_noiseless','qasm','qasm+noise']
+            fields_to_run = ['sv','qasm','qasm+noise']
             fc_evaluations = evaluate_full_circ(circ=full_circ,total_shots=fc_shots,device_name=args.device_name,fields=fields_to_run)
             case_dict['fc_evaluations'] = fc_evaluations
         return case_dict
@@ -124,7 +124,7 @@ if __name__ == '__main__':
     device_size = len(evaluator_info['properties'].qubits)
 
     # NOTE: toggle circuits to benchmark
-    dimension_l = np.arange(9,11)
+    dimension_l = np.arange(3,11)
     counter = 1
     total_cases = (args.max_qubit-args.min_qubit+1)*len(dimension_l)
     for cluster_max_qubit in range(args.min_qubit,args.max_qubit+1):
