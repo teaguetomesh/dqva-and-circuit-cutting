@@ -31,7 +31,7 @@ if __name__ == '__main__':
     time_now = datetime.datetime.now()
 
     for x in provider.backends():
-        if 'qasm' not in str(x):
+        if 'qasm' not in str(x) and 'tokyo' not in str(x):
             evaluator_info = get_evaluator_info(circ=None,device_name=str(x),fields=['properties'])
             num_qubits = len(evaluator_info['properties'].qubits)
             if num_qubits==20:

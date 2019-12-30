@@ -296,6 +296,7 @@ if __name__ == '__main__':
             continue
         print('case {}'.format(case),flush=True)
         case_dict = copy.deepcopy(uniter_input[case])
+        [print('%d qubit cluster'%len(x.qubits)) for x in case_dict['clusters']]
         
         uniter_begin = time()
         reconstructed_prob = reconstruct(complete_path_map=uniter_input[case]['complete_path_map'],
