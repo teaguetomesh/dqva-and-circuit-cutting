@@ -126,7 +126,7 @@ if __name__ == '__main__':
     device_max_experiments = int(evaluator_info['device'].configuration().max_experiments/3*2)
     
     # NOTE: toggle circuits to benchmark
-    dimension_l = np.arange(9,11)
+    dimension_l = np.arange(3,11)
     cases_to_run = []
     for cluster_max_qubit in range(args.min_qubit,args.max_qubit+1):
         for dimension in dimension_l:
