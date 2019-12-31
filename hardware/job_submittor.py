@@ -69,7 +69,7 @@ def accumulate_cluster_jobs(cluster_job_dict,cluster_meas_filter):
             else:
                 hw_counts[init_meas] = update_counts(cumulated={}, batch=hw_count)
     for init_meas in hw_counts:
-        print('init_meas {} has {} shots'.format(init_meas,sum(hw_counts[init_meas].values())))
+        print('circuit instance has {} shots'.format(sum(hw_counts[init_meas].values())))
         break
     
     hw_probs = {}
@@ -149,9 +149,10 @@ if __name__ == '__main__':
             
     counter = 1
     for case in all_submitted_jobs:
+        print('Retrieving case {}'.format(case))
         for cluster_idx in all_submitted_jobs[case]:
             cluster_job_dict = all_submitted_jobs[case][cluster_idx]['jobs']
-            print('Retrieving case {} cluster {:d} has {:d} jobs'.format(case,cluster_idx,len(cluster_job_dict)))
+            print('Cluster {:d} has {:d} jobs'.format(cluster_idx,len(cluster_job_dict)))
             hw_probs = accumulate_cluster_jobs(cluster_job_dict=cluster_job_dict,cluster_meas_filter=all_submitted_jobs[case][cluster_idx]['meas_filter'])
             cases_to_run[case]['all_cluster_prob'][cluster_idx] = hw_probs
         case_dict = cases_to_run[case]
