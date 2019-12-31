@@ -93,6 +93,16 @@ def evaluate_full_circ(circ, total_shots, device_name, fields):
 
     return fc_evaluations
 
+def case_feasible(case,args):
+    cluster_max_qubit, full_circuit_size = case
+    full_circ = generate_circ(dimension=full_circuit_size,circuit_type=args.circuit_type)
+    hardness, positions, ancilla, d, num_cluster, m = searcher.find_cuts(circ=full_circ,reconstructor_runtime_params=[4.275e-9,6.863e-1],reconstructor_weight=0,
+    num_clusters=range(2,min(len(full_circ.qubits),args.max_clusters)+1),cluster_max_qubit=cluster_max_qubit)
+    if m == None:
+        return False
+    else:
+        return True
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='generate evaluator inputs')
     parser.add_argument('--min-qubit', metavar='N', type=int,help='Benchmark minimum number of HW qubits')
@@ -118,7 +128,6 @@ if __name__ == '__main__':
     # NOTE: toggle circuits to benchmark
     dimension_l = np.arange(3,13)
     cases_to_run = []
-    full_circ_sizes = []
     for cluster_max_qubit in range(args.min_qubit,args.max_qubit+1):
         for dimension in dimension_l:
             case = (cluster_max_qubit,dimension)
@@ -126,10 +135,16 @@ if __name__ == '__main__':
                 print('Case {} impossible, skipped'.format(case))
             elif case not in evaluator_input:
                 cases_to_run.append(case)
-                if dimension not in full_circ_sizes:
-                    full_circ_sizes.append(dimension)
-    total_cases = len(cases_to_run)
-    print('{:d} cases, {:d} full circuits to run : {}'.format(total_cases,len(full_circ_sizes),cases_to_run))
+    feasible_cases = []
+    full_circ_sizes = []
+    for case in cases_to_run:
+        feasible = case_feasible(case=case,args=args)
+        if feasible:
+            feasible_cases.append(case)
+            if case[1] not in full_circ_sizes:
+                full_circ_sizes.append(case[1])
+    total_cases = len(feasible_cases)
+    print('{:d} cases, {:d} full circuits to run : {}'.format(total_cases,len(full_circ_sizes),feasible_cases))
     print('*'*50)
 
     full_circ_info = {}
@@ -154,7 +169,7 @@ if __name__ == '__main__':
         print('*'*50)
 
     counter = 1
-    for case in cases_to_run:
+    for case in feasible_cases:
         print('Case {}'.format(case))
         case_dict = {}
         cluster_max_qubit,full_circuit_size = case
