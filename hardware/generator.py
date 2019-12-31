@@ -109,6 +109,11 @@ if __name__ == '__main__':
     print('-'*50,'Generator','-'*50,flush=True)
     evaluator_input = read_file(dirname+evaluator_input_filename)
     print('Existing cases:',evaluator_input.keys())
+
+    evaluator_info = get_evaluator_info(circ=None,device_name=args.device_name,fields=['properties','device'])
+    device_size = len(evaluator_info['properties'].qubits)
+    device_max_shots = evaluator_info['device'].configuration().max_shots
+    device_max_experiments = int(evaluator_info['device'].configuration().max_experiments/3*2)
     
     # NOTE: toggle circuits to benchmark
     dimension_l = np.arange(3,13)
@@ -117,7 +122,9 @@ if __name__ == '__main__':
     for cluster_max_qubit in range(args.min_qubit,args.max_qubit+1):
         for dimension in dimension_l:
             case = (cluster_max_qubit,dimension)
-            if case not in evaluator_input:
+            if dimension<=cluster_max_qubit or dimension>device_size or (cluster_max_qubit-1)*args.max_clusters<dimension:
+                print('Case {} impossible, skipped'.format(case))
+            elif case not in evaluator_input:
                 cases_to_run.append(case)
                 if dimension not in full_circ_sizes:
                     full_circ_sizes.append(dimension)
@@ -145,11 +152,6 @@ if __name__ == '__main__':
         hw_prob = accumulate_jobs(jobs=hw_jobs,meas_filter=meas_filter)
         full_circ_info[full_circ_size]['fc_evaluations']['hw'] = hw_prob
         print('*'*50)
-
-    evaluator_info = get_evaluator_info(circ=None,device_name=args.device_name,fields=['properties','device'])
-    device_size = len(evaluator_info['properties'].qubits)
-    device_max_shots = evaluator_info['device'].configuration().max_shots
-    device_max_experiments = int(evaluator_info['device'].configuration().max_experiments/3*2)
 
     counter = 1
     for case in cases_to_run:
