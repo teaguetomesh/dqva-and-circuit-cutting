@@ -1,0 +1,526 @@
+-------------------------------------------------- Generator --------------------------------------------------
+Existing cases: dict_keys([])
+Generating 3x3, 1+8+1 supremacy circuit
+Using license file /home/weit/gurobi.lic
+Academic license - for non-commercial use only
+solving for 2 clusters
+Infeasible
+solving for 3 clusters
+solving for 4 clusters
+solving for 5 clusters
+Generating 2x5, 1+8+1 supremacy circuit
+solving for 2 clusters
+Infeasible
+solving for 3 clusters
+solving for 4 clusters
+solving for 5 clusters
+Generating 3x3, 1+8+1 supremacy circuit
+solving for 2 clusters
+solving for 3 clusters
+solving for 4 clusters
+solving for 5 clusters
+Generating 2x5, 1+8+1 supremacy circuit
+solving for 2 clusters
+solving for 3 clusters
+solving for 4 clusters
+solving for 5 clusters
+4 cases, 2 full circuits to run : [(5, 9), (5, 10), (6, 9), (6, 10)]
+**************************************************
+Generating 3x3, 1+8+1 supremacy circuit
+9 qubit circuit saturated shots = 291840, ΔH = 1.069e-03
+Evaluating fc state vector
+Evaluating fc qasm, 291840 shots
+Evaluating fc hardware, 291840 shots
+Submitted 57 reps * 5120 shots to hardware, job_id = 92947ecb-dc29-44ad-9032-02a0d066a418
+/home/weit/anaconda3/envs/cc-env/lib/python3.7/site-packages/qiskit/providers/models/backendconfiguration.py:337: UserWarning: `dt` and `dtm` now have units of seconds(s) rather than nanoseconds(ns).
+  warnings.warn('`dt` and `dtm` now have units of seconds(s) rather '
+Submitted measurement filter, 512 calibration circuits * 8192 shots, job_id = e41f40c3-f2e9-4b29-9a37-7db93bbccb9d
+**************************************************
+Generating 2x5, 1+8+1 supremacy circuit
+10 qubit circuit saturated shots = 622592, ΔH = 1.023e-03
+Evaluating fc state vector
+Evaluating fc qasm, 622592 shots
+Evaluating fc hardware, 622592 shots
+Submitted 76 reps * 8192 shots to hardware, job_id = 42f3be93-4f2a-4ac1-bc13-80a61dafe136
+**************************************************
+Retrieving 9-qubit circuit
+Meas filter job id e41f40c3-f2e9-4b29-9a37-7db93bbccb9d
+job_id : 92947ecb-dc29-44ad-9032-02a0d066a418
+Mitigation for 57 * 9 qubit circuit took 8.624e+01 seconds
+**************************************************
+Retrieving 10-qubit circuit
+job_id : 42f3be93-4f2a-4ac1-bc13-80a61dafe136
+**************************************************
+Case (5, 9)
+9 qubits, 291840 shots
+sv : 512, qasm : 512, qasm+noise : 512, hw : 512
+solving for 2 clusters
+Infeasible
+solving for 3 clusters
+solving for 4 clusters
+solving for 5 clusters
+********************
+MIQCP stats:
+6 cuts, 4 clusters, max qubit = 5
+cluster 0: original input = 3.00, ρ_qubits = 2.00, O_qubits = 1.00, d = 5.00
+cluster 1: original input = 4.00, ρ_qubits = 1.00, O_qubits = 2.00, d = 5.00
+cluster 2: original input = 2.00, ρ_qubits = 1.00, O_qubits = 2.00, d = 3.00
+cluster 3: original input = 0.00, ρ_qubits = 2.00, O_qubits = 1.00, d = 2.00
+objective value = 3.240e+02
+manually calculated objective value: 3.240e+02
+evaluator_cost = 324, reconstructor_cost = 1.481e-02, reconstructor_weight = 0.000e+00
+runtime: 0.3352470397949219
+OPTIMAL
+********************
+1/4 cases
+----------------------------------------------------------------------------------------------------
+Case (5, 10)
+10 qubits, 622592 shots
+sv : 1024, qasm : 1024, qasm+noise : 1024, hw : 1024
+solving for 2 clusters
+Infeasible
+solving for 3 clusters
+solving for 4 clusters
+solving for 5 clusters
+********************
+MIQCP stats:
+7 cuts, 5 clusters, max qubit = 5
+cluster 0: original input = 4.00, ρ_qubits = 1.00, O_qubits = 2.00, d = 5.00
+cluster 1: original input = 1.00, ρ_qubits = 1.00, O_qubits = 2.00, d = 2.00
+cluster 2: original input = 2.00, ρ_qubits = 1.00, O_qubits = 3.00, d = 3.00
+cluster 3: original input = 0.00, ρ_qubits = 2.00, O_qubits = 0.00, d = 2.00
+cluster 4: original input = 3.00, ρ_qubits = 2.00, O_qubits = -0.00, d = 5.00
+objective value = 3.420e+02
+manually calculated objective value: 3.420e+02
+evaluator_cost = 341, reconstructor_cost = 7.024e-02, reconstructor_weight = 0.000e+00
+runtime: 0.28075098991394043
+OPTIMAL
+********************
+2/4 cases
+----------------------------------------------------------------------------------------------------
+Case (6, 9)
+9 qubits, 291840 shots
+sv : 512, qasm : 512, qasm+noise : 512, hw : 512
+solving for 2 clusters
+solving for 3 clusters
+solving for 4 clusters
+solving for 5 clusters
+********************
+MIQCP stats:
+3 cuts, 2 clusters, max qubit = 6
+cluster 0: original input = 5.00, ρ_qubits = 1.00, O_qubits = 2.00, d = 6.00
+cluster 1: original input = 4.00, ρ_qubits = 2.00, O_qubits = 1.00, d = 6.00
+objective value = 1.620e+02
+manually calculated objective value: 1.620e+02
+evaluator_cost = 161, reconstructor_cost = 1.317e-04, reconstructor_weight = 0.000e+00
+runtime: 0.060231924057006836
+OPTIMAL
+********************
+3/4 cases
+----------------------------------------------------------------------------------------------------
+Case (6, 10)
+10 qubits, 622592 shots
+sv : 1024, qasm : 1024, qasm+noise : 1024, hw : 1024
+solving for 2 clusters
+solving for 3 clusters
+solving for 4 clusters
+solving for 5 clusters
+********************
+MIQCP stats:
+2 cuts, 2 clusters, max qubit = 6
+cluster 0: original input = 5.00, ρ_qubits = 1.00, O_qubits = 1.00, d = 6.00
+cluster 1: original input = 5.00, ρ_qubits = 1.00, O_qubits = 1.00, d = 6.00
+objective value = 3.600e+01
+manually calculated objective value: 3.600e+01
+evaluator_cost = 36, reconstructor_cost = 6.541e-05, reconstructor_weight = 0.000e+00
+runtime: 0.05985593795776367
+OPTIMAL
+********************
+4/4 cases
+----------------------------------------------------------------------------------------------------
+-------------------------------------------------- Job Submittor --------------------------------------------------
+Existing cases: dict_keys([])
+Run cases: dict_keys([(5, 9), (5, 10), (6, 9), (6, 10)])
+**************************************************
+Submitting case  (5, 9)
+Cluster 0, 5 qubit circuit
+5 qubit circuit saturated shots = 12288, ΔH = 9.762e-04
+108 instances, 12288 shots each
+/home/weit/anaconda3/envs/cc-env/lib/python3.7/site-packages/qiskit/providers/models/backendconfiguration.py:337: UserWarning: `dt` and `dtm` now have units of seconds(s) rather than nanoseconds(ns).
+  warnings.warn('`dt` and `dtm` now have units of seconds(s) rather '
+Submitted measurement filter, 32 calibration circuits * 8192 shots, job_id = 39b231e1-9a47-4839-8040-b89b12a7c3b8
+Submitted 108 circs, 6144 shots, 2 reps to hardware, job_id = 8409c41b-5841-44d0-a134-33006e0e36fe
+Cluster 1, 5 qubit circuit
+5 qubit circuit saturated shots = 11264, ΔH = 9.960e-04
+54 instances, 11264 shots each
+Submitted measurement filter, 32 calibration circuits * 8192 shots, job_id = e1878fb2-9d90-4afb-b600-bf0970cbfc4e
+Submitted 54 circs, 1024 shots, 11 reps to hardware, job_id = 7ac786cc-dfd9-4d0a-b011-902a999eec9e
+Cluster 2, 3 qubit circuit
+3 qubit circuit saturated shots = 5120, ΔH = 4.307e-04
+54 instances, 5120 shots each
+Submitted measurement filter, 8 calibration circuits * 8192 shots, job_id = a3a36071-08b0-4d0a-9e12-cc591d226282
+Submitted 54 circs, 5120 shots, 1 reps to hardware, job_id = d03602e7-8f16-45b9-adce-8556122c7028
+Cluster 3, 2 qubit circuit
+2 qubit circuit saturated shots = 3072, ΔH = 5.879e-04
+108 instances, 3072 shots each
+Submitted measurement filter, 4 calibration circuits * 8192 shots, job_id = bb460fac-03ae-473b-94b8-5daa4c7d0715
+Submitted 108 circs, 3072 shots, 1 reps to hardware, job_id = f365c66f-3171-4e90-91b2-780975c4ef10
+**************************************************
+Submitting case  (5, 10)
+Cluster 0, 5 qubit circuit
+5 qubit circuit saturated shots = 19456, ΔH = 9.599e-04
+54 instances, 19456 shots each
+Submitted measurement filter, 32 calibration circuits * 8192 shots, job_id = ed554896-00d2-49e9-b31c-1a548795544a
+Submitted 54 circs, 8192 shots, 2 reps to hardware, job_id = ad22472a-de88-463c-8254-a63da455ccff
+Submitted 54 circs, 3072 shots, 1 reps to hardware, job_id = f3a90578-5c96-4132-9dfd-0ba1899f5333
+Cluster 1, 2 qubit circuit
+2 qubit circuit saturated shots = 2048, ΔH = 3.269e-04
+54 instances, 2048 shots each
+Submitted measurement filter, 4 calibration circuits * 8192 shots, job_id = 97a5be03-d0d3-41c2-8625-e8ff8f1a6fed
+Submitted 54 circs, 2048 shots, 1 reps to hardware, job_id = d688dcf8-1721-4b52-8de2-75e102716078
+Cluster 2, 5 qubit circuit
+5 qubit circuit saturated shots = 16384, ΔH = 9.379e-04
+36 instances, 16384 shots each
+Submitted measurement filter, 32 calibration circuits * 8192 shots, job_id = 6f00710d-c804-46d1-9116-e7af43959f5a
+Submitted 36 circs, 8192 shots, 2 reps to hardware, job_id = d3a1f6a7-f75a-4ea3-b541-9cce5137837e
+Cluster 3, 3 qubit circuit
+3 qubit circuit saturated shots = 2048, ΔH = 3.052e-05
+162 instances, 2048 shots each
+Submitted measurement filter, 8 calibration circuits * 8192 shots, job_id = 41daf624-3817-4c80-b5d1-921fdaec1a58
+Submitted 162 circs, 2048 shots, 1 reps to hardware, job_id = 8e1849be-fb8c-4317-917f-270c23b14bdd
+Cluster 4, 2 qubit circuit
+2 qubit circuit saturated shots = 3072, ΔH = 9.202e-04
+36 instances, 3072 shots each
+Submitted measurement filter, 4 calibration circuits * 8192 shots, job_id = 68118afb-3fdf-46f0-b16d-05b7629fb55c
+Submitted 36 circs, 3072 shots, 1 reps to hardware, job_id = f5965b7a-4aef-478d-a206-a5ac8d9411db
+**************************************************
+Submitting case  (6, 9)
+Cluster 0, 6 qubit circuit
+6 qubit circuit saturated shots = 32768, ΔH = 9.507e-04
+54 instances, 32768 shots each
+Submitted measurement filter, 64 calibration circuits * 8192 shots, job_id = ddc16a41-9a22-44e3-b95a-9cf6b713a95d
+Submitted 54 circs, 8192 shots, 4 reps to hardware, job_id = 55ee69f2-c17a-4bc7-bb2f-82008e20a1d2
+Cluster 1, 6 qubit circuit
+6 qubit circuit saturated shots = 30720, ΔH = 9.640e-04
+108 instances, 30720 shots each
+Submitted measurement filter, 64 calibration circuits * 8192 shots, job_id = 433e5150-116e-4f4b-a6b4-0cb08b755436
+Submitted 108 circs, 6144 shots, 5 reps to hardware, job_id = 4d353769-9421-41c4-b0bc-9e018a0c7fce
+**************************************************
+Submitting case  (6, 10)
+Cluster 0, 6 qubit circuit
+6 qubit circuit saturated shots = 30720, ΔH = 1.005e-03
+18 instances, 30720 shots each
+Submitted measurement filter, 64 calibration circuits * 8192 shots, job_id = 05725a88-026e-4c74-ab53-0ec91c9bd13e
+Submitted 18 circs, 6144 shots, 5 reps to hardware, job_id = 84ea0e6d-40c9-4e41-bfa5-36b4a939d583
+Cluster 1, 6 qubit circuit
+6 qubit circuit saturated shots = 27648, ΔH = 1.025e-03
+18 instances, 27648 shots each
+Submitted measurement filter, 64 calibration circuits * 8192 shots, job_id = a7328a58-ab23-408e-ab3c-2c6443feb878
+Submitted 18 circs, 3072 shots, 9 reps to hardware, job_id = b0cb6a39-40fb-4418-9a4a-627de359dd81
+**************************************************
+----------------------------------------------------------------------------------------------------
+Retrieving case (5, 9)
+Cluster 0 has 1 jobs
+Meas filter job id 39b231e1-9a47-4839-8040-b89b12a7c3b8
+8409c41b-5841-44d0-a134-33006e0e36fe
+Mitigation for 216 * 5-qubit circuit took 6.251e+00 seconds
+circuit instance has 12288.000000000002 shots
+Cluster 1 has 1 jobs
+Meas filter job id e1878fb2-9d90-4afb-b600-bf0970cbfc4e
+7ac786cc-dfd9-4d0a-b011-902a999eec9e
+Mitigation for 594 * 5-qubit circuit took 1.409e+01 seconds
+circuit instance has 11264.0 shots
+Cluster 2 has 1 jobs
+Meas filter job id a3a36071-08b0-4d0a-9e12-cc591d226282
+d03602e7-8f16-45b9-adce-8556122c7028
+Mitigation for 54 * 3-qubit circuit took 2.497e-01 seconds
+circuit instance has 5120.0 shots
+Cluster 3 has 1 jobs
+Meas filter job id bb460fac-03ae-473b-94b8-5daa4c7d0715
+f365c66f-3171-4e90-91b2-780975c4ef10
+Mitigation for 108 * 2-qubit circuit took 3.850e-01 seconds
+circuit instance has 3072.0 shots
+Job submittor output has 1/4 cases
+**************************************************
+Retrieving case (5, 10)
+Cluster 0 has 2 jobs
+Meas filter job id ed554896-00d2-49e9-b31c-1a548795544a
+ad22472a-de88-463c-8254-a63da455ccff
+Mitigation for 108 * 5-qubit circuit took 5.548e-01 seconds
+f3a90578-5c96-4132-9dfd-0ba1899f5333
+Mitigation for 54 * 5-qubit circuit took 3.387e-01 seconds
+circuit instance has 19456.000000000004 shots
+Cluster 1 has 1 jobs
+Meas filter job id 97a5be03-d0d3-41c2-8625-e8ff8f1a6fed
+d688dcf8-1721-4b52-8de2-75e102716078
+Mitigation for 54 * 2-qubit circuit took 2.323e-01 seconds
+circuit instance has 2047.9999999999998 shots
+Cluster 2 has 1 jobs
+Meas filter job id 6f00710d-c804-46d1-9116-e7af43959f5a
+d3a1f6a7-f75a-4ea3-b541-9cce5137837e
+Mitigation for 72 * 5-qubit circuit took 3.783e-01 seconds
+circuit instance has 16384.0 shots
+Cluster 3 has 1 jobs
+Meas filter job id 41daf624-3817-4c80-b5d1-921fdaec1a58
+8e1849be-fb8c-4317-917f-270c23b14bdd
+Mitigation for 162 * 3-qubit circuit took 6.428e-01 seconds
+circuit instance has 2047.9999999999995 shots
+Cluster 4 has 1 jobs
+Meas filter job id 68118afb-3fdf-46f0-b16d-05b7629fb55c
+f5965b7a-4aef-478d-a206-a5ac8d9411db
+Mitigation for 36 * 2-qubit circuit took 1.783e-01 seconds
+circuit instance has 3072.0 shots
+Job submittor output has 2/4 cases
+**************************************************
+Retrieving case (6, 9)
+Cluster 0 has 1 jobs
+Meas filter job id ddc16a41-9a22-44e3-b95a-9cf6b713a95d
+55ee69f2-c17a-4bc7-bb2f-82008e20a1d2
+Mitigation for 216 * 6-qubit circuit took 2.478e+00 seconds
+circuit instance has 32767.999999999996 shots
+Cluster 1 has 1 jobs
+Meas filter job id 433e5150-116e-4f4b-a6b4-0cb08b755436
+4d353769-9421-41c4-b0bc-9e018a0c7fce
+Mitigation for 540 * 6-qubit circuit took 1.166e+01 seconds
+circuit instance has 30719.999999999996 shots
+Job submittor output has 3/4 cases
+**************************************************
+Retrieving case (6, 10)
+Cluster 0 has 1 jobs
+Meas filter job id 05725a88-026e-4c74-ab53-0ec91c9bd13e
+84ea0e6d-40c9-4e41-bfa5-36b4a939d583
+Mitigation for 90 * 6-qubit circuit took 7.590e-01 seconds
+circuit instance has 30720.000000000004 shots
+Cluster 1 has 1 jobs
+Meas filter job id a7328a58-ab23-408e-ab3c-2c6443feb878
+b0cb6a39-40fb-4418-9a4a-627de359dd81
+Mitigation for 162 * 6-qubit circuit took 4.574e+00 seconds
+circuit instance has 27647.999999999996 shots
+Job submittor output has 4/4 cases
+**************************************************
+----------------------------------------------------------------------------------------------------
+-------------------------------------------------- Reconstructor --------------------------------------------------
+Existing cases: dict_keys([])
+case (5, 9)
+5 qubit cluster
+5 qubit cluster
+3 qubit cluster
+2 qubit cluster
+Reconstruction output has 1 cases
+----------------------------------------------------------------------------------------------------
+case (5, 10)
+5 qubit cluster
+2 qubit cluster
+5 qubit cluster
+3 qubit cluster
+2 qubit cluster
+Reconstruction output has 2 cases
+----------------------------------------------------------------------------------------------------
+case (6, 9)
+6 qubit cluster
+6 qubit cluster
+Reconstruction output has 3 cases
+----------------------------------------------------------------------------------------------------
+case (6, 10)
+6 qubit cluster
+6 qubit cluster
+Reconstruction output has 4 cases
+----------------------------------------------------------------------------------------------------
+-------------------------------------------------- Job Submittor --------------------------------------------------
+Existing cases: dict_keys([])
+Run cases: dict_keys([(5, 9), (5, 10), (6, 9), (6, 10)])
+**************************************************
+Submitting case  (5, 9)
+Cluster 0, 5 qubit circuit
+108 instances, 2703 shots each
+/home/weit/anaconda3/envs/cc-env/lib/python3.7/site-packages/qiskit/providers/models/backendconfiguration.py:337: UserWarning: `dt` and `dtm` now have units of seconds(s) rather than nanoseconds(ns).
+  warnings.warn('`dt` and `dtm` now have units of seconds(s) rather '
+Submitted measurement filter, 32 calibration circuits * 8192 shots, job_id = af769581-9354-4d74-82fd-c8475bc4c7fd
+Submitted 108 circs, 3072 shots, 1 reps to hardware, job_id = 117cfe4a-acd6-4637-b894-be6c4dabc60c
+Cluster 1, 5 qubit circuit
+54 instances, 5405 shots each
+Submitted measurement filter, 32 calibration circuits * 8192 shots, job_id = d8329eae-ca85-4bcb-bd21-a0188d553b1c
+Submitted 54 circs, 6144 shots, 1 reps to hardware, job_id = 917a79c6-f4df-4a1c-becd-cf6f0985bb78
+Cluster 2, 3 qubit circuit
+54 instances, 5405 shots each
+Submitted measurement filter, 8 calibration circuits * 8192 shots, job_id = 59e27b97-11fc-4d35-8a89-1d07c00e21a3
+Submitted 54 circs, 6144 shots, 1 reps to hardware, job_id = ea6bc96a-7bff-4a18-865d-e084c464d73d
+Cluster 3, 2 qubit circuit
+108 instances, 2703 shots each
+Submitted measurement filter, 4 calibration circuits * 8192 shots, job_id = 74fbd94b-eeef-4e8a-9e8c-ee4bedc475a5
+Submitted 108 circs, 3072 shots, 1 reps to hardware, job_id = 9ba370e5-a350-4cb3-b277-356fe2fc7b38
+**************************************************
+Submitting case  (5, 10)
+Cluster 0, 5 qubit circuit
+54 instances, 11530 shots each
+Submitted measurement filter, 32 calibration circuits * 8192 shots, job_id = 3c37bbe6-e767-4b90-87d7-d27b238ea7f6
+Submitted 54 circs, 6144 shots, 2 reps to hardware, job_id = cba1f849-8a04-4163-b942-8e48b20d74bd
+Cluster 1, 2 qubit circuit
+54 instances, 11530 shots each
+Submitted measurement filter, 4 calibration circuits * 8192 shots, job_id = 55a00ba1-83d1-4d4f-a52d-76621710297b
+Submitted 54 circs, 6144 shots, 2 reps to hardware, job_id = 84ab994f-0597-4acf-8e0c-4872013692f7
+Cluster 2, 5 qubit circuit
+36 instances, 17295 shots each
+Submitted measurement filter, 32 calibration circuits * 8192 shots, job_id = be0e377c-a124-45e1-8597-5c27ee04eef0
+Submitted 36 circs, 8192 shots, 2 reps to hardware, job_id = 664900b3-af3d-4a46-9913-c1fe373f7787
+Submitted 36 circs, 1024 shots, 1 reps to hardware, job_id = 20ac3f96-d5c3-4a18-b66d-ab3d03b2a858
+Cluster 3, 3 qubit circuit
+162 instances, 3844 shots each
+Submitted measurement filter, 8 calibration circuits * 8192 shots, job_id = 71cb253a-908a-49a8-8fe2-33809373b94a
+Submitted 162 circs, 4096 shots, 1 reps to hardware, job_id = 22588439-7ffc-43a3-a761-9c77b5eab878
+Cluster 4, 2 qubit circuit
+36 instances, 17295 shots each
+Submitted measurement filter, 4 calibration circuits * 8192 shots, job_id = 663bdfe8-878d-4717-86bb-1551f18cd5f7
+Submitted 36 circs, 8192 shots, 2 reps to hardware, job_id = dedf764c-0a54-4e14-916d-57670a82cb0c
+Submitted 36 circs, 1024 shots, 1 reps to hardware, job_id = d614a796-871b-4a39-a597-c1ce9805ff46
+**************************************************
+Submitting case  (6, 9)
+Cluster 0, 6 qubit circuit
+54 instances, 5405 shots each
+Submitted measurement filter, 64 calibration circuits * 8192 shots, job_id = 748df924-6061-4fda-8653-a6f5c2dcd480
+Submitted 54 circs, 6144 shots, 1 reps to hardware, job_id = 2b5f0eee-a0a9-4279-9e26-638253133160
+Cluster 1, 6 qubit circuit
+108 instances, 2703 shots each
+Submitted measurement filter, 64 calibration circuits * 8192 shots, job_id = 1043b780-e40e-4847-935e-7041d1f7c41d
+Submitted 108 circs, 3072 shots, 1 reps to hardware, job_id = 5d4f7827-4c62-46bd-967c-0a31a40c86ee
+**************************************************
+Submitting case  (6, 10)
+Cluster 0, 6 qubit circuit
+18 instances, 34589 shots each
+Submitted measurement filter, 64 calibration circuits * 8192 shots, job_id = 9b9759b5-1f27-49d5-85b9-a3fe740e61e6
+Submitted 18 circs, 2048 shots, 17 reps to hardware, job_id = a2bd3865-d14c-4684-a803-fd9b8887a199
+Cluster 1, 6 qubit circuit
+18 instances, 34589 shots each
+Submitted measurement filter, 64 calibration circuits * 8192 shots, job_id = c78d45f7-060f-4cca-bdce-b58de6bcc1bd
+Submitted 18 circs, 2048 shots, 17 reps to hardware, job_id = b4b9b000-b77c-4314-9aaf-cb2ad24a80d3
+**************************************************
+----------------------------------------------------------------------------------------------------
+Retrieving case (5, 9)
+Cluster 0 has 1 jobs
+Meas filter job id af769581-9354-4d74-82fd-c8475bc4c7fd
+117cfe4a-acd6-4637-b894-be6c4dabc60c
+Mitigation for 108 * 5-qubit circuit took 3.535e+00 seconds
+circuit instance has 3072.000000000001 shots
+Cluster 1 has 1 jobs
+Meas filter job id d8329eae-ca85-4bcb-bd21-a0188d553b1c
+917a79c6-f4df-4a1c-becd-cf6f0985bb78
+Mitigation for 54 * 5-qubit circuit took 2.086e+00 seconds
+circuit instance has 6143.999999999999 shots
+Cluster 2 has 1 jobs
+Meas filter job id 59e27b97-11fc-4d35-8a89-1d07c00e21a3
+ea6bc96a-7bff-4a18-865d-e084c464d73d
+Mitigation for 54 * 3-qubit circuit took 2.342e+00 seconds
+circuit instance has 6143.999999999999 shots
+Cluster 3 has 1 jobs
+Meas filter job id 74fbd94b-eeef-4e8a-9e8c-ee4bedc475a5
+9ba370e5-a350-4cb3-b277-356fe2fc7b38
+Mitigation for 108 * 2-qubit circuit took 2.505e+00 seconds
+circuit instance has 3072.0 shots
+Job submittor output has 1/4 cases
+**************************************************
+Retrieving case (5, 10)
+Cluster 0 has 1 jobs
+Meas filter job id 3c37bbe6-e767-4b90-87d7-d27b238ea7f6
+cba1f849-8a04-4163-b942-8e48b20d74bd
+Mitigation for 108 * 5-qubit circuit took 2.638e+00 seconds
+circuit instance has 12288.000000000002 shots
+Cluster 1 has 1 jobs
+Meas filter job id 55a00ba1-83d1-4d4f-a52d-76621710297b
+84ab994f-0597-4acf-8e0c-4872013692f7
+Mitigation for 108 * 2-qubit circuit took 3.540e-01 seconds
+circuit instance has 12288.0 shots
+Cluster 2 has 2 jobs
+Meas filter job id be0e377c-a124-45e1-8597-5c27ee04eef0
+664900b3-af3d-4a46-9913-c1fe373f7787
+Mitigation for 72 * 5-qubit circuit took 3.774e-01 seconds
+20ac3f96-d5c3-4a18-b66d-ab3d03b2a858
+Mitigation for 36 * 5-qubit circuit took 2.247e-01 seconds
+circuit instance has 17408.0 shots
+Cluster 3 has 1 jobs
+Meas filter job id 71cb253a-908a-49a8-8fe2-33809373b94a
+22588439-7ffc-43a3-a761-9c77b5eab878
+Mitigation for 162 * 3-qubit circuit took 6.114e-01 seconds
+circuit instance has 4096.0 shots
+Cluster 4 has 2 jobs
+Meas filter job id 663bdfe8-878d-4717-86bb-1551f18cd5f7
+dedf764c-0a54-4e14-916d-57670a82cb0c
+Mitigation for 72 * 2-qubit circuit took 3.056e-01 seconds
+d614a796-871b-4a39-a597-c1ce9805ff46
+Mitigation for 36 * 2-qubit circuit took 1.940e-01 seconds
+circuit instance has 17408.0 shots
+Job submittor output has 2/4 cases
+**************************************************
+Retrieving case (6, 9)
+Cluster 0 has 1 jobs
+Meas filter job id 748df924-6061-4fda-8653-a6f5c2dcd480
+2b5f0eee-a0a9-4279-9e26-638253133160
+Mitigation for 54 * 6-qubit circuit took 4.237e-01 seconds
+circuit instance has 6144.000000000002 shots
+Cluster 1 has 1 jobs
+Meas filter job id 1043b780-e40e-4847-935e-7041d1f7c41d
+5d4f7827-4c62-46bd-967c-0a31a40c86ee
+Mitigation for 108 * 6-qubit circuit took 7.925e-01 seconds
+circuit instance has 3071.999999999998 shots
+Job submittor output has 3/4 cases
+**************************************************
+Retrieving case (6, 10)
+Cluster 0 has 1 jobs
+Meas filter job id 9b9759b5-1f27-49d5-85b9-a3fe740e61e6
+a2bd3865-d14c-4684-a803-fd9b8887a199
+Mitigation for 306 * 6-qubit circuit took 3.517e+00 seconds
+circuit instance has 34816.0 shots
+Cluster 1 has 1 jobs
+Meas filter job id c78d45f7-060f-4cca-bdce-b58de6bcc1bd
+b4b9b000-b77c-4314-9aaf-cb2ad24a80d3
+Mitigation for 306 * 6-qubit circuit took 3.900e+00 seconds
+circuit instance has 34816.0 shots
+Job submittor output has 4/4 cases
+**************************************************
+----------------------------------------------------------------------------------------------------
+-------------------------------------------------- Reconstructor --------------------------------------------------
+Existing cases: dict_keys([])
+case (5, 9)
+5 qubit cluster
+5 qubit cluster
+3 qubit cluster
+2 qubit cluster
+Reconstruction output has 1 cases
+----------------------------------------------------------------------------------------------------
+case (5, 10)
+5 qubit cluster
+2 qubit cluster
+5 qubit cluster
+3 qubit cluster
+2 qubit cluster
+Reconstruction output has 2 cases
+----------------------------------------------------------------------------------------------------
+case (6, 9)
+6 qubit cluster
+6 qubit cluster
+Reconstruction output has 3 cases
+----------------------------------------------------------------------------------------------------
+case (6, 10)
+6 qubit cluster
+6 qubit cluster
+Reconstruction output has 4 cases
+----------------------------------------------------------------------------------------------------
+-------------------------------------------------- Plot --------------------------------------------------
+Processing ./hardware/benchmark_data/supremacy_ibmq_boeblingen/hw_plotter_input_ibmq_boeblingen_saturated.p
+case (5, 9): ce percentage reduction = -888.179, fidelity improvement = 0.000, reconstruction time: 1.391e+00
+case (5, 10): ce percentage reduction = -1381.276, fidelity improvement = -0.000, reconstruction time: 7.235e+00
+case (6, 9): ce percentage reduction = -605.649, fidelity improvement = -0.000, reconstruction time: 2.819e-02
+case (6, 10): ce percentage reduction = -310.791, fidelity improvement = 0.000, reconstruction time: 8.562e-03
+************************* Best Cases *************************
+{'ce_percent': -605.6492307419195, 'reconstructor_time': 0.028191566467285156, 'best_case': (6, 9), 'hw_ce': 0.0009123596954288208, 'cutting_ce': 0.006438059172392795}
+{'ce_percent': -310.791251427356, 'reconstructor_time': 0.00856161117553711, 'best_case': (6, 10), 'hw_ce': 0.0009270375137747949, 'cutting_ce': 0.003808189004036527}
+**************************************************
+Processing ./hardware/benchmark_data/supremacy_ibmq_boeblingen/hw_plotter_input_ibmq_boeblingen_sametotal.p
+case (5, 9): ce percentage reduction = -2287.344, fidelity improvement = 0.000, reconstruction time: 1.343e+00
+case (5, 10): ce percentage reduction = -556.130, fidelity improvement = 0.000, reconstruction time: 6.978e+00
+case (6, 9): ce percentage reduction = -3407.764, fidelity improvement = 0.000, reconstruction time: 2.470e-02
+case (6, 10): ce percentage reduction = -306.626, fidelity improvement = -0.000, reconstruction time: 8.394e-03
+************************* Best Cases *************************
+{'ce_percent': -2287.3440147942238, 'reconstructor_time': 1.3426446914672852, 'best_case': (5, 9), 'hw_ce': 0.0009123596954288208, 'cutting_ce': 0.021781164582214765}
+{'ce_percent': -306.6261812296162, 'reconstructor_time': 0.008394241333007812, 'best_case': (6, 10), 'hw_ce': 0.0009270375137747949, 'cutting_ce': 0.0037695772408284254}
+**************************************************
+----------------------------------------------------------------------------------------------------
