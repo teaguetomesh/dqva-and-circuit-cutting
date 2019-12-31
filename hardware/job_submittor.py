@@ -68,6 +68,9 @@ def accumulate_cluster_jobs(cluster_job_dict,cluster_meas_filter):
                 hw_counts[init_meas] = update_counts(cumulated=hw_counts[init_meas], batch=hw_count)
             else:
                 hw_counts[init_meas] = update_counts(cumulated={}, batch=hw_count)
+    for init_meas in hw_counts:
+        print('init_meas {} has {:d} shots'.format(init_meas,sum(hw_counts[init_meas])))
+        break
     
     hw_probs = {}
     for init_meas in hw_counts:

@@ -161,8 +161,8 @@ if __name__ == '__main__':
         full_circ = full_circ_info[full_circuit_size]['full_circ']
         fc_shots = full_circ_info[full_circuit_size]['fc_shots']
         fc_evaluations = full_circ_info[full_circuit_size]['fc_evaluations']
-        # print('%d qubits, %d shots'%(len(full_circ.qubits),fc_shots))
-        # print('sv : %d, qasm : %d, qasm+noise : %d, hw : %d'%(len(fc_evaluations['sv']),len(fc_evaluations['qasm']),len(fc_evaluations['qasm+noise']),len(fc_evaluations['hw'])))
+        print('%d qubits, %d shots'%(len(full_circ.qubits),fc_shots))
+        print('sv : %d, qasm : %d, qasm+noise : %d, hw : %d'%(len(fc_evaluations['sv']),len(fc_evaluations['qasm']),len(fc_evaluations['qasm+noise']),len(fc_evaluations['hw'])))
         case_dict['full_circ'] = copy.deepcopy(full_circ)
         case_dict['fc_shots'] = copy.deepcopy(fc_shots)
         case_dict['fc_evaluations'] = copy.deepcopy(fc_evaluations)
