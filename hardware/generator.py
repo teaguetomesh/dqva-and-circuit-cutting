@@ -104,7 +104,7 @@ def case_feasible(full_circ,cluster_max_qubit,max_clusters):
     else:
         m.print_stat()
         clusters, complete_path_map, K, d = cutter.cut_circuit(full_circ, positions)
-        return {'searcher_time':searcher_time,'clusters':clusters,'complete_path_map':complete_path_map}
+        return {'full_circ':full_circ,'searcher_time':searcher_time,'clusters':clusters,'complete_path_map':complete_path_map}
 
 def fc_size_in_dict(full_circ_size,dictionary):
     for case in dictionary:
@@ -132,8 +132,8 @@ if __name__ == '__main__':
     evaluator_info = get_evaluator_info(circ=None,device_name=args.device_name,fields=['properties','device'])
     device_size = len(evaluator_info['properties'].qubits)
 
-    full_circuit_sizes = np.arange(3,8)
-    cases_to_run = []
+    full_circuit_sizes = np.arange(3,6)
+    cases_to_run = {}
     full_circ_to_run = {}
     for full_circ_size in full_circuit_sizes:
         if full_circ_size in full_circ_to_run:
@@ -154,24 +154,36 @@ if __name__ == '__main__':
                     print('Case {} NOT feasible'.format(case))
                 else:
                     print('Adding case {} to run'.format(case))
-                    cases_to_run.append(case)
-                    searcher_time = feasibility['searcher_time']
-                    clusters = feasibility['clusters']
-                    complete_path_map = feasibility['complete_path_map']
+                    cases_to_run[case] = copy.deepcopy(feasibility)
 
                     if full_circ_size not in full_circ_to_run:
                         print('Adding %d qubit full circuit to run'%full_circ_size)
                         saturated_shots, saturated_probs, ground_truths = get_circ_saturated_shots(circs=[full_circ],device_name=args.device_name)
-                        full_circ_to_run[full_circ_size] = {'circ':full_circ,'shots':saturated_shots[0],
-                        'sv':ground_truths[0],'qasm':saturated_probs[0]}
+                        full_circ_to_run[full_circ_size] = copy.deepcopy({'circ':full_circ,'shots':saturated_shots[0],
+                        'sv':ground_truths[0],'qasm':saturated_probs[0]})
                     else:
                         print('Use currently running %d qubit full circuit'%full_circ_size)
             print('-'*100)
-    print('{:d} cases, {:d} full circuits to run : {}'.format(len(cases_to_run),len(full_circ_to_run),cases_to_run))
+    print('{:d} cases, {:d} full circuits to run : {}'.format(len(cases_to_run),len(full_circ_to_run),cases_to_run.keys()))
+
+    # for case in cases_to_run:
+    #     full_circ = cases_to_run[case]['full_circ']
+    #     searcher_time = cases_to_run[case]['searcher_time']
+    #     clusters = cases_to_run[case]['clusters']
+    #     complete_path_map = cases_to_run[case]['complete_path_map']
+    #     print('Case {}: {:d} qubit full circuit has {:d} clusters, searcher time = {:.3e}'.format(case,len(full_circ.qubits),len(clusters),searcher_time))
+    # for full_circ_size in full_circ_to_run:
+    #     full_circ = full_circ_to_run[full_circ_size]['circ']
+    #     shots = full_circ_to_run[full_circ_size]['shots']
+    #     sv = full_circ_to_run[full_circ_size]['sv']
+    #     qasm = full_circ_to_run[full_circ_size]['qasm']
+    #     print('{:d} size has {:d} qubit circuit, {:d} shots, lengths:'.format(full_circ_size,len(full_circ.qubits),shots),len(sv),len(qasm))
     
     scheduler = Scheduler(circ_dict=full_circ_to_run,device_name=args.device_name)
     schedule = scheduler.get_schedule()
     jobs = scheduler.submit_schedule(schedule=schedule)
+    scheduler.retrieve(schedule=schedule,jobs=jobs)
+    full_circ_to_run = scheduler.circ_dict
 
     # fc_jobs = submit(schedule=fc_schedule,device_name=args.device_name)
     # full_circ_to_run = retrieve(circ_dict=full_circ_to_run,jobs=fc_jobs)
