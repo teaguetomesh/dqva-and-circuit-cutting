@@ -4,6 +4,14 @@ from utils.helper_fun import get_evaluator_info, apply_measurement
 from qiskit.compiler import transpile, assemble
 from qiskit import Aer
 
+def update_dicts(accumulated_dict,dict_to_add):
+    for key in dict_to_add:
+        if key in accumulated_dict:
+            accumulated_dict[key] += dict_to_add[key]
+        else:
+            accumulated_dict[key] = dict_to_add[key]
+    return accumulated_dict
+
 class ScheduleItem:
     def __init__(self,max_experiments,max_shots):
         self.max_experiments = max_experiments
@@ -101,11 +109,30 @@ class Scheduler:
         print('*'*20,'Retrieving jobs','*'*20)
         assert len(schedule) == len(jobs)
         circ_dict = copy.deepcopy(self.circ_dict)
+        for key in circ_dict:
+            circ_dict[key]['hw'] = {}
         for job_idx in range(len(jobs)):
             schedule_item = schedule[job_idx]
             hw_job = jobs[job_idx]
             print('Retrieving job {:d}/{:d}, job_id {} --> {:d} circuits'.format(job_idx+1,len(jobs),hw_job.job_id(),schedule_item.total_circs))
             hw_result = hw_job.result()
-            result_idx = 0
+            start_idx = 0
             for element in schedule_item.circ_list:
-                experiment_hw_counts = hw_result.get_counts(result_idx)
+                key = element['key']
+                circ = element['circ']
+                reps = element['reps']
+                end_idx = start_idx + reps
+                for result_idx in range(start_idx,end_idx):
+                    print('getting {:d}/{:d} circuit, key {} : {:d} qubit'.format(result_idx+1,schedule_item.total_circs,key,len(circ.qubits)))
+                    experiment_hw_counts = hw_result.get_counts(result_idx)
+                    circ_dict[key]['hw'] = update_dicts(accumulated_dict=circ_dict[key]['hw'],dict_to_add=experiment_hw_counts)
+                start_idx = end_idx
+        # for key in circ_dict:
+        #     full_circ = circ_dict[key]['circ']
+        #     shots = circ_dict[key]['shots']
+        #     sv = circ_dict[key]['sv']
+        #     qasm = circ_dict[key]['qasm']
+        #     hw = circ_dict[key]['hw']
+        #     print('{:d} size has {:d} qubit circuit, {:d} shots, lengths:'.format(key,len(full_circ.qubits),shots),len(sv),len(qasm))
+        #     print('hw has {:d} shots'.format(sum(hw.values())))
+        self.circ_dict = copy.deepcopy(circ_dict)

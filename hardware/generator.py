@@ -172,18 +172,21 @@ if __name__ == '__main__':
     #     clusters = cases_to_run[case]['clusters']
     #     complete_path_map = cases_to_run[case]['complete_path_map']
     #     print('Case {}: {:d} qubit full circuit has {:d} clusters, searcher time = {:.3e}'.format(case,len(full_circ.qubits),len(clusters),searcher_time))
-    # for full_circ_size in full_circ_to_run:
-    #     full_circ = full_circ_to_run[full_circ_size]['circ']
-    #     shots = full_circ_to_run[full_circ_size]['shots']
-    #     sv = full_circ_to_run[full_circ_size]['sv']
-    #     qasm = full_circ_to_run[full_circ_size]['qasm']
-    #     print('{:d} size has {:d} qubit circuit, {:d} shots, lengths:'.format(full_circ_size,len(full_circ.qubits),shots),len(sv),len(qasm))
     
     scheduler = Scheduler(circ_dict=full_circ_to_run,device_name=args.device_name)
     schedule = scheduler.get_schedule()
     jobs = scheduler.submit_schedule(schedule=schedule)
     scheduler.retrieve(schedule=schedule,jobs=jobs)
     full_circ_to_run = scheduler.circ_dict
+
+    for full_circ_size in full_circ_to_run:
+        full_circ = full_circ_to_run[full_circ_size]['circ']
+        shots = full_circ_to_run[full_circ_size]['shots']
+        sv = full_circ_to_run[full_circ_size]['sv']
+        qasm = full_circ_to_run[full_circ_size]['qasm']
+        hw = full_circ_to_run[full_circ_size]['hw']
+        print('{:d} size has {:d} qubit circuit, {:d} shots, lengths:'.format(full_circ_size,len(full_circ.qubits),shots),len(sv),len(qasm))
+        print('hw has {:d} shots'.format(sum(hw.values())))
 
     # fc_jobs = submit(schedule=fc_schedule,device_name=args.device_name)
     # full_circ_to_run = retrieve(circ_dict=full_circ_to_run,jobs=fc_jobs)
