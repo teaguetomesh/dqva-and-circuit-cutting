@@ -15,7 +15,7 @@ from time import time
 import os
 from qcg.generators import gen_supremacy, gen_hwea, gen_BV, gen_qft, gen_sycamore
 
-def generate_circ(dimension,circuit_type):
+def generate_circ(full_circ_size,circuit_type):
     def gen_secret(num_qubit):
         num_digit = num_qubit-1
         num = 2**num_digit-1
@@ -23,7 +23,7 @@ def generate_circ(dimension,circuit_type):
         num_with_zeros = str(num).zfill(num_digit)
         return num_with_zeros
 
-    i,j = factor_int(dimension)
+    i,j = factor_int(full_circ_size)
     if circuit_type == 'supremacy':
         full_circ = gen_supremacy(i,j,8)
     elif circuit_type == 'hwea':
@@ -153,6 +153,8 @@ def find_cluster_O_rho_qubits(complete_path_map,cluster_idx):
 
 def get_circ_saturated_shots(circs,device_name):
     saturated_shots = []
+    saturated_probs = []
+    ground_truths = []
     for circ_idx, circ in enumerate(circs):
         full_circ_size = len(circ.qubits)
         ground_truth = evaluate_circ(circ=circ,backend='statevector_simulator',evaluator_info=None)
@@ -178,10 +180,12 @@ def get_circ_saturated_shots(circs,device_name):
                 second_derivative = (ce_l[-1]+ce_l[-3]-2*ce_l[-2])/(2*np.power(shots_increment,2))
                 if (abs(first_derivative)<1e-6 and abs(second_derivative) < 1e-10) or accumulated_shots/device_max_experiments/device_max_shots>1:
                     saturated_shots.append(accumulated_shots)
+                    saturated_probs.append(accumulated_prob)
+                    ground_truths.append(ground_truth)
                     print('%d qubit circuit saturated shots = %d, \u0394H = %.3e'%(full_circ_size,accumulated_shots,ce_l[-2]))
                     break
             counter += 1
-    return saturated_shots
+    return saturated_shots, saturated_probs, ground_truths
 
 def distribute_cluster_shots(total_shots,clusters,complete_path_map):
     cluster_shots = []
@@ -190,61 +194,6 @@ def distribute_cluster_shots(total_shots,clusters,complete_path_map):
         num_instances = np.power(6,len(rho_qubits))*np.power(3,len(O_qubits))
         cluster_shots.append(math.ceil(total_shots/num_instances))
     return cluster_shots
-
-def schedule_job(circs,shots,max_experiments,max_shots):
-    # print('%d circuits, %d shots each, %d max_experiments, %d max_shots'%(len(circs),shots,max_experiments,max_shots))
-    shots = 1024*math.ceil(shots/1024)
-    if len(circs)==0 or shots==0:
-        return []
-    elif len(circs)<=max_experiments and shots<=max_shots:
-        current_schedule = {'circs':circs,'shots':shots,'reps':1}
-        return [current_schedule]
-    elif len(circs)>max_experiments and shots<=max_shots:
-        curr_circs = {}
-        next_circs = {}
-        for init_meas in circs:
-            if len(curr_circs)<max_experiments:
-                curr_circs[init_meas] = circs[init_meas]
-            else:
-                next_circs[init_meas] = circs[init_meas]
-        current_schedule = {'circs':curr_circs,'shots':shots,'reps':1}
-        next_schedule = schedule_job(circs=next_circs,shots=shots,max_experiments=max_experiments,max_shots=max_shots)
-        return [current_schedule]+next_schedule
-    elif len(circs)<=max_experiments and shots>max_shots:
-        batch_shots = max_shots
-        while 1:
-            if shots%batch_shots == 0:
-                break
-            else:
-                batch_shots -= 1024
-        shots_repetitions_required = int(shots/batch_shots)
-        repetitions_allowed = int(max_experiments/len(circs))
-        if shots_repetitions_required <= repetitions_allowed:
-            reps = shots_repetitions_required
-            remaining_shots = shots - reps*batch_shots
-            assert remaining_shots==0
-            current_schedule = {'circs':circs,'shots':batch_shots,'reps':reps}
-            return [current_schedule]
-        else:
-            min_shots_repetitions_required = int(shots/max_shots)
-            reps = min(repetitions_allowed,min_shots_repetitions_required)
-            remaining_shots = shots - reps*max_shots
-            current_schedule = {'circs':circs,'shots':max_shots,'reps':reps}
-            next_schedule = schedule_job(circs=circs,shots=remaining_shots,max_experiments=max_experiments,max_shots=max_shots)
-            return [current_schedule]+next_schedule
-    elif len(circs)>max_experiments and shots>max_shots:
-        left_circs = {}
-        right_circs = {}
-        for init_meas in circs:
-            if len(left_circs) < max_experiments:
-                left_circs[init_meas] = circs[init_meas]
-            else:
-                right_circs[init_meas] = circs[init_meas]
-        left_schedule = schedule_job(circs=left_circs,shots=shots,max_experiments=max_experiments,max_shots=max_shots)
-        right_schedule = schedule_job(circs=right_circs,shots=shots,max_experiments=max_experiments,max_shots=max_shots)
-        return left_schedule + right_schedule
-    else:
-        raise Exception('This condition should not happen')
 
 def apply_measurement(circ):
     c = ClassicalRegister(len(circ.qubits), 'c')
@@ -343,8 +292,8 @@ def evaluate_circ(circ, backend, evaluator_info):
                 reps_l = [s['circs'][init_meas] for i in range(s['reps'])]
                 circs_l += reps_l
             qobj = assemble(circs_l, backend=evaluator_info['device'], shots=s['shots'])
-            job = evaluator_info['device'].run(qobj)
-            # job = Aer.get_backend('qasm_simulator').run(qobj)
+            # job = evaluator_info['device'].run(qobj)
+            job = Aer.get_backend('qasm_simulator').run(qobj)
             jobs.append({'job':job,'circ':circ,'mapped_circuit_l':circs_l,'evaluator_info':evaluator_info})
             print('Submitted {:d} reps * {:d} shots to hardware, job_id = {}'.format(s['reps'],s['shots'],job.job_id()))
         return jobs
@@ -371,8 +320,8 @@ def readout_mitigation(device,initial_layout):
     # Execute the calibration circuits
     meas_calibs_transpiled = transpile(meas_calibs, backend=device)
     qobj = assemble(meas_calibs_transpiled, backend=device, shots=num_shots)
-    job = device.run(qobj)
-    # job = Aer.get_backend('qasm_simulator').run(qobj)
+    # job = device.run(qobj)
+    job = Aer.get_backend('qasm_simulator').run(qobj)
     print('Submitted measurement filter, {:d} calibration circuits * {:d} shots, job_id = {}'.format(len(meas_calibs),num_shots,job.job_id()))
     return job, state_labels, qubit_list
 

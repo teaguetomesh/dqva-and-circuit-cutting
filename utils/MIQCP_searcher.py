@@ -148,7 +148,7 @@ class Basic_Model(object):
             assert(u < n_vertices)
     
     def solve(self):
-        print('solving for %d clusters'%self.num_cluster)
+        # print('solving for %d clusters'%self.num_cluster)
         # print('model has %d variables, %d linear constraints,%d quadratic constraints, %d general constraints'
         # % (self.model.NumVars,self.model.NumConstrs, self.model.NumQConstrs, self.model.NumGenConstrs))
         try:
@@ -185,7 +185,7 @@ class Basic_Model(object):
             self.cut_edges = cut_edges
             return True
         else:
-            print('Infeasible')
+            # print('Infeasible')
             return False
     
     def print_stat(self):
