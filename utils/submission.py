@@ -1,6 +1,8 @@
 import math
 import copy
-from utils.helper_fun import get_evaluator_info
+from utils.helper_fun import get_evaluator_info, apply_measurement
+from qiskit.compiler import transpile, assemble
+from qiskit import Aer
 
 class Job:
     def __init__(self,max_experiments,max_shots):
@@ -63,8 +65,33 @@ class Scheduler:
             schedule.append(job)
         return schedule
 
-    def submit(self,schedule):
+    def submit_schedule(self,schedule):
         jobs = []
+        for idx, job in enumerate(schedule):
+            # print('Job %d/%d'%(idx+1,len(schedule)))
+            # print('Has %d total circuits * %d shots, %d circ_list elements'%(job.total_circs,job.shots,len(job.circ_list)))
+            job_circuits = []
+            for element in job.circ_list:
+                circ, reps = element
+                # print('%d qubit circuit * %d reps'%(len(circ.qubits),reps))
+                
+                evaluator_info = get_evaluator_info(circ=circ,device_name=self.device_name,
+                fields=['device','basis_gates','coupling_map','properties','initial_layout'])
+
+                qc=apply_measurement(circ)
+                mapped_circuit = transpile(qc,
+                backend=evaluator_info['device'], basis_gates=evaluator_info['basis_gates'],
+                coupling_map=evaluator_info['coupling_map'],backend_properties=evaluator_info['properties'],
+                initial_layout=evaluator_info['initial_layout'])
+
+                circs_to_add = [mapped_circuit]*reps
+                job_circuits += circs_to_add
+            
+            assert len(job_circuits) == job.total_circs
+            qobj = assemble(job_circuits, backend=evaluator_info['device'], shots=job.shots)
+            hw_job = Aer.get_backend('qasm_simulator').run(qobj)
+            jobs.append(hw_job)
+            print('Job {:d}/{:d} {} --> submitted {:d} circuits * {:d} shots'.format(idx+1,len(schedule),hw_job.job_id(),len(job_circuits),job.shots))
         return jobs
 
     def retrieve(self,jobs):

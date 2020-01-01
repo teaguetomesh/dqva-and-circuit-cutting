@@ -171,12 +171,8 @@ if __name__ == '__main__':
     
     scheduler = Scheduler(circ_dict=full_circ_to_run,device_name=args.device_name)
     schedule = scheduler.get_schedule()
-    for idx, job in enumerate(schedule):
-        print('job %d/%d'%(idx+1,len(schedule)))
-        print('Has %d total circuits * %d shots'%(job.total_circs,job.shots))
-        for element in job.circ_list:
-            circ, reps = element
-            print('%d qubit circuit * %d reps'%(len(circ.qubits),reps))
+    jobs = scheduler.submit_schedule(schedule=schedule)
+
     # fc_jobs = submit(schedule=fc_schedule,device_name=args.device_name)
     # full_circ_to_run = retrieve(circ_dict=full_circ_to_run,jobs=fc_jobs)
     
