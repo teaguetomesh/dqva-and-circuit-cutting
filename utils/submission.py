@@ -29,6 +29,9 @@ class Scheduler:
         self.circ_dict = circ_dict
         self.device_name = device_name
         self.check_input()
+        evaluator_info = get_evaluator_info(circ=None,device_name=self.device_name,fields=['properties','device'])
+        self.device_max_shots = evaluator_info['device'].configuration().max_shots
+        self.device_max_experiments = int(evaluator_info['device'].configuration().max_experiments)
 
     def check_input(self):
         assert isinstance(self.circ_dict,dict)
@@ -42,12 +45,8 @@ class Scheduler:
 
     def get_schedule(self):
         circ_dict = copy.deepcopy(self.circ_dict)
-        evaluator_info = get_evaluator_info(circ=None,device_name=self.device_name,fields=['properties','device'])
-        device_size = len(evaluator_info['properties'].qubits)
-        device_max_shots = evaluator_info['device'].configuration().max_shots
-        device_max_experiments = int(evaluator_info['device'].configuration().max_experiments)
         schedule = []
-        schedule_item = ScheduleItem(max_experiments=device_max_experiments,max_shots=device_max_shots)
+        schedule_item = ScheduleItem(max_experiments=self.device_max_experiments,max_shots=self.device_max_shots)
         key_idx = 0
         while key_idx<len(circ_dict):
             key = list(circ_dict.keys())[key_idx]
@@ -58,7 +57,7 @@ class Scheduler:
             if shots_remaining>0:
                 # print('OVERFLOW, has %d total circuits * %d shots'%(job.total_circs,job.shots))
                 schedule.append(schedule_item)
-                schedule_item = ScheduleItem(max_experiments=device_max_experiments,max_shots=device_max_shots)
+                schedule_item = ScheduleItem(max_experiments=self.device_max_experiments,max_shots=self.device_max_shots)
                 circ_dict[key]['shots'] = shots_remaining
             else:
                 # print('Did not overflow, has %d total circuits * %d shots'%(job.total_circs,job.shots))
@@ -116,7 +115,7 @@ class Scheduler:
                 circ = element['circ']
                 reps = element['reps']
                 end_idx = start_idx + reps
-                print('Getting {:d}-{:d}/{:d} circuits, key {} : {:d} qubit'.format(start_idx+1,end_idx,schedule_item.total_circs,key,len(circ.qubits)),flush=True)
+                print('Getting {:d}-{:d} ({:d}/{:d}) circuits, key {} : {:d} qubit'.format(start_idx,end_idx-1,end_idx,schedule_item.total_circs,key,len(circ.qubits)),flush=True)
                 for result_idx in range(start_idx,end_idx):
                     experiment_hw_counts = hw_result.get_counts(result_idx)
                     circ_dict[key]['hw'] = combine_dict(dict_sum=circ_dict[key]['hw'],dict_a=experiment_hw_counts)
@@ -126,8 +125,8 @@ class Scheduler:
             shots = circ_dict[key]['shots']
             hw = circ_dict[key]['hw']
             # print('Key {} has {:d} qubit circuit, hw has {:d}/{:d} shots'.format(key,len(full_circ.qubits),sum(hw.values()),shots))
-            print('Expecting {:d} shots, got {:d} shots'.format(sum(hw.values()),shots),flush=True)
-            # assert sum(hw.values()) >= shots
+            # print('Expecting {:d} shots, got {:d} shots'.format(sum(hw.values()),shots),flush=True)
+            assert sum(hw.values())-shots<self.device_max_shots and sum(hw.values())-shots>=0
             hw_prob = dict_to_prob(distribution_dict=hw)
             circ_dict[key]['hw'] = copy.deepcopy(hw_prob)
             assert abs(sum(circ_dict[key]['hw'])-1)<1e-10

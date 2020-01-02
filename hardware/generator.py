@@ -2,15 +2,12 @@ import pickle
 import os
 from time import time
 import numpy as np
-from qcg.generators import gen_supremacy, gen_hwea, gen_BV, gen_qft, gen_sycamore
 import utils.MIQCP_searcher as searcher
 import utils.cutter as cutter
-from utils.helper_fun import evaluate_circ, get_evaluator_info, get_circ_saturated_shots, readout_mitigation, get_filename, read_file, factor_int, generate_circ
+from utils.helper_fun import get_evaluator_info, get_circ_saturated_shots, get_filename, read_file, generate_circ
 from utils.submission import Scheduler
 import argparse
-from qiskit import IBMQ
 import math
-from qiskit.ignis.mitigation.measurement import CompleteMeasFitter
 import copy
 
 def case_feasible(full_circ,cluster_max_qubit,max_clusters):
@@ -51,7 +48,7 @@ if __name__ == '__main__':
     evaluator_info = get_evaluator_info(circ=None,device_name=args.device_name,fields=['properties','device'])
     device_size = len(evaluator_info['properties'].qubits)
 
-    full_circuit_sizes = np.arange(5,6)
+    full_circuit_sizes = np.arange(5,7)
     cases_to_run = {}
     full_circ_to_run = {}
     for full_circ_size in full_circuit_sizes:
