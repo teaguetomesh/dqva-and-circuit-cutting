@@ -203,6 +203,19 @@ def apply_measurement(circ):
     qc = circ+meas
     return qc
 
+def dict_to_prob(distribution_dict,reverse=False):
+    state = list(distribution_dict.keys())[0]
+    num_qubits = len(state)
+    num_shots = sum(distribution_dict.values())
+    prob = [0 for x in range(np.power(2,num_qubits))]
+    for state in distribution_dict:
+        if reverse:
+            reversed_state = reverseBits(int(state,2),num_qubits)
+            prob[reversed_state] = distribution_dict[state]/num_shots
+        else:
+            prob[int(state,2)] = distribution_dict[state]/num_shots
+    return prob
+
 def reverseBits(num,bitSize): 
     binary = bin(num)
     reverse = binary[-1:1:-1] 
@@ -225,11 +238,7 @@ def evaluate_circ(circ, backend, evaluator_info):
         job = execute(circ, backend=backend,backend_options=backend_options)
         result = job.result()
         outputstate = result.get_statevector(circ)
-        outputstate_ordered = [0 for sv in outputstate]
-        for i, sv in enumerate(outputstate):
-            reverse_i = reverseBits(i,len(circ.qubits))
-            outputstate_ordered[reverse_i] = sv
-        sv_prob = [np.power(np.absolute(x),2) for x in outputstate_ordered]
+        sv_prob = [np.power(np.absolute(x),2) for x in outputstate]
         return sv_prob
     elif backend == 'noiseless_qasm_simulator':
         # print('using noiseless qasm simulator %d shots'%num_shots)
@@ -242,10 +251,7 @@ def evaluate_circ(circ, backend, evaluator_info):
         
         noiseless_counts = noiseless_qasm_result.get_counts(0)
         assert sum(noiseless_counts.values())>=num_shots
-        noiseless_prob = [0 for x in range(np.power(2,len(circ.qubits)))]
-        for state in noiseless_counts:
-            reversed_state = reverseBits(int(state,2),len(circ.qubits))
-            noiseless_prob[reversed_state] = noiseless_counts[state]/num_shots
+        noiseless_prob = dict_to_prob(distribution_dict=noiseless_counts)
         return noiseless_prob
     elif backend == 'noisy_qasm_simulator':
         # print('using noisy qasm simulator {} shots'.format(num_shots))
@@ -267,10 +273,7 @@ def evaluate_circ(circ, backend, evaluator_info):
 
         noisy_counts = noisy_qasm_result.get_counts(0)
         assert sum(noisy_counts.values())>=num_shots
-        noisy_prob = [0 for x in range(np.power(2,len(circ.qubits)))]
-        for state in noisy_counts:
-            reversed_state = reverseBits(int(state,2),len(circ.qubits))
-            noisy_prob[reversed_state] = noisy_counts[state]/num_shots
+        noisy_prob = dict_to_prob(distribution_dict=noisy_counts)
         return noisy_prob
     elif backend == 'hardware':
         jobs = []
