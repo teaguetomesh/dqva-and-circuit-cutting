@@ -1,6 +1,6 @@
 import math
 import copy
-from utils.helper_fun import get_evaluator_info, apply_measurement, combine_dict, dict_to_prob, memory_to_dict
+from utils.helper_fun import get_evaluator_info, apply_measurement, dict_to_prob, memory_to_dict
 from qiskit.compiler import transpile, assemble
 from qiskit import Aer, execute
 

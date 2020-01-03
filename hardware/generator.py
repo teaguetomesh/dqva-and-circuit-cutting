@@ -50,10 +50,10 @@ if __name__ == '__main__':
 
     full_circuit_sizes = np.arange(5,6)
     cases_to_run = {}
-    full_circ_to_run = {}
+    circ_dict = {}
     for full_circ_size in full_circuit_sizes:
-        if full_circ_size in full_circ_to_run:
-            full_circ = full_circ_to_run[full_circ_size]['circ']
+        if full_circ_size in circ_dict:
+            full_circ = circ_dict[full_circ_size]['circ']
         elif fc_size_in_dict(full_circ_size=full_circ_size,dictionary=evaluator_input)[0]==True:
             full_circ = fc_size_in_dict(full_circ_size=full_circ_size,dictionary=evaluator_input)[1]
         else:
@@ -72,26 +72,26 @@ if __name__ == '__main__':
                     print('Adding case {} to run'.format(case))
                     cases_to_run[case] = copy.deepcopy(feasibility)
 
-                    if full_circ_size not in full_circ_to_run:
+                    if full_circ_size not in circ_dict:
                         print('Adding %d qubit full circuit to run'%full_circ_size)
                         saturated_shots, ground_truths, saturated_probs = get_circ_saturated_shots(circs=[full_circ],device_name=args.device_name)
-                        full_circ_to_run[full_circ_size] = copy.deepcopy({'circ':full_circ,'shots':saturated_shots[0],
+                        circ_dict[full_circ_size] = copy.deepcopy({'circ':full_circ,'shots':saturated_shots[0],
                         'sv':ground_truths[0],'qasm':saturated_probs[0]})
                     else:
                         print('Use currently running %d qubit full circuit'%full_circ_size)
             print('-'*100)
-    print('{:d} cases, {:d} full circuits to run : {}'.format(len(cases_to_run),len(full_circ_to_run),cases_to_run.keys()))
+    print('{:d} cases, {:d} full circuits to run : {}'.format(len(cases_to_run),len(circ_dict),cases_to_run.keys()))
     
-    scheduler = Scheduler(circ_dict=full_circ_to_run,device_name=args.device_name)
+    scheduler = Scheduler(circ_dict=circ_dict,device_name=args.device_name)
     schedule = scheduler.get_schedule()
     jobs = scheduler.submit_schedule(schedule=schedule)
     scheduler.retrieve(schedule=schedule,jobs=jobs)
-    full_circ_to_run = scheduler.circ_dict
+    circ_dict = scheduler.circ_dict
 
     for case in cases_to_run:
         uniform_prob = [1/2**case[1] for i in range(2**case[1])]
-        case_dict = {'full_circ':full_circ_to_run[case[1]]['circ'],'fc_shots':full_circ_to_run[case[1]]['shots'],
-        'sv':full_circ_to_run[case[1]]['sv'],'qasm':full_circ_to_run[case[1]]['qasm'],'qasm+noise':uniform_prob,'hw':full_circ_to_run[case[1]]['hw'],
+        case_dict = {'full_circ':circ_dict[case[1]]['circ'],'fc_shots':circ_dict[case[1]]['shots'],
+        'sv':circ_dict[case[1]]['sv'],'qasm':circ_dict[case[1]]['qasm'],'qasm+noise':uniform_prob,'hw':circ_dict[case[1]]['hw'],
         'searcher_time':cases_to_run[case]['searcher_time'],'clusters':cases_to_run[case]['clusters'],'complete_path_map':cases_to_run[case]['complete_path_map']}
         # print('Case {}: {:d} qubit full circuit has {:d} clusters, searcher time = {:.3e}'.format(case,len(case_dict['full_circ'].qubits),len(case_dict['clusters']),case_dict['searcher_time']))
         assert case[1] == len(case_dict['full_circ'].qubits)

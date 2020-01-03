@@ -298,6 +298,28 @@ def evaluate_circ(circ, backend, evaluator_info, reverse=True):
     else:
         raise Exception('Illegal backend :',backend)
 
+def get_mitigation_circuits(key,circ,device_name):
+    evaluator_info = get_evaluator_info(circ=circ,device_name=device_name,
+    fields=['device','basis_gates','coupling_map','properties','initial_layout'])
+    num_qubits = len(evaluator_info['properties'].qubits)
+
+    # Generate the calibration circuits
+    qr = QuantumRegister(num_qubits)
+    qubit_list = []
+    _initial_layout = evaluator_info['initial_layout'].get_physical_bits()
+    for q in _initial_layout:
+        if 'ancilla' not in _initial_layout[q].register.name:
+            qubit_list.append(q)
+    meas_calibs, state_labels = complete_meas_cal(qubit_list=qubit_list, qr=qr, circlabel='mcal')
+    num_shots = evaluator_info['device'].configuration().max_shots
+    if len(meas_calibs)<=evaluator_info['device'].configuration().max_experiments:
+        mitigation_dict = {}
+        for idx, meas_calib in enumerate(meas_calibs):
+            mitigation_dict['%s_mitigation_%d'%(key,idx)] = {'circ':meas_calib, 'shots':num_shots, 'state_labels':state_labels, 'qubit_list':qubit_list}
+        return mitigation_dict
+    else:
+        return {}
+
 # Entangled readout mitigation
 def readout_mitigation(device,initial_layout):
     filter_begin = time()
