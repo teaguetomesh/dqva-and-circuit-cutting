@@ -1,8 +1,8 @@
 import math
 import copy
-from utils.helper_fun import get_evaluator_info, apply_measurement, combine_dict, dict_to_prob
+from utils.helper_fun import get_evaluator_info, apply_measurement, combine_dict, dict_to_prob, memory_to_dict
 from qiskit.compiler import transpile, assemble
-from qiskit import Aer
+from qiskit import Aer, execute
 
 class ScheduleItem:
     def __init__(self,max_experiments,max_shots):
@@ -66,18 +66,18 @@ class Scheduler:
             schedule.append(schedule_item)
         return schedule
 
-    def submit_schedule(self,schedule):
+    def submit_schedule(self,schedule,real_device=False):
         print('*'*20,'Submitting jobs','*'*20)
         jobs = []
         for idx, schedule_item in enumerate(schedule):
-            print('Submitting job %d/%d'%(idx+1,len(schedule)))
-            # print('Has %d total circuits * %d shots, %d circ_list elements'%(job.total_circs,job.shots,len(job.circ_list)))
+            # print('Submitting job %d/%d'%(idx+1,len(schedule)))
+            # print('Has %d total circuits * %d shots, %d circ_list elements'%(schedule_item.total_circs,schedule_item.shots,len(schedule_item.circ_list)))
             job_circuits = []
             for element in schedule_item.circ_list:
                 key = element['key']
                 circ = element['circ']
                 reps = element['reps']
-                print('Key {} {:d} qubit circuit * {:d} reps'.format(key,len(circ.qubits),reps))
+                # print('Key {} {:d} qubit circuit * {:d} reps'.format(key,len(circ.qubits),reps))
                 
                 evaluator_info = get_evaluator_info(circ=circ,device_name=self.device_name,
                 fields=['device','basis_gates','coupling_map','properties','initial_layout'])
@@ -93,9 +93,12 @@ class Scheduler:
             
             assert len(job_circuits) == schedule_item.total_circs
             qobj = assemble(job_circuits, backend=evaluator_info['device'], shots=schedule_item.shots)
-            hw_job = Aer.get_backend('qasm_simulator').run(qobj)
+            if real_device:
+                hw_job = evaluator_info['device'].run(qobj,backend_options={'memory':True})
+            else:
+                hw_job = Aer.get_backend('qasm_simulator').run(qobj,backend_options={'memory':True})
             jobs.append(hw_job)
-            print('Job {:d}/{:d} {} --> submitted {:d} circuits * {:d} shots'.format(idx+1,len(schedule),hw_job.job_id(),len(job_circuits),schedule_item.shots))
+            print('Submitting job {:d}/{:d} {} --> {:d} circuits, {:d} * {:d} shots'.format(idx+1,len(schedule),hw_job.job_id(),len(schedule_item.circ_list),len(job_circuits),schedule_item.shots),flush=True)
         return jobs
 
     def retrieve(self,schedule,jobs):
@@ -104,10 +107,11 @@ class Scheduler:
         circ_dict = copy.deepcopy(self.circ_dict)
         for key in circ_dict:
             circ_dict[key]['hw'] = {}
+        memories = {}
         for job_idx in range(len(jobs)):
             schedule_item = schedule[job_idx]
             hw_job = jobs[job_idx]
-            print('Retrieving job {:d}/{:d}, job_id {} --> {:d} circuits'.format(job_idx+1,len(jobs),hw_job.job_id(),schedule_item.total_circs),flush=True)
+            print('Retrieving job {:d}/{:d} {} --> {:d} circuits, {:d} * {:d} shots'.format(job_idx+1,len(jobs),hw_job.job_id(),len(schedule_item.circ_list),schedule_item.total_circs,schedule_item.shots),flush=True)
             hw_result = hw_job.result()
             start_idx = 0
             for element in schedule_item.circ_list:
@@ -115,19 +119,25 @@ class Scheduler:
                 circ = element['circ']
                 reps = element['reps']
                 end_idx = start_idx + reps
-                print('Getting {:d}-{:d} ({:d}/{:d}) circuits, key {} : {:d} qubit'.format(start_idx,end_idx-1,end_idx,schedule_item.total_circs,key,len(circ.qubits)),flush=True)
+                # print('Getting {:d}-{:d} ({:d}/{:d}) circuits, key {} : {:d} qubit'.format(start_idx,end_idx-1,end_idx,schedule_item.total_circs,key,len(circ.qubits)),flush=True)
                 for result_idx in range(start_idx,end_idx):
-                    experiment_hw_counts = hw_result.get_counts(result_idx)
-                    circ_dict[key]['hw'] = combine_dict(dict_sum=circ_dict[key]['hw'],dict_a=experiment_hw_counts)
+                    # experiment_hw_counts = hw_result.get_counts(result_idx)
+                    experiment_hw_memory = hw_result.get_memory(result_idx)
+                    if key in memories:
+                        memories[key] += experiment_hw_memory
+                    else:
+                        memories[key] = experiment_hw_memory
                 start_idx = end_idx
         for key in circ_dict:
             full_circ = circ_dict[key]['circ']
             shots = circ_dict[key]['shots']
-            hw = circ_dict[key]['hw']
-            # print('Key {} has {:d} qubit circuit, hw has {:d}/{:d} shots'.format(key,len(full_circ.qubits),sum(hw.values()),shots))
-            # print('Expecting {:d} shots, got {:d} shots'.format(sum(hw.values()),shots),flush=True)
-            assert sum(hw.values())-shots<self.device_max_shots and sum(hw.values())-shots>=0
-            hw_prob = dict_to_prob(distribution_dict=hw)
+            memory = memories[key]
+            mem_dict = memory_to_dict(memory=memory[:shots])
+            hw_prob = dict_to_prob(distribution_dict=mem_dict,reverse=True)
             circ_dict[key]['hw'] = copy.deepcopy(hw_prob)
+            # print('Key {} has {:d} qubit circuit, hw has {:d}/{:d} shots'.format(key,len(full_circ.qubits),sum(hw.values()),shots))
+            # print('Expecting {:d} shots, got {:d} shots'.format(shots,sum(mem_dict.values())),flush=True)
+            assert len(circ_dict[key]['hw']) == 2**len(full_circ.qubits)
+            assert sum(mem_dict.values())==shots
             assert abs(sum(circ_dict[key]['hw'])-1)<1e-10
         self.circ_dict = copy.deepcopy(circ_dict)

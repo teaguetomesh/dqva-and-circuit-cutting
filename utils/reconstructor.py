@@ -296,7 +296,7 @@ if __name__ == '__main__':
             continue
         print('case {}'.format(case),flush=True)
         case_dict = copy.deepcopy(uniter_input[case])
-        [print('%d qubit cluster'%len(x.qubits)) for x in case_dict['clusters']]
+        print('Cut into ',[len(x.qubits) for x in case_dict['clusters']],'clusters')
         
         uniter_begin = time()
         reconstructed_prob = reconstruct(complete_path_map=uniter_input[case]['complete_path_map'],
@@ -305,6 +305,9 @@ if __name__ == '__main__':
         uniter_time = time()-uniter_begin
         case_dict['reconstructor_time'] = uniter_time
         case_dict['cutting'] = reconstructed_prob
+        print('qasm \u0394H = %.3e'%cross_entropy(target=case_dict['sv'],obs=case_dict['qasm']))
+        print('hw \u0394H = %.3e'%cross_entropy(target=case_dict['sv'],obs=case_dict['hw']))
+        print('cutting \u0394H = %.3e'%cross_entropy(target=case_dict['sv'],obs=case_dict['cutting']))
 
         pickle.dump({case:case_dict}, open('%s'%(dirname+plotter_input_filename),'ab'))
         counter += 1

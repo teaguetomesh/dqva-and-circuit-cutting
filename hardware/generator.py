@@ -4,7 +4,7 @@ from time import time
 import numpy as np
 import utils.MIQCP_searcher as searcher
 import utils.cutter as cutter
-from utils.helper_fun import get_evaluator_info, get_circ_saturated_shots, get_filename, read_file, generate_circ
+from utils.helper_fun import get_evaluator_info, get_circ_saturated_shots, get_filename, read_file, generate_circ,evaluate_circ
 from utils.submission import Scheduler
 import argparse
 import math
@@ -25,8 +25,8 @@ def case_feasible(full_circ,cluster_max_qubit,max_clusters):
 def fc_size_in_dict(full_circ_size,dictionary):
     for case in dictionary:
         if full_circ_size == case[1]:
-            return dictionary[case]['full_circ']
-    return None
+            return True, dictionary[case]['full_circ']
+    return False, None
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='generate evaluator inputs')
@@ -48,14 +48,14 @@ if __name__ == '__main__':
     evaluator_info = get_evaluator_info(circ=None,device_name=args.device_name,fields=['properties','device'])
     device_size = len(evaluator_info['properties'].qubits)
 
-    full_circuit_sizes = np.arange(5,7)
+    full_circuit_sizes = np.arange(5,6)
     cases_to_run = {}
     full_circ_to_run = {}
     for full_circ_size in full_circuit_sizes:
         if full_circ_size in full_circ_to_run:
             full_circ = full_circ_to_run[full_circ_size]['circ']
-        elif fc_size_in_dict(full_circ_size=full_circ_size,dictionary=evaluator_input)!=None:
-            full_circ = fc_size_in_dict(full_circ_size=full_circ_size,dictionary=evaluator_input)
+        elif fc_size_in_dict(full_circ_size=full_circ_size,dictionary=evaluator_input)[0]==True:
+            full_circ = fc_size_in_dict(full_circ_size=full_circ_size,dictionary=evaluator_input)[1]
         else:
             full_circ = generate_circ(full_circ_size=full_circ_size,circuit_type=args.circuit_type)
         for cluster_max_qubit in range(args.min_qubit,args.max_qubit+1):
@@ -74,7 +74,7 @@ if __name__ == '__main__':
 
                     if full_circ_size not in full_circ_to_run:
                         print('Adding %d qubit full circuit to run'%full_circ_size)
-                        saturated_shots, saturated_probs, ground_truths = get_circ_saturated_shots(circs=[full_circ],device_name=args.device_name)
+                        saturated_shots, ground_truths, saturated_probs = get_circ_saturated_shots(circs=[full_circ],device_name=args.device_name)
                         full_circ_to_run[full_circ_size] = copy.deepcopy({'circ':full_circ,'shots':saturated_shots[0],
                         'sv':ground_truths[0],'qasm':saturated_probs[0]})
                     else:
@@ -89,11 +89,12 @@ if __name__ == '__main__':
     full_circ_to_run = scheduler.circ_dict
 
     for case in cases_to_run:
+        uniform_prob = [1/2**case[1] for i in range(2**case[1])]
         case_dict = {'full_circ':full_circ_to_run[case[1]]['circ'],'fc_shots':full_circ_to_run[case[1]]['shots'],
-        'sv':full_circ_to_run[case[1]]['sv'],'qasm':full_circ_to_run[case[1]]['qasm'],'hw':full_circ_to_run[case[1]]['hw'],
+        'sv':full_circ_to_run[case[1]]['sv'],'qasm':full_circ_to_run[case[1]]['qasm'],'qasm+noise':uniform_prob,'hw':full_circ_to_run[case[1]]['hw'],
         'searcher_time':cases_to_run[case]['searcher_time'],'clusters':cases_to_run[case]['clusters'],'complete_path_map':cases_to_run[case]['complete_path_map']}
         # print('Case {}: {:d} qubit full circuit has {:d} clusters, searcher time = {:.3e}'.format(case,len(case_dict['full_circ'].qubits),len(case_dict['clusters']),case_dict['searcher_time']))
         assert case[1] == len(case_dict['full_circ'].qubits)
-        for key in ['sv','qasm','hw']:
+        for key in ['sv','qasm','qasm+noise','hw']:
             assert len(case_dict[key])==2**case[1] and abs(sum(case_dict[key])-1)<1e-10
         pickle.dump({case:case_dict},open(dirname+evaluator_input_filename,'ab'))
