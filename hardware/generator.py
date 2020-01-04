@@ -48,7 +48,7 @@ if __name__ == '__main__':
     evaluator_info = get_evaluator_info(circ=None,device_name=args.device_name,fields=['properties','device'])
     device_size = len(evaluator_info['properties'].qubits)
 
-    full_circuit_sizes = np.arange(5,6)
+    full_circuit_sizes = np.arange(3,11)
     cases_to_run = {}
     circ_dict = {}
     for full_circ_size in full_circuit_sizes:
