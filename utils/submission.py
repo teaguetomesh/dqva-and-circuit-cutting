@@ -30,23 +30,20 @@ class Scheduler:
         self.device_name = device_name
         self.check_input()
         evaluator_info = get_evaluator_info(circ=None,device_name=self.device_name,fields=['properties','device'])
-        self.device_max_shots = evaluator_info['device'].configuration().max_shots
-        self.device_max_experiments = int(evaluator_info['device'].configuration().max_experiments)
+        self.schedule = self.get_schedule(device_max_shots=evaluator_info['device'].configuration().max_shots,
+        device_max_experiments=evaluator_info['device'].configuration().max_experiments)
 
     def check_input(self):
         assert isinstance(self.circ_dict,dict)
         for key in self.circ_dict:
             value = self.circ_dict[key]
-            try:
-                circ = value['circ']
-                shots = value['shots']
-            except (AttributeError, TypeError):
-                raise AssertionError('Input circ_dict should have circ and shots')
+            if 'circ' not in value or 'shots' not in value:
+                raise Exception('Input circ_dict should have circ and shots for key {}'.format(key))
 
-    def get_schedule(self):
+    def get_schedule(self,device_max_shots,device_max_experiments):
         circ_dict = copy.deepcopy(self.circ_dict)
         schedule = []
-        schedule_item = ScheduleItem(max_experiments=self.device_max_experiments,max_shots=self.device_max_shots)
+        schedule_item = ScheduleItem(max_experiments=device_max_experiments,max_shots=device_max_shots)
         key_idx = 0
         while key_idx<len(circ_dict):
             key = list(circ_dict.keys())[key_idx]
@@ -57,7 +54,7 @@ class Scheduler:
             if shots_remaining>0:
                 # print('OVERFLOW, has %d total circuits * %d shots'%(job.total_circs,job.shots))
                 schedule.append(schedule_item)
-                schedule_item = ScheduleItem(max_experiments=self.device_max_experiments,max_shots=self.device_max_shots)
+                schedule_item = ScheduleItem(max_experiments=device_max_experiments,max_shots=device_max_shots)
                 circ_dict[key]['shots'] = shots_remaining
             else:
                 # print('Did not overflow, has %d total circuits * %d shots'%(job.total_circs,job.shots))
@@ -66,10 +63,10 @@ class Scheduler:
             schedule.append(schedule_item)
         return schedule
 
-    def submit_schedule(self,schedule,real_device=False):
+    def run(self,real_device=False):
         print('*'*20,'Submitting jobs','*'*20)
         jobs = []
-        for idx, schedule_item in enumerate(schedule):
+        for idx, schedule_item in enumerate(self.schedule):
             # print('Submitting job %d/%d'%(idx+1,len(schedule)))
             # print('Has %d total circuits * %d shots, %d circ_list elements'%(schedule_item.total_circs,schedule_item.shots,len(schedule_item.circ_list)))
             job_circuits = []
@@ -79,14 +76,19 @@ class Scheduler:
                 reps = element['reps']
                 # print('Key {} {:d} qubit circuit * {:d} reps'.format(key,len(circ.qubits),reps))
                 
-                evaluator_info = get_evaluator_info(circ=circ,device_name=self.device_name,
-                fields=['device','basis_gates','coupling_map','properties','initial_layout'])
+                if len(circ.clbits)>0:
+                    evaluator_info = get_evaluator_info(circ=circ,device_name=self.device_name,
+                    fields=['device'])
+                    mapped_circuit = circ
+                else:
+                    evaluator_info = get_evaluator_info(circ=circ,device_name=self.device_name,
+                    fields=['device','basis_gates','coupling_map','properties','initial_layout'])
 
-                qc=apply_measurement(circ)
-                mapped_circuit = transpile(qc,
-                backend=evaluator_info['device'], basis_gates=evaluator_info['basis_gates'],
-                coupling_map=evaluator_info['coupling_map'],backend_properties=evaluator_info['properties'],
-                initial_layout=evaluator_info['initial_layout'])
+                    qc=apply_measurement(circ)
+                    mapped_circuit = transpile(qc,
+                    backend=evaluator_info['device'], basis_gates=evaluator_info['basis_gates'],
+                    coupling_map=evaluator_info['coupling_map'],backend_properties=evaluator_info['properties'],
+                    initial_layout=evaluator_info['initial_layout'])
 
                 circs_to_add = [mapped_circuit]*reps
                 job_circuits += circs_to_add
@@ -98,20 +100,20 @@ class Scheduler:
             else:
                 hw_job = Aer.get_backend('qasm_simulator').run(qobj,backend_options={'memory':True})
             jobs.append(hw_job)
-            print('Submitting job {:d}/{:d} {} --> {:d} circuits, {:d} * {:d} shots'.format(idx+1,len(schedule),hw_job.job_id(),len(schedule_item.circ_list),len(job_circuits),schedule_item.shots),flush=True)
-        return jobs
+            print('Submitting job {:d}/{:d} {} --> {:d} circuits, {:d} * {:d} shots'.format(idx+1,len(self.schedule),hw_job.job_id(),len(schedule_item.circ_list),len(job_circuits),schedule_item.shots),flush=True)
+        self.jobs = jobs
 
-    def retrieve(self,schedule,jobs):
+    def retrieve(self):
         print('*'*20,'Retrieving jobs','*'*20)
-        assert len(schedule) == len(jobs)
+        assert len(self.schedule) == len(self.jobs)
         circ_dict = copy.deepcopy(self.circ_dict)
         for key in circ_dict:
             circ_dict[key]['hw'] = {}
         memories = {}
-        for job_idx in range(len(jobs)):
-            schedule_item = schedule[job_idx]
-            hw_job = jobs[job_idx]
-            print('Retrieving job {:d}/{:d} {} --> {:d} circuits, {:d} * {:d} shots'.format(job_idx+1,len(jobs),hw_job.job_id(),len(schedule_item.circ_list),schedule_item.total_circs,schedule_item.shots),flush=True)
+        for job_idx in range(len(self.jobs)):
+            schedule_item = self.schedule[job_idx]
+            hw_job = self.jobs[job_idx]
+            print('Retrieving job {:d}/{:d} {} --> {:d} circuits, {:d} * {:d} shots'.format(job_idx+1,len(self.jobs),hw_job.job_id(),len(schedule_item.circ_list),schedule_item.total_circs,schedule_item.shots),flush=True)
             hw_result = hw_job.result()
             start_idx = 0
             for element in schedule_item.circ_list:
@@ -121,7 +123,6 @@ class Scheduler:
                 end_idx = start_idx + reps
                 # print('Getting {:d}-{:d} ({:d}/{:d}) circuits, key {} : {:d} qubit'.format(start_idx,end_idx-1,end_idx,schedule_item.total_circs,key,len(circ.qubits)),flush=True)
                 for result_idx in range(start_idx,end_idx):
-                    # experiment_hw_counts = hw_result.get_counts(result_idx)
                     experiment_hw_memory = hw_result.get_memory(result_idx)
                     if key in memories:
                         memories[key] += experiment_hw_memory
@@ -137,7 +138,10 @@ class Scheduler:
             circ_dict[key]['hw'] = copy.deepcopy(hw_prob)
             # print('Key {} has {:d} qubit circuit, hw has {:d}/{:d} shots'.format(key,len(full_circ.qubits),sum(hw.values()),shots))
             # print('Expecting {:d} shots, got {:d} shots'.format(shots,sum(mem_dict.values())),flush=True)
-            assert len(circ_dict[key]['hw']) == 2**len(full_circ.qubits)
+            if len(full_circ.clbits)>0:
+                assert len(circ_dict[key]['hw']) == 2**len(full_circ.clbits)
+            else:
+                assert len(circ_dict[key]['hw']) == 2**len(full_circ.qubits)
             assert sum(mem_dict.values())==shots
             assert abs(sum(circ_dict[key]['hw'])-1)<1e-10
         self.circ_dict = copy.deepcopy(circ_dict)

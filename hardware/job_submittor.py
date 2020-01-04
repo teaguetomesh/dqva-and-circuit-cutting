@@ -57,10 +57,10 @@ if __name__ == '__main__':
                 circ = case_dict['all_cluster_prob'][cluster_idx][init_meas]
                 shots = cluster_shots
                 circ_dict[key] = {'circ':circ,'shots':shots}
+
     scheduler = Scheduler(circ_dict=circ_dict,device_name=args.device_name)
-    schedule = scheduler.get_schedule()
-    jobs = scheduler.submit_schedule(schedule=schedule)
-    scheduler.retrieve(schedule=schedule,jobs=jobs)
+    scheduler.run()
+    scheduler.retrieve()
     circ_dict = scheduler.circ_dict
 
     for case in cases_to_run:
