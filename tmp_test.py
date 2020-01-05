@@ -1,11 +1,14 @@
 from utils.helper_fun import generate_circ
-from utils.mitigation import TensoredMitigation
+from utils.mitigation import LocalMitigation, TensoredMitigation
 
-circ = generate_circ(full_circ_size=12,circuit_type='supremacy')
+circ = generate_circ(full_circ_size=8,circuit_type='supremacy')
 circ_dict = {'test':{'circ':circ}}
 
-mitigation = TensoredMitigation(circ_dict=circ_dict,device_name='ibmq_boeblingen')
-mitigation.run()
-mitigation.retrieve()
-calibration_matrices = mitigation.calibration_matrices
-print(calibration_matrices['test'])
+# local_mitigation = LocalMitigation(circ_dict=circ_dict,device_name='ibmq_boeblingen')
+# local_mitigation.run()
+# local_mitigation.retrieve()
+# circ_dict = local_mitigation.circ_dict
+# print(circ_dict['test']['calibration_matrix'])
+
+tensored_mitigation = TensoredMitigation(circ_dict=circ_dict,device_name='ibmq_boeblingen')
+# [print(x) for x in tensored_mitigation.meas_calibs_dict.keys()]

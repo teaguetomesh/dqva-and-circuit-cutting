@@ -13,6 +13,57 @@ class TensoredMitigation:
         self.check_status()
         self.meas_calibs_dict = self.get_mitigation_circuits()
         self.scheduler = Scheduler(circ_dict=self.meas_calibs_dict,device_name=self.device_name)
+
+    def check_status(self):
+        assert isinstance(self.circ_dict,dict)
+        for key in self.circ_dict:
+            value = self.circ_dict[key]
+            if 'circ' not in value:
+                raise Exception('Input circ_dict does not have circ for key {}'.format(key))
+        try:
+            evaluator_info = get_evaluator_info(circ=None,device_name=self.device_name,fields=['device','properties'])
+        except:
+            raise Exception('Illegal input device : {}'.format(self.device_name))
+    
+    def get_mitigation_circuits(self):
+        meas_calibs_dict = {}
+        for key in self.circ_dict:
+            circ = self.circ_dict[key]['circ']
+            evaluator_info = get_evaluator_info(circ=circ,device_name=self.device_name,
+            fields=['device','basis_gates','coupling_map','properties','initial_layout'])
+            device_max_shots = evaluator_info['device'].configuration().max_shots
+            device_max_experiments = evaluator_info['device'].configuration().max_experiments
+            device_max_experiments = 10
+            num_qubits = len(evaluator_info['properties'].qubits)
+            qr = QuantumRegister(num_qubits)
+            mit_pattern = []
+            qubit_group = []
+            _initial_layout = evaluator_info['initial_layout'].get_physical_bits()
+            for q in _initial_layout:
+                if 'ancilla' not in _initial_layout[q].register.name and 2**(len(qubit_group)+1)<=device_max_experiments:
+                    qubit_group.append(q)
+                else:
+                    mit_pattern.append(qubit_group)
+                    qubit_group = [q]
+            if len(qubit_group)>0:
+                mit_pattern.append(qubit_group)
+            print(mit_pattern)
+            meas_calibs, state_labels = tensored_meas_cal(mit_pattern=mit_pattern, qr=qr, circlabel='')
+            meas_calibs_transpiled = transpile(meas_calibs, backend=evaluator_info['device'])
+            for meas_calib_circ in meas_calibs_transpiled:
+                meas_calibs_dict_key = '%s|%s'%(key,meas_calib_circ.name.split('_')[1][::-1])
+                assert meas_calibs_dict_key not in meas_calibs_dict
+                meas_calibs_dict.update({meas_calibs_dict_key:{'circ':meas_calib_circ,'shots':device_max_shots}})
+                print(meas_calibs_dict_key)
+        return meas_calibs_dict
+
+class LocalMitigation:
+    def __init__(self,circ_dict,device_name):
+        self.circ_dict = circ_dict
+        self.device_name = device_name
+        self.check_status()
+        self.meas_calibs_dict = self.get_mitigation_circuits()
+        self.scheduler = Scheduler(circ_dict=self.meas_calibs_dict,device_name=self.device_name)
     
     def check_status(self):
         assert isinstance(self.circ_dict,dict)
@@ -42,7 +93,9 @@ class TensoredMitigation:
             meas_calibs, state_labels = tensored_meas_cal(mit_pattern=mit_pattern, qr=qr, circlabel='')
             meas_calibs_transpiled = transpile(meas_calibs, backend=evaluator_info['device'])
             for meas_calib_circ in meas_calibs_transpiled:
-                meas_calibs_dict.update({'%s|%s'%(key,meas_calib_circ.name.split('_')[1]):{'circ':meas_calib_circ,'shots':device_max_shots}})
+                meas_calibs_dict_key = '%s|%s'%(key,meas_calib_circ.name.split('_')[1])
+                assert meas_calibs_dict_key not in meas_calibs_dict
+                meas_calibs_dict.update({meas_calibs_dict_key:{'circ':meas_calib_circ,'shots':device_max_shots}})
         return meas_calibs_dict
 
     def run(self,real_device=False):
@@ -50,7 +103,6 @@ class TensoredMitigation:
 
     def retrieve(self):
         self.scheduler.retrieve()
-        self.calibration_matrices = {}
         for key in self.circ_dict:
             circ = self.circ_dict[key]['circ']
             num_qubits = len(circ.qubits)
@@ -72,7 +124,7 @@ class TensoredMitigation:
                     perturbation_probabilities[qubit_idx][b+2] += prob
 
             # print('Key %s has perturbation_probabilities:'%key,perturbation_probabilities)
-            self.calibration_matrices[key] = self.get_calibration_matrix(perturbation_probabilities=perturbation_probabilities)
+            self.circ_dict[key]['calibration_matrix'] = self.get_calibration_matrix(perturbation_probabilities=perturbation_probabilities)
     
     def get_calibration_matrix(self,perturbation_probabilities):
         num_qubits = len(perturbation_probabilities)
