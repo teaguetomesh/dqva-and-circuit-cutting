@@ -44,7 +44,6 @@ class TensoredMitigation:
             fields=['device','basis_gates','coupling_map','properties','initial_layout'])
             device_max_shots = evaluator_info['device'].configuration().max_shots
             device_max_experiments = evaluator_info['device'].configuration().max_experiments
-            device_max_experiments = 4
             num_qubits = len(evaluator_info['properties'].qubits)
             qr = QuantumRegister(num_qubits)
             mit_pattern = []
@@ -122,7 +121,7 @@ class TensoredMitigation:
                     binary_position_str += '%s%s'%(a,m)
                 position = int(binary_position_str,2)
                 calibration_matrix[meas][actual] = base[position]
-        print(time()-begin)
+        print('Took %.3e seconds'%(time()-begin))
         return calibration_matrix
 
 class LocalMitigation:
