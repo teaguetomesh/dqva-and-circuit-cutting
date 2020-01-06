@@ -57,7 +57,7 @@ class TensoredMitigation:
                     qubit_group = [q]
             if len(qubit_group)>0:
                 mit_pattern.append(qubit_group)
-            # print(mit_pattern)
+            print('Circuit %s has mit_pattern:'%key,mit_pattern)
             self.circ_dict[key]['mit_pattern'] = mit_pattern
             meas_calibs, state_labels = tensored_meas_cal(mit_pattern=mit_pattern, qr=qr, circlabel='')
             meas_calibs_transpiled = transpile(meas_calibs, backend=evaluator_info['device'])

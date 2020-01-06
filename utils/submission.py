@@ -100,7 +100,7 @@ class Scheduler:
             else:
                 evaluator_info = get_evaluator_info(circ=None,device_name=self.device_name,
                 fields=['device','basis_gates','coupling_map','properties','noise_model'])
-                hw_job = execute(job_circuits, backend=Aer.get_backend('qasm_simulator'), shots=schedule_item.shots, noise_model=evaluator_info['noise_model'])
+                hw_job = execute(job_circuits, backend=Aer.get_backend('qasm_simulator'), shots=schedule_item.shots, memory=True, noise_model=evaluator_info['noise_model'])
                 # hw_job = execute(job_circuits, backend=Aer.get_backend('qasm_simulator'), shots=schedule_item.shots, memory=True)
                 # hw_job = Aer.get_backend('qasm_simulator').run(qobj,backend_options={'memory':True},noise_model=evaluator_info['noise_model'])
             jobs.append(hw_job)
