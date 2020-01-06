@@ -2,7 +2,9 @@ from qiskit import QuantumRegister, QuantumCircuit, ClassicalRegister, Aer, exec
 from qiskit.ignis.mitigation.measurement import (complete_meas_cal, tensored_meas_cal,CompleteMeasFitter, TensoredMeasFitter)
 from utils.helper_fun import generate_circ, get_evaluator_info
 from utils.mitigation import TensoredMitigation
+import numpy as np
 
+np.random.seed(1234)
 full_circ_size = 2
 circ = generate_circ(full_circ_size=full_circ_size,circuit_type='supremacy')
 device_name = 'ibmq_boeblingen'

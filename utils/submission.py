@@ -1,5 +1,6 @@
 import math
 import copy
+import numpy as np
 from utils.helper_fun import get_evaluator_info, apply_measurement, dict_to_prob, memory_to_dict
 from qiskit.compiler import transpile, assemble
 from qiskit import Aer, execute
@@ -64,6 +65,7 @@ class Scheduler:
         return schedule
 
     def run(self,real_device=False):
+        np.random.seed(1234)
         print('*'*20,'Submitting jobs','*'*20)
         jobs = []
         for idx, schedule_item in enumerate(self.schedule):
