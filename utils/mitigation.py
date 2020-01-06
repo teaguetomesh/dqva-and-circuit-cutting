@@ -104,6 +104,26 @@ class TensoredMitigation:
                     for perturbation_idx in range(4**len(qubit_group)):
                         perturbation_probabilities[qubit_group_idx][perturbation_idx] /= num_repetitions
             print('mit_pattern = {} perturbation_probabilities = {}'.format(mit_pattern,perturbation_probabilities))
+            self.circ_dict[key]['calibration_matrix'] = self.get_calibration_matrix(perturbation_probabilities=perturbation_probabilities)
+    
+    def get_calibration_matrix(self,perturbation_probabilities):
+        num_qubits = int(sum([np.log(len(x))/np.log(4) for x in perturbation_probabilities]))
+        begin = time()
+        base = [1]
+        calibration_matrix = np.zeros(shape=(2**num_qubits,2**num_qubits))
+        for qubit_perturbation in perturbation_probabilities:
+            base = np.kron(base,qubit_perturbation)
+        for meas in range(2**num_qubits):
+            meas_state = bin(meas)[2:].zfill(num_qubits)
+            for actual in range(2**num_qubits):
+                actual_state = bin(actual)[2:].zfill(num_qubits)
+                binary_position_str = ''
+                for a,m in zip(actual_state,meas_state):
+                    binary_position_str += '%s%s'%(a,m)
+                position = int(binary_position_str,2)
+                calibration_matrix[meas][actual] = base[position]
+        print(time()-begin)
+        return calibration_matrix
 
 class LocalMitigation:
     def __init__(self,circ_dict,device_name):
