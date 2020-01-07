@@ -77,7 +77,7 @@ class TensoredMitigation:
             circ = self.circ_dict[key]['circ']
             num_qubits = len(circ.qubits)
             mit_pattern = self.circ_dict[key]['mit_pattern']
-            print('Circuit %s'%key)
+            # print('Circuit %s'%key)
             perturbation_probabilities = [[0]*4**len(qubit_group) for qubit_group in mit_pattern]
             for meas_calibs_dict_key in self.scheduler.circ_dict:
                 if meas_calibs_dict_key.split('|')[0]==key:
@@ -102,7 +102,7 @@ class TensoredMitigation:
                 if num_repetitions>1:
                     for perturbation_idx in range(4**len(qubit_group)):
                         perturbation_probabilities[qubit_group_idx][perturbation_idx] /= num_repetitions
-            print('mit_pattern = {} perturbation_probabilities = {}'.format(mit_pattern,perturbation_probabilities))
+            # print('mit_pattern = {} perturbation_probabilities = {}'.format(mit_pattern,perturbation_probabilities))
             self.circ_dict[key]['calibration_matrix'] = self.get_calibration_matrix(perturbation_probabilities=perturbation_probabilities)
     
     def get_calibration_matrix(self,perturbation_probabilities):
@@ -121,7 +121,7 @@ class TensoredMitigation:
                     binary_position_str += '%s%s'%(a,m)
                 position = int(binary_position_str,2)
                 calibration_matrix[meas][actual] = base[position]
-        print('Took %.3e seconds'%(time()-begin))
+        print('Computing calibration matrix for %d qubit circuit took %.3e seconds'%(num_qubits,time()-begin))
         return calibration_matrix
 
 class LocalMitigation:
