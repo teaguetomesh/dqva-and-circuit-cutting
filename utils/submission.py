@@ -13,16 +13,18 @@ class ScheduleItem:
         self.total_circs = 0
     
     def update(self, key, circ, shots):
-        circ_shots = max(shots,self.shots)
-        circ_shots = min(circ_shots,self.max_shots)
-        total_reps = math.ceil(shots/circ_shots)
         reps_vacant = self.max_experiments - self.total_circs
         if reps_vacant>0:
+            circ_shots = max(shots,self.shots)
+            circ_shots = min(circ_shots,self.max_shots)
+            total_reps = math.ceil(shots/circ_shots)
             reps_to_add = min(total_reps,reps_vacant)
             self.circ_list.append({'key':key,'circ':circ,'reps':reps_to_add})
             self.shots = circ_shots
             self.total_circs += reps_to_add
-        shots_remaining = (total_reps - reps_to_add)*self.shots
+            shots_remaining = shots - reps_to_add * self.shots
+        else:
+            shots_remaining = shots
         return shots_remaining
 
 class Scheduler:
