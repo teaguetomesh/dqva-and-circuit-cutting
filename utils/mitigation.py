@@ -81,7 +81,7 @@ class TensoredMitigation:
             # print('Circuit %s'%key)
             perturbation_probabilities = [[0]*4**len(qubit_group) for qubit_group in mit_pattern]
             for meas_calibs_dict_key in self.scheduler.circ_dict:
-                if meas_calibs_dict_key.split('|')[0]==key:
+                if meas_calibs_dict_key.split('|')[0]==str(key):
                     full_actual = meas_calibs_dict_key.split('|')[1]
                     qubit_group_actual_states = break_state(bin_state=full_actual,mit_pattern=mit_pattern)
                     # print('Qubit group actual states:',qubit_group_actual_states)
@@ -123,6 +123,8 @@ class TensoredMitigation:
                 position = int(binary_position_str,2)
                 calibration_matrix[meas][actual] = base[position]
         print('Computing calibration matrix for %d qubit circuit took %.3e seconds'%(num_qubits,time()-begin))
+        for col_idx in range(2**num_qubits):
+            assert abs(sum([calibration_matrix[row][col_idx] for row in range(2**num_qubits)])-1)<1e-10
         return calibration_matrix
 
     def apply(self,unmitigated):
