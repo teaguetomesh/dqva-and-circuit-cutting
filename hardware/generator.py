@@ -6,6 +6,7 @@ import utils.MIQCP_searcher as searcher
 import utils.cutter as cutter
 from utils.helper_fun import get_evaluator_info, get_circ_saturated_shots, get_filename, read_file, generate_circ,evaluate_circ
 from utils.submission import Scheduler
+from utils.mitigation import TensoredMitigation
 import argparse
 import math
 import copy
@@ -48,7 +49,7 @@ if __name__ == '__main__':
     evaluator_info = get_evaluator_info(circ=None,device_name=args.device_name,fields=['properties','device'])
     device_size = len(evaluator_info['properties'].qubits)
 
-    full_circuit_sizes = np.arange(3,16)
+    full_circuit_sizes = np.arange(3,11)
     cases_to_run = {}
     circ_dict = {}
     for full_circ_size in full_circuit_sizes:
@@ -84,16 +85,22 @@ if __name__ == '__main__':
     
     scheduler = Scheduler(circ_dict=circ_dict,device_name=args.device_name)
     scheduler.run()
+    tensored_mitigation = TensoredMitigation(circ_dict=circ_dict,device_name=args.device_name)
+    tensored_mitigation.run()
+
     scheduler.retrieve()
-    circ_dict = scheduler.circ_dict
+    tensored_mitigation.retrieve()
+    tensored_mitigation.apply(unmitigated=scheduler.circ_dict)
+    circ_dict = tensored_mitigation.circ_dict
 
     for case in cases_to_run:
         uniform_prob = [1/2**case[1] for i in range(2**case[1])]
         case_dict = {'full_circ':circ_dict[case[1]]['circ'],'fc_shots':circ_dict[case[1]]['shots'],
-        'sv':circ_dict[case[1]]['sv'],'qasm':circ_dict[case[1]]['qasm'],'qasm+noise':uniform_prob,'hw':circ_dict[case[1]]['hw'],
+        'sv':circ_dict[case[1]]['sv'],'qasm':circ_dict[case[1]]['qasm'],
+        'qasm+noise':uniform_prob,'hw':circ_dict[case[1]]['hw'],'mitigated_hw':circ_dict[case[1]]['mitigated_hw'],
         'searcher_time':cases_to_run[case]['searcher_time'],'clusters':cases_to_run[case]['clusters'],'complete_path_map':cases_to_run[case]['complete_path_map']}
         # print('Case {}: {:d} qubit full circuit has {:d} clusters, searcher time = {:.3e}'.format(case,len(case_dict['full_circ'].qubits),len(case_dict['clusters']),case_dict['searcher_time']))
         assert case[1] == len(case_dict['full_circ'].qubits)
-        for key in ['sv','qasm','qasm+noise','hw']:
+        for key in ['sv','qasm','qasm+noise','hw','mitigated_hw']:
             assert len(case_dict[key])==2**case[1] and abs(sum(case_dict[key])-1)<1e-10
         pickle.dump({case:case_dict},open(dirname+evaluator_input_filename,'ab'))

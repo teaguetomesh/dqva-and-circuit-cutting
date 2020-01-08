@@ -1,5 +1,6 @@
 import numpy as np
 from time import time
+import copy
 from qiskit.circuit.quantumregister import QuantumRegister
 from utils.helper_fun import get_evaluator_info
 from qiskit.ignis.mitigation.measurement import tensored_meas_cal
@@ -125,11 +126,14 @@ class TensoredMitigation:
         return calibration_matrix
 
     def apply(self,unmitigated):
+        mitigated = {}
         for key in unmitigated:
             assert key in self.circ_dict
+            mitigated[key] = copy.deepcopy(unmitigated[key])
             calibration_matrix = self.circ_dict[key]['calibration_matrix']
             filter_matrix = np.linalg.inv(calibration_matrix)
             unmitigated_prob = np.reshape(unmitigated[key]['hw'],(-1,1))
             mitigated_prob = np.reshape(filter_matrix.dot(unmitigated_prob),(1,-1)).tolist()[0]
             assert abs(sum(mitigated_prob)-1)<1e-10
-            self.circ_dict[key]['mitigated_hw'] = mitigated_prob
+            mitigated[key]['mitigated_hw'] = copy.deepcopy(mitigated_prob)
+        self.circ_dict = copy.deepcopy(mitigated)

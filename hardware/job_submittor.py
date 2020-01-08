@@ -4,6 +4,7 @@ import argparse
 from qiskit.compiler import transpile, assemble
 from utils.helper_fun import get_evaluator_info, get_circ_saturated_shots, get_filename, read_file
 from utils.submission import Scheduler
+from utils.mitigation import TensoredMitigation
 from time import time
 import copy
 from qiskit import Aer
@@ -60,8 +61,13 @@ if __name__ == '__main__':
 
     scheduler = Scheduler(circ_dict=circ_dict,device_name=args.device_name)
     scheduler.run()
+    tensored_mitigation = TensoredMitigation(circ_dict=circ_dict,device_name=args.device_name)
+    tensored_mitigation.run()
+
     scheduler.retrieve()
-    circ_dict = scheduler.circ_dict
+    tensored_mitigation.retrieve()
+    tensored_mitigation.apply(unmitigated=scheduler.circ_dict)
+    circ_dict = tensored_mitigation.circ_dict
 
     for case in cases_to_run:
         case_dict = cases_to_run[case]
@@ -71,4 +77,5 @@ if __name__ == '__main__':
                 meas_str = ','.join(init_meas[1])
                 key = '{}|{}|{}|{}|{}'.format(case[0],case[1],cluster_idx,init_str,meas_str)
                 case_dict['all_cluster_prob'][cluster_idx][init_meas] = copy.deepcopy(circ_dict[key]['hw'])
+                case_dict['mitigated_all_cluster_prob'][cluster_idx][init_meas] = copy.deepcopy(circ_dict[key]['mitigated_hw'])
         pickle.dump({case:case_dict}, open(dirname+uniter_input_filename,'ab'))
