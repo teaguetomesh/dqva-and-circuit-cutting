@@ -45,7 +45,7 @@ if __name__ == '__main__':
         case_dict = cases_to_run[case]
         for cluster_idx in cases_to_run[case]['all_cluster_prob']:
             cluster_base_circ = case_dict['clusters'][cluster_idx]
-            evaluator_info = get_evaluator_info(circ=cluster_base_circ,device_name=self.device_name,
+            evaluator_info = get_evaluator_info(circ=cluster_base_circ,device_name=args.device_name,
             fields=['device','basis_gates','coupling_map','properties','initial_layout'])
             mitigation_circ_key = '{},{},{}'.format(case[0],case[1],cluster_idx)
             mitigation_circ_dict[mitigation_circ_key] = {'circ':cluster_base_circ,'initial_layout':evaluator_info['initial_layout']}
