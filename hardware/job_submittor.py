@@ -92,7 +92,9 @@ if __name__ == '__main__':
 
     for case in cases_to_run:
         case_dict = cases_to_run[case]
+        case_dict['mitigated_all_cluster_prob'] = {}
         for cluster_idx in case_dict['all_cluster_prob']:
+            case_dict['mitigated_all_cluster_prob'][cluster_idx] = {}
             for init_meas in case_dict['all_cluster_prob'][cluster_idx]:
                 init_str = ','.join(init_meas[0])
                 meas_str = ','.join(init_meas[1])

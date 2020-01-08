@@ -47,18 +47,19 @@ class TensoredMitigation:
             device_max_experiments = evaluator_info['device'].configuration().max_experiments
             num_qubits = len(evaluator_info['properties'].qubits)
             qr = QuantumRegister(num_qubits)
-            mit_pattern = []
-            qubit_group = []
             if 'initial_layout' in self.circ_dict[key]:
                 _initial_layout = self.circ_dict[key]['initial_layout'].get_physical_bits()
             else:
                 _initial_layout = evaluator_info['initial_layout'].get_physical_bits()
+            mit_pattern = []
+            qubit_group = []
             for q in _initial_layout:
-                if 'ancilla' not in _initial_layout[q].register.name and 2**(len(qubit_group)+1)<=device_max_experiments:
-                    qubit_group.append(q)
-                else:
-                    mit_pattern.append(qubit_group)
-                    qubit_group = [q]
+                if 'ancilla' not in _initial_layout[q].register.name:
+                    if 2**(len(qubit_group)+1)<=device_max_experiments:
+                        qubit_group.append(q)
+                    else:
+                        mit_pattern.append(qubit_group)
+                        qubit_group = [q]
             if len(qubit_group)>0:
                 mit_pattern.append(qubit_group)
             # print('Circuit %s has mit_pattern:'%key,mit_pattern)
@@ -66,7 +67,7 @@ class TensoredMitigation:
             meas_calibs, state_labels = tensored_meas_cal(mit_pattern=mit_pattern, qr=qr, circlabel='')
             meas_calibs_transpiled = transpile(meas_calibs, backend=evaluator_info['device'])
             for meas_calib_circ in meas_calibs_transpiled:
-                meas_calibs_dict_key = '%s|%s'%(key,meas_calib_circ.name.split('_')[1][::-1])
+                meas_calibs_dict_key = (key,meas_calib_circ.name.split('_')[1][::-1])
                 assert meas_calibs_dict_key not in meas_calibs_dict
                 meas_calibs_dict.update({meas_calibs_dict_key:{'circ':meas_calib_circ,'shots':device_max_shots}})
                 # print(meas_calibs_dict_key)
@@ -84,8 +85,8 @@ class TensoredMitigation:
             # print('Circuit %s'%key)
             perturbation_probabilities = [[0]*4**len(qubit_group) for qubit_group in mit_pattern]
             for meas_calibs_dict_key in self.scheduler.circ_dict:
-                if meas_calibs_dict_key.split('|')[0]==str(key):
-                    full_actual = meas_calibs_dict_key.split('|')[1]
+                if meas_calibs_dict_key[0]==key:
+                    full_actual = meas_calibs_dict_key[1]
                     qubit_group_actual_states = break_state(bin_state=full_actual,mit_pattern=mit_pattern)
                     # print('Qubit group actual states:',qubit_group_actual_states)
                     measured = self.scheduler.circ_dict[meas_calibs_dict_key]['hw']

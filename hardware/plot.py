@@ -261,9 +261,9 @@ def process_data(filename,circuit_type,mitigated):
         qasm_noise_ce = cross_entropy(target=plotter_input[case]['sv'],
         obs= plotter_input[case]['qasm+noise'])
         hw_ce = cross_entropy(target=plotter_input[case]['sv'],
-        obs= plotter_input[case]['%shw'%'mitigated_' if mitigated else ''])
+        obs= plotter_input[case]['%shw'%('mitigated_' if mitigated else '')])
         cutting_ce = cross_entropy(target=plotter_input[case]['sv'],
-        obs= plotter_input[case]['%scutting'%'mitigated_' if mitigated else ''])
+        obs= plotter_input[case]['%scutting'%('mitigated_' if mitigated else '')])
         ce_percent_change = 100*(hw_ce - cutting_ce)/hw_ce
         assert ce_percent_change <= 100+1e-10
         plotter_input[case]['ce_comparisons'] = (hw_ce,cutting_ce)
@@ -276,9 +276,9 @@ def process_data(filename,circuit_type,mitigated):
         qasm_noise_fid = fidelity(target=plotter_input[case]['sv'],
         obs= plotter_input[case]['qasm+noise'])
         hw_fid = fidelity(target=plotter_input[case]['sv'],
-        obs= plotter_input[case]['%shw'%'mitigated_' if mitigated else ''])
+        obs= plotter_input[case]['%shw'%('mitigated_' if mitigated else '')])
         cutting_fid = fidelity(target=plotter_input[case]['sv'],
-        obs= plotter_input[case]['%scutting'%'mitigated_' if mitigated else ''])
+        obs= plotter_input[case]['%scutting'%('mitigated_' if mitigated else '')])
         fid_percent_change = 100*(cutting_fid-hw_fid)/hw_fid
         if circuit_type == 'bv' or circuit_type=='hwea':
             assert abs(ground_truth_fid-1)<1e-10 and abs(qasm_fid-1)<1e-10 and qasm_noise_fid<=1 and qasm_noise_fid<=1 and cutting_fid<=1
