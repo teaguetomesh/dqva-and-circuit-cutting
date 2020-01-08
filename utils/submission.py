@@ -17,10 +17,11 @@ class ScheduleItem:
         circ_shots = min(circ_shots,self.max_shots)
         total_reps = math.ceil(shots/circ_shots)
         reps_vacant = self.max_experiments - self.total_circs
-        reps_to_add = min(total_reps,reps_vacant)
-        self.circ_list.append({'key':key,'circ':circ,'reps':reps_to_add})
-        self.shots = circ_shots
-        self.total_circs += reps_to_add
+        if reps_vacant>0:
+            reps_to_add = min(total_reps,reps_vacant)
+            self.circ_list.append({'key':key,'circ':circ,'reps':reps_to_add})
+            self.shots = circ_shots
+            self.total_circs += reps_to_add
         shots_remaining = (total_reps - reps_to_add)*self.shots
         return shots_remaining
 
@@ -64,7 +65,7 @@ class Scheduler:
         return schedule
 
     def run(self,real_device=False):
-        print('*'*20,'Submitting jobs','*'*20)
+        print('*'*20,'Submitting jobs','*'*20,flush=True)
         jobs = []
         for idx, schedule_item in enumerate(self.schedule):
             # print('Submitting job %d/%d'%(idx+1,len(schedule)))
