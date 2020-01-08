@@ -2,7 +2,7 @@ import numpy as np
 import pickle
 import argparse
 from qiskit.compiler import transpile, assemble
-from utils.helper_fun import get_evaluator_info, get_circ_saturated_shots, get_filename, read_file
+from utils.helper_fun import get_evaluator_info, get_circ_saturated_shots, get_filename, read_file, apply_measurement
 from utils.submission import Scheduler
 from utils.mitigation import TensoredMitigation
 from time import time
@@ -39,12 +39,17 @@ if __name__ == '__main__':
     device_max_experiments = int(evaluator_info['device'].configuration().max_experiments/3*2)
 
     circ_dict = {}
+    mitigation_circ_dict = {}
     for case in cases_to_run:
         print('Case {}'.format(case))
         case_dict = cases_to_run[case]
         for cluster_idx in cases_to_run[case]['all_cluster_prob']:
+            cluster_base_circ = case_dict['clusters'][cluster_idx]
+            evaluator_info = get_evaluator_info(circ=cluster_base_circ,device_name=self.device_name,
+            fields=['device','basis_gates','coupling_map','properties','initial_layout'])
+            mitigation_circ_key = '{},{},{}'.format(case[0],case[1],cluster_idx)
+            mitigation_circ_dict[mitigation_circ_key] = {'circ':cluster_base_circ,'initial_layout':evaluator_info['initial_layout']}
             if args.shots_mode == 'saturated':
-                cluster_base_circ = case_dict['clusters'][cluster_idx]
                 cluster_shots = get_circ_saturated_shots(circs=[cluster_base_circ],device_name=args.device_name)[0][0]
                 print('Cluster %d saturated shots = %d'%(cluster_idx,cluster_shots))
             else:
@@ -54,20 +59,36 @@ if __name__ == '__main__':
             for init_meas in case_dict['all_cluster_prob'][cluster_idx]:
                 init_str = ','.join(init_meas[0])
                 meas_str = ','.join(init_meas[1])
-                key = '{}|{}|{}|{}|{}'.format(case[0],case[1],cluster_idx,init_str,meas_str)
+                key = '{},{},{}|{},{}'.format(case[0],case[1],cluster_idx,init_str,meas_str)
                 circ = case_dict['all_cluster_prob'][cluster_idx][init_meas]
-                shots = cluster_shots
-                circ_dict[key] = {'circ':circ,'shots':shots}
+                qc=apply_measurement(circ)
+                mapped_circuit = transpile(qc,
+                backend=evaluator_info['device'], basis_gates=evaluator_info['basis_gates'],
+                coupling_map=evaluator_info['coupling_map'],backend_properties=evaluator_info['properties'],
+                initial_layout=evaluator_info['initial_layout'])
+                circ_dict[key] = {'circ':mapped_circuit,'shots':cluster_shots}
 
     scheduler = Scheduler(circ_dict=circ_dict,device_name=args.device_name)
     scheduler.run()
-    tensored_mitigation = TensoredMitigation(circ_dict=circ_dict,device_name=args.device_name)
+    tensored_mitigation = TensoredMitigation(circ_dict=mitigation_circ_dict,device_name=args.device_name)
     tensored_mitigation.run()
 
     scheduler.retrieve()
     tensored_mitigation.retrieve()
-    tensored_mitigation.apply(unmitigated=scheduler.circ_dict)
-    circ_dict = tensored_mitigation.circ_dict
+    
+    mitigated = {}
+    unmitigated = scheduler.circ_dict
+    for mitigation_circ_key in tensored_mitigation.circ_dict:
+        calibration_matrix = tensored_mitigation.circ_dict[mitigation_circ_key]['calibration_matrix']
+        filter_matrix = np.linalg.inv(calibration_matrix)
+        for key in unmitigated:
+            if mitigation_circ_key == key.split('|')[0]:
+                mitigated[key] = copy.deepcopy(unmitigated[key])
+                unmitigated_prob = np.reshape(unmitigated[key]['hw'],(-1,1))
+                mitigated_prob = np.reshape(filter_matrix.dot(unmitigated_prob),(1,-1)).tolist()[0]
+                assert abs(sum(mitigated_prob)-1)<1e-10
+                mitigated[key]['mitigated_hw'] = copy.deepcopy(mitigated_prob)
+    circ_dict = copy.deepcopy(mitigated)
 
     for case in cases_to_run:
         case_dict = cases_to_run[case]
@@ -75,7 +96,7 @@ if __name__ == '__main__':
             for init_meas in case_dict['all_cluster_prob'][cluster_idx]:
                 init_str = ','.join(init_meas[0])
                 meas_str = ','.join(init_meas[1])
-                key = '{}|{}|{}|{}|{}'.format(case[0],case[1],cluster_idx,init_str,meas_str)
+                key = '{},{},{}|{},{}'.format(case[0],case[1],cluster_idx,init_str,meas_str)
                 case_dict['all_cluster_prob'][cluster_idx][init_meas] = copy.deepcopy(circ_dict[key]['hw'])
                 case_dict['mitigated_all_cluster_prob'][cluster_idx][init_meas] = copy.deepcopy(circ_dict[key]['mitigated_hw'])
         pickle.dump({case:case_dict}, open(dirname+uniter_input_filename,'ab'))

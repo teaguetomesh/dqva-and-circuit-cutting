@@ -49,7 +49,10 @@ class TensoredMitigation:
             qr = QuantumRegister(num_qubits)
             mit_pattern = []
             qubit_group = []
-            _initial_layout = evaluator_info['initial_layout'].get_physical_bits()
+            if 'initial_layout' in self.circ_dict[key]:
+                _initial_layout = self.circ_dict[key]['initial_layout'].get_physical_bits()
+            else:
+                _initial_layout = evaluator_info['initial_layout'].get_physical_bits()
             for q in _initial_layout:
                 if 'ancilla' not in _initial_layout[q].register.name and 2**(len(qubit_group)+1)<=device_max_experiments:
                     qubit_group.append(q)
@@ -58,7 +61,7 @@ class TensoredMitigation:
                     qubit_group = [q]
             if len(qubit_group)>0:
                 mit_pattern.append(qubit_group)
-            print('Circuit %s has mit_pattern:'%key,mit_pattern)
+            # print('Circuit %s has mit_pattern:'%key,mit_pattern)
             self.circ_dict[key]['mit_pattern'] = mit_pattern
             meas_calibs, state_labels = tensored_meas_cal(mit_pattern=mit_pattern, qr=qr, circlabel='')
             meas_calibs_transpiled = transpile(meas_calibs, backend=evaluator_info['device'])

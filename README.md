@@ -22,4 +22,4 @@ conda install gurobi
 - [x] Update to be compatible with Qiskit 0.14
 - [ ] Report IBMQ.load_account() warning
 - [ ] Report Qiskit incompatibility with Python 3.8
-- [ ] Force MIP to use max qubits
+- [ ] Edit job_submittor to use same mitigation for each cluster
