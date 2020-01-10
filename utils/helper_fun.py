@@ -320,31 +320,6 @@ def get_mitigation_circuits(key,circ,device_name):
     else:
         return {}
 
-# Entangled readout mitigation
-def readout_mitigation(device,initial_layout):
-    filter_begin = time()
-    properties = device.properties()
-    num_qubits = len(properties.qubits)
-
-    # Generate the calibration circuits
-    qr = QuantumRegister(num_qubits)
-    qubit_list = []
-    _initial_layout = initial_layout.get_physical_bits()
-    for q in _initial_layout:
-        if 'ancilla' not in _initial_layout[q].register.name:
-            qubit_list.append(q)
-    meas_calibs, state_labels = complete_meas_cal(qubit_list=qubit_list, qr=qr, circlabel='mcal')
-    num_shots = device.configuration().max_shots
-    assert len(meas_calibs)<=device.configuration().max_experiments/3*2
-
-    # Execute the calibration circuits
-    meas_calibs_transpiled = transpile(meas_calibs, backend=device)
-    qobj = assemble(meas_calibs_transpiled, backend=device, shots=num_shots)
-    # job = device.run(qobj)
-    job = Aer.get_backend('qasm_simulator').run(qobj)
-    print('Submitted measurement filter, {:d} calibration circuits * {:d} shots, job_id = {}'.format(len(meas_calibs),num_shots,job.job_id()))
-    return job, state_labels, qubit_list
-
 def get_evaluator_info(circ,device_name,fields):
     provider = load_IBMQ()
     device = provider.get_backend(device_name)
