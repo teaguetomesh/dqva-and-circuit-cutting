@@ -29,7 +29,7 @@ class ScheduleItem:
 
 class Scheduler:
     def __init__(self,circ_dict,device_name):
-        self.circ_dict = circ_dict
+        self.circ_dict = copy.deepcopy(circ_dict)
         self.device_name = device_name
         self.check_input()
         evaluator_info = get_evaluator_info(circ=None,device_name=self.device_name,fields=['properties','device'])

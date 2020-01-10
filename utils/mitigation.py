@@ -20,7 +20,7 @@ def break_state(bin_state,mit_pattern):
 
 class TensoredMitigation:
     def __init__(self,circ_dict,device_name):
-        self.circ_dict = circ_dict
+        self.circ_dict = copy.deepcopy(circ_dict)
         self.device_name = device_name
         self.check_status()
         self.meas_calibs_dict = self.get_mitigation_circuits()
@@ -139,10 +139,9 @@ class TensoredMitigation:
         return calibration_matrix
 
     def apply(self,unmitigated):
-        mitigated = {}
+        mitigated = copy.deepcopy(unmitigated)
         for key in unmitigated:
             if key in self.circ_dict:
-                mitigated[key] = copy.deepcopy(unmitigated[key])
                 calibration_matrix = self.circ_dict[key]['calibration_matrix']
                 filter_matrix = np.linalg.inv(calibration_matrix)
                 unmitigated_prob = np.reshape(unmitigated[key]['hw'],(-1,1))

@@ -49,7 +49,7 @@ if __name__ == '__main__':
     evaluator_info = get_evaluator_info(circ=None,device_name=args.device_name,fields=['properties','device'])
     device_size = len(evaluator_info['properties'].qubits)
 
-    full_circuit_sizes = [5,9,12,15]
+    full_circuit_sizes = [10]
     cases_to_run = {}
     circ_dict = {}
     for full_circ_size in full_circuit_sizes:
@@ -60,7 +60,7 @@ if __name__ == '__main__':
         else:
             full_circ = generate_circ(full_circ_size=full_circ_size,circuit_type=args.circuit_type)
         # for cluster_max_qubit in range(args.min_qubit,args.max_qubit+1):
-        for cluster_max_qubit in [2,5,9]:
+        for cluster_max_qubit in [9]:
             case = (cluster_max_qubit,full_circ_size)
             if full_circ_size<=cluster_max_qubit or full_circ_size>device_size or (cluster_max_qubit-1)*args.max_clusters<full_circ_size:
                 print('Case {} impossible, skipped'.format(case))
