@@ -1,0 +1,279 @@
+-------------------------------------------------- Generator --------------------------------------------------
+Existing cases: dict_keys([])
+Generating 1x5, 1+8+1 supremacy circuit
+Case (2, 5) impossible, skipped
+----------------------------------------------------------------------------------------------------
+Case (5, 5) impossible, skipped
+----------------------------------------------------------------------------------------------------
+Case (9, 5) impossible, skipped
+----------------------------------------------------------------------------------------------------
+Generating 2x5, 1+8+1 supremacy circuit
+Case (2, 10) impossible, skipped
+----------------------------------------------------------------------------------------------------
+Using license file /home/weit/gurobi.lic
+Academic license - for non-commercial use only
+********************
+MIQCP stats:
+4 cuts, 3 clusters, max qubit = 5
+cluster 0: original input = 4.00, ρ_qubits = 0.00, O_qubits = 2.00, d = 4.00
+cluster 1: original input = 3.00, ρ_qubits = 2.00, O_qubits = 2.00, d = 5.00
+cluster 2: original input = 3.00, ρ_qubits = 2.00, O_qubits = -0.00, d = 5.00
+objective value = 3.690e+02
+manually calculated objective value: 3.690e+02
+evaluator_cost = 369, reconstructor_cost = 1.080e-03, reconstructor_weight = 0.000e+00
+runtime: 0.22934913635253906
+OPTIMAL
+********************
+Adding case (5, 10) to run
+Adding 10 qubit full circuit to run
+10 qubit circuit saturated shots = 616448, ΔH = 9.661e-04
+----------------------------------------------------------------------------------------------------
+********************
+MIQCP stats:
+2 cuts, 2 clusters, max qubit = 9
+cluster 0: original input = 8.00, ρ_qubits = 1.00, O_qubits = 1.00, d = 9.00
+cluster 1: original input = 2.00, ρ_qubits = 1.00, O_qubits = 1.00, d = 3.00
+objective value = 3.602e+01
+manually calculated objective value: 3.600e+01
+evaluator_cost = 36, reconstructor_cost = 6.541e-05, reconstructor_weight = 0.000e+00
+runtime: 0.1578218936920166
+OPTIMAL
+********************
+Adding case (9, 10) to run
+Use currently running 10 qubit full circuit
+----------------------------------------------------------------------------------------------------
+Generating 3x5, 1+8+1 supremacy circuit
+Case (2, 15) impossible, skipped
+----------------------------------------------------------------------------------------------------
+Case (5, 15) impossible, skipped
+----------------------------------------------------------------------------------------------------
+********************
+MIQCP stats:
+3 cuts, 2 clusters, max qubit = 9
+cluster 0: original input = 8.00, ρ_qubits = 1.00, O_qubits = 2.00, d = 9.00
+cluster 1: original input = 7.00, ρ_qubits = 2.00, O_qubits = 1.00, d = 9.00
+objective value = 1.621e+02
+manually calculated objective value: 1.620e+02
+evaluator_cost = 162, reconstructor_cost = 8.090e-03, reconstructor_weight = 0.000e+00
+runtime: 0.16060185432434082
+OPTIMAL
+********************
+Adding case (9, 15) to run
+Adding 15 qubit full circuit to run
+15 qubit circuit saturated shots = 4916224, ΔH = 5.408e-03
+----------------------------------------------------------------------------------------------------
+3 cases, 2 full circuits to run : dict_keys([(5, 10), (9, 10), (9, 15)])
+******************** Submitting jobs ********************
+Submitting job 1/1 e9136cc4-7e68-49dd-b5f2-0d73323bc0cd --> 2 circuits, 677 * 8192 shots
+******************** Submitting jobs ********************
+******************** Retrieving jobs ********************
+Retrieving job 1/1 e9136cc4-7e68-49dd-b5f2-0d73323bc0cd --> 2 circuits, 677 * 8192 shots
+/home/weit/anaconda3/envs/cc-env/lib/python3.7/site-packages/qiskit/providers/models/backendconfiguration.py:337: UserWarning: `dt` and `dtm` now have units of seconds(s) rather than nanoseconds(ns).
+  warnings.warn('`dt` and `dtm` now have units of seconds(s) rather '
+******************** Retrieving jobs ********************
+-------------------------------------------------- Generator --------------------------------------------------
+Existing cases: dict_keys([(5, 10), (9, 10), (9, 15)])
+Generating 1x5, 1+8+1 supremacy circuit
+Case (2, 5) impossible, skipped
+----------------------------------------------------------------------------------------------------
+Case (5, 5) impossible, skipped
+----------------------------------------------------------------------------------------------------
+Case (9, 5) impossible, skipped
+----------------------------------------------------------------------------------------------------
+Case (2, 10) impossible, skipped
+----------------------------------------------------------------------------------------------------
+Case (5, 10) already exists
+----------------------------------------------------------------------------------------------------
+Case (9, 10) already exists
+----------------------------------------------------------------------------------------------------
+Case (2, 15) impossible, skipped
+----------------------------------------------------------------------------------------------------
+Case (5, 15) impossible, skipped
+----------------------------------------------------------------------------------------------------
+Case (9, 15) already exists
+----------------------------------------------------------------------------------------------------
+0 cases, 0 full circuits to run : dict_keys([])
+******************** Submitting jobs ********************
+******************** Submitting jobs ********************
+/home/weit/anaconda3/envs/cc-env/lib/python3.7/site-packages/qiskit/providers/models/backendconfiguration.py:337: UserWarning: `dt` and `dtm` now have units of seconds(s) rather than nanoseconds(ns).
+  warnings.warn('`dt` and `dtm` now have units of seconds(s) rather '
+******************** Retrieving jobs ********************
+******************** Retrieving jobs ********************
+-------------------------------------------------- Job Submittor --------------------------------------------------
+Existing cases: dict_keys([])
+Run cases: dict_keys([(5, 10), (9, 10), (9, 15)])
+**************************************************
+Case (5, 10)
+4 qubit circuit saturated shots = 9216, ΔH = 7.810e-04
+Cluster 0 saturated shots = 9216
+5 qubit circuit saturated shots = 22528, ΔH = 1.051e-03
+Cluster 1 saturated shots = 22528
+5 qubit circuit saturated shots = 14336, ΔH = 8.552e-04
+Cluster 2 saturated shots = 14336
+Case (9, 10)
+9 qubit circuit saturated shots = 228352, ΔH = 1.019e-03
+Cluster 0 saturated shots = 228352
+3 qubit circuit saturated shots = 9216, ΔH = 4.947e-04
+Cluster 1 saturated shots = 9216
+Case (9, 15)
+9 qubit circuit saturated shots = 263168, ΔH = 1.023e-03
+Cluster 0 saturated shots = 263168
+9 qubit circuit saturated shots = 232448, ΔH = 1.022e-03
+Cluster 1 saturated shots = 232448
+******************** Submitting jobs ********************
+Submitting job 1/8 bfd63160-d738-47c0-bf0c-a23788eaf8a3 --> 303 circuits, 900 * 8192 shots
+Submitting job 2/8 91fb7c67-8bde-4bdd-b2f0-88f8d3e6b5a8 --> 108 circuits, 900 * 8192 shots
+Submitting job 3/8 e3246da4-5563-47f5-9dd2-940ff124a44b --> 28 circuits, 900 * 8192 shots
+Submitting job 4/8 1847d64f-d33a-4ee0-b80b-a4cef12c4c67 --> 29 circuits, 900 * 8192 shots
+Submitting job 5/8 84ff62c1-4f9e-450e-80be-7d55659a6376 --> 32 circuits, 900 * 8192 shots
+Submitting job 6/8 9c19cb7a-c797-4fce-b5f7-c5c1f224978c --> 32 circuits, 900 * 8192 shots
+Submitting job 7/8 b8a4fdd1-145e-422d-98cf-76744fa76d9e --> 32 circuits, 900 * 8192 shots
+Submitting job 8/8 56ea84a9-9089-404f-b852-edc2c11782bd --> 8 circuits, 216 * 8192 shots
+/home/weit/anaconda3/envs/cc-env/lib/python3.7/site-packages/qiskit/providers/models/backendconfiguration.py:337: UserWarning: `dt` and `dtm` now have units of seconds(s) rather than nanoseconds(ns).
+  warnings.warn('`dt` and `dtm` now have units of seconds(s) rather '
+******************** Submitting jobs ********************
+Submitting job 1/2 59c2c249-e5fa-4486-bd9b-e41174c9544c --> 900 circuits, 900 * 8192 shots
+Submitting job 2/2 0ea33e4f-d796-4424-bb4d-d8941def62fd --> 724 circuits, 724 * 8192 shots
+******************** Retrieving jobs ********************
+Retrieving job 1/8 bfd63160-d738-47c0-bf0c-a23788eaf8a3 --> 303 circuits, 900 * 8192 shots
+Retrieving job 2/8 91fb7c67-8bde-4bdd-b2f0-88f8d3e6b5a8 --> 108 circuits, 900 * 8192 shots
+Retrieving job 3/8 e3246da4-5563-47f5-9dd2-940ff124a44b --> 28 circuits, 900 * 8192 shots
+Retrieving job 4/8 1847d64f-d33a-4ee0-b80b-a4cef12c4c67 --> 29 circuits, 900 * 8192 shots
+Retrieving job 5/8 84ff62c1-4f9e-450e-80be-7d55659a6376 --> 32 circuits, 900 * 8192 shots
+Retrieving job 6/8 9c19cb7a-c797-4fce-b5f7-c5c1f224978c --> 32 circuits, 900 * 8192 shots
+Retrieving job 7/8 b8a4fdd1-145e-422d-98cf-76744fa76d9e --> 32 circuits, 900 * 8192 shots
+Retrieving job 8/8 56ea84a9-9089-404f-b852-edc2c11782bd --> 8 circuits, 216 * 8192 shots
+******************** Retrieving jobs ********************
+Retrieving job 1/2 59c2c249-e5fa-4486-bd9b-e41174c9544c --> 900 circuits, 900 * 8192 shots
+Retrieving job 2/2 0ea33e4f-d796-4424-bb4d-d8941def62fd --> 724 circuits, 724 * 8192 shots
+Computing calibration matrix for 4 qubit circuit took 5.698e-04 seconds
+Computing calibration matrix for 5 qubit circuit took 1.791e-03 seconds
+Computing calibration matrix for 5 qubit circuit took 1.776e-03 seconds
+Computing calibration matrix for 9 qubit circuit took 6.013e-01 seconds
+Computing calibration matrix for 3 qubit circuit took 1.447e-04 seconds
+Computing calibration matrix for 9 qubit circuit took 6.073e-01 seconds
+Computing calibration matrix for 9 qubit circuit took 6.053e-01 seconds
+-------------------------------------------------- Reconstructor --------------------------------------------------
+Existing cases: dict_keys([])
+case (5, 10)
+Cut into  [4, 5, 5] clusters
+qasm ΔH = 8.959e-04
+hw ΔH = 8.622e-04
+cutting ΔH = 7.838e-03
+mitigated_cutting ΔH = 7.838e-03
+Reconstruction output has 1 cases
+----------------------------------------------------------------------------------------------------
+case (9, 10)
+Cut into  [9, 3] clusters
+qasm ΔH = 8.959e-04
+hw ΔH = 8.622e-04
+cutting ΔH = 4.172e-03
+mitigated_cutting ΔH = 4.172e-03
+Reconstruction output has 2 cases
+----------------------------------------------------------------------------------------------------
+case (9, 15)
+Cut into  [9, 9] clusters
+qasm ΔH = 5.308e-03
+hw ΔH = 5.708e-03
+cutting ΔH = 4.778e-03
+mitigated_cutting ΔH = 4.778e-03
+Reconstruction output has 3 cases
+----------------------------------------------------------------------------------------------------
+-------------------------------------------------- Job Submittor --------------------------------------------------
+Existing cases: dict_keys([])
+Run cases: dict_keys([(5, 10), (9, 10), (9, 15)])
+**************************************************
+Case (5, 10)
+Cluster 0 sametotal shots = 68494
+Cluster 1 sametotal shots = 1902
+Cluster 2 sametotal shots = 17123
+Case (9, 10)
+Cluster 0 sametotal shots = 34247
+Cluster 1 sametotal shots = 34247
+Case (9, 15)
+Cluster 0 sametotal shots = 91041
+Cluster 1 sametotal shots = 45520
+******************** Submitting jobs ********************
+Submitting job 1/3 1a77b0e5-49e8-470a-98ee-fb3fa6370986 --> 423 circuits, 900 * 8192 shots
+Submitting job 2/3 db3334f9-9aa2-49a9-bdd2-f32d26eb6c62 --> 114 circuits, 900 * 8192 shots
+Submitting job 3/3 75ec7299-b667-44c8-b1d6-294e3538257e --> 32 circuits, 189 * 8192 shots
+/home/weit/anaconda3/envs/cc-env/lib/python3.7/site-packages/qiskit/providers/models/backendconfiguration.py:337: UserWarning: `dt` and `dtm` now have units of seconds(s) rather than nanoseconds(ns).
+  warnings.warn('`dt` and `dtm` now have units of seconds(s) rather '
+******************** Submitting jobs ********************
+Submitting job 1/2 560d505c-7cdb-4073-8685-6f8d29bf224e --> 900 circuits, 900 * 8192 shots
+Submitting job 2/2 981c8625-9f71-47ae-b617-a1dddb479ac0 --> 724 circuits, 724 * 8192 shots
+******************** Retrieving jobs ********************
+Retrieving job 1/3 1a77b0e5-49e8-470a-98ee-fb3fa6370986 --> 423 circuits, 900 * 8192 shots
+Retrieving job 2/3 db3334f9-9aa2-49a9-bdd2-f32d26eb6c62 --> 114 circuits, 900 * 8192 shots
+Retrieving job 3/3 75ec7299-b667-44c8-b1d6-294e3538257e --> 32 circuits, 189 * 8192 shots
+******************** Retrieving jobs ********************
+Retrieving job 1/2 560d505c-7cdb-4073-8685-6f8d29bf224e --> 900 circuits, 900 * 8192 shots
+Retrieving job 2/2 981c8625-9f71-47ae-b617-a1dddb479ac0 --> 724 circuits, 724 * 8192 shots
+Computing calibration matrix for 4 qubit circuit took 4.952e-04 seconds
+Computing calibration matrix for 5 qubit circuit took 1.692e-03 seconds
+Computing calibration matrix for 5 qubit circuit took 1.693e-03 seconds
+Computing calibration matrix for 9 qubit circuit took 5.968e-01 seconds
+Computing calibration matrix for 3 qubit circuit took 1.445e-04 seconds
+Computing calibration matrix for 9 qubit circuit took 5.954e-01 seconds
+Computing calibration matrix for 9 qubit circuit took 6.020e-01 seconds
+-------------------------------------------------- Reconstructor --------------------------------------------------
+Existing cases: dict_keys([])
+case (5, 10)
+Cut into  [4, 5, 5] clusters
+qasm ΔH = 8.959e-04
+hw ΔH = 8.622e-04
+cutting ΔH = 2.118e-02
+mitigated_cutting ΔH = 2.118e-02
+Reconstruction output has 1 cases
+----------------------------------------------------------------------------------------------------
+case (9, 10)
+Cut into  [9, 3] clusters
+qasm ΔH = 8.959e-04
+hw ΔH = 8.622e-04
+cutting ΔH = 1.910e-02
+mitigated_cutting ΔH = 1.910e-02
+Reconstruction output has 2 cases
+----------------------------------------------------------------------------------------------------
+case (9, 15)
+Cut into  [9, 9] clusters
+qasm ΔH = 5.308e-03
+hw ΔH = 5.708e-03
+cutting ΔH = 1.739e-02
+mitigated_cutting ΔH = 1.739e-02
+Reconstruction output has 3 cases
+----------------------------------------------------------------------------------------------------
+-------------------------------------------------- Plot --------------------------------------------------
+Processing ./hardware/benchmark_data/supremacy_ibmq_boeblingen/hw_plotter_input_ibmq_boeblingen_saturated.p
+case (5, 10): ce percentage reduction = -809.072, fidelity improvement = 0.000, reconstruction time: 5.796e-02
+case (9, 10): ce percentage reduction = -383.924, fidelity improvement = 0.000, reconstruction time: 1.576e-02
+case (9, 15): ce percentage reduction = 16.289, fidelity improvement = 0.000, reconstruction time: 2.221e-01
+************************* Best Cases *************************
+{'ce_percent': -383.92439061786786, 'reconstructor_time': 0.015761852264404297, 'best_case': (9, 10), 'hw_ce': 0.0008622165978380805, 'cutting_ce': 0.004172476416894043}
+{'ce_percent': 16.288770469299397, 'reconstructor_time': 0.22214436531066895, 'best_case': (9, 15), 'hw_ce': 0.005708064722286119, 'cutting_ce': 0.004778291161433881}
+**************************************************
+Processing ./hardware/benchmark_data/supremacy_ibmq_boeblingen/hw_plotter_input_ibmq_boeblingen_sametotal.p
+case (5, 10): ce percentage reduction = -2356.082, fidelity improvement = 0.000, reconstruction time: 5.833e-02
+case (9, 10): ce percentage reduction = -2114.847, fidelity improvement = 0.000, reconstruction time: 1.589e-02
+case (9, 15): ce percentage reduction = -204.733, fidelity improvement = -0.000, reconstruction time: 2.297e-01
+************************* Best Cases *************************
+{'ce_percent': -2114.8471341355457, 'reconstructor_time': 0.015885353088378906, 'best_case': (9, 10), 'hw_ce': 0.0008622165978380805, 'cutting_ce': 0.01909677960725773}
+{'ce_percent': -204.7334653410948, 'reconstructor_time': 0.2296617031097412, 'best_case': (9, 15), 'hw_ce': 0.005708064722286119, 'cutting_ce': 0.01739438343213503}
+**************************************************
+----------------------------------------------------------------------------------------------------
+Processing ./hardware/benchmark_data/supremacy_ibmq_boeblingen/hw_plotter_input_ibmq_boeblingen_saturated.p
+case (5, 10): ce percentage reduction = -809.072, fidelity improvement = 0.000, reconstruction time: 5.796e-02
+case (9, 10): ce percentage reduction = -383.924, fidelity improvement = 0.000, reconstruction time: 1.576e-02
+case (9, 15): ce percentage reduction = 16.289, fidelity improvement = 0.000, reconstruction time: 2.221e-01
+************************* Best Cases *************************
+{'ce_percent': -383.92439061786786, 'reconstructor_time': 0.015761852264404297, 'best_case': (9, 10), 'hw_ce': 0.0008622165978380805, 'cutting_ce': 0.004172476416894043}
+{'ce_percent': 16.288770469299397, 'reconstructor_time': 0.22214436531066895, 'best_case': (9, 15), 'hw_ce': 0.005708064722286119, 'cutting_ce': 0.004778291161433881}
+**************************************************
+Processing ./hardware/benchmark_data/supremacy_ibmq_boeblingen/hw_plotter_input_ibmq_boeblingen_sametotal.p
+case (5, 10): ce percentage reduction = -2356.082, fidelity improvement = 0.000, reconstruction time: 5.833e-02
+case (9, 10): ce percentage reduction = -2114.847, fidelity improvement = 0.000, reconstruction time: 1.589e-02
+case (9, 15): ce percentage reduction = -204.733, fidelity improvement = -0.000, reconstruction time: 2.297e-01
+************************* Best Cases *************************
+{'ce_percent': -2114.8471341355457, 'reconstructor_time': 0.015885353088378906, 'best_case': (9, 10), 'hw_ce': 0.0008622165978380805, 'cutting_ce': 0.01909677960725773}
+{'ce_percent': -204.7334653410948, 'reconstructor_time': 0.2296617031097412, 'best_case': (9, 15), 'hw_ce': 0.005708064722286119, 'cutting_ce': 0.01739438343213503}
+**************************************************
+----------------------------------------------------------------------------------------------------
