@@ -99,7 +99,8 @@ class Scheduler:
             assert len(job_circuits) == schedule_item.total_circs
             qobj = assemble(job_circuits, backend=evaluator_info['device'], shots=schedule_item.shots)
             if real_device:
-                hw_job = evaluator_info['device'].run(qobj,backend_options={'memory':True})
+                print(type(evaluator_info['device']))
+                hw_job = evaluator_info['device'].run(qobj,memory=True)
             else:
                 hw_job = Aer.get_backend('qasm_simulator').run(qobj,backend_options={'memory':True})
             jobs.append(hw_job)
