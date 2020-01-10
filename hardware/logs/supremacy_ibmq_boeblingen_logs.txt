@@ -1,0 +1,135 @@
+-------------------------------------------------- Generator --------------------------------------------------
+Existing cases: dict_keys([])
+Generating 1x3, 1+8+1 supremacy circuit
+Using license file /home/weit/gurobi.lic
+Academic license - for non-commercial use only
+********************
+MIQCP stats:
+1 cuts, 2 clusters, max qubit = 2
+cluster 0: original input = 2.00, ρ_qubits = 0.00, O_qubits = 1.00, d = 2.00
+cluster 1: original input = 1.00, ρ_qubits = 1.00, O_qubits = 0.00, d = 2.00
+objective value = 9.000e+00
+manually calculated objective value: 9.000e+00
+evaluator_cost = 9, reconstructor_cost = 1.340e-07, reconstructor_weight = 0.000e+00
+runtime: 0.00037789344787597656
+OPTIMAL
+********************
+Adding case (2, 3) to run
+Adding 3 qubit full circuit to run
+3 qubit circuit saturated shots = 6144, ΔH = 3.832e-04
+----------------------------------------------------------------------------------------------------
+Case (3, 3) impossible, skipped
+----------------------------------------------------------------------------------------------------
+Case (4, 3) impossible, skipped
+----------------------------------------------------------------------------------------------------
+Case (5, 3) impossible, skipped
+----------------------------------------------------------------------------------------------------
+Case (6, 3) impossible, skipped
+----------------------------------------------------------------------------------------------------
+Case (7, 3) impossible, skipped
+----------------------------------------------------------------------------------------------------
+Case (8, 3) impossible, skipped
+----------------------------------------------------------------------------------------------------
+Case (9, 3) impossible, skipped
+----------------------------------------------------------------------------------------------------
+1 cases, 1 full circuits to run : dict_keys([(2, 3)])
+******************** Submitting jobs ********************
+<class 'qiskit.providers.ibmq.ibmqbackend.IBMQBackend'>
+Submitting job 1/1 5e19066f1b68f80011eb2d58 --> 1 circuits, 1 * 6144 shots
+/home/weit/anaconda3/envs/cc-env/lib/python3.7/site-packages/qiskit/providers/models/backendconfiguration.py:337: UserWarning: `dt` and `dtm` now have units of seconds(s) rather than nanoseconds(ns).
+  warnings.warn('`dt` and `dtm` now have units of seconds(s) rather '
+******************** Submitting jobs ********************
+<class 'qiskit.providers.ibmq.ibmqbackend.IBMQBackend'>
+Submitting job 1/1 5e190673b9e88e0011fb8e1c --> 8 circuits, 8 * 8192 shots
+******************** Retrieving jobs ********************
+Retrieving job 1/1 5e19066f1b68f80011eb2d58 --> 1 circuits, 1 * 6144 shots
+******************** Retrieving jobs ********************
+Retrieving job 1/1 5e190673b9e88e0011fb8e1c --> 8 circuits, 8 * 8192 shots
+Computing calibration matrix for 3 qubit circuit took 1.922e-04 seconds
+-------------------------------------------------- Job Submittor --------------------------------------------------
+Existing cases: dict_keys([])
+Run cases: dict_keys([(2, 3)])
+**************************************************
+Case (2, 3)
+2 qubit circuit saturated shots = 2048, ΔH = 8.901e-04
+Cluster 0 saturated shots = 2048
+2 qubit circuit saturated shots = 4096, ΔH = 1.597e-04
+Cluster 1 saturated shots = 4096
+******************** Submitting jobs ********************
+<class 'qiskit.providers.ibmq.ibmqbackend.IBMQBackend'>
+Submitting job 1/1 5e190764eea81b00116220fb --> 9 circuits, 9 * 4096 shots
+/home/weit/anaconda3/envs/cc-env/lib/python3.7/site-packages/qiskit/providers/models/backendconfiguration.py:337: UserWarning: `dt` and `dtm` now have units of seconds(s) rather than nanoseconds(ns).
+  warnings.warn('`dt` and `dtm` now have units of seconds(s) rather '
+******************** Submitting jobs ********************
+<class 'qiskit.providers.ibmq.ibmqbackend.IBMQBackend'>
+Submitting job 1/1 5e190769e91aa60012ffd6ab --> 8 circuits, 8 * 8192 shots
+******************** Retrieving jobs ********************
+Retrieving job 1/1 5e190764eea81b00116220fb --> 9 circuits, 9 * 4096 shots
+******************** Retrieving jobs ********************
+Retrieving job 1/1 5e190769e91aa60012ffd6ab --> 8 circuits, 8 * 8192 shots
+Computing calibration matrix for 2 qubit circuit took 1.574e-04 seconds
+Computing calibration matrix for 2 qubit circuit took 4.983e-05 seconds
+-------------------------------------------------- Reconstructor --------------------------------------------------
+Existing cases: dict_keys([])
+case (2, 3)
+Cut into  [2, 2] clusters
+qasm ΔH = 3.255e-04
+hw ΔH = 2.063e-02
+cutting ΔH = 5.395e-02
+mitigated_cutting ΔH = 9.388e-03
+Reconstruction output has 1 cases
+----------------------------------------------------------------------------------------------------
+-------------------------------------------------- Job Submittor --------------------------------------------------
+Existing cases: dict_keys([])
+Run cases: dict_keys([(2, 3)])
+**************************************************
+Case (2, 3)
+Cluster 0 sametotal shots = 2048
+Cluster 1 sametotal shots = 1024
+******************** Submitting jobs ********************
+<class 'qiskit.providers.ibmq.ibmqbackend.IBMQBackend'>
+Submitting job 1/1 5e1909bd38090b00118cb3be --> 9 circuits, 9 * 2048 shots
+/home/weit/anaconda3/envs/cc-env/lib/python3.7/site-packages/qiskit/providers/models/backendconfiguration.py:337: UserWarning: `dt` and `dtm` now have units of seconds(s) rather than nanoseconds(ns).
+  warnings.warn('`dt` and `dtm` now have units of seconds(s) rather '
+******************** Submitting jobs ********************
+<class 'qiskit.providers.ibmq.ibmqbackend.IBMQBackend'>
+Submitting job 1/1 5e1909c2c7d39c0011c71c36 --> 8 circuits, 8 * 8192 shots
+******************** Retrieving jobs ********************
+Retrieving job 1/1 5e1909bd38090b00118cb3be --> 9 circuits, 9 * 2048 shots
+******************** Retrieving jobs ********************
+Retrieving job 1/1 5e1909c2c7d39c0011c71c36 --> 8 circuits, 8 * 8192 shots
+Computing calibration matrix for 2 qubit circuit took 1.323e-04 seconds
+Computing calibration matrix for 2 qubit circuit took 5.221e-05 seconds
+-------------------------------------------------- Reconstructor --------------------------------------------------
+Existing cases: dict_keys([])
+case (2, 3)
+Cut into  [2, 2] clusters
+qasm ΔH = 3.255e-04
+hw ΔH = 2.063e-02
+cutting ΔH = 3.905e-02
+mitigated_cutting ΔH = 4.505e-03
+Reconstruction output has 1 cases
+----------------------------------------------------------------------------------------------------
+-------------------------------------------------- Plot --------------------------------------------------
+Processing ./hardware/benchmark_data/supremacy_ibmq_boeblingen/hw_plotter_input_ibmq_boeblingen_saturated.p
+case (2, 3): ce percentage reduction = -183.607, fidelity improvement = -0.000, reconstruction time: 5.217e-04
+************************* Best Cases *************************
+{'ce_percent': -183.60695236203452, 'reconstructor_time': 0.0005216598510742188, 'best_case': (2, 3), 'hw_ce': 0.003310086635302422, 'cutting_ce': 0.009387635826924211}
+**************************************************
+Processing ./hardware/benchmark_data/supremacy_ibmq_boeblingen/hw_plotter_input_ibmq_boeblingen_sametotal.p
+case (2, 3): ce percentage reduction = -36.106, fidelity improvement = 0.000, reconstruction time: 5.233e-04
+************************* Best Cases *************************
+{'ce_percent': -36.10605550296466, 'reconstructor_time': 0.0005233287811279297, 'best_case': (2, 3), 'hw_ce': 0.003310086635302422, 'cutting_ce': 0.00450522835304093}
+**************************************************
+----------------------------------------------------------------------------------------------------
+Processing ./hardware/benchmark_data/supremacy_ibmq_boeblingen/hw_plotter_input_ibmq_boeblingen_saturated.p
+case (2, 3): ce percentage reduction = -161.474, fidelity improvement = 0.000, reconstruction time: 5.217e-04
+************************* Best Cases *************************
+{'ce_percent': -161.4737702746719, 'reconstructor_time': 0.0005216598510742188, 'best_case': (2, 3), 'hw_ce': 0.02063144074230173, 'cutting_ce': 0.05394580597088109}
+**************************************************
+Processing ./hardware/benchmark_data/supremacy_ibmq_boeblingen/hw_plotter_input_ibmq_boeblingen_sametotal.p
+case (2, 3): ce percentage reduction = -89.259, fidelity improvement = 0.000, reconstruction time: 5.233e-04
+************************* Best Cases *************************
+{'ce_percent': -89.25902512748242, 'reconstructor_time': 0.0005233287811279297, 'best_case': (2, 3), 'hw_ce': 0.02063144074230173, 'cutting_ce': 0.03904686361863448}
+**************************************************
+----------------------------------------------------------------------------------------------------
