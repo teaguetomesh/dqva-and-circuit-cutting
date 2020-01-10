@@ -28,12 +28,14 @@ class TensoredMitigation:
 
     def check_status(self):
         assert isinstance(self.circ_dict,dict)
+        evaluator_info = get_evaluator_info(circ=None,device_name=self.device_name,fields=['device'])
+        device_max_experiments = evaluator_info['device'].configuration().max_experiments
         keys_to_delete = []
         for key in self.circ_dict:
             value = self.circ_dict[key]
             if 'circ' not in value:
                 raise Exception('Input circ_dict does not have circ for key {}'.format(key))
-            elif len(value['circ'].qubits)>15:
+            elif 2**len(value['circ'].qubits)>device_max_experiments:
                 keys_to_delete.append(key)
         for key in keys_to_delete:
             del self.circ_dict[key]
