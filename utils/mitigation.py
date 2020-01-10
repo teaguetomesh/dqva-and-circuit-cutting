@@ -28,10 +28,15 @@ class TensoredMitigation:
 
     def check_status(self):
         assert isinstance(self.circ_dict,dict)
+        keys_to_delete = []
         for key in self.circ_dict:
             value = self.circ_dict[key]
             if 'circ' not in value:
                 raise Exception('Input circ_dict does not have circ for key {}'.format(key))
+            elif len(value['circ'].qubits)>15:
+                keys_to_delete.append(key)
+        for key in keys_to_delete:
+            del self.circ_dict[key]
         try:
             evaluator_info = get_evaluator_info(circ=None,device_name=self.device_name,fields=['device','properties'])
         except:
@@ -134,12 +139,14 @@ class TensoredMitigation:
     def apply(self,unmitigated):
         mitigated = {}
         for key in unmitigated:
-            assert key in self.circ_dict
-            mitigated[key] = copy.deepcopy(unmitigated[key])
-            calibration_matrix = self.circ_dict[key]['calibration_matrix']
-            filter_matrix = np.linalg.inv(calibration_matrix)
-            unmitigated_prob = np.reshape(unmitigated[key]['hw'],(-1,1))
-            mitigated_prob = np.reshape(filter_matrix.dot(unmitigated_prob),(1,-1)).tolist()[0]
-            assert abs(sum(mitigated_prob)-1)<1e-10
-            mitigated[key]['mitigated_hw'] = copy.deepcopy(mitigated_prob)
+            if key in self.circ_dict:
+                mitigated[key] = copy.deepcopy(unmitigated[key])
+                calibration_matrix = self.circ_dict[key]['calibration_matrix']
+                filter_matrix = np.linalg.inv(calibration_matrix)
+                unmitigated_prob = np.reshape(unmitigated[key]['hw'],(-1,1))
+                mitigated_prob = np.reshape(filter_matrix.dot(unmitigated_prob),(1,-1)).tolist()[0]
+                assert abs(sum(mitigated_prob)-1)<1e-10
+                mitigated[key]['mitigated_hw'] = copy.deepcopy(mitigated_prob)
+            else:
+                mitigated[key]['mitigated_hw'] = copy.deepcopy(unmitigated[key]['hw'])
         self.circ_dict = copy.deepcopy(mitigated)
