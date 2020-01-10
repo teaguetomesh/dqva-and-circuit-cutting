@@ -1,0 +1,112 @@
+-------------------------------------------------- Generator --------------------------------------------------
+Existing cases: dict_keys([])
+Generating 1x3, 1+8+1 supremacy circuit
+Using license file /home/weit/gurobi.lic
+Academic license - for non-commercial use only
+********************
+MIQCP stats:
+1 cuts, 2 clusters, max qubit = 2
+cluster 0: original input = 2.00, ρ_qubits = 0.00, O_qubits = 1.00, d = 2.00
+cluster 1: original input = 1.00, ρ_qubits = 1.00, O_qubits = 0.00, d = 2.00
+objective value = 9.000e+00
+manually calculated objective value: 9.000e+00
+evaluator_cost = 9, reconstructor_cost = 1.340e-07, reconstructor_weight = 0.000e+00
+runtime: 0.0003910064697265625
+OPTIMAL
+********************
+Adding case (2, 3) to run
+Adding 3 qubit full circuit to run
+3 qubit circuit saturated shots = 5120, ΔH = 5.270e-04
+----------------------------------------------------------------------------------------------------
+Case (3, 3) impossible, skipped
+----------------------------------------------------------------------------------------------------
+Case (4, 3) impossible, skipped
+----------------------------------------------------------------------------------------------------
+Case (5, 3) impossible, skipped
+----------------------------------------------------------------------------------------------------
+Case (6, 3) impossible, skipped
+----------------------------------------------------------------------------------------------------
+Case (7, 3) impossible, skipped
+----------------------------------------------------------------------------------------------------
+Case (8, 3) impossible, skipped
+----------------------------------------------------------------------------------------------------
+Case (9, 3) impossible, skipped
+----------------------------------------------------------------------------------------------------
+1 cases, 1 full circuits to run : dict_keys([(2, 3)])
+******************** Submitting jobs ********************
+/home/weit/anaconda3/envs/cc-env/lib/python3.7/site-packages/qiskit/providers/models/backendconfiguration.py:337: UserWarning: `dt` and `dtm` now have units of seconds(s) rather than nanoseconds(ns).
+  warnings.warn('`dt` and `dtm` now have units of seconds(s) rather '
+Traceback (most recent call last):
+  File "/home/weit/anaconda3/envs/cc-env/lib/python3.7/runpy.py", line 193, in _run_module_as_main
+    "__main__", mod_spec)
+  File "/home/weit/anaconda3/envs/cc-env/lib/python3.7/runpy.py", line 85, in _run_code
+    exec(code, run_globals)
+  File "/home/weit/circuit_cutting/hardware/generator.py", line 87, in <module>
+    scheduler.run(real_device=True)
+  File "/home/weit/circuit_cutting/utils/submission.py", line 103, in run
+    hw_job = evaluator_info['device'].run(qobj,memory=True)
+TypeError: run() got an unexpected keyword argument 'memory'
+<class 'qiskit.providers.ibmq.ibmqbackend.IBMQBackend'>
+-------------------------------------------------- Job Submittor --------------------------------------------------
+Existing cases: dict_keys([])
+Run cases: dict_keys([])
+**************************************************
+******************** Submitting jobs ********************
+******************** Submitting jobs ********************
+/home/weit/anaconda3/envs/cc-env/lib/python3.7/site-packages/qiskit/providers/models/backendconfiguration.py:337: UserWarning: `dt` and `dtm` now have units of seconds(s) rather than nanoseconds(ns).
+  warnings.warn('`dt` and `dtm` now have units of seconds(s) rather '
+******************** Retrieving jobs ********************
+******************** Retrieving jobs ********************
+-------------------------------------------------- Reconstructor --------------------------------------------------
+Existing cases: dict_keys([])
+-------------------------------------------------- Job Submittor --------------------------------------------------
+Existing cases: dict_keys([])
+Run cases: dict_keys([])
+**************************************************
+******************** Submitting jobs ********************
+******************** Submitting jobs ********************
+/home/weit/anaconda3/envs/cc-env/lib/python3.7/site-packages/qiskit/providers/models/backendconfiguration.py:337: UserWarning: `dt` and `dtm` now have units of seconds(s) rather than nanoseconds(ns).
+  warnings.warn('`dt` and `dtm` now have units of seconds(s) rather '
+******************** Retrieving jobs ********************
+******************** Retrieving jobs ********************
+-------------------------------------------------- Reconstructor --------------------------------------------------
+Existing cases: dict_keys([])
+-------------------------------------------------- Plot --------------------------------------------------
+/home/weit/circuit_cutting/hardware/plot.py:39: UserWarning: Attempting to set identical left == right == -0.5 results in singular transformations; automatically expanding.
+  im = ax.imshow(data, **kwargs)
+/home/weit/circuit_cutting/hardware/plot.py:39: UserWarning: Attempting to set identical bottom == top == -0.5 results in singular transformations; automatically expanding.
+  im = ax.imshow(data, **kwargs)
+Traceback (most recent call last):
+  File "/home/weit/anaconda3/envs/cc-env/lib/python3.7/runpy.py", line 193, in _run_module_as_main
+    "__main__", mod_spec)
+  File "/home/weit/anaconda3/envs/cc-env/lib/python3.7/runpy.py", line 85, in _run_code
+    exec(code, run_globals)
+  File "/home/weit/circuit_cutting/hardware/plot.py", line 333, in <module>
+    plot_fid_bar(saturated_best_cc=saturated_best_cc, sametotal_best_cc=sametotal_best_cc,circuit_type=args.circuit_type,dirname=dirname,device_name=args.device_name,mitigated=mitigated)
+  File "/home/weit/circuit_cutting/hardware/plot.py", line 243, in plot_fid_bar
+    plt.legend()
+  File "/home/weit/anaconda3/envs/cc-env/lib/python3.7/site-packages/matplotlib/pyplot.py", line 2685, in legend
+    return gca().legend(*args, **kwargs)
+  File "/home/weit/anaconda3/envs/cc-env/lib/python3.7/site-packages/matplotlib/axes/_axes.py", line 406, in legend
+    self.legend_ = mlegend.Legend(self, handles, labels, **kwargs)
+  File "/home/weit/anaconda3/envs/cc-env/lib/python3.7/site-packages/matplotlib/legend.py", line 575, in __init__
+    self._init_legend_box(handles, labels, markerfirst)
+  File "/home/weit/anaconda3/envs/cc-env/lib/python3.7/site-packages/matplotlib/legend.py", line 833, in _init_legend_box
+    fontsize, handlebox))
+  File "/home/weit/anaconda3/envs/cc-env/lib/python3.7/site-packages/matplotlib/legend_handler.py", line 115, in legend_artist
+    fontsize, handlebox.get_transform())
+  File "/home/weit/anaconda3/envs/cc-env/lib/python3.7/site-packages/matplotlib/legend_handler.py", line 299, in create_artists
+    self.update_prop(p, orig_handle, legend)
+  File "/home/weit/anaconda3/envs/cc-env/lib/python3.7/site-packages/matplotlib/legend_handler.py", line 72, in update_prop
+    self._update_prop(legend_handle, orig_handle)
+  File "/home/weit/anaconda3/envs/cc-env/lib/python3.7/site-packages/matplotlib/legend_handler.py", line 65, in _update_prop
+    self._update_prop_func(legend_handle, orig_handle)
+  File "/home/weit/anaconda3/envs/cc-env/lib/python3.7/site-packages/matplotlib/legend_handler.py", line 38, in update_from_first_child
+    tgt.update_from(src.get_children()[0])
+IndexError: list index out of range
+Processing ./hardware/benchmark_data/supremacy_ibmq_boeblingen/hw_plotter_input_ibmq_boeblingen_saturated.p
+************************* Best Cases *************************
+**************************************************
+Processing ./hardware/benchmark_data/supremacy_ibmq_boeblingen/hw_plotter_input_ibmq_boeblingen_sametotal.p
+************************* Best Cases *************************
+**************************************************
