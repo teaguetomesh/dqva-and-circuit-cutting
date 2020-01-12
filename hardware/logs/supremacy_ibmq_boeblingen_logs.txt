@@ -1146,3 +1146,953 @@ case (9, 10): ce percentage reduction = 16.010, fidelity improvement = -0.000, r
 {'ce_percent': 20.34832608326586, 'reconstructor_time': 0.00712275505065918, 'best_case': (7, 10), 'hw_ce': 0.5978095883854257, 'cutting_ce': 0.4761653439837299}
 **************************************************
 ----------------------------------------------------------------------------------------------------
+-------------------------------------------------- Generator --------------------------------------------------
+Existing cases: dict_keys([(2, 3), (3, 4), (3, 5), (4, 5), (4, 6), (5, 6), (4, 7), (5, 7), (6, 7), (4, 8), (5, 8), (6, 8), (7, 8), (5, 9), (6, 9), (7, 9), (8, 9), (5, 10), (6, 10), (7, 10), (8, 10), (9, 10)])
+Case (2, 3) already exists
+----------------------------------------------------------------------------------------------------
+Case (3, 3) impossible, skipped
+----------------------------------------------------------------------------------------------------
+Case (4, 3) impossible, skipped
+----------------------------------------------------------------------------------------------------
+Case (5, 3) impossible, skipped
+----------------------------------------------------------------------------------------------------
+Case (6, 3) impossible, skipped
+----------------------------------------------------------------------------------------------------
+Case (7, 3) impossible, skipped
+----------------------------------------------------------------------------------------------------
+Case (8, 3) impossible, skipped
+----------------------------------------------------------------------------------------------------
+Case (9, 3) impossible, skipped
+----------------------------------------------------------------------------------------------------
+Case (2, 4) impossible, skipped
+----------------------------------------------------------------------------------------------------
+Case (3, 4) already exists
+----------------------------------------------------------------------------------------------------
+Case (4, 4) impossible, skipped
+----------------------------------------------------------------------------------------------------
+Case (5, 4) impossible, skipped
+----------------------------------------------------------------------------------------------------
+Case (6, 4) impossible, skipped
+----------------------------------------------------------------------------------------------------
+Case (7, 4) impossible, skipped
+----------------------------------------------------------------------------------------------------
+Case (8, 4) impossible, skipped
+----------------------------------------------------------------------------------------------------
+Case (9, 4) impossible, skipped
+----------------------------------------------------------------------------------------------------
+Case (2, 5) impossible, skipped
+----------------------------------------------------------------------------------------------------
+Case (3, 5) already exists
+----------------------------------------------------------------------------------------------------
+Case (4, 5) already exists
+----------------------------------------------------------------------------------------------------
+Case (5, 5) impossible, skipped
+----------------------------------------------------------------------------------------------------
+Case (6, 5) impossible, skipped
+----------------------------------------------------------------------------------------------------
+Case (7, 5) impossible, skipped
+----------------------------------------------------------------------------------------------------
+Case (8, 5) impossible, skipped
+----------------------------------------------------------------------------------------------------
+Case (9, 5) impossible, skipped
+----------------------------------------------------------------------------------------------------
+Case (2, 6) impossible, skipped
+----------------------------------------------------------------------------------------------------
+Using license file /home/weit/gurobi.lic
+Academic license - for non-commercial use only
+Case (3, 6) NOT feasible
+----------------------------------------------------------------------------------------------------
+Case (4, 6) already exists
+----------------------------------------------------------------------------------------------------
+Case (5, 6) already exists
+----------------------------------------------------------------------------------------------------
+Case (6, 6) impossible, skipped
+----------------------------------------------------------------------------------------------------
+Case (7, 6) impossible, skipped
+----------------------------------------------------------------------------------------------------
+Case (8, 6) impossible, skipped
+----------------------------------------------------------------------------------------------------
+Case (9, 6) impossible, skipped
+----------------------------------------------------------------------------------------------------
+Case (2, 7) impossible, skipped
+----------------------------------------------------------------------------------------------------
+Case (3, 7) impossible, skipped
+----------------------------------------------------------------------------------------------------
+Case (4, 7) already exists
+----------------------------------------------------------------------------------------------------
+Case (5, 7) already exists
+----------------------------------------------------------------------------------------------------
+Case (6, 7) already exists
+----------------------------------------------------------------------------------------------------
+Case (7, 7) impossible, skipped
+----------------------------------------------------------------------------------------------------
+Case (8, 7) impossible, skipped
+----------------------------------------------------------------------------------------------------
+Case (9, 7) impossible, skipped
+----------------------------------------------------------------------------------------------------
+Case (2, 8) impossible, skipped
+----------------------------------------------------------------------------------------------------
+Case (3, 8) impossible, skipped
+----------------------------------------------------------------------------------------------------
+Case (4, 8) already exists
+----------------------------------------------------------------------------------------------------
+Case (5, 8) already exists
+----------------------------------------------------------------------------------------------------
+Case (6, 8) already exists
+----------------------------------------------------------------------------------------------------
+Case (7, 8) already exists
+----------------------------------------------------------------------------------------------------
+Case (8, 8) impossible, skipped
+----------------------------------------------------------------------------------------------------
+Case (9, 8) impossible, skipped
+----------------------------------------------------------------------------------------------------
+Case (2, 9) impossible, skipped
+----------------------------------------------------------------------------------------------------
+Case (3, 9) impossible, skipped
+----------------------------------------------------------------------------------------------------
+Case (4, 9) NOT feasible
+----------------------------------------------------------------------------------------------------
+Case (5, 9) already exists
+----------------------------------------------------------------------------------------------------
+Case (6, 9) already exists
+----------------------------------------------------------------------------------------------------
+Case (7, 9) already exists
+----------------------------------------------------------------------------------------------------
+Case (8, 9) already exists
+----------------------------------------------------------------------------------------------------
+Case (9, 9) impossible, skipped
+----------------------------------------------------------------------------------------------------
+Case (2, 10) impossible, skipped
+----------------------------------------------------------------------------------------------------
+Case (3, 10) impossible, skipped
+----------------------------------------------------------------------------------------------------
+Case (4, 10) impossible, skipped
+----------------------------------------------------------------------------------------------------
+Case (5, 10) already exists
+----------------------------------------------------------------------------------------------------
+Case (6, 10) already exists
+----------------------------------------------------------------------------------------------------
+Case (7, 10) already exists
+----------------------------------------------------------------------------------------------------
+Case (8, 10) already exists
+----------------------------------------------------------------------------------------------------
+Case (9, 10) already exists
+----------------------------------------------------------------------------------------------------
+0 cases, 0 full circuits to run : dict_keys([])
+******************** Submitting jobs ********************
+******************** Submitting jobs ********************
+/home/weit/anaconda3/envs/cc-env/lib/python3.7/site-packages/qiskit/providers/models/backendconfiguration.py:337: UserWarning: `dt` and `dtm` now have units of seconds(s) rather than nanoseconds(ns).
+  warnings.warn('`dt` and `dtm` now have units of seconds(s) rather '
+******************** Retrieving jobs ********************
+******************** Retrieving jobs ********************
+-------------------------------------------------- Evaluator --------------------------------------------------
+Existing cases: dict_keys([(2, 3), (3, 4), (3, 5), (4, 5), (4, 6), (5, 6), (4, 7), (5, 7), (6, 7), (4, 8), (5, 8), (6, 8), (7, 8), (5, 9), (6, 9), (7, 9), (8, 9), (5, 10), (6, 10), (7, 10), (8, 10), (9, 10)])
+-------------------------------------------------- Job Submittor --------------------------------------------------
+Existing cases: dict_keys([])
+Run cases: dict_keys([(2, 3), (3, 4), (3, 5), (4, 5), (4, 6), (5, 6), (4, 7), (5, 7), (6, 7), (4, 8), (5, 8), (6, 8), (7, 8), (5, 9), (6, 9), (7, 9), (8, 9), (5, 10), (6, 10), (7, 10), (8, 10), (9, 10)])
+**************************************************
+Case (2, 3)
+2 qubit circuit saturated shots = 2048, ΔH = 4.491e-04
+Cluster 0 saturated shots = 2048
+2 qubit circuit saturated shots = 7168, ΔH = 5.801e-04
+Cluster 1 saturated shots = 7168
+Case (3, 4)
+3 qubit circuit saturated shots = 7168, ΔH = 4.820e-04
+Cluster 0 saturated shots = 7168
+3 qubit circuit saturated shots = 5120, ΔH = 7.531e-04
+Cluster 1 saturated shots = 5120
+Case (3, 5)
+3 qubit circuit saturated shots = 6144, ΔH = 5.092e-04
+Cluster 0 saturated shots = 6144
+3 qubit circuit saturated shots = 2048, ΔH = 9.662e-04
+Cluster 1 saturated shots = 2048
+Case (4, 5)
+2 qubit circuit saturated shots = 3072, ΔH = 3.189e-04
+Cluster 0 saturated shots = 3072
+4 qubit circuit saturated shots = 9216, ΔH = 7.468e-04
+Cluster 1 saturated shots = 9216
+Case (4, 6)
+4 qubit circuit saturated shots = 7168, ΔH = 6.564e-04
+Cluster 0 saturated shots = 7168
+4 qubit circuit saturated shots = 3072, ΔH = 7.001e-04
+Cluster 1 saturated shots = 3072
+2 qubit circuit saturated shots = 4096, ΔH = 1.037e-04
+Cluster 2 saturated shots = 4096
+Case (5, 6)
+3 qubit circuit saturated shots = 4096, ΔH = 6.303e-05
+Cluster 0 saturated shots = 4096
+5 qubit circuit saturated shots = 14336, ΔH = 9.878e-04
+Cluster 1 saturated shots = 14336
+Case (4, 7)
+4 qubit circuit saturated shots = 8192, ΔH = 6.369e-04
+Cluster 0 saturated shots = 8192
+4 qubit circuit saturated shots = 10240, ΔH = 5.627e-04
+Cluster 1 saturated shots = 10240
+Case (5, 7)
+3 qubit circuit saturated shots = 5120, ΔH = 4.897e-04
+Cluster 0 saturated shots = 5120
+5 qubit circuit saturated shots = 11264, ΔH = 7.638e-04
+Cluster 1 saturated shots = 11264
+Case (6, 7)
+2 qubit circuit saturated shots = 3072, ΔH = 6.980e-04
+Cluster 0 saturated shots = 3072
+6 qubit circuit saturated shots = 33792, ΔH = 9.749e-04
+Cluster 1 saturated shots = 33792
+Case (4, 8)
+4 qubit circuit saturated shots = 12288, ΔH = 9.862e-04
+Cluster 0 saturated shots = 12288
+4 qubit circuit saturated shots = 6144, ΔH = 9.571e-04
+Cluster 1 saturated shots = 6144
+4 qubit circuit saturated shots = 8192, ΔH = 8.049e-04
+Cluster 2 saturated shots = 8192
+Case (5, 8)
+5 qubit circuit saturated shots = 15360, ΔH = 9.748e-04
+Cluster 0 saturated shots = 15360
+5 qubit circuit saturated shots = 11264, ΔH = 8.047e-04
+Cluster 1 saturated shots = 11264
+2 qubit circuit saturated shots = 4096, ΔH = 5.112e-04
+Cluster 2 saturated shots = 4096
+Case (6, 8)
+6 qubit circuit saturated shots = 50176, ΔH = 1.039e-03
+Cluster 0 saturated shots = 50176
+4 qubit circuit saturated shots = 9216, ΔH = 6.379e-04
+Cluster 1 saturated shots = 9216
+Case (7, 8)
+7 qubit circuit saturated shots = 59392, ΔH = 9.899e-04
+Cluster 0 saturated shots = 59392
+3 qubit circuit saturated shots = 5120, ΔH = 6.473e-04
+Cluster 1 saturated shots = 5120
+Case (5, 9)
+5 qubit circuit saturated shots = 16384, ΔH = 1.021e-03
+Cluster 0 saturated shots = 16384
+4 qubit circuit saturated shots = 10240, ΔH = 8.124e-04
+Cluster 1 saturated shots = 10240
+5 qubit circuit saturated shots = 12288, ΔH = 8.906e-04
+Cluster 2 saturated shots = 12288
+Case (6, 9)
+6 qubit circuit saturated shots = 31744, ΔH = 1.013e-03
+Cluster 0 saturated shots = 31744
+6 qubit circuit saturated shots = 29696, ΔH = 9.793e-04
+Cluster 1 saturated shots = 29696
+Case (7, 9)
+7 qubit circuit saturated shots = 72704, ΔH = 1.019e-03
+Cluster 0 saturated shots = 72704
+5 qubit circuit saturated shots = 12288, ΔH = 7.796e-04
+Cluster 1 saturated shots = 12288
+Case (8, 9)
+8 qubit circuit saturated shots = 132096, ΔH = 1.027e-03
+Cluster 0 saturated shots = 132096
+3 qubit circuit saturated shots = 3072, ΔH = 7.765e-04
+Cluster 1 saturated shots = 3072
+Case (5, 10)
+4 qubit circuit saturated shots = 8192, ΔH = 1.000e-03
+Cluster 0 saturated shots = 8192
+5 qubit circuit saturated shots = 11264, ΔH = 9.068e-04
+Cluster 1 saturated shots = 11264
+5 qubit circuit saturated shots = 13312, ΔH = 1.087e-03
+Cluster 2 saturated shots = 13312
+Case (6, 10)
+6 qubit circuit saturated shots = 36864, ΔH = 9.715e-04
+Cluster 0 saturated shots = 36864
+6 qubit circuit saturated shots = 24576, ΔH = 9.794e-04
+Cluster 1 saturated shots = 24576
+Case (7, 10)
+6 qubit circuit saturated shots = 32768, ΔH = 1.003e-03
+Cluster 0 saturated shots = 32768
+6 qubit circuit saturated shots = 24576, ΔH = 9.617e-04
+Cluster 1 saturated shots = 24576
+Case (8, 10)
+6 qubit circuit saturated shots = 34816, ΔH = 1.025e-03
+Cluster 0 saturated shots = 34816
+6 qubit circuit saturated shots = 31744, ΔH = 1.022e-03
+Cluster 1 saturated shots = 31744
+Case (9, 10)
+9 qubit circuit saturated shots = 263168, ΔH = 1.023e-03
+Cluster 0 saturated shots = 263168
+3 qubit circuit saturated shots = 3072, ΔH = 2.432e-04
+Cluster 1 saturated shots = 3072
+******************** Submitting jobs ********************
+Submitting job 1/7 5e1a0ebeb423940011a83cb5 --> 606 circuits, 900 * 8192 shots
+Submitting job 2/7 5e1a0f00de1c9f00118eb240 --> 390 circuits, 900 * 8192 shots
+Submitting job 3/7 5e1a0f2dd565fc00129a99c0 --> 228 circuits, 900 * 8192 shots
+Submitting job 4/7 5e1a0f54429bb80012165f82 --> 166 circuits, 900 * 8192 shots
+Submitting job 5/7 5e1a0f94a0ce000011bd9d7a --> 346 circuits, 900 * 8192 shots
+Submitting job 6/7 5e1a0fbbe185630011942da8 --> 168 circuits, 900 * 8192 shots
+Submitting job 7/7 5e1a0fc6b423940011a83cb6 --> 25 circuits, 240 * 8192 shots
+/home/weit/anaconda3/envs/cc-env/lib/python3.7/site-packages/qiskit/providers/models/backendconfiguration.py:337: UserWarning: `dt` and `dtm` now have units of seconds(s) rather than nanoseconds(ns).
+  warnings.warn('`dt` and `dtm` now have units of seconds(s) rather '
+******************** Submitting jobs ********************
+Submitting job 1/3 5e1a107ede1c9f00118eb247 --> 900 circuits, 900 * 8192 shots
+Submitting job 2/3 5e1a1113524c4800115872ec --> 900 circuits, 900 * 8192 shots
+Submitting job 3/3 5e1a115cb423940011a83cbb --> 424 circuits, 424 * 8192 shots
+******************** Retrieving jobs ********************
+Retrieving job 1/7 5e1a0ebeb423940011a83cb5 --> 606 circuits, 900 * 8192 shots
+Retrieving job 2/7 5e1a0f00de1c9f00118eb240 --> 390 circuits, 900 * 8192 shots
+Retrieving job 3/7 5e1a0f2dd565fc00129a99c0 --> 228 circuits, 900 * 8192 shots
+-------------------------------------------------- Generator --------------------------------------------------
+Existing cases: dict_keys([(2, 3), (3, 4), (3, 5), (4, 5), (4, 6), (5, 6), (4, 7), (5, 7), (6, 7), (4, 8), (5, 8), (6, 8), (7, 8), (5, 9), (6, 9), (7, 9), (8, 9), (5, 10), (6, 10), (7, 10), (8, 10), (9, 10)])
+Case (2, 3) already exists
+----------------------------------------------------------------------------------------------------
+Case (3, 3) impossible, skipped
+----------------------------------------------------------------------------------------------------
+Case (4, 3) impossible, skipped
+----------------------------------------------------------------------------------------------------
+Case (5, 3) impossible, skipped
+----------------------------------------------------------------------------------------------------
+Case (6, 3) impossible, skipped
+----------------------------------------------------------------------------------------------------
+Case (7, 3) impossible, skipped
+----------------------------------------------------------------------------------------------------
+Case (8, 3) impossible, skipped
+----------------------------------------------------------------------------------------------------
+Case (9, 3) impossible, skipped
+----------------------------------------------------------------------------------------------------
+Case (2, 4) impossible, skipped
+----------------------------------------------------------------------------------------------------
+Case (3, 4) already exists
+----------------------------------------------------------------------------------------------------
+Case (4, 4) impossible, skipped
+----------------------------------------------------------------------------------------------------
+Case (5, 4) impossible, skipped
+----------------------------------------------------------------------------------------------------
+Case (6, 4) impossible, skipped
+----------------------------------------------------------------------------------------------------
+Case (7, 4) impossible, skipped
+----------------------------------------------------------------------------------------------------
+Case (8, 4) impossible, skipped
+----------------------------------------------------------------------------------------------------
+Case (9, 4) impossible, skipped
+----------------------------------------------------------------------------------------------------
+Case (2, 5) impossible, skipped
+----------------------------------------------------------------------------------------------------
+Case (3, 5) already exists
+----------------------------------------------------------------------------------------------------
+Case (4, 5) already exists
+----------------------------------------------------------------------------------------------------
+Case (5, 5) impossible, skipped
+----------------------------------------------------------------------------------------------------
+Case (6, 5) impossible, skipped
+----------------------------------------------------------------------------------------------------
+Case (7, 5) impossible, skipped
+----------------------------------------------------------------------------------------------------
+Case (8, 5) impossible, skipped
+----------------------------------------------------------------------------------------------------
+Case (9, 5) impossible, skipped
+----------------------------------------------------------------------------------------------------
+Case (2, 6) impossible, skipped
+----------------------------------------------------------------------------------------------------
+Using license file /home/weit/gurobi.lic
+Academic license - for non-commercial use only
+Case (3, 6) NOT feasible
+----------------------------------------------------------------------------------------------------
+Case (4, 6) already exists
+----------------------------------------------------------------------------------------------------
+Case (5, 6) already exists
+----------------------------------------------------------------------------------------------------
+Case (6, 6) impossible, skipped
+----------------------------------------------------------------------------------------------------
+Case (7, 6) impossible, skipped
+----------------------------------------------------------------------------------------------------
+Case (8, 6) impossible, skipped
+----------------------------------------------------------------------------------------------------
+Case (9, 6) impossible, skipped
+----------------------------------------------------------------------------------------------------
+Case (2, 7) impossible, skipped
+----------------------------------------------------------------------------------------------------
+Case (3, 7) impossible, skipped
+----------------------------------------------------------------------------------------------------
+Case (4, 7) already exists
+----------------------------------------------------------------------------------------------------
+Case (5, 7) already exists
+----------------------------------------------------------------------------------------------------
+Case (6, 7) already exists
+----------------------------------------------------------------------------------------------------
+Case (7, 7) impossible, skipped
+----------------------------------------------------------------------------------------------------
+Case (8, 7) impossible, skipped
+----------------------------------------------------------------------------------------------------
+Case (9, 7) impossible, skipped
+----------------------------------------------------------------------------------------------------
+Case (2, 8) impossible, skipped
+----------------------------------------------------------------------------------------------------
+Case (3, 8) impossible, skipped
+----------------------------------------------------------------------------------------------------
+Case (4, 8) already exists
+----------------------------------------------------------------------------------------------------
+Case (5, 8) already exists
+----------------------------------------------------------------------------------------------------
+Case (6, 8) already exists
+----------------------------------------------------------------------------------------------------
+Case (7, 8) already exists
+----------------------------------------------------------------------------------------------------
+Case (8, 8) impossible, skipped
+----------------------------------------------------------------------------------------------------
+Case (9, 8) impossible, skipped
+----------------------------------------------------------------------------------------------------
+Case (2, 9) impossible, skipped
+----------------------------------------------------------------------------------------------------
+Case (3, 9) impossible, skipped
+----------------------------------------------------------------------------------------------------
+Case (4, 9) NOT feasible
+----------------------------------------------------------------------------------------------------
+Case (5, 9) already exists
+----------------------------------------------------------------------------------------------------
+Case (6, 9) already exists
+----------------------------------------------------------------------------------------------------
+Case (7, 9) already exists
+----------------------------------------------------------------------------------------------------
+Case (8, 9) already exists
+----------------------------------------------------------------------------------------------------
+Case (9, 9) impossible, skipped
+----------------------------------------------------------------------------------------------------
+Case (2, 10) impossible, skipped
+----------------------------------------------------------------------------------------------------
+Case (3, 10) impossible, skipped
+----------------------------------------------------------------------------------------------------
+Case (4, 10) impossible, skipped
+----------------------------------------------------------------------------------------------------
+Case (5, 10) already exists
+----------------------------------------------------------------------------------------------------
+Case (6, 10) already exists
+----------------------------------------------------------------------------------------------------
+Case (7, 10) already exists
+----------------------------------------------------------------------------------------------------
+Case (8, 10) already exists
+----------------------------------------------------------------------------------------------------
+Case (9, 10) already exists
+----------------------------------------------------------------------------------------------------
+0 cases, 0 full circuits to run : dict_keys([])
+******************** Submitting jobs ********************
+******************** Submitting jobs ********************
+/home/weit/anaconda3/envs/cc-env/lib/python3.7/site-packages/qiskit/providers/models/backendconfiguration.py:337: UserWarning: `dt` and `dtm` now have units of seconds(s) rather than nanoseconds(ns).
+  warnings.warn('`dt` and `dtm` now have units of seconds(s) rather '
+******************** Retrieving jobs ********************
+******************** Retrieving jobs ********************
+-------------------------------------------------- Evaluator --------------------------------------------------
+Existing cases: dict_keys([(2, 3), (3, 4), (3, 5), (4, 5), (4, 6), (5, 6), (4, 7), (5, 7), (6, 7), (4, 8), (5, 8), (6, 8), (7, 8), (5, 9), (6, 9), (7, 9), (8, 9), (5, 10), (6, 10), (7, 10), (8, 10), (9, 10)])
+-------------------------------------------------- Job Submittor --------------------------------------------------
+Existing cases: dict_keys([])
+Run cases: dict_keys([(2, 3), (3, 4), (3, 5), (4, 5), (4, 6), (5, 6), (4, 7), (5, 7), (6, 7), (4, 8), (5, 8), (6, 8), (7, 8), (5, 9), (6, 9), (7, 9), (8, 9), (5, 10), (6, 10), (7, 10), (8, 10), (9, 10)])
+**************************************************
+Case (2, 3)
+2 qubit circuit saturated shots = 3072, ΔH = 8.834e-04
+Cluster 0 saturated shots = 3072
+2 qubit circuit saturated shots = 6144, ΔH = 3.829e-04
+Cluster 1 saturated shots = 6144
+Case (3, 4)
+3 qubit circuit saturated shots = 7168, ΔH = 9.737e-04
+Cluster 0 saturated shots = 7168
+3 qubit circuit saturated shots = 5120, ΔH = 4.948e-04
+Cluster 1 saturated shots = 5120
+Case (3, 5)
+3 qubit circuit saturated shots = 4096, ΔH = 6.790e-04
+Cluster 0 saturated shots = 4096
+3 qubit circuit saturated shots = 5120, ΔH = 5.219e-04
+Cluster 1 saturated shots = 5120
+Case (4, 5)
+2 qubit circuit saturated shots = 6144, ΔH = 1.214e-04
+Cluster 0 saturated shots = 6144
+4 qubit circuit saturated shots = 9216, ΔH = 9.238e-04
+Cluster 1 saturated shots = 9216
+Case (4, 6)
+4 qubit circuit saturated shots = 10240, ΔH = 8.459e-04
+Cluster 0 saturated shots = 10240
+4 qubit circuit saturated shots = 6144, ΔH = 3.459e-04
+Cluster 1 saturated shots = 6144
+2 qubit circuit saturated shots = 3072, ΔH = 4.253e-04
+Cluster 2 saturated shots = 3072
+Case (5, 6)
+3 qubit circuit saturated shots = 3072, ΔH = 7.864e-04
+Cluster 0 saturated shots = 3072
+5 qubit circuit saturated shots = 14336, ΔH = 7.993e-04
+Cluster 1 saturated shots = 14336
+Case (4, 7)
+4 qubit circuit saturated shots = 7168, ΔH = 9.542e-04
+Cluster 0 saturated shots = 7168
+4 qubit circuit saturated shots = 9216, ΔH = 9.530e-04
+Cluster 1 saturated shots = 9216
+Case (5, 7)
+3 qubit circuit saturated shots = 3072, ΔH = 3.263e-04
+Cluster 0 saturated shots = 3072
+5 qubit circuit saturated shots = 12288, ΔH = 6.697e-04
+Cluster 1 saturated shots = 12288
+Case (6, 7)
+2 qubit circuit saturated shots = 3072, ΔH = 3.503e-04
+Cluster 0 saturated shots = 3072
+6 qubit circuit saturated shots = 26624, ΔH = 1.001e-03
+Cluster 1 saturated shots = 26624
+Case (4, 8)
+4 qubit circuit saturated shots = 10240, ΔH = 7.309e-04
+Cluster 0 saturated shots = 10240
+4 qubit circuit saturated shots = 10240, ΔH = 8.414e-04
+Cluster 1 saturated shots = 10240
+4 qubit circuit saturated shots = 8192, ΔH = 9.754e-04
+Cluster 2 saturated shots = 8192
+Case (5, 8)
+5 qubit circuit saturated shots = 16384, ΔH = 9.293e-04
+Cluster 0 saturated shots = 16384
+5 qubit circuit saturated shots = 17408, ΔH = 8.887e-04
+Cluster 1 saturated shots = 17408
+2 qubit circuit saturated shots = 3072, ΔH = 1.816e-04
+Cluster 2 saturated shots = 3072
+Case (6, 8)
+6 qubit circuit saturated shots = 27648, ΔH = 1.067e-03
+Cluster 0 saturated shots = 27648
+4 qubit circuit saturated shots = 7168, ΔH = 8.534e-04
+Cluster 1 saturated shots = 7168
+Case (7, 8)
+7 qubit circuit saturated shots = 57344, ΔH = 9.818e-04
+Cluster 0 saturated shots = 57344
+3 qubit circuit saturated shots = 6144, ΔH = 9.029e-04
+Cluster 1 saturated shots = 6144
+Case (5, 9)
+5 qubit circuit saturated shots = 19456, ΔH = 8.647e-04
+Cluster 0 saturated shots = 19456
+4 qubit circuit saturated shots = 9216, ΔH = 1.041e-03
+Cluster 1 saturated shots = 9216
+5 qubit circuit saturated shots = 10240, ΔH = 8.836e-04
+Cluster 2 saturated shots = 10240
+Case (6, 9)
+6 qubit circuit saturated shots = 43008, ΔH = 1.072e-03
+Cluster 0 saturated shots = 43008
+6 qubit circuit saturated shots = 35840, ΔH = 1.046e-03
+Cluster 1 saturated shots = 35840
+Case (7, 9)
+7 qubit circuit saturated shots = 55296, ΔH = 1.065e-03
+Cluster 0 saturated shots = 55296
+5 qubit circuit saturated shots = 12288, ΔH = 1.058e-03
+Cluster 1 saturated shots = 12288
+Case (8, 9)
+8 qubit circuit saturated shots = 144384, ΔH = 1.028e-03
+Cluster 0 saturated shots = 144384
+3 qubit circuit saturated shots = 7168, ΔH = 7.105e-04
+Cluster 1 saturated shots = 7168
+Case (5, 10)
+4 qubit circuit saturated shots = 11264, ΔH = 7.291e-04
+Cluster 0 saturated shots = 11264
+5 qubit circuit saturated shots = 8192, ΔH = 8.337e-04
+Cluster 1 saturated shots = 8192
+5 qubit circuit saturated shots = 12288, ΔH = 9.564e-04
+Cluster 2 saturated shots = 12288
+Case (6, 10)
+6 qubit circuit saturated shots = 26624, ΔH = 1.003e-03
+Cluster 0 saturated shots = 26624
+6 qubit circuit saturated shots = 30720, ΔH = 9.814e-04
+Cluster 1 saturated shots = 30720
+Case (7, 10)
+6 qubit circuit saturated shots = 28672, ΔH = 9.970e-04
+Cluster 0 saturated shots = 28672
+6 qubit circuit saturated shots = 19456, ΔH = 1.030e-03
+Cluster 1 saturated shots = 19456
+Case (8, 10)
+6 qubit circuit saturated shots = 25600, ΔH = 9.711e-04
+Cluster 0 saturated shots = 25600
+6 qubit circuit saturated shots = 30720, ΔH = 9.631e-04
+Cluster 1 saturated shots = 30720
+Case (9, 10)
+9 qubit circuit saturated shots = 235520, ΔH = 1.016e-03
+Cluster 0 saturated shots = 235520
+3 qubit circuit saturated shots = 6144, ΔH = 3.633e-04
+Cluster 1 saturated shots = 6144
+******************** Submitting jobs ********************
+Submitting job 1/7 5e1a8445a0ce000011bd9de2 --> 558 circuits, 900 * 8192 shots
+Submitting job 2/7 5e1a848ab423940011a83d2d --> 369 circuits, 900 * 8192 shots
+Submitting job 3/7 5e1a84bb429bb80012165ff5 --> 240 circuits, 900 * 8192 shots
+Submitting job 4/7 5e1a84e8de1c9f00118eb2bb --> 208 circuits, 900 * 8192 shots
+Submitting job 5/7 5e1a8532a0ce000011bd9de5 --> 377 circuits, 900 * 8192 shots
+Submitting job 6/7 5e1a855ce185630011942e27 --> 155 circuits, 900 * 8192 shots
+Submitting job 7/7 5e1a8567a0ce000011bd9de6 --> 22 circuits, 117 * 8192 shots
+/home/weit/anaconda3/envs/cc-env/lib/python3.7/site-packages/qiskit/providers/models/backendconfiguration.py:337: UserWarning: `dt` and `dtm` now have units of seconds(s) rather than nanoseconds(ns).
+  warnings.warn('`dt` and `dtm` now have units of seconds(s) rather '
+******************** Submitting jobs ********************
+Submitting job 1/3 5e1a861ae672bc0013871cee --> 900 circuits, 900 * 8192 shots
+Submitting job 2/3 5e1a86a8524c480011587345 --> 900 circuits, 900 * 8192 shots
+Submitting job 3/3 5e1a86edb423940011a83d30 --> 424 circuits, 424 * 8192 shots
+******************** Retrieving jobs ********************
+Retrieving job 1/7 5e1a8445a0ce000011bd9de2 --> 558 circuits, 900 * 8192 shots
+Retrieving job 2/7 5e1a848ab423940011a83d2d --> 369 circuits, 900 * 8192 shots
+Retrieving job 3/7 5e1a84bb429bb80012165ff5 --> 240 circuits, 900 * 8192 shots
+Retrieving job 4/7 5e1a84e8de1c9f00118eb2bb --> 208 circuits, 900 * 8192 shots
+Retrieving job 5/7 5e1a8532a0ce000011bd9de5 --> 377 circuits, 900 * 8192 shots
+Retrieving job 6/7 5e1a855ce185630011942e27 --> 155 circuits, 900 * 8192 shots
+Retrieving job 7/7 5e1a8567a0ce000011bd9de6 --> 22 circuits, 117 * 8192 shots
+******************** Retrieving jobs ********************
+Retrieving job 1/3 5e1a861ae672bc0013871cee --> 900 circuits, 900 * 8192 shots
+Retrieving job 2/3 5e1a86a8524c480011587345 --> 900 circuits, 900 * 8192 shots
+Retrieving job 3/3 5e1a86edb423940011a83d30 --> 424 circuits, 424 * 8192 shots
+Computing calibration matrix for 2 qubit circuit took 1.986e-04 seconds
+Computing calibration matrix for 2 qubit circuit took 5.412e-05 seconds
+Computing calibration matrix for 3 qubit circuit took 1.266e-04 seconds
+Computing calibration matrix for 3 qubit circuit took 1.183e-04 seconds
+Computing calibration matrix for 3 qubit circuit took 1.178e-04 seconds
+Computing calibration matrix for 3 qubit circuit took 1.302e-04 seconds
+Computing calibration matrix for 2 qubit circuit took 4.911e-05 seconds
+Computing calibration matrix for 4 qubit circuit took 4.747e-04 seconds
+Computing calibration matrix for 4 qubit circuit took 4.237e-04 seconds
+Computing calibration matrix for 4 qubit circuit took 4.144e-04 seconds
+Computing calibration matrix for 2 qubit circuit took 4.888e-05 seconds
+Computing calibration matrix for 3 qubit circuit took 1.204e-04 seconds
+Computing calibration matrix for 5 qubit circuit took 1.755e-03 seconds
+Computing calibration matrix for 4 qubit circuit took 4.215e-04 seconds
+Computing calibration matrix for 4 qubit circuit took 4.187e-04 seconds
+Computing calibration matrix for 3 qubit circuit took 1.321e-04 seconds
+Computing calibration matrix for 5 qubit circuit took 1.707e-03 seconds
+Computing calibration matrix for 2 qubit circuit took 4.983e-05 seconds
+Computing calibration matrix for 6 qubit circuit took 7.496e-03 seconds
+Computing calibration matrix for 4 qubit circuit took 4.306e-04 seconds
+Computing calibration matrix for 4 qubit circuit took 4.196e-04 seconds
+Computing calibration matrix for 4 qubit circuit took 4.199e-04 seconds
+Computing calibration matrix for 5 qubit circuit took 1.715e-03 seconds
+Computing calibration matrix for 5 qubit circuit took 1.754e-03 seconds
+Computing calibration matrix for 2 qubit circuit took 4.983e-05 seconds
+Computing calibration matrix for 6 qubit circuit took 7.562e-03 seconds
+Computing calibration matrix for 4 qubit circuit took 4.344e-04 seconds
+Computing calibration matrix for 7 qubit circuit took 3.330e-02 seconds
+Computing calibration matrix for 3 qubit circuit took 1.316e-04 seconds
+Computing calibration matrix for 5 qubit circuit took 1.722e-03 seconds
+Computing calibration matrix for 4 qubit circuit took 4.163e-04 seconds
+Computing calibration matrix for 5 qubit circuit took 1.748e-03 seconds
+Computing calibration matrix for 6 qubit circuit took 7.528e-03 seconds
+Computing calibration matrix for 6 qubit circuit took 7.465e-03 seconds
+Computing calibration matrix for 7 qubit circuit took 3.281e-02 seconds
+Computing calibration matrix for 5 qubit circuit took 1.776e-03 seconds
+Computing calibration matrix for 8 qubit circuit took 1.378e-01 seconds
+Computing calibration matrix for 3 qubit circuit took 1.333e-04 seconds
+Computing calibration matrix for 4 qubit circuit took 4.292e-04 seconds
+Computing calibration matrix for 5 qubit circuit took 1.773e-03 seconds
+Computing calibration matrix for 5 qubit circuit took 1.766e-03 seconds
+Computing calibration matrix for 6 qubit circuit took 7.358e-03 seconds
+Computing calibration matrix for 6 qubit circuit took 7.418e-03 seconds
+Computing calibration matrix for 6 qubit circuit took 7.411e-03 seconds
+Computing calibration matrix for 6 qubit circuit took 7.382e-03 seconds
+Computing calibration matrix for 6 qubit circuit took 7.555e-03 seconds
+Computing calibration matrix for 6 qubit circuit took 7.401e-03 seconds
+Computing calibration matrix for 9 qubit circuit took 5.993e-01 seconds
+Computing calibration matrix for 3 qubit circuit took 1.593e-04 seconds
+-------------------------------------------------- Reconstructor --------------------------------------------------
+Existing cases: dict_keys([])
+case (2, 3)
+Cut into  [2, 2] clusters
+qasm ΔH = 3.466e-04
+hw ΔH = 3.033e-02
+cutting ΔH = 4.680e-02
+mitigated_cutting ΔH = 1.724e-02
+Reconstruction output has 1 cases
+----------------------------------------------------------------------------------------------------
+case (3, 4)
+Cut into  [3, 3] clusters
+qasm ΔH = 7.191e-04
+hw ΔH = 1.109e-01
+cutting ΔH = 1.277e-01
+mitigated_cutting ΔH = 1.186e-01
+Reconstruction output has 2 cases
+----------------------------------------------------------------------------------------------------
+case (3, 5)
+Cut into  [3, 3] clusters
+qasm ΔH = 6.272e-04
+hw ΔH = 4.235e-02
+cutting ΔH = 6.850e-02
+mitigated_cutting ΔH = 1.111e-01
+Reconstruction output has 3 cases
+----------------------------------------------------------------------------------------------------
+case (4, 5)
+Cut into  [2, 4] clusters
+qasm ΔH = 6.272e-04
+hw ΔH = 4.235e-02
+cutting ΔH = 3.705e-02
+mitigated_cutting ΔH = 3.706e-02
+Reconstruction output has 4 cases
+----------------------------------------------------------------------------------------------------
+case (4, 6)
+Cut into  [4, 4, 2] clusters
+qasm ΔH = 7.418e-04
+hw ΔH = 2.230e-01
+cutting ΔH = 1.672e-01
+mitigated_cutting ΔH = 2.183e-01
+Reconstruction output has 5 cases
+----------------------------------------------------------------------------------------------------
+case (5, 6)
+Cut into  [3, 5] clusters
+qasm ΔH = 7.418e-04
+hw ΔH = 2.230e-01
+cutting ΔH = 3.350e-01
+mitigated_cutting ΔH = 4.273e-01
+Reconstruction output has 6 cases
+----------------------------------------------------------------------------------------------------
+case (4, 7)
+Cut into  [4, 4] clusters
+qasm ΔH = 1.172e-03
+hw ΔH = 4.354e-01
+cutting ΔH = 1.862e-01
+mitigated_cutting ΔH = 1.602e-01
+Reconstruction output has 7 cases
+----------------------------------------------------------------------------------------------------
+case (5, 7)
+Cut into  [3, 5] clusters
+qasm ΔH = 1.172e-03
+hw ΔH = 4.354e-01
+cutting ΔH = 1.172e-01
+mitigated_cutting ΔH = 8.082e-02
+Reconstruction output has 8 cases
+----------------------------------------------------------------------------------------------------
+case (6, 7)
+Cut into  [2, 6] clusters
+qasm ΔH = 1.172e-03
+hw ΔH = 4.354e-01
+cutting ΔH = 1.584e-01
+mitigated_cutting ΔH = 1.412e-01
+Reconstruction output has 9 cases
+----------------------------------------------------------------------------------------------------
+case (4, 8)
+Cut into  [4, 4, 4] clusters
+qasm ΔH = 9.301e-04
+hw ΔH = 3.418e-01
+cutting ΔH = 2.745e-01
+mitigated_cutting ΔH = 3.673e-01
+Reconstruction output has 10 cases
+----------------------------------------------------------------------------------------------------
+case (5, 8)
+Cut into  [5, 5, 2] clusters
+qasm ΔH = 9.301e-04
+hw ΔH = 3.418e-01
+cutting ΔH = 3.507e-01
+mitigated_cutting ΔH = 4.895e-01
+Reconstruction output has 11 cases
+----------------------------------------------------------------------------------------------------
+case (6, 8)
+Cut into  [6, 4] clusters
+qasm ΔH = 9.301e-04
+hw ΔH = 3.418e-01
+cutting ΔH = 3.467e-01
+mitigated_cutting ΔH = 4.030e-01
+Reconstruction output has 12 cases
+----------------------------------------------------------------------------------------------------
+case (7, 8)
+Cut into  [7, 3] clusters
+qasm ΔH = 9.301e-04
+hw ΔH = 3.418e-01
+cutting ΔH = 3.309e-01
+mitigated_cutting ΔH = 4.013e-01
+Reconstruction output has 13 cases
+----------------------------------------------------------------------------------------------------
+case (5, 9)
+Cut into  [5, 4, 5] clusters
+qasm ΔH = 8.831e-04
+hw ΔH = 4.120e-01
+cutting ΔH = 3.009e-01
+mitigated_cutting ΔH = 3.861e-01
+Reconstruction output has 14 cases
+----------------------------------------------------------------------------------------------------
+case (6, 9)
+Cut into  [6, 6] clusters
+qasm ΔH = 8.831e-04
+hw ΔH = 4.120e-01
+cutting ΔH = 4.886e-01
+mitigated_cutting ΔH = 5.562e-01
+Reconstruction output has 15 cases
+----------------------------------------------------------------------------------------------------
+case (7, 9)
+Cut into  [7, 5] clusters
+qasm ΔH = 8.831e-04
+hw ΔH = 4.120e-01
+cutting ΔH = 3.839e-01
+mitigated_cutting ΔH = 4.972e-01
+Reconstruction output has 16 cases
+----------------------------------------------------------------------------------------------------
+case (8, 9)
+Cut into  [8, 3] clusters
+qasm ΔH = 8.831e-04
+hw ΔH = 4.120e-01
+cutting ΔH = 3.726e-01
+mitigated_cutting ΔH = 4.247e-01
+Reconstruction output has 17 cases
+----------------------------------------------------------------------------------------------------
+case (5, 10)
+Cut into  [4, 5, 5] clusters
+qasm ΔH = 1.204e-03
+hw ΔH = 5.978e-01
+cutting ΔH = 4.465e-01
+mitigated_cutting ΔH = 4.605e-01
+Reconstruction output has 18 cases
+----------------------------------------------------------------------------------------------------
+case (6, 10)
+Cut into  [6, 6] clusters
+qasm ΔH = 1.204e-03
+hw ΔH = 5.978e-01
+cutting ΔH = 4.721e-01
+mitigated_cutting ΔH = 5.335e-01
+Reconstruction output has 19 cases
+----------------------------------------------------------------------------------------------------
+case (7, 10)
+Cut into  [6, 6] clusters
+qasm ΔH = 1.204e-03
+hw ΔH = 5.978e-01
+cutting ΔH = 5.086e-01
+mitigated_cutting ΔH = 6.470e-01
+Reconstruction output has 20 cases
+----------------------------------------------------------------------------------------------------
+case (8, 10)
+Cut into  [6, 6] clusters
+qasm ΔH = 1.204e-03
+hw ΔH = 5.978e-01
+cutting ΔH = 4.442e-01
+mitigated_cutting ΔH = 4.827e-01
+Reconstruction output has 21 cases
+----------------------------------------------------------------------------------------------------
+case (9, 10)
+Cut into  [9, 3] clusters
+qasm ΔH = 1.204e-03
+hw ΔH = 5.978e-01
+cutting ΔH = 4.582e-01
+mitigated_cutting ΔH = 5.003e-01
+Reconstruction output has 22 cases
+----------------------------------------------------------------------------------------------------
+-------------------------------------------------- Evaluator --------------------------------------------------
+Existing cases: dict_keys([(2, 3), (3, 4), (3, 5), (4, 5), (4, 6), (5, 6), (4, 7), (5, 7), (6, 7), (4, 8), (5, 8), (6, 8), (7, 8), (5, 9), (6, 9), (7, 9), (8, 9), (5, 10), (6, 10), (7, 10), (8, 10), (9, 10)])
+-------------------------------------------------- Job Submittor --------------------------------------------------
+Existing cases: dict_keys([(2, 3), (3, 4), (3, 5), (4, 5), (4, 6), (5, 6), (4, 7), (5, 7), (6, 7), (4, 8), (5, 8), (6, 8), (7, 8), (5, 9), (6, 9), (7, 9), (8, 9), (5, 10), (6, 10), (7, 10), (8, 10), (9, 10)])
+Run cases: dict_keys([])
+**************************************************
+******************** Submitting jobs ********************
+******************** Submitting jobs ********************
+/home/weit/anaconda3/envs/cc-env/lib/python3.7/site-packages/qiskit/providers/models/backendconfiguration.py:337: UserWarning: `dt` and `dtm` now have units of seconds(s) rather than nanoseconds(ns).
+  warnings.warn('`dt` and `dtm` now have units of seconds(s) rather '
+******************** Retrieving jobs ********************
+******************** Retrieving jobs ********************
+-------------------------------------------------- Reconstructor --------------------------------------------------
+Existing cases: dict_keys([(2, 3), (3, 4), (3, 5), (4, 5), (4, 6), (5, 6), (4, 7), (5, 7), (6, 7), (4, 8), (5, 8), (6, 8), (7, 8), (5, 9), (6, 9), (7, 9), (8, 9), (5, 10), (6, 10), (7, 10), (8, 10), (9, 10)])
+-------------------------------------------------- Plot --------------------------------------------------
+Processing ./hardware/benchmark_data/supremacy_ibmq_boeblingen/hw_plotter_input_ibmq_boeblingen_saturated.p
+case (2, 3): ce percentage reduction = 4.585, fidelity improvement = -0.000, reconstruction time: 5.393e-04
+case (3, 4): ce percentage reduction = -13.762, fidelity improvement = 0.000, reconstruction time: 1.763e-03
+case (3, 5): ce percentage reduction = -345.249, fidelity improvement = 0.000, reconstruction time: 5.267e-04
+case (4, 5): ce percentage reduction = -48.496, fidelity improvement = 0.000, reconstruction time: 5.274e-04
+case (4, 6): ce percentage reduction = 5.701, fidelity improvement = 0.000, reconstruction time: 3.253e-02
+case (5, 6): ce percentage reduction = -84.625, fidelity improvement = -0.000, reconstruction time: 2.314e-03
+case (4, 7): ce percentage reduction = 64.153, fidelity improvement = -0.000, reconstruction time: 8.602e-04
+case (5, 7): ce percentage reduction = 81.912, fidelity improvement = 0.000, reconstruction time: 8.807e-04
+case (6, 7): ce percentage reduction = 68.392, fidelity improvement = 0.000, reconstruction time: 9.885e-04
+case (4, 8): ce percentage reduction = -3.360, fidelity improvement = -0.000, reconstruction time: 3.745e-02
+case (5, 8): ce percentage reduction = -37.749, fidelity improvement = 0.000, reconstruction time: 4.279e-02
+case (6, 8): ce percentage reduction = -13.386, fidelity improvement = -0.000, reconstruction time: 3.856e-03
+case (7, 8): ce percentage reduction = -12.934, fidelity improvement = 0.000, reconstruction time: 5.048e-03
+case (5, 9): ce percentage reduction = 10.513, fidelity improvement = -0.000, reconstruction time: 2.079e-01
+case (6, 9): ce percentage reduction = -28.916, fidelity improvement = 0.000, reconstruction time: 1.893e-02
+case (7, 9): ce percentage reduction = -15.243, fidelity improvement = 0.000, reconstruction time: 2.011e-02
+case (8, 9): ce percentage reduction = 1.553, fidelity improvement = -0.000, reconstruction time: 7.034e-03
+case (5, 10): ce percentage reduction = 22.970, fidelity improvement = 0.000, reconstruction time: 5.537e-02
+case (6, 10): ce percentage reduction = 10.753, fidelity improvement = 0.000, reconstruction time: 7.274e-03
+case (7, 10): ce percentage reduction = -8.227, fidelity improvement = -0.000, reconstruction time: 7.154e-03
+case (8, 10): ce percentage reduction = 19.255, fidelity improvement = 0.000, reconstruction time: 7.158e-03
+case (9, 10): ce percentage reduction = 16.313, fidelity improvement = 0.000, reconstruction time: 1.559e-02
+************************* Best Cases *************************
+{'ce_percent': 4.58475762596056, 'reconstructor_time': 0.0005393028259277344, 'best_case': (2, 3), 'hw_ce': 0.018065078782629806, 'cutting_ce': 0.017236838705507403}
+{'ce_percent': -13.762047547333898, 'reconstructor_time': 0.0017631053924560547, 'best_case': (3, 4), 'hw_ce': 0.10427062652756254, 'cutting_ce': 0.11862039972818865}
+{'ce_percent': -48.49633784516243, 'reconstructor_time': 0.0005273818969726562, 'best_case': (4, 5), 'hw_ce': 0.02495570433852277, 'cutting_ce': 0.03705830702617263}
+{'ce_percent': 5.7009830907890064, 'reconstructor_time': 0.03252720832824707, 'best_case': (4, 6), 'hw_ce': 0.23145983319407323, 'cutting_ce': 0.21826434724171068}
+{'ce_percent': 81.91236059813157, 'reconstructor_time': 0.0008807182312011719, 'best_case': (5, 7), 'hw_ce': 0.4468084420983711, 'cutting_ce': 0.08081709982385946}
+{'ce_percent': -3.3601541598037743, 'reconstructor_time': 0.03744673728942871, 'best_case': (4, 8), 'hw_ce': 0.35538125282557426, 'cutting_ce': 0.36732261077555556}
+{'ce_percent': 10.513112537105444, 'reconstructor_time': 0.20790314674377441, 'best_case': (5, 9), 'hw_ce': 0.43142785194390676, 'cutting_ce': 0.3860713563526272}
+{'ce_percent': 22.96966289325058, 'reconstructor_time': 0.05537271499633789, 'best_case': (5, 10), 'hw_ce': 0.5978095883854257, 'cutting_ce': 0.4604947411897646}
+**************************************************
+Processing ./hardware/benchmark_data/supremacy_ibmq_boeblingen/hw_plotter_input_ibmq_boeblingen_sametotal.p
+case (2, 3): ce percentage reduction = 7.654, fidelity improvement = -0.000, reconstruction time: 5.815e-04
+case (3, 4): ce percentage reduction = -1.905, fidelity improvement = 0.000, reconstruction time: 1.760e-03
+case (3, 5): ce percentage reduction = -43.860, fidelity improvement = 0.000, reconstruction time: 5.229e-04
+case (4, 5): ce percentage reduction = -2865.513, fidelity improvement = 0.000, reconstruction time: 5.314e-04
+case (4, 6): ce percentage reduction = -111.659, fidelity improvement = 0.000, reconstruction time: 3.232e-02
+case (5, 6): ce percentage reduction = -106.539, fidelity improvement = -0.000, reconstruction time: 2.320e-03
+case (4, 7): ce percentage reduction = 28.128, fidelity improvement = 0.000, reconstruction time: 8.633e-04
+case (5, 7): ce percentage reduction = -19.027, fidelity improvement = -0.000, reconstruction time: 8.759e-04
+case (6, 7): ce percentage reduction = 7.768, fidelity improvement = 0.000, reconstruction time: 9.992e-04
+case (4, 8): ce percentage reduction = -34.197, fidelity improvement = 0.000, reconstruction time: 3.727e-02
+case (5, 8): ce percentage reduction = -27.097, fidelity improvement = 0.000, reconstruction time: 4.243e-02
+case (6, 8): ce percentage reduction = -59.846, fidelity improvement = 0.000, reconstruction time: 3.868e-03
+case (7, 8): ce percentage reduction = -14.778, fidelity improvement = 0.000, reconstruction time: 5.051e-03
+case (5, 9): ce percentage reduction = -1.959, fidelity improvement = 0.000, reconstruction time: 2.069e-01
+case (6, 9): ce percentage reduction = 4.563, fidelity improvement = -0.000, reconstruction time: 1.888e-02
+case (7, 9): ce percentage reduction = 12.256, fidelity improvement = 0.000, reconstruction time: 2.032e-02
+case (8, 9): ce percentage reduction = -5.910, fidelity improvement = 0.000, reconstruction time: 7.015e-03
+case (5, 10): ce percentage reduction = 0.977, fidelity improvement = 0.000, reconstruction time: 5.462e-02
+case (6, 10): ce percentage reduction = 10.180, fidelity improvement = -0.000, reconstruction time: 7.249e-03
+case (7, 10): ce percentage reduction = 16.157, fidelity improvement = -0.000, reconstruction time: 7.123e-03
+case (8, 10): ce percentage reduction = 11.471, fidelity improvement = 0.000, reconstruction time: 7.161e-03
+case (9, 10): ce percentage reduction = 5.093, fidelity improvement = -0.000, reconstruction time: 1.568e-02
+************************* Best Cases *************************
+{'ce_percent': 7.654347188593996, 'reconstructor_time': 0.0005815029144287109, 'best_case': (2, 3), 'hw_ce': 0.018065078782629806, 'cutting_ce': 0.01668231493271429}
+{'ce_percent': -1.9054911850337097, 'reconstructor_time': 0.0017600059509277344, 'best_case': (3, 4), 'hw_ce': 0.10427062652756254, 'cutting_ce': 0.10625749412462467}
+{'ce_percent': -43.86008172490012, 'reconstructor_time': 0.0005228519439697266, 'best_case': (3, 5), 'hw_ce': 0.02495570433852277, 'cutting_ce': 0.035901296656423304}
+{'ce_percent': -106.53893985534903, 'reconstructor_time': 0.002319812774658203, 'best_case': (5, 6), 'hw_ce': 0.23145983319407323, 'cutting_ce': 0.4780546856699981}
+{'ce_percent': 28.12754762002377, 'reconstructor_time': 0.0008633136749267578, 'best_case': (4, 7), 'hw_ce': 0.4468084420983711, 'cutting_ce': 0.32113218477686545}
+{'ce_percent': -14.77849390358728, 'reconstructor_time': 0.005051136016845703, 'best_case': (7, 8), 'hw_ce': 0.35538125282557426, 'cutting_ce': 0.40790124960889385}
+{'ce_percent': 12.256218564187323, 'reconstructor_time': 0.020315170288085938, 'best_case': (7, 9), 'hw_ce': 0.43142785194390676, 'cutting_ce': 0.37855111146288306}
+{'ce_percent': 16.15679698487835, 'reconstructor_time': 0.00712275505065918, 'best_case': (7, 10), 'hw_ce': 0.5978095883854257, 'cutting_ce': 0.5012227068338556}
+**************************************************
+----------------------------------------------------------------------------------------------------
+Processing ./hardware/benchmark_data/supremacy_ibmq_boeblingen/hw_plotter_input_ibmq_boeblingen_saturated.p
+case (2, 3): ce percentage reduction = -54.272, fidelity improvement = 0.000, reconstruction time: 5.393e-04
+case (3, 4): ce percentage reduction = -15.101, fidelity improvement = 0.000, reconstruction time: 1.763e-03
+case (3, 5): ce percentage reduction = -61.743, fidelity improvement = 0.000, reconstruction time: 5.267e-04
+case (4, 5): ce percentage reduction = 12.506, fidelity improvement = 0.000, reconstruction time: 5.274e-04
+case (4, 6): ce percentage reduction = 25.037, fidelity improvement = -0.000, reconstruction time: 3.253e-02
+case (5, 6): ce percentage reduction = -50.202, fidelity improvement = -0.000, reconstruction time: 2.314e-03
+case (4, 7): ce percentage reduction = 57.239, fidelity improvement = -0.000, reconstruction time: 8.602e-04
+case (5, 7): ce percentage reduction = 73.088, fidelity improvement = 0.000, reconstruction time: 8.807e-04
+case (6, 7): ce percentage reduction = 63.622, fidelity improvement = 0.000, reconstruction time: 9.885e-04
+case (4, 8): ce percentage reduction = 19.669, fidelity improvement = 0.000, reconstruction time: 3.745e-02
+case (5, 8): ce percentage reduction = -2.605, fidelity improvement = 0.000, reconstruction time: 4.279e-02
+case (6, 8): ce percentage reduction = -1.452, fidelity improvement = 0.000, reconstruction time: 3.856e-03
+case (7, 8): ce percentage reduction = 3.167, fidelity improvement = 0.000, reconstruction time: 5.048e-03
+case (5, 9): ce percentage reduction = 26.975, fidelity improvement = 0.000, reconstruction time: 2.079e-01
+case (6, 9): ce percentage reduction = -18.593, fidelity improvement = -0.000, reconstruction time: 1.893e-02
+case (7, 9): ce percentage reduction = 6.823, fidelity improvement = -0.000, reconstruction time: 2.011e-02
+case (8, 9): ce percentage reduction = 9.562, fidelity improvement = 0.000, reconstruction time: 7.034e-03
+case (5, 10): ce percentage reduction = 25.313, fidelity improvement = 0.000, reconstruction time: 5.537e-02
+case (6, 10): ce percentage reduction = 21.021, fidelity improvement = 0.000, reconstruction time: 7.274e-03
+case (7, 10): ce percentage reduction = 14.923, fidelity improvement = -0.000, reconstruction time: 7.154e-03
+case (8, 10): ce percentage reduction = 25.692, fidelity improvement = -0.000, reconstruction time: 7.158e-03
+case (9, 10): ce percentage reduction = 23.360, fidelity improvement = 0.000, reconstruction time: 1.559e-02
+************************* Best Cases *************************
+{'ce_percent': -54.27157549571599, 'reconstructor_time': 0.0005393028259277344, 'best_case': (2, 3), 'hw_ce': 0.030333743936239235, 'cutting_ce': 0.046796344677272485}
+{'ce_percent': -15.100917632360913, 'reconstructor_time': 0.0017631053924560547, 'best_case': (3, 4), 'hw_ce': 0.11093750185333077, 'cutting_ce': 0.12769008263160112}
+{'ce_percent': 12.506471632367735, 'reconstructor_time': 0.0005273818969726562, 'best_case': (4, 5), 'hw_ce': 0.04235110023038763, 'cutting_ce': 0.037054471894078574}
+{'ce_percent': 25.036989962371305, 'reconstructor_time': 0.03252720832824707, 'best_case': (4, 6), 'hw_ce': 0.22301335691794252, 'cutting_ce': 0.16717752513164996}
+{'ce_percent': 73.08765778117234, 'reconstructor_time': 0.0008807182312011719, 'best_case': (5, 7), 'hw_ce': 0.4353678820394115, 'cutting_ce': 0.11716769432530832}
+{'ce_percent': 19.668644880813602, 'reconstructor_time': 0.03744673728942871, 'best_case': (4, 8), 'hw_ce': 0.34176595205472726, 'cutting_ce': 0.2745452206215513}
+{'ce_percent': 26.97501587273454, 'reconstructor_time': 0.20790314674377441, 'best_case': (5, 9), 'hw_ce': 0.41201253234972623, 'cutting_ce': 0.30087208635073204}
+{'ce_percent': 25.692034805509678, 'reconstructor_time': 0.007157802581787109, 'best_case': (8, 10), 'hw_ce': 0.5978095883854257, 'cutting_ce': 0.44422014086676803}
+**************************************************
+Processing ./hardware/benchmark_data/supremacy_ibmq_boeblingen/hw_plotter_input_ibmq_boeblingen_sametotal.p
+case (2, 3): ce percentage reduction = 31.880, fidelity improvement = 0.000, reconstruction time: 5.815e-04
+case (3, 4): ce percentage reduction = 56.773, fidelity improvement = -0.000, reconstruction time: 1.760e-03
+case (3, 5): ce percentage reduction = 42.993, fidelity improvement = 0.000, reconstruction time: 5.229e-04
+case (4, 5): ce percentage reduction = -1417.396, fidelity improvement = 0.000, reconstruction time: 5.314e-04
+case (4, 6): ce percentage reduction = -123.988, fidelity improvement = -0.000, reconstruction time: 3.232e-02
+case (5, 6): ce percentage reduction = -123.625, fidelity improvement = 0.000, reconstruction time: 2.320e-03
+case (4, 7): ce percentage reduction = 46.040, fidelity improvement = 0.000, reconstruction time: 8.633e-04
+case (5, 7): ce percentage reduction = -29.046, fidelity improvement = 0.000, reconstruction time: 8.759e-04
+case (6, 7): ce percentage reduction = -1.586, fidelity improvement = -0.000, reconstruction time: 9.992e-04
+case (4, 8): ce percentage reduction = -9.916, fidelity improvement = 0.000, reconstruction time: 3.727e-02
+case (5, 8): ce percentage reduction = -9.364, fidelity improvement = -0.000, reconstruction time: 4.243e-02
+case (6, 8): ce percentage reduction = -37.892, fidelity improvement = 0.000, reconstruction time: 3.868e-03
+case (7, 8): ce percentage reduction = -4.101, fidelity improvement = 0.000, reconstruction time: 5.051e-03
+case (5, 9): ce percentage reduction = 16.656, fidelity improvement = -0.000, reconstruction time: 2.069e-01
+case (6, 9): ce percentage reduction = 6.747, fidelity improvement = 0.000, reconstruction time: 1.888e-02
+case (7, 9): ce percentage reduction = 17.348, fidelity improvement = 0.000, reconstruction time: 2.032e-02
+case (8, 9): ce percentage reduction = 4.799, fidelity improvement = 0.000, reconstruction time: 7.015e-03
+case (5, 10): ce percentage reduction = 11.430, fidelity improvement = -0.000, reconstruction time: 5.462e-02
+case (6, 10): ce percentage reduction = 15.059, fidelity improvement = 0.000, reconstruction time: 7.249e-03
+case (7, 10): ce percentage reduction = 20.348, fidelity improvement = -0.000, reconstruction time: 7.123e-03
+case (8, 10): ce percentage reduction = 19.192, fidelity improvement = -0.000, reconstruction time: 7.161e-03
+case (9, 10): ce percentage reduction = 16.010, fidelity improvement = -0.000, reconstruction time: 1.568e-02
+************************* Best Cases *************************
+{'ce_percent': 31.880444984989857, 'reconstructor_time': 0.0005815029144287109, 'best_case': (2, 3), 'hw_ce': 0.030333743936239235, 'cutting_ce': 0.02066321138875879}
+{'ce_percent': 56.7725788762025, 'reconstructor_time': 0.0017600059509277344, 'best_case': (3, 4), 'hw_ce': 0.11093750185333077, 'cutting_ce': 0.04795542111035994}
+{'ce_percent': 42.992822738571284, 'reconstructor_time': 0.0005228519439697266, 'best_case': (3, 5), 'hw_ce': 0.04235110023038763, 'cutting_ce': 0.02414316678050242}
+{'ce_percent': -123.62490711592477, 'reconstructor_time': 0.002319812774658203, 'best_case': (5, 6), 'hw_ce': 0.22301335691794252, 'cutting_ce': 0.4987134122638548}
+{'ce_percent': 46.03980860131224, 'reconstructor_time': 0.0008633136749267578, 'best_case': (4, 7), 'hw_ce': 0.4353678820394115, 'cutting_ce': 0.2349253424368796}
+{'ce_percent': -4.101378778721193, 'reconstructor_time': 0.005051136016845703, 'best_case': (7, 8), 'hw_ce': 0.34176595205472726, 'cutting_ce': 0.3557830682851943}
+{'ce_percent': 17.347798375422197, 'reconstructor_time': 0.020315170288085938, 'best_case': (7, 9), 'hw_ce': 0.41201253234972623, 'cutting_ce': 0.3405374289562246}
+{'ce_percent': 20.34832608326586, 'reconstructor_time': 0.00712275505065918, 'best_case': (7, 10), 'hw_ce': 0.5978095883854257, 'cutting_ce': 0.4761653439837299}
+**************************************************
+----------------------------------------------------------------------------------------------------
