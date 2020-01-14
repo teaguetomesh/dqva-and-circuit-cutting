@@ -41,6 +41,7 @@ def find_saturation(ce_l,derivative_thresholds,shots_increment):
 
         if abs(first_derivative)<first_derivative_threshold and abs(second_derivative)<second_derivative_threshold:
             break
+    cutoff += 1
     return cutoff, abs(first_derivative), abs(second_derivative)
 
 if __name__ == '__main__':

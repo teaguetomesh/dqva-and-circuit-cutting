@@ -34,6 +34,8 @@ if __name__ == '__main__':
     parser.add_argument('--min-qubit', metavar='N', type=int,help='Benchmark minimum number of HW qubits')
     parser.add_argument('--max-qubit', metavar='N', type=int,help='Benchmark maximum number of HW qubits')
     parser.add_argument('--max-clusters', metavar='N', type=int,help='max number of clusters to split into')
+    parser.add_argument('--min-size', metavar='N', type=int,help='Benchmark minimum circuit size')
+    parser.add_argument('--max-size', metavar='N', type=int,help='Benchmark maximum circuit size')
     parser.add_argument('--device-name', metavar='S',type=str,help='IBM device')
     parser.add_argument('--circuit-type', metavar='S', type=str,help='which circuit input file to run')
     args = parser.parse_args()
@@ -49,7 +51,7 @@ if __name__ == '__main__':
     evaluator_info = get_evaluator_info(circ=None,device_name=args.device_name,fields=['properties','device'])
     device_size = len(evaluator_info['properties'].qubits)
 
-    full_circuit_sizes = range(3,16)
+    full_circuit_sizes = range(args.min_size,args.max_size+1)
     cases_to_run = {}
     circ_dict = {}
     for full_circ_size in full_circuit_sizes:
@@ -84,9 +86,9 @@ if __name__ == '__main__':
     print('{:d} cases, {:d} full circuits to run : {}'.format(len(cases_to_run),len(circ_dict),cases_to_run.keys()))
     
     scheduler = Scheduler(circ_dict=circ_dict,device_name=args.device_name)
-    scheduler.run(real_device=True)
+    scheduler.run(real_device=False)
     tensored_mitigation = TensoredMitigation(circ_dict=circ_dict,device_name=args.device_name)
-    tensored_mitigation.run(real_device=True)
+    tensored_mitigation.run(real_device=False)
 
     scheduler.retrieve()
     tensored_mitigation.retrieve()

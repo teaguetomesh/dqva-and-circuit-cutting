@@ -69,9 +69,9 @@ if __name__ == '__main__':
                 circ_dict[key] = {'circ':mapped_circuit,'shots':cluster_shots}
 
     scheduler = Scheduler(circ_dict=circ_dict,device_name=args.device_name)
-    scheduler.run(real_device=True)
+    scheduler.run(real_device=False)
     tensored_mitigation = TensoredMitigation(circ_dict=mitigation_circ_dict,device_name=args.device_name)
-    tensored_mitigation.run(real_device=True)
+    tensored_mitigation.run(real_device=False)
 
     scheduler.retrieve()
     tensored_mitigation.retrieve()

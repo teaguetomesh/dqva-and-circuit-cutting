@@ -123,6 +123,20 @@ def cross_entropy(target,obs):
             h += p*np.log(p/q)
     return h
 
+def entropy(prob_dist):
+    epsilon = 1e-20
+    prob_dist = [abs(x) if x!=0 else epsilon for x in prob_dist]
+    sum_of_prob = sum(prob_dist)
+    prob_dist = [x/sum_of_prob for x in prob_dist]
+    assert abs(sum(prob_dist)-1) < 1e-10
+    h = 0
+    for p in prob_dist:
+        if p==0:
+            h += 0
+        else:
+            h -= p*np.log(p)
+    return h
+
 def fidelity(target,obs):
     assert len(target)==len(obs)
     epsilon = 1e-20
@@ -158,6 +172,7 @@ def get_circ_saturated_shots(circs,device_name):
     for circ_idx, circ in enumerate(circs):
         full_circ_size = len(circ.qubits)
         ground_truth = evaluate_circ(circ=circ,backend='statevector_simulator',evaluator_info=None,reverse=False)
+        ground_truth_entropy = entropy(prob_dist=ground_truth)
         shots_increment = 1024
         
         qasm_evaluator_info = get_evaluator_info(circ=circ,device_name=device_name,
@@ -165,29 +180,35 @@ def get_circ_saturated_shots(circs,device_name):
         qasm_evaluator_info['num_shots'] = shots_increment
         device_max_shots = qasm_evaluator_info['device'].configuration().max_shots
         device_max_experiments = int(qasm_evaluator_info['device'].configuration().max_experiments/3*2)
-        ce_l = []
-        counter = 1
-        accumulated_prob = [0 for i in range(np.power(2,len(circ.qubits)))]
-        while 1:
-            noiseless_prob_batch = evaluate_circ(circ=circ,backend='noiseless_qasm_simulator',evaluator_info=qasm_evaluator_info,reverse=False)
-            accumulated_prob = [(x*(counter-1)+y)/counter for x,y in zip(accumulated_prob,noiseless_prob_batch)]
-            assert abs(sum(accumulated_prob)-1)<1e-5
-            accumulated_ce = cross_entropy(target=ground_truth,obs=accumulated_prob)
-            ce_l.append(accumulated_ce)
-            if len(ce_l)>=3:
-                accumulated_shots = int((len(ce_l)-1)*shots_increment)
-                first_derivative = (ce_l[-1]+ce_l[-3])/(2*shots_increment)
-                second_derivative = (ce_l[-1]+ce_l[-3]-2*ce_l[-2])/(2*np.power(shots_increment,2))
-                if (abs(first_derivative)<1e-6 and abs(second_derivative) < 1e-10) or accumulated_shots/device_max_experiments/device_max_shots>1:
-                    saturated_shots.append(accumulated_shots)
-                    ground_truth = evaluate_circ(circ=circ,backend='statevector_simulator',evaluator_info=None,reverse=True)
-                    qasm_evaluator_info['num_shots'] = accumulated_shots
-                    saturated_prob = evaluate_circ(circ=circ,backend='noiseless_qasm_simulator',evaluator_info=qasm_evaluator_info,reverse=True)
-                    ground_truths.append(ground_truth)
-                    saturated_probs.append(saturated_prob)
-                    print('%d qubit circuit saturated shots = %d, \u0394H = %.3e'%(full_circ_size,accumulated_shots,ce_l[-2]))
-                    break
-            counter += 1
+        if ground_truth_entropy < 1e-10:
+            saturated_shot = max(1024,int(10*np.power(2,full_circ_size)))
+            saturated_shot = min(saturated_shot,int(device_max_experiments*device_max_shots))
+        else:
+            ce_l = []
+            counter = 1
+            accumulated_prob = [0 for i in range(np.power(2,len(circ.qubits)))]
+            while 1:
+                noiseless_prob_batch = evaluate_circ(circ=circ,backend='noiseless_qasm_simulator',evaluator_info=qasm_evaluator_info,reverse=False)
+                accumulated_prob = [(x*(counter-1)+y)/counter for x,y in zip(accumulated_prob,noiseless_prob_batch)]
+                assert abs(sum(accumulated_prob)-1)<1e-5
+                accumulated_ce = cross_entropy(target=ground_truth,obs=accumulated_prob)
+                ce_l.append(accumulated_ce)
+                if len(ce_l)>=3:
+                    accumulated_shots = int((len(ce_l)-1)*shots_increment)
+                    first_derivative = (ce_l[-1]+ce_l[-3])/(2*shots_increment)
+                    second_derivative = (ce_l[-1]+ce_l[-3]-2*ce_l[-2])/(2*np.power(shots_increment,2))
+                    if (abs(first_derivative)<1e-5 and abs(second_derivative) < 1e-5) or accumulated_shots/device_max_experiments/device_max_shots>1:
+                        saturated_shot = accumulated_shots
+                        break
+                counter += 1
+        ground_truth = evaluate_circ(circ=circ,backend='statevector_simulator',evaluator_info=None,reverse=True)
+        qasm_evaluator_info['num_shots'] = saturated_shot
+        saturated_prob = evaluate_circ(circ=circ,backend='noiseless_qasm_simulator',evaluator_info=qasm_evaluator_info,reverse=True)
+        saturated_ce = cross_entropy(target=ground_truth,obs=saturated_prob)
+        saturated_shots.append(saturated_shot)
+        ground_truths.append(ground_truth)
+        saturated_probs.append(saturated_prob)
+        print('%d qubit circuit saturated shots = %d, \u0394H = %.3e'%(full_circ_size,saturated_shot,saturated_ce))
         
     return saturated_shots, ground_truths, saturated_probs
 
