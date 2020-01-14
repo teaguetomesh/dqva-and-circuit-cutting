@@ -33,7 +33,7 @@ class Scheduler:
         self.device_name = device_name
         self.check_input()
         evaluator_info = get_evaluator_info(circ=None,device_name=self.device_name,fields=['properties','device'])
-        self.schedule = self.get_schedule(device_max_shots=min(evaluator_info['device'].configuration().max_shots,8192),
+        self.schedule = self.get_schedule(device_max_shots=evaluator_info['device'].configuration().max_shots,
         device_max_experiments=evaluator_info['device'].configuration().max_experiments)
 
     def check_input(self):
