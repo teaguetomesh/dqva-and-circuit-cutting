@@ -29,12 +29,13 @@ if __name__ == '__main__':
     terminal_status = [JobStatus['DONE'],JobStatus['CANCELLED'],JobStatus['ERROR']]
 
     time_now = datetime.datetime.now()
+    time_delta = format_time(hours=24)
 
     for x in provider.backends():
         if 'qasm' not in str(x) and 'tokyo' not in str(x):
             evaluator_info = get_evaluator_info(circ=None,device_name=str(x),fields=['properties'])
             num_qubits = len(evaluator_info['properties'].qubits)
-            if num_qubits>=20:
+            if num_qubits==20:
                 print('%s: %d-qubit, max %d jobs * %d shots'%(x,num_qubits,x.configuration().max_experiments,x.configuration().max_shots))
                 print('Most recently QUEUED:')
                 limit = 100 if str(x)=='ibmq_boeblingen' else 5
@@ -46,7 +47,12 @@ if __name__ == '__main__':
                 print('Total queued = {:d}. Time stamp: {}'.format(total_queued,time_now))
                 print('Most recently DONE:')
                 for job in x.jobs(limit=5,status=JobStatus['DONE']):
-                    print(job.creation_date(),job.status(),job.error_message(),job.job_id())
+                    if job.creation_date()>time_delta:
+                        print(job.creation_date(),job.status(),job.error_message(),job.job_id())
+                print('Most recently ERROR:')
+                for job in x.jobs(limit=5,status=JobStatus['ERROR']):
+                    if job.creation_date()>time_delta:
+                        print(job.creation_date(),job.status(),job.error_message(),job.job_id())
                 if args.cancel_jobs:
                     [print('Warning!!! Cancelling jobs! 5 seconds count down') for i in range(5)]
                     time.sleep(5)
