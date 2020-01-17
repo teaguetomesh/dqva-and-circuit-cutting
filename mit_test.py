@@ -3,20 +3,55 @@ from qiskit.ignis.mitigation.measurement import (complete_meas_cal, tensored_mea
 from qiskit.compiler import transpile, assemble
 from qiskit.converters import circuit_to_dag, dag_to_circuit
 from qiskit.extensions.standard import HGate, SGate, SdgGate, XGate, RXGate, RYGate, RZGate
+from qiskit.tools.visualization import plot_histogram
+from qiskit.providers.aer import noise
 from utils.helper_fun import generate_circ, get_evaluator_info, reverseBits
 from utils.mitigation import TensoredMitigation
 from utils.submission import Scheduler
 import copy
 import math
 
-full_circ_size = 5
-circ = generate_circ(full_circ_size=full_circ_size,circuit_type='supremacy')
+# Make a 3Q GHZ state
+qr = QuantumRegister(5)
+cr = ClassicalRegister(5)
+ghz = QuantumCircuit(qr, cr)
+ghz.h(qr[2])
+ghz.cx(qr[2], qr[3])
+ghz.cx(qr[3], qr[4])
+ghz.measure(qr,cr)
+print(ghz)
+
+# Generate a noise model for the 5 qubits
+noise_model = noise.NoiseModel()
+for qi in range(5):
+    read_err = noise.errors.readout_error.ReadoutError([[0.9, 0.1],[0.25,0.75]])
+    noise_model.add_readout_error(read_err, [qi])
+
+backend = Aer.get_backend('qasm_simulator')
+job = execute([ghz], backend=backend, shots=5000, noise_model=noise_model)
+results = job.result()
+
+# Results without mitigation
+raw_counts = results.get_counts()
+
+# Generate the calibration circuits
+mit_pattern = [[0,1,2,3,4]]
+meas_calibs, state_labels = tensored_meas_cal(mit_pattern=mit_pattern, qr=qr, circlabel='mcal')
+# Execute the calibration circuits
+backend = Aer.get_backend('qasm_simulator')
+job = execute(meas_calibs, backend=backend, shots=5000, noise_model=noise_model)
+cal_results = job.result()
+meas_fitter = TensoredMeasFitter(cal_results, mit_pattern=mit_pattern)
+
+# Get the filter object
+meas_filter = meas_fitter.filter
+
+# Results with mitigation
+mitigated_results = meas_filter.apply(results)
+mitigated_counts = mitigated_results.get_counts(0)
+
 device_name = 'ibmq_boeblingen'
-evaluator_info = get_evaluator_info(circ=circ,device_name=device_name,
-        fields=['device','basis_gates','coupling_map','properties','initial_layout','noise_model'])
-device_max_experiments = evaluator_info['device'].configuration().max_experiments
-device_max_shots = evaluator_info['device'].configuration().max_shots
-circ_dict = {'test':{'circ':circ,'shots':device_max_shots}}
+circ_dict = {'test':{'circ':ghz,'shots':5000}}
 
 tensored_mitigation = TensoredMitigation(circ_dict=circ_dict,device_name=device_name)
 tensored_mitigation.run()
@@ -30,40 +65,4 @@ tensored_mitigation.apply(unmitigated=scheduler.circ_dict)
 mitigated_circ_dict = tensored_mitigation.circ_dict
 print(mitigated_circ_dict['test'].keys())
 
-
-# qr = QuantumRegister(len(evaluator_info['properties'].qubits))
-
-# mit_pattern = []
-# qubit_group = []
-# _initial_layout = evaluator_info['initial_layout'].get_physical_bits()
-# for q in _initial_layout:
-#     if 'ancilla' not in _initial_layout[q].register.name and 2**(len(qubit_group)+1)<=device_max_experiments:
-#         qubit_group.append(q)
-#     else:
-#         mit_pattern.append(qubit_group)
-#         qubit_group = [q]
-# if len(qubit_group)>0:
-#     mit_pattern.append(qubit_group)
-
-# meas_calibs, state_labels = tensored_meas_cal(mit_pattern=mit_pattern, qr=qr, circlabel='')
-
-# modified_circ = meas_calibs[0]
-# modified_dag = circuit_to_dag(modified_circ)
-# modified_dag.apply_operation_front(op=RXGate(theta=math.pi/2),qargs=[modified_circ.qubits[mit_pattern[0][0]]],cargs=[])
-# modified_circ = dag_to_circuit(modified_dag)
-# meas_calibs[0] = modified_circ
-
-# meas_calibs_transpiled = transpile(meas_calibs, backend=evaluator_info['device'])
-# qobj = assemble(meas_calibs_transpiled, backend=evaluator_info['device'], shots=device_max_shots)
-# print('Qiskit tensored mitigation mit_pattern:',mit_pattern)
-
-# backend = Aer.get_backend('qasm_simulator')
-# job = Aer.get_backend('qasm_simulator').run(qobj)
-# cal_results = job.result()
-# meas_fitter = TensoredMeasFitter(cal_results, mit_pattern=mit_pattern)
-# calibration_matrix = copy.deepcopy(meas_fitter.cal_matrices[0])
-# for row_idx in range(2**full_circ_size):
-#     reversed_row_idx = reverseBits(num=row_idx,bitSize=full_circ_size)
-#     for col_idx in range(2**full_circ_size):
-#         reversed_col_idx = reverseBits(num=col_idx,bitSize=full_circ_size)
-#         calibration_matrix[reversed_row_idx][reversed_col_idx] = meas_fitter.cal_matrices[0][row_idx][col_idx]
+plot_histogram([raw_counts, mitigated_counts, mitigated_circ_dict['test']['hw']], legend=['raw', 'mitigated', 'my_raw','my_mitigated'])

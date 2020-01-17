@@ -3,6 +3,7 @@ import copy
 from utils.helper_fun import get_evaluator_info, apply_measurement, dict_to_prob, memory_to_dict
 from qiskit.compiler import transpile, assemble
 from qiskit import Aer, execute
+from qiskit.providers.aer import noise
 
 class ScheduleItem:
     def __init__(self,max_experiments,max_shots):
@@ -101,7 +102,12 @@ class Scheduler:
             if real_device:
                 hw_job = evaluator_info['device'].run(qobj)
             else:
-                hw_job = Aer.get_backend('qasm_simulator').run(qobj)
+                # Generate a noise model for the 5 qubits
+                noise_model = noise.NoiseModel()
+                for qi in range(20):
+                    read_err = noise.errors.readout_error.ReadoutError([[0.9, 0.1],[0.25,0.75]])
+                    noise_model.add_readout_error(read_err, [qi])
+                hw_job = Aer.get_backend('qasm_simulator').run(qobj,noise_model=noise_model)
             jobs.append(hw_job)
             print('Submitting job {:d}/{:d} {} --> {:d} circuits, {:d} * {:d} shots'.format(idx+1,len(self.schedule),hw_job.job_id(),len(schedule_item.circ_list),len(job_circuits),schedule_item.shots),flush=True)
         self.jobs = jobs

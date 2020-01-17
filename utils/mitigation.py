@@ -143,7 +143,9 @@ class TensoredMitigation:
         for key in unmitigated:
             if key in self.circ_dict:
                 calibration_matrix = self.circ_dict[key]['calibration_matrix']
-                filter_matrix = np.linalg.inv(calibration_matrix)
+                print(calibration_matrix)
+                filter_matrix = np.linalg.pinv(calibration_matrix)
+                print(filter_matrix)
                 unmitigated_prob = np.reshape(unmitigated[key]['hw'],(-1,1))
                 mitigated_prob = np.reshape(filter_matrix.dot(unmitigated_prob),(1,-1)).tolist()[0]
                 assert abs(sum(mitigated_prob)-1)<1e-10
