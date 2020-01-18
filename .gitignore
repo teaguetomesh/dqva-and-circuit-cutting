@@ -3,7 +3,7 @@ __pycache__
 .vscode
 .ipynb_checkpoints
 gurobi.log
-
+*.p
 .DS_Store
 *.pdf
 
