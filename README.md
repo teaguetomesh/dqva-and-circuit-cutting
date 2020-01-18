@@ -24,4 +24,4 @@ conda install gurobi
 - [ ] Report Qiskit incompatibility with Python 3.8
 - [x] Edit job_submittor to use same mitigation for each cluster
 - [x] Edit mitigation for robust key names
-- [ ] Implement 'least_squares' mitigation (currently is )
+- [x] Implement 'least_squares' mitigation (currently is pseudo inverse)

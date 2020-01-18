@@ -1,4 +1,5 @@
 import numpy as np
+from scipy.optimize import minimize
 from time import time
 import copy
 from qiskit.circuit.quantumregister import QuantumRegister
@@ -52,6 +53,7 @@ class TensoredMitigation:
             fields=['device','basis_gates','coupling_map','properties','initial_layout'])
             device_max_shots = evaluator_info['device'].configuration().max_shots
             device_max_experiments = evaluator_info['device'].configuration().max_experiments
+            device_max_experiments = 4
             num_qubits = len(evaluator_info['properties'].qubits)
             qr = QuantumRegister(num_qubits)
             if 'initial_layout' in self.circ_dict[key]:
@@ -114,42 +116,87 @@ class TensoredMitigation:
                 if num_repetitions>1:
                     for perturbation_idx in range(4**len(qubit_group)):
                         perturbation_probabilities[qubit_group_idx][perturbation_idx] /= num_repetitions
-            # print('mit_pattern = {} perturbation_probabilities = {}'.format(mit_pattern,perturbation_probabilities))
-            self.circ_dict[key]['calibration_matrix'] = self.get_calibration_matrix(perturbation_probabilities=perturbation_probabilities)
+            # print('mit_pattern = {} perturbation_probabilities = {}'.format(mit_pattern,[len(x) for x in perturbation_probabilities]))
+            self.circ_dict[key]['calibration_matrices'] = self.get_calibration_matrices(perturbation_probabilities=perturbation_probabilities)
     
-    def get_calibration_matrix(self,perturbation_probabilities):
-        num_qubits = int(sum([np.log(len(x))/np.log(4) for x in perturbation_probabilities]))
-        begin = time()
-        base = [1]
-        calibration_matrix = np.zeros(shape=(2**num_qubits,2**num_qubits))
-        for qubit_perturbation in perturbation_probabilities:
-            base = np.kron(base,qubit_perturbation)
-        for meas in range(2**num_qubits):
-            meas_state = bin(meas)[2:].zfill(num_qubits)
-            for actual in range(2**num_qubits):
-                actual_state = bin(actual)[2:].zfill(num_qubits)
-                binary_position_str = ''
-                for a,m in zip(actual_state,meas_state):
-                    binary_position_str += '%s%s'%(a,m)
-                position = int(binary_position_str,2)
-                calibration_matrix[meas][actual] = base[position]
-        print('Computing calibration matrix for %d qubit circuit took %.3e seconds'%(num_qubits,time()-begin))
-        for col_idx in range(2**num_qubits):
-            assert abs(sum([calibration_matrix[row][col_idx] for row in range(2**num_qubits)])-1)<1e-10
-        return calibration_matrix
+    def get_calibration_matrices(self,perturbation_probabilities):
+        calibration_matrices = []
+        total_qubits = 0
+        for group_perturbation in perturbation_probabilities:
+            num_qubits = int(np.log(len(group_perturbation))/np.log(4))
+            total_qubits += num_qubits
+            begin = time()
+            calibration_matrix = np.zeros(shape=(2**num_qubits,2**num_qubits))
+            for meas in range(2**num_qubits):
+                meas_state = bin(meas)[2:].zfill(num_qubits)
+                for actual in range(2**num_qubits):
+                    actual_state = bin(actual)[2:].zfill(num_qubits)
+                    binary_position_str = ''
+                    for a,m in zip(actual_state,meas_state):
+                        binary_position_str += '%s%s'%(a,m)
+                    position = int(binary_position_str,2)
+                    calibration_matrix[meas][actual] = group_perturbation[position]
+            for col_idx in range(2**num_qubits):
+                assert abs(sum(calibration_matrix[:,col_idx])-1)<1e-10
+            calibration_matrices.append(calibration_matrix)
+        print('Computing tensored calibration matrices for %d qubit circuit took %.3e seconds'%(total_qubits,time()-begin))
+        return calibration_matrices
 
     def apply(self,unmitigated):
+
         mitigated = copy.deepcopy(unmitigated)
         for key in unmitigated:
             if key in self.circ_dict:
-                calibration_matrix = self.circ_dict[key]['calibration_matrix']
-                print(calibration_matrix)
-                filter_matrix = np.linalg.pinv(calibration_matrix)
-                print(filter_matrix)
-                unmitigated_prob = np.reshape(unmitigated[key]['hw'],(-1,1))
-                mitigated_prob = np.reshape(filter_matrix.dot(unmitigated_prob),(1,-1)).tolist()[0]
+                calibration_matrices = self.circ_dict[key]['calibration_matrices']
+                nqubits = len(unmitigated[key]['circ'].qubits)
+                qubits_list_sizes = [int(np.log(np.shape(mat)[0])/np.log(2)) for mat in calibration_matrices]
+                indices_list = [{bin(ind)[2:].zfill(group_size): ind for ind in range(2**group_size)} for group_size in qubits_list_sizes]
+                num_of_states = 2**nqubits
+                all_states = [bin(state)[2:].zfill(nqubits) for state in range(2**nqubits)]
+                unmitigated_prob = np.array(unmitigated[key]['hw'])
+                # print('unmitigated_prob:',unmitigated_prob)
+                # print('qubits list sizes:',qubits_list_sizes)
+                # print('indices_list:',indices_list)
+                # print('nqubits:',nqubits)
+                # print('all_states:',all_states)
+                # print('num_of_states:',num_of_states)
+
+                def fun(x):
+                    mat_dot_x = np.zeros([num_of_states], dtype=float)
+                    for state1_idx, state1 in enumerate(all_states):
+                        mat_dot_x[state1_idx] = 0.
+                        for state2_idx, state2 in enumerate(all_states):
+                            if x[state2_idx] != 0:
+                                product = 1.
+                                end_index = nqubits
+                                for c_ind, cal_mat in enumerate(calibration_matrices):
+
+                                    start_index = end_index - qubits_list_sizes[c_ind]
+
+                                    state1_as_int = indices_list[c_ind][state1[start_index:end_index]]
+
+                                    state2_as_int = indices_list[c_ind][state2[start_index:end_index]]
+
+                                    end_index = start_index
+                                    product *= cal_mat[state1_as_int][state2_as_int]
+                                    if product == 0:
+                                        break
+                                mat_dot_x[state1_idx] += (product * x[state2_idx])
+                    return sum((unmitigated_prob - mat_dot_x)**2)
+                
+                x0 = np.random.rand(num_of_states)
+                x0 = x0 / sum(x0)
+                nshots = sum(unmitigated_prob)
+                # print('random initial x0 = {}, nshots = {}'.format(x0,nshots))
+                cons = ({'type': 'eq', 'fun': lambda x: nshots - sum(x)})
+                bnds = tuple((0, nshots) for x in x0)
+                # print('cons:',cons)
+                # print('bnds:',bnds)
+                res = minimize(fun, x0, method='SLSQP',constraints=cons, bounds=bnds, tol=1e-6)
+                mitigated_prob = res.x
                 assert abs(sum(mitigated_prob)-1)<1e-10
                 mitigated[key]['mitigated_hw'] = copy.deepcopy(mitigated_prob)
+                # print('mitigated_prob:',mitigated_prob)
             else:
                 mitigated[key]['mitigated_hw'] = copy.deepcopy(unmitigated[key]['hw'])
         self.circ_dict = copy.deepcopy(mitigated)
