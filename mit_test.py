@@ -87,8 +87,9 @@ for i, p in enumerate(my_mitigated):
     bin_i = bin(i)[2:].zfill(full_circ_size)
     my_mitigated_dict[bin_i] = p
 
-plot_histogram([raw_counts, mitigated_counts_dict, ground_truth_dict], legend=['raw','mitigated','truth'])
+fig = plot_histogram([raw_counts, mitigated_counts_dict, ground_truth_dict], legend=['raw','mitigated','truth'],figsize=(15,10),title='qiskit mitigation')
+fig.savefig('output.png')
 
-plot_histogram([my_raw_dict, my_mitigated_dict,ground_truth_dict], legend=['my_raw', 'my_mitigated','truth'])
+plot_histogram([my_raw_dict, my_mitigated_dict,ground_truth_dict], legend=['my_raw', 'my_mitigated','truth'],figsize=(15,10),title='my mitigation')
 
-plot_histogram([mitigated_counts_dict, my_mitigated_dict], legend=['mitigated', 'my_mitigated'])
+plot_histogram([mitigated_counts_dict, my_mitigated_dict], legend=['mitigated', 'my_mitigated'],figsize=(15,10),title='mitigations comparison')

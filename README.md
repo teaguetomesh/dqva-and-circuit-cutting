@@ -21,7 +21,6 @@ conda install gurobi
 ## TODO
 - [x] Update to be compatible with Qiskit 0.14
 - [ ] Report IBMQ.load_account() warning
-- [ ] Report Qiskit incompatibility with Python 3.8
 - [x] Edit job_submittor to use same mitigation for each cluster
 - [x] Edit mitigation for robust key names
 - [x] Implement 'least_squares' mitigation (currently is pseudo inverse)
