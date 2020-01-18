@@ -53,7 +53,6 @@ class TensoredMitigation:
             fields=['device','basis_gates','coupling_map','properties','initial_layout'])
             device_max_shots = evaluator_info['device'].configuration().max_shots
             device_max_experiments = evaluator_info['device'].configuration().max_experiments
-            device_max_experiments = 4
             num_qubits = len(evaluator_info['properties'].qubits)
             qr = QuantumRegister(num_qubits)
             if 'initial_layout' in self.circ_dict[key]:
