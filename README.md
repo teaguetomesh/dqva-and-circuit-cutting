@@ -23,4 +23,5 @@ conda install gurobi
 - [ ] Report IBMQ.load_account() warning
 - [x] Edit job_submittor to use same mitigation for each cluster
 - [x] Edit mitigation for robust key names
-- [x] Implement 'least_squares' mitigation (currently is pseudo inverse)
+- [ ] Implement 'least_squares' mitigation (currently is pseudo inverse)
+- [ ] Fix job_submittor for the new mitigation method

@@ -228,7 +228,7 @@ def apply_measurement(circ):
     qc = circ+meas
     return qc
 
-def dict_to_prob(distribution_dict,reverse=True):
+def dict_to_prob(distribution_dict,force_prob=True,reverse=True):
     state = list(distribution_dict.keys())[0]
     num_qubits = len(state)
     num_shots = sum(distribution_dict.values())
@@ -236,9 +236,12 @@ def dict_to_prob(distribution_dict,reverse=True):
     for state in distribution_dict:
         if reverse:
             reversed_state = reverseBits(int(state,2),num_qubits)
-            prob[reversed_state] = distribution_dict[state]/num_shots
+            prob[reversed_state] = distribution_dict[state]
         else:
-            prob[int(state,2)] = distribution_dict[state]/num_shots
+            prob[int(state,2)] = distribution_dict[state]
+    if force_prob:
+        for i, count in enumerate(prob):
+            prob[i] = count/num_shots
     return prob
 
 def memory_to_dict(memory):

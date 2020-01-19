@@ -1,5 +1,6 @@
 import math
 import copy
+import numpy as np
 from utils.helper_fun import get_evaluator_info, apply_measurement, dict_to_prob, memory_to_dict
 from qiskit.compiler import transpile, assemble
 from qiskit import Aer, execute
@@ -98,21 +99,24 @@ class Scheduler:
                 job_circuits += circs_to_add
             
             assert len(job_circuits) == schedule_item.total_circs
-            qobj = assemble(job_circuits, backend=evaluator_info['device'], shots=schedule_item.shots,memory=True)
             if real_device:
+                qobj = assemble(job_circuits, backend=evaluator_info['device'], shots=schedule_item.shots,memory=True)
                 hw_job = evaluator_info['device'].run(qobj)
             else:
+                qobj = assemble(job_circuits, backend=Aer.get_backend('qasm_simulator'), shots=schedule_item.shots,memory=True)
                 noise_model = noise.NoiseModel()
                 for qi in range(20):
-                    read_err = noise.errors.readout_error.ReadoutError([[0.9, 0.1],[0.25,0.75]])
-                    noise_model.add_readout_error(read_err, [qi])
+                    correct_p = np.exp(-qi/10)
+                    read_err = noise.errors.readout_error.ReadoutError([[0.9*correct_p, 1-0.9*correct_p],[1-0.75*correct_p, 0.75*correct_p]])
+                    if qi==0 or qi==1:
+                        noise_model.add_readout_error(read_err, [qi])
                 hw_job = Aer.get_backend('qasm_simulator').run(qobj,noise_model=noise_model)
                 # hw_job = Aer.get_backend('qasm_simulator').run(qobj)
             jobs.append(hw_job)
             print('Submitting job {:d}/{:d} {} --> {:d} circuits, {:d} * {:d} shots'.format(idx+1,len(self.schedule),hw_job.job_id(),len(schedule_item.circ_list),len(job_circuits),schedule_item.shots),flush=True)
         self.jobs = jobs
 
-    def retrieve(self):
+    def retrieve(self,force_prob=True):
         print('*'*20,'Retrieving jobs','*'*20)
         assert len(self.schedule) == len(self.jobs)
         circ_dict = copy.deepcopy(self.circ_dict)
@@ -143,7 +147,7 @@ class Scheduler:
             shots = circ_dict[key]['shots']
             memory = memories[key]
             mem_dict = memory_to_dict(memory=memory[:shots])
-            hw_prob = dict_to_prob(distribution_dict=mem_dict,reverse=True)
+            hw_prob = dict_to_prob(distribution_dict=mem_dict,force_prob=force_prob,reverse=True)
             circ_dict[key]['hw'] = copy.deepcopy(hw_prob)
             # print('Key {} has {:d} qubit circuit, hw has {:d}/{:d} shots'.format(key,len(full_circ.qubits),sum(hw.values()),shots))
             # print('Expecting {:d} shots, got {:d} shots'.format(shots,sum(mem_dict.values())),flush=True)
@@ -151,6 +155,8 @@ class Scheduler:
                 assert len(circ_dict[key]['hw']) == 2**len(full_circ.clbits)
             else:
                 assert len(circ_dict[key]['hw']) == 2**len(full_circ.qubits)
-            assert sum(mem_dict.values())==shots
-            assert abs(sum(circ_dict[key]['hw'])-1)<1e-10
+            if force_prob:
+                assert abs(sum(circ_dict[key]['hw'])-1)<1e-10
+            else:
+                assert sum(circ_dict[key]['hw'])==shots
         self.circ_dict = copy.deepcopy(circ_dict)
