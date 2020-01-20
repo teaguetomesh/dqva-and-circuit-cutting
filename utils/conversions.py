@@ -13,7 +13,8 @@ def list_to_dict(l):
     for state, entry in enumerate(l):
         bin_state = bin(state)[2:].zfill(num_qubits)
         l_dict[bin_state] = entry
-    assert sum(l_dict.values()) == sum(l)
+    if abs(sum(l_dict.values())-sum(l))>1:
+        print('list_to_dict may be wrong, converted counts = {}, input counts = {}'.format(sum(l_dict.values()),sum(l)))
     return l_dict
 
 def dict_to_array(distribution_dict,force_prob):
@@ -23,8 +24,8 @@ def dict_to_array(distribution_dict,force_prob):
     cnts = np.zeros(2**num_qubits,dtype=float)
     for state in distribution_dict:
         cnts[int(state,2)] = distribution_dict[state]
-    print(sum(cnts),num_shots)
-    assert sum(cnts) == num_shots
+    if abs(sum(cnts)-num_shots)>1:
+        print('dict_to_array may be wrong, converted counts = {}, input counts = {}'.format(sum(cnts),num_shots))
     if not force_prob:
         return cnts
     else:
