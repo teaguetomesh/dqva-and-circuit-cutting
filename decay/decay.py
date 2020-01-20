@@ -1,11 +1,12 @@
 import numpy as np
 from qcg.generators import gen_supremacy, gen_hwea, gen_BV, gen_qft, gen_sycamore
-from utils.helper_fun import evaluate_circ, factor_int, read_file
+from utils.helper_fun import evaluate_circ, factor_int, read_file, get_evaluator_info
 from utils.conversions import dict_to_array
 import os
 from mpi4py import MPI
 import pickle
 from time import time
+from scipy.stats import chisquare
 
 def find_rank_tasks(tasks,rank,num_workers):
     rank_tasks = []
@@ -39,23 +40,26 @@ def accumulate_batch(circ,accumulated_prob,counter,shots_increment,evaluation_me
     assert abs(sum(accumulated_prob)-1)<1e-10
     return accumulated_prob
 
-def noiseless_decay(circuit,shots_increment):
+def noiseless_decay(circuit,shots_increment,device_max_experiments):
     decay_begin = time()
+    ground_truth = evaluate_circ(circ=circuit,backend='statevector_simulator',evaluator_info=None,force_prob=True)
+    ground_truth = dict_to_array(distribution_dict=ground_truth,force_prob=True)
     full_circ_size = len(circuit.qubits)
     # print('%d qubit full circuit, shots increment = %d'%(full_circ_size,shots_increment))
     noiseless_accumulated_prob = np.zeros(2**full_circ_size,dtype=float)
-    noiseless_prob_l = []
+    chi2_l = []
     max_counter = max(20,int(20*np.power(2,full_circ_size)/shots_increment))
-    max_counter = min(max_counter,5000)
+    max_counter = min(max_counter,device_max_experiments)
     for counter in range(1,max_counter+1):
         noiseless_accumulated_prob = accumulate_batch(circ=circuit,accumulated_prob=noiseless_accumulated_prob,
         counter=counter,shots_increment=shots_increment,evaluation_method='qasm_simulator')
-        noiseless_prob_l.append(noiseless_accumulated_prob)
+        chi2 = chisquare(f_obs=noiseless_accumulated_prob,f_exp=ground_truth)
+        chi2_l.append(chi2)
         if full_circ_size>=15 and counter%50==0:
             time_elapsed = time()-decay_begin
             eta = time_elapsed/counter*max_counter-time_elapsed
             print('%d qubit circuit, counter %d/%d, ETA = %.1e'%(full_circ_size,counter,max_counter,eta),flush=True)
-    return noiseless_prob_l
+    return chi2_l
 
 if __name__ == '__main__':
     comm = MPI.COMM_WORLD
@@ -70,6 +74,10 @@ if __name__ == '__main__':
         if full_circ_size not in decay_dict:
             full_circ_sizes.append(full_circ_size)
         
+    evaluator_info = get_evaluator_info(circ=None,device_name='ibmq_boeblingen',fields=['properties','device'])
+    device_max_shots = evaluator_info['device'].configuration().max_shots
+    device_max_experiments = evaluator_info['device'].configuration().max_experiments
+    
     rank_tasks = find_rank_tasks(tasks=full_circ_sizes,rank=rank,num_workers=num_workers)
     print('Rank %d runs :'%rank,rank_tasks,flush=True)
     rank_decay_dict = {}
@@ -77,10 +85,10 @@ if __name__ == '__main__':
         i, j = factor_int(full_circ_size)
         circ = gen_supremacy(i,j,8)
 
-        shots_increment = 1024
+        shots_increment = device_max_shots
     
-        noiseless_prob_l = noiseless_decay(circuit=circ,shots_increment=shots_increment)
-        rank_decay_dict[full_circ_size] = {'circ':circ,'prob_l':noiseless_prob_l,'shots_increment':shots_increment}
+        chi2_l = noiseless_decay(circuit=circ,shots_increment=shots_increment,device_max_experiments=device_max_experiments)
+        rank_decay_dict[full_circ_size] = {'circ':circ,'chi2_l':chi2_l,'shots_increment':shots_increment}
     
     if rank == size - 1:
         decay_dict.update(rank_decay_dict)

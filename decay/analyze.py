@@ -55,14 +55,11 @@ if __name__ == '__main__':
 
     for full_circ_size in decay_dict:
         circ = decay_dict[full_circ_size]['circ']
-        prob_l = decay_dict[full_circ_size]['prob_l']
-        shots_increment = decay_dict[full_circ_size]['shots_increment']
-        ground_truth = evaluate_circ(circ=circ,backend='statevector_simulator',evaluator_info=None,force_prob=True)
-        ground_truth = dict_to_array(distribution_dict=ground_truth,force_prob=True)
+        chi2_l = decay_dict[full_circ_size]['chi2_l']
         metric_l = []
-        for prob in prob_l:
-            chi2 = chisquare(f_obs=prob,f_exp=ground_truth)[0]
-            metric_l.append(chi2)
+        for chi2 in chi2_l:
+            metric_l.append(chi2[0])
+        shots_increment = decay_dict[full_circ_size]['shots_increment']
         cutoff, first_derivative, second_derivative = find_saturation(metric_l=metric_l,derivative_thresholds=(args.first_derivative,args.second_derivative),shots_increment=shots_increment)
         print('%d qubit circuit, cutoff = %d, chi^2 = %.3f, first derivative = %.3e, second derivative = %.3e'%(full_circ_size,cutoff,metric_l[cutoff],first_derivative,second_derivative),flush=True)
         make_plot(metric_l=metric_l,cutoff=cutoff,full_circ_size=full_circ_size,shots_increment=shots_increment,derivative_thresholds=(args.first_derivative,args.second_derivative))
