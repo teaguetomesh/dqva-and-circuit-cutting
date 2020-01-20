@@ -76,13 +76,13 @@ class TensoredMitigation:
             meas_calibs, state_labels = tensored_meas_cal(mit_pattern=mit_pattern, qr=qr, circlabel='')
             meas_calibs_transpiled = transpile(meas_calibs, backend=evaluator_info['device'])
             for meas_calib_circ in meas_calibs_transpiled:
-                meas_calibs_dict_key = (key,meas_calib_circ.name.split('_')[1][::-1])
+                meas_calibs_dict_key = (key,meas_calib_circ.name.split('_')[1])
                 assert meas_calibs_dict_key not in meas_calibs_dict
-                meas_calibs_dict.update({meas_calibs_dict_key:{'circ':meas_calib_circ,'shots':device_max_shots}})
+                meas_calibs_dict.update({meas_calibs_dict_key:{'circ':meas_calib_circ,'shots':100*device_max_shots}})
                 # print(meas_calibs_dict_key)
         return meas_calibs_dict
 
-    def run(self,real_device=False):
+    def run(self,real_device):
         self.scheduler.run(real_device=real_device)
 
     def retrieve(self):
@@ -111,17 +111,17 @@ class TensoredMitigation:
                             continue
                         else:
                             measured_state = bin(measured_state)[2:].zfill(num_qubits)
-                            start_index = 0
+                            end_index = num_qubits
                             # print('measured_state: {}, counts = {}'.format(measured_state,counts))
                             for cal_ind, cal_mat in enumerate(self.circ_dict[key]['calibration_matrices']):
                                 # print('Filling up calibration matrix {:d}'.format(cal_ind))
-                                end_index = start_index + qubit_list_sizes[cal_ind]
+                                start_index = end_index - qubit_list_sizes[cal_ind]
                                 # print('Substate from {:d}-->{:d}'.format(start_index,end_index))
                                 prepared_substate_index = indices_list[cal_ind][prepared_state[start_index:end_index]]
                                 measured_substate_index = indices_list[cal_ind][measured_state[start_index:end_index]]
                                 # print('prepared_state piece:',prepared_state[start_index:end_index],'measured_state piece:',measured_state[start_index:end_index])
                                 # print('prepared_substate_index = {}, measured_substate_index = {}'.format(prepared_substate_index,measured_substate_index))
-                                start_index = end_index
+                                end_index = start_index
                                 cal_mat[measured_substate_index][prepared_substate_index] += counts
             for mat_index, _ in enumerate(self.circ_dict[key]['calibration_matrices']):
                 sums_of_columns = np.sum(self.circ_dict[key]['calibration_matrices'][mat_index], axis=0)
@@ -130,23 +130,19 @@ class TensoredMitigation:
                     out=np.zeros_like(self.circ_dict[key]['calibration_matrices'][mat_index]),
                     where=sums_of_columns != 0)
 
-    def apply(self,unmitigated):
+    def apply(self,unmitigated,force_prob):
         mitigated = copy.deepcopy(unmitigated)
         for key in unmitigated:
             if key in self.circ_dict:
                 calibration_matrices = self.circ_dict[key]['calibration_matrices']
-                print('My calibration matrices:')
-                np.set_printoptions(precision=4)
-                for cal_mat in calibration_matrices:
-                    print(cal_mat)
                 nqubits = len(unmitigated[key]['circ'].qubits)
-                qubits_list_sizes = [int(np.log(np.shape(mat)[0])/np.log(2)) for mat in calibration_matrices]
-                indices_list = [{bin(ind)[2:].zfill(group_size): ind for ind in range(2**group_size)} for group_size in qubits_list_sizes]
+                qubit_list_sizes = [int(np.log(np.shape(mat)[0])/np.log(2)) for mat in calibration_matrices]
+                indices_list = [{bin(ind)[2:].zfill(group_size): ind for ind in range(2**group_size)} for group_size in qubit_list_sizes]
                 num_of_states = 2**nqubits
                 all_states = [bin(state)[2:].zfill(nqubits) for state in range(2**nqubits)]
                 unmitigated_prob = np.array(unmitigated[key]['hw'],dtype=float)
                 print('unmitigated_prob:',unmitigated_prob)
-                print('qubits list sizes:',qubits_list_sizes)
+                print('qubit list sizes:',qubit_list_sizes)
                 print('indices_list:',indices_list)
                 print('nqubits:',nqubits)
                 print('all_states:',all_states)
@@ -159,16 +155,16 @@ class TensoredMitigation:
                         for state2_idx, state2 in enumerate(all_states):
                             if x[state2_idx] != 0:
                                 product = 1.
-                                start_index = 0
+                                end_index = nqubits
                                 for c_ind, cal_mat in enumerate(calibration_matrices):
 
-                                    end_index = start_index + qubits_list_sizes[c_ind]
+                                    start_index = end_index - qubit_list_sizes[c_ind]
 
                                     state1_as_int = indices_list[c_ind][state1[start_index:end_index]]
 
                                     state2_as_int = indices_list[c_ind][state2[start_index:end_index]]
 
-                                    start_index = end_index
+                                    end_index = start_index
                                     product *= cal_mat[state1_as_int][state2_as_int]
                                     if product == 0:
                                         break
@@ -181,14 +177,14 @@ class TensoredMitigation:
                 print('random initial x0 = {}, nshots = {}'.format(x0,nshots))
                 cons = ({'type': 'eq', 'fun': lambda x: nshots - sum(x)})
                 bnds = tuple((0, nshots) for x in x0)
-                print('cons:',cons)
-                print('bnds:',bnds)
                 res = minimize(fun, x0, method='SLSQP',constraints=cons, bounds=bnds, tol=1e-6)
-                mitigated_prob = res.x
-                mitigated_prob = mitigated_prob / sum(mitigated_prob)
-                assert abs(sum(mitigated_prob)-1)<1e-10
-                mitigated[key]['mitigated_hw'] = copy.deepcopy(mitigated_prob)
-                print('mitigated_prob:',mitigated_prob)
+                mitigated_cnts = res.x
+                if force_prob:
+                    mitigated_prob = mitigated_cnts / sum(mitigated_cnts)
+                    assert abs(sum(mitigated_prob)-1)<1e-10
+                    mitigated[key]['mitigated_hw'] = copy.deepcopy(mitigated_prob)
+                else:
+                    mitigated[key]['mitigated_hw'] = copy.deepcopy(mitigated_cnts)
             else:
                 mitigated[key]['mitigated_hw'] = copy.deepcopy(unmitigated[key]['hw'])
         self.circ_dict = copy.deepcopy(mitigated)

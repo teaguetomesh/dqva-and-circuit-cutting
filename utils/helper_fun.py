@@ -14,6 +14,7 @@ import copy
 from time import time
 import os
 from qcg.generators import gen_supremacy, gen_hwea, gen_BV, gen_qft, gen_sycamore
+from utils.conversions import list_to_dict
 
 def generate_circ(full_circ_size,circuit_type):
     def gen_secret(num_qubit):
@@ -108,49 +109,6 @@ def load_IBMQ():
     provider = IBMQ.get_provider(hub='ibm-q-ornl', group='bes-qis', project='argonne')
     return provider
 
-def cross_entropy(target,obs):
-    assert len(target)==len(obs)
-    epsilon = 1e-20
-    obs = [abs(x) if x!=0 else epsilon for x in obs]
-    sum_of_prob = sum(obs)
-    obs = [x/sum_of_prob for x in obs]
-    assert abs(sum(obs)-1) < 1e-10
-    h = 0
-    for p,q in zip(target,obs):
-        if p==0:
-            h += 0
-        else:
-            h += p*np.log(p/q)
-    return h
-
-def entropy(prob_dist):
-    epsilon = 1e-20
-    prob_dist = [abs(x) if x!=0 else epsilon for x in prob_dist]
-    sum_of_prob = sum(prob_dist)
-    prob_dist = [x/sum_of_prob for x in prob_dist]
-    assert abs(sum(prob_dist)-1) < 1e-10
-    h = 0
-    for p in prob_dist:
-        if p==0:
-            h += 0
-        else:
-            h -= p*np.log(p)
-    return h
-
-def fidelity(target,obs):
-    assert len(target)==len(obs)
-    epsilon = 1e-20
-    obs = [abs(x) if x!=0 else epsilon for x in obs]
-    sum_of_prob = sum(obs)
-    obs = [x/sum_of_prob for x in obs]
-    if abs(sum(obs)-1) > 1e-10:
-        print('sum of obs =',sum(obs))
-    fidelity = 0
-    for t,o in zip(target,obs):
-        if t!= 0:
-            fidelity += o
-    return fidelity
-
 def find_cluster_O_rho_qubits(complete_path_map,cluster_idx):
     O_qubits = []
     rho_qubits = []
@@ -228,37 +186,6 @@ def apply_measurement(circ):
     qc = circ+meas
     return qc
 
-def dict_to_prob(distribution_dict,force_prob=True,reverse=True):
-    state = list(distribution_dict.keys())[0]
-    num_qubits = len(state)
-    num_shots = sum(distribution_dict.values())
-    prob = [0 for x in range(np.power(2,num_qubits))]
-    for state in distribution_dict:
-        if reverse:
-            reversed_state = reverseBits(int(state,2),num_qubits)
-            prob[reversed_state] = distribution_dict[state]
-        else:
-            prob[int(state,2)] = distribution_dict[state]
-    if force_prob:
-        for i, count in enumerate(prob):
-            prob[i] = count/num_shots
-    return prob
-
-def memory_to_dict(memory):
-    mem_dict = {}
-    for m in memory:
-        if m in mem_dict:
-            mem_dict[m] += 1
-        else:
-            mem_dict[m] = 1
-    return mem_dict
-
-def reverseBits(num,bitSize): 
-    binary = bin(num)
-    reverse = binary[-1:1:-1] 
-    reverse = reverse + (bitSize - len(reverse))*'0'
-    return int(reverse,2)
-
 def combine_dict(dict_a, dict_sum):
     for key in dict_a:
         if key in dict_sum:
@@ -267,7 +194,7 @@ def combine_dict(dict_a, dict_sum):
             dict_sum[key] = dict_a[key]
     return dict_sum
 
-def evaluate_circ(circ, backend, evaluator_info, reverse=True):
+def evaluate_circ(circ, backend, evaluator_info, force_prob):
     if backend == 'statevector_simulator':
         # print('using statevector simulator')
         backend = Aer.get_backend('statevector_simulator')
@@ -275,15 +202,12 @@ def evaluate_circ(circ, backend, evaluator_info, reverse=True):
         job = execute(circ, backend=backend,backend_options=backend_options)
         result = job.result()
         outputstate = result.get_statevector(circ)
-        if reverse:
-            outputstate_ordered = [0 for sv in outputstate]
-            for i, sv in enumerate(outputstate):
-                reverse_i = reverseBits(i,len(circ.qubits))
-                outputstate_ordered[reverse_i] = sv
-            sv_prob = [np.power(np.absolute(x),2) for x in outputstate_ordered]
-        else:
-            sv_prob = [np.power(np.absolute(x),2) for x in outputstate]
-        return sv_prob
+        outputstate_dict = list_to_dict(l=outputstate)
+        if force_prob:
+            for key in outputstate_dict:
+                x = outputstate_dict[key]
+                outputstate_dict[key] = np.absolute(x)**2
+        return outputstate_dict
     elif backend == 'noiseless_qasm_simulator':
         # print('using noiseless qasm simulator %d shots'%num_shots)
         backend = Aer.get_backend('qasm_simulator')
@@ -294,9 +218,11 @@ def evaluate_circ(circ, backend, evaluator_info, reverse=True):
         noiseless_qasm_result = execute(qc, backend, shots=num_shots,backend_options=backend_options).result()
         
         noiseless_counts = noiseless_qasm_result.get_counts(0)
-        assert sum(noiseless_counts.values())>=num_shots
-        noiseless_prob = dict_to_prob(distribution_dict=noiseless_counts,reverse=reverse)
-        return noiseless_prob
+        assert sum(noiseless_counts.values())==num_shots
+        if force_prob:
+            for key in noiseless_counts:
+                noiseless_counts[key] = noiseless_counts[key]/num_shots
+        return noiseless_counts
     elif backend == 'noisy_qasm_simulator':
         # print('using noisy qasm simulator {} shots'.format(num_shots))
         backend = Aer.get_backend('qasm_simulator')
@@ -316,9 +242,11 @@ def evaluate_circ(circ, backend, evaluator_info, reverse=True):
         shots=num_shots,backend_options=backend_options).result()
 
         noisy_counts = noisy_qasm_result.get_counts(0)
-        assert sum(noisy_counts.values())>=num_shots
-        noisy_prob = dict_to_prob(distribution_dict=noisy_counts,reverse=reverse)
-        return noisy_prob
+        assert sum(noisy_counts.values())==num_shots
+        if force_prob:
+            for key in noisy_counts:
+                noisy_counts[key] = noisy_counts[key]/num_shots
+        return noisy_counts
     else:
         raise Exception('Illegal backend :',backend)
 

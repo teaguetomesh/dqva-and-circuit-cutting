@@ -18,6 +18,11 @@ conda install gurobi
 - ```max_parallel_experiments``` affects the ```parallel_experiments``` metadata, helps when there are multiple circuits
 - ```max_parallel_shots``` does not change the ```parallel_shots``` parameter, does not affect runtime
 
+## Design choices
+- Always ```assemble``` and ```run```
+- APIs do not reverse default Qiskit orders. Only manually reverse when saving to output.
+- Use as few default parameters as possible
+
 ## TODO
 - [x] Update to be compatible with Qiskit 0.14
 - [ ] Report IBMQ.load_account() warning
@@ -25,3 +30,4 @@ conda install gurobi
 - [x] Edit mitigation for robust key names
 - [ ] Implement 'least_squares' mitigation (currently is pseudo inverse)
 - [ ] Fix job_submittor for the new mitigation method
+- [ ] Test if ```assemble``` does any transpilation
