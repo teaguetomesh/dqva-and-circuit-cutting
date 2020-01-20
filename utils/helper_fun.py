@@ -129,7 +129,7 @@ def get_circ_saturated_shots(circs,device_name):
     saturated_probs = []
     for circ_idx, circ in enumerate(circs):
         full_circ_size = len(circ.qubits)
-        ground_truth = evaluate_circ(circ=circ,backend='statevector_simulator',evaluator_info=None,reverse=False)
+        ground_truth = evaluate_circ(circ=circ,backend='statevector_simulator',evaluator_info=None,force_prob=True)
         ground_truth_entropy = entropy(prob_dist=ground_truth)
         shots_increment = 1024
         
@@ -146,7 +146,7 @@ def get_circ_saturated_shots(circs,device_name):
             counter = 1
             accumulated_prob = [0 for i in range(np.power(2,len(circ.qubits)))]
             while 1:
-                noiseless_prob_batch = evaluate_circ(circ=circ,backend='noiseless_qasm_simulator',evaluator_info=qasm_evaluator_info,reverse=False)
+                noiseless_prob_batch = evaluate_circ(circ=circ,backend='noiseless_qasm_simulator',evaluator_info=qasm_evaluator_info,force_prob=True)
                 accumulated_prob = [(x*(counter-1)+y)/counter for x,y in zip(accumulated_prob,noiseless_prob_batch)]
                 assert abs(sum(accumulated_prob)-1)<1e-5
                 accumulated_ce = cross_entropy(target=ground_truth,obs=accumulated_prob)
@@ -159,9 +159,9 @@ def get_circ_saturated_shots(circs,device_name):
                         saturated_shot = accumulated_shots
                         break
                 counter += 1
-        ground_truth = evaluate_circ(circ=circ,backend='statevector_simulator',evaluator_info=None,reverse=True)
+        ground_truth = evaluate_circ(circ=circ,backend='statevector_simulator',evaluator_info=None,force_prob=True)
         qasm_evaluator_info['num_shots'] = saturated_shot
-        saturated_prob = evaluate_circ(circ=circ,backend='noiseless_qasm_simulator',evaluator_info=qasm_evaluator_info,reverse=True)
+        saturated_prob = evaluate_circ(circ=circ,backend='noiseless_qasm_simulator',evaluator_info=qasm_evaluator_info,force_prob=True)
         saturated_ce = cross_entropy(target=ground_truth,obs=saturated_prob)
         saturated_shots.append(saturated_shot)
         ground_truths.append(ground_truth)

@@ -9,7 +9,7 @@ from utils.helper_fun import generate_circ, get_evaluator_info, apply_measuremen
 from utils.metrics import cross_entropy
 from utils.mitigation import TensoredMitigation
 from utils.submission import Scheduler
-from utils.conversions import list_to_dict
+from utils.conversions import list_to_dict, dict_to_array
 import copy
 import math
 import numpy as np
@@ -18,7 +18,7 @@ device_name = 'ibmq_boeblingen'
 evaluator_info = get_evaluator_info(circ=None,device_name='ibmq_boeblingen',fields=['basis_gates','properties'])
 device_qubits = len(evaluator_info['properties'].qubits)
 # Make a 3Q GHZ state
-full_circ_size = 3
+full_circ_size = 7
 qr = QuantumRegister(full_circ_size)
 ghz = generate_circ(full_circ_size=full_circ_size,circuit_type='supremacy')
 ground_truth = evaluate_circ(circ=ghz,backend='statevector_simulator',evaluator_info=None,force_prob=True)
@@ -32,10 +32,11 @@ print(ghz)
 # Generate a noise model for the qubits
 noise_model = noise.NoiseModel()
 for qi in range(device_qubits):
-    correct_p = np.exp(-qi/10)
+    correct_p = np.exp(-qi/7.231)
     read_err = noise.errors.readout_error.ReadoutError([[0.9*correct_p, 1-0.9*correct_p],[1-0.75*correct_p, 0.75*correct_p]])
-    if qi == 1:
-        noise_model.add_readout_error(read_err, [qi])
+    # s = np.random.uniform(0.75,1,2)
+    # read_err = noise.errors.readout_error.ReadoutError([[s[0], 1-s[0]],[1-s[1], s[1]]])
+    noise_model.add_readout_error(read_err, [qi])
 
 backend = Aer.get_backend('qasm_simulator')
 qobj = assemble(ghz, backend=backend, shots=500000)
@@ -94,3 +95,15 @@ fig.savefig('my_mitigation.png')
 
 fig = plot_histogram([mitigated_counts, my_mitigated_dict], legend=['mitigated', 'my_mitigated'],figsize=(20,10),title='mitigations comparison')
 fig.savefig('mitigations.png')
+
+qiskit_raw_ce = cross_entropy(target=dict_to_array(distribution_dict=ground_truth,force_prob=True),
+obs=dict_to_array(distribution_dict=raw_counts,force_prob=True))
+qiskit_mit_ce = cross_entropy(target=dict_to_array(distribution_dict=ground_truth,force_prob=True),
+obs=dict_to_array(distribution_dict=mitigated_counts,force_prob=True))
+
+my_raw_ce = cross_entropy(target=dict_to_array(distribution_dict=ground_truth,force_prob=True),
+obs=dict_to_array(distribution_dict=my_raw_dict,force_prob=True))
+my_mit_ce = cross_entropy(target=dict_to_array(distribution_dict=ground_truth,force_prob=True),
+obs=dict_to_array(distribution_dict=my_mitigated_dict,force_prob=True))
+
+print('Qiskit : {:.3e}-->{:.3e}, My : {:.3e}-->{:.3e}'.format(qiskit_raw_ce,qiskit_mit_ce,my_raw_ce,my_mit_ce))

@@ -174,7 +174,7 @@ class TensoredMitigation:
                 x0 = np.random.rand(num_of_states)
                 x0 = x0 / sum(x0)
                 nshots = sum(unmitigated_prob)
-                print('random initial x0 = {}, nshots = {}'.format(x0,nshots))
+                # print('random initial x0 = {}, nshots = {}'.format(x0,nshots))
                 cons = ({'type': 'eq', 'fun': lambda x: nshots - sum(x)})
                 bnds = tuple((0, nshots) for x in x0)
                 res = minimize(fun, x0, method='SLSQP',constraints=cons, bounds=bnds, tol=1e-6)

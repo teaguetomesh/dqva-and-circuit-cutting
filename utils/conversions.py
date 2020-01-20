@@ -23,6 +23,7 @@ def dict_to_array(distribution_dict,force_prob):
     cnts = np.zeros(2**num_qubits,dtype=float)
     for state in distribution_dict:
         cnts[int(state,2)] = distribution_dict[state]
+    print(sum(cnts),num_shots)
     assert sum(cnts) == num_shots
     if not force_prob:
         return cnts

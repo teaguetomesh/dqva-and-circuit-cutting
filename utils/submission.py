@@ -121,10 +121,11 @@ class Scheduler:
                 device_qubits = len(evaluator_info['properties'].qubits)
                 noise_model = noise.NoiseModel()
                 for qi in range(device_qubits):
-                    correct_p = np.exp(-qi/10)
+                    correct_p = np.exp(-qi/7.231)
                     read_err = noise.errors.readout_error.ReadoutError([[0.9*correct_p, 1-0.9*correct_p],[1-0.75*correct_p, 0.75*correct_p]])
-                    if qi == 1:
-                        noise_model.add_readout_error(read_err, [qi])
+                    # s = np.random.uniform(0.75,1,2)
+                    # read_err = noise.errors.readout_error.ReadoutError([[s[0], 1-s[0]],[1-s[1], s[1]]])
+                    noise_model.add_readout_error(read_err, [qi])
                 hw_job = Aer.get_backend('qasm_simulator').run(qobj,noise_model=noise_model)
                 # hw_job = Aer.get_backend('qasm_simulator').run(qobj)
             jobs.append(hw_job)
