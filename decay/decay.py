@@ -1,6 +1,7 @@
 import numpy as np
 from qcg.generators import gen_supremacy, gen_hwea, gen_BV, gen_qft, gen_sycamore
-from utils.helper_fun import evaluate_circ, factor_int, cross_entropy, read_file
+from utils.helper_fun import evaluate_circ, factor_int, read_file
+from utils.conversions import dict_to_array
 import os
 from mpi4py import MPI
 import pickle
@@ -27,35 +28,34 @@ def find_rank_tasks(tasks,rank,num_workers):
             print('Should not reach here')
     return rank_tasks
 
-def calculate_delta_H(circ,ground_truth,accumulated_prob,counter,shots_increment,evaluation_method):
+def accumulate_batch(circ,accumulated_prob,counter,shots_increment,evaluation_method):
     if evaluation_method == 'qasm_simulator':
         qasm_evaluator_info = {'num_shots':shots_increment}
-        prob_batch = evaluate_circ(circ=circ,backend='noiseless_qasm_simulator',evaluator_info=qasm_evaluator_info)
+        prob_batch = evaluate_circ(circ=circ,backend='noiseless_qasm_simulator',evaluator_info=qasm_evaluator_info,force_prob=True)
+        prob_batch = dict_to_array(distribution_dict=prob_batch,force_prob=True)
     else:
         raise Exception('Illegal evaluation method:',evaluation_method)
-    accumulated_prob = [(x*(counter-1)+y)/counter for x,y in zip(accumulated_prob,prob_batch)]
+    accumulated_prob = ((counter-1)*accumulated_prob+prob_batch)/counter
     assert abs(sum(accumulated_prob)-1)<1e-10
-    accumulated_ce = cross_entropy(target=ground_truth,obs=accumulated_prob)
-    return accumulated_ce, accumulated_prob
+    return accumulated_prob
 
 def noiseless_decay(circuit,shots_increment):
     decay_begin = time()
     full_circ_size = len(circuit.qubits)
     # print('%d qubit full circuit, shots increment = %d'%(full_circ_size,shots_increment))
-    ground_truth = evaluate_circ(circ=circuit,backend='statevector_simulator',evaluator_info=None)
-    noiseless_accumulated_prob = [0 for i in range(np.power(2,full_circ_size))]
-    noiseless_delta_H_l = []
+    noiseless_accumulated_prob = np.zeros(2**full_circ_size,dtype=float)
+    noiseless_prob_l = []
     max_counter = max(20,int(20*np.power(2,full_circ_size)/shots_increment))
     max_counter = min(max_counter,5000)
     for counter in range(1,max_counter+1):
-        noiseless_accumulated_ce, noiseless_accumulated_prob = calculate_delta_H(circ=circuit,ground_truth=ground_truth,
-        accumulated_prob=noiseless_accumulated_prob,counter=counter,shots_increment=shots_increment,evaluation_method='qasm_simulator')
-        noiseless_delta_H_l.append(noiseless_accumulated_ce)
+        noiseless_accumulated_prob = accumulate_batch(circ=circuit,accumulated_prob=noiseless_accumulated_prob,
+        counter=counter,shots_increment=shots_increment,evaluation_method='qasm_simulator')
+        noiseless_prob_l.append(noiseless_accumulated_prob)
         if full_circ_size>=15 and counter%50==0:
             time_elapsed = time()-decay_begin
             eta = time_elapsed/counter*max_counter-time_elapsed
             print('%d qubit circuit, counter %d/%d, ETA = %.1e'%(full_circ_size,counter,max_counter,eta),flush=True)
-    return noiseless_delta_H_l
+    return noiseless_prob_l
 
 if __name__ == '__main__':
     comm = MPI.COMM_WORLD
@@ -79,8 +79,8 @@ if __name__ == '__main__':
 
         shots_increment = 1024
     
-        noiseless_delta_H_l = noiseless_decay(circuit=circ,shots_increment=shots_increment)
-        rank_decay_dict[full_circ_size] = {'ce_l':noiseless_delta_H_l,'shots_increment':shots_increment}
+        noiseless_prob_l = noiseless_decay(circuit=circ,shots_increment=shots_increment)
+        rank_decay_dict[full_circ_size] = {'circ':circ,'prob_l':noiseless_prob_l,'shots_increment':shots_increment}
     
     if rank == size - 1:
         decay_dict.update(rank_decay_dict)

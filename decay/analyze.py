@@ -1,8 +1,10 @@
 import matplotlib.pyplot as plt
 import argparse
-from utils.helper_fun import read_file
+from utils.helper_fun import read_file, evaluate_circ
+from utils.conversions import dict_to_array
 import math
 import numpy as np
+from scipy.stats import chisquare
 
 def get_xticks(xvals,compulsory):
     if len(xvals)<=10:
@@ -15,15 +17,15 @@ def get_xticks(xvals,compulsory):
                 x_ticks.append(x)
         return x_ticks
 
-def make_plot(ce_l,cutoff,full_circ_size,shots_increment,derivative_thresholds):
+def make_plot(metric_l,cutoff,full_circ_size,shots_increment,derivative_thresholds):
     first_derivative_threshold, second_derivative_threshold = derivative_thresholds
-    xvals = range(1,len(ce_l)+1)
+    xvals = range(1,len(metric_l)+1)
     plt.figure()
-    plt.axvline(x=cutoff,label='saturated cutoff' if len(ce_l)>cutoff+2 else 'diverged cutoff',color='k',linestyle='--')
-    plt.plot(xvals,ce_l,label='noiseless')
+    plt.axvline(x=cutoff,label='saturated cutoff' if len(metric_l)>cutoff+2 else 'diverged cutoff',color='k',linestyle='--')
+    plt.plot(xvals,metric_l,label='noiseless')
     x_ticks = get_xticks(xvals=xvals,compulsory=cutoff)
     plt.xticks(ticks=x_ticks,labels=x_ticks)
-    plt.ylabel('\u0394H, lower is better')
+    plt.ylabel('chi^2, lower is better')
     plt.xlabel('shots [*%d]'%shots_increment)
     plt.title('%d qubit circuit, derivative_thresholds : %.3e, %.3e'%(full_circ_size,first_derivative_threshold,second_derivative_threshold))
     plt.legend()
@@ -31,14 +33,13 @@ def make_plot(ce_l,cutoff,full_circ_size,shots_increment,derivative_thresholds):
     plt.savefig('decay/%d_decay.png'%(full_circ_size),dpi=400)
     plt.close()
 
-def find_saturation(ce_l,derivative_thresholds,shots_increment):
-    assert len(ce_l)>=3
+def find_saturation(metric_l,derivative_thresholds,shots_increment):
+    assert len(metric_l)>=3
     first_derivative_threshold, second_derivative_threshold = derivative_thresholds
-    for cutoff in range(1,len(ce_l)-1):
-        first_derivative = (ce_l[cutoff+1]-ce_l[cutoff-1])/(2*shots_increment)
-        second_derivative = (ce_l[cutoff+1]+ce_l[cutoff-1]-2*ce_l[cutoff])/(2*np.power(shots_increment,2))
-        # print('\u0394H = %.3f, first derivative = %.3e, second derivative = %.3e'%(ce_l[cutoff],first_derivative,second_derivative),flush=True)
-
+    for cutoff in range(1,len(metric_l)-1):
+        first_derivative = (metric_l[cutoff+1]-metric_l[cutoff-1])/(2*shots_increment)
+        second_derivative = (metric_l[cutoff+1]+metric_l[cutoff-1]-2*metric_l[cutoff])/(2*np.power(shots_increment,2))
+        # print('chi2 = %.3f, first derivative = %.3e, second derivative = %.3e'%(metric_l[cutoff],first_derivative,second_derivative),flush=True)
         if abs(first_derivative)<first_derivative_threshold and abs(second_derivative)<second_derivative_threshold:
             break
     cutoff += 1
@@ -53,8 +54,15 @@ if __name__ == '__main__':
     decay_dict = read_file(filename='./decay/decay.pickle')
 
     for full_circ_size in decay_dict:
-        ce_l = decay_dict[full_circ_size]['ce_l']
+        circ = decay_dict[full_circ_size]['circ']
+        prob_l = decay_dict[full_circ_size]['prob_l']
         shots_increment = decay_dict[full_circ_size]['shots_increment']
-        cutoff, first_derivative, second_derivative = find_saturation(ce_l=ce_l,derivative_thresholds=(args.first_derivative,args.second_derivative),shots_increment=shots_increment)
-        print('%d qubit circuit, cutoff = %d, \u0394H = %.3f, first derivative = %.3e, second derivative = %.3e'%(full_circ_size,cutoff,ce_l[cutoff],first_derivative,second_derivative),flush=True)
-        make_plot(ce_l=ce_l,cutoff=cutoff,full_circ_size=full_circ_size,shots_increment=shots_increment,derivative_thresholds=(args.first_derivative,args.second_derivative))
+        ground_truth = evaluate_circ(circ=circ,backend='statevector_simulator',evaluator_info=None,force_prob=True)
+        ground_truth = dict_to_array(distribution_dict=ground_truth,force_prob=True)
+        metric_l = []
+        for prob in prob_l:
+            chi2 = chisquare(f_obs=prob,f_exp=ground_truth)[0]
+            metric_l.append(chi2)
+        cutoff, first_derivative, second_derivative = find_saturation(metric_l=metric_l,derivative_thresholds=(args.first_derivative,args.second_derivative),shots_increment=shots_increment)
+        print('%d qubit circuit, cutoff = %d, chi^2 = %.3f, first derivative = %.3e, second derivative = %.3e'%(full_circ_size,cutoff,metric_l[cutoff],first_derivative,second_derivative),flush=True)
+        make_plot(metric_l=metric_l,cutoff=cutoff,full_circ_size=full_circ_size,shots_increment=shots_increment,derivative_thresholds=(args.first_derivative,args.second_derivative))
