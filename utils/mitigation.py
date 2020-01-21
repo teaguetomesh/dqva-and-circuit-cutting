@@ -71,7 +71,7 @@ class TensoredMitigation:
             if len(qubit_group)>0:
                 mit_pattern.append(qubit_group)
             mit_pattern = [range(len(circ.qubits))]
-            print('Circuit %s has mit_pattern:'%key,mit_pattern)
+            # print('Circuit %s has mit_pattern:'%key,mit_pattern)
             self.circ_dict[key]['mit_pattern'] = mit_pattern
             meas_calibs, state_labels = tensored_meas_cal(mit_pattern=mit_pattern, qr=qr, circlabel='')
             meas_calibs_transpiled = transpile(meas_calibs, backend=evaluator_info['device'])
@@ -141,12 +141,12 @@ class TensoredMitigation:
                 num_of_states = 2**nqubits
                 all_states = [bin(state)[2:].zfill(nqubits) for state in range(2**nqubits)]
                 unmitigated_prob = np.array(unmitigated[key]['hw'],dtype=float)
-                print('unmitigated_prob:',unmitigated_prob)
-                print('qubit list sizes:',qubit_list_sizes)
-                print('indices_list:',indices_list)
-                print('nqubits:',nqubits)
-                print('all_states:',all_states)
-                print('num_of_states:',num_of_states)
+                # print('unmitigated_prob:',unmitigated_prob)
+                # print('qubit list sizes:',qubit_list_sizes)
+                # print('indices_list:',indices_list)
+                # print('nqubits:',nqubits)
+                # print('all_states:',all_states)
+                # print('num_of_states:',num_of_states)
 
                 def fun(x):
                     mat_dot_x = np.zeros([num_of_states], dtype=float)
@@ -179,7 +179,7 @@ class TensoredMitigation:
                 bnds = tuple((0, nshots) for x in x0)
                 res = minimize(fun, x0, method='SLSQP',constraints=cons, bounds=bnds, tol=1e-6)
                 mitigated_cnts = res.x
-                print('mitigated_prob:',mitigated_cnts)
+                # print('mitigated_prob:',mitigated_cnts)
                 mitigated[key]['mitigated_hw'] = copy.deepcopy(mitigated_cnts)
             else:
                 mitigated[key]['mitigated_hw'] = copy.deepcopy(unmitigated[key]['hw'])
