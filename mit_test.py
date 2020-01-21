@@ -14,6 +14,7 @@ from utils.conversions import list_to_dict, dict_to_array
 import copy
 import math
 import numpy as np
+import matplotlib.pyplot as plt
 
 def compute_metrics(ground_truth,raw_counts,mitigated_counts,metric):
     if metric == 'ce':
@@ -35,11 +36,56 @@ def compute_metrics(ground_truth,raw_counts,mitigated_counts,metric):
     else:
         raise Exception('gg')
 
+def cross_entropy_terms(target,obs):
+    assert len(target)==len(obs)
+    epsilon = 1e-20
+    obs = [abs(x) if x!=0 else epsilon for x in obs]
+    sum_of_prob = sum(obs)
+    obs = [x/sum_of_prob for x in obs]
+    assert abs(sum(obs)-1) < 1e-10
+    h = 0
+    delta_h_terms = []
+    delta_p_terms = []
+    for p,q in zip(target,obs):
+        delta_p_terms.append(abs(p-q))
+        if p==0:
+            h += 0
+            delta_h_terms.append(0)
+        else:
+            h += p*np.log(p/q)
+            delta_h_terms.append(p*np.log(p/q))
+    delta_h_terms = list_to_dict(delta_h_terms)
+    delta_p_terms = list_to_dict(delta_p_terms)
+    return h, delta_h_terms, delta_p_terms
+
+def plot_bar(data,legends,title):
+    nqubits = len(list(data[0].keys())[0])
+    labels = [bin(state)[2:].zfill(nqubits) for state in range(2**nqubits)]
+    x = np.arange(len(labels))
+    width = 1/(len(data)+2)
+
+    fig, ax = plt.subplots(figsize=(30,10))
+    counter = -int(len(data)/2)
+    for datum, legend in zip(data,legends):
+        datum = dict_to_array(distribution_dict=datum,force_prob=True)
+        rects = ax.bar(x + counter*width, datum, width, label=legend)
+        counter += 1
+    # Add some text for labels, title and custom x-axis tick labels, etc.
+    ax.set_ylabel('')
+    ax.set_title(title)
+    ax.set_xticks(x)
+    ax.set_xticklabels(labels,rotation='vertical')
+    ax.legend()
+    fig.tight_layout()
+
+    fig.savefig('%s.png'%title)
+    return
+
 device_name = 'ibmq_boeblingen'
 evaluator_info = get_evaluator_info(circ=None,device_name='ibmq_boeblingen',fields=['basis_gates','properties'])
 device_qubits = len(evaluator_info['properties'].qubits)
 
-full_circ_size = 3
+full_circ_size = 5
 qr = QuantumRegister(full_circ_size)
 ghz = generate_circ(full_circ_size=full_circ_size,circuit_type='supremacy')
 ground_truth = evaluate_circ(circ=ghz,backend='statevector_simulator',evaluator_info=None,force_prob=True)
@@ -105,17 +151,24 @@ my_mitigated = mitigated_circ_dict['test']['mitigated_hw']
 my_raw_dict = list_to_dict(l=list(my_raw))
 my_mitigated_dict = list_to_dict(l=list(my_mitigated))
 
-truth_ce, qiskit_raw_ce, qiskit_mit_ce = compute_metrics(ground_truth=ground_truth,raw_counts=raw_counts,mitigated_counts=mitigated_counts,metric='chi2')
-print('Qiskit \u03C7^2: {:.3e}-->{:.3e}'.format(qiskit_raw_ce,qiskit_mit_ce))
+truth_ce, qiskit_raw_ce, qiskit_mit_ce = compute_metrics(ground_truth=ground_truth,raw_counts=raw_counts,mitigated_counts=mitigated_counts,metric='ce')
+print('Qiskit metric: {:.3e}-->{:.3e}'.format(qiskit_raw_ce,qiskit_mit_ce))
 
 fig = plot_histogram([raw_counts, mitigated_counts, ground_truth], legend=['raw = %.3e'%qiskit_raw_ce,'mitigated = %.3e'%qiskit_mit_ce,'truth = %.3e'%truth_ce],figsize=(35,10),title='qiskit mitigation')
 fig.savefig('qiskit_mitigation.png')
 
-truth_ce, my_raw_ce, my_mit_ce = compute_metrics(ground_truth=ground_truth,raw_counts=my_raw_dict,mitigated_counts=my_mitigated_dict,metric='chi2')
-print('My \u03C7^2: {:.3e}-->{:.3e}'.format(my_raw_ce,my_mit_ce))
+truth_ce, my_raw_ce, my_mit_ce = compute_metrics(ground_truth=ground_truth,raw_counts=my_raw_dict,mitigated_counts=my_mitigated_dict,metric='ce')
+print('My metric: {:.3e}-->{:.3e}'.format(my_raw_ce,my_mit_ce))
 
-fig = plot_histogram([my_raw_dict, my_mitigated_dict,ground_truth], legend=['my_raw = %.3e'%my_raw_ce,'my_mitigated = %.3e'%my_mit_ce,'truth = %.3e'%truth_ce],figsize=(35,10),title='my mitigation')
+fig = plot_histogram([my_raw_dict, my_mitigated_dict, ground_truth], legend=['my_raw = %.3e'%my_raw_ce,'my_mitigated = %.3e'%my_mit_ce,'truth = %.3e'%truth_ce],figsize=(35,10),title='my mitigation')
 fig.savefig('my_mitigation.png')
 
-fig = plot_histogram([mitigated_counts, my_mitigated_dict, ground_truth], legend=['mitigated', 'my_mitigated', 'truth'],figsize=(35,10),title='mitigations comparison')
-fig.savefig('mitigations.png')
+# fig = plot_histogram([mitigated_counts, my_mitigated_dict, ground_truth], legend=['mitigated', 'my_mitigated', 'truth'],figsize=(35,10),title='mitigations comparison')
+# fig.savefig('mitigations.png')
+
+qiskit_raw_h, qiskit_raw_delta_h_terms, qiskit_raw_delta_p_terms = cross_entropy_terms(target=dict_to_array(distribution_dict=ground_truth,force_prob=True),
+obs=dict_to_array(distribution_dict=raw_counts,force_prob=True))
+qiskit_mit_h, qiskit_mit_delta_h_terms, qiskit_mit_delta_p_terms = cross_entropy_terms(target=dict_to_array(distribution_dict=ground_truth,force_prob=True),
+obs=dict_to_array(distribution_dict=mitigated_counts,force_prob=True))
+plot_bar(data=[raw_counts, qiskit_raw_delta_h_terms, qiskit_raw_delta_p_terms],legends=['raw = %.3e'%qiskit_raw_h,'delta_H','delta_p'],title='qiskit_raw')
+plot_bar(data=[mitigated_counts, qiskit_mit_delta_h_terms, qiskit_mit_delta_p_terms],legends=['mitigated = %.3e'%qiskit_mit_h,'delta_H','delta_p'],title='qiskit_mit')

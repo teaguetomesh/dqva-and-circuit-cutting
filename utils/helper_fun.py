@@ -134,10 +134,10 @@ def get_circ_saturated_shots(circs,device_name):
         ground_truth = dict_to_array(distribution_dict=ground_truth,force_prob=True)
 
         qasm_evaluator_info = get_evaluator_info(circ=circ,device_name=device_name,fields=['device'])
-        qasm_evaluator_info['num_shots'] = shots_increment
         device_max_shots = qasm_evaluator_info['device'].configuration().max_shots
         device_max_experiments = int(qasm_evaluator_info['device'].configuration().max_experiments/3*2)
         shots_increment = device_max_shots
+        qasm_evaluator_info['num_shots'] = shots_increment
 
         chi2_l = []
         counter = 1
@@ -148,7 +148,7 @@ def get_circ_saturated_shots(circs,device_name):
             accumulated_prob = ((counter-1)*accumulated_prob+noiseless_prob_batch)/counter
             assert abs(sum(accumulated_prob)-1)<1e-10
             accumulated_chi2 = chisquare(f_obs=accumulated_prob,f_exp=ground_truth)
-            chi2_l.append(accumulated_chi2)
+            chi2_l.append(accumulated_chi2[0])
             if len(chi2_l)>=3:
                 accumulated_shots = int((len(chi2_l)-1)*shots_increment)
                 first_derivative = (chi2_l[-1]+chi2_l[-3])/(2*shots_increment)
@@ -166,7 +166,7 @@ def get_circ_saturated_shots(circs,device_name):
         ground_truths.append(ground_truth)
         saturated_probs.append(saturated_prob)
         saturated_chi2 = chisquare(f_obs=saturated_prob,f_exp=ground_truth)
-        print('%d qubit circuit saturated shots = %d, \u03C7^2 = %.3e'%(full_circ_size,saturated_shot,saturated_chi2))
+        print('%d qubit circuit saturated shots = %d, \u03C7^2 = %.3e'%(full_circ_size,saturated_shot,saturated_chi2[0]))
         
     return saturated_shots, ground_truths, saturated_probs
 
