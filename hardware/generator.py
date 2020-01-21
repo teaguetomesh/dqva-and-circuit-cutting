@@ -90,7 +90,7 @@ if __name__ == '__main__':
     tensored_mitigation = TensoredMitigation(circ_dict=circ_dict,device_name=args.device_name)
     tensored_mitigation.run(real_device=False)
 
-    scheduler.retrieve()
+    scheduler.retrieve(force_prob=True)
     tensored_mitigation.retrieve()
     tensored_mitigation.apply(unmitigated=scheduler.circ_dict)
     circ_dict = tensored_mitigation.circ_dict

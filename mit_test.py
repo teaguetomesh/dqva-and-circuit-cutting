@@ -39,7 +39,7 @@ device_name = 'ibmq_boeblingen'
 evaluator_info = get_evaluator_info(circ=None,device_name='ibmq_boeblingen',fields=['basis_gates','properties'])
 device_qubits = len(evaluator_info['properties'].qubits)
 
-full_circ_size = 7
+full_circ_size = 3
 qr = QuantumRegister(full_circ_size)
 ghz = generate_circ(full_circ_size=full_circ_size,circuit_type='supremacy')
 ground_truth = evaluate_circ(circ=ghz,backend='statevector_simulator',evaluator_info=None,force_prob=True)
@@ -95,12 +95,9 @@ tensored_mitigation.run(real_device=False)
 scheduler = Scheduler(circ_dict=circ_dict,device_name=device_name)
 scheduler.run(real_device=False)
 
-scheduler.retrieve(force_prob=False)
+scheduler.retrieve(force_prob=True)
 tensored_mitigation.retrieve()
-np.set_printoptions(formatter={'all':lambda x: '%.2f'%x})
-for qiskit_cal_mat, my_cal_mat in zip(meas_fitter.cal_matrices, tensored_mitigation.circ_dict['test']['calibration_matrices']):
-    print(qiskit_cal_mat-my_cal_mat)
-tensored_mitigation.apply(unmitigated=scheduler.circ_dict,force_prob=False)
+tensored_mitigation.apply(unmitigated=scheduler.circ_dict)
 mitigated_circ_dict = tensored_mitigation.circ_dict
 print(mitigated_circ_dict['test'].keys())
 my_raw = mitigated_circ_dict['test']['hw']
@@ -109,13 +106,13 @@ my_raw_dict = list_to_dict(l=list(my_raw))
 my_mitigated_dict = list_to_dict(l=list(my_mitigated))
 
 truth_ce, qiskit_raw_ce, qiskit_mit_ce = compute_metrics(ground_truth=ground_truth,raw_counts=raw_counts,mitigated_counts=mitigated_counts,metric='chi2')
-print('Qiskit chi^2: {:.3e}-->{:.3e}'.format(qiskit_raw_ce,qiskit_mit_ce))
+print('Qiskit \u03C7^2: {:.3e}-->{:.3e}'.format(qiskit_raw_ce,qiskit_mit_ce))
 
 fig = plot_histogram([raw_counts, mitigated_counts, ground_truth], legend=['raw = %.3e'%qiskit_raw_ce,'mitigated = %.3e'%qiskit_mit_ce,'truth = %.3e'%truth_ce],figsize=(35,10),title='qiskit mitigation')
 fig.savefig('qiskit_mitigation.png')
 
 truth_ce, my_raw_ce, my_mit_ce = compute_metrics(ground_truth=ground_truth,raw_counts=my_raw_dict,mitigated_counts=my_mitigated_dict,metric='chi2')
-print('My chi^2: {:.3e}-->{:.3e}'.format(my_raw_ce,my_mit_ce))
+print('My \u03C7^2: {:.3e}-->{:.3e}'.format(my_raw_ce,my_mit_ce))
 
 fig = plot_histogram([my_raw_dict, my_mitigated_dict,ground_truth], legend=['my_raw = %.3e'%my_raw_ce,'my_mitigated = %.3e'%my_mit_ce,'truth = %.3e'%truth_ce],figsize=(35,10),title='my mitigation')
 fig.savefig('my_mitigation.png')

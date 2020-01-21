@@ -130,7 +130,7 @@ class TensoredMitigation:
                     out=np.zeros_like(self.circ_dict[key]['calibration_matrices'][mat_index]),
                     where=sums_of_columns != 0)
 
-    def apply(self,unmitigated,force_prob):
+    def apply(self,unmitigated):
         mitigated = copy.deepcopy(unmitigated)
         for key in unmitigated:
             if key in self.circ_dict:
@@ -179,12 +179,8 @@ class TensoredMitigation:
                 bnds = tuple((0, nshots) for x in x0)
                 res = minimize(fun, x0, method='SLSQP',constraints=cons, bounds=bnds, tol=1e-6)
                 mitigated_cnts = res.x
-                if force_prob:
-                    mitigated_prob = mitigated_cnts / sum(mitigated_cnts)
-                    assert abs(sum(mitigated_prob)-1)<1e-10
-                    mitigated[key]['mitigated_hw'] = copy.deepcopy(mitigated_prob)
-                else:
-                    mitigated[key]['mitigated_hw'] = copy.deepcopy(mitigated_cnts)
+                print('mitigated_prob:',mitigated_cnts)
+                mitigated[key]['mitigated_hw'] = copy.deepcopy(mitigated_cnts)
             else:
                 mitigated[key]['mitigated_hw'] = copy.deepcopy(unmitigated[key]['hw'])
         self.circ_dict = copy.deepcopy(mitigated)

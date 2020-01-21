@@ -14,7 +14,8 @@ import copy
 from time import time
 import os
 from qcg.generators import gen_supremacy, gen_hwea, gen_BV, gen_qft, gen_sycamore
-from utils.conversions import list_to_dict
+from utils.conversions import list_to_dict, dict_to_array
+from scipy.stats import chisquare
 
 def generate_circ(full_circ_size,circuit_type):
     def gen_secret(num_qubit):
@@ -130,43 +131,42 @@ def get_circ_saturated_shots(circs,device_name):
     for circ_idx, circ in enumerate(circs):
         full_circ_size = len(circ.qubits)
         ground_truth = evaluate_circ(circ=circ,backend='statevector_simulator',evaluator_info=None,force_prob=True)
-        ground_truth_entropy = entropy(prob_dist=ground_truth)
-        shots_increment = 1024
-        
-        qasm_evaluator_info = get_evaluator_info(circ=circ,device_name=device_name,
-        fields=['device','basis_gates','coupling_map','properties','initial_layout'])
+        ground_truth = dict_to_array(distribution_dict=ground_truth,force_prob=True)
+
+        qasm_evaluator_info = get_evaluator_info(circ=circ,device_name=device_name,fields=['device'])
         qasm_evaluator_info['num_shots'] = shots_increment
         device_max_shots = qasm_evaluator_info['device'].configuration().max_shots
         device_max_experiments = int(qasm_evaluator_info['device'].configuration().max_experiments/3*2)
-        if ground_truth_entropy < 1e-10:
-            saturated_shot = max(1024,int(10*np.power(2,full_circ_size)))
-            saturated_shot = min(saturated_shot,int(device_max_experiments*device_max_shots))
-        else:
-            ce_l = []
-            counter = 1
-            accumulated_prob = [0 for i in range(np.power(2,len(circ.qubits)))]
-            while 1:
-                noiseless_prob_batch = evaluate_circ(circ=circ,backend='noiseless_qasm_simulator',evaluator_info=qasm_evaluator_info,force_prob=True)
-                accumulated_prob = [(x*(counter-1)+y)/counter for x,y in zip(accumulated_prob,noiseless_prob_batch)]
-                assert abs(sum(accumulated_prob)-1)<1e-5
-                accumulated_ce = cross_entropy(target=ground_truth,obs=accumulated_prob)
-                ce_l.append(accumulated_ce)
-                if len(ce_l)>=3:
-                    accumulated_shots = int((len(ce_l)-1)*shots_increment)
-                    first_derivative = (ce_l[-1]+ce_l[-3])/(2*shots_increment)
-                    second_derivative = (ce_l[-1]+ce_l[-3]-2*ce_l[-2])/(2*np.power(shots_increment,2))
-                    if (abs(first_derivative)<1e-5 and abs(second_derivative) < 1e-5) or accumulated_shots/device_max_experiments/device_max_shots>1:
-                        saturated_shot = accumulated_shots
-                        break
-                counter += 1
+        shots_increment = device_max_shots
+
+        chi2_l = []
+        counter = 1
+        accumulated_prob = np.zeros(2**full_circ_size,dtype=float)
+        while 1:
+            noiseless_prob_batch = evaluate_circ(circ=circ,backend='noiseless_qasm_simulator',evaluator_info=qasm_evaluator_info,force_prob=True)
+            noiseless_prob_batch = dict_to_array(distribution_dict=noiseless_prob_batch,force_prob=True)
+            accumulated_prob = ((counter-1)*accumulated_prob+noiseless_prob_batch)/counter
+            assert abs(sum(accumulated_prob)-1)<1e-10
+            accumulated_chi2 = chisquare(f_obs=accumulated_prob,f_exp=ground_truth)
+            chi2_l.append(accumulated_chi2)
+            if len(chi2_l)>=3:
+                accumulated_shots = int((len(chi2_l)-1)*shots_increment)
+                first_derivative = (chi2_l[-1]+chi2_l[-3])/(2*shots_increment)
+                second_derivative = (chi2_l[-1]+chi2_l[-3]-2*chi2_l[-2])/(2*np.power(shots_increment,2))
+                if (abs(first_derivative)<1e-5 and abs(second_derivative) < 1e-5) or accumulated_shots/device_max_experiments/device_max_shots>1:
+                    saturated_shot = accumulated_shots
+                    break
+            counter += 1
         ground_truth = evaluate_circ(circ=circ,backend='statevector_simulator',evaluator_info=None,force_prob=True)
+        ground_truth = dict_to_array(distribution_dict=ground_truth,force_prob=True)
         qasm_evaluator_info['num_shots'] = saturated_shot
         saturated_prob = evaluate_circ(circ=circ,backend='noiseless_qasm_simulator',evaluator_info=qasm_evaluator_info,force_prob=True)
-        saturated_ce = cross_entropy(target=ground_truth,obs=saturated_prob)
+        saturated_prob = dict_to_array(distribution_dict=saturated_prob,force_prob=True)
         saturated_shots.append(saturated_shot)
         ground_truths.append(ground_truth)
         saturated_probs.append(saturated_prob)
-        print('%d qubit circuit saturated shots = %d, \u0394H = %.3e'%(full_circ_size,saturated_shot,saturated_ce))
+        saturated_chi2 = chisquare(f_obs=saturated_prob,f_exp=ground_truth)
+        print('%d qubit circuit saturated shots = %d, \u03C7^2 = %.3e'%(full_circ_size,saturated_shot,saturated_chi2))
         
     return saturated_shots, ground_truths, saturated_probs
 
