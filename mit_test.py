@@ -74,7 +74,7 @@ print('Qiskit mit_pattern = ',mit_pattern)
 meas_calibs, state_labels = tensored_meas_cal(mit_pattern=mit_pattern, qr=qr, circlabel='mcal')
 # Execute the calibration circuits
 backend = Aer.get_backend('qasm_simulator')
-qobj = assemble(meas_calibs, backend=backend, shots=8192*100)
+qobj = assemble(meas_calibs, backend=backend, shots=8192)
 job = Aer.get_backend('qasm_simulator').run(qobj,noise_model=noise_model)
 cal_results = job.result()
 meas_fitter = TensoredMeasFitter(cal_results, mit_pattern=mit_pattern)
@@ -109,13 +109,13 @@ my_raw_dict = list_to_dict(l=list(my_raw))
 my_mitigated_dict = list_to_dict(l=list(my_mitigated))
 
 truth_ce, qiskit_raw_ce, qiskit_mit_ce = compute_metrics(ground_truth=ground_truth,raw_counts=raw_counts,mitigated_counts=mitigated_counts,metric='chi2')
-print('Qiskit \u0394H: {:.3e}-->{:.3e}'.format(qiskit_raw_ce,qiskit_mit_ce))
+print('Qiskit chi^2: {:.3e}-->{:.3e}'.format(qiskit_raw_ce,qiskit_mit_ce))
 
 fig = plot_histogram([raw_counts, mitigated_counts, ground_truth], legend=['raw = %.3e'%qiskit_raw_ce,'mitigated = %.3e'%qiskit_mit_ce,'truth = %.3e'%truth_ce],figsize=(35,10),title='qiskit mitigation')
 fig.savefig('qiskit_mitigation.png')
 
 truth_ce, my_raw_ce, my_mit_ce = compute_metrics(ground_truth=ground_truth,raw_counts=my_raw_dict,mitigated_counts=my_mitigated_dict,metric='chi2')
-print('My \u0394H: {:.3e}-->{:.3e}'.format(my_raw_ce,my_mit_ce))
+print('My chi^2: {:.3e}-->{:.3e}'.format(my_raw_ce,my_mit_ce))
 
 fig = plot_histogram([my_raw_dict, my_mitigated_dict,ground_truth], legend=['my_raw = %.3e'%my_raw_ce,'my_mitigated = %.3e'%my_mit_ce,'truth = %.3e'%truth_ce],figsize=(35,10),title='my mitigation')
 fig.savefig('my_mitigation.png')

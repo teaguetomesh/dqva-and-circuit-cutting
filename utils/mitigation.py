@@ -78,7 +78,7 @@ class TensoredMitigation:
             for meas_calib_circ in meas_calibs_transpiled:
                 meas_calibs_dict_key = (key,meas_calib_circ.name.split('_')[1])
                 assert meas_calibs_dict_key not in meas_calibs_dict
-                meas_calibs_dict.update({meas_calibs_dict_key:{'circ':meas_calib_circ,'shots':100*device_max_shots}})
+                meas_calibs_dict.update({meas_calibs_dict_key:{'circ':meas_calib_circ,'shots':device_max_shots}})
                 # print(meas_calibs_dict_key)
         return meas_calibs_dict
 
