@@ -4,7 +4,7 @@ from time import time
 import numpy as np
 import utils.MIQCP_searcher as searcher
 import utils.cutter as cutter
-from utils.helper_fun import get_evaluator_info, get_circ_saturated_shots, get_filename, read_file, generate_circ,evaluate_circ
+from utils.helper_fun import get_evaluator_info, get_circ_saturated_shots, get_filename, read_file, generate_circ, evaluate_circ
 from utils.submission import Scheduler
 from utils.mitigation import TensoredMitigation
 import argparse

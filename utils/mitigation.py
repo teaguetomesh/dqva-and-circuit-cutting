@@ -70,6 +70,7 @@ class TensoredMitigation:
                         qubit_group = [q]
             if len(qubit_group)>0:
                 mit_pattern.append(qubit_group)
+            # Note: only for debugging
             mit_pattern = [range(len(circ.qubits))]
             # print('Circuit %s has mit_pattern:'%key,mit_pattern)
             self.circ_dict[key]['mit_pattern'] = mit_pattern

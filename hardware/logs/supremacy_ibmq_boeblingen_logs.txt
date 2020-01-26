@@ -306,3 +306,102 @@ Submitting job 1/1 942e4555-06f6-4fb5-b389-3169b0538041 --> 768 circuits, 768 * 
 Retrieving job 1/1 c6a16c49-162c-458e-86c0-61ff6233d0eb --> 4 circuits, 11 * 8192 shots
 ******************** Retrieving jobs ********************
 Retrieving job 1/1 942e4555-06f6-4fb5-b389-3169b0538041 --> 768 circuits, 768 * 8192 shots
+-------------------------------------------------- Evaluator --------------------------------------------------
+Existing cases: dict_keys([])
+Running case: (4, 8)
+case (4, 8), cluster_0 4_qubits * 54_instances on ibmq_boeblingen QUANTUM HARDWARE, saturated shots
+case (4, 8), cluster_1 4_qubits * 18_instances on ibmq_boeblingen QUANTUM HARDWARE, saturated shots
+case (4, 8), cluster_2 4_qubits * 108_instances on ibmq_boeblingen QUANTUM HARDWARE, saturated shots
+Rank MASTER dumped case (4, 8), 1/18 cases
+----------------------------------------------------------------------------------------------------
+Running case: (5, 8)
+case (5, 8), cluster_0 5_qubits * 54_instances on ibmq_boeblingen QUANTUM HARDWARE, saturated shots
+case (5, 8), cluster_1 5_qubits * 54_instances on ibmq_boeblingen QUANTUM HARDWARE, saturated shots
+case (5, 8), cluster_2 2_qubits * 36_instances on ibmq_boeblingen QUANTUM HARDWARE, saturated shots
+Rank MASTER dumped case (5, 8), 2/18 cases
+----------------------------------------------------------------------------------------------------
+Running case: (6, 8)
+case (6, 8), cluster_0 6_qubits * 18_instances on ibmq_boeblingen QUANTUM HARDWARE, saturated shots
+case (6, 8), cluster_1 4_qubits * 18_instances on ibmq_boeblingen QUANTUM HARDWARE, saturated shots
+Rank MASTER dumped case (6, 8), 3/18 cases
+----------------------------------------------------------------------------------------------------
+Running case: (7, 8)
+case (7, 8), cluster_0 7_qubits * 18_instances on ibmq_boeblingen QUANTUM HARDWARE, saturated shots
+case (7, 8), cluster_1 3_qubits * 18_instances on ibmq_boeblingen QUANTUM HARDWARE, saturated shots
+Rank MASTER dumped case (7, 8), 4/18 cases
+----------------------------------------------------------------------------------------------------
+Running case: (5, 9)
+case (5, 9), cluster_0 5_qubits * 108_instances on ibmq_boeblingen QUANTUM HARDWARE, saturated shots
+case (5, 9), cluster_1 4_qubits * 108_instances on ibmq_boeblingen QUANTUM HARDWARE, saturated shots
+case (5, 9), cluster_2 5_qubits * 162_instances on ibmq_boeblingen QUANTUM HARDWARE, saturated shots
+Rank MASTER dumped case (5, 9), 5/18 cases
+----------------------------------------------------------------------------------------------------
+Running case: (6, 9)
+case (6, 9), cluster_0 6_qubits * 54_instances on ibmq_boeblingen QUANTUM HARDWARE, saturated shots
+case (6, 9), cluster_1 6_qubits * 108_instances on ibmq_boeblingen QUANTUM HARDWARE, saturated shots
+Rank MASTER dumped case (6, 9), 6/18 cases
+----------------------------------------------------------------------------------------------------
+Running case: (7, 9)
+case (7, 9), cluster_0 7_qubits * 54_instances on ibmq_boeblingen QUANTUM HARDWARE, saturated shots
+case (7, 9), cluster_1 5_qubits * 108_instances on ibmq_boeblingen QUANTUM HARDWARE, saturated shots
+Rank MASTER dumped case (7, 9), 7/18 cases
+----------------------------------------------------------------------------------------------------
+Running case: (8, 9)
+case (8, 9), cluster_0 8_qubits * 36_instances on ibmq_boeblingen QUANTUM HARDWARE, saturated shots
+case (8, 9), cluster_1 3_qubits * 9_instances on ibmq_boeblingen QUANTUM HARDWARE, saturated shots
+Rank MASTER dumped case (8, 9), 8/18 cases
+----------------------------------------------------------------------------------------------------
+Running case: (5, 10)
+case (5, 10), cluster_0 4_qubits * 9_instances on ibmq_boeblingen QUANTUM HARDWARE, saturated shots
+case (5, 10), cluster_1 5_qubits * 324_instances on ibmq_boeblingen QUANTUM HARDWARE, saturated shots
+case (5, 10), cluster_2 5_qubits * 36_instances on ibmq_boeblingen QUANTUM HARDWARE, saturated shots
+Rank MASTER dumped case (5, 10), 9/18 cases
+----------------------------------------------------------------------------------------------------
+Running case: (6, 10)
+case (6, 10), cluster_0 6_qubits * 18_instances on ibmq_boeblingen QUANTUM HARDWARE, saturated shots
+case (6, 10), cluster_1 6_qubits * 18_instances on ibmq_boeblingen QUANTUM HARDWARE, saturated shots
+Rank MASTER dumped case (6, 10), 10/18 cases
+----------------------------------------------------------------------------------------------------
+Running case: (7, 10)
+case (7, 10), cluster_0 6_qubits * 18_instances on ibmq_boeblingen QUANTUM HARDWARE, saturated shots
+case (7, 10), cluster_1 6_qubits * 18_instances on ibmq_boeblingen QUANTUM HARDWARE, saturated shots
+Rank MASTER dumped case (7, 10), 11/18 cases
+----------------------------------------------------------------------------------------------------
+Running case: (8, 10)
+case (8, 10), cluster_0 6_qubits * 18_instances on ibmq_boeblingen QUANTUM HARDWARE, saturated shots
+case (8, 10), cluster_1 6_qubits * 18_instances on ibmq_boeblingen QUANTUM HARDWARE, saturated shots
+Rank MASTER dumped case (8, 10), 12/18 cases
+----------------------------------------------------------------------------------------------------
+Running case: (9, 10)
+case (9, 10), cluster_0 9_qubits * 18_instances on ibmq_boeblingen QUANTUM HARDWARE, saturated shots
+case (9, 10), cluster_1 3_qubits * 18_instances on ibmq_boeblingen QUANTUM HARDWARE, saturated shots
+Rank MASTER dumped case (9, 10), 13/18 cases
+----------------------------------------------------------------------------------------------------
+Running case: (5, 11)
+case (5, 11), cluster_0 5_qubits * 6_instances on ibmq_boeblingen QUANTUM HARDWARE, saturated shots
+case (5, 11), cluster_1 3_qubits * 9_instances on ibmq_boeblingen QUANTUM HARDWARE, saturated shots
+case (5, 11), cluster_2 5_qubits * 6_instances on ibmq_boeblingen QUANTUM HARDWARE, saturated shots
+Rank MASTER dumped case (5, 11), 14/18 cases
+----------------------------------------------------------------------------------------------------
+Running case: (6, 11)
+case (6, 11), cluster_0 6_qubits * 3_instances on ibmq_boeblingen QUANTUM HARDWARE, saturated shots
+case (6, 11), cluster_1 6_qubits * 6_instances on ibmq_boeblingen QUANTUM HARDWARE, saturated shots
+Rank MASTER dumped case (6, 11), 15/18 cases
+----------------------------------------------------------------------------------------------------
+Running case: (7, 11)
+case (7, 11), cluster_0 7_qubits * 3_instances on ibmq_boeblingen QUANTUM HARDWARE, saturated shots
+case (7, 11), cluster_1 5_qubits * 6_instances on ibmq_boeblingen QUANTUM HARDWARE, saturated shots
+Rank MASTER dumped case (7, 11), 16/18 cases
+----------------------------------------------------------------------------------------------------
+Running case: (8, 11)
+case (8, 11), cluster_0 8_qubits * 3_instances on ibmq_boeblingen QUANTUM HARDWARE, saturated shots
+case (8, 11), cluster_1 4_qubits * 6_instances on ibmq_boeblingen QUANTUM HARDWARE, saturated shots
+Rank MASTER dumped case (8, 11), 17/18 cases
+----------------------------------------------------------------------------------------------------
+Running case: (9, 11)
+case (9, 11), cluster_0 9_qubits * 6_instances on ibmq_boeblingen QUANTUM HARDWARE, saturated shots
+case (9, 11), cluster_1 3_qubits * 3_instances on ibmq_boeblingen QUANTUM HARDWARE, saturated shots
+Rank MASTER dumped case (9, 11), 18/18 cases
+----------------------------------------------------------------------------------------------------
+-------------------------------------------------- Evaluator --------------------------------------------------
+Existing cases: dict_keys([(4, 8), (5, 8), (6, 8), (7, 8), (5, 9), (6, 9), (7, 9), (8, 9), (5, 10), (6, 10), (7, 10), (8, 10), (9, 10), (5, 11), (6, 11), (7, 11), (8, 11), (9, 11)])

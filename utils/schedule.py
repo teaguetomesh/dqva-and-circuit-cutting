@@ -1,3 +1,7 @@
+"""
+Job submission/simulating backend
+"""
+
 import math
 import copy
 import numpy as np
