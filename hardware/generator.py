@@ -80,7 +80,7 @@ if __name__ == '__main__':
                         print('Adding %d qubit full circuit to run'%full_circ_size)
                         saturated_shots, ground_truths, saturated_probs = get_circ_saturated_shots(circs=[full_circ],device_name=args.device_name)
                         evaluator_info = get_evaluator_info(circ=full_circ,device_name=args.device_name,fields=
-                        ['device','basis_gates','coupling_map','properties','initial_layout'])
+                        ['basis_gates','coupling_map','properties','initial_layout'])
                         circ_dict[full_circ_size] = copy.deepcopy({'circ':full_circ,'shots':saturated_shots[0],
                         'evaluator_info':evaluator_info,'sv':ground_truths[0],'qasm':saturated_probs[0]})
                         mitigation_correspondence_dict[full_circ_size] = [full_circ_size]

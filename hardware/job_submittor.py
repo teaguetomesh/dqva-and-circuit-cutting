@@ -3,7 +3,7 @@ import pickle
 import argparse
 from qiskit.compiler import transpile, assemble
 from utils.helper_fun import get_evaluator_info, get_circ_saturated_shots, get_filename, read_file, apply_measurement
-from utils.submission import Scheduler
+from utils.schedule import Scheduler
 from utils.mitigation import TensoredMitigation
 from time import time
 import copy
@@ -47,7 +47,8 @@ if __name__ == '__main__':
         for cluster_idx in cases_to_run[case]['all_cluster_prob']:
             cluster_base_circ = case_dict['clusters'][cluster_idx]
             evaluator_info = get_evaluator_info(circ=cluster_base_circ,device_name=args.device_name,
-            fields=['device','basis_gates','coupling_map','properties','initial_layout'])
+            fields=['basis_gates','coupling_map','properties','initial_layout'])
+            backend_device = get_evaluator_info(circ=None,device_name=args.device_name,fields=['device'])['device']
             mitigation_circ_key = '{},{},{}'.format(case[0],case[1],cluster_idx)
             mitigation_circ_dict[mitigation_circ_key] = {'circ':cluster_base_circ,'initial_layout':evaluator_info['initial_layout']}
             mitigation_correspondence_dict[mitigation_circ_key] = []
@@ -65,7 +66,7 @@ if __name__ == '__main__':
                 circ = case_dict['all_cluster_prob'][cluster_idx][init_meas]
                 qc=apply_measurement(circ)
                 mapped_circuit = transpile(qc,
-                backend=evaluator_info['device'], basis_gates=evaluator_info['basis_gates'],
+                backend=backend_device, basis_gates=evaluator_info['basis_gates'],
                 coupling_map=evaluator_info['coupling_map'],backend_properties=evaluator_info['properties'],
                 initial_layout=evaluator_info['initial_layout'])
                 circ_dict[key] = {'circ':mapped_circuit,'shots':cluster_shots,'evaluator_info':evaluator_info}

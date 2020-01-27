@@ -135,7 +135,7 @@ def get_circ_saturated_shots(circs,device_name):
 
         qasm_evaluator_info = get_evaluator_info(circ=circ,device_name=device_name,fields=['device'])
         device_max_shots = qasm_evaluator_info['device'].configuration().max_shots
-        device_max_experiments = int(qasm_evaluator_info['device'].configuration().max_experiments/3*2)
+        device_max_experiments = int(qasm_evaluator_info['device'].configuration().max_experiments/5)
         shots_increment = device_max_shots
         qasm_evaluator_info['num_shots'] = shots_increment
 
@@ -165,8 +165,8 @@ def get_circ_saturated_shots(circs,device_name):
         saturated_shots.append(saturated_shot)
         ground_truths.append(ground_truth)
         saturated_probs.append(saturated_prob)
-        saturated_chi2 = chisquare(f_obs=saturated_prob,f_exp=ground_truth)
-        print('%d qubit circuit saturated shots = %d, \u03C7^2 = %.3e'%(full_circ_size,saturated_shot,saturated_chi2[0]))
+        saturated_chi2 = chisquare(f_obs=saturated_prob,f_exp=ground_truth)[0]
+        print('%d qubit circuit saturated shots = %d, \u03C7^2 = %.3e'%(full_circ_size,saturated_shot,saturated_chi2))
         
     return saturated_shots, ground_truths, saturated_probs
 
@@ -249,28 +249,6 @@ def evaluate_circ(circ, backend, evaluator_info, force_prob):
         return noisy_counts
     else:
         raise Exception('Illegal backend :',backend)
-
-def get_mitigation_circuits(key,circ,device_name):
-    evaluator_info = get_evaluator_info(circ=circ,device_name=device_name,
-    fields=['device','basis_gates','coupling_map','properties','initial_layout'])
-    num_qubits = len(evaluator_info['properties'].qubits)
-
-    # Generate the calibration circuits
-    qr = QuantumRegister(num_qubits)
-    qubit_list = []
-    _initial_layout = evaluator_info['initial_layout'].get_physical_bits()
-    for q in _initial_layout:
-        if 'ancilla' not in _initial_layout[q].register.name:
-            qubit_list.append(q)
-    meas_calibs, state_labels = complete_meas_cal(qubit_list=qubit_list, qr=qr, circlabel='mcal')
-    num_shots = evaluator_info['device'].configuration().max_shots
-    if len(meas_calibs)<=evaluator_info['device'].configuration().max_experiments:
-        mitigation_dict = {}
-        for idx, meas_calib in enumerate(meas_calibs):
-            mitigation_dict['%s_mitigation_%d'%(key,idx)] = {'circ':meas_calib, 'shots':num_shots, 'state_labels':state_labels, 'qubit_list':qubit_list}
-        return mitigation_dict
-    else:
-        return {}
 
 def get_evaluator_info(circ,device_name,fields):
     provider = load_IBMQ()
