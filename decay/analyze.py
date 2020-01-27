@@ -4,7 +4,6 @@ from utils.helper_fun import read_file, evaluate_circ
 from utils.conversions import dict_to_array
 import math
 import numpy as np
-from scipy.stats import chisquare
 
 def get_xticks(xvals,compulsory):
     if len(xvals)<=10:
@@ -58,7 +57,7 @@ if __name__ == '__main__':
         chi2_l = decay_dict[full_circ_size]['chi2_l']
         metric_l = []
         for chi2 in chi2_l:
-            metric_l.append(chi2[0])
+            metric_l.append(chi2)
         shots_increment = decay_dict[full_circ_size]['shots_increment']
         cutoff, first_derivative, second_derivative = find_saturation(metric_l=metric_l,derivative_thresholds=(args.first_derivative,args.second_derivative),shots_increment=shots_increment)
         print('%d qubit circuit, cutoff = %d, chi^2 = %.3f, first derivative = %.3e, second derivative = %.3e'%(full_circ_size,cutoff,metric_l[cutoff],first_derivative,second_derivative),flush=True)

@@ -2,11 +2,11 @@ import numpy as np
 from qcg.generators import gen_supremacy, gen_hwea, gen_BV, gen_qft, gen_sycamore
 from utils.helper_fun import evaluate_circ, factor_int, read_file, get_evaluator_info
 from utils.conversions import dict_to_array
+from utils.metrics import chi2_distance
 import os
 from mpi4py import MPI
 import pickle
 from time import time
-from scipy.stats import chisquare
 
 def find_rank_tasks(tasks,rank,num_workers):
     rank_tasks = []
@@ -53,7 +53,7 @@ def noiseless_decay(circuit,shots_increment,device_max_experiments):
     for counter in range(1,max_counter+1):
         noiseless_accumulated_prob = accumulate_batch(circ=circuit,accumulated_prob=noiseless_accumulated_prob,
         counter=counter,shots_increment=shots_increment,evaluation_method='qasm_simulator')
-        chi2 = chisquare(f_obs=noiseless_accumulated_prob,f_exp=ground_truth)
+        chi2 = chi2_distance(target=ground_truth,obs=noiseless_accumulated_prob)
         chi2_l.append(chi2)
         if full_circ_size>=15 and counter%50==0:
             time_elapsed = time()-decay_begin

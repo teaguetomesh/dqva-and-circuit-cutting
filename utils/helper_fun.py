@@ -132,6 +132,7 @@ def get_circ_saturated_shots(circs,device_name):
         full_circ_size = len(circ.qubits)
         ground_truth = evaluate_circ(circ=circ,backend='statevector_simulator',evaluator_info=None,force_prob=True)
         ground_truth = dict_to_array(distribution_dict=ground_truth,force_prob=True)
+        print('ground_truth:',ground_truth)
 
         qasm_evaluator_info = get_evaluator_info(circ=circ,device_name=device_name,fields=['device'])
         device_max_shots = qasm_evaluator_info['device'].configuration().max_shots
@@ -147,7 +148,9 @@ def get_circ_saturated_shots(circs,device_name):
             noiseless_prob_batch = dict_to_array(distribution_dict=noiseless_prob_batch,force_prob=True)
             accumulated_prob = ((counter-1)*accumulated_prob+noiseless_prob_batch)/counter
             assert abs(sum(accumulated_prob)-1)<1e-10
+            print('accumulated_prob:',accumulated_prob)
             accumulated_chi2 = chisquare(f_obs=accumulated_prob,f_exp=ground_truth)
+            print('accumulated_chi2:',accumulated_chi2)
             chi2_l.append(accumulated_chi2[0])
             if len(chi2_l)>=3:
                 accumulated_shots = int((len(chi2_l)-1)*shots_increment)
