@@ -20,11 +20,11 @@ def make_plot(metric_l,cutoff,full_circ_size,shots_increment,derivative_threshol
     first_derivative_threshold, second_derivative_threshold = derivative_thresholds
     xvals = range(1,len(metric_l)+1)
     plt.figure()
-    plt.axvline(x=cutoff,label='saturated cutoff' if len(metric_l)>cutoff+2 else 'diverged cutoff',color='k',linestyle='--')
+    plt.axvline(x=cutoff,label='saturated cutoff = %d'%cutoff if len(metric_l)>=cutoff+1 else 'diverged cutoff = %d'%cutoff,color='k',linestyle='--')
     plt.plot(xvals,metric_l,label='noiseless')
     x_ticks = get_xticks(xvals=xvals,compulsory=cutoff)
     plt.xticks(ticks=x_ticks,labels=x_ticks)
-    plt.ylabel('chi^2, lower is better')
+    plt.ylabel('\u03C7^2, lower is better')
     plt.xlabel('shots [*%d]'%shots_increment)
     plt.title('%d qubit circuit, derivative_thresholds : %.3e, %.3e'%(full_circ_size,first_derivative_threshold,second_derivative_threshold))
     plt.legend()
@@ -60,5 +60,5 @@ if __name__ == '__main__':
             metric_l.append(chi2)
         shots_increment = decay_dict[full_circ_size]['shots_increment']
         cutoff, first_derivative, second_derivative = find_saturation(metric_l=metric_l,derivative_thresholds=(args.first_derivative,args.second_derivative),shots_increment=shots_increment)
-        print('%d qubit circuit, cutoff = %d, chi^2 = %.3f, first derivative = %.3e, second derivative = %.3e'%(full_circ_size,cutoff,metric_l[cutoff],first_derivative,second_derivative),flush=True)
+        print('%d qubit circuit, cutoff = %d, \u03C7^2 = %.3f, first derivative = %.3e, second derivative = %.3e'%(full_circ_size,cutoff,metric_l[cutoff],first_derivative,second_derivative),flush=True)
         make_plot(metric_l=metric_l,cutoff=cutoff,full_circ_size=full_circ_size,shots_increment=shots_increment,derivative_thresholds=(args.first_derivative,args.second_derivative))
