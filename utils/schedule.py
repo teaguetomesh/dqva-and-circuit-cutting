@@ -1,5 +1,7 @@
 """
 Job submission/simulating backend
+Input:
+circ_dict (dict): circ (not transpiled), shots, evaluator_info
 """
 
 import math
@@ -19,14 +21,14 @@ class ScheduleItem:
         self.shots = 0
         self.total_circs = 0
     
-    def update(self, key, circ, shots):
+    def update(self, key, circ, shots, evaluator_info):
         reps_vacant = self.max_experiments - self.total_circs
         if reps_vacant>0:
             circ_shots = max(shots,self.shots)
             circ_shots = min(circ_shots,self.max_shots)
             total_reps = math.ceil(shots/circ_shots)
             reps_to_add = min(total_reps,reps_vacant)
-            self.circ_list.append({'key':key,'circ':circ,'reps':reps_to_add})
+            self.circ_list.append({'key':key,'circ':circ,'reps':reps_to_add,'evaluator_info':evaluator_info})
             self.shots = circ_shots
             self.total_circs += reps_to_add
             shots_remaining = shots - reps_to_add * self.shots
@@ -47,8 +49,8 @@ class Scheduler:
         assert isinstance(self.circ_dict,dict)
         for key in self.circ_dict:
             value = self.circ_dict[key]
-            if 'circ' not in value or 'shots' not in value:
-                raise Exception('Input circ_dict should have circ and shots for key {}'.format(key))
+            if 'circ' not in value or 'shots' not in value or 'evaluator_info' not in value:
+                raise Exception('Input circ_dict should have circ, shots and evaluator_info for key {}'.format(key))
 
     def get_schedule(self,device_max_shots,device_max_experiments):
         circ_dict = copy.deepcopy(self.circ_dict)
@@ -59,8 +61,9 @@ class Scheduler:
             key = list(circ_dict.keys())[key_idx]
             circ = circ_dict[key]['circ']
             shots = circ_dict[key]['shots']
+            evaluator_info = circ_dict[key]['evaluator_info']
             # print('adding %d qubit circuit with %d shots to job'%(len(circ.qubits),shots))
-            shots_remaining = schedule_item.update(key,circ,shots)
+            shots_remaining = schedule_item.update(key,circ,shots,evaluator_info)
             if shots_remaining>0:
                 # print('OVERFLOW, has %d total circuits * %d shots'%(job.total_circs,job.shots))
                 schedule.append(schedule_item)
@@ -68,6 +71,7 @@ class Scheduler:
                 circ_dict[key]['shots'] = shots_remaining
             else:
                 # print('Did not overflow, has %d total circuits * %d shots'%(job.total_circs,job.shots))
+                circ_dict[key]['shots'] = shots_remaining
                 key_idx += 1
         if schedule_item.total_circs>0:
             schedule.append(schedule_item)
@@ -84,17 +88,14 @@ class Scheduler:
                 key = element['key']
                 circ = element['circ']
                 reps = element['reps']
+                evaluator_info = element['evaluator_info']
                 # print('Key {} {:d} qubit circuit * {:d} reps'.format(key,len(circ.qubits),reps))
                 
                 # Circ has already been transpiled
                 if len(circ.clbits)>0:
-                    mapped_circuit = circ
-                    # print('Already transpiled:')
-                    # print(mapped_circuit)
+                    raise Exception('Input circuit should not be transpiled')
                 # Circ not transpiled, running on real device
                 elif real_device:
-                    evaluator_info = get_evaluator_info(circ=circ,device_name=self.device_name,
-                    fields=['device','basis_gates','coupling_map','properties','initial_layout'])
                     qc=apply_measurement(circ=circ)
                     mapped_circuit = transpile(qc,
                     backend=evaluator_info['device'], basis_gates=evaluator_info['basis_gates'],
@@ -102,7 +103,6 @@ class Scheduler:
                     initial_layout=evaluator_info['initial_layout'])
                 # Circ not transpiled, running on simulator
                 else:
-                    evaluator_info = get_evaluator_info(circ=circ,device_name=self.device_name,fields=['basis_gates'])
                     qc=apply_measurement(circ=circ)
                     mapped_circuit = transpile(qc, basis_gates=evaluator_info['basis_gates'])
                     # print('Transpiled into basis gates:')

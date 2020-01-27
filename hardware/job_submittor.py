@@ -40,6 +40,7 @@ if __name__ == '__main__':
 
     circ_dict = {}
     mitigation_circ_dict = {}
+    mitigation_correspondence_dict = {}
     for case in cases_to_run:
         print('Case {}'.format(case))
         case_dict = cases_to_run[case]
@@ -49,6 +50,7 @@ if __name__ == '__main__':
             fields=['device','basis_gates','coupling_map','properties','initial_layout'])
             mitigation_circ_key = '{},{},{}'.format(case[0],case[1],cluster_idx)
             mitigation_circ_dict[mitigation_circ_key] = {'circ':cluster_base_circ,'initial_layout':evaluator_info['initial_layout']}
+            mitigation_correspondence_dict[mitigation_circ_key] = []
             if args.shots_mode == 'saturated':
                 cluster_shots = get_circ_saturated_shots(circs=[cluster_base_circ],device_name=args.device_name)[0][0]
                 print('Cluster %d saturated shots = %d'%(cluster_idx,cluster_shots))
@@ -66,7 +68,8 @@ if __name__ == '__main__':
                 backend=evaluator_info['device'], basis_gates=evaluator_info['basis_gates'],
                 coupling_map=evaluator_info['coupling_map'],backend_properties=evaluator_info['properties'],
                 initial_layout=evaluator_info['initial_layout'])
-                circ_dict[key] = {'circ':mapped_circuit,'shots':cluster_shots}
+                circ_dict[key] = {'circ':mapped_circuit,'shots':cluster_shots,'evaluator_info':evaluator_info}
+                mitigation_correspondence_dict[mitigation_circ_key].append(key)
 
     scheduler = Scheduler(circ_dict=circ_dict,device_name=args.device_name)
     scheduler.run(real_device=False)
@@ -75,20 +78,9 @@ if __name__ == '__main__':
 
     scheduler.retrieve(force_prob=True)
     tensored_mitigation.retrieve()
-    
-    mitigated = {}
-    unmitigated = scheduler.circ_dict
-    for mitigation_circ_key in tensored_mitigation.circ_dict:
-        calibration_matrix = tensored_mitigation.circ_dict[mitigation_circ_key]['calibration_matrix']
-        filter_matrix = np.linalg.inv(calibration_matrix)
-        for key in unmitigated:
-            if mitigation_circ_key == key.split('|')[0]:
-                mitigated[key] = copy.deepcopy(unmitigated[key])
-                unmitigated_prob = np.reshape(unmitigated[key]['hw'],(-1,1))
-                mitigated_prob = np.reshape(filter_matrix.dot(unmitigated_prob),(1,-1)).tolist()[0]
-                assert abs(sum(mitigated_prob)-1)<1e-10
-                mitigated[key]['mitigated_hw'] = copy.deepcopy(mitigated_prob)
-    circ_dict = copy.deepcopy(mitigated)
+
+    tensored_mitigation.apply(unmitigated=scheduler.circ_dict,mitigation_correspondence_dict=mitigation_correspondence_dict)
+    circ_dict = tensored_mitigation.circ_dict
 
     for case in cases_to_run:
         case_dict = cases_to_run[case]

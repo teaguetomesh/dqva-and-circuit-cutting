@@ -5,7 +5,7 @@ import numpy as np
 import utils.MIQCP_searcher as searcher
 import utils.cutter as cutter
 from utils.helper_fun import get_evaluator_info, get_circ_saturated_shots, get_filename, read_file, generate_circ, evaluate_circ
-from utils.submission import Scheduler
+from utils.schedule import Scheduler
 from utils.mitigation import TensoredMitigation
 import argparse
 import math
@@ -54,6 +54,7 @@ if __name__ == '__main__':
     full_circuit_sizes = range(args.min_size,args.max_size+1)
     cases_to_run = {}
     circ_dict = {}
+    mitigation_correspondence_dict = {}
     for full_circ_size in full_circuit_sizes:
         if full_circ_size in circ_dict:
             full_circ = circ_dict[full_circ_size]['circ']
@@ -78,8 +79,11 @@ if __name__ == '__main__':
                     if full_circ_size not in circ_dict:
                         print('Adding %d qubit full circuit to run'%full_circ_size)
                         saturated_shots, ground_truths, saturated_probs = get_circ_saturated_shots(circs=[full_circ],device_name=args.device_name)
+                        evaluator_info = get_evaluator_info(circ=full_circ,device_name=args.device_name,fields=
+                        ['device','basis_gates','coupling_map','properties','initial_layout'])
                         circ_dict[full_circ_size] = copy.deepcopy({'circ':full_circ,'shots':saturated_shots[0],
-                        'sv':ground_truths[0],'qasm':saturated_probs[0]})
+                        'evaluator_info':evaluator_info,'sv':ground_truths[0],'qasm':saturated_probs[0]})
+                        mitigation_correspondence_dict[full_circ_size] = [full_circ_size]
                     else:
                         print('Use currently running %d qubit full circuit'%full_circ_size)
             print('-'*100)
@@ -92,7 +96,7 @@ if __name__ == '__main__':
 
     scheduler.retrieve(force_prob=True)
     tensored_mitigation.retrieve()
-    tensored_mitigation.apply(unmitigated=scheduler.circ_dict)
+    tensored_mitigation.apply(unmitigated=scheduler.circ_dict,mitigation_correspondence_dict=mitigation_correspondence_dict)
     circ_dict = tensored_mitigation.circ_dict
 
     for case in cases_to_run:

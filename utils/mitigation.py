@@ -40,10 +40,6 @@ class TensoredMitigation:
                 keys_to_delete.append(key)
         for key in keys_to_delete:
             del self.circ_dict[key]
-        try:
-            evaluator_info = get_evaluator_info(circ=None,device_name=self.device_name,fields=['device','properties'])
-        except:
-            raise Exception('Illegal input device : {}'.format(self.device_name))
     
     def get_mitigation_circuits(self):
         meas_calibs_dict = {}
@@ -131,17 +127,18 @@ class TensoredMitigation:
                     out=np.zeros_like(self.circ_dict[key]['calibration_matrices'][mat_index]),
                     where=sums_of_columns != 0)
 
-    def apply(self,unmitigated):
+    def apply(self,unmitigated,mitigation_correspondence_dict):
         mitigated = copy.deepcopy(unmitigated)
-        for key in unmitigated:
-            if key in self.circ_dict:
-                calibration_matrices = self.circ_dict[key]['calibration_matrices']
-                nqubits = len(unmitigated[key]['circ'].qubits)
-                qubit_list_sizes = [int(np.log(np.shape(mat)[0])/np.log(2)) for mat in calibration_matrices]
-                indices_list = [{bin(ind)[2:].zfill(group_size): ind for ind in range(2**group_size)} for group_size in qubit_list_sizes]
+        for key in self.circ_dict:
+            keys_to_mitigate = mitigation_correspondence_dict[key]
+            calibration_matrices = self.circ_dict[key]['calibration_matrices']
+            qubit_list_sizes = [int(np.log(np.shape(mat)[0])/np.log(2)) for mat in calibration_matrices]
+            indices_list = [{bin(ind)[2:].zfill(group_size): ind for ind in range(2**group_size)} for group_size in qubit_list_sizes]
+            for unmitigated_key in keys_to_mitigate:
+                nqubits = len(unmitigated[unmitigated_key]['circ'].qubits)
                 num_of_states = 2**nqubits
                 all_states = [bin(state)[2:].zfill(nqubits) for state in range(2**nqubits)]
-                unmitigated_prob = np.array(unmitigated[key]['hw'],dtype=float)
+                unmitigated_prob = np.array(unmitigated[unmitigated_key]['hw'],dtype=float)
                 # print('unmitigated_prob:',unmitigated_prob)
                 # print('qubit list sizes:',qubit_list_sizes)
                 # print('indices_list:',indices_list)
@@ -181,7 +178,8 @@ class TensoredMitigation:
                 res = minimize(fun, x0, method='SLSQP',constraints=cons, bounds=bnds, tol=1e-6)
                 mitigated_cnts = res.x
                 # print('mitigated_prob:',mitigated_cnts)
-                mitigated[key]['mitigated_hw'] = copy.deepcopy(mitigated_cnts)
-            else:
-                mitigated[key]['mitigated_hw'] = copy.deepcopy(unmitigated[key]['hw'])
+                mitigated[unmitigated_key]['mitigated_hw'] = copy.deepcopy(mitigated_cnts)
+        for unmitigated_key in mitigated:
+            if 'mitigated_hw' not in mitigated[unmitigated_key]:
+                mitigated[unmitigated_key]['mitigated_hw'] = copy.deepcopy(mitigated[unmitigated_key]['hw'])
         self.circ_dict = copy.deepcopy(mitigated)
