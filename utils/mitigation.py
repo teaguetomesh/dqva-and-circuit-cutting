@@ -5,7 +5,7 @@ import copy
 from qiskit.circuit.quantumregister import QuantumRegister
 from utils.helper_fun import get_evaluator_info
 from qiskit.ignis.mitigation.measurement import tensored_meas_cal
-from utils.submission import Scheduler
+from utils.schedule import Scheduler
 from qiskit.compiler import transpile
 
 def break_state(bin_state,mit_pattern):
