@@ -4,8 +4,8 @@ import matplotlib
 import matplotlib.pyplot as plt
 import matplotlib.patheffects as path_effects
 import numpy as np
-from utils.helper_fun import fidelity, get_filename, read_file
-from utils.metrics import chi2_distance, kl_divergence
+from utils.helper_fun import get_filename, read_file
+from utils.metrics import chi2_distance, kl_divergence, fidelity
 import os
 import argparse
 

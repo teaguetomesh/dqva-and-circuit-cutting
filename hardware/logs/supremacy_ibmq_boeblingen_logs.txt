@@ -685,3 +685,124 @@ cutting χ^2 = 3.519e-01
 mitigated_cutting χ^2 = 1.779e+00
 Reconstruction output has 2 cases
 ----------------------------------------------------------------------------------------------------
+-------------------------------------------------- Generator --------------------------------------------------
+Existing cases: dict_keys([(4, 5), (4, 6)])
+Case (4, 5) already exists
+----------------------------------------------------------------------------------------------------
+Case (4, 6) already exists
+----------------------------------------------------------------------------------------------------
+0 cases, 0 full circuits to run : dict_keys([])
+******************** Submitting jobs ********************
+******************** Submitting jobs ********************
+/home/weit/anaconda3/envs/cc-env/lib/python3.7/site-packages/qiskit/providers/models/backendconfiguration.py:337: UserWarning: `dt` and `dtm` now have units of seconds(s) rather than nanoseconds(ns).
+  warnings.warn('`dt` and `dtm` now have units of seconds(s) rather '
+******************** Retrieving jobs ********************
+******************** Retrieving jobs ********************
+-------------------------------------------------- Evaluator --------------------------------------------------
+Existing cases: dict_keys([(4, 5), (4, 6)])
+-------------------------------------------------- Job Submittor --------------------------------------------------
+Existing cases: dict_keys([(4, 5), (4, 6)])
+Run cases: dict_keys([])
+**************************************************
+******************** Submitting jobs ********************
+******************** Submitting jobs ********************
+/home/weit/anaconda3/envs/cc-env/lib/python3.7/site-packages/qiskit/providers/models/backendconfiguration.py:337: UserWarning: `dt` and `dtm` now have units of seconds(s) rather than nanoseconds(ns).
+  warnings.warn('`dt` and `dtm` now have units of seconds(s) rather '
+******************** Retrieving jobs ********************
+******************** Retrieving jobs ********************
+-------------------------------------------------- Reconstructor --------------------------------------------------
+Existing cases: dict_keys([(4, 5), (4, 6)])
+-------------------------------------------------- Evaluator --------------------------------------------------
+Existing cases: dict_keys([(4, 5), (4, 6)])
+-------------------------------------------------- Job Submittor --------------------------------------------------
+Existing cases: dict_keys([(4, 5), (4, 6)])
+Run cases: dict_keys([])
+**************************************************
+******************** Submitting jobs ********************
+******************** Submitting jobs ********************
+/home/weit/anaconda3/envs/cc-env/lib/python3.7/site-packages/qiskit/providers/models/backendconfiguration.py:337: UserWarning: `dt` and `dtm` now have units of seconds(s) rather than nanoseconds(ns).
+  warnings.warn('`dt` and `dtm` now have units of seconds(s) rather '
+******************** Retrieving jobs ********************
+******************** Retrieving jobs ********************
+-------------------------------------------------- Reconstructor --------------------------------------------------
+Existing cases: dict_keys([(4, 5), (4, 6)])
+Traceback (most recent call last):
+  File "/home/weit/anaconda3/envs/cc-env/lib/python3.7/runpy.py", line 193, in _run_module_as_main
+    "__main__", mod_spec)
+  File "/home/weit/anaconda3/envs/cc-env/lib/python3.7/runpy.py", line 85, in _run_code
+    exec(code, run_globals)
+  File "/home/weit/circuit_cutting/hardware/plot.py", line 7, in <module>
+    from utils.helper_fun import fidelity, get_filename, read_file
+ImportError: cannot import name 'fidelity' from 'utils.helper_fun' (/home/weit/circuit_cutting/utils/helper_fun.py)
+-------------------------------------------------- Generator --------------------------------------------------
+Existing cases: dict_keys([(4, 5), (4, 6)])
+Case (4, 5) already exists
+----------------------------------------------------------------------------------------------------
+Case (4, 6) already exists
+----------------------------------------------------------------------------------------------------
+0 cases, 0 full circuits to run : dict_keys([])
+******************** Submitting jobs ********************
+******************** Submitting jobs ********************
+/home/weit/anaconda3/envs/cc-env/lib/python3.7/site-packages/qiskit/providers/models/backendconfiguration.py:337: UserWarning: `dt` and `dtm` now have units of seconds(s) rather than nanoseconds(ns).
+  warnings.warn('`dt` and `dtm` now have units of seconds(s) rather '
+******************** Retrieving jobs ********************
+******************** Retrieving jobs ********************
+-------------------------------------------------- Evaluator --------------------------------------------------
+Existing cases: dict_keys([(4, 5), (4, 6)])
+-------------------------------------------------- Job Submittor --------------------------------------------------
+Existing cases: dict_keys([(4, 5), (4, 6)])
+Run cases: dict_keys([])
+**************************************************
+******************** Submitting jobs ********************
+******************** Submitting jobs ********************
+/home/weit/anaconda3/envs/cc-env/lib/python3.7/site-packages/qiskit/providers/models/backendconfiguration.py:337: UserWarning: `dt` and `dtm` now have units of seconds(s) rather than nanoseconds(ns).
+  warnings.warn('`dt` and `dtm` now have units of seconds(s) rather '
+******************** Retrieving jobs ********************
+******************** Retrieving jobs ********************
+-------------------------------------------------- Reconstructor --------------------------------------------------
+Existing cases: dict_keys([(4, 5), (4, 6)])
+-------------------------------------------------- Evaluator --------------------------------------------------
+Existing cases: dict_keys([(4, 5), (4, 6)])
+-------------------------------------------------- Job Submittor --------------------------------------------------
+Existing cases: dict_keys([(4, 5), (4, 6)])
+Run cases: dict_keys([])
+**************************************************
+******************** Submitting jobs ********************
+******************** Submitting jobs ********************
+/home/weit/anaconda3/envs/cc-env/lib/python3.7/site-packages/qiskit/providers/models/backendconfiguration.py:337: UserWarning: `dt` and `dtm` now have units of seconds(s) rather than nanoseconds(ns).
+  warnings.warn('`dt` and `dtm` now have units of seconds(s) rather '
+******************** Retrieving jobs ********************
+******************** Retrieving jobs ********************
+-------------------------------------------------- Reconstructor --------------------------------------------------
+Existing cases: dict_keys([(4, 5), (4, 6)])
+-------------------------------------------------- Plot --------------------------------------------------
+Processing ./hardware/benchmark_data/supremacy_ibmq_boeblingen/hw_plotter_input_ibmq_boeblingen_saturated.p
+case (4, 5): ce percentage reduction = -2739.801, fidelity improvement = -0.000, reconstruction time: 6.924e-04
+case (4, 6): ce percentage reduction = 12.484, fidelity improvement = 0.000, reconstruction time: 3.568e-02
+************************* Best Cases *************************
+{'ce_percent': -2739.8005535840243, 'reconstructor_time': 0.0006923675537109375, 'best_case': (4, 5), 'hw_ce': 0.991167593111073, 'cutting_ce': 28.147182796113704}
+{'ce_percent': 12.483872032426596, 'reconstructor_time': 0.03568410873413086, 'best_case': (4, 6), 'hw_ce': 0.5082995223148297, 'cutting_ce': 0.44484406040761065}
+**************************************************
+Processing ./hardware/benchmark_data/supremacy_ibmq_boeblingen/hw_plotter_input_ibmq_boeblingen_sametotal.p
+case (4, 5): ce percentage reduction = -2642.309, fidelity improvement = 0.000, reconstruction time: 7.207e-04
+case (4, 6): ce percentage reduction = -43.214, fidelity improvement = -0.000, reconstruction time: 3.618e-02
+************************* Best Cases *************************
+{'ce_percent': -2642.3094699278713, 'reconstructor_time': 0.0007207393646240234, 'best_case': (4, 5), 'hw_ce': 0.991167593111073, 'cutting_ce': 27.180882768741107}
+{'ce_percent': -43.213531130189644, 'reconstructor_time': 0.0361783504486084, 'best_case': (4, 6), 'hw_ce': 0.5082995223148297, 'cutting_ce': 0.7279536946249539}
+**************************************************
+----------------------------------------------------------------------------------------------------
+Processing ./hardware/benchmark_data/supremacy_ibmq_boeblingen/hw_plotter_input_ibmq_boeblingen_saturated.p
+case (4, 5): ce percentage reduction = -36.217, fidelity improvement = 0.000, reconstruction time: 6.924e-04
+case (4, 6): ce percentage reduction = -0.933, fidelity improvement = -0.000, reconstruction time: 3.568e-02
+************************* Best Cases *************************
+{'ce_percent': -36.216744436146406, 'reconstructor_time': 0.0006923675537109375, 'best_case': (4, 5), 'hw_ce': 0.659415879919173, 'cutting_ce': 0.898234843920866}
+{'ce_percent': -0.9330064833001119, 'reconstructor_time': 0.03568410873413086, 'best_case': (4, 6), 'hw_ce': 0.34231648628327954, 'cutting_ce': 0.3455103212937077}
+**************************************************
+Processing ./hardware/benchmark_data/supremacy_ibmq_boeblingen/hw_plotter_input_ibmq_boeblingen_sametotal.p
+case (4, 5): ce percentage reduction = -35.599, fidelity improvement = 0.000, reconstruction time: 7.207e-04
+case (4, 6): ce percentage reduction = -7.205, fidelity improvement = -0.000, reconstruction time: 3.618e-02
+************************* Best Cases *************************
+{'ce_percent': -35.598570372282744, 'reconstructor_time': 0.0007207393646240234, 'best_case': (4, 5), 'hw_ce': 0.659415879919173, 'cutting_ce': 0.8941585059782073}
+{'ce_percent': -7.20494419555604, 'reconstructor_time': 0.0361783504486084, 'best_case': (4, 6), 'hw_ce': 0.34231648628327954, 'cutting_ce': 0.3669801980921781}
+**************************************************
+----------------------------------------------------------------------------------------------------
