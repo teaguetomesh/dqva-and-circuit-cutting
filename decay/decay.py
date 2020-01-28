@@ -3,6 +3,7 @@ from qcg.generators import gen_supremacy, gen_hwea, gen_BV, gen_qft, gen_sycamor
 from utils.helper_fun import evaluate_circ, factor_int, read_file, get_evaluator_info
 from utils.conversions import dict_to_array
 from utils.metrics import chi2_distance
+from scipy.stats import wasserstein_distance
 import os
 from mpi4py import MPI
 import pickle
@@ -48,18 +49,21 @@ def noiseless_decay(circuit,shots_increment,device_max_experiments):
     # print('%d qubit full circuit, shots increment = %d'%(full_circ_size,shots_increment))
     noiseless_accumulated_prob = np.zeros(2**full_circ_size,dtype=float)
     chi2_l = []
+    distance_l = []
     max_counter = max(20,int(20*np.power(2,full_circ_size)/shots_increment))
     max_counter = min(max_counter,device_max_experiments)
     for counter in range(1,max_counter+1):
         noiseless_accumulated_prob = accumulate_batch(circ=circuit,accumulated_prob=noiseless_accumulated_prob,
         counter=counter,shots_increment=shots_increment,evaluation_method='qasm_simulator')
         chi2 = chi2_distance(target=ground_truth,obs=noiseless_accumulated_prob)
+        distance = wasserstein_distance(u_values=ground_truth,v_values=noiseless_accumulated_prob)
         chi2_l.append(chi2)
+        distance_l.append(distance)
         if full_circ_size>=15 and counter%50==0:
             time_elapsed = time()-decay_begin
             eta = time_elapsed/counter*max_counter-time_elapsed
             print('%d qubit circuit, counter %d/%d, ETA = %.1e'%(full_circ_size,counter,max_counter,eta),flush=True)
-    return chi2_l
+    return chi2_l, distance_l
 
 if __name__ == '__main__':
     comm = MPI.COMM_WORLD
@@ -87,8 +91,8 @@ if __name__ == '__main__':
 
         shots_increment = device_max_shots
     
-        chi2_l = noiseless_decay(circuit=circ,shots_increment=shots_increment,device_max_experiments=device_max_experiments)
-        rank_decay_dict[full_circ_size] = {'circ':circ,'chi2_l':chi2_l,'shots_increment':shots_increment}
+        chi2_l, distance_l = noiseless_decay(circuit=circ,shots_increment=shots_increment,device_max_experiments=device_max_experiments)
+        rank_decay_dict[full_circ_size] = {'circ':circ,'chi2_l':chi2_l,'distance':distance_l,'shots_increment':shots_increment}
     
     if rank == size - 1:
         decay_dict.update(rank_decay_dict)

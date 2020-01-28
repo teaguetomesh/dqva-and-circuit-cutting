@@ -255,15 +255,15 @@ def process_data(filename,circuit_type,mitigated):
     fc_qubits = [case[1] for case in plotter_input]
 
     for case in plotter_input:
-        ground_truth_ce = kl_divergence(target=plotter_input[case]['sv'],
+        ground_truth_ce = chi2_distance(target=plotter_input[case]['sv'],
         obs= plotter_input[case]['sv'])
-        qasm_ce = kl_divergence(target=plotter_input[case]['sv'],
+        qasm_ce = chi2_distance(target=plotter_input[case]['sv'],
         obs= plotter_input[case]['qasm'])
-        qasm_noise_ce = kl_divergence(target=plotter_input[case]['sv'],
+        qasm_noise_ce = chi2_distance(target=plotter_input[case]['sv'],
         obs= plotter_input[case]['qasm+noise'])
-        hw_ce = kl_divergence(target=plotter_input[case]['sv'],
+        hw_ce = chi2_distance(target=plotter_input[case]['sv'],
         obs= plotter_input[case]['%shw'%('mitigated_' if mitigated else '')])
-        cutting_ce = kl_divergence(target=plotter_input[case]['sv'],
+        cutting_ce = chi2_distance(target=plotter_input[case]['sv'],
         obs= plotter_input[case]['%scutting'%('mitigated_' if mitigated else '')])
         ce_percent_change = 100*(hw_ce - cutting_ce)/hw_ce
         assert ce_percent_change <= 100+1e-10

@@ -38,4 +38,5 @@ def chi2_distance(target,obs):
             distance += 0
         else:
             distance += np.power(x-y,2)/(x+y)
+    # distance /= len(target)
     return distance

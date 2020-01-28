@@ -6,10 +6,10 @@ from qiskit.extensions.standard import HGate, SGate, SdgGate, XGate, RXGate, RYG
 from qiskit.tools.visualization import plot_histogram
 from qiskit.providers.aer import noise
 from utils.helper_fun import generate_circ, get_evaluator_info, apply_measurement, evaluate_circ
-from utils.metrics import cross_entropy
-from scipy.stats import chisquare
+from utils.metrics import kl_divergence, chi2_distance
+from scipy.stats import wasserstein_distance
 from utils.mitigation import TensoredMitigation
-from utils.submission import Scheduler
+from utils.schedule import Scheduler
 from utils.conversions import list_to_dict, dict_to_array
 import copy
 import math
@@ -18,25 +18,33 @@ import matplotlib.pyplot as plt
 
 def compute_metrics(ground_truth,raw_counts,mitigated_counts,metric):
     if metric == 'ce':
-        truth_ce = cross_entropy(target=dict_to_array(distribution_dict=ground_truth,force_prob=True),
+        truth_ce = kl_divergence(target=dict_to_array(distribution_dict=ground_truth,force_prob=True),
         obs=dict_to_array(distribution_dict=ground_truth,force_prob=True))
-        raw_ce = cross_entropy(target=dict_to_array(distribution_dict=ground_truth,force_prob=True),
+        raw_ce = kl_divergence(target=dict_to_array(distribution_dict=ground_truth,force_prob=True),
         obs=dict_to_array(distribution_dict=raw_counts,force_prob=True))
-        mit_ce = cross_entropy(target=dict_to_array(distribution_dict=ground_truth,force_prob=True),
+        mit_ce = kl_divergence(target=dict_to_array(distribution_dict=ground_truth,force_prob=True),
         obs=dict_to_array(distribution_dict=mitigated_counts,force_prob=True))
         return truth_ce, raw_ce, mit_ce
     elif metric == 'chi2':
-        truth_chi2 = chisquare(f_exp=dict_to_array(distribution_dict=ground_truth,force_prob=True),
-        f_obs=dict_to_array(distribution_dict=ground_truth,force_prob=True))[0]
-        raw_chi2 = chisquare(f_exp=dict_to_array(distribution_dict=ground_truth,force_prob=True),
-        f_obs=dict_to_array(distribution_dict=raw_counts,force_prob=True))[0]
-        mit_chi2 = chisquare(f_exp=dict_to_array(distribution_dict=ground_truth,force_prob=True),
-        f_obs=dict_to_array(distribution_dict=mitigated_counts,force_prob=True))[0]
+        truth_chi2 = chi2_distance(target=dict_to_array(distribution_dict=ground_truth,force_prob=True),
+        obs=dict_to_array(distribution_dict=ground_truth,force_prob=True))
+        raw_chi2 = chi2_distance(target=dict_to_array(distribution_dict=ground_truth,force_prob=True),
+        obs=dict_to_array(distribution_dict=raw_counts,force_prob=True))
+        mit_chi2 = chi2_distance(target=dict_to_array(distribution_dict=ground_truth,force_prob=True),
+        obs=dict_to_array(distribution_dict=mitigated_counts,force_prob=True))
         return truth_chi2, raw_chi2, mit_chi2
+    elif metric == 'wasserstein_distance':
+        truth_distance = wasserstein_distance(u_values=dict_to_array(distribution_dict=ground_truth,force_prob=True),
+        v_values=dict_to_array(distribution_dict=ground_truth,force_prob=True))
+        raw_distance = wasserstein_distance(u_values=dict_to_array(distribution_dict=ground_truth,force_prob=True),
+        v_values=dict_to_array(distribution_dict=raw_counts,force_prob=True))
+        mit_distance = wasserstein_distance(u_values=dict_to_array(distribution_dict=ground_truth,force_prob=True),
+        v_values=dict_to_array(distribution_dict=mitigated_counts,force_prob=True))
+        return truth_distance, raw_distance, mit_distance
     else:
         raise Exception('gg')
 
-def cross_entropy_terms(target,obs):
+def kl_divergence_terms(target,obs):
     assert len(target)==len(obs)
     epsilon = 1e-20
     obs = [abs(x) if x!=0 else epsilon for x in obs]
@@ -85,7 +93,7 @@ device_name = 'ibmq_boeblingen'
 evaluator_info = get_evaluator_info(circ=None,device_name='ibmq_boeblingen',fields=['basis_gates','properties'])
 device_qubits = len(evaluator_info['properties'].qubits)
 
-full_circ_size = 5
+full_circ_size = 3
 qr = QuantumRegister(full_circ_size)
 ghz = generate_circ(full_circ_size=full_circ_size,circuit_type='supremacy')
 ground_truth = evaluate_circ(circ=ghz,backend='statevector_simulator',evaluator_info=None,force_prob=True)
@@ -135,40 +143,43 @@ print('Qiskit mitigated counts:',mitigated_counts)
 
 circ_dict = {'test':{'circ':ghz,'shots':500000}}
 
-tensored_mitigation = TensoredMitigation(circ_dict=circ_dict,device_name=device_name)
-tensored_mitigation.run(real_device=False)
+mitigation_correspondence_dict = {'test':['test']}
 
 scheduler = Scheduler(circ_dict=circ_dict,device_name=device_name)
 scheduler.run(real_device=False)
 
+tensored_mitigation = TensoredMitigation(circ_dict=circ_dict,device_name=device_name)
+tensored_mitigation.run(real_device=False)
+
 scheduler.retrieve(force_prob=True)
 tensored_mitigation.retrieve()
-tensored_mitigation.apply(unmitigated=scheduler.circ_dict)
+tensored_mitigation.apply(unmitigated=scheduler.circ_dict,mitigation_correspondence_dict=mitigation_correspondence_dict)
 mitigated_circ_dict = tensored_mitigation.circ_dict
+
 print(mitigated_circ_dict['test'].keys())
 my_raw = mitigated_circ_dict['test']['hw']
 my_mitigated = mitigated_circ_dict['test']['mitigated_hw']
 my_raw_dict = list_to_dict(l=list(my_raw))
 my_mitigated_dict = list_to_dict(l=list(my_mitigated))
 
-truth_ce, qiskit_raw_ce, qiskit_mit_ce = compute_metrics(ground_truth=ground_truth,raw_counts=raw_counts,mitigated_counts=mitigated_counts,metric='ce')
+truth_ce, qiskit_raw_ce, qiskit_mit_ce = compute_metrics(ground_truth=ground_truth,raw_counts=raw_counts,mitigated_counts=mitigated_counts,metric='wasserstein_distance')
 print('Qiskit metric: {:.3e}-->{:.3e}'.format(qiskit_raw_ce,qiskit_mit_ce))
 
-fig = plot_histogram([raw_counts, mitigated_counts, ground_truth], legend=['raw = %.3e'%qiskit_raw_ce,'mitigated = %.3e'%qiskit_mit_ce,'truth = %.3e'%truth_ce],figsize=(35,10),title='qiskit mitigation')
+fig = plot_histogram([ground_truth, raw_counts, mitigated_counts], legend=['truth = %.3e'%truth_ce,'raw = %.3e'%qiskit_raw_ce,'mitigated = %.3e'%qiskit_mit_ce],figsize=(35,10),title='qiskit mitigation')
 fig.savefig('qiskit_mitigation.png')
 
-truth_ce, my_raw_ce, my_mit_ce = compute_metrics(ground_truth=ground_truth,raw_counts=my_raw_dict,mitigated_counts=my_mitigated_dict,metric='ce')
+truth_ce, my_raw_ce, my_mit_ce = compute_metrics(ground_truth=ground_truth,raw_counts=my_raw_dict,mitigated_counts=my_mitigated_dict,metric='wasserstein_distance')
 print('My metric: {:.3e}-->{:.3e}'.format(my_raw_ce,my_mit_ce))
 
-fig = plot_histogram([my_raw_dict, my_mitigated_dict, ground_truth], legend=['my_raw = %.3e'%my_raw_ce,'my_mitigated = %.3e'%my_mit_ce,'truth = %.3e'%truth_ce],figsize=(35,10),title='my mitigation')
+fig = plot_histogram([ground_truth, my_raw_dict, my_mitigated_dict], legend=['truth = %.3e'%truth_ce,'my_raw = %.3e'%my_raw_ce,'my_mitigated = %.3e'%my_mit_ce],figsize=(35,10),title='my mitigation')
 fig.savefig('my_mitigation.png')
 
 # fig = plot_histogram([mitigated_counts, my_mitigated_dict, ground_truth], legend=['mitigated', 'my_mitigated', 'truth'],figsize=(35,10),title='mitigations comparison')
 # fig.savefig('mitigations.png')
 
-qiskit_raw_h, qiskit_raw_delta_h_terms, qiskit_raw_delta_p_terms = cross_entropy_terms(target=dict_to_array(distribution_dict=ground_truth,force_prob=True),
-obs=dict_to_array(distribution_dict=raw_counts,force_prob=True))
-qiskit_mit_h, qiskit_mit_delta_h_terms, qiskit_mit_delta_p_terms = cross_entropy_terms(target=dict_to_array(distribution_dict=ground_truth,force_prob=True),
-obs=dict_to_array(distribution_dict=mitigated_counts,force_prob=True))
-plot_bar(data=[raw_counts, qiskit_raw_delta_h_terms, qiskit_raw_delta_p_terms],legends=['raw = %.3e'%qiskit_raw_h,'delta_H','delta_p'],title='qiskit_raw')
-plot_bar(data=[mitigated_counts, qiskit_mit_delta_h_terms, qiskit_mit_delta_p_terms],legends=['mitigated = %.3e'%qiskit_mit_h,'delta_H','delta_p'],title='qiskit_mit')
+# qiskit_raw_h, qiskit_raw_delta_h_terms, qiskit_raw_delta_p_terms = kl_divergence_terms(target=dict_to_array(distribution_dict=ground_truth,force_prob=True),
+# obs=dict_to_array(distribution_dict=raw_counts,force_prob=True))
+# qiskit_mit_h, qiskit_mit_delta_h_terms, qiskit_mit_delta_p_terms = kl_divergence_terms(target=dict_to_array(distribution_dict=ground_truth,force_prob=True),
+# obs=dict_to_array(distribution_dict=mitigated_counts,force_prob=True))
+# plot_bar(data=[raw_counts, qiskit_raw_delta_h_terms, qiskit_raw_delta_p_terms],legends=['raw = %.3e'%qiskit_raw_h,'delta_H','delta_p'],title='qiskit_raw')
+# plot_bar(data=[mitigated_counts, qiskit_mit_delta_h_terms, qiskit_mit_delta_p_terms],legends=['mitigated = %.3e'%qiskit_mit_h,'delta_H','delta_p'],title='qiskit_mit')
