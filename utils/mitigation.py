@@ -142,9 +142,9 @@ class TensoredMitigation:
                 # print('unmitigated_prob:',unmitigated_prob)
                 # print('qubit list sizes:',qubit_list_sizes)
                 # print('indices_list:',indices_list)
-                # print('nqubits:',nqubits)
+                print('nqubits:',nqubits)
                 # print('all_states:',all_states)
-                # print('num_of_states:',num_of_states)
+                print('num_of_states:',num_of_states)
 
                 def fun(x):
                     mat_dot_x = np.zeros([num_of_states], dtype=float)

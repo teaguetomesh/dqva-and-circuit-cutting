@@ -155,12 +155,12 @@ class Scheduler:
                 len(schedule_item.circ_list),schedule_item.total_circs,schedule_item.shots),flush=True)
             hw_result = hw_job.result()
             start_idx = 0
-            for element in schedule_item.circ_list:
+            for element_ctr, element in enumerate(schedule_item.circ_list):
                 key = element['key']
                 circ = element['circ']
                 reps = element['reps']
                 end_idx = start_idx + reps
-                print('Getting {:d}-{:d} ({:d}/{:d}) circuits, key {} : {:d} qubit'.format(start_idx,end_idx-1,end_idx,schedule_item.total_circs,key,len(circ.qubits)),flush=True)
+                print('{:d}: getting {:d}-{:d}/{:d} circuits, key {} : {:d} qubit'.format(element_ctr,start_idx,end_idx-1,schedule_item.total_circs-1,key,len(circ.qubits)),flush=True)
                 for result_idx in range(start_idx,end_idx):
                     experiment_hw_memory = hw_result.get_memory(result_idx)
                     if key in memories:
