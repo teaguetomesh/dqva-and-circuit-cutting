@@ -96,7 +96,7 @@ class Scheduler:
                 
                 # Circ has already been transpiled
                 if len(circ.clbits)>0:
-                    print('Already transpiled')
+                    # print('Already transpiled')
                     mapped_circuit = circ
                 # Circ not transpiled, running on real device
                 elif real_device:
@@ -111,7 +111,7 @@ class Scheduler:
                     evaluator_info = element['evaluator_info']
                     qc=apply_measurement(circ=circ)
                     mapped_circuit = transpile(qc, basis_gates=evaluator_info['basis_gates'])
-                    print('Transpiled into basis gates:')
+                    # print('Transpiled into basis gates:')
                     # print(mapped_circuit)
 
                 circs_to_add = [mapped_circuit]*reps
