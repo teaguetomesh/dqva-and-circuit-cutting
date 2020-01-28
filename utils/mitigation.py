@@ -134,10 +134,10 @@ class TensoredMitigation:
             calibration_matrices = self.circ_dict[key]['calibration_matrices']
             qubit_list_sizes = [int(np.log(np.shape(mat)[0])/np.log(2)) for mat in calibration_matrices]
             indices_list = [{bin(ind)[2:].zfill(group_size): ind for ind in range(2**group_size)} for group_size in qubit_list_sizes]
+            nqubits = sum(qubit_list_sizes)
+            num_of_states = 2**nqubits
+            all_states = [bin(state)[2:].zfill(nqubits) for state in range(2**nqubits)]
             for unmitigated_key in keys_to_mitigate:
-                nqubits = len(unmitigated[unmitigated_key]['circ'].qubits)
-                num_of_states = 2**nqubits
-                all_states = [bin(state)[2:].zfill(nqubits) for state in range(2**nqubits)]
                 unmitigated_prob = np.array(unmitigated[unmitigated_key]['hw'],dtype=float)
                 # print('unmitigated_prob:',unmitigated_prob)
                 # print('qubit list sizes:',qubit_list_sizes)
