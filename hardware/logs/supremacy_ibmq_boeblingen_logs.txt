@@ -1,0 +1,692 @@
+-------------------------------------------------- Generator --------------------------------------------------
+Existing cases: dict_keys([])
+Generating 1x5, 1+8+1 supremacy circuit
+Using license file /home/weit/gurobi.lic
+Academic license - for non-commercial use only
+********************
+MIQCP stats:
+1 cuts, 2 clusters, max qubit = 4
+cluster 0: original input = 2.00, ρ_qubits = -0.00, O_qubits = 1.00, d = 2.00
+cluster 1: original input = 3.00, ρ_qubits = 1.00, O_qubits = -0.00, d = 4.00
+objective value = 9.001e+00
+manually calculated objective value: 9.000e+00
+evaluator_cost = 9, reconstructor_cost = 5.288e-07, reconstructor_weight = 0.000e+00
+runtime: 0.0266420841217041
+OPTIMAL
+********************
+Adding case (4, 5) to run
+Adding 5 qubit full circuit to run
+accumulated_chi2: 0.0019784253133503125
+accumulated_chi2: 0.0006233881690199583
+accumulated_chi2: 0.0006023422544689164
+accumulated_chi2: 0.0006544833709783677
+5 qubit circuit saturated shots = 24576, χ^2 = 4.596e-04
+----------------------------------------------------------------------------------------------------
+Generating 3x2, 1+8+1 supremacy circuit
+********************
+MIQCP stats:
+4 cuts, 3 clusters, max qubit = 4
+cluster 0: original input = 3.00, ρ_qubits = 1.00, O_qubits = 2.00, d = 4.00
+cluster 1: original input = 3.00, ρ_qubits = 1.00, O_qubits = 2.00, d = 4.00
+cluster 2: original input = 0.00, ρ_qubits = 2.00, O_qubits = 0.00, d = 2.00
+objective value = 1.440e+02
+manually calculated objective value: 1.440e+02
+evaluator_cost = 144, reconstructor_cost = 8.426e-05, reconstructor_weight = 0.000e+00
+runtime: 0.12875604629516602
+OPTIMAL
+********************
+Adding case (4, 6) to run
+Adding 6 qubit full circuit to run
+accumulated_chi2: 0.003678487195086102
+accumulated_chi2: 0.0017535600260502326
+accumulated_chi2: 0.0013811181941412538
+accumulated_chi2: 0.001041283105853179
+accumulated_chi2: 0.0007283970927121152
+accumulated_chi2: 0.000608235903585795
+accumulated_chi2: 0.00047791731268455746
+6 qubit circuit saturated shots = 49152, χ^2 = 6.197e-04
+----------------------------------------------------------------------------------------------------
+2 cases, 2 full circuits to run : dict_keys([(4, 5), (4, 6)])
+******************** Submitting jobs ********************
+Submitting job 1/1 136afe20-a414-49ad-8e8a-e14a67fe435d --> 2 circuits, 9 * 8192 shots
+/home/weit/anaconda3/envs/cc-env/lib/python3.7/site-packages/qiskit/providers/models/backendconfiguration.py:337: UserWarning: `dt` and `dtm` now have units of seconds(s) rather than nanoseconds(ns).
+  warnings.warn('`dt` and `dtm` now have units of seconds(s) rather '
+******************** Submitting jobs ********************
+Submitting job 1/1 71f4fd31-a13b-440c-8c0d-00df8d0f424c --> 96 circuits, 96 * 8192 shots
+******************** Retrieving jobs ********************
+Retrieving job 1/1 136afe20-a414-49ad-8e8a-e14a67fe435d --> 2 circuits, 9 * 8192 shots
+Getting 0-2 (3/9) circuits, key 5 : 5 qubit
+Getting 3-8 (9/9) circuits, key 6 : 6 qubit
+******************** Retrieving jobs ********************
+Retrieving job 1/1 71f4fd31-a13b-440c-8c0d-00df8d0f424c --> 96 circuits, 96 * 8192 shots
+Getting 0-0 (1/96) circuits, key (5, '00000') : 20 qubit
+Getting 1-1 (2/96) circuits, key (5, '00001') : 20 qubit
+Getting 2-2 (3/96) circuits, key (5, '00010') : 20 qubit
+Getting 3-3 (4/96) circuits, key (5, '00011') : 20 qubit
+Getting 4-4 (5/96) circuits, key (5, '00100') : 20 qubit
+Getting 5-5 (6/96) circuits, key (5, '00101') : 20 qubit
+Getting 6-6 (7/96) circuits, key (5, '00110') : 20 qubit
+Getting 7-7 (8/96) circuits, key (5, '00111') : 20 qubit
+Getting 8-8 (9/96) circuits, key (5, '01000') : 20 qubit
+Getting 9-9 (10/96) circuits, key (5, '01001') : 20 qubit
+Getting 10-10 (11/96) circuits, key (5, '01010') : 20 qubit
+Getting 11-11 (12/96) circuits, key (5, '01011') : 20 qubit
+Getting 12-12 (13/96) circuits, key (5, '01100') : 20 qubit
+Getting 13-13 (14/96) circuits, key (5, '01101') : 20 qubit
+Getting 14-14 (15/96) circuits, key (5, '01110') : 20 qubit
+Getting 15-15 (16/96) circuits, key (5, '01111') : 20 qubit
+Getting 16-16 (17/96) circuits, key (5, '10000') : 20 qubit
+Getting 17-17 (18/96) circuits, key (5, '10001') : 20 qubit
+Getting 18-18 (19/96) circuits, key (5, '10010') : 20 qubit
+Getting 19-19 (20/96) circuits, key (5, '10011') : 20 qubit
+Getting 20-20 (21/96) circuits, key (5, '10100') : 20 qubit
+Getting 21-21 (22/96) circuits, key (5, '10101') : 20 qubit
+Getting 22-22 (23/96) circuits, key (5, '10110') : 20 qubit
+Getting 23-23 (24/96) circuits, key (5, '10111') : 20 qubit
+Getting 24-24 (25/96) circuits, key (5, '11000') : 20 qubit
+Getting 25-25 (26/96) circuits, key (5, '11001') : 20 qubit
+Getting 26-26 (27/96) circuits, key (5, '11010') : 20 qubit
+Getting 27-27 (28/96) circuits, key (5, '11011') : 20 qubit
+Getting 28-28 (29/96) circuits, key (5, '11100') : 20 qubit
+Getting 29-29 (30/96) circuits, key (5, '11101') : 20 qubit
+Getting 30-30 (31/96) circuits, key (5, '11110') : 20 qubit
+Getting 31-31 (32/96) circuits, key (5, '11111') : 20 qubit
+Getting 32-32 (33/96) circuits, key (6, '000000') : 20 qubit
+Getting 33-33 (34/96) circuits, key (6, '000001') : 20 qubit
+Getting 34-34 (35/96) circuits, key (6, '000010') : 20 qubit
+Getting 35-35 (36/96) circuits, key (6, '000011') : 20 qubit
+Getting 36-36 (37/96) circuits, key (6, '000100') : 20 qubit
+Getting 37-37 (38/96) circuits, key (6, '000101') : 20 qubit
+Getting 38-38 (39/96) circuits, key (6, '000110') : 20 qubit
+Getting 39-39 (40/96) circuits, key (6, '000111') : 20 qubit
+Getting 40-40 (41/96) circuits, key (6, '001000') : 20 qubit
+Getting 41-41 (42/96) circuits, key (6, '001001') : 20 qubit
+Getting 42-42 (43/96) circuits, key (6, '001010') : 20 qubit
+Getting 43-43 (44/96) circuits, key (6, '001011') : 20 qubit
+Getting 44-44 (45/96) circuits, key (6, '001100') : 20 qubit
+Getting 45-45 (46/96) circuits, key (6, '001101') : 20 qubit
+Getting 46-46 (47/96) circuits, key (6, '001110') : 20 qubit
+Getting 47-47 (48/96) circuits, key (6, '001111') : 20 qubit
+Getting 48-48 (49/96) circuits, key (6, '010000') : 20 qubit
+Getting 49-49 (50/96) circuits, key (6, '010001') : 20 qubit
+Getting 50-50 (51/96) circuits, key (6, '010010') : 20 qubit
+Getting 51-51 (52/96) circuits, key (6, '010011') : 20 qubit
+Getting 52-52 (53/96) circuits, key (6, '010100') : 20 qubit
+Getting 53-53 (54/96) circuits, key (6, '010101') : 20 qubit
+Getting 54-54 (55/96) circuits, key (6, '010110') : 20 qubit
+Getting 55-55 (56/96) circuits, key (6, '010111') : 20 qubit
+Getting 56-56 (57/96) circuits, key (6, '011000') : 20 qubit
+Getting 57-57 (58/96) circuits, key (6, '011001') : 20 qubit
+Getting 58-58 (59/96) circuits, key (6, '011010') : 20 qubit
+Getting 59-59 (60/96) circuits, key (6, '011011') : 20 qubit
+Getting 60-60 (61/96) circuits, key (6, '011100') : 20 qubit
+Getting 61-61 (62/96) circuits, key (6, '011101') : 20 qubit
+Getting 62-62 (63/96) circuits, key (6, '011110') : 20 qubit
+Getting 63-63 (64/96) circuits, key (6, '011111') : 20 qubit
+Getting 64-64 (65/96) circuits, key (6, '100000') : 20 qubit
+Getting 65-65 (66/96) circuits, key (6, '100001') : 20 qubit
+Getting 66-66 (67/96) circuits, key (6, '100010') : 20 qubit
+Getting 67-67 (68/96) circuits, key (6, '100011') : 20 qubit
+Getting 68-68 (69/96) circuits, key (6, '100100') : 20 qubit
+Getting 69-69 (70/96) circuits, key (6, '100101') : 20 qubit
+Getting 70-70 (71/96) circuits, key (6, '100110') : 20 qubit
+Getting 71-71 (72/96) circuits, key (6, '100111') : 20 qubit
+Getting 72-72 (73/96) circuits, key (6, '101000') : 20 qubit
+Getting 73-73 (74/96) circuits, key (6, '101001') : 20 qubit
+Getting 74-74 (75/96) circuits, key (6, '101010') : 20 qubit
+Getting 75-75 (76/96) circuits, key (6, '101011') : 20 qubit
+Getting 76-76 (77/96) circuits, key (6, '101100') : 20 qubit
+Getting 77-77 (78/96) circuits, key (6, '101101') : 20 qubit
+Getting 78-78 (79/96) circuits, key (6, '101110') : 20 qubit
+Getting 79-79 (80/96) circuits, key (6, '101111') : 20 qubit
+Getting 80-80 (81/96) circuits, key (6, '110000') : 20 qubit
+Getting 81-81 (82/96) circuits, key (6, '110001') : 20 qubit
+Getting 82-82 (83/96) circuits, key (6, '110010') : 20 qubit
+Getting 83-83 (84/96) circuits, key (6, '110011') : 20 qubit
+Getting 84-84 (85/96) circuits, key (6, '110100') : 20 qubit
+Getting 85-85 (86/96) circuits, key (6, '110101') : 20 qubit
+Getting 86-86 (87/96) circuits, key (6, '110110') : 20 qubit
+Getting 87-87 (88/96) circuits, key (6, '110111') : 20 qubit
+Getting 88-88 (89/96) circuits, key (6, '111000') : 20 qubit
+Getting 89-89 (90/96) circuits, key (6, '111001') : 20 qubit
+Getting 90-90 (91/96) circuits, key (6, '111010') : 20 qubit
+Getting 91-91 (92/96) circuits, key (6, '111011') : 20 qubit
+Getting 92-92 (93/96) circuits, key (6, '111100') : 20 qubit
+Getting 93-93 (94/96) circuits, key (6, '111101') : 20 qubit
+Getting 94-94 (95/96) circuits, key (6, '111110') : 20 qubit
+Getting 95-95 (96/96) circuits, key (6, '111111') : 20 qubit
+-------------------------------------------------- Evaluator --------------------------------------------------
+Existing cases: dict_keys([])
+Running case: (4, 5)
+case (4, 5), cluster_0 2_qubits * 3_instances on ibmq_boeblingen QUANTUM HARDWARE, saturated shots
+case (4, 5), cluster_1 4_qubits * 6_instances on ibmq_boeblingen QUANTUM HARDWARE, saturated shots
+Rank MASTER dumped case (4, 5), 1/2 cases
+----------------------------------------------------------------------------------------------------
+Running case: (4, 6)
+case (4, 6), cluster_0 4_qubits * 54_instances on ibmq_boeblingen QUANTUM HARDWARE, saturated shots
+case (4, 6), cluster_1 4_qubits * 54_instances on ibmq_boeblingen QUANTUM HARDWARE, saturated shots
+case (4, 6), cluster_2 2_qubits * 36_instances on ibmq_boeblingen QUANTUM HARDWARE, saturated shots
+Rank MASTER dumped case (4, 6), 2/2 cases
+----------------------------------------------------------------------------------------------------
+-------------------------------------------------- Job Submittor --------------------------------------------------
+Existing cases: dict_keys([])
+Run cases: dict_keys([(4, 5), (4, 6)])
+**************************************************
+Case (4, 5)
+accumulated_chi2: 0.00010831054180941715
+accumulated_chi2: 3.123784699525846e-05
+accumulated_chi2: 5.166310309520301e-05
+2 qubit circuit saturated shots = 16384, χ^2 = 2.969e-05
+Cluster 0 saturated shots = 16384
+accumulated_chi2: 0.0011342215705906458
+accumulated_chi2: 0.0003857955862893949
+accumulated_chi2: 0.00029478458022690594
+4 qubit circuit saturated shots = 16384, χ^2 = 4.324e-04
+Cluster 1 saturated shots = 16384
+Case (4, 6)
+accumulated_chi2: 0.0008594720414997643
+accumulated_chi2: 0.0003183244655220385
+accumulated_chi2: 0.0002068617830818598
+4 qubit circuit saturated shots = 16384, χ^2 = 4.258e-04
+Cluster 0 saturated shots = 16384
+accumulated_chi2: 0.000646726679340906
+accumulated_chi2: 0.0002866282268429675
+accumulated_chi2: 0.00023938503660427094
+4 qubit circuit saturated shots = 16384, χ^2 = 3.435e-04
+Cluster 1 saturated shots = 16384
+accumulated_chi2: 0.00019331568335442855
+accumulated_chi2: 4.899318813615246e-05
+accumulated_chi2: 7.923217490171054e-05
+2 qubit circuit saturated shots = 16384, χ^2 = 6.877e-05
+Cluster 2 saturated shots = 16384
+******************** Submitting jobs ********************
+Submitting job 1/1 ad018c54-a30b-481d-8003-8fe75c2e114a --> 153 circuits, 306 * 8192 shots
+/home/weit/anaconda3/envs/cc-env/lib/python3.7/site-packages/qiskit/providers/models/backendconfiguration.py:337: UserWarning: `dt` and `dtm` now have units of seconds(s) rather than nanoseconds(ns).
+  warnings.warn('`dt` and `dtm` now have units of seconds(s) rather '
+******************** Submitting jobs ********************
+Submitting job 1/1 00536e57-c520-45e5-b29a-0e50c1bad2b9 --> 56 circuits, 56 * 8192 shots
+******************** Retrieving jobs ********************
+Retrieving job 1/1 ad018c54-a30b-481d-8003-8fe75c2e114a --> 153 circuits, 306 * 8192 shots
+Getting 0-1 (2/306) circuits, key 4,5,0|zero,zero,I,I : 20 qubit
+Getting 2-3 (4/306) circuits, key 4,5,0|zero,zero,I,X : 20 qubit
+Getting 4-5 (6/306) circuits, key 4,5,0|zero,zero,I,Y : 20 qubit
+Getting 6-7 (8/306) circuits, key 4,5,1|zero,zero,zero,zero,I,I,I,I : 20 qubit
+Getting 8-9 (10/306) circuits, key 4,5,1|one,zero,zero,zero,I,I,I,I : 20 qubit
+Getting 10-11 (12/306) circuits, key 4,5,1|plus,zero,zero,zero,I,I,I,I : 20 qubit
+Getting 12-13 (14/306) circuits, key 4,5,1|minus,zero,zero,zero,I,I,I,I : 20 qubit
+Getting 14-15 (16/306) circuits, key 4,5,1|plus_i,zero,zero,zero,I,I,I,I : 20 qubit
+Getting 16-17 (18/306) circuits, key 4,5,1|minus_i,zero,zero,zero,I,I,I,I : 20 qubit
+Getting 18-19 (20/306) circuits, key 4,6,0|zero,zero,zero,zero,I,I,I,I : 20 qubit
+Getting 20-21 (22/306) circuits, key 4,6,0|zero,zero,zero,zero,I,I,I,X : 20 qubit
+Getting 22-23 (24/306) circuits, key 4,6,0|zero,zero,zero,zero,I,I,I,Y : 20 qubit
+Getting 24-25 (26/306) circuits, key 4,6,0|zero,zero,zero,zero,I,X,I,I : 20 qubit
+Getting 26-27 (28/306) circuits, key 4,6,0|zero,zero,zero,zero,I,X,I,X : 20 qubit
+Getting 28-29 (30/306) circuits, key 4,6,0|zero,zero,zero,zero,I,X,I,Y : 20 qubit
+Getting 30-31 (32/306) circuits, key 4,6,0|zero,zero,zero,zero,I,Y,I,I : 20 qubit
+Getting 32-33 (34/306) circuits, key 4,6,0|zero,zero,zero,zero,I,Y,I,X : 20 qubit
+Getting 34-35 (36/306) circuits, key 4,6,0|zero,zero,zero,zero,I,Y,I,Y : 20 qubit
+Getting 36-37 (38/306) circuits, key 4,6,0|zero,zero,one,zero,I,I,I,I : 20 qubit
+Getting 38-39 (40/306) circuits, key 4,6,0|zero,zero,one,zero,I,I,I,X : 20 qubit
+Getting 40-41 (42/306) circuits, key 4,6,0|zero,zero,one,zero,I,I,I,Y : 20 qubit
+Getting 42-43 (44/306) circuits, key 4,6,0|zero,zero,one,zero,I,X,I,I : 20 qubit
+Getting 44-45 (46/306) circuits, key 4,6,0|zero,zero,one,zero,I,X,I,X : 20 qubit
+Getting 46-47 (48/306) circuits, key 4,6,0|zero,zero,one,zero,I,X,I,Y : 20 qubit
+Getting 48-49 (50/306) circuits, key 4,6,0|zero,zero,one,zero,I,Y,I,I : 20 qubit
+Getting 50-51 (52/306) circuits, key 4,6,0|zero,zero,one,zero,I,Y,I,X : 20 qubit
+Getting 52-53 (54/306) circuits, key 4,6,0|zero,zero,one,zero,I,Y,I,Y : 20 qubit
+Getting 54-55 (56/306) circuits, key 4,6,0|zero,zero,plus,zero,I,I,I,I : 20 qubit
+Getting 56-57 (58/306) circuits, key 4,6,0|zero,zero,plus,zero,I,I,I,X : 20 qubit
+Getting 58-59 (60/306) circuits, key 4,6,0|zero,zero,plus,zero,I,I,I,Y : 20 qubit
+Getting 60-61 (62/306) circuits, key 4,6,0|zero,zero,plus,zero,I,X,I,I : 20 qubit
+Getting 62-63 (64/306) circuits, key 4,6,0|zero,zero,plus,zero,I,X,I,X : 20 qubit
+Getting 64-65 (66/306) circuits, key 4,6,0|zero,zero,plus,zero,I,X,I,Y : 20 qubit
+Getting 66-67 (68/306) circuits, key 4,6,0|zero,zero,plus,zero,I,Y,I,I : 20 qubit
+Getting 68-69 (70/306) circuits, key 4,6,0|zero,zero,plus,zero,I,Y,I,X : 20 qubit
+Getting 70-71 (72/306) circuits, key 4,6,0|zero,zero,plus,zero,I,Y,I,Y : 20 qubit
+Getting 72-73 (74/306) circuits, key 4,6,0|zero,zero,minus,zero,I,I,I,I : 20 qubit
+Getting 74-75 (76/306) circuits, key 4,6,0|zero,zero,minus,zero,I,I,I,X : 20 qubit
+Getting 76-77 (78/306) circuits, key 4,6,0|zero,zero,minus,zero,I,I,I,Y : 20 qubit
+Getting 78-79 (80/306) circuits, key 4,6,0|zero,zero,minus,zero,I,X,I,I : 20 qubit
+Getting 80-81 (82/306) circuits, key 4,6,0|zero,zero,minus,zero,I,X,I,X : 20 qubit
+Getting 82-83 (84/306) circuits, key 4,6,0|zero,zero,minus,zero,I,X,I,Y : 20 qubit
+Getting 84-85 (86/306) circuits, key 4,6,0|zero,zero,minus,zero,I,Y,I,I : 20 qubit
+Getting 86-87 (88/306) circuits, key 4,6,0|zero,zero,minus,zero,I,Y,I,X : 20 qubit
+Getting 88-89 (90/306) circuits, key 4,6,0|zero,zero,minus,zero,I,Y,I,Y : 20 qubit
+Getting 90-91 (92/306) circuits, key 4,6,0|zero,zero,plus_i,zero,I,I,I,I : 20 qubit
+Getting 92-93 (94/306) circuits, key 4,6,0|zero,zero,plus_i,zero,I,I,I,X : 20 qubit
+Getting 94-95 (96/306) circuits, key 4,6,0|zero,zero,plus_i,zero,I,I,I,Y : 20 qubit
+Getting 96-97 (98/306) circuits, key 4,6,0|zero,zero,plus_i,zero,I,X,I,I : 20 qubit
+Getting 98-99 (100/306) circuits, key 4,6,0|zero,zero,plus_i,zero,I,X,I,X : 20 qubit
+Getting 100-101 (102/306) circuits, key 4,6,0|zero,zero,plus_i,zero,I,X,I,Y : 20 qubit
+Getting 102-103 (104/306) circuits, key 4,6,0|zero,zero,plus_i,zero,I,Y,I,I : 20 qubit
+Getting 104-105 (106/306) circuits, key 4,6,0|zero,zero,plus_i,zero,I,Y,I,X : 20 qubit
+Getting 106-107 (108/306) circuits, key 4,6,0|zero,zero,plus_i,zero,I,Y,I,Y : 20 qubit
+Getting 108-109 (110/306) circuits, key 4,6,0|zero,zero,minus_i,zero,I,I,I,I : 20 qubit
+Getting 110-111 (112/306) circuits, key 4,6,0|zero,zero,minus_i,zero,I,I,I,X : 20 qubit
+Getting 112-113 (114/306) circuits, key 4,6,0|zero,zero,minus_i,zero,I,I,I,Y : 20 qubit
+Getting 114-115 (116/306) circuits, key 4,6,0|zero,zero,minus_i,zero,I,X,I,I : 20 qubit
+Getting 116-117 (118/306) circuits, key 4,6,0|zero,zero,minus_i,zero,I,X,I,X : 20 qubit
+Getting 118-119 (120/306) circuits, key 4,6,0|zero,zero,minus_i,zero,I,X,I,Y : 20 qubit
+Getting 120-121 (122/306) circuits, key 4,6,0|zero,zero,minus_i,zero,I,Y,I,I : 20 qubit
+Getting 122-123 (124/306) circuits, key 4,6,0|zero,zero,minus_i,zero,I,Y,I,X : 20 qubit
+Getting 124-125 (126/306) circuits, key 4,6,0|zero,zero,minus_i,zero,I,Y,I,Y : 20 qubit
+Getting 126-127 (128/306) circuits, key 4,6,1|zero,zero,zero,zero,I,I,I,I : 20 qubit
+Getting 128-129 (130/306) circuits, key 4,6,1|zero,zero,zero,zero,I,X,I,I : 20 qubit
+Getting 130-131 (132/306) circuits, key 4,6,1|zero,zero,zero,zero,I,Y,I,I : 20 qubit
+Getting 132-133 (134/306) circuits, key 4,6,1|zero,zero,zero,zero,X,I,I,I : 20 qubit
+Getting 134-135 (136/306) circuits, key 4,6,1|zero,zero,zero,zero,X,X,I,I : 20 qubit
+Getting 136-137 (138/306) circuits, key 4,6,1|zero,zero,zero,zero,X,Y,I,I : 20 qubit
+Getting 138-139 (140/306) circuits, key 4,6,1|zero,zero,zero,zero,Y,I,I,I : 20 qubit
+Getting 140-141 (142/306) circuits, key 4,6,1|zero,zero,zero,zero,Y,X,I,I : 20 qubit
+Getting 142-143 (144/306) circuits, key 4,6,1|zero,zero,zero,zero,Y,Y,I,I : 20 qubit
+Getting 144-145 (146/306) circuits, key 4,6,1|zero,one,zero,zero,I,I,I,I : 20 qubit
+Getting 146-147 (148/306) circuits, key 4,6,1|zero,one,zero,zero,I,X,I,I : 20 qubit
+Getting 148-149 (150/306) circuits, key 4,6,1|zero,one,zero,zero,I,Y,I,I : 20 qubit
+Getting 150-151 (152/306) circuits, key 4,6,1|zero,one,zero,zero,X,I,I,I : 20 qubit
+Getting 152-153 (154/306) circuits, key 4,6,1|zero,one,zero,zero,X,X,I,I : 20 qubit
+Getting 154-155 (156/306) circuits, key 4,6,1|zero,one,zero,zero,X,Y,I,I : 20 qubit
+Getting 156-157 (158/306) circuits, key 4,6,1|zero,one,zero,zero,Y,I,I,I : 20 qubit
+Getting 158-159 (160/306) circuits, key 4,6,1|zero,one,zero,zero,Y,X,I,I : 20 qubit
+Getting 160-161 (162/306) circuits, key 4,6,1|zero,one,zero,zero,Y,Y,I,I : 20 qubit
+Getting 162-163 (164/306) circuits, key 4,6,1|zero,plus,zero,zero,I,I,I,I : 20 qubit
+Getting 164-165 (166/306) circuits, key 4,6,1|zero,plus,zero,zero,I,X,I,I : 20 qubit
+Getting 166-167 (168/306) circuits, key 4,6,1|zero,plus,zero,zero,I,Y,I,I : 20 qubit
+Getting 168-169 (170/306) circuits, key 4,6,1|zero,plus,zero,zero,X,I,I,I : 20 qubit
+Getting 170-171 (172/306) circuits, key 4,6,1|zero,plus,zero,zero,X,X,I,I : 20 qubit
+Getting 172-173 (174/306) circuits, key 4,6,1|zero,plus,zero,zero,X,Y,I,I : 20 qubit
+Getting 174-175 (176/306) circuits, key 4,6,1|zero,plus,zero,zero,Y,I,I,I : 20 qubit
+Getting 176-177 (178/306) circuits, key 4,6,1|zero,plus,zero,zero,Y,X,I,I : 20 qubit
+Getting 178-179 (180/306) circuits, key 4,6,1|zero,plus,zero,zero,Y,Y,I,I : 20 qubit
+Getting 180-181 (182/306) circuits, key 4,6,1|zero,minus,zero,zero,I,I,I,I : 20 qubit
+Getting 182-183 (184/306) circuits, key 4,6,1|zero,minus,zero,zero,I,X,I,I : 20 qubit
+Getting 184-185 (186/306) circuits, key 4,6,1|zero,minus,zero,zero,I,Y,I,I : 20 qubit
+Getting 186-187 (188/306) circuits, key 4,6,1|zero,minus,zero,zero,X,I,I,I : 20 qubit
+Getting 188-189 (190/306) circuits, key 4,6,1|zero,minus,zero,zero,X,X,I,I : 20 qubit
+Getting 190-191 (192/306) circuits, key 4,6,1|zero,minus,zero,zero,X,Y,I,I : 20 qubit
+Getting 192-193 (194/306) circuits, key 4,6,1|zero,minus,zero,zero,Y,I,I,I : 20 qubit
+Getting 194-195 (196/306) circuits, key 4,6,1|zero,minus,zero,zero,Y,X,I,I : 20 qubit
+Getting 196-197 (198/306) circuits, key 4,6,1|zero,minus,zero,zero,Y,Y,I,I : 20 qubit
+Getting 198-199 (200/306) circuits, key 4,6,1|zero,plus_i,zero,zero,I,I,I,I : 20 qubit
+Getting 200-201 (202/306) circuits, key 4,6,1|zero,plus_i,zero,zero,I,X,I,I : 20 qubit
+Getting 202-203 (204/306) circuits, key 4,6,1|zero,plus_i,zero,zero,I,Y,I,I : 20 qubit
+Getting 204-205 (206/306) circuits, key 4,6,1|zero,plus_i,zero,zero,X,I,I,I : 20 qubit
+Getting 206-207 (208/306) circuits, key 4,6,1|zero,plus_i,zero,zero,X,X,I,I : 20 qubit
+Getting 208-209 (210/306) circuits, key 4,6,1|zero,plus_i,zero,zero,X,Y,I,I : 20 qubit
+Getting 210-211 (212/306) circuits, key 4,6,1|zero,plus_i,zero,zero,Y,I,I,I : 20 qubit
+Getting 212-213 (214/306) circuits, key 4,6,1|zero,plus_i,zero,zero,Y,X,I,I : 20 qubit
+Getting 214-215 (216/306) circuits, key 4,6,1|zero,plus_i,zero,zero,Y,Y,I,I : 20 qubit
+Getting 216-217 (218/306) circuits, key 4,6,1|zero,minus_i,zero,zero,I,I,I,I : 20 qubit
+Getting 218-219 (220/306) circuits, key 4,6,1|zero,minus_i,zero,zero,I,X,I,I : 20 qubit
+Getting 220-221 (222/306) circuits, key 4,6,1|zero,minus_i,zero,zero,I,Y,I,I : 20 qubit
+Getting 222-223 (224/306) circuits, key 4,6,1|zero,minus_i,zero,zero,X,I,I,I : 20 qubit
+Getting 224-225 (226/306) circuits, key 4,6,1|zero,minus_i,zero,zero,X,X,I,I : 20 qubit
+Getting 226-227 (228/306) circuits, key 4,6,1|zero,minus_i,zero,zero,X,Y,I,I : 20 qubit
+Getting 228-229 (230/306) circuits, key 4,6,1|zero,minus_i,zero,zero,Y,I,I,I : 20 qubit
+Getting 230-231 (232/306) circuits, key 4,6,1|zero,minus_i,zero,zero,Y,X,I,I : 20 qubit
+Getting 232-233 (234/306) circuits, key 4,6,1|zero,minus_i,zero,zero,Y,Y,I,I : 20 qubit
+Getting 234-235 (236/306) circuits, key 4,6,2|zero,zero,I,I : 20 qubit
+Getting 236-237 (238/306) circuits, key 4,6,2|zero,one,I,I : 20 qubit
+Getting 238-239 (240/306) circuits, key 4,6,2|zero,plus,I,I : 20 qubit
+Getting 240-241 (242/306) circuits, key 4,6,2|zero,minus,I,I : 20 qubit
+Getting 242-243 (244/306) circuits, key 4,6,2|zero,plus_i,I,I : 20 qubit
+Getting 244-245 (246/306) circuits, key 4,6,2|zero,minus_i,I,I : 20 qubit
+Getting 246-247 (248/306) circuits, key 4,6,2|one,zero,I,I : 20 qubit
+Getting 248-249 (250/306) circuits, key 4,6,2|one,one,I,I : 20 qubit
+Getting 250-251 (252/306) circuits, key 4,6,2|one,plus,I,I : 20 qubit
+Getting 252-253 (254/306) circuits, key 4,6,2|one,minus,I,I : 20 qubit
+Getting 254-255 (256/306) circuits, key 4,6,2|one,plus_i,I,I : 20 qubit
+Getting 256-257 (258/306) circuits, key 4,6,2|one,minus_i,I,I : 20 qubit
+Getting 258-259 (260/306) circuits, key 4,6,2|plus,zero,I,I : 20 qubit
+Getting 260-261 (262/306) circuits, key 4,6,2|plus,one,I,I : 20 qubit
+Getting 262-263 (264/306) circuits, key 4,6,2|plus,plus,I,I : 20 qubit
+Getting 264-265 (266/306) circuits, key 4,6,2|plus,minus,I,I : 20 qubit
+Getting 266-267 (268/306) circuits, key 4,6,2|plus,plus_i,I,I : 20 qubit
+Getting 268-269 (270/306) circuits, key 4,6,2|plus,minus_i,I,I : 20 qubit
+Getting 270-271 (272/306) circuits, key 4,6,2|minus,zero,I,I : 20 qubit
+Getting 272-273 (274/306) circuits, key 4,6,2|minus,one,I,I : 20 qubit
+Getting 274-275 (276/306) circuits, key 4,6,2|minus,plus,I,I : 20 qubit
+Getting 276-277 (278/306) circuits, key 4,6,2|minus,minus,I,I : 20 qubit
+Getting 278-279 (280/306) circuits, key 4,6,2|minus,plus_i,I,I : 20 qubit
+Getting 280-281 (282/306) circuits, key 4,6,2|minus,minus_i,I,I : 20 qubit
+Getting 282-283 (284/306) circuits, key 4,6,2|plus_i,zero,I,I : 20 qubit
+Getting 284-285 (286/306) circuits, key 4,6,2|plus_i,one,I,I : 20 qubit
+Getting 286-287 (288/306) circuits, key 4,6,2|plus_i,plus,I,I : 20 qubit
+Getting 288-289 (290/306) circuits, key 4,6,2|plus_i,minus,I,I : 20 qubit
+Getting 290-291 (292/306) circuits, key 4,6,2|plus_i,plus_i,I,I : 20 qubit
+Getting 292-293 (294/306) circuits, key 4,6,2|plus_i,minus_i,I,I : 20 qubit
+Getting 294-295 (296/306) circuits, key 4,6,2|minus_i,zero,I,I : 20 qubit
+Getting 296-297 (298/306) circuits, key 4,6,2|minus_i,one,I,I : 20 qubit
+Getting 298-299 (300/306) circuits, key 4,6,2|minus_i,plus,I,I : 20 qubit
+Getting 300-301 (302/306) circuits, key 4,6,2|minus_i,minus,I,I : 20 qubit
+Getting 302-303 (304/306) circuits, key 4,6,2|minus_i,plus_i,I,I : 20 qubit
+Getting 304-305 (306/306) circuits, key 4,6,2|minus_i,minus_i,I,I : 20 qubit
+******************** Retrieving jobs ********************
+Retrieving job 1/1 00536e57-c520-45e5-b29a-0e50c1bad2b9 --> 56 circuits, 56 * 8192 shots
+Getting 0-0 (1/56) circuits, key ('4,5,0', '00') : 20 qubit
+Getting 1-1 (2/56) circuits, key ('4,5,0', '01') : 20 qubit
+Getting 2-2 (3/56) circuits, key ('4,5,0', '10') : 20 qubit
+Getting 3-3 (4/56) circuits, key ('4,5,0', '11') : 20 qubit
+Getting 4-4 (5/56) circuits, key ('4,5,1', '0000') : 20 qubit
+Getting 5-5 (6/56) circuits, key ('4,5,1', '0001') : 20 qubit
+Getting 6-6 (7/56) circuits, key ('4,5,1', '0010') : 20 qubit
+Getting 7-7 (8/56) circuits, key ('4,5,1', '0011') : 20 qubit
+Getting 8-8 (9/56) circuits, key ('4,5,1', '0100') : 20 qubit
+Getting 9-9 (10/56) circuits, key ('4,5,1', '0101') : 20 qubit
+Getting 10-10 (11/56) circuits, key ('4,5,1', '0110') : 20 qubit
+Getting 11-11 (12/56) circuits, key ('4,5,1', '0111') : 20 qubit
+Getting 12-12 (13/56) circuits, key ('4,5,1', '1000') : 20 qubit
+Getting 13-13 (14/56) circuits, key ('4,5,1', '1001') : 20 qubit
+Getting 14-14 (15/56) circuits, key ('4,5,1', '1010') : 20 qubit
+Getting 15-15 (16/56) circuits, key ('4,5,1', '1011') : 20 qubit
+Getting 16-16 (17/56) circuits, key ('4,5,1', '1100') : 20 qubit
+Getting 17-17 (18/56) circuits, key ('4,5,1', '1101') : 20 qubit
+Getting 18-18 (19/56) circuits, key ('4,5,1', '1110') : 20 qubit
+Getting 19-19 (20/56) circuits, key ('4,5,1', '1111') : 20 qubit
+Getting 20-20 (21/56) circuits, key ('4,6,0', '0000') : 20 qubit
+Getting 21-21 (22/56) circuits, key ('4,6,0', '0001') : 20 qubit
+Getting 22-22 (23/56) circuits, key ('4,6,0', '0010') : 20 qubit
+Getting 23-23 (24/56) circuits, key ('4,6,0', '0011') : 20 qubit
+Getting 24-24 (25/56) circuits, key ('4,6,0', '0100') : 20 qubit
+Getting 25-25 (26/56) circuits, key ('4,6,0', '0101') : 20 qubit
+Getting 26-26 (27/56) circuits, key ('4,6,0', '0110') : 20 qubit
+Getting 27-27 (28/56) circuits, key ('4,6,0', '0111') : 20 qubit
+Getting 28-28 (29/56) circuits, key ('4,6,0', '1000') : 20 qubit
+Getting 29-29 (30/56) circuits, key ('4,6,0', '1001') : 20 qubit
+Getting 30-30 (31/56) circuits, key ('4,6,0', '1010') : 20 qubit
+Getting 31-31 (32/56) circuits, key ('4,6,0', '1011') : 20 qubit
+Getting 32-32 (33/56) circuits, key ('4,6,0', '1100') : 20 qubit
+Getting 33-33 (34/56) circuits, key ('4,6,0', '1101') : 20 qubit
+Getting 34-34 (35/56) circuits, key ('4,6,0', '1110') : 20 qubit
+Getting 35-35 (36/56) circuits, key ('4,6,0', '1111') : 20 qubit
+Getting 36-36 (37/56) circuits, key ('4,6,1', '0000') : 20 qubit
+Getting 37-37 (38/56) circuits, key ('4,6,1', '0001') : 20 qubit
+Getting 38-38 (39/56) circuits, key ('4,6,1', '0010') : 20 qubit
+Getting 39-39 (40/56) circuits, key ('4,6,1', '0011') : 20 qubit
+Getting 40-40 (41/56) circuits, key ('4,6,1', '0100') : 20 qubit
+Getting 41-41 (42/56) circuits, key ('4,6,1', '0101') : 20 qubit
+Getting 42-42 (43/56) circuits, key ('4,6,1', '0110') : 20 qubit
+Getting 43-43 (44/56) circuits, key ('4,6,1', '0111') : 20 qubit
+Getting 44-44 (45/56) circuits, key ('4,6,1', '1000') : 20 qubit
+Getting 45-45 (46/56) circuits, key ('4,6,1', '1001') : 20 qubit
+Getting 46-46 (47/56) circuits, key ('4,6,1', '1010') : 20 qubit
+Getting 47-47 (48/56) circuits, key ('4,6,1', '1011') : 20 qubit
+Getting 48-48 (49/56) circuits, key ('4,6,1', '1100') : 20 qubit
+Getting 49-49 (50/56) circuits, key ('4,6,1', '1101') : 20 qubit
+Getting 50-50 (51/56) circuits, key ('4,6,1', '1110') : 20 qubit
+Getting 51-51 (52/56) circuits, key ('4,6,1', '1111') : 20 qubit
+Getting 52-52 (53/56) circuits, key ('4,6,2', '00') : 20 qubit
+Getting 53-53 (54/56) circuits, key ('4,6,2', '01') : 20 qubit
+Getting 54-54 (55/56) circuits, key ('4,6,2', '10') : 20 qubit
+Getting 55-55 (56/56) circuits, key ('4,6,2', '11') : 20 qubit
+Traceback (most recent call last):
+  File "/home/weit/anaconda3/envs/cc-env/lib/python3.7/runpy.py", line 193, in _run_module_as_main
+    "__main__", mod_spec)
+  File "/home/weit/anaconda3/envs/cc-env/lib/python3.7/runpy.py", line 85, in _run_code
+    exec(code, run_globals)
+  File "/home/weit/circuit_cutting/hardware/job_submittor.py", line 83, in <module>
+    tensored_mitigation.apply(unmitigated=scheduler.circ_dict,mitigation_correspondence_dict=mitigation_correspondence_dict)
+  File "/home/weit/circuit_cutting/utils/mitigation.py", line 178, in apply
+    res = minimize(fun, x0, method='SLSQP',constraints=cons, bounds=bnds, tol=1e-6)
+  File "/home/weit/anaconda3/envs/cc-env/lib/python3.7/site-packages/scipy/optimize/_minimize.py", line 618, in minimize
+    constraints, callback=callback, **options)
+  File "/home/weit/anaconda3/envs/cc-env/lib/python3.7/site-packages/scipy/optimize/slsqp.py", line 329, in _minimize_slsqp
+    w = zeros(len_w)
+MemoryError: Unable to allocate array with shape (9345880817689,) and data type float64
+-------------------------------------------------- Reconstructor --------------------------------------------------
+Existing cases: dict_keys([])
+-------------------------------------------------- Evaluator --------------------------------------------------
+Existing cases: dict_keys([(4, 5), (4, 6)])
+-------------------------------------------------- Job Submittor --------------------------------------------------
+Existing cases: dict_keys([])
+Run cases: dict_keys([(4, 5), (4, 6)])
+**************************************************
+Case (4, 5)
+Cluster 0 sametotal shots = 8192
+Cluster 1 sametotal shots = 4096
+Case (4, 6)
+Cluster 0 sametotal shots = 910
+Cluster 1 sametotal shots = 910
+Cluster 2 sametotal shots = 1365
+******************** Submitting jobs ********************
+Submitting job 1/1 1439a1b8-e9ed-4660-92eb-219c0abb073f --> 153 circuits, 153 * 8192 shots
+/home/weit/anaconda3/envs/cc-env/lib/python3.7/site-packages/qiskit/providers/models/backendconfiguration.py:337: UserWarning: `dt` and `dtm` now have units of seconds(s) rather than nanoseconds(ns).
+  warnings.warn('`dt` and `dtm` now have units of seconds(s) rather '
+******************** Submitting jobs ********************
+Submitting job 1/1 cd61bc98-707c-49a0-9953-f409dc5bbc8e --> 56 circuits, 56 * 8192 shots
+******************** Retrieving jobs ********************
+Retrieving job 1/1 1439a1b8-e9ed-4660-92eb-219c0abb073f --> 153 circuits, 153 * 8192 shots
+Getting 0-0 (1/153) circuits, key 4,5,0|zero,zero,I,I : 20 qubit
+Getting 1-1 (2/153) circuits, key 4,5,0|zero,zero,I,X : 20 qubit
+Getting 2-2 (3/153) circuits, key 4,5,0|zero,zero,I,Y : 20 qubit
+Getting 3-3 (4/153) circuits, key 4,5,1|zero,zero,zero,zero,I,I,I,I : 20 qubit
+Getting 4-4 (5/153) circuits, key 4,5,1|one,zero,zero,zero,I,I,I,I : 20 qubit
+Getting 5-5 (6/153) circuits, key 4,5,1|plus,zero,zero,zero,I,I,I,I : 20 qubit
+Getting 6-6 (7/153) circuits, key 4,5,1|minus,zero,zero,zero,I,I,I,I : 20 qubit
+Getting 7-7 (8/153) circuits, key 4,5,1|plus_i,zero,zero,zero,I,I,I,I : 20 qubit
+Getting 8-8 (9/153) circuits, key 4,5,1|minus_i,zero,zero,zero,I,I,I,I : 20 qubit
+Getting 9-9 (10/153) circuits, key 4,6,0|zero,zero,zero,zero,I,I,I,I : 20 qubit
+Getting 10-10 (11/153) circuits, key 4,6,0|zero,zero,zero,zero,I,I,I,X : 20 qubit
+Getting 11-11 (12/153) circuits, key 4,6,0|zero,zero,zero,zero,I,I,I,Y : 20 qubit
+Getting 12-12 (13/153) circuits, key 4,6,0|zero,zero,zero,zero,I,X,I,I : 20 qubit
+Getting 13-13 (14/153) circuits, key 4,6,0|zero,zero,zero,zero,I,X,I,X : 20 qubit
+Getting 14-14 (15/153) circuits, key 4,6,0|zero,zero,zero,zero,I,X,I,Y : 20 qubit
+Getting 15-15 (16/153) circuits, key 4,6,0|zero,zero,zero,zero,I,Y,I,I : 20 qubit
+Getting 16-16 (17/153) circuits, key 4,6,0|zero,zero,zero,zero,I,Y,I,X : 20 qubit
+Getting 17-17 (18/153) circuits, key 4,6,0|zero,zero,zero,zero,I,Y,I,Y : 20 qubit
+Getting 18-18 (19/153) circuits, key 4,6,0|zero,zero,one,zero,I,I,I,I : 20 qubit
+Getting 19-19 (20/153) circuits, key 4,6,0|zero,zero,one,zero,I,I,I,X : 20 qubit
+Getting 20-20 (21/153) circuits, key 4,6,0|zero,zero,one,zero,I,I,I,Y : 20 qubit
+Getting 21-21 (22/153) circuits, key 4,6,0|zero,zero,one,zero,I,X,I,I : 20 qubit
+Getting 22-22 (23/153) circuits, key 4,6,0|zero,zero,one,zero,I,X,I,X : 20 qubit
+Getting 23-23 (24/153) circuits, key 4,6,0|zero,zero,one,zero,I,X,I,Y : 20 qubit
+Getting 24-24 (25/153) circuits, key 4,6,0|zero,zero,one,zero,I,Y,I,I : 20 qubit
+Getting 25-25 (26/153) circuits, key 4,6,0|zero,zero,one,zero,I,Y,I,X : 20 qubit
+Getting 26-26 (27/153) circuits, key 4,6,0|zero,zero,one,zero,I,Y,I,Y : 20 qubit
+Getting 27-27 (28/153) circuits, key 4,6,0|zero,zero,plus,zero,I,I,I,I : 20 qubit
+Getting 28-28 (29/153) circuits, key 4,6,0|zero,zero,plus,zero,I,I,I,X : 20 qubit
+Getting 29-29 (30/153) circuits, key 4,6,0|zero,zero,plus,zero,I,I,I,Y : 20 qubit
+Getting 30-30 (31/153) circuits, key 4,6,0|zero,zero,plus,zero,I,X,I,I : 20 qubit
+Getting 31-31 (32/153) circuits, key 4,6,0|zero,zero,plus,zero,I,X,I,X : 20 qubit
+Getting 32-32 (33/153) circuits, key 4,6,0|zero,zero,plus,zero,I,X,I,Y : 20 qubit
+Getting 33-33 (34/153) circuits, key 4,6,0|zero,zero,plus,zero,I,Y,I,I : 20 qubit
+Getting 34-34 (35/153) circuits, key 4,6,0|zero,zero,plus,zero,I,Y,I,X : 20 qubit
+Getting 35-35 (36/153) circuits, key 4,6,0|zero,zero,plus,zero,I,Y,I,Y : 20 qubit
+Getting 36-36 (37/153) circuits, key 4,6,0|zero,zero,minus,zero,I,I,I,I : 20 qubit
+Getting 37-37 (38/153) circuits, key 4,6,0|zero,zero,minus,zero,I,I,I,X : 20 qubit
+Getting 38-38 (39/153) circuits, key 4,6,0|zero,zero,minus,zero,I,I,I,Y : 20 qubit
+Getting 39-39 (40/153) circuits, key 4,6,0|zero,zero,minus,zero,I,X,I,I : 20 qubit
+Getting 40-40 (41/153) circuits, key 4,6,0|zero,zero,minus,zero,I,X,I,X : 20 qubit
+Getting 41-41 (42/153) circuits, key 4,6,0|zero,zero,minus,zero,I,X,I,Y : 20 qubit
+Getting 42-42 (43/153) circuits, key 4,6,0|zero,zero,minus,zero,I,Y,I,I : 20 qubit
+Getting 43-43 (44/153) circuits, key 4,6,0|zero,zero,minus,zero,I,Y,I,X : 20 qubit
+Getting 44-44 (45/153) circuits, key 4,6,0|zero,zero,minus,zero,I,Y,I,Y : 20 qubit
+Getting 45-45 (46/153) circuits, key 4,6,0|zero,zero,plus_i,zero,I,I,I,I : 20 qubit
+Getting 46-46 (47/153) circuits, key 4,6,0|zero,zero,plus_i,zero,I,I,I,X : 20 qubit
+Getting 47-47 (48/153) circuits, key 4,6,0|zero,zero,plus_i,zero,I,I,I,Y : 20 qubit
+Getting 48-48 (49/153) circuits, key 4,6,0|zero,zero,plus_i,zero,I,X,I,I : 20 qubit
+Getting 49-49 (50/153) circuits, key 4,6,0|zero,zero,plus_i,zero,I,X,I,X : 20 qubit
+Getting 50-50 (51/153) circuits, key 4,6,0|zero,zero,plus_i,zero,I,X,I,Y : 20 qubit
+Getting 51-51 (52/153) circuits, key 4,6,0|zero,zero,plus_i,zero,I,Y,I,I : 20 qubit
+Getting 52-52 (53/153) circuits, key 4,6,0|zero,zero,plus_i,zero,I,Y,I,X : 20 qubit
+Getting 53-53 (54/153) circuits, key 4,6,0|zero,zero,plus_i,zero,I,Y,I,Y : 20 qubit
+Getting 54-54 (55/153) circuits, key 4,6,0|zero,zero,minus_i,zero,I,I,I,I : 20 qubit
+Getting 55-55 (56/153) circuits, key 4,6,0|zero,zero,minus_i,zero,I,I,I,X : 20 qubit
+Getting 56-56 (57/153) circuits, key 4,6,0|zero,zero,minus_i,zero,I,I,I,Y : 20 qubit
+Getting 57-57 (58/153) circuits, key 4,6,0|zero,zero,minus_i,zero,I,X,I,I : 20 qubit
+Getting 58-58 (59/153) circuits, key 4,6,0|zero,zero,minus_i,zero,I,X,I,X : 20 qubit
+Getting 59-59 (60/153) circuits, key 4,6,0|zero,zero,minus_i,zero,I,X,I,Y : 20 qubit
+Getting 60-60 (61/153) circuits, key 4,6,0|zero,zero,minus_i,zero,I,Y,I,I : 20 qubit
+Getting 61-61 (62/153) circuits, key 4,6,0|zero,zero,minus_i,zero,I,Y,I,X : 20 qubit
+Getting 62-62 (63/153) circuits, key 4,6,0|zero,zero,minus_i,zero,I,Y,I,Y : 20 qubit
+Getting 63-63 (64/153) circuits, key 4,6,1|zero,zero,zero,zero,I,I,I,I : 20 qubit
+Getting 64-64 (65/153) circuits, key 4,6,1|zero,zero,zero,zero,I,X,I,I : 20 qubit
+Getting 65-65 (66/153) circuits, key 4,6,1|zero,zero,zero,zero,I,Y,I,I : 20 qubit
+Getting 66-66 (67/153) circuits, key 4,6,1|zero,zero,zero,zero,X,I,I,I : 20 qubit
+Getting 67-67 (68/153) circuits, key 4,6,1|zero,zero,zero,zero,X,X,I,I : 20 qubit
+Getting 68-68 (69/153) circuits, key 4,6,1|zero,zero,zero,zero,X,Y,I,I : 20 qubit
+Getting 69-69 (70/153) circuits, key 4,6,1|zero,zero,zero,zero,Y,I,I,I : 20 qubit
+Getting 70-70 (71/153) circuits, key 4,6,1|zero,zero,zero,zero,Y,X,I,I : 20 qubit
+Getting 71-71 (72/153) circuits, key 4,6,1|zero,zero,zero,zero,Y,Y,I,I : 20 qubit
+Getting 72-72 (73/153) circuits, key 4,6,1|zero,one,zero,zero,I,I,I,I : 20 qubit
+Getting 73-73 (74/153) circuits, key 4,6,1|zero,one,zero,zero,I,X,I,I : 20 qubit
+Getting 74-74 (75/153) circuits, key 4,6,1|zero,one,zero,zero,I,Y,I,I : 20 qubit
+Getting 75-75 (76/153) circuits, key 4,6,1|zero,one,zero,zero,X,I,I,I : 20 qubit
+Getting 76-76 (77/153) circuits, key 4,6,1|zero,one,zero,zero,X,X,I,I : 20 qubit
+Getting 77-77 (78/153) circuits, key 4,6,1|zero,one,zero,zero,X,Y,I,I : 20 qubit
+Getting 78-78 (79/153) circuits, key 4,6,1|zero,one,zero,zero,Y,I,I,I : 20 qubit
+Getting 79-79 (80/153) circuits, key 4,6,1|zero,one,zero,zero,Y,X,I,I : 20 qubit
+Getting 80-80 (81/153) circuits, key 4,6,1|zero,one,zero,zero,Y,Y,I,I : 20 qubit
+Getting 81-81 (82/153) circuits, key 4,6,1|zero,plus,zero,zero,I,I,I,I : 20 qubit
+Getting 82-82 (83/153) circuits, key 4,6,1|zero,plus,zero,zero,I,X,I,I : 20 qubit
+Getting 83-83 (84/153) circuits, key 4,6,1|zero,plus,zero,zero,I,Y,I,I : 20 qubit
+Getting 84-84 (85/153) circuits, key 4,6,1|zero,plus,zero,zero,X,I,I,I : 20 qubit
+Getting 85-85 (86/153) circuits, key 4,6,1|zero,plus,zero,zero,X,X,I,I : 20 qubit
+Getting 86-86 (87/153) circuits, key 4,6,1|zero,plus,zero,zero,X,Y,I,I : 20 qubit
+Getting 87-87 (88/153) circuits, key 4,6,1|zero,plus,zero,zero,Y,I,I,I : 20 qubit
+Getting 88-88 (89/153) circuits, key 4,6,1|zero,plus,zero,zero,Y,X,I,I : 20 qubit
+Getting 89-89 (90/153) circuits, key 4,6,1|zero,plus,zero,zero,Y,Y,I,I : 20 qubit
+Getting 90-90 (91/153) circuits, key 4,6,1|zero,minus,zero,zero,I,I,I,I : 20 qubit
+Getting 91-91 (92/153) circuits, key 4,6,1|zero,minus,zero,zero,I,X,I,I : 20 qubit
+Getting 92-92 (93/153) circuits, key 4,6,1|zero,minus,zero,zero,I,Y,I,I : 20 qubit
+Getting 93-93 (94/153) circuits, key 4,6,1|zero,minus,zero,zero,X,I,I,I : 20 qubit
+Getting 94-94 (95/153) circuits, key 4,6,1|zero,minus,zero,zero,X,X,I,I : 20 qubit
+Getting 95-95 (96/153) circuits, key 4,6,1|zero,minus,zero,zero,X,Y,I,I : 20 qubit
+Getting 96-96 (97/153) circuits, key 4,6,1|zero,minus,zero,zero,Y,I,I,I : 20 qubit
+Getting 97-97 (98/153) circuits, key 4,6,1|zero,minus,zero,zero,Y,X,I,I : 20 qubit
+Getting 98-98 (99/153) circuits, key 4,6,1|zero,minus,zero,zero,Y,Y,I,I : 20 qubit
+Getting 99-99 (100/153) circuits, key 4,6,1|zero,plus_i,zero,zero,I,I,I,I : 20 qubit
+Getting 100-100 (101/153) circuits, key 4,6,1|zero,plus_i,zero,zero,I,X,I,I : 20 qubit
+Getting 101-101 (102/153) circuits, key 4,6,1|zero,plus_i,zero,zero,I,Y,I,I : 20 qubit
+Getting 102-102 (103/153) circuits, key 4,6,1|zero,plus_i,zero,zero,X,I,I,I : 20 qubit
+Getting 103-103 (104/153) circuits, key 4,6,1|zero,plus_i,zero,zero,X,X,I,I : 20 qubit
+Getting 104-104 (105/153) circuits, key 4,6,1|zero,plus_i,zero,zero,X,Y,I,I : 20 qubit
+Getting 105-105 (106/153) circuits, key 4,6,1|zero,plus_i,zero,zero,Y,I,I,I : 20 qubit
+Getting 106-106 (107/153) circuits, key 4,6,1|zero,plus_i,zero,zero,Y,X,I,I : 20 qubit
+Getting 107-107 (108/153) circuits, key 4,6,1|zero,plus_i,zero,zero,Y,Y,I,I : 20 qubit
+Getting 108-108 (109/153) circuits, key 4,6,1|zero,minus_i,zero,zero,I,I,I,I : 20 qubit
+Getting 109-109 (110/153) circuits, key 4,6,1|zero,minus_i,zero,zero,I,X,I,I : 20 qubit
+Getting 110-110 (111/153) circuits, key 4,6,1|zero,minus_i,zero,zero,I,Y,I,I : 20 qubit
+Getting 111-111 (112/153) circuits, key 4,6,1|zero,minus_i,zero,zero,X,I,I,I : 20 qubit
+Getting 112-112 (113/153) circuits, key 4,6,1|zero,minus_i,zero,zero,X,X,I,I : 20 qubit
+Getting 113-113 (114/153) circuits, key 4,6,1|zero,minus_i,zero,zero,X,Y,I,I : 20 qubit
+Getting 114-114 (115/153) circuits, key 4,6,1|zero,minus_i,zero,zero,Y,I,I,I : 20 qubit
+Getting 115-115 (116/153) circuits, key 4,6,1|zero,minus_i,zero,zero,Y,X,I,I : 20 qubit
+Getting 116-116 (117/153) circuits, key 4,6,1|zero,minus_i,zero,zero,Y,Y,I,I : 20 qubit
+Getting 117-117 (118/153) circuits, key 4,6,2|zero,zero,I,I : 20 qubit
+Getting 118-118 (119/153) circuits, key 4,6,2|zero,one,I,I : 20 qubit
+Getting 119-119 (120/153) circuits, key 4,6,2|zero,plus,I,I : 20 qubit
+Getting 120-120 (121/153) circuits, key 4,6,2|zero,minus,I,I : 20 qubit
+Getting 121-121 (122/153) circuits, key 4,6,2|zero,plus_i,I,I : 20 qubit
+Getting 122-122 (123/153) circuits, key 4,6,2|zero,minus_i,I,I : 20 qubit
+Getting 123-123 (124/153) circuits, key 4,6,2|one,zero,I,I : 20 qubit
+Getting 124-124 (125/153) circuits, key 4,6,2|one,one,I,I : 20 qubit
+Getting 125-125 (126/153) circuits, key 4,6,2|one,plus,I,I : 20 qubit
+Getting 126-126 (127/153) circuits, key 4,6,2|one,minus,I,I : 20 qubit
+Getting 127-127 (128/153) circuits, key 4,6,2|one,plus_i,I,I : 20 qubit
+Getting 128-128 (129/153) circuits, key 4,6,2|one,minus_i,I,I : 20 qubit
+Getting 129-129 (130/153) circuits, key 4,6,2|plus,zero,I,I : 20 qubit
+Getting 130-130 (131/153) circuits, key 4,6,2|plus,one,I,I : 20 qubit
+Getting 131-131 (132/153) circuits, key 4,6,2|plus,plus,I,I : 20 qubit
+Getting 132-132 (133/153) circuits, key 4,6,2|plus,minus,I,I : 20 qubit
+Getting 133-133 (134/153) circuits, key 4,6,2|plus,plus_i,I,I : 20 qubit
+Getting 134-134 (135/153) circuits, key 4,6,2|plus,minus_i,I,I : 20 qubit
+Getting 135-135 (136/153) circuits, key 4,6,2|minus,zero,I,I : 20 qubit
+Getting 136-136 (137/153) circuits, key 4,6,2|minus,one,I,I : 20 qubit
+Getting 137-137 (138/153) circuits, key 4,6,2|minus,plus,I,I : 20 qubit
+Getting 138-138 (139/153) circuits, key 4,6,2|minus,minus,I,I : 20 qubit
+Getting 139-139 (140/153) circuits, key 4,6,2|minus,plus_i,I,I : 20 qubit
+Getting 140-140 (141/153) circuits, key 4,6,2|minus,minus_i,I,I : 20 qubit
+Getting 141-141 (142/153) circuits, key 4,6,2|plus_i,zero,I,I : 20 qubit
+Getting 142-142 (143/153) circuits, key 4,6,2|plus_i,one,I,I : 20 qubit
+Getting 143-143 (144/153) circuits, key 4,6,2|plus_i,plus,I,I : 20 qubit
+Getting 144-144 (145/153) circuits, key 4,6,2|plus_i,minus,I,I : 20 qubit
+Getting 145-145 (146/153) circuits, key 4,6,2|plus_i,plus_i,I,I : 20 qubit
+Getting 146-146 (147/153) circuits, key 4,6,2|plus_i,minus_i,I,I : 20 qubit
+Getting 147-147 (148/153) circuits, key 4,6,2|minus_i,zero,I,I : 20 qubit
+Getting 148-148 (149/153) circuits, key 4,6,2|minus_i,one,I,I : 20 qubit
+Getting 149-149 (150/153) circuits, key 4,6,2|minus_i,plus,I,I : 20 qubit
+Getting 150-150 (151/153) circuits, key 4,6,2|minus_i,minus,I,I : 20 qubit
+Getting 151-151 (152/153) circuits, key 4,6,2|minus_i,plus_i,I,I : 20 qubit
+Getting 152-152 (153/153) circuits, key 4,6,2|minus_i,minus_i,I,I : 20 qubit
+******************** Retrieving jobs ********************
+Retrieving job 1/1 cd61bc98-707c-49a0-9953-f409dc5bbc8e --> 56 circuits, 56 * 8192 shots
+Getting 0-0 (1/56) circuits, key ('4,5,0', '00') : 20 qubit
+Getting 1-1 (2/56) circuits, key ('4,5,0', '01') : 20 qubit
+Getting 2-2 (3/56) circuits, key ('4,5,0', '10') : 20 qubit
+Getting 3-3 (4/56) circuits, key ('4,5,0', '11') : 20 qubit
+Getting 4-4 (5/56) circuits, key ('4,5,1', '0000') : 20 qubit
+Getting 5-5 (6/56) circuits, key ('4,5,1', '0001') : 20 qubit
+Getting 6-6 (7/56) circuits, key ('4,5,1', '0010') : 20 qubit
+Getting 7-7 (8/56) circuits, key ('4,5,1', '0011') : 20 qubit
+Getting 8-8 (9/56) circuits, key ('4,5,1', '0100') : 20 qubit
+Getting 9-9 (10/56) circuits, key ('4,5,1', '0101') : 20 qubit
+Getting 10-10 (11/56) circuits, key ('4,5,1', '0110') : 20 qubit
+Getting 11-11 (12/56) circuits, key ('4,5,1', '0111') : 20 qubit
+Getting 12-12 (13/56) circuits, key ('4,5,1', '1000') : 20 qubit
+Getting 13-13 (14/56) circuits, key ('4,5,1', '1001') : 20 qubit
+Getting 14-14 (15/56) circuits, key ('4,5,1', '1010') : 20 qubit
+Getting 15-15 (16/56) circuits, key ('4,5,1', '1011') : 20 qubit
+Getting 16-16 (17/56) circuits, key ('4,5,1', '1100') : 20 qubit
+Getting 17-17 (18/56) circuits, key ('4,5,1', '1101') : 20 qubit
+Getting 18-18 (19/56) circuits, key ('4,5,1', '1110') : 20 qubit
+Getting 19-19 (20/56) circuits, key ('4,5,1', '1111') : 20 qubit
+Getting 20-20 (21/56) circuits, key ('4,6,0', '0000') : 20 qubit
+Getting 21-21 (22/56) circuits, key ('4,6,0', '0001') : 20 qubit
+Getting 22-22 (23/56) circuits, key ('4,6,0', '0010') : 20 qubit
+Getting 23-23 (24/56) circuits, key ('4,6,0', '0011') : 20 qubit
+Getting 24-24 (25/56) circuits, key ('4,6,0', '0100') : 20 qubit
+Getting 25-25 (26/56) circuits, key ('4,6,0', '0101') : 20 qubit
+Getting 26-26 (27/56) circuits, key ('4,6,0', '0110') : 20 qubit
+Getting 27-27 (28/56) circuits, key ('4,6,0', '0111') : 20 qubit
+Getting 28-28 (29/56) circuits, key ('4,6,0', '1000') : 20 qubit
+Getting 29-29 (30/56) circuits, key ('4,6,0', '1001') : 20 qubit
+Getting 30-30 (31/56) circuits, key ('4,6,0', '1010') : 20 qubit
+Getting 31-31 (32/56) circuits, key ('4,6,0', '1011') : 20 qubit
+Getting 32-32 (33/56) circuits, key ('4,6,0', '1100') : 20 qubit
+Getting 33-33 (34/56) circuits, key ('4,6,0', '1101') : 20 qubit
+Getting 34-34 (35/56) circuits, key ('4,6,0', '1110') : 20 qubit
+Getting 35-35 (36/56) circuits, key ('4,6,0', '1111') : 20 qubit
+Getting 36-36 (37/56) circuits, key ('4,6,1', '0000') : 20 qubit
+Getting 37-37 (38/56) circuits, key ('4,6,1', '0001') : 20 qubit
+Getting 38-38 (39/56) circuits, key ('4,6,1', '0010') : 20 qubit
+Getting 39-39 (40/56) circuits, key ('4,6,1', '0011') : 20 qubit
+Getting 40-40 (41/56) circuits, key ('4,6,1', '0100') : 20 qubit
+Getting 41-41 (42/56) circuits, key ('4,6,1', '0101') : 20 qubit
+Getting 42-42 (43/56) circuits, key ('4,6,1', '0110') : 20 qubit
+Getting 43-43 (44/56) circuits, key ('4,6,1', '0111') : 20 qubit
+Getting 44-44 (45/56) circuits, key ('4,6,1', '1000') : 20 qubit
+Getting 45-45 (46/56) circuits, key ('4,6,1', '1001') : 20 qubit
+Getting 46-46 (47/56) circuits, key ('4,6,1', '1010') : 20 qubit
+Getting 47-47 (48/56) circuits, key ('4,6,1', '1011') : 20 qubit
+Getting 48-48 (49/56) circuits, key ('4,6,1', '1100') : 20 qubit
+Getting 49-49 (50/56) circuits, key ('4,6,1', '1101') : 20 qubit
+Getting 50-50 (51/56) circuits, key ('4,6,1', '1110') : 20 qubit
+Getting 51-51 (52/56) circuits, key ('4,6,1', '1111') : 20 qubit
+Getting 52-52 (53/56) circuits, key ('4,6,2', '00') : 20 qubit
+Getting 53-53 (54/56) circuits, key ('4,6,2', '01') : 20 qubit
+Getting 54-54 (55/56) circuits, key ('4,6,2', '10') : 20 qubit
+Getting 55-55 (56/56) circuits, key ('4,6,2', '11') : 20 qubit
+Traceback (most recent call last):
+  File "/home/weit/anaconda3/envs/cc-env/lib/python3.7/runpy.py", line 193, in _run_module_as_main
+    "__main__", mod_spec)
+  File "/home/weit/anaconda3/envs/cc-env/lib/python3.7/runpy.py", line 85, in _run_code
+    exec(code, run_globals)
+  File "/home/weit/circuit_cutting/hardware/job_submittor.py", line 83, in <module>
+    tensored_mitigation.apply(unmitigated=scheduler.circ_dict,mitigation_correspondence_dict=mitigation_correspondence_dict)
+  File "/home/weit/circuit_cutting/utils/mitigation.py", line 178, in apply
+    res = minimize(fun, x0, method='SLSQP',constraints=cons, bounds=bnds, tol=1e-6)
+  File "/home/weit/anaconda3/envs/cc-env/lib/python3.7/site-packages/scipy/optimize/_minimize.py", line 618, in minimize
+    constraints, callback=callback, **options)
+  File "/home/weit/anaconda3/envs/cc-env/lib/python3.7/site-packages/scipy/optimize/slsqp.py", line 329, in _minimize_slsqp
+    w = zeros(len_w)
+MemoryError: Unable to allocate array with shape (9345880817689,) and data type float64
+-------------------------------------------------- Reconstructor --------------------------------------------------
+Existing cases: dict_keys([])
+Traceback (most recent call last):
+  File "/home/weit/anaconda3/envs/cc-env/lib/python3.7/runpy.py", line 193, in _run_module_as_main
+    "__main__", mod_spec)
+  File "/home/weit/anaconda3/envs/cc-env/lib/python3.7/runpy.py", line 85, in _run_code
+    exec(code, run_globals)
+  File "/home/weit/circuit_cutting/hardware/plot.py", line 7, in <module>
+    from utils.helper_fun import cross_entropy, fidelity, get_filename, read_file
+ImportError: cannot import name 'cross_entropy' from 'utils.helper_fun' (/home/weit/circuit_cutting/utils/helper_fun.py)
