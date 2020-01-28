@@ -160,7 +160,7 @@ class Scheduler:
                 circ = element['circ']
                 reps = element['reps']
                 end_idx = start_idx + reps
-                # print('Getting {:d}-{:d} ({:d}/{:d}) circuits, key {} : {:d} qubit'.format(start_idx,end_idx-1,end_idx,schedule_item.total_circs,key,len(circ.qubits)),flush=True)
+                print('Getting {:d}-{:d} ({:d}/{:d}) circuits, key {} : {:d} qubit'.format(start_idx,end_idx-1,end_idx,schedule_item.total_circs,key,len(circ.qubits)),flush=True)
                 for result_idx in range(start_idx,end_idx):
                     experiment_hw_memory = hw_result.get_memory(result_idx)
                     if key in memories:
