@@ -306,9 +306,9 @@ if __name__ == '__main__':
         uniter_time = time()-uniter_begin
         case_dict['reconstructor_time'] = uniter_time
         case_dict['cutting'] = reconstructed_prob
-        print('qasm \u03C7^2 = %.3e'%chi2_distance(target=case_dict['sv'],obs=case_dict['qasm']))
-        print('hw \u03C7^2 = %.3e'%chi2_distance(target=case_dict['sv'],obs=case_dict['hw']))
-        print('cutting \u03C7^2 = %.3e'%(chi2_distance(target=case_dict['sv'],obs=case_dict['cutting'])))
+        print('qasm metric = %.3e'%wasserstein_distance(u_values=case_dict['sv'],v_values=case_dict['qasm']))
+        print('hw metric = %.3e'%wasserstein_distance(u_values=case_dict['sv'],v_values=case_dict['hw']))
+        print('cutting metric = %.3e'%(wasserstein_distance(u_values=case_dict['sv'],v_values=case_dict['cutting'])))
 
         if args.evaluation_method == 'hardware':
             uniter_begin = time()
@@ -318,7 +318,7 @@ if __name__ == '__main__':
             uniter_time = time()-uniter_begin
             case_dict['mitigated_reconstructor_time'] = uniter_time
             case_dict['mitigated_cutting'] = mitigated_reconstructed_prob
-            print('mitigated_cutting \u03C7^2 = %.3e'%chi2_distance(target=case_dict['sv'],obs=case_dict['mitigated_cutting']))
+            print('mitigated_cutting metric = %.3e'%wasserstein_distance(u_values=case_dict['sv'],v_values=case_dict['mitigated_cutting']))
 
         pickle.dump({case:case_dict}, open('%s'%(dirname+plotter_input_filename),'ab'))
         counter += 1

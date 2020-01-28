@@ -16,6 +16,7 @@ import os
 from qcg.generators import gen_supremacy, gen_hwea, gen_BV, gen_qft, gen_sycamore
 from utils.conversions import list_to_dict, dict_to_array
 from utils.metrics import chi2_distance
+from scipy.stats import wasserstein_distance
 
 def generate_circ(full_circ_size,circuit_type):
     def gen_secret(num_qubit):
@@ -147,8 +148,9 @@ def get_circ_saturated_shots(circs,device_name):
             noiseless_prob_batch = dict_to_array(distribution_dict=noiseless_prob_batch,force_prob=True)
             accumulated_prob = ((counter-1)*accumulated_prob+noiseless_prob_batch)/counter
             assert abs(sum(accumulated_prob)-1)<1e-10
-            accumulated_chi2 = chi2_distance(target=ground_truth,obs=accumulated_prob)
-            print('accumulated_chi2:',accumulated_chi2)
+            # accumulated_chi2 = chi2_distance(target=ground_truth,obs=accumulated_prob)
+            accumulated_chi2 = wasserstein_distance(u_values=ground_truth,v_values=accumulated_prob)
+            # print('accumulated_chi2:',accumulated_chi2)
             chi2_l.append(accumulated_chi2)
             if len(chi2_l)>=3:
                 accumulated_shots = int((len(chi2_l)-1)*shots_increment)
@@ -166,8 +168,9 @@ def get_circ_saturated_shots(circs,device_name):
         saturated_shots.append(saturated_shot)
         ground_truths.append(ground_truth)
         saturated_probs.append(saturated_prob)
-        saturated_chi2 = chi2_distance(target=ground_truth,obs=saturated_prob)
-        print('%d qubit circuit saturated shots = %d, \u03C7^2 = %.3e'%(full_circ_size,saturated_shot,saturated_chi2))
+        # saturated_chi2 = chi2_distance(target=ground_truth,obs=saturated_prob)
+        saturated_chi2 = wasserstein_distance(u_values=ground_truth,v_values=saturated_prob)
+        print('%d qubit circuit saturated shots = %d, metric = %.3e'%(full_circ_size,saturated_shot,saturated_chi2))
         
     return saturated_shots, ground_truths, saturated_probs
 

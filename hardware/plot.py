@@ -6,6 +6,7 @@ import matplotlib.patheffects as path_effects
 import numpy as np
 from utils.helper_fun import get_filename, read_file
 from utils.metrics import chi2_distance, kl_divergence, fidelity
+from scipy.stats import wasserstein_distance
 import os
 import argparse
 
@@ -139,7 +140,7 @@ def plot_tradeoff(best_cc,circuit_type,filename,mitigated):
     plt.xlabel('Number of qubits',size=12)
     if circuit_type == 'supremacy':
         plt.plot([fc for fc in best_cc], [best_cc[fc]['ce_percent'] for fc in best_cc], 'bX')
-        plt.ylabel('\u03C7^2 reduction (%)',size=12)
+        plt.ylabel('metric reduction (%)',size=12)
         plt.ylim(0,100)
     elif circuit_type == 'bv' or circuit_type=='hwea':
         plt.plot([fc for fc in best_cc], [best_cc[fc]['fid_percent'] for fc in best_cc], 'bX')
@@ -175,7 +176,7 @@ def plot_heatmap(plotter_input,hw_qubits,fc_qubits,circuit_type,filename,mitigat
     data =np.ma.masked_where(reduction_map==0, reduction_map)
 
     im, cbar = heatmap(data, fc_qubits_unique, hw_qubits_unique, ax=ax,
-                    cmap="YlGn", cbarlabel="\u03C7^2 Reduction, higher is better [%]" if circuit_type == 'supremacy' or circuit_type == 'qft' else "Fidelity Improvement [%]")
+                    cmap="YlGn", cbarlabel="metric Reduction, higher is better [%]" if circuit_type == 'supremacy' or circuit_type == 'qft' else "Fidelity Improvement [%]")
     texts = annotate_heatmap(im, valfmt="{x:.1f}")
     ax.set_xlabel('Hardware qubits',fontsize=18,labelpad=10)
     ax.set_ylabel('Full circuit qubits',fontsize=18,labelpad=10)
@@ -214,7 +215,7 @@ def plot_fid_bar(saturated_best_cc,sametotal_best_cc,circuit_type,dirname,device
     opacity = 0.8
 
     if circuit_type == 'supremacy':
-        ax.set_ylabel('\u03C7^2, lower is better',size=12)
+        ax.set_ylabel('metric, lower is better',size=12)
         # plt.title('\u03C7^2 Reduction')
     elif circuit_type == 'bv' or circuit_type=='hwea':
         ax.set_ylim(0,1)
@@ -255,16 +256,16 @@ def process_data(filename,circuit_type,mitigated):
     fc_qubits = [case[1] for case in plotter_input]
 
     for case in plotter_input:
-        ground_truth_ce = chi2_distance(target=plotter_input[case]['sv'],
-        obs= plotter_input[case]['sv'])
-        qasm_ce = chi2_distance(target=plotter_input[case]['sv'],
-        obs= plotter_input[case]['qasm'])
-        qasm_noise_ce = chi2_distance(target=plotter_input[case]['sv'],
-        obs= plotter_input[case]['qasm+noise'])
-        hw_ce = chi2_distance(target=plotter_input[case]['sv'],
-        obs= plotter_input[case]['%shw'%('mitigated_' if mitigated else '')])
-        cutting_ce = chi2_distance(target=plotter_input[case]['sv'],
-        obs= plotter_input[case]['%scutting'%('mitigated_' if mitigated else '')])
+        ground_truth_ce = wasserstein_distance(u_values=plotter_input[case]['sv'],
+        v_values= plotter_input[case]['sv'])
+        qasm_ce = wasserstein_distance(u_values=plotter_input[case]['sv'],
+        v_values= plotter_input[case]['qasm'])
+        qasm_noise_ce = wasserstein_distance(u_values=plotter_input[case]['sv'],
+        v_values= plotter_input[case]['qasm+noise'])
+        hw_ce = wasserstein_distance(u_values=plotter_input[case]['sv'],
+        v_values= plotter_input[case]['%shw'%('mitigated_' if mitigated else '')])
+        cutting_ce = wasserstein_distance(u_values=plotter_input[case]['sv'],
+        v_values= plotter_input[case]['%scutting'%('mitigated_' if mitigated else '')])
         ce_percent_change = 100*(hw_ce - cutting_ce)/hw_ce
         assert ce_percent_change <= 100+1e-10
         plotter_input[case]['ce_comparisons'] = (hw_ce,cutting_ce)
@@ -287,7 +288,7 @@ def process_data(filename,circuit_type,mitigated):
         plotter_input[case]['fid_percent_improvement'] = fid_percent_change
 
         print('case {}: ce percentage reduction = {:.3f}, fidelity improvement = {:.3f}, reconstruction time: {:.3e}'.format(case,ce_percent_change,fid_percent_change,plotter_input[case]['reconstructor_time']))
-    print('*'*25,'Best Cases','*'*25)
+    print('*'*25,'%sBest Cases'%('Mitigated ' if mitigated else ''),'*'*25)
 
     best_cc = {}
     for case in plotter_input:

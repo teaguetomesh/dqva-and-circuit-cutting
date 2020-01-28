@@ -96,6 +96,7 @@ class Scheduler:
                 
                 # Circ has already been transpiled
                 if len(circ.clbits)>0:
+                    print('Already transpiled')
                     mapped_circuit = circ
                 # Circ not transpiled, running on real device
                 elif real_device:
@@ -110,7 +111,7 @@ class Scheduler:
                     evaluator_info = element['evaluator_info']
                     qc=apply_measurement(circ=circ)
                     mapped_circuit = transpile(qc, basis_gates=evaluator_info['basis_gates'])
-                    # print('Transpiled into basis gates:')
+                    print('Transpiled into basis gates:')
                     # print(mapped_circuit)
 
                 circs_to_add = [mapped_circuit]*reps
@@ -129,11 +130,10 @@ class Scheduler:
                 device_qubits = len(evaluator_info['properties'].qubits)
                 noise_model = noise.NoiseModel()
                 for qi in range(device_qubits):
-                    correct_p = np.exp(-qi/7.231)
-                    read_err = noise.errors.readout_error.ReadoutError([[0.9*correct_p, 1-0.9*correct_p],[1-0.75*correct_p, 0.75*correct_p]])
-                    # s = np.random.uniform(0.75,1,2)
-                    # read_err = noise.errors.readout_error.ReadoutError([[s[0], 1-s[0]],[1-s[1], s[1]]])
-                    noise_model.add_readout_error(read_err, [qi])
+                    correct_p = 0.75
+                    read_err = noise.errors.readout_error.ReadoutError([[correct_p, 1-correct_p],[1-0.9*correct_p, 0.9*correct_p]])
+                    if qi>4:
+                        noise_model.add_readout_error(read_err, [qi])
                 hw_job = Aer.get_backend('qasm_simulator').run(qobj,noise_model=noise_model)
                 # hw_job = Aer.get_backend('qasm_simulator').run(qobj)
             jobs.append(hw_job)
@@ -160,7 +160,7 @@ class Scheduler:
                 circ = element['circ']
                 reps = element['reps']
                 end_idx = start_idx + reps
-                print('{:d}: getting {:d}-{:d}/{:d} circuits, key {} : {:d} qubit'.format(element_ctr,start_idx,end_idx-1,schedule_item.total_circs-1,key,len(circ.qubits)),flush=True)
+                # print('{:d}: getting {:d}-{:d}/{:d} circuits, key {} : {:d} qubit'.format(element_ctr,start_idx,end_idx-1,schedule_item.total_circs-1,key,len(circ.qubits)),flush=True)
                 for result_idx in range(start_idx,end_idx):
                     experiment_hw_memory = hw_result.get_memory(result_idx)
                     if key in memories:
