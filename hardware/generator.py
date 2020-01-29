@@ -7,6 +7,7 @@ import utils.cutter as cutter
 from utils.helper_fun import get_evaluator_info, get_circ_saturated_shots, get_filename, read_file, generate_circ, evaluate_circ
 from utils.schedule import Scheduler
 from utils.mitigation import TensoredMitigation
+from scipy.stats import wasserstein_distance
 import argparse
 import math
 import copy
@@ -110,3 +111,7 @@ if __name__ == '__main__':
         for key in ['sv','qasm','qasm+noise','hw','mitigated_hw']:
             assert len(case_dict[key])==2**case[1] and abs(sum(case_dict[key])-1)<1e-10
         pickle.dump({case:case_dict},open(dirname+evaluator_input_filename,'ab'))
+        sv_distance = wasserstein_distance(u_values=case_dict['sv'],v_values=case_dict['sv'])
+        hw_distance = wasserstein_distance(u_values=case_dict['sv'],v_values=case_dict['hw'])
+        mitigated_hw_distance = wasserstein_distance(u_values=case_dict['sv'],v_values=case_dict['mitigated_hw'])
+        print('Case {} sv distance = {:.3e}, hw distance = {:.3e}, mitigated_hw distance = {:.3e}'.format(case,sv_distance,hw_distance,mitigated_hw_distance))

@@ -308,6 +308,7 @@ if __name__ == '__main__':
         case_dict['cutting'] = reconstructed_prob
         print('qasm metric = %.3e'%wasserstein_distance(u_values=case_dict['sv'],v_values=case_dict['qasm']))
         print('hw metric = %.3e'%wasserstein_distance(u_values=case_dict['sv'],v_values=case_dict['hw']))
+        print('mitigated_hw metric = %.3e'%wasserstein_distance(u_values=case_dict['sv'],v_values=case_dict['mitigated_hw']))
         print('cutting metric = %.3e'%(wasserstein_distance(u_values=case_dict['sv'],v_values=case_dict['cutting'])))
 
         if args.evaluation_method == 'hardware':

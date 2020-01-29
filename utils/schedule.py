@@ -99,20 +99,13 @@ class Scheduler:
                     # print('Already transpiled')
                     mapped_circuit = circ
                 # Circ not transpiled, running on real device
-                elif real_device:
+                else:
                     evaluator_info = element['evaluator_info']
                     qc=apply_measurement(circ=circ)
                     mapped_circuit = transpile(qc,
                     backend=backend_device, basis_gates=evaluator_info['basis_gates'],
                     coupling_map=evaluator_info['coupling_map'],backend_properties=evaluator_info['properties'],
                     initial_layout=evaluator_info['initial_layout'])
-                # Circ not transpiled, running on simulator
-                else:
-                    evaluator_info = element['evaluator_info']
-                    qc=apply_measurement(circ=circ)
-                    mapped_circuit = transpile(qc, basis_gates=evaluator_info['basis_gates'])
-                    # print('Transpiled into basis gates:')
-                    # print(mapped_circuit)
 
                 circs_to_add = [mapped_circuit]*reps
                 job_circuits += circs_to_add
@@ -130,10 +123,9 @@ class Scheduler:
                 device_qubits = len(evaluator_info['properties'].qubits)
                 noise_model = noise.NoiseModel()
                 for qi in range(device_qubits):
-                    correct_p = 0.75
+                    correct_p = np.exp(-qi/10)
                     read_err = noise.errors.readout_error.ReadoutError([[correct_p, 1-correct_p],[1-0.9*correct_p, 0.9*correct_p]])
-                    if qi>4:
-                        noise_model.add_readout_error(read_err, [qi])
+                    noise_model.add_readout_error(read_err, [qi])
                 hw_job = Aer.get_backend('qasm_simulator').run(qobj,noise_model=noise_model)
                 # hw_job = Aer.get_backend('qasm_simulator').run(qobj)
             jobs.append(hw_job)
