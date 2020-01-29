@@ -119,14 +119,8 @@ class Scheduler:
                 qobj = assemble(job_circuits, backend=Aer.get_backend('qasm_simulator'), shots=schedule_item.shots, memory=True)
                 
                 # Add fake noise model
-                evaluator_info = get_evaluator_info(circ=circ,device_name=self.device_name,fields=['properties'])
-                device_qubits = len(evaluator_info['properties'].qubits)
-                noise_model = noise.NoiseModel()
-                for qi in range(device_qubits):
-                    correct_p = np.exp(-qi/10)
-                    read_err = noise.errors.readout_error.ReadoutError([[correct_p, 1-correct_p],[1-0.9*correct_p, 0.9*correct_p]])
-                    noise_model.add_readout_error(read_err, [qi])
-                hw_job = Aer.get_backend('qasm_simulator').run(qobj,noise_model=noise_model)
+                evaluator_info = get_evaluator_info(circ=circ,device_name=self.device_name,fields=['noise_model'])
+                hw_job = Aer.get_backend('qasm_simulator').run(qobj,noise_model=evaluator_info['noise_model'])
                 # hw_job = Aer.get_backend('qasm_simulator').run(qobj)
             jobs.append(hw_job)
             print('Submitting job {:d}/{:d} {} --> {:d} circuits, {:d} * {:d} shots'.format(idx+1,len(self.schedule),hw_job.job_id(),len(schedule_item.circ_list),len(job_circuits),schedule_item.shots),flush=True)
