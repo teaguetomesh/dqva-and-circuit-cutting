@@ -44,7 +44,7 @@ class Scheduler:
         self.circ_dict = copy.deepcopy(circ_dict)
         self.device_name = device_name
         self.check_input()
-        evaluator_info = get_evaluator_info(circ=None,device_name=self.device_name,fields=['properties','device'])
+        evaluator_info = get_evaluator_info(circ=None,device_name=self.device_name,fields=['device'])
         self.schedule = self.get_schedule(device_max_shots=evaluator_info['device'].configuration().max_shots,
         device_max_experiments=evaluator_info['device'].configuration().max_experiments)
 
@@ -83,7 +83,7 @@ class Scheduler:
     def run(self,real_device):
         print('*'*20,'Submitting jobs','*'*20,flush=True)
         jobs = []
-        backend_device = get_evaluator_info(circ=None,device_name=self.device_name,fields=['device'])['device']
+        device_evaluator_info = get_evaluator_info(circ=None,device_name=self.device_name,fields=['device','properties','basis_gates'])
         for idx, schedule_item in enumerate(self.schedule):
             # print('Submitting job %d/%d'%(idx+1,len(schedule)))
             # print('Has %d total circuits * %d shots, %d circ_list elements'%(schedule_item.total_circs,schedule_item.shots,len(schedule_item.circ_list)))
@@ -99,13 +99,18 @@ class Scheduler:
                     # print('Already transpiled')
                     mapped_circuit = circ
                 # Circ not transpiled, running on real device
-                else:
+                elif real_device:
                     evaluator_info = element['evaluator_info']
                     qc=apply_measurement(circ=circ)
                     mapped_circuit = transpile(qc,
-                    backend=backend_device, basis_gates=evaluator_info['basis_gates'],
+                    backend=evaluator_info['device'], basis_gates=evaluator_info['basis_gates'],
                     coupling_map=evaluator_info['coupling_map'],backend_properties=evaluator_info['properties'],
                     initial_layout=evaluator_info['initial_layout'])
+                # Circ not transpiled, running on simulator
+                else:
+                    qc=apply_measurement(circ=circ)
+                    mapped_circuit = transpile(qc,basis_gates=device_evaluator_info['basis_gates'],
+                    initial_layout={circ.qregs[0][x]:x for x in range(len(circ.qubits))})
 
                 circs_to_add = [mapped_circuit]*reps
                 job_circuits += circs_to_add
@@ -117,10 +122,16 @@ class Scheduler:
                 hw_job = backend_device.run(qobj)
             else:
                 qobj = assemble(job_circuits, backend=Aer.get_backend('qasm_simulator'), shots=schedule_item.shots, memory=True)
-                
-                # Add fake noise model
-                evaluator_info = get_evaluator_info(circ=circ,device_name=self.device_name,fields=['noise_model'])
-                hw_job = Aer.get_backend('qasm_simulator').run(qobj,noise_model=evaluator_info['noise_model'])
+                # Generate a noise model for the qubits
+                noise_model = noise.NoiseModel()
+                device_qubits = len(device_evaluator_info['properties'].qubits)
+                for qi in range(device_qubits):
+                    if qi < 0:
+                        read_err = noise.errors.readout_error.ReadoutError([[1, 0],[0, 1]])
+                    else:
+                        read_err = noise.errors.readout_error.ReadoutError([[0.93, 1-0.93],[1-0.89, 0.89]])
+                    noise_model.add_readout_error(read_err, [qi])
+                hw_job = Aer.get_backend('qasm_simulator').run(qobj,noise_model=noise_model)
                 # hw_job = Aer.get_backend('qasm_simulator').run(qobj)
             jobs.append(hw_job)
             print('Submitting job {:d}/{:d} {} --> {:d} circuits, {:d} * {:d} shots'.format(idx+1,len(self.schedule),hw_job.job_id(),len(schedule_item.circ_list),len(job_circuits),schedule_item.shots),flush=True)

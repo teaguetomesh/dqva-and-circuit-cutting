@@ -50,7 +50,7 @@ class TensoredMitigation:
             device_max_shots = evaluator_info['device'].configuration().max_shots
             device_max_experiments = evaluator_info['device'].configuration().max_experiments
             num_qubits = len(evaluator_info['properties'].qubits)
-            qr = QuantumRegister(num_qubits)
+            qr = QuantumRegister(len(circ.qubits))
             if 'initial_layout' in self.circ_dict[key]:
                 _initial_layout = self.circ_dict[key]['initial_layout'].get_physical_bits()
             else:
@@ -66,11 +66,12 @@ class TensoredMitigation:
                         qubit_group = [q]
             if len(qubit_group)>0:
                 mit_pattern.append(qubit_group)
-            # print('Circuit %s has mit_pattern:'%key,mit_pattern)
+            mit_pattern = [range(len(circ.qubits))]
+            print('Circuit %s has mit_pattern:'%key,mit_pattern)
+            print(evaluator_info['initial_layout'])
             self.circ_dict[key]['mit_pattern'] = mit_pattern
             meas_calibs, state_labels = tensored_meas_cal(mit_pattern=mit_pattern, qr=qr, circlabel='')
-            meas_calibs_transpiled = transpile(meas_calibs, backend=evaluator_info['device'])
-            for meas_calib_circ in meas_calibs_transpiled:
+            for meas_calib_circ in meas_calibs:
                 meas_calibs_dict_key = (key,meas_calib_circ.name.split('_')[1])
                 assert meas_calibs_dict_key not in meas_calibs_dict
                 meas_calibs_dict.update({meas_calibs_dict_key:{'circ':meas_calib_circ,'shots':device_max_shots}})
