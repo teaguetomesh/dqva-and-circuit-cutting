@@ -24,8 +24,6 @@ class TensoredMitigation:
         self.circ_dict = copy.deepcopy(circ_dict)
         self.device_name = device_name
         self.check_status()
-        self.meas_calibs_dict = self.get_mitigation_circuits()
-        self.scheduler = Scheduler(circ_dict=self.meas_calibs_dict,device_name=self.device_name)
 
     def check_status(self):
         assert isinstance(self.circ_dict,dict)
@@ -41,44 +39,49 @@ class TensoredMitigation:
         for key in keys_to_delete:
             del self.circ_dict[key]
     
-    def get_mitigation_circuits(self):
+    def get_mitigation_circuits(self,real_device):
         meas_calibs_dict = {}
+        device_evaluator_info = get_evaluator_info(circ=None,device_name=self.device_name,fields=['device','properties','basis_gates','coupling_map'])
+        device_max_shots = device_evaluator_info['device'].configuration().max_shots
+        device_max_experiments = device_evaluator_info['device'].configuration().max_experiments
+        device_qubits = len(device_evaluator_info['properties'].qubits)
         for key in self.circ_dict:
             circ = self.circ_dict[key]['circ']
-            evaluator_info = get_evaluator_info(circ=circ,device_name=self.device_name,
-            fields=['device','basis_gates','coupling_map','properties','initial_layout'])
-            device_max_shots = evaluator_info['device'].configuration().max_shots
-            device_max_experiments = evaluator_info['device'].configuration().max_experiments
-            num_qubits = len(evaluator_info['properties'].qubits)
-            qr = QuantumRegister(len(circ.qubits))
-            if 'initial_layout' in self.circ_dict[key]:
-                _initial_layout = self.circ_dict[key]['initial_layout'].get_physical_bits()
-            else:
-                _initial_layout = evaluator_info['initial_layout'].get_physical_bits()
             mit_pattern = []
             qubit_group = []
-            for q in _initial_layout:
-                if 'ancilla' not in _initial_layout[q].register.name:
-                    if 2**(len(qubit_group)+1)<=device_max_experiments:
-                        qubit_group.append(q)
-                    else:
-                        mit_pattern.append(qubit_group)
-                        qubit_group = [q]
-            if len(qubit_group)>0:
-                mit_pattern.append(qubit_group)
-            mit_pattern = [range(len(circ.qubits))]
+            if real_device:
+                _initial_layout = self.circ_dict[key]['initial_layout'].get_physical_bits()
+                for q in _initial_layout:
+                    if 'ancilla' not in _initial_layout[q].register.name:
+                        if 2**(len(qubit_group)+1)<=device_max_experiments:
+                            qubit_group.append(q)
+                        else:
+                            mit_pattern.append(qubit_group)
+                            qubit_group = [q]
+                if len(qubit_group)>0:
+                    mit_pattern.append(qubit_group)
+                qr = QuantumRegister(device_qubits)
+            else:
+                mit_pattern = [range(len(circ.qubits))]
+                qr = QuantumRegister(len(circ.qubits))
+
             print('Circuit %s has mit_pattern:'%key,mit_pattern)
-            print(evaluator_info['initial_layout'])
             self.circ_dict[key]['mit_pattern'] = mit_pattern
             meas_calibs, state_labels = tensored_meas_cal(mit_pattern=mit_pattern, qr=qr, circlabel='')
             for meas_calib_circ in meas_calibs:
+                meas_calib_circ.remove_final_measurements()
                 meas_calibs_dict_key = (key,meas_calib_circ.name.split('_')[1])
                 assert meas_calibs_dict_key not in meas_calibs_dict
-                meas_calibs_dict.update({meas_calibs_dict_key:{'circ':meas_calib_circ,'shots':device_max_shots}})
+                if real_device:
+                    meas_calibs_dict.update({meas_calibs_dict_key:{'circ':meas_calib_circ,'shots':device_max_shots,'initial_layout':self.circ_dict[key]['initial_layout']}})
+                else:
+                    meas_calibs_dict.update({meas_calibs_dict_key:{'circ':meas_calib_circ,'shots':device_max_shots}})
                 # print(meas_calibs_dict_key)
         return meas_calibs_dict
 
     def run(self,real_device):
+        self.meas_calibs_dict = self.get_mitigation_circuits(real_device=real_device)
+        self.scheduler = Scheduler(circ_dict=self.meas_calibs_dict,device_name=self.device_name)
         self.scheduler.run(real_device=real_device)
 
     def retrieve(self):

@@ -67,6 +67,7 @@ def plot_bar(data,legends,title):
     fig.savefig('%s.png'%title)
     return
 
+metric = 'chi2'
 device_name = 'ibmq_boeblingen'
 evaluator_info = get_evaluator_info(circ=None,device_name='ibmq_boeblingen',fields=['basis_gates','properties'])
 device_qubits = len(evaluator_info['properties'].qubits)
@@ -74,7 +75,7 @@ device_qubits = len(evaluator_info['properties'].qubits)
 full_circ_size = 4
 ghz = generate_circ(full_circ_size=full_circ_size,circuit_type='supremacy')
 ground_truth = evaluate_circ(circ=ghz,backend='statevector_simulator',evaluator_info=None,force_prob=True)
-print('Ground truth:',ground_truth)
+# print('Ground truth:',ground_truth)
 qreg = ghz.qregs[0]
 
 ghz_transpiled = apply_measurement(circ=ghz)
@@ -120,7 +121,7 @@ mitigated_results = meas_filter.apply(results,method='least_squares')
 mitigated_counts = mitigated_results.get_counts(0)
 # print('Qiskit mitigated counts:',mitigated_counts)
 
-truth_metric, qiskit_raw_metric, qiskit_mit_metric = compute_metrics(ground_truth=ground_truth,raw_counts=raw_counts,mitigated_counts=mitigated_counts,metric='chi2')
+truth_metric, qiskit_raw_metric, qiskit_mit_metric = compute_metrics(ground_truth=ground_truth,raw_counts=raw_counts,mitigated_counts=mitigated_counts,metric=metric)
 print('Qiskit metric: {:.3e}-->{:.3e}'.format(qiskit_raw_metric,qiskit_mit_metric))
 
 fig = plot_histogram([raw_counts, mitigated_counts, ground_truth], legend=['raw = %.3e'%qiskit_raw_metric,'mitigated = %.3e'%qiskit_mit_metric,'truth = %.3e'%truth_metric],figsize=(35,10),title='qiskit mitigation')
@@ -147,7 +148,7 @@ my_mitigated = mitigated_circ_dict['test']['mitigated_hw']
 my_raw_dict = list_to_dict(l=list(my_raw))
 my_mitigated_dict = list_to_dict(l=list(my_mitigated))
 
-truth_ce, my_raw_ce, my_mit_ce = compute_metrics(ground_truth=ground_truth,raw_counts=my_raw_dict,mitigated_counts=my_mitigated_dict,metric='wasserstein_distance')
+truth_ce, my_raw_ce, my_mit_ce = compute_metrics(ground_truth=ground_truth,raw_counts=my_raw_dict,mitigated_counts=my_mitigated_dict,metric=metric)
 print('My metric: {:.3e}-->{:.3e}'.format(my_raw_ce,my_mit_ce))
 
 fig = plot_histogram([my_raw_dict, my_mitigated_dict, ground_truth], legend=['my_raw = %.3e'%my_raw_ce,'my_mitigated = %.3e'%my_mit_ce,'truth = %.3e'%truth_ce],figsize=(35,10),title='my mitigation')
