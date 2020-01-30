@@ -13,7 +13,6 @@ def reverse_prob(prob_l):
     for state, p in enumerate(prob_l):
         reverse_state = reverseBits(num=state,bitSize=nqubit)
         reverse_prob_l[reverse_state] = p
-    assert abs(sum(reverse_prob_l)-1)<1e-10
     return reverse_prob_l
 
 def list_to_dict(l):

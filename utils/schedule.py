@@ -120,10 +120,10 @@ class Scheduler:
                 noise_model = noise.NoiseModel()
                 device_qubits = len(device_evaluator_info['properties'].qubits)
                 for qi in range(device_qubits):
-                    if qi < 3:
+                    if qi < 4:
                         read_err = noise.errors.readout_error.ReadoutError([[1, 0],[0, 1]])
                     else:
-                        read_err = noise.errors.readout_error.ReadoutError([[0.93, 1-0.93],[1-0.89, 0.89]])
+                        read_err = noise.errors.readout_error.ReadoutError([[0.6, 1-0.6],[1-0.55, 0.55]])
                     noise_model.add_readout_error(read_err, [qi])
                 hw_job = Aer.get_backend('qasm_simulator').run(qobj,noise_model=noise_model)
                 # hw_job = Aer.get_backend('qasm_simulator').run(qobj)
@@ -151,7 +151,7 @@ class Scheduler:
                 circ = element['circ']
                 reps = element['reps']
                 end_idx = start_idx + reps
-                print('{:d}: getting {:d}-{:d}/{:d} circuits, key {} : {:d} qubit'.format(element_ctr,start_idx,end_idx-1,schedule_item.total_circs-1,key,len(circ.qubits)),flush=True)
+                # print('{:d}: getting {:d}-{:d}/{:d} circuits, key {} : {:d} qubit'.format(element_ctr,start_idx,end_idx-1,schedule_item.total_circs-1,key,len(circ.qubits)),flush=True)
                 for result_idx in range(start_idx,end_idx):
                     experiment_hw_memory = hw_result.get_memory(result_idx)
                     if key in memories:

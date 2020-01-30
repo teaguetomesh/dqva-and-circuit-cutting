@@ -273,6 +273,8 @@ def reconstruct(complete_path_map, full_circ, cluster_circs, cluster_sim_probs):
     # print()
     reconstructed_prob = [x/scaling_factor for x in reconstructed_prob]
     reconstructed_prob = reconstructed_reorder(reconstructed_prob,complete_path_map)
+    norm = sum(reconstructed_prob)
+    reconstructed_prob = [x/norm for x in reconstructed_prob]
     # print('reconstruction len = ', len(reconstructed_prob),'probabilities sum = ', sum(reconstructed_prob))
     return reconstructed_prob
 
