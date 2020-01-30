@@ -118,18 +118,20 @@ def effective_full_state_corresppndence(O_rho_pairs,cluster_circs):
             if O_qubit[0] == cluster_idx:
                 cluster_O_qubits.append(O_qubit[1])
         effective_num_qubits = total_num_qubits - len(cluster_O_qubits)
+        # print('cluster O qubits:',cluster_O_qubits)
         if effective_num_qubits>0:
             effective_states = itertools.product(range(2),repeat=effective_num_qubits)
-            # print('effective states:',list(effective_states))
             O_qubit_states = list(itertools.product(range(2),repeat=len(cluster_O_qubits)))
             cluster_correspondence = {}
             for effective_state in effective_states:
+                # print('effective state:',effective_state)
                 effective_state_index = int("".join(str(x) for x in effective_state), 2)
                 corresponding_full_states = []
                 for O_qubit_state in O_qubit_states:
                     full_state = list(effective_state)
                     for p,i in zip(cluster_O_qubits,O_qubit_state):
                         full_state.insert(p,i)
+                    # print('O qubit state: {} --> full state: {}'.format(O_qubit_state,full_state))
                     full_state_index = int("".join(str(x) for x in full_state), 2)
                     corresponding_full_states.append(full_state_index)
                 cluster_correspondence[effective_state_index] = corresponding_full_states
