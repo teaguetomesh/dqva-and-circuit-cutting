@@ -7,7 +7,7 @@ import utils.cutter as cutter
 from utils.helper_fun import get_evaluator_info, get_circ_saturated_shots, get_filename, read_file, generate_circ, evaluate_circ
 from utils.schedule import Scheduler
 from utils.mitigation import TensoredMitigation
-from scipy.stats import wasserstein_distance
+from utils.metrics import chi2_distance
 import argparse
 import math
 import copy
@@ -22,6 +22,10 @@ def case_feasible(full_circ,cluster_max_qubit,max_clusters):
     else:
         m.print_stat()
         clusters, complete_path_map, K, d = cutter.cut_circuit(full_circ, positions)
+        # print(full_circ)
+        # for i, x in enumerate(clusters):
+        #     print('cluster %d'%i)
+        #     print(x)
         return {'full_circ':full_circ,'searcher_time':searcher_time,'clusters':clusters,'complete_path_map':complete_path_map}
 
 def fc_size_in_dict(full_circ_size,dictionary):
@@ -83,7 +87,7 @@ if __name__ == '__main__':
                         evaluator_info = get_evaluator_info(circ=full_circ,device_name=args.device_name,fields=
                         ['basis_gates','coupling_map','properties','initial_layout'])
                         circ_dict[full_circ_size] = copy.deepcopy({'circ':full_circ,'shots':saturated_shots[0],
-                        'evaluator_info':evaluator_info,'sv':ground_truths[0],'qasm':saturated_probs[0]})
+                        'sv':ground_truths[0],'qasm':saturated_probs[0]})
                         mitigation_correspondence_dict[full_circ_size] = [full_circ_size]
                     else:
                         print('Use currently running %d qubit full circuit'%full_circ_size)
@@ -97,6 +101,7 @@ if __name__ == '__main__':
 
     scheduler.retrieve(force_prob=True)
     tensored_mitigation.retrieve()
+
     tensored_mitigation.apply(unmitigated=scheduler.circ_dict,mitigation_correspondence_dict=mitigation_correspondence_dict)
     circ_dict = tensored_mitigation.circ_dict
 
@@ -111,7 +116,7 @@ if __name__ == '__main__':
         for key in ['sv','qasm','qasm+noise','hw','mitigated_hw']:
             assert len(case_dict[key])==2**case[1] and abs(sum(case_dict[key])-1)<1e-10
         pickle.dump({case:case_dict},open(dirname+evaluator_input_filename,'ab'))
-        sv_distance = wasserstein_distance(u_values=case_dict['sv'],v_values=case_dict['sv'])
-        hw_distance = wasserstein_distance(u_values=case_dict['sv'],v_values=case_dict['hw'])
-        mitigated_hw_distance = wasserstein_distance(u_values=case_dict['sv'],v_values=case_dict['mitigated_hw'])
+        sv_distance = chi2_distance(target=case_dict['sv'],obs=case_dict['sv'])
+        hw_distance = chi2_distance(target=case_dict['sv'],obs=case_dict['hw'])
+        mitigated_hw_distance = chi2_distance(target=case_dict['sv'],obs=case_dict['mitigated_hw'])
         print('Case {} sv distance = {:.3e}, hw distance = {:.3e}, mitigated_hw distance = {:.3e}'.format(case,sv_distance,hw_distance,mitigated_hw_distance))

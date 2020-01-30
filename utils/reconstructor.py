@@ -8,6 +8,7 @@ from scipy.stats import wasserstein_distance
 import argparse
 from utils.helper_fun import get_filename, read_file
 from utils.metrics import chi2_distance
+from utils.conversions import reverse_prob
 import copy
 import os.path
 
@@ -303,23 +304,25 @@ if __name__ == '__main__':
         reconstructed_prob = reconstruct(complete_path_map=uniter_input[case]['complete_path_map'],
         full_circ=uniter_input[case]['full_circ'], cluster_circs=uniter_input[case]['clusters'],
         cluster_sim_probs=uniter_input[case]['all_cluster_prob'])
+        reconstructed_prob = reverse_prob(prob_l=reconstructed_prob)
         uniter_time = time()-uniter_begin
         case_dict['reconstructor_time'] = uniter_time
         case_dict['cutting'] = reconstructed_prob
-        print('qasm metric = %.3e'%wasserstein_distance(u_values=case_dict['sv'],v_values=case_dict['qasm']))
-        print('hw metric = %.3e'%wasserstein_distance(u_values=case_dict['sv'],v_values=case_dict['hw']))
-        print('mitigated_hw metric = %.3e'%wasserstein_distance(u_values=case_dict['sv'],v_values=case_dict['mitigated_hw']))
-        print('cutting metric = %.3e'%(wasserstein_distance(u_values=case_dict['sv'],v_values=case_dict['cutting'])))
+        print('qasm metric = %.3e'%chi2_distance(target=case_dict['sv'],obs=case_dict['qasm']))
+        print('hw metric = %.3e'%chi2_distance(target=case_dict['sv'],obs=case_dict['hw']))
+        print('mitigated_hw metric = %.3e'%chi2_distance(target=case_dict['sv'],obs=case_dict['mitigated_hw']))
+        print('cutting metric = %.3e'%(chi2_distance(target=case_dict['sv'],obs=case_dict['cutting'])))
 
         if args.evaluation_method == 'hardware':
             uniter_begin = time()
             mitigated_reconstructed_prob = reconstruct(complete_path_map=uniter_input[case]['complete_path_map'],
             full_circ=uniter_input[case]['full_circ'], cluster_circs=uniter_input[case]['clusters'],
             cluster_sim_probs=uniter_input[case]['mitigated_all_cluster_prob'])
+            mitigated_reconstructed_prob = reverse_prob(prob_l=mitigated_reconstructed_prob)
             uniter_time = time()-uniter_begin
             case_dict['mitigated_reconstructor_time'] = uniter_time
             case_dict['mitigated_cutting'] = mitigated_reconstructed_prob
-            print('mitigated_cutting metric = %.3e'%wasserstein_distance(u_values=case_dict['sv'],v_values=case_dict['mitigated_cutting']))
+            print('mitigated_cutting metric = %.3e'%chi2_distance(target=case_dict['sv'],obs=case_dict['mitigated_cutting']))
 
         pickle.dump({case:case_dict}, open('%s'%(dirname+plotter_input_filename),'ab'))
         counter += 1

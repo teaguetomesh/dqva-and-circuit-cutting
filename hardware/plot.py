@@ -256,16 +256,14 @@ def process_data(filename,circuit_type,mitigated):
     fc_qubits = [case[1] for case in plotter_input]
 
     for case in plotter_input:
-        ground_truth_ce = wasserstein_distance(u_values=plotter_input[case]['sv'],
-        v_values= plotter_input[case]['sv'])
-        qasm_ce = wasserstein_distance(u_values=plotter_input[case]['sv'],
-        v_values= plotter_input[case]['qasm'])
-        qasm_noise_ce = wasserstein_distance(u_values=plotter_input[case]['sv'],
-        v_values= plotter_input[case]['qasm+noise'])
-        hw_ce = wasserstein_distance(u_values=plotter_input[case]['sv'],
-        v_values= plotter_input[case]['%shw'%('mitigated_' if mitigated else '')])
-        cutting_ce = wasserstein_distance(u_values=plotter_input[case]['sv'],
-        v_values= plotter_input[case]['%scutting'%('mitigated_' if mitigated else '')])
+        ground_truth_ce = chi2_distance(target=plotter_input[case]['sv'],
+        obs= plotter_input[case]['sv'])
+        qasm_ce = chi2_distance(target=plotter_input[case]['sv'],
+        obs= plotter_input[case]['qasm'])
+        hw_ce = chi2_distance(target=plotter_input[case]['sv'],
+        obs= plotter_input[case]['%shw'%('mitigated_' if mitigated else '')])
+        cutting_ce = chi2_distance(target=plotter_input[case]['sv'],
+        obs= plotter_input[case]['%scutting'%('mitigated_' if mitigated else '')])
         ce_percent_change = 100*(hw_ce - cutting_ce)/hw_ce
         assert ce_percent_change <= 100+1e-10
         plotter_input[case]['ce_comparisons'] = (hw_ce,cutting_ce)

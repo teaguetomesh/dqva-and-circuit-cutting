@@ -2,9 +2,10 @@ import numpy as np
 import pickle
 import argparse
 from qiskit.compiler import transpile, assemble
-from utils.helper_fun import get_evaluator_info, get_circ_saturated_shots, get_filename, read_file, apply_measurement
+from utils.helper_fun import get_evaluator_info, get_circ_saturated_shots, get_filename, read_file
 from utils.schedule import Scheduler
 from utils.mitigation import TensoredMitigation
+from utils.conversions import reverse_prob
 from time import time
 import copy
 from qiskit import Aer
@@ -64,12 +65,7 @@ if __name__ == '__main__':
                 meas_str = ','.join(init_meas[1])
                 key = '{},{},{}|{},{}'.format(case[0],case[1],cluster_idx,init_str,meas_str)
                 circ = case_dict['all_cluster_prob'][cluster_idx][init_meas]
-                qc=apply_measurement(circ)
-                mapped_circuit = transpile(qc,
-                backend=backend_device, basis_gates=evaluator_info['basis_gates'],
-                coupling_map=evaluator_info['coupling_map'],backend_properties=evaluator_info['properties'],
-                initial_layout=evaluator_info['initial_layout'])
-                circ_dict[key] = {'circ':mapped_circuit,'shots':cluster_shots,'evaluator_info':evaluator_info}
+                circ_dict[key] = {'circ':circ,'shots':cluster_shots}
                 mitigation_correspondence_dict[mitigation_circ_key].append(key)
 
     scheduler = Scheduler(circ_dict=circ_dict,device_name=args.device_name)
@@ -92,6 +88,6 @@ if __name__ == '__main__':
                 init_str = ','.join(init_meas[0])
                 meas_str = ','.join(init_meas[1])
                 key = '{},{},{}|{},{}'.format(case[0],case[1],cluster_idx,init_str,meas_str)
-                case_dict['all_cluster_prob'][cluster_idx][init_meas] = copy.deepcopy(circ_dict[key]['hw'])
-                case_dict['mitigated_all_cluster_prob'][cluster_idx][init_meas] = copy.deepcopy(circ_dict[key]['mitigated_hw'])
+                case_dict['all_cluster_prob'][cluster_idx][init_meas] = copy.deepcopy(reverse_prob(prob_l=circ_dict[key]['hw']))
+                case_dict['mitigated_all_cluster_prob'][cluster_idx][init_meas] = copy.deepcopy(reverse_prob(prob_l=circ_dict[key]['mitigated_hw']))
         pickle.dump({case:case_dict}, open(dirname+uniter_input_filename,'ab'))

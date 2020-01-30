@@ -21,7 +21,7 @@ class ScheduleItem:
         self.shots = 0
         self.total_circs = 0
     
-    def update(self, key, circ, shots, evaluator_info):
+    def update(self, key, circ, shots, initial_layout):
         reps_vacant = self.max_experiments - self.total_circs
         if reps_vacant>0:
             circ_shots = max(shots,self.shots)
@@ -29,8 +29,7 @@ class ScheduleItem:
             total_reps = math.ceil(shots/circ_shots)
             reps_to_add = min(total_reps,reps_vacant)
             circ_list_item = {'key':key,'circ':circ,'reps':reps_to_add}
-            if evaluator_info != None:
-                circ_list_item['evaluator_info'] = evaluator_info
+            circ_list_item['initial_layout'] = initial_layout
             self.circ_list.append(circ_list_item)
             self.shots = circ_shots
             self.total_circs += reps_to_add
@@ -64,9 +63,9 @@ class Scheduler:
             key = list(circ_dict.keys())[key_idx]
             circ = circ_dict[key]['circ']
             shots = circ_dict[key]['shots']
-            evaluator_info = circ_dict[key]['evaluator_info'] if 'evaluator_info' in circ_dict[key] else None
+            initial_layout = circ_dict[key]['initial_layout'] if 'initial_layout' in circ_dict[key] else None
             # print('adding %d qubit circuit with %d shots to job'%(len(circ.qubits),shots))
-            shots_remaining = schedule_item.update(key,circ,shots,evaluator_info)
+            shots_remaining = schedule_item.update(key,circ,shots,initial_layout)
             if shots_remaining>0:
                 # print('OVERFLOW, has %d total circuits * %d shots'%(job.total_circs,job.shots))
                 schedule.append(schedule_item)
@@ -121,7 +120,7 @@ class Scheduler:
                 noise_model = noise.NoiseModel()
                 device_qubits = len(device_evaluator_info['properties'].qubits)
                 for qi in range(device_qubits):
-                    if qi < 0:
+                    if qi < 3:
                         read_err = noise.errors.readout_error.ReadoutError([[1, 0],[0, 1]])
                     else:
                         read_err = noise.errors.readout_error.ReadoutError([[0.93, 1-0.93],[1-0.89, 0.89]])
@@ -152,7 +151,7 @@ class Scheduler:
                 circ = element['circ']
                 reps = element['reps']
                 end_idx = start_idx + reps
-                # print('{:d}: getting {:d}-{:d}/{:d} circuits, key {} : {:d} qubit'.format(element_ctr,start_idx,end_idx-1,schedule_item.total_circs-1,key,len(circ.qubits)),flush=True)
+                print('{:d}: getting {:d}-{:d}/{:d} circuits, key {} : {:d} qubit'.format(element_ctr,start_idx,end_idx-1,schedule_item.total_circs-1,key,len(circ.qubits)),flush=True)
                 for result_idx in range(start_idx,end_idx):
                     experiment_hw_memory = hw_result.get_memory(result_idx)
                     if key in memories:

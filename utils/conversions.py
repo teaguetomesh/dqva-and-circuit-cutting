@@ -6,6 +6,16 @@ def reverseBits(num,bitSize):
     reverse = reverse + (bitSize - len(reverse))*'0'
     return int(reverse,2)
 
+def reverse_prob(prob_l):
+    nqubit = int(np.log(len(prob_l))/np.log(2))
+    assert 2**nqubit == len(prob_l)
+    reverse_prob_l = np.zeros(2**nqubit,dtype=float)
+    for state, p in enumerate(prob_l):
+        reverse_state = reverseBits(num=state,bitSize=nqubit)
+        reverse_prob_l[reverse_state] = p
+    assert abs(sum(reverse_prob_l)-1)<1e-10
+    return reverse_prob_l
+
 def list_to_dict(l):
     l_dict = {}
     num_qubits = int(np.log(len(l))/np.log(2))
