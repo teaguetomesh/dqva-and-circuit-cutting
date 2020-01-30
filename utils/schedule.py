@@ -63,7 +63,7 @@ class Scheduler:
             key = list(circ_dict.keys())[key_idx]
             circ = circ_dict[key]['circ']
             shots = circ_dict[key]['shots']
-            initial_layout = circ_dict[key]['initial_layout'] if 'initial_layout' in circ_dict[key] else None
+            initial_layout = circ_dict[key]['initial_layout'] if 'initial_layout' in circ_dict[key] else 'None'
             # print('adding %d qubit circuit with %d shots to job'%(len(circ.qubits),shots))
             shots_remaining = schedule_item.update(key,circ,shots,initial_layout)
             if shots_remaining>0:

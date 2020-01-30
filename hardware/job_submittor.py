@@ -65,13 +65,13 @@ if __name__ == '__main__':
                 meas_str = ','.join(init_meas[1])
                 key = '{},{},{}|{},{}'.format(case[0],case[1],cluster_idx,init_str,meas_str)
                 circ = case_dict['all_cluster_prob'][cluster_idx][init_meas]
-                circ_dict[key] = {'circ':circ,'shots':cluster_shots}
+                circ_dict[key] = {'circ':circ,'shots':cluster_shots,'initial_layout':evaluator_info['initial_layout']}
                 mitigation_correspondence_dict[mitigation_circ_key].append(key)
 
     scheduler = Scheduler(circ_dict=circ_dict,device_name=args.device_name)
-    scheduler.run(real_device=False)
+    scheduler.run(real_device=True)
     tensored_mitigation = TensoredMitigation(circ_dict=mitigation_circ_dict,device_name=args.device_name)
-    tensored_mitigation.run(real_device=False)
+    tensored_mitigation.run(real_device=True)
 
     scheduler.retrieve(force_prob=True)
     tensored_mitigation.retrieve()

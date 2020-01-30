@@ -87,6 +87,7 @@ if __name__ == '__main__':
                         evaluator_info = get_evaluator_info(circ=full_circ,device_name=args.device_name,fields=
                         ['basis_gates','coupling_map','properties','initial_layout'])
                         circ_dict[full_circ_size] = copy.deepcopy({'circ':full_circ,'shots':saturated_shots[0],
+                        'initial_layout':evaluator_info['initial_layout'],
                         'sv':ground_truths[0],'qasm':saturated_probs[0]})
                         mitigation_correspondence_dict[full_circ_size] = [full_circ_size]
                     else:
@@ -95,9 +96,9 @@ if __name__ == '__main__':
     print('{:d} cases, {:d} full circuits to run : {}'.format(len(cases_to_run),len(circ_dict),cases_to_run.keys()))
     
     scheduler = Scheduler(circ_dict=circ_dict,device_name=args.device_name)
-    scheduler.run(real_device=False)
+    scheduler.run(real_device=True)
     tensored_mitigation = TensoredMitigation(circ_dict=circ_dict,device_name=args.device_name)
-    tensored_mitigation.run(real_device=False)
+    tensored_mitigation.run(real_device=True)
 
     scheduler.retrieve(force_prob=True)
     tensored_mitigation.retrieve()
