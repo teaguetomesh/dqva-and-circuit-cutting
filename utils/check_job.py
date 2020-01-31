@@ -5,12 +5,11 @@ from qiskit import IBMQ
 from qiskit.providers.jobstatus import JobStatus
 import argparse
 from qiskit.visualization import plot_gate_map, plot_error_map
-import datetime
-from datetime import timedelta
+from datetime import timedelta, datetime, timezone
 import time
 
 def format_time(hours):
-    t = datetime.datetime.now(datetime.timezone.utc)
+    t = datetime.now(timezone.utc)
     delta = timedelta(days=0,seconds=0,microseconds=0,milliseconds=0,minutes=0,hours=hours,weeks=0)
     t = t - delta
     s = t.strftime('%Y-%m-%dT%H:%M:%S.%f')
@@ -28,7 +27,7 @@ if __name__ == '__main__':
 
     terminal_status = [JobStatus['DONE'],JobStatus['CANCELLED'],JobStatus['ERROR']]
 
-    time_now = datetime.datetime.now()
+    time_now = datetime.now(timezone.utc)
     time_delta = format_time(hours=24)
 
     for x in provider.backends():
@@ -37,26 +36,38 @@ if __name__ == '__main__':
             num_qubits = len(evaluator_info['properties'].qubits)
             if num_qubits==20:
                 print('%s: %d-qubit, max %d jobs * %d shots'%(x,num_qubits,x.configuration().max_experiments,x.configuration().max_shots))
-                print('Most recently QUEUED:')
-                limit = 100 if str(x)=='ibmq_boeblingen' else 5
+                queued_jobs = []
+                run_jobs = []
+                done_jobs = []
+                error_jobs = []
                 total_queued = 0
-                for job in x.jobs(limit=200,status='QUEUED'):
-                    if total_queued < 100:
-                        print(job.creation_date(),job.status(),job.queue_position(),job.job_id())
-                    total_queued += 1
-                print('Total queued = {:d}. Time stamp: {}'.format(total_queued,time_now))
+                for job in x.jobs(limit=50):
+                    if job.status() == JobStatus['QUEUED']:
+                        queued_jobs.append(job)
+                    elif job.status() == JobStatus['RUNNING']:
+                        run_jobs.append(job)
+                    elif job.status() == JobStatus['DONE'] and job.creation_date()>time_delta:
+                        done_jobs.append(job)
+                    elif job.status() == JobStatus['ERROR'] and job.creation_date()>time_delta:
+                        error_jobs.append(job)
+                print('Most recently QUEUED:')
+                for job in queued_jobs:
+                    print(job.creation_date(),job.status(),job.queue_position(),'ETA:',job.queue_info().estimated_complete_time-time_now)
+                print('Total queued = {:d}.'.format(len(queued_jobs)))
+                print('RUNNING:')
+                for job in run_jobs:
+                    print(job.creation_date(),job.status(),job.queue_position())
                 print('Most recently DONE:')
-                for job in x.jobs(limit=5,status=JobStatus['DONE']):
-                    if job.creation_date()>time_delta:
-                        print(job.creation_date(),job.status(),job.error_message(),job.job_id())
+                for job in done_jobs:
+                    print(job.creation_date(),job.status(),job.error_message(),job.job_id())
                 print('Most recently ERROR:')
-                for job in x.jobs(limit=5,status=JobStatus['ERROR']):
-                    if job.creation_date()>time_delta:
-                        print(job.creation_date(),job.status(),job.error_message(),job.job_id())
+                for job in error_jobs:
+                    print(job.creation_date(),job.status(),job.error_message(),job.job_id())
                 if args.cancel_jobs:
-                    [print('Warning!!! Cancelling jobs! 5 seconds count down') for i in range(5)]
-                    time.sleep(5)
-                    for job in x.jobs(limit=500,status='QUEUED'):
+                    for i in range(5):
+                        print('Warning!!! Cancelling jobs! 5 seconds count down')
+                        time.sleep(1.2)
+                    for job in queued_jobs:
                         print(job.creation_date(),job.status(),job.queue_position(),job.job_id())
                         job.cancel()
                         print('cancelled')
