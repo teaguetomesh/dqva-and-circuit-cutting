@@ -8,17 +8,6 @@ from qiskit.ignis.mitigation.measurement import tensored_meas_cal
 from utils.schedule import Scheduler
 from qiskit.compiler import transpile
 
-def break_state(bin_state,mit_pattern):
-    start_idx = 0
-    bin_state_parts = []
-    for qubit_group in mit_pattern:
-        end_idx = start_idx + len(qubit_group)
-        bin_state_part = bin_state[start_idx:end_idx]
-        bin_state_parts.append(bin_state_part)
-        start_idx = end_idx
-    assert sum([len(x) for x in bin_state_parts]) == len(bin_state)
-    return bin_state_parts
-
 class TensoredMitigation:
     def __init__(self,circ_dict,device_name):
         self.circ_dict = copy.deepcopy(circ_dict)

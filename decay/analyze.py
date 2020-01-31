@@ -25,7 +25,7 @@ def make_plot(metric_l,cutoff,full_circ_size,shots_increment,derivative_threshol
     x_ticks = get_xticks(xvals=xvals,compulsory=cutoff)
     plt.xticks(ticks=x_ticks,labels=x_ticks)
     # plt.ylabel('\u03C7^2, lower is better')
-    plt.ylabel('wasserstein distance, lower is better')
+    plt.ylabel('metric distance, lower is better')
     plt.xlabel('shots [*%d]'%shots_increment)
     plt.title('%d qubit circuit, derivative_thresholds : %.3e, %.3e'%(full_circ_size,first_derivative_threshold,second_derivative_threshold))
     plt.legend()
@@ -58,8 +58,8 @@ if __name__ == '__main__':
         chi2_l = decay_dict[full_circ_size]['chi2_l']
         distance_l = decay_dict[full_circ_size]['distance']
         metric_l = []
-        for distance in distance_l:
-            metric_l.append(distance)
+        for chi2 in chi2_l:
+            metric_l.append(chi2)
         shots_increment = decay_dict[full_circ_size]['shots_increment']
         cutoff, first_derivative, second_derivative = find_saturation(metric_l=metric_l,derivative_thresholds=(args.first_derivative,args.second_derivative),shots_increment=shots_increment)
         print('%d qubit circuit, cutoff = %d, metric = %.3f, first derivative = %.3e, second derivative = %.3e'%(full_circ_size,cutoff,metric_l[cutoff],first_derivative,second_derivative),flush=True)
