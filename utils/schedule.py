@@ -12,6 +12,7 @@ from utils.conversions import dict_to_array, memory_to_dict
 from qiskit.compiler import transpile, assemble
 from qiskit import Aer
 from qiskit.providers.aer import noise
+import random
 
 class ScheduleItem:
     def __init__(self,max_experiments,max_shots):
@@ -125,7 +126,9 @@ class Scheduler:
                     if qi < 4:
                         read_err = noise.errors.readout_error.ReadoutError([[1, 0],[0, 1]])
                     else:
-                        read_err = noise.errors.readout_error.ReadoutError([[0.6, 1-0.6],[1-0.55, 0.55]])
+                        correct_p = 1-qi/30
+                        correct_p = 0.1
+                        read_err = noise.errors.readout_error.ReadoutError([[correct_p, 1-correct_p],[1-correct_p, correct_p]])
                     noise_model.add_readout_error(read_err, [qi])
                 hw_job = Aer.get_backend('qasm_simulator').run(qobj,noise_model=noise_model)
                 # hw_job = Aer.get_backend('qasm_simulator').run(qobj)

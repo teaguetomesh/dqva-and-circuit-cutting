@@ -15,6 +15,7 @@ import copy
 import math
 import numpy as np
 import matplotlib.pyplot as plt
+import random
 
 def compute_metrics(ground_truth,raw_counts,mitigated_counts,metric):
     if metric == 'ce':
@@ -72,7 +73,7 @@ device_name = 'ibmq_boeblingen'
 evaluator_info = get_evaluator_info(circ=None,device_name='ibmq_boeblingen',fields=['basis_gates','properties'])
 device_qubits = len(evaluator_info['properties'].qubits)
 
-full_circ_size = 4
+full_circ_size = 7
 ghz = generate_circ(full_circ_size=full_circ_size,circuit_type='supremacy')
 ground_truth = evaluate_circ(circ=ghz,backend='statevector_simulator',evaluator_info=None,force_prob=True)
 # print('Ground truth:',ground_truth)
@@ -89,7 +90,9 @@ for qi in range(device_qubits):
     if qi < 0:
         read_err = noise.errors.readout_error.ReadoutError([[1, 0],[0, 1]])
     else:
-        read_err = noise.errors.readout_error.ReadoutError([[0.93, 1-0.93],[1-0.89, 0.89]])
+        correct_p = 1-qi/30
+        correct_p = 0.1
+        read_err = noise.errors.readout_error.ReadoutError([[correct_p, 1-correct_p],[1-correct_p, correct_p]])
     noise_model.add_readout_error(read_err, [qi])
 
 backend = Aer.get_backend('qasm_simulator')
@@ -124,8 +127,8 @@ mitigated_counts = mitigated_results.get_counts(0)
 truth_metric, qiskit_raw_metric, qiskit_mit_metric = compute_metrics(ground_truth=ground_truth,raw_counts=raw_counts,mitigated_counts=mitigated_counts,metric=metric)
 print('Qiskit metric: {:.3e}-->{:.3e}'.format(qiskit_raw_metric,qiskit_mit_metric))
 
-fig = plot_histogram([raw_counts, mitigated_counts, ground_truth], legend=['raw = %.3e'%qiskit_raw_metric,'mitigated = %.3e'%qiskit_mit_metric,'truth = %.3e'%truth_metric],figsize=(35,10),title='qiskit mitigation')
-fig.savefig('qiskit_mitigation.png')
+# fig = plot_histogram([raw_counts, mitigated_counts, ground_truth], legend=['raw = %.3e'%qiskit_raw_metric,'mitigated = %.3e'%qiskit_mit_metric,'truth = %.3e'%truth_metric],figsize=(35,10),title='qiskit mitigation')
+# fig.savefig('qiskit_mitigation.png')
 
 circ_dict = {'test':{'circ':ghz,'shots':500000}}
 
@@ -151,8 +154,8 @@ my_mitigated_dict = list_to_dict(l=list(my_mitigated))
 truth_ce, my_raw_ce, my_mit_ce = compute_metrics(ground_truth=ground_truth,raw_counts=my_raw_dict,mitigated_counts=my_mitigated_dict,metric=metric)
 print('My metric: {:.3e}-->{:.3e}'.format(my_raw_ce,my_mit_ce))
 
-fig = plot_histogram([my_raw_dict, my_mitigated_dict, ground_truth], legend=['my_raw = %.3e'%my_raw_ce,'my_mitigated = %.3e'%my_mit_ce,'truth = %.3e'%truth_ce],figsize=(35,10),title='my mitigation')
-fig.savefig('my_mitigation.png')
+# fig = plot_histogram([my_raw_dict, my_mitigated_dict, ground_truth], legend=['my_raw = %.3e'%my_raw_ce,'my_mitigated = %.3e'%my_mit_ce,'truth = %.3e'%truth_ce],figsize=(35,10),title='my mitigation')
+# fig.savefig('my_mitigation.png')
 
 # fig = plot_histogram([mitigated_counts, my_mitigated_dict, ground_truth], legend=['mitigated', 'my_mitigated', 'truth'],figsize=(35,10),title='mitigations comparison')
 # fig.savefig('mitigations.png')
