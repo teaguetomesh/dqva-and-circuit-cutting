@@ -91,9 +91,11 @@ class Scheduler:
                 key = element['key']
                 circ = element['circ']
                 reps = element['reps']
-                # print('Key {} {:d} qubit circuit * {:d} reps'.format(key,len(circ.qubits),reps))
+                # print('Key {}, {:d} qubit circuit * {:d} reps'.format(key,len(circ.qubits),reps))
                 
-                if real_device:
+                if len(circ.clbits)>0:
+                    mapped_circuit = circ
+                elif real_device:
                     initial_layout = element['initial_layout']
                     qc=apply_measurement(circ=circ)
                     mapped_circuit = transpile(qc,

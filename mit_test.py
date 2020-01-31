@@ -132,10 +132,10 @@ circ_dict = {'test':{'circ':ghz,'shots':500000}}
 mitigation_correspondence_dict = {'test':['test']}
 
 scheduler = Scheduler(circ_dict=circ_dict,device_name=device_name)
-scheduler.run(real_device=False)
+scheduler.run(real_device= False)
 
 tensored_mitigation = TensoredMitigation(circ_dict=circ_dict,device_name=device_name)
-tensored_mitigation.run(real_device=False)
+tensored_mitigation.run(real_device= False)
 
 scheduler.retrieve(force_prob=True)
 tensored_mitigation.retrieve()

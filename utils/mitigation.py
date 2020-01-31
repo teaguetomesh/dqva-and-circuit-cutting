@@ -57,8 +57,8 @@ class TensoredMitigation:
             print('Circuit %s has mit_pattern:'%key,mit_pattern)
             self.circ_dict[key]['mit_pattern'] = mit_pattern
             meas_calibs, state_labels = tensored_meas_cal(mit_pattern=mit_pattern, qr=qr, circlabel='')
-            for meas_calib_circ in meas_calibs:
-                meas_calib_circ.remove_final_measurements()
+            meas_calibs_transpiled = transpile(meas_calibs,basis_gates=device_evaluator_info['basis_gates'])
+            for meas_calib_circ in meas_calibs_transpiled:
                 meas_calibs_dict_key = (key,meas_calib_circ.name.split('_')[1])
                 assert meas_calibs_dict_key not in meas_calibs_dict
                 if real_device:
