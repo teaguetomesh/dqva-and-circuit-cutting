@@ -35,6 +35,7 @@ def make_plot(metric_l,cutoff,full_circ_size,shots_increment,derivative_threshol
 
 def find_saturation(metric_l,derivative_thresholds,shots_increment):
     assert len(metric_l)>=3
+    shots_increment = 1
     first_derivative_threshold, second_derivative_threshold = derivative_thresholds
     for cutoff in range(1,len(metric_l)-1):
         first_derivative = (metric_l[cutoff+1]-metric_l[cutoff-1])/(2*shots_increment)

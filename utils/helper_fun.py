@@ -131,6 +131,12 @@ def get_circ_saturated_shots(circs,device_name):
     saturated_probs = []
     for circ_idx, circ in enumerate(circs):
         full_circ_size = len(circ.qubits)
+        if full_circ_size<10:
+            min_saturated_shots = 8192
+        elif full_circ_size<15:
+            min_saturated_shots = 8192*10
+        else:
+            min_saturated_shots = 8192*20
         ground_truth = evaluate_circ(circ=circ,backend='statevector_simulator',evaluator_info=None,force_prob=True)
         ground_truth = dict_to_array(distribution_dict=ground_truth,force_prob=True)
 
@@ -154,14 +160,15 @@ def get_circ_saturated_shots(circs,device_name):
             chi2_l.append(accumulated_chi2)
             if len(chi2_l)>=3:
                 accumulated_shots = int((len(chi2_l)-1)*shots_increment)
-                first_derivative = (chi2_l[-1]+chi2_l[-3])/(2*shots_increment)
-                second_derivative = (chi2_l[-1]+chi2_l[-3]-2*chi2_l[-2])/(2*np.power(shots_increment,2))
-                if (abs(first_derivative)<1e-7 and abs(second_derivative) < 1e-7) or accumulated_shots/device_max_experiments/device_max_shots>1/10:
+                first_derivative = (chi2_l[-1]+chi2_l[-3])/2
+                second_derivative = (chi2_l[-1]+chi2_l[-3]-2*chi2_l[-2])/2
+                if (abs(first_derivative)<1e-3 and abs(second_derivative)<1e-3) or accumulated_shots/device_max_experiments/device_max_shots>1/10:
                     saturated_shot = accumulated_shots
                     break
             counter += 1
         ground_truth = evaluate_circ(circ=circ,backend='statevector_simulator',evaluator_info=None,force_prob=True)
         ground_truth = dict_to_array(distribution_dict=ground_truth,force_prob=True)
+        saturated_shot = max(min_saturated_shots,saturated_shot)
         qasm_evaluator_info['num_shots'] = saturated_shot
         saturated_prob = evaluate_circ(circ=circ,backend='noiseless_qasm_simulator',evaluator_info=qasm_evaluator_info,force_prob=True)
         saturated_prob = dict_to_array(distribution_dict=saturated_prob,force_prob=True)

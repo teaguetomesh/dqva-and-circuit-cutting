@@ -82,7 +82,6 @@ if __name__ == '__main__':
                     cases_to_run[case] = copy.deepcopy(feasibility)
 
                     if full_circ_size not in circ_dict:
-                        print('Adding %d qubit full circuit to run'%full_circ_size)
                         saturated_shots, ground_truths, saturated_probs = get_circ_saturated_shots(circs=[full_circ],device_name=args.device_name)
                         evaluator_info = get_evaluator_info(circ=full_circ,device_name=args.device_name,fields=
                         ['basis_gates','coupling_map','properties','initial_layout'])
@@ -90,8 +89,9 @@ if __name__ == '__main__':
                         'initial_layout':evaluator_info['initial_layout'],
                         'sv':ground_truths[0],'qasm':saturated_probs[0]})
                         mitigation_correspondence_dict[full_circ_size] = [full_circ_size]
+                        print('Adding %d qubit full circuit to run, %d shots'%(full_circ_size,saturated_shots[0]))
                     else:
-                        print('Use currently running %d qubit full circuit'%full_circ_size)
+                        print('Use currently running %d qubit full circuit, %d shots'%(full_circ_size,saturated_shots[0]))
             print('-'*100)
     print('{:d} cases, {:d} full circuits to run : {}'.format(len(cases_to_run),len(circ_dict),cases_to_run.keys()))
     
