@@ -1,0 +1,1157 @@
+-------------------------------------------------- Generator --------------------------------------------------
+Existing cases: dict_keys([])
+Generating 1x3, 1+8+1 supremacy circuit
+Using license file /home/weit/gurobi.lic
+Academic license - for non-commercial use only
+********************
+MIQCP stats:
+1 cuts, 2 clusters, max qubit = 2
+cluster 0: original input = 2.00, ρ_qubits = 0.00, O_qubits = 1.00, d = 2.00
+cluster 1: original input = 1.00, ρ_qubits = 1.00, O_qubits = 0.00, d = 2.00
+objective value = 9.000e+00
+manually calculated objective value: 9.000e+00
+evaluator_cost = 9, reconstructor_cost = 1.340e-07, reconstructor_weight = 0.000e+00
+runtime: 0.0006051063537597656
+OPTIMAL
+********************
+Adding case (2, 3) to run
+Adding 3 qubit full circuit to run
+3 qubit circuit saturated shots = 16384, metric = 1.601e-04
+----------------------------------------------------------------------------------------------------
+Case (3, 3) impossible, skipped
+----------------------------------------------------------------------------------------------------
+Case (4, 3) impossible, skipped
+----------------------------------------------------------------------------------------------------
+Case (5, 3) impossible, skipped
+----------------------------------------------------------------------------------------------------
+Case (6, 3) impossible, skipped
+----------------------------------------------------------------------------------------------------
+Case (7, 3) impossible, skipped
+----------------------------------------------------------------------------------------------------
+Case (8, 3) impossible, skipped
+----------------------------------------------------------------------------------------------------
+Case (9, 3) impossible, skipped
+----------------------------------------------------------------------------------------------------
+Generating 2x2, 1+8+1 supremacy circuit
+Case (2, 4) impossible, skipped
+----------------------------------------------------------------------------------------------------
+********************
+MIQCP stats:
+2 cuts, 2 clusters, max qubit = 3
+cluster 0: original input = 2.00, ρ_qubits = 1.00, O_qubits = 1.00, d = 3.00
+cluster 1: original input = 2.00, ρ_qubits = 1.00, O_qubits = 1.00, d = 3.00
+objective value = 3.600e+01
+manually calculated objective value: 3.600e+01
+evaluator_cost = 36, reconstructor_cost = 1.065e-06, reconstructor_weight = 0.000e+00
+runtime: 0.022661924362182617
+OPTIMAL
+********************
+Adding case (3, 4) to run
+Adding 4 qubit full circuit to run
+4 qubit circuit saturated shots = 16384, metric = 9.182e-04
+----------------------------------------------------------------------------------------------------
+Case (4, 4) impossible, skipped
+----------------------------------------------------------------------------------------------------
+Case (5, 4) impossible, skipped
+----------------------------------------------------------------------------------------------------
+Case (6, 4) impossible, skipped
+----------------------------------------------------------------------------------------------------
+Case (7, 4) impossible, skipped
+----------------------------------------------------------------------------------------------------
+Case (8, 4) impossible, skipped
+----------------------------------------------------------------------------------------------------
+Case (9, 4) impossible, skipped
+----------------------------------------------------------------------------------------------------
+Generating 1x5, 1+8+1 supremacy circuit
+Case (2, 5) impossible, skipped
+----------------------------------------------------------------------------------------------------
+********************
+MIQCP stats:
+1 cuts, 2 clusters, max qubit = 3
+cluster 0: original input = 3.00, ρ_qubits = 0.00, O_qubits = 1.00, d = 3.00
+cluster 1: original input = 2.00, ρ_qubits = 1.00, O_qubits = 0.00, d = 3.00
+objective value = 9.000e+00
+manually calculated objective value: 9.000e+00
+evaluator_cost = 9, reconstructor_cost = 5.288e-07, reconstructor_weight = 0.000e+00
+runtime: 0.01382589340209961
+OPTIMAL
+********************
+Adding case (3, 5) to run
+Adding 5 qubit full circuit to run
+5 qubit circuit saturated shots = 32768, metric = 6.985e-04
+----------------------------------------------------------------------------------------------------
+********************
+MIQCP stats:
+1 cuts, 2 clusters, max qubit = 4
+cluster 0: original input = 2.00, ρ_qubits = -0.00, O_qubits = 1.00, d = 2.00
+cluster 1: original input = 3.00, ρ_qubits = 1.00, O_qubits = -0.00, d = 4.00
+objective value = 9.001e+00
+manually calculated objective value: 9.000e+00
+evaluator_cost = 9, reconstructor_cost = 5.288e-07, reconstructor_weight = 0.000e+00
+runtime: 0.02661299705505371
+OPTIMAL
+********************
+Adding case (4, 5) to run
+Use currently running 5 qubit full circuit
+----------------------------------------------------------------------------------------------------
+Case (5, 5) impossible, skipped
+----------------------------------------------------------------------------------------------------
+Case (6, 5) impossible, skipped
+----------------------------------------------------------------------------------------------------
+Case (7, 5) impossible, skipped
+----------------------------------------------------------------------------------------------------
+Case (8, 5) impossible, skipped
+----------------------------------------------------------------------------------------------------
+Case (9, 5) impossible, skipped
+----------------------------------------------------------------------------------------------------
+Generating 3x2, 1+8+1 supremacy circuit
+Case (2, 6) impossible, skipped
+----------------------------------------------------------------------------------------------------
+Case (3, 6) NOT feasible
+----------------------------------------------------------------------------------------------------
+********************
+MIQCP stats:
+4 cuts, 3 clusters, max qubit = 4
+cluster 0: original input = 3.00, ρ_qubits = 1.00, O_qubits = 2.00, d = 4.00
+cluster 1: original input = 3.00, ρ_qubits = 1.00, O_qubits = 2.00, d = 4.00
+cluster 2: original input = 0.00, ρ_qubits = 2.00, O_qubits = 0.00, d = 2.00
+objective value = 1.440e+02
+manually calculated objective value: 1.440e+02
+evaluator_cost = 144, reconstructor_cost = 8.426e-05, reconstructor_weight = 0.000e+00
+runtime: 0.12880206108093262
+OPTIMAL
+********************
+Adding case (4, 6) to run
+Adding 6 qubit full circuit to run
+6 qubit circuit saturated shots = 40960, metric = 6.393e-04
+----------------------------------------------------------------------------------------------------
+********************
+MIQCP stats:
+2 cuts, 2 clusters, max qubit = 5
+cluster 0: original input = 2.00, ρ_qubits = 1.00, O_qubits = 1.00, d = 3.00
+cluster 1: original input = 4.00, ρ_qubits = 1.00, O_qubits = 1.00, d = 5.00
+objective value = 3.601e+01
+manually calculated objective value: 3.600e+01
+evaluator_cost = 36, reconstructor_cost = 4.201e-06, reconstructor_weight = 0.000e+00
+runtime: 0.05747389793395996
+OPTIMAL
+********************
+Adding case (5, 6) to run
+Use currently running 6 qubit full circuit
+----------------------------------------------------------------------------------------------------
+Case (6, 6) impossible, skipped
+----------------------------------------------------------------------------------------------------
+Case (7, 6) impossible, skipped
+----------------------------------------------------------------------------------------------------
+Case (8, 6) impossible, skipped
+----------------------------------------------------------------------------------------------------
+Case (9, 6) impossible, skipped
+----------------------------------------------------------------------------------------------------
+Generating 1x7, 1+8+1 supremacy circuit
+Case (2, 7) impossible, skipped
+----------------------------------------------------------------------------------------------------
+Case (3, 7) impossible, skipped
+----------------------------------------------------------------------------------------------------
+********************
+MIQCP stats:
+1 cuts, 2 clusters, max qubit = 4
+cluster 0: original input = 4.00, ρ_qubits = -0.00, O_qubits = 1.00, d = 4.00
+cluster 1: original input = 3.00, ρ_qubits = 1.00, O_qubits = 0.00, d = 4.00
+objective value = 9.001e+00
+manually calculated objective value: 9.000e+00
+evaluator_cost = 9, reconstructor_cost = 2.086e-06, reconstructor_weight = 0.000e+00
+runtime: 0.02186298370361328
+OPTIMAL
+********************
+Adding case (4, 7) to run
+Adding 7 qubit full circuit to run
+7 qubit circuit saturated shots = 81920, metric = 6.479e-04
+----------------------------------------------------------------------------------------------------
+********************
+MIQCP stats:
+1 cuts, 2 clusters, max qubit = 5
+cluster 0: original input = 3.00, ρ_qubits = 0.00, O_qubits = 1.00, d = 3.00
+cluster 1: original input = 4.00, ρ_qubits = 1.00, O_qubits = 0.00, d = 5.00
+objective value = 9.001e+00
+manually calculated objective value: 9.000e+00
+evaluator_cost = 9, reconstructor_cost = 2.086e-06, reconstructor_weight = 0.000e+00
+runtime: 0.033915042877197266
+OPTIMAL
+********************
+Adding case (5, 7) to run
+Use currently running 7 qubit full circuit
+----------------------------------------------------------------------------------------------------
+********************
+MIQCP stats:
+1 cuts, 2 clusters, max qubit = 6
+cluster 0: original input = 2.00, ρ_qubits = -0.00, O_qubits = 1.00, d = 2.00
+cluster 1: original input = 5.00, ρ_qubits = 1.00, O_qubits = 0.00, d = 6.00
+objective value = 9.002e+00
+manually calculated objective value: 9.000e+00
+evaluator_cost = 9, reconstructor_cost = 2.086e-06, reconstructor_weight = 0.000e+00
+runtime: 0.038110971450805664
+OPTIMAL
+********************
+Adding case (6, 7) to run
+Use currently running 7 qubit full circuit
+----------------------------------------------------------------------------------------------------
+Case (7, 7) impossible, skipped
+----------------------------------------------------------------------------------------------------
+Case (8, 7) impossible, skipped
+----------------------------------------------------------------------------------------------------
+Case (9, 7) impossible, skipped
+----------------------------------------------------------------------------------------------------
+Generating 2x4, 1+8+1 supremacy circuit
+Case (2, 8) impossible, skipped
+----------------------------------------------------------------------------------------------------
+Case (3, 8) impossible, skipped
+----------------------------------------------------------------------------------------------------
+********************
+MIQCP stats:
+4 cuts, 3 clusters, max qubit = 4
+cluster 0: original input = 3.00, ρ_qubits = 1.00, O_qubits = 2.00, d = 4.00
+cluster 1: original input = 3.00, ρ_qubits = 1.00, O_qubits = 1.00, d = 4.00
+cluster 2: original input = 2.00, ρ_qubits = 2.00, O_qubits = 1.00, d = 4.00
+objective value = 1.800e+02
+manually calculated objective value: 1.800e+02
+evaluator_cost = 180, reconstructor_cost = 2.991e-04, reconstructor_weight = 0.000e+00
+runtime: 0.17959308624267578
+OPTIMAL
+********************
+Adding case (4, 8) to run
+Adding 8 qubit full circuit to run
+8 qubit circuit saturated shots = 163840, metric = 6.915e-04
+----------------------------------------------------------------------------------------------------
+********************
+MIQCP stats:
+4 cuts, 3 clusters, max qubit = 5
+cluster 0: original input = 4.00, ρ_qubits = 1.00, O_qubits = 2.00, d = 5.00
+cluster 1: original input = 4.00, ρ_qubits = 1.00, O_qubits = 2.00, d = 5.00
+cluster 2: original input = 0.00, ρ_qubits = 2.00, O_qubits = 0.00, d = 2.00
+objective value = 1.440e+02
+manually calculated objective value: 1.440e+02
+evaluator_cost = 144, reconstructor_cost = 3.325e-04, reconstructor_weight = 0.000e+00
+runtime: 0.1750190258026123
+OPTIMAL
+********************
+Adding case (5, 8) to run
+Use currently running 8 qubit full circuit
+----------------------------------------------------------------------------------------------------
+********************
+MIQCP stats:
+2 cuts, 2 clusters, max qubit = 6
+cluster 0: original input = 5.00, ρ_qubits = 1.00, O_qubits = 1.00, d = 6.00
+cluster 1: original input = 3.00, ρ_qubits = 1.00, O_qubits = 1.00, d = 4.00
+objective value = 3.600e+01
+manually calculated objective value: 3.600e+01
+evaluator_cost = 36, reconstructor_cost = 1.658e-05, reconstructor_weight = 0.000e+00
+runtime: 0.07259798049926758
+OPTIMAL
+********************
+Adding case (6, 8) to run
+Use currently running 8 qubit full circuit
+----------------------------------------------------------------------------------------------------
+********************
+MIQCP stats:
+2 cuts, 2 clusters, max qubit = 7
+cluster 0: original input = 6.00, ρ_qubits = 1.00, O_qubits = 1.00, d = 7.00
+cluster 1: original input = 2.00, ρ_qubits = 1.00, O_qubits = 1.00, d = 3.00
+objective value = 3.601e+01
+manually calculated objective value: 3.600e+01
+evaluator_cost = 35, reconstructor_cost = 1.658e-05, reconstructor_weight = 0.000e+00
+runtime: 0.11054301261901855
+OPTIMAL
+********************
+Adding case (7, 8) to run
+Use currently running 8 qubit full circuit
+----------------------------------------------------------------------------------------------------
+Case (8, 8) impossible, skipped
+----------------------------------------------------------------------------------------------------
+Case (9, 8) impossible, skipped
+----------------------------------------------------------------------------------------------------
+Generating 3x3, 1+8+1 supremacy circuit
+Case (2, 9) impossible, skipped
+----------------------------------------------------------------------------------------------------
+Case (3, 9) impossible, skipped
+----------------------------------------------------------------------------------------------------
+Case (4, 9) NOT feasible
+----------------------------------------------------------------------------------------------------
+********************
+MIQCP stats:
+5 cuts, 3 clusters, max qubit = 5
+cluster 0: original input = 3.00, ρ_qubits = 2.00, O_qubits = 1.00, d = 5.00
+cluster 1: original input = 2.00, ρ_qubits = 2.00, O_qubits = 1.00, d = 4.00
+cluster 2: original input = 4.00, ρ_qubits = 1.00, O_qubits = 3.00, d = 5.00
+objective value = 3.781e+02
+manually calculated objective value: 3.780e+02
+evaluator_cost = 378, reconstructor_cost = 2.641e-03, reconstructor_weight = 0.000e+00
+runtime: 0.25047993659973145
+OPTIMAL
+********************
+Adding case (5, 9) to run
+Adding 9 qubit full circuit to run
+9 qubit circuit saturated shots = 311296, metric = 7.889e-04
+----------------------------------------------------------------------------------------------------
+********************
+MIQCP stats:
+3 cuts, 2 clusters, max qubit = 6
+cluster 0: original input = 5.00, ρ_qubits = 1.00, O_qubits = 2.00, d = 6.00
+cluster 1: original input = 4.00, ρ_qubits = 2.00, O_qubits = 1.00, d = 6.00
+objective value = 1.620e+02
+manually calculated objective value: 1.620e+02
+evaluator_cost = 161, reconstructor_cost = 1.317e-04, reconstructor_weight = 0.000e+00
+runtime: 0.07283496856689453
+OPTIMAL
+********************
+Adding case (6, 9) to run
+Use currently running 9 qubit full circuit
+----------------------------------------------------------------------------------------------------
+********************
+MIQCP stats:
+3 cuts, 2 clusters, max qubit = 7
+cluster 0: original input = 6.00, ρ_qubits = 1.00, O_qubits = 2.00, d = 7.00
+cluster 1: original input = 3.00, ρ_qubits = 2.00, O_qubits = 1.00, d = 5.00
+objective value = 1.620e+02
+manually calculated objective value: 1.620e+02
+evaluator_cost = 161, reconstructor_cost = 1.317e-04, reconstructor_weight = 0.000e+00
+runtime: 0.17934703826904297
+OPTIMAL
+********************
+Adding case (7, 9) to run
+Use currently running 9 qubit full circuit
+----------------------------------------------------------------------------------------------------
+********************
+MIQCP stats:
+2 cuts, 2 clusters, max qubit = 8
+cluster 0: original input = 6.00, ρ_qubits = 2.00, O_qubits = 0.00, d = 8.00
+cluster 1: original input = 3.00, ρ_qubits = 0.00, O_qubits = 2.00, d = 3.00
+objective value = 4.502e+01
+manually calculated objective value: 4.500e+01
+evaluator_cost = 45, reconstructor_cost = 3.293e-05, reconstructor_weight = 0.000e+00
+runtime: 0.14989614486694336
+OPTIMAL
+********************
+Adding case (8, 9) to run
+Use currently running 9 qubit full circuit
+----------------------------------------------------------------------------------------------------
+Case (9, 9) impossible, skipped
+----------------------------------------------------------------------------------------------------
+17 cases, 7 full circuits to run : dict_keys([(2, 3), (3, 4), (3, 5), (4, 5), (4, 6), (5, 6), (4, 7), (5, 7), (6, 7), (4, 8), (5, 8), (6, 8), (7, 8), (5, 9), (6, 9), (7, 9), (8, 9)])
+******************** Submitting jobs ********************
+Submitting job 1/1 5e33b98fa6d76f00186aa747 --> 7 circuits, 81 * 8192 shots
+Circuit 3 has mit_pattern: [[15, 16, 17]]
+/home/weit/anaconda3/envs/cc-env/lib/python3.7/site-packages/qiskit/providers/models/backendconfiguration.py:337: UserWarning: `dt` and `dtm` now have units of seconds(s) rather than nanoseconds(ns).
+  warnings.warn('`dt` and `dtm` now have units of seconds(s) rather '
+Circuit 4 has mit_pattern: [[15, 16, 17, 11]]
+Circuit 5 has mit_pattern: [[15, 16, 17, 11, 10]]
+Circuit 6 has mit_pattern: [[15, 16, 17, 11, 18, 13]]
+Circuit 7 has mit_pattern: [[15, 16, 17, 11, 10, 5, 6]]
+Circuit 8 has mit_pattern: [[15, 16, 11, 12, 17, 18, 13, 14]]
+Circuit 9 has mit_pattern: [[15, 16, 11, 17, 18, 7, 13, 14, 9]]
+******************** Submitting jobs ********************
+Submitting job 1/2 5e33b99c4367420018757159 --> 900 circuits, 900 * 8192 shots
+Submitting job 2/2 5e33b99fc0c9e600182e6efa --> 116 circuits, 116 * 8192 shots
+******************** Retrieving jobs ********************
+Retrieving job 1/1 5e33b98fa6d76f00186aa747 --> 7 circuits, 81 * 8192 shots
+******************** Retrieving jobs ********************
+Retrieving job 1/2 5e33b99c4367420018757159 --> 900 circuits, 900 * 8192 shots
+Retrieving job 2/2 5e33b99fc0c9e600182e6efa --> 116 circuits, 116 * 8192 shots
+Case (2, 3) sv distance = 1.206e-32, hw distance = 3.414e-02, mitigated_hw distance = 5.410e-03
+Case (3, 4) sv distance = 0.000e+00, hw distance = 2.393e-01, mitigated_hw distance = 2.337e-01
+Case (3, 5) sv distance = 0.000e+00, hw distance = 2.335e-01, mitigated_hw distance = 2.145e-01
+Case (4, 5) sv distance = 0.000e+00, hw distance = 2.335e-01, mitigated_hw distance = 2.145e-01
+Case (4, 6) sv distance = 9.392e-32, hw distance = 3.880e-01, mitigated_hw distance = 3.810e-01
+Case (5, 6) sv distance = 9.392e-32, hw distance = 3.880e-01, mitigated_hw distance = 3.810e-01
+Case (4, 7) sv distance = 0.000e+00, hw distance = 1.558e-01, mitigated_hw distance = 1.658e-01
+Case (5, 7) sv distance = 0.000e+00, hw distance = 1.558e-01, mitigated_hw distance = 1.658e-01
+Case (6, 7) sv distance = 0.000e+00, hw distance = 1.558e-01, mitigated_hw distance = 1.658e-01
+Case (4, 8) sv distance = 6.326e-32, hw distance = 4.467e-01, mitigated_hw distance = 4.587e-01
+Case (5, 8) sv distance = 6.326e-32, hw distance = 4.467e-01, mitigated_hw distance = 4.587e-01
+Case (6, 8) sv distance = 6.326e-32, hw distance = 4.467e-01, mitigated_hw distance = 4.587e-01
+Case (7, 8) sv distance = 6.326e-32, hw distance = 4.467e-01, mitigated_hw distance = 4.587e-01
+Case (5, 9) sv distance = 9.862e-32, hw distance = 3.931e-01, mitigated_hw distance = 3.992e-01
+Case (6, 9) sv distance = 9.862e-32, hw distance = 3.931e-01, mitigated_hw distance = 3.992e-01
+Case (7, 9) sv distance = 9.862e-32, hw distance = 3.931e-01, mitigated_hw distance = 3.992e-01
+Case (8, 9) sv distance = 9.862e-32, hw distance = 3.931e-01, mitigated_hw distance = 3.992e-01
+-------------------------------------------------- Evaluator --------------------------------------------------
+Existing cases: dict_keys([])
+Running case: (2, 3)
+case (2, 3), cluster_0 2_qubits * 3_instances on ibmq_boeblingen QUANTUM HARDWARE, saturated shots
+case (2, 3), cluster_1 2_qubits * 6_instances on ibmq_boeblingen QUANTUM HARDWARE, saturated shots
+Rank MASTER dumped case (2, 3), 1/17 cases
+----------------------------------------------------------------------------------------------------
+Running case: (3, 4)
+case (3, 4), cluster_0 3_qubits * 18_instances on ibmq_boeblingen QUANTUM HARDWARE, saturated shots
+case (3, 4), cluster_1 3_qubits * 18_instances on ibmq_boeblingen QUANTUM HARDWARE, saturated shots
+Rank MASTER dumped case (3, 4), 2/17 cases
+----------------------------------------------------------------------------------------------------
+Running case: (3, 5)
+case (3, 5), cluster_0 3_qubits * 3_instances on ibmq_boeblingen QUANTUM HARDWARE, saturated shots
+case (3, 5), cluster_1 3_qubits * 6_instances on ibmq_boeblingen QUANTUM HARDWARE, saturated shots
+Rank MASTER dumped case (3, 5), 3/17 cases
+----------------------------------------------------------------------------------------------------
+Running case: (4, 5)
+case (4, 5), cluster_0 2_qubits * 3_instances on ibmq_boeblingen QUANTUM HARDWARE, saturated shots
+case (4, 5), cluster_1 4_qubits * 6_instances on ibmq_boeblingen QUANTUM HARDWARE, saturated shots
+Rank MASTER dumped case (4, 5), 4/17 cases
+----------------------------------------------------------------------------------------------------
+Running case: (4, 6)
+case (4, 6), cluster_0 4_qubits * 54_instances on ibmq_boeblingen QUANTUM HARDWARE, saturated shots
+case (4, 6), cluster_1 4_qubits * 54_instances on ibmq_boeblingen QUANTUM HARDWARE, saturated shots
+case (4, 6), cluster_2 2_qubits * 36_instances on ibmq_boeblingen QUANTUM HARDWARE, saturated shots
+Rank MASTER dumped case (4, 6), 5/17 cases
+----------------------------------------------------------------------------------------------------
+Running case: (5, 6)
+case (5, 6), cluster_0 3_qubits * 18_instances on ibmq_boeblingen QUANTUM HARDWARE, saturated shots
+case (5, 6), cluster_1 5_qubits * 18_instances on ibmq_boeblingen QUANTUM HARDWARE, saturated shots
+Rank MASTER dumped case (5, 6), 6/17 cases
+----------------------------------------------------------------------------------------------------
+Running case: (4, 7)
+case (4, 7), cluster_0 4_qubits * 3_instances on ibmq_boeblingen QUANTUM HARDWARE, saturated shots
+case (4, 7), cluster_1 4_qubits * 6_instances on ibmq_boeblingen QUANTUM HARDWARE, saturated shots
+Rank MASTER dumped case (4, 7), 7/17 cases
+----------------------------------------------------------------------------------------------------
+Running case: (5, 7)
+case (5, 7), cluster_0 3_qubits * 3_instances on ibmq_boeblingen QUANTUM HARDWARE, saturated shots
+case (5, 7), cluster_1 5_qubits * 6_instances on ibmq_boeblingen QUANTUM HARDWARE, saturated shots
+Rank MASTER dumped case (5, 7), 8/17 cases
+----------------------------------------------------------------------------------------------------
+Running case: (6, 7)
+case (6, 7), cluster_0 2_qubits * 3_instances on ibmq_boeblingen QUANTUM HARDWARE, saturated shots
+case (6, 7), cluster_1 6_qubits * 6_instances on ibmq_boeblingen QUANTUM HARDWARE, saturated shots
+Rank MASTER dumped case (6, 7), 9/17 cases
+----------------------------------------------------------------------------------------------------
+Running case: (4, 8)
+case (4, 8), cluster_0 4_qubits * 54_instances on ibmq_boeblingen QUANTUM HARDWARE, saturated shots
+case (4, 8), cluster_1 4_qubits * 18_instances on ibmq_boeblingen QUANTUM HARDWARE, saturated shots
+case (4, 8), cluster_2 4_qubits * 108_instances on ibmq_boeblingen QUANTUM HARDWARE, saturated shots
+Rank MASTER dumped case (4, 8), 10/17 cases
+----------------------------------------------------------------------------------------------------
+Running case: (5, 8)
+case (5, 8), cluster_0 5_qubits * 54_instances on ibmq_boeblingen QUANTUM HARDWARE, saturated shots
+case (5, 8), cluster_1 5_qubits * 54_instances on ibmq_boeblingen QUANTUM HARDWARE, saturated shots
+case (5, 8), cluster_2 2_qubits * 36_instances on ibmq_boeblingen QUANTUM HARDWARE, saturated shots
+Rank MASTER dumped case (5, 8), 11/17 cases
+----------------------------------------------------------------------------------------------------
+Running case: (6, 8)
+case (6, 8), cluster_0 6_qubits * 18_instances on ibmq_boeblingen QUANTUM HARDWARE, saturated shots
+case (6, 8), cluster_1 4_qubits * 18_instances on ibmq_boeblingen QUANTUM HARDWARE, saturated shots
+Rank MASTER dumped case (6, 8), 12/17 cases
+----------------------------------------------------------------------------------------------------
+Running case: (7, 8)
+case (7, 8), cluster_0 7_qubits * 18_instances on ibmq_boeblingen QUANTUM HARDWARE, saturated shots
+case (7, 8), cluster_1 3_qubits * 18_instances on ibmq_boeblingen QUANTUM HARDWARE, saturated shots
+Rank MASTER dumped case (7, 8), 13/17 cases
+----------------------------------------------------------------------------------------------------
+Running case: (5, 9)
+case (5, 9), cluster_0 5_qubits * 108_instances on ibmq_boeblingen QUANTUM HARDWARE, saturated shots
+case (5, 9), cluster_1 4_qubits * 108_instances on ibmq_boeblingen QUANTUM HARDWARE, saturated shots
+case (5, 9), cluster_2 5_qubits * 162_instances on ibmq_boeblingen QUANTUM HARDWARE, saturated shots
+Rank MASTER dumped case (5, 9), 14/17 cases
+----------------------------------------------------------------------------------------------------
+Running case: (6, 9)
+case (6, 9), cluster_0 6_qubits * 54_instances on ibmq_boeblingen QUANTUM HARDWARE, saturated shots
+case (6, 9), cluster_1 6_qubits * 108_instances on ibmq_boeblingen QUANTUM HARDWARE, saturated shots
+Rank MASTER dumped case (6, 9), 15/17 cases
+----------------------------------------------------------------------------------------------------
+Running case: (7, 9)
+case (7, 9), cluster_0 7_qubits * 54_instances on ibmq_boeblingen QUANTUM HARDWARE, saturated shots
+case (7, 9), cluster_1 5_qubits * 108_instances on ibmq_boeblingen QUANTUM HARDWARE, saturated shots
+Rank MASTER dumped case (7, 9), 16/17 cases
+----------------------------------------------------------------------------------------------------
+Running case: (8, 9)
+case (8, 9), cluster_0 8_qubits * 36_instances on ibmq_boeblingen QUANTUM HARDWARE, saturated shots
+case (8, 9), cluster_1 3_qubits * 9_instances on ibmq_boeblingen QUANTUM HARDWARE, saturated shots
+Rank MASTER dumped case (8, 9), 17/17 cases
+----------------------------------------------------------------------------------------------------
+-------------------------------------------------- Job Submittor --------------------------------------------------
+Existing cases: dict_keys([])
+Run cases: dict_keys([(2, 3), (3, 4), (3, 5), (4, 5), (4, 6), (5, 6), (4, 7), (5, 7), (6, 7), (4, 8), (5, 8), (6, 8), (7, 8), (5, 9), (6, 9), (7, 9), (8, 9)])
+**************************************************
+Case (2, 3)
+2 qubit circuit saturated shots = 16384, metric = 9.522e-05
+Cluster 0 saturated shots = 16384
+2 qubit circuit saturated shots = 16384, metric = 2.175e-05
+Cluster 1 saturated shots = 16384
+Case (3, 4)
+3 qubit circuit saturated shots = 16384, metric = 3.300e-04
+Cluster 0 saturated shots = 16384
+3 qubit circuit saturated shots = 16384, metric = 4.389e-05
+Cluster 1 saturated shots = 16384
+Case (3, 5)
+3 qubit circuit saturated shots = 16384, metric = 2.961e-05
+Cluster 0 saturated shots = 16384
+3 qubit circuit saturated shots = 16384, metric = 1.523e-04
+Cluster 1 saturated shots = 16384
+Case (4, 5)
+2 qubit circuit saturated shots = 16384, metric = 2.280e-04
+Cluster 0 saturated shots = 16384
+4 qubit circuit saturated shots = 16384, metric = 2.830e-04
+Cluster 1 saturated shots = 16384
+Case (4, 6)
+4 qubit circuit saturated shots = 16384, metric = 5.862e-04
+Cluster 0 saturated shots = 16384
+4 qubit circuit saturated shots = 16384, metric = 2.397e-04
+Cluster 1 saturated shots = 16384
+2 qubit circuit saturated shots = 16384, metric = 1.001e-04
+Cluster 2 saturated shots = 16384
+Case (5, 6)
+3 qubit circuit saturated shots = 16384, metric = 1.894e-04
+Cluster 0 saturated shots = 16384
+5 qubit circuit saturated shots = 24576, metric = 5.098e-04
+Cluster 1 saturated shots = 24576
+Case (4, 7)
+4 qubit circuit saturated shots = 16384, metric = 2.095e-04
+Cluster 0 saturated shots = 16384
+4 qubit circuit saturated shots = 24576, metric = 4.081e-04
+Cluster 1 saturated shots = 24576
+Case (5, 7)
+3 qubit circuit saturated shots = 16384, metric = 6.108e-05
+Cluster 0 saturated shots = 16384
+5 qubit circuit saturated shots = 16384, metric = 3.580e-04
+Cluster 1 saturated shots = 16384
+Case (6, 7)
+2 qubit circuit saturated shots = 16384, metric = 3.723e-05
+Cluster 0 saturated shots = 16384
+6 qubit circuit saturated shots = 57344, metric = 5.306e-04
+Cluster 1 saturated shots = 57344
+Case (4, 8)
+4 qubit circuit saturated shots = 16384, metric = 4.533e-04
+Cluster 0 saturated shots = 16384
+4 qubit circuit saturated shots = 16384, metric = 6.939e-04
+Cluster 1 saturated shots = 16384
+4 qubit circuit saturated shots = 16384, metric = 4.642e-04
+Cluster 2 saturated shots = 16384
+Case (5, 8)
+5 qubit circuit saturated shots = 24576, metric = 8.768e-04
+Cluster 0 saturated shots = 24576
+5 qubit circuit saturated shots = 32768, metric = 4.824e-04
+Cluster 1 saturated shots = 32768
+2 qubit circuit saturated shots = 16384, metric = 1.722e-04
+Cluster 2 saturated shots = 16384
+Case (6, 8)
+6 qubit circuit saturated shots = 32768, metric = 7.386e-04
+Cluster 0 saturated shots = 32768
+4 qubit circuit saturated shots = 16384, metric = 3.901e-04
+Cluster 1 saturated shots = 16384
+Case (7, 8)
+7 qubit circuit saturated shots = 90112, metric = 6.797e-04
+Cluster 0 saturated shots = 90112
+3 qubit circuit saturated shots = 16384, metric = 4.106e-05
+Cluster 1 saturated shots = 16384
+Case (5, 9)
+5 qubit circuit saturated shots = 24576, metric = 7.603e-04
+Cluster 0 saturated shots = 24576
+4 qubit circuit saturated shots = 16384, metric = 3.378e-04
+Cluster 1 saturated shots = 16384
+5 qubit circuit saturated shots = 16384, metric = 3.495e-04
+Cluster 2 saturated shots = 16384
+Case (6, 9)
+6 qubit circuit saturated shots = 49152, metric = 5.564e-04
+Cluster 0 saturated shots = 49152
+6 qubit circuit saturated shots = 40960, metric = 8.292e-04
+Cluster 1 saturated shots = 40960
+Case (7, 9)
+7 qubit circuit saturated shots = 81920, metric = 7.114e-04
+Cluster 0 saturated shots = 81920
+5 qubit circuit saturated shots = 32768, metric = 3.202e-04
+Cluster 1 saturated shots = 32768
+Case (8, 9)
+8 qubit circuit saturated shots = 147456, metric = 8.260e-04
+Cluster 0 saturated shots = 147456
+3 qubit circuit saturated shots = 16384, metric = 2.403e-04
+Cluster 1 saturated shots = 16384
+******************** Submitting jobs ********************
+Submitting job 1/6 5e33db07be7b9d0019d2c9d9 --> 423 circuits, 900 * 8192 shots
+Submitting job 2/6 5e33db32584c9c00189bdc49 --> 261 circuits, 900 * 8192 shots
+Submitting job 3/6 5e33db5c584c9c00189bdc4a --> 375 circuits, 900 * 8192 shots
+Submitting job 4/6 5e33db882b13810018bb899d --> 160 circuits, 900 * 8192 shots
+Submitting job 5/6 5e33dbb373c92200192276b8 --> 153 circuits, 900 * 8192 shots
+Submitting job 6/6 5e33dbd0be7b9d0019d2c9db --> 42 circuits, 612 * 8192 shots
+Circuit 2,3,0 has mit_pattern: [[15, 16]]
+/home/weit/anaconda3/envs/cc-env/lib/python3.7/site-packages/qiskit/providers/models/backendconfiguration.py:337: UserWarning: `dt` and `dtm` now have units of seconds(s) rather than nanoseconds(ns).
+  warnings.warn('`dt` and `dtm` now have units of seconds(s) rather '
+Circuit 2,3,1 has mit_pattern: [[15, 16]]
+Circuit 3,4,0 has mit_pattern: [[15, 16, 17]]
+Circuit 3,4,1 has mit_pattern: [[15, 16, 17]]
+Circuit 3,5,0 has mit_pattern: [[15, 16, 17]]
+Circuit 3,5,1 has mit_pattern: [[15, 16, 17]]
+Circuit 4,5,0 has mit_pattern: [[15, 16]]
+Circuit 4,5,1 has mit_pattern: [[15, 16, 17, 11]]
+Circuit 4,6,0 has mit_pattern: [[15, 16, 17, 11]]
+Circuit 4,6,1 has mit_pattern: [[17, 11, 15, 16]]
+Circuit 4,6,2 has mit_pattern: [[15, 16]]
+Circuit 5,6,0 has mit_pattern: [[15, 16, 17]]
+Circuit 5,6,1 has mit_pattern: [[18, 17, 11, 15, 16]]
+Circuit 4,7,0 has mit_pattern: [[15, 16, 17, 11]]
+Circuit 4,7,1 has mit_pattern: [[17, 15, 16, 11]]
+Circuit 5,7,0 has mit_pattern: [[15, 16, 17]]
+Circuit 5,7,1 has mit_pattern: [[18, 17, 15, 16, 11]]
+Circuit 6,7,0 has mit_pattern: [[15, 16]]
+Circuit 6,7,1 has mit_pattern: [[13, 18, 17, 15, 16, 11]]
+Circuit 4,8,0 has mit_pattern: [[15, 16, 17, 11]]
+Circuit 4,8,1 has mit_pattern: [[17, 11, 15, 16]]
+Circuit 4,8,2 has mit_pattern: [[15, 16, 17, 11]]
+Circuit 5,8,0 has mit_pattern: [[15, 16, 17, 11, 10]]
+Circuit 5,8,1 has mit_pattern: [[18, 17, 11, 15, 16]]
+Circuit 5,8,2 has mit_pattern: [[15, 16]]
+Circuit 6,8,0 has mit_pattern: [[15, 16, 11, 17, 18, 13]]
+Circuit 6,8,1 has mit_pattern: [[11, 17, 15, 16]]
+Circuit 7,8,0 has mit_pattern: [[15, 16, 17, 18, 11, 10, 13]]
+Circuit 7,8,1 has mit_pattern: [[15, 16, 17]]
+Circuit 5,9,0 has mit_pattern: [[15, 16, 17, 11, 10]]
+Circuit 5,9,1 has mit_pattern: [[17, 15, 11, 16]]
+Circuit 5,9,2 has mit_pattern: [[11, 18, 15, 16, 17]]
+Circuit 6,9,0 has mit_pattern: [[15, 16, 17, 11, 10, 5]]
+Circuit 6,9,1 has mit_pattern: [[13, 17, 18, 15, 16, 11]]
+Circuit 7,9,0 has mit_pattern: [[15, 16, 17, 13, 11, 10, 5]]
+Circuit 7,9,1 has mit_pattern: [[10, 17, 11, 15, 16]]
+Circuit 8,9,0 has mit_pattern: [[15, 16, 11, 17, 18, 13, 19, 14]]
+Circuit 8,9,1 has mit_pattern: [[17, 15, 16]]
+******************** Submitting jobs ********************
+Submitting job 1/2 5e33dbe3c5defb0018c7beb6 --> 900 circuits, 900 * 8192 shots
+Submitting job 2/2 5e33dbe662699d00188bf22e --> 340 circuits, 340 * 8192 shots
+******************** Retrieving jobs ********************
+Retrieving job 1/6 5e33db07be7b9d0019d2c9d9 --> 423 circuits, 900 * 8192 shots
+Retrieving job 2/6 5e33db32584c9c00189bdc49 --> 261 circuits, 900 * 8192 shots
+Retrieving job 3/6 5e33db5c584c9c00189bdc4a --> 375 circuits, 900 * 8192 shots
+Retrieving job 4/6 5e33db882b13810018bb899d --> 160 circuits, 900 * 8192 shots
+Retrieving job 5/6 5e33dbb373c92200192276b8 --> 153 circuits, 900 * 8192 shots
+Retrieving job 6/6 5e33dbd0be7b9d0019d2c9db --> 42 circuits, 612 * 8192 shots
+******************** Retrieving jobs ********************
+Retrieving job 1/2 5e33dbe3c5defb0018c7beb6 --> 900 circuits, 900 * 8192 shots
+Retrieving job 2/2 5e33dbe662699d00188bf22e --> 340 circuits, 340 * 8192 shots
+-------------------------------------------------- Reconstructor --------------------------------------------------
+Existing cases: dict_keys([])
+case (2, 3)
+Cut into  [2, 2] clusters
+qasm metric = 1.601e-04
+hw metric = 3.414e-02
+mitigated_hw metric = 5.410e-03
+cutting metric = 4.600e-02
+mitigated_cutting metric = 5.985e-03
+Reconstruction output has 1 cases
+----------------------------------------------------------------------------------------------------
+case (3, 4)
+Cut into  [3, 3] clusters
+qasm metric = 9.182e-04
+hw metric = 2.393e-01
+mitigated_hw metric = 2.337e-01
+cutting metric = 6.532e-02
+mitigated_cutting metric = 3.985e-02
+Reconstruction output has 2 cases
+----------------------------------------------------------------------------------------------------
+case (3, 5)
+Cut into  [3, 3] clusters
+qasm metric = 6.985e-04
+hw metric = 2.335e-01
+mitigated_hw metric = 2.145e-01
+cutting metric = 5.914e-02
+mitigated_cutting metric = 2.610e-02
+Reconstruction output has 3 cases
+----------------------------------------------------------------------------------------------------
+case (4, 5)
+Cut into  [2, 4] clusters
+qasm metric = 6.985e-04
+hw metric = 2.335e-01
+mitigated_hw metric = 2.145e-01
+cutting metric = 8.811e-02
+mitigated_cutting metric = 6.243e-02
+Reconstruction output has 4 cases
+----------------------------------------------------------------------------------------------------
+case (4, 6)
+Cut into  [4, 4, 2] clusters
+qasm metric = 6.393e-04
+hw metric = 3.880e-01
+mitigated_hw metric = 3.810e-01
+cutting metric = 2.784e-01
+mitigated_cutting metric = 2.697e-01
+Reconstruction output has 5 cases
+----------------------------------------------------------------------------------------------------
+case (5, 6)
+Cut into  [3, 5] clusters
+qasm metric = 6.393e-04
+hw metric = 3.880e-01
+mitigated_hw metric = 3.810e-01
+cutting metric = 4.454e-01
+mitigated_cutting metric = 4.979e-01
+Reconstruction output has 6 cases
+----------------------------------------------------------------------------------------------------
+case (4, 7)
+Cut into  [4, 4] clusters
+qasm metric = 6.479e-04
+hw metric = 1.558e-01
+mitigated_hw metric = 1.658e-01
+cutting metric = 1.851e-01
+mitigated_cutting metric = 2.095e-01
+Reconstruction output has 7 cases
+----------------------------------------------------------------------------------------------------
+case (5, 7)
+Cut into  [3, 5] clusters
+qasm metric = 6.479e-04
+hw metric = 1.558e-01
+mitigated_hw metric = 1.658e-01
+cutting metric = 3.405e-01
+mitigated_cutting metric = 3.348e-01
+Reconstruction output has 8 cases
+----------------------------------------------------------------------------------------------------
+case (6, 7)
+Cut into  [2, 6] clusters
+qasm metric = 6.479e-04
+hw metric = 1.558e-01
+mitigated_hw metric = 1.658e-01
+cutting metric = 3.308e-01
+mitigated_cutting metric = 3.671e-01
+Reconstruction output has 9 cases
+----------------------------------------------------------------------------------------------------
+case (4, 8)
+Cut into  [4, 4, 4] clusters
+qasm metric = 6.915e-04
+hw metric = 4.467e-01
+mitigated_hw metric = 4.587e-01
+cutting metric = 2.836e-01
+mitigated_cutting metric = 2.608e-01
+Reconstruction output has 10 cases
+----------------------------------------------------------------------------------------------------
+case (5, 8)
+Cut into  [5, 5, 2] clusters
+qasm metric = 6.915e-04
+hw metric = 4.467e-01
+mitigated_hw metric = 4.587e-01
+cutting metric = 3.536e-01
+mitigated_cutting metric = 3.652e-01
+Reconstruction output has 11 cases
+----------------------------------------------------------------------------------------------------
+case (6, 8)
+Cut into  [6, 4] clusters
+qasm metric = 6.915e-04
+hw metric = 4.467e-01
+mitigated_hw metric = 4.587e-01
+cutting metric = 4.905e-01
+mitigated_cutting metric = 5.282e-01
+Reconstruction output has 12 cases
+----------------------------------------------------------------------------------------------------
+case (7, 8)
+Cut into  [7, 3] clusters
+qasm metric = 6.915e-04
+hw metric = 4.467e-01
+mitigated_hw metric = 4.587e-01
+cutting metric = 4.869e-01
+mitigated_cutting metric = 5.052e-01
+Reconstruction output has 13 cases
+----------------------------------------------------------------------------------------------------
+case (5, 9)
+Cut into  [5, 4, 5] clusters
+qasm metric = 7.889e-04
+hw metric = 3.931e-01
+mitigated_hw metric = 3.992e-01
+cutting metric = 3.713e-01
+mitigated_cutting metric = 3.855e-01
+Reconstruction output has 14 cases
+----------------------------------------------------------------------------------------------------
+case (6, 9)
+Cut into  [6, 6] clusters
+qasm metric = 7.889e-04
+hw metric = 3.931e-01
+mitigated_hw metric = 3.992e-01
+cutting metric = 4.187e-01
+mitigated_cutting metric = 4.589e-01
+Reconstruction output has 15 cases
+----------------------------------------------------------------------------------------------------
+case (7, 9)
+Cut into  [7, 5] clusters
+qasm metric = 7.889e-04
+hw metric = 3.931e-01
+mitigated_hw metric = 3.992e-01
+cutting metric = 3.503e-01
+mitigated_cutting metric = 3.730e-01
+Reconstruction output has 16 cases
+----------------------------------------------------------------------------------------------------
+case (8, 9)
+Cut into  [8, 3] clusters
+qasm metric = 7.889e-04
+hw metric = 3.931e-01
+mitigated_hw metric = 3.992e-01
+cutting metric = 4.385e-01
+mitigated_cutting metric = 5.129e-01
+Reconstruction output has 17 cases
+----------------------------------------------------------------------------------------------------
+-------------------------------------------------- Evaluator --------------------------------------------------
+Existing cases: dict_keys([(2, 3), (3, 4), (3, 5), (4, 5), (4, 6), (5, 6), (4, 7), (5, 7), (6, 7), (4, 8), (5, 8), (6, 8), (7, 8), (5, 9), (6, 9), (7, 9), (8, 9)])
+-------------------------------------------------- Job Submittor --------------------------------------------------
+Existing cases: dict_keys([])
+Run cases: dict_keys([(2, 3), (3, 4), (3, 5), (4, 5), (4, 6), (5, 6), (4, 7), (5, 7), (6, 7), (4, 8), (5, 8), (6, 8), (7, 8), (5, 9), (6, 9), (7, 9), (8, 9)])
+**************************************************
+Case (2, 3)
+Cluster 0 sametotal shots = 5461
+Cluster 1 sametotal shots = 2730
+Case (3, 4)
+Cluster 0 sametotal shots = 910
+Cluster 1 sametotal shots = 910
+Case (3, 5)
+Cluster 0 sametotal shots = 10922
+Cluster 1 sametotal shots = 5461
+Case (4, 5)
+Cluster 0 sametotal shots = 10922
+Cluster 1 sametotal shots = 5461
+Case (4, 6)
+Cluster 0 sametotal shots = 758
+Cluster 1 sametotal shots = 758
+Cluster 2 sametotal shots = 1137
+Case (5, 6)
+Cluster 0 sametotal shots = 2275
+Cluster 1 sametotal shots = 2275
+Case (4, 7)
+Cluster 0 sametotal shots = 27306
+Cluster 1 sametotal shots = 13653
+Case (5, 7)
+Cluster 0 sametotal shots = 27306
+Cluster 1 sametotal shots = 13653
+Case (6, 7)
+Cluster 0 sametotal shots = 27306
+Cluster 1 sametotal shots = 13653
+Case (4, 8)
+Cluster 0 sametotal shots = 3034
+Cluster 1 sametotal shots = 9102
+Cluster 2 sametotal shots = 1517
+Case (5, 8)
+Cluster 0 sametotal shots = 3034
+Cluster 1 sametotal shots = 3034
+Cluster 2 sametotal shots = 4551
+Case (6, 8)
+Cluster 0 sametotal shots = 9102
+Cluster 1 sametotal shots = 9102
+Case (7, 8)
+Cluster 0 sametotal shots = 9102
+Cluster 1 sametotal shots = 9102
+Case (5, 9)
+Cluster 0 sametotal shots = 2882
+Cluster 1 sametotal shots = 2882
+Cluster 2 sametotal shots = 1921
+Case (6, 9)
+Cluster 0 sametotal shots = 5764
+Cluster 1 sametotal shots = 2882
+Case (7, 9)
+Cluster 0 sametotal shots = 5764
+Cluster 1 sametotal shots = 2882
+Case (8, 9)
+Cluster 0 sametotal shots = 8647
+Cluster 1 sametotal shots = 34588
+******************** Submitting jobs ********************
+Submitting job 1/2 5e347f2974e77d001852d63c --> 759 circuits, 900 * 8192 shots
+Submitting job 2/2 5e347f8f74e77d001852d63f --> 654 circuits, 726 * 8192 shots
+Circuit 2,3,0 has mit_pattern: [[15, 16]]
+/home/weit/anaconda3/envs/cc-env/lib/python3.7/site-packages/qiskit/providers/models/backendconfiguration.py:337: UserWarning: `dt` and `dtm` now have units of seconds(s) rather than nanoseconds(ns).
+  warnings.warn('`dt` and `dtm` now have units of seconds(s) rather '
+Circuit 2,3,1 has mit_pattern: [[15, 16]]
+Circuit 3,4,0 has mit_pattern: [[15, 16, 17]]
+Circuit 3,4,1 has mit_pattern: [[15, 16, 17]]
+Circuit 3,5,0 has mit_pattern: [[15, 16, 17]]
+Circuit 3,5,1 has mit_pattern: [[15, 16, 17]]
+Circuit 4,5,0 has mit_pattern: [[15, 16]]
+Circuit 4,5,1 has mit_pattern: [[15, 16, 17, 11]]
+Circuit 4,6,0 has mit_pattern: [[15, 16, 17, 11]]
+Circuit 4,6,1 has mit_pattern: [[17, 11, 15, 16]]
+Circuit 4,6,2 has mit_pattern: [[15, 16]]
+Circuit 5,6,0 has mit_pattern: [[15, 16, 17]]
+Circuit 5,6,1 has mit_pattern: [[18, 17, 11, 15, 16]]
+Circuit 4,7,0 has mit_pattern: [[15, 16, 17, 11]]
+Circuit 4,7,1 has mit_pattern: [[17, 15, 16, 11]]
+Circuit 5,7,0 has mit_pattern: [[15, 16, 17]]
+Circuit 5,7,1 has mit_pattern: [[18, 17, 15, 16, 11]]
+Circuit 6,7,0 has mit_pattern: [[15, 16]]
+Circuit 6,7,1 has mit_pattern: [[13, 18, 17, 15, 16, 11]]
+Circuit 4,8,0 has mit_pattern: [[15, 16, 17, 11]]
+Circuit 4,8,1 has mit_pattern: [[17, 11, 15, 16]]
+Circuit 4,8,2 has mit_pattern: [[15, 16, 17, 11]]
+Circuit 5,8,0 has mit_pattern: [[15, 16, 17, 11, 10]]
+Circuit 5,8,1 has mit_pattern: [[18, 17, 11, 15, 16]]
+Circuit 5,8,2 has mit_pattern: [[15, 16]]
+Circuit 6,8,0 has mit_pattern: [[15, 16, 11, 17, 18, 13]]
+Circuit 6,8,1 has mit_pattern: [[11, 17, 15, 16]]
+Circuit 7,8,0 has mit_pattern: [[15, 16, 17, 18, 11, 10, 13]]
+Circuit 7,8,1 has mit_pattern: [[15, 16, 17]]
+Circuit 5,9,0 has mit_pattern: [[15, 16, 17, 11, 10]]
+Circuit 5,9,1 has mit_pattern: [[17, 15, 11, 16]]
+Circuit 5,9,2 has mit_pattern: [[11, 18, 15, 16, 17]]
+Circuit 6,9,0 has mit_pattern: [[15, 16, 17, 11, 10, 5]]
+Circuit 6,9,1 has mit_pattern: [[13, 17, 18, 15, 16, 11]]
+Circuit 7,9,0 has mit_pattern: [[15, 16, 17, 13, 11, 10, 5]]
+Circuit 7,9,1 has mit_pattern: [[10, 17, 11, 15, 16]]
+Circuit 8,9,0 has mit_pattern: [[15, 16, 11, 17, 18, 13, 19, 14]]
+Circuit 8,9,1 has mit_pattern: [[17, 15, 16]]
+******************** Submitting jobs ********************
+Submitting job 1/2 5e347fa9d7ddc900183bc0dc --> 900 circuits, 900 * 8192 shots
+Submitting job 2/2 5e347faf9710ed00188e68b6 --> 340 circuits, 340 * 8192 shots
+******************** Retrieving jobs ********************
+Retrieving job 1/2 5e347f2974e77d001852d63c --> 759 circuits, 900 * 8192 shots
+Retrieving job 2/2 5e347f8f74e77d001852d63f --> 654 circuits, 726 * 8192 shots
+******************** Retrieving jobs ********************
+Retrieving job 1/2 5e347fa9d7ddc900183bc0dc --> 900 circuits, 900 * 8192 shots
+Retrieving job 2/2 5e347faf9710ed00188e68b6 --> 340 circuits, 340 * 8192 shots
+-------------------------------------------------- Reconstructor --------------------------------------------------
+Existing cases: dict_keys([])
+case (2, 3)
+Cut into  [2, 2] clusters
+qasm metric = 1.601e-04
+hw metric = 3.414e-02
+mitigated_hw metric = 5.410e-03
+cutting metric = 4.424e-02
+mitigated_cutting metric = 7.242e-03
+Reconstruction output has 1 cases
+----------------------------------------------------------------------------------------------------
+case (3, 4)
+Cut into  [3, 3] clusters
+qasm metric = 9.182e-04
+hw metric = 2.393e-01
+mitigated_hw metric = 2.337e-01
+cutting metric = 5.623e-02
+mitigated_cutting metric = 4.868e-02
+Reconstruction output has 2 cases
+----------------------------------------------------------------------------------------------------
+case (3, 5)
+Cut into  [3, 3] clusters
+qasm metric = 6.985e-04
+hw metric = 2.335e-01
+mitigated_hw metric = 2.145e-01
+cutting metric = 4.694e-02
+mitigated_cutting metric = 2.629e-02
+Reconstruction output has 3 cases
+----------------------------------------------------------------------------------------------------
+case (4, 5)
+Cut into  [2, 4] clusters
+qasm metric = 6.985e-04
+hw metric = 2.335e-01
+mitigated_hw metric = 2.145e-01
+cutting metric = 1.069e-01
+mitigated_cutting metric = 9.691e-02
+Reconstruction output has 4 cases
+----------------------------------------------------------------------------------------------------
+case (4, 6)
+Cut into  [4, 4, 2] clusters
+qasm metric = 6.393e-04
+hw metric = 3.880e-01
+mitigated_hw metric = 3.810e-01
+cutting metric = 2.476e-01
+mitigated_cutting metric = 2.234e-01
+Reconstruction output has 5 cases
+----------------------------------------------------------------------------------------------------
+case (5, 6)
+Cut into  [3, 5] clusters
+qasm metric = 6.393e-04
+hw metric = 3.880e-01
+mitigated_hw metric = 3.810e-01
+cutting metric = 4.584e-01
+mitigated_cutting metric = 4.724e-01
+Reconstruction output has 6 cases
+----------------------------------------------------------------------------------------------------
+case (4, 7)
+Cut into  [4, 4] clusters
+qasm metric = 6.479e-04
+hw metric = 1.558e-01
+mitigated_hw metric = 1.658e-01
+cutting metric = 1.602e-01
+mitigated_cutting metric = 1.604e-01
+Reconstruction output has 7 cases
+----------------------------------------------------------------------------------------------------
+case (5, 7)
+Cut into  [3, 5] clusters
+qasm metric = 6.479e-04
+hw metric = 1.558e-01
+mitigated_hw metric = 1.658e-01
+cutting metric = 4.883e-01
+mitigated_cutting metric = 5.091e-01
+Reconstruction output has 8 cases
+----------------------------------------------------------------------------------------------------
+case (6, 7)
+Cut into  [2, 6] clusters
+qasm metric = 6.479e-04
+hw metric = 1.558e-01
+mitigated_hw metric = 1.658e-01
+cutting metric = 5.289e-01
+mitigated_cutting metric = 5.738e-01
+Reconstruction output has 9 cases
+----------------------------------------------------------------------------------------------------
+case (4, 8)
+Cut into  [4, 4, 4] clusters
+qasm metric = 6.915e-04
+hw metric = 4.467e-01
+mitigated_hw metric = 4.587e-01
+cutting metric = 3.037e-01
+mitigated_cutting metric = 2.974e-01
+Reconstruction output has 10 cases
+----------------------------------------------------------------------------------------------------
+case (5, 8)
+Cut into  [5, 5, 2] clusters
+qasm metric = 6.915e-04
+hw metric = 4.467e-01
+mitigated_hw metric = 4.587e-01
+cutting metric = 3.527e-01
+mitigated_cutting metric = 3.507e-01
+Reconstruction output has 11 cases
+----------------------------------------------------------------------------------------------------
+case (6, 8)
+Cut into  [6, 4] clusters
+qasm metric = 6.915e-04
+hw metric = 4.467e-01
+mitigated_hw metric = 4.587e-01
+cutting metric = 4.645e-01
+mitigated_cutting metric = 4.885e-01
+Reconstruction output has 12 cases
+----------------------------------------------------------------------------------------------------
+case (7, 8)
+Cut into  [7, 3] clusters
+qasm metric = 6.915e-04
+hw metric = 4.467e-01
+mitigated_hw metric = 4.587e-01
+cutting metric = 4.749e-01
+mitigated_cutting metric = 4.927e-01
+Reconstruction output has 13 cases
+----------------------------------------------------------------------------------------------------
+case (5, 9)
+Cut into  [5, 4, 5] clusters
+qasm metric = 7.889e-04
+hw metric = 3.931e-01
+mitigated_hw metric = 3.992e-01
+cutting metric = 3.996e-01
+mitigated_cutting metric = 4.307e-01
+Reconstruction output has 14 cases
+----------------------------------------------------------------------------------------------------
+case (6, 9)
+Cut into  [6, 6] clusters
+qasm metric = 7.889e-04
+hw metric = 3.931e-01
+mitigated_hw metric = 3.992e-01
+cutting metric = 3.927e-01
+mitigated_cutting metric = 4.366e-01
+Reconstruction output has 15 cases
+----------------------------------------------------------------------------------------------------
+case (7, 9)
+Cut into  [7, 5] clusters
+qasm metric = 7.889e-04
+hw metric = 3.931e-01
+mitigated_hw metric = 3.992e-01
+cutting metric = 3.800e-01
+mitigated_cutting metric = 4.246e-01
+Reconstruction output has 16 cases
+----------------------------------------------------------------------------------------------------
+case (8, 9)
+Cut into  [8, 3] clusters
+qasm metric = 7.889e-04
+hw metric = 3.931e-01
+mitigated_hw metric = 3.992e-01
+cutting metric = 3.905e-01
+mitigated_cutting metric = 4.249e-01
+Reconstruction output has 17 cases
+----------------------------------------------------------------------------------------------------
+-------------------------------------------------- Plot --------------------------------------------------
+Processing ./hardware/benchmark_data/supremacy_ibmq_boeblingen/hw_plotter_input_ibmq_boeblingen_saturated.p
+case (2, 3): ce percentage reduction = -10.629, fidelity improvement = 0.000, reconstruction time: 7.033e-04
+case (3, 4): ce percentage reduction = 82.946, fidelity improvement = 0.000, reconstruction time: 2.607e-03
+case (3, 5): ce percentage reduction = 87.831, fidelity improvement = -0.000, reconstruction time: 7.854e-04
+case (4, 5): ce percentage reduction = 70.896, fidelity improvement = 0.000, reconstruction time: 7.939e-04
+case (4, 6): ce percentage reduction = 29.211, fidelity improvement = 0.000, reconstruction time: 4.708e-02
+case (5, 6): ce percentage reduction = -30.654, fidelity improvement = 0.000, reconstruction time: 3.856e-03
+case (4, 7): ce percentage reduction = -26.358, fidelity improvement = 0.000, reconstruction time: 1.372e-03
+case (5, 7): ce percentage reduction = -101.927, fidelity improvement = 0.000, reconstruction time: 1.401e-03
+case (6, 7): ce percentage reduction = -121.357, fidelity improvement = -0.000, reconstruction time: 1.581e-03
+case (4, 8): ce percentage reduction = 43.150, fidelity improvement = 0.000, reconstruction time: 5.537e-02
+case (5, 8): ce percentage reduction = 20.379, fidelity improvement = 0.000, reconstruction time: 6.300e-02
+case (6, 8): ce percentage reduction = -15.166, fidelity improvement = -0.000, reconstruction time: 7.008e-03
+case (7, 8): ce percentage reduction = -10.139, fidelity improvement = -0.000, reconstruction time: 9.190e-03
+case (5, 9): ce percentage reduction = 3.441, fidelity improvement = 0.000, reconstruction time: 3.057e-01
+case (6, 9): ce percentage reduction = -14.967, fidelity improvement = 0.000, reconstruction time: 3.529e-02
+case (7, 9): ce percentage reduction = 6.551, fidelity improvement = 0.000, reconstruction time: 3.760e-02
+case (8, 9): ce percentage reduction = -28.496, fidelity improvement = -0.000, reconstruction time: 1.329e-02
+************************* Mitigated Best Cases *************************
+{'ce_percent': -10.629125510069752, 'reconstructor_time': 0.0007033348083496094, 'best_case': (2, 3), 'hw_ce': 0.005410374168550818, 'cutting_ce': 0.005985449629490477}
+{'ce_percent': 82.94643931269228, 'reconstructor_time': 0.0026073455810546875, 'best_case': (3, 4), 'hw_ce': 0.23365224091449902, 'cutting_ce': 0.03984602670160853}
+{'ce_percent': 87.83076044127154, 'reconstructor_time': 0.0007853507995605469, 'best_case': (3, 5), 'hw_ce': 0.21451186286452273, 'cutting_ce': 0.02610446247387486}
+{'ce_percent': 29.2109222532864, 'reconstructor_time': 0.04707980155944824, 'best_case': (4, 6), 'hw_ce': 0.3810447826805272, 'cutting_ce': 0.2697380874615143}
+{'ce_percent': -26.358382413962115, 'reconstructor_time': 0.001371622085571289, 'best_case': (4, 7), 'hw_ce': 0.16581869773701866, 'cutting_ce': 0.20952582420039398}
+{'ce_percent': 43.150304367280924, 'reconstructor_time': 0.055365800857543945, 'best_case': (4, 8), 'hw_ce': 0.4586845921221104, 'cutting_ce': 0.2607607945355987}
+{'ce_percent': 6.550583639559799, 'reconstructor_time': 0.037598371505737305, 'best_case': (7, 9), 'hw_ce': 0.3991936336208976, 'cutting_ce': 0.3730441207667628}
+**************************************************
+Processing ./hardware/benchmark_data/supremacy_ibmq_boeblingen/hw_plotter_input_ibmq_boeblingen_sametotal.p
+case (2, 3): ce percentage reduction = -33.861, fidelity improvement = 0.000, reconstruction time: 6.182e-04
+case (3, 4): ce percentage reduction = 79.168, fidelity improvement = 0.000, reconstruction time: 2.278e-03
+case (3, 5): ce percentage reduction = 87.746, fidelity improvement = 0.000, reconstruction time: 6.757e-04
+case (4, 5): ce percentage reduction = 54.824, fidelity improvement = -0.000, reconstruction time: 6.900e-04
+case (4, 6): ce percentage reduction = 41.366, fidelity improvement = 0.000, reconstruction time: 4.123e-02
+case (5, 6): ce percentage reduction = -23.974, fidelity improvement = 0.000, reconstruction time: 3.345e-03
+case (4, 7): ce percentage reduction = 3.259, fidelity improvement = -0.000, reconstruction time: 1.179e-03
+case (5, 7): ce percentage reduction = -207.027, fidelity improvement = 0.000, reconstruction time: 2.405e-03
+case (6, 7): ce percentage reduction = -246.039, fidelity improvement = 0.000, reconstruction time: 1.760e-03
+case (4, 8): ce percentage reduction = 35.172, fidelity improvement = -0.000, reconstruction time: 5.104e-02
+case (5, 8): ce percentage reduction = 23.551, fidelity improvement = 0.000, reconstruction time: 5.768e-02
+case (6, 8): ce percentage reduction = -6.505, fidelity improvement = -0.000, reconstruction time: 6.095e-03
+case (7, 8): ce percentage reduction = -7.427, fidelity improvement = 0.000, reconstruction time: 8.188e-03
+case (5, 9): ce percentage reduction = -7.893, fidelity improvement = 0.000, reconstruction time: 2.789e-01
+case (6, 9): ce percentage reduction = -9.365, fidelity improvement = -0.000, reconstruction time: 3.293e-02
+case (7, 9): ce percentage reduction = -6.352, fidelity improvement = 0.000, reconstruction time: 3.355e-02
+case (8, 9): ce percentage reduction = -6.450, fidelity improvement = -0.000, reconstruction time: 1.167e-02
+************************* Mitigated Best Cases *************************
+{'ce_percent': -33.8611955993039, 'reconstructor_time': 0.0006182193756103516, 'best_case': (2, 3), 'hw_ce': 0.005410374168550818, 'cutting_ce': 0.007242391548418023}
+{'ce_percent': 79.16773303834351, 'reconstructor_time': 0.0022780895233154297, 'best_case': (3, 4), 'hw_ce': 0.23365224091449902, 'cutting_ce': 0.04867505858920122}
+{'ce_percent': 87.74576726756676, 'reconstructor_time': 0.0006756782531738281, 'best_case': (3, 5), 'hw_ce': 0.21451186286452273, 'cutting_ce': 0.02628678291409664}
+{'ce_percent': 41.36563009346266, 'reconstructor_time': 0.041228294372558594, 'best_case': (4, 6), 'hw_ce': 0.3810447826805272, 'cutting_ce': 0.22342320738646165}
+{'ce_percent': 3.2592099503869183, 'reconstructor_time': 0.0011794567108154297, 'best_case': (4, 7), 'hw_ce': 0.16581869773701866, 'cutting_ce': 0.16041431824077174}
+{'ce_percent': 35.17176172658161, 'reconstructor_time': 0.05103802680969238, 'best_case': (4, 8), 'hw_ce': 0.4586845921221104, 'cutting_ce': 0.297357140304379}
+{'ce_percent': -6.352451181377622, 'reconstructor_time': 0.03354501724243164, 'best_case': (7, 9), 'hw_ce': 0.3991936336208976, 'cutting_ce': 0.42455221431583257}
+**************************************************
+----------------------------------------------------------------------------------------------------
+Processing ./hardware/benchmark_data/supremacy_ibmq_boeblingen/hw_plotter_input_ibmq_boeblingen_saturated.p
+case (2, 3): ce percentage reduction = -34.734, fidelity improvement = 0.000, reconstruction time: 7.033e-04
+case (3, 4): ce percentage reduction = 72.698, fidelity improvement = 0.000, reconstruction time: 2.607e-03
+case (3, 5): ce percentage reduction = 74.677, fidelity improvement = 0.000, reconstruction time: 7.854e-04
+case (4, 5): ce percentage reduction = 62.272, fidelity improvement = 0.000, reconstruction time: 7.939e-04
+case (4, 6): ce percentage reduction = 28.257, fidelity improvement = 0.000, reconstruction time: 4.708e-02
+case (5, 6): ce percentage reduction = -14.799, fidelity improvement = 0.000, reconstruction time: 3.856e-03
+case (4, 7): ce percentage reduction = -18.832, fidelity improvement = 0.000, reconstruction time: 1.372e-03
+case (5, 7): ce percentage reduction = -118.591, fidelity improvement = -0.000, reconstruction time: 1.401e-03
+case (6, 7): ce percentage reduction = -112.384, fidelity improvement = -0.000, reconstruction time: 1.581e-03
+case (4, 8): ce percentage reduction = 36.503, fidelity improvement = 0.000, reconstruction time: 5.537e-02
+case (5, 8): ce percentage reduction = 20.847, fidelity improvement = 0.000, reconstruction time: 6.300e-02
+case (6, 8): ce percentage reduction = -9.818, fidelity improvement = 0.000, reconstruction time: 7.008e-03
+case (7, 8): ce percentage reduction = -8.997, fidelity improvement = 0.000, reconstruction time: 9.190e-03
+case (5, 9): ce percentage reduction = 5.548, fidelity improvement = 0.000, reconstruction time: 3.057e-01
+case (6, 9): ce percentage reduction = -6.535, fidelity improvement = 0.000, reconstruction time: 3.529e-02
+case (7, 9): ce percentage reduction = 10.886, fidelity improvement = 0.000, reconstruction time: 3.760e-02
+case (8, 9): ce percentage reduction = -11.570, fidelity improvement = -0.000, reconstruction time: 1.329e-02
+************************* Best Cases *************************
+{'ce_percent': -34.73428076993498, 'reconstructor_time': 0.0007033348083496094, 'best_case': (2, 3), 'hw_ce': 0.03414249510673687, 'cutting_ce': 0.04600164521897217}
+{'ce_percent': 72.6982414910487, 'reconstructor_time': 0.0026073455810546875, 'best_case': (3, 4), 'hw_ce': 0.23926957351042416, 'cutting_ce': 0.06532480114521372}
+{'ce_percent': 74.67741946392279, 'reconstructor_time': 0.0007853507995605469, 'best_case': (3, 5), 'hw_ce': 0.2335499543689972, 'cutting_ce': 0.059140875287060884}
+{'ce_percent': 28.257200842657628, 'reconstructor_time': 0.04707980155944824, 'best_case': (4, 6), 'hw_ce': 0.38800012363478054, 'cutting_ce': 0.2783621494295407}
+{'ce_percent': -18.83202071592806, 'reconstructor_time': 0.001371622085571289, 'best_case': (4, 7), 'hw_ce': 0.1557693593075931, 'cutting_ce': 0.18510387732146746}
+{'ce_percent': 36.50347907062017, 'reconstructor_time': 0.055365800857543945, 'best_case': (4, 8), 'hw_ce': 0.4466929005323334, 'cutting_ce': 0.2836344510765669}
+{'ce_percent': 10.886489282656186, 'reconstructor_time': 0.037598371505737305, 'best_case': (7, 9), 'hw_ce': 0.3930616105949582, 'cutting_ce': 0.3502710004833023}
+**************************************************
+Processing ./hardware/benchmark_data/supremacy_ibmq_boeblingen/hw_plotter_input_ibmq_boeblingen_sametotal.p
+case (2, 3): ce percentage reduction = -29.572, fidelity improvement = 0.000, reconstruction time: 6.182e-04
+case (3, 4): ce percentage reduction = 76.499, fidelity improvement = 0.000, reconstruction time: 2.278e-03
+case (3, 5): ce percentage reduction = 79.900, fidelity improvement = 0.000, reconstruction time: 6.757e-04
+case (4, 5): ce percentage reduction = 54.214, fidelity improvement = 0.000, reconstruction time: 6.900e-04
+case (4, 6): ce percentage reduction = 36.192, fidelity improvement = 0.000, reconstruction time: 4.123e-02
+case (5, 6): ce percentage reduction = -18.134, fidelity improvement = 0.000, reconstruction time: 3.345e-03
+case (4, 7): ce percentage reduction = -2.816, fidelity improvement = -0.000, reconstruction time: 1.179e-03
+case (5, 7): ce percentage reduction = -213.471, fidelity improvement = -0.000, reconstruction time: 2.405e-03
+case (6, 7): ce percentage reduction = -239.561, fidelity improvement = 0.000, reconstruction time: 1.760e-03
+case (4, 8): ce percentage reduction = 32.006, fidelity improvement = 0.000, reconstruction time: 5.104e-02
+case (5, 8): ce percentage reduction = 21.040, fidelity improvement = 0.000, reconstruction time: 5.768e-02
+case (6, 8): ce percentage reduction = -3.980, fidelity improvement = 0.000, reconstruction time: 6.095e-03
+case (7, 8): ce percentage reduction = -6.325, fidelity improvement = -0.000, reconstruction time: 8.188e-03
+case (5, 9): ce percentage reduction = -1.664, fidelity improvement = -0.000, reconstruction time: 2.789e-01
+case (6, 9): ce percentage reduction = 0.104, fidelity improvement = 0.000, reconstruction time: 3.293e-02
+case (7, 9): ce percentage reduction = 3.315, fidelity improvement = 0.000, reconstruction time: 3.355e-02
+case (8, 9): ce percentage reduction = 0.649, fidelity improvement = 0.000, reconstruction time: 1.167e-02
+************************* Best Cases *************************
+{'ce_percent': -29.571952024110683, 'reconstructor_time': 0.0006182193756103516, 'best_case': (2, 3), 'hw_ce': 0.03414249510673687, 'cutting_ce': 0.044239097379535436}
+{'ce_percent': 76.49852749969524, 'reconstructor_time': 0.0022780895233154297, 'best_case': (3, 4), 'hw_ce': 0.23926957351042416, 'cutting_ce': 0.056231873020148815}
+{'ce_percent': 79.89966370478504, 'reconstructor_time': 0.0006756782531738281, 'best_case': (3, 5), 'hw_ce': 0.2335499543689972, 'cutting_ce': 0.04694432624548951}
+{'ce_percent': 36.19205899993596, 'reconstructor_time': 0.041228294372558594, 'best_case': (4, 6), 'hw_ce': 0.38800012363478054, 'cutting_ce': 0.2475748899690563}
+{'ce_percent': -2.8155380531053877, 'reconstructor_time': 0.0011794567108154297, 'best_case': (4, 7), 'hw_ce': 0.1557693593075931, 'cutting_ce': 0.16015510489397686}
+{'ce_percent': 32.00642841722398, 'reconstructor_time': 0.05103802680969238, 'best_case': (4, 8), 'hw_ce': 0.4466929005323334, 'cutting_ce': 0.3037224570786306}
+{'ce_percent': 3.315305842024458, 'reconstructor_time': 0.03354501724243164, 'best_case': (7, 9), 'hw_ce': 0.3930616105949582, 'cutting_ce': 0.3800304160561481}
+**************************************************
+----------------------------------------------------------------------------------------------------
