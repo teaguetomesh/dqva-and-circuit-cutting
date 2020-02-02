@@ -41,7 +41,7 @@ if __name__ == '__main__':
                 done_jobs = []
                 error_jobs = []
                 total_queued = 0
-                for job in x.jobs(limit=50):
+                for job in x.jobs(limit=200):
                     if job.status() == JobStatus['QUEUED']:
                         queued_jobs.append(job)
                     elif job.status() == JobStatus['RUNNING']:
@@ -50,18 +50,19 @@ if __name__ == '__main__':
                         done_jobs.append(job)
                     elif job.status() == JobStatus['ERROR'] and job.creation_date()>time_delta:
                         error_jobs.append(job)
+                print_ctr = 0
                 print('Most recently QUEUED:')
-                for job in queued_jobs:
+                for job in queued_jobs[-10:]:
                     print(job.creation_date(),job.status(),job.queue_position(),'ETA:',job.queue_info().estimated_complete_time-time_now)
                 print('Total queued = {:d}.'.format(len(queued_jobs)))
                 print('RUNNING:')
                 for job in run_jobs:
                     print(job.creation_date(),job.status(),job.queue_position())
                 print('Most recently DONE:')
-                for job in done_jobs:
+                for job in done_jobs[-3:]:
                     print(job.creation_date(),job.status(),job.error_message(),job.job_id())
                 print('Most recently ERROR:')
-                for job in error_jobs:
+                for job in error_jobs[-3:]:
                     print(job.creation_date(),job.status(),job.error_message(),job.job_id())
                 if args.cancel_jobs:
                     for i in range(5):

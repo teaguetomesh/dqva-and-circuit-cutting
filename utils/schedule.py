@@ -130,8 +130,8 @@ class Scheduler:
                         correct_p = 0.1
                         read_err = noise.errors.readout_error.ReadoutError([[correct_p, 1-correct_p],[1-correct_p, correct_p]])
                     noise_model.add_readout_error(read_err, [qi])
-                hw_job = Aer.get_backend('qasm_simulator').run(qobj,noise_model=noise_model)
-                # hw_job = Aer.get_backend('qasm_simulator').run(qobj)
+                # hw_job = Aer.get_backend('qasm_simulator').run(qobj,noise_model=noise_model)
+                hw_job = Aer.get_backend('qasm_simulator').run(qobj)
             jobs.append(hw_job)
             print('Submitting job {:d}/{:d} {} --> {:d} circuits, {:d} * {:d} shots'.format(idx+1,len(self.schedule),hw_job.job_id(),len(schedule_item.circ_list),len(job_circuits),schedule_item.shots),flush=True)
         self.jobs = jobs

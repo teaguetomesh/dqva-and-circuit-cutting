@@ -156,7 +156,7 @@ def get_circ_saturated_shots(circs,device_name):
                 accumulated_shots = int((len(chi2_l)-1)*shots_increment)
                 first_derivative = (chi2_l[-1]+chi2_l[-3])/(2*shots_increment)
                 second_derivative = (chi2_l[-1]+chi2_l[-3]-2*chi2_l[-2])/(2*np.power(shots_increment,2))
-                if (abs(first_derivative)<1e-7 and abs(second_derivative) < 1e-7) or accumulated_shots/device_max_experiments/device_max_shots>1:
+                if (abs(first_derivative)<1e-7 and abs(second_derivative) < 1e-7) or accumulated_shots/device_max_experiments/device_max_shots>1/10:
                     saturated_shot = accumulated_shots
                     break
             counter += 1
