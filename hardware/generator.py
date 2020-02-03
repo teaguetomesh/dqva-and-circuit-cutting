@@ -96,9 +96,9 @@ if __name__ == '__main__':
     print('{:d} cases, {:d} full circuits to run : {}'.format(len(cases_to_run),len(circ_dict),cases_to_run.keys()))
     
     scheduler = Scheduler(circ_dict=circ_dict,device_name=args.device_name)
-    scheduler.run(real_device=False)
+    scheduler.run(real_device=True)
     tensored_mitigation = TensoredMitigation(circ_dict=circ_dict,device_name=args.device_name)
-    tensored_mitigation.run(real_device=False)
+    tensored_mitigation.run(real_device=True)
 
     scheduler.retrieve(force_prob=True)
     tensored_mitigation.retrieve()

@@ -71,9 +71,9 @@ if __name__ == '__main__':
                     mitigation_correspondence_dict[mitigation_circ_key].append(key)
 
     scheduler = Scheduler(circ_dict=circ_dict,device_name=args.device_name)
-    scheduler.run(real_device=False)
+    scheduler.run(real_device=True)
     tensored_mitigation = TensoredMitigation(circ_dict=mitigation_circ_dict,device_name=args.device_name)
-    tensored_mitigation.run(real_device=False)
+    tensored_mitigation.run(real_device=True)
 
     scheduler.retrieve(force_prob=True)
     tensored_mitigation.retrieve()
