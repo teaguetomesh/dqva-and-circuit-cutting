@@ -50,9 +50,10 @@ if __name__ == '__main__':
             evaluator_info = get_evaluator_info(circ=cluster_base_circ,device_name=args.device_name,
             fields=['basis_gates','coupling_map','properties','initial_layout'])
             backend_device = get_evaluator_info(circ=None,device_name=args.device_name,fields=['device'])['device']
-            mitigation_circ_key = '{},{},{}'.format(case[0],case[1],cluster_idx)
-            mitigation_circ_dict[mitigation_circ_key] = {'circ':cluster_base_circ,'initial_layout':evaluator_info['initial_layout']}
-            mitigation_correspondence_dict[mitigation_circ_key] = []
+            if 2**case[1]<=device_max_experiments:
+                mitigation_circ_key = '{},{},{}'.format(case[0],case[1],cluster_idx)
+                mitigation_circ_dict[mitigation_circ_key] = {'circ':cluster_base_circ,'initial_layout':evaluator_info['initial_layout']}
+                mitigation_correspondence_dict[mitigation_circ_key] = []
             if args.shots_mode == 'saturated':
                 cluster_shots = get_circ_saturated_shots(circs=[cluster_base_circ],device_name=args.device_name)[0][0]
                 print('Cluster %d saturated shots = %d'%(cluster_idx,cluster_shots))
@@ -66,7 +67,8 @@ if __name__ == '__main__':
                 key = '{},{},{}|{},{}'.format(case[0],case[1],cluster_idx,init_str,meas_str)
                 circ = case_dict['all_cluster_prob'][cluster_idx][init_meas]
                 circ_dict[key] = {'circ':circ,'shots':cluster_shots,'initial_layout':evaluator_info['initial_layout']}
-                mitigation_correspondence_dict[mitigation_circ_key].append(key)
+                if 2**case[1]<=device_max_experiments:
+                    mitigation_correspondence_dict[mitigation_circ_key].append(key)
 
     scheduler = Scheduler(circ_dict=circ_dict,device_name=args.device_name)
     scheduler.run(real_device=False)
