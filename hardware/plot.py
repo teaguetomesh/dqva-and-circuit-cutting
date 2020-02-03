@@ -281,7 +281,7 @@ def process_data(filename,circuit_type,mitigated):
         obs= plotter_input[case]['%scutting'%('mitigated_' if mitigated else '')])
         fid_percent_change = 100*(cutting_fid-hw_fid)/hw_fid
         if circuit_type == 'bv' or circuit_type=='hwea':
-            assert abs(ground_truth_fid-1)<1e-10 and abs(qasm_fid-1)<1e-10 and qasm_noise_fid<=1 and qasm_noise_fid<=1 and cutting_fid<=1
+            assert abs(ground_truth_fid-1)<1e-10 and abs(qasm_fid-1)<1e-10 and cutting_fid-1<1e-10
         plotter_input[case]['fid_comparisons'] = (hw_fid,cutting_fid)
         plotter_input[case]['fid_percent_improvement'] = fid_percent_change
 
