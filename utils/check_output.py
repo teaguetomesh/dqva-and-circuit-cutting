@@ -1,7 +1,8 @@
 import pickle
 import matplotlib.pyplot as plt
 import numpy as np
-from utils.helper_fun import cross_entropy, fidelity, get_filename, read_file
+from utils.helper_fun import get_filename, read_file
+from utils.metrics import fidelity, chi2_distance
 import argparse
 
 if __name__ == '__main__':
@@ -17,7 +18,7 @@ if __name__ == '__main__':
     plotter_input = read_file(dirname+plotter_input_filename)
     print(plotter_input.keys())
 
-    case = (5,14)
+    case = (5,12)
     plotter_input = plotter_input[case]
 
     d1 = plotter_input['fc_evaluations']['sv_noiseless']
