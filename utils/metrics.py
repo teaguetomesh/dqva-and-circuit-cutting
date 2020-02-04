@@ -24,7 +24,7 @@ def fidelity(target,obs):
         print('sum of obs =',sum(obs))
     fidelity = 0
     for t,o in zip(target,obs):
-        if t!= 0:
+        if t > 1e-16:
             fidelity += o
     return fidelity
 
