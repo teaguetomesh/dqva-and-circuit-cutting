@@ -2635,3 +2635,860 @@ Retrieving job 2/3 5e3939e2ff61f00019b04be2 --> 278 circuits, 900 * 8192 shots
 Retrieving job 3/3 5e3939eac10a7f00181cb9a8 --> 111 circuits, 336 * 8192 shots
 ******************** Retrieving jobs ********************
 Retrieving job 1/2 5e393a15c10a7f00181cb9aa --> 900 circuits, 900 * 8192 shots
+Retrieving job 2/2 5e393a184afe220018f23cab --> 156 circuits, 156 * 8192 shots
+-------------------------------------------------- Reconstructor --------------------------------------------------
+Existing cases: dict_keys([])
+case (2, 3)
+Cut into  [2, 2] clusters
+qasm metric = 2.173e-05
+hw metric = 1.742e-01
+mitigated_hw metric = 1.712e-02
+cutting metric = 2.265e-01
+mitigated_cutting metric = 1.871e-02
+Reconstruction output has 1 cases
+----------------------------------------------------------------------------------------------------
+case (3, 4)
+Cut into  [2, 3] clusters
+qasm metric = 8.691e-05
+hw metric = 3.503e-01
+mitigated_hw metric = 6.882e-02
+cutting metric = 3.222e-01
+mitigated_cutting metric = 2.786e-02
+Reconstruction output has 2 cases
+----------------------------------------------------------------------------------------------------
+case (3, 5)
+Cut into  [3, 3] clusters
+qasm metric = 8.114e-06
+hw metric = 4.481e-01
+mitigated_hw metric = 1.354e-01
+cutting metric = 4.111e-01
+mitigated_cutting metric = 6.033e-02
+Reconstruction output has 3 cases
+----------------------------------------------------------------------------------------------------
+case (4, 5)
+Cut into  [2, 4] clusters
+qasm metric = 8.114e-06
+hw metric = 4.481e-01
+mitigated_hw metric = 1.354e-01
+cutting metric = 3.895e-01
+mitigated_cutting metric = 5.552e-02
+Reconstruction output has 4 cases
+----------------------------------------------------------------------------------------------------
+case (3, 6)
+Cut into  [3, 3, 2] clusters
+qasm metric = 2.980e-08
+hw metric = 6.067e-01
+mitigated_hw metric = 2.333e-01
+cutting metric = 5.179e-01
+mitigated_cutting metric = 6.367e-02
+Reconstruction output has 5 cases
+----------------------------------------------------------------------------------------------------
+case (4, 6)
+Cut into  [4, 3] clusters
+qasm metric = 2.980e-08
+hw metric = 6.067e-01
+mitigated_hw metric = 2.333e-01
+cutting metric = 4.962e-01
+mitigated_cutting metric = 7.157e-02
+Reconstruction output has 6 cases
+----------------------------------------------------------------------------------------------------
+case (5, 6)
+Cut into  [5, 2] clusters
+qasm metric = 2.980e-08
+hw metric = 6.067e-01
+mitigated_hw metric = 2.333e-01
+cutting metric = 4.637e-01
+mitigated_cutting metric = 8.072e-02
+Reconstruction output has 7 cases
+----------------------------------------------------------------------------------------------------
+case (4, 7)
+Cut into  [4, 4] clusters
+qasm metric = 2.414e-06
+hw metric = 7.277e-01
+mitigated_hw metric = 3.393e-01
+cutting metric = 5.578e-01
+mitigated_cutting metric = 9.417e-02
+Reconstruction output has 8 cases
+----------------------------------------------------------------------------------------------------
+case (5, 7)
+Cut into  [5, 3] clusters
+qasm metric = 2.414e-06
+hw metric = 7.277e-01
+mitigated_hw metric = 3.393e-01
+cutting metric = 5.599e-01
+mitigated_cutting metric = 1.125e-01
+Reconstruction output has 9 cases
+----------------------------------------------------------------------------------------------------
+case (6, 7)
+Cut into  [6, 2] clusters
+qasm metric = 2.414e-06
+hw metric = 7.277e-01
+mitigated_hw metric = 3.393e-01
+cutting metric = 5.589e-01
+mitigated_cutting metric = 1.655e-01
+Reconstruction output has 10 cases
+----------------------------------------------------------------------------------------------------
+case (4, 8)
+Cut into  [4, 3, 3] clusters
+qasm metric = 6.266e-06
+hw metric = 8.809e-01
+mitigated_hw metric = 4.409e-01
+cutting metric = 6.909e-01
+mitigated_cutting metric = 1.063e-01
+Reconstruction output has 11 cases
+----------------------------------------------------------------------------------------------------
+case (5, 8)
+Cut into  [5, 4] clusters
+qasm metric = 6.266e-06
+hw metric = 8.809e-01
+mitigated_hw metric = 4.409e-01
+cutting metric = 6.406e-01
+mitigated_cutting metric = 1.459e-01
+Reconstruction output has 12 cases
+----------------------------------------------------------------------------------------------------
+case (6, 8)
+Cut into  [6, 3] clusters
+qasm metric = 6.266e-06
+hw metric = 8.809e-01
+mitigated_hw metric = 4.409e-01
+cutting metric = 6.902e-01
+mitigated_cutting metric = 2.201e-01
+Reconstruction output has 13 cases
+----------------------------------------------------------------------------------------------------
+case (7, 8)
+Cut into  [5, 4] clusters
+qasm metric = 6.266e-06
+hw metric = 8.809e-01
+mitigated_hw metric = 4.409e-01
+cutting metric = 6.608e-01
+mitigated_cutting metric = 1.715e-01
+Reconstruction output has 14 cases
+----------------------------------------------------------------------------------------------------
+case (4, 9)
+Cut into  [4, 3, 4] clusters
+qasm metric = 1.460e-06
+hw metric = 9.585e-01
+mitigated_hw metric = 5.498e-01
+cutting metric = 7.372e-01
+mitigated_cutting metric = 1.028e-01
+Reconstruction output has 15 cases
+----------------------------------------------------------------------------------------------------
+case (5, 9)
+Cut into  [5, 5] clusters
+qasm metric = 1.460e-06
+hw metric = 9.585e-01
+mitigated_hw metric = 5.498e-01
+cutting metric = 6.756e-01
+mitigated_cutting metric = 1.489e-01
+Reconstruction output has 16 cases
+----------------------------------------------------------------------------------------------------
+case (6, 9)
+Cut into  [6, 4] clusters
+qasm metric = 1.460e-06
+hw metric = 9.585e-01
+mitigated_hw metric = 5.498e-01
+cutting metric = 7.433e-01
+mitigated_cutting metric = 2.312e-01
+Reconstruction output has 17 cases
+----------------------------------------------------------------------------------------------------
+case (7, 9)
+Cut into  [7, 3] clusters
+qasm metric = 1.460e-06
+hw metric = 9.585e-01
+mitigated_hw metric = 5.498e-01
+cutting metric = 7.325e-01
+mitigated_cutting metric = 2.083e-01
+Reconstruction output has 18 cases
+----------------------------------------------------------------------------------------------------
+case (8, 9)
+Cut into  [2, 8] clusters
+qasm metric = 1.460e-06
+hw metric = 9.585e-01
+mitigated_hw metric = 5.498e-01
+cutting metric = 7.519e-01
+mitigated_cutting metric = 2.917e-01
+Reconstruction output has 19 cases
+----------------------------------------------------------------------------------------------------
+case (5, 10)
+Cut into  [3, 5, 4] clusters
+qasm metric = 4.657e-06
+hw metric = 1.169e+00
+mitigated_hw metric = 1.169e+00
+cutting metric = 8.057e-01
+mitigated_cutting metric = 8.057e-01
+Reconstruction output has 20 cases
+----------------------------------------------------------------------------------------------------
+case (6, 10)
+Cut into  [6, 5] clusters
+qasm metric = 4.657e-06
+hw metric = 1.169e+00
+mitigated_hw metric = 1.169e+00
+cutting metric = 7.494e-01
+mitigated_cutting metric = 7.494e-01
+Reconstruction output has 21 cases
+----------------------------------------------------------------------------------------------------
+case (7, 10)
+Cut into  [6, 5] clusters
+qasm metric = 4.657e-06
+hw metric = 1.169e+00
+mitigated_hw metric = 1.169e+00
+cutting metric = 7.565e-01
+mitigated_cutting metric = 7.565e-01
+Reconstruction output has 22 cases
+----------------------------------------------------------------------------------------------------
+case (8, 10)
+Cut into  [8, 3] clusters
+qasm metric = 4.657e-06
+hw metric = 1.169e+00
+mitigated_hw metric = 1.169e+00
+cutting metric = 8.004e-01
+mitigated_cutting metric = 8.004e-01
+Reconstruction output has 23 cases
+----------------------------------------------------------------------------------------------------
+case (9, 10)
+Cut into  [9, 2] clusters
+qasm metric = 4.657e-06
+hw metric = 1.169e+00
+mitigated_hw metric = 1.169e+00
+cutting metric = 7.909e-01
+mitigated_cutting metric = 7.909e-01
+Reconstruction output has 24 cases
+----------------------------------------------------------------------------------------------------
+case (5, 11)
+Cut into  [3, 5, 5] clusters
+qasm metric = 1.984e-05
+hw metric = 1.209e+00
+mitigated_hw metric = 1.209e+00
+cutting metric = 8.532e-01
+mitigated_cutting metric = 8.532e-01
+Reconstruction output has 25 cases
+----------------------------------------------------------------------------------------------------
+case (6, 11)
+Cut into  [6, 6] clusters
+qasm metric = 1.984e-05
+hw metric = 1.209e+00
+mitigated_hw metric = 1.209e+00
+cutting metric = 8.351e-01
+mitigated_cutting metric = 8.351e-01
+Reconstruction output has 26 cases
+----------------------------------------------------------------------------------------------------
+case (7, 11)
+Cut into  [6, 6] clusters
+qasm metric = 1.984e-05
+hw metric = 1.209e+00
+mitigated_hw metric = 1.209e+00
+cutting metric = 8.255e-01
+mitigated_cutting metric = 8.255e-01
+Reconstruction output has 27 cases
+----------------------------------------------------------------------------------------------------
+case (8, 11)
+Cut into  [6, 6] clusters
+qasm metric = 1.984e-05
+hw metric = 1.209e+00
+mitigated_hw metric = 1.209e+00
+cutting metric = 8.301e-01
+mitigated_cutting metric = 8.301e-01
+Reconstruction output has 28 cases
+----------------------------------------------------------------------------------------------------
+case (9, 11)
+Cut into  [9, 3] clusters
+qasm metric = 1.984e-05
+hw metric = 1.209e+00
+mitigated_hw metric = 1.209e+00
+cutting metric = 8.720e-01
+mitigated_cutting metric = 8.720e-01
+Reconstruction output has 29 cases
+----------------------------------------------------------------------------------------------------
+case (5, 12)
+Cut into  [5, 4, 5] clusters
+qasm metric = 9.346e-07
+hw metric = 1.306e+00
+mitigated_hw metric = 1.306e+00
+cutting metric = 9.200e-01
+mitigated_cutting metric = 9.200e-01
+Reconstruction output has 30 cases
+----------------------------------------------------------------------------------------------------
+case (6, 12)
+Cut into  [3, 6, 5] clusters
+qasm metric = 9.346e-07
+hw metric = 1.306e+00
+mitigated_hw metric = 1.306e+00
+cutting metric = 9.516e-01
+mitigated_cutting metric = 9.516e-01
+Reconstruction output has 31 cases
+----------------------------------------------------------------------------------------------------
+case (7, 12)
+Cut into  [7, 6] clusters
+qasm metric = 9.346e-07
+hw metric = 1.306e+00
+mitigated_hw metric = 1.306e+00
+cutting metric = 9.175e-01
+mitigated_cutting metric = 9.175e-01
+Reconstruction output has 32 cases
+----------------------------------------------------------------------------------------------------
+case (8, 12)
+Cut into  [8, 5] clusters
+qasm metric = 9.346e-07
+hw metric = 1.306e+00
+mitigated_hw metric = 1.306e+00
+cutting metric = 9.186e-01
+mitigated_cutting metric = 9.186e-01
+Reconstruction output has 33 cases
+----------------------------------------------------------------------------------------------------
+case (9, 12)
+Cut into  [9, 4] clusters
+qasm metric = 9.346e-07
+hw metric = 1.306e+00
+mitigated_hw metric = 1.306e+00
+cutting metric = 9.247e-01
+mitigated_cutting metric = 9.247e-01
+Reconstruction output has 34 cases
+----------------------------------------------------------------------------------------------------
+case (6, 13)
+Cut into  [3, 6, 6] clusters
+qasm metric = 7.629e-06
+hw metric = 1.301e+00
+mitigated_hw metric = 1.301e+00
+cutting metric = 1.029e+00
+mitigated_cutting metric = 1.029e+00
+Reconstruction output has 35 cases
+----------------------------------------------------------------------------------------------------
+case (7, 13)
+Cut into  [7, 7] clusters
+qasm metric = 7.629e-06
+hw metric = 1.301e+00
+mitigated_hw metric = 1.301e+00
+cutting metric = 1.005e+00
+mitigated_cutting metric = 1.005e+00
+Reconstruction output has 36 cases
+----------------------------------------------------------------------------------------------------
+case (8, 13)
+Cut into  [8, 6] clusters
+qasm metric = 7.629e-06
+hw metric = 1.301e+00
+mitigated_hw metric = 1.301e+00
+cutting metric = 9.864e-01
+mitigated_cutting metric = 9.864e-01
+Reconstruction output has 37 cases
+----------------------------------------------------------------------------------------------------
+case (9, 13)
+Cut into  [9, 5] clusters
+qasm metric = 7.629e-06
+hw metric = 1.301e+00
+mitigated_hw metric = 1.301e+00
+cutting metric = 9.847e-01
+mitigated_cutting metric = 9.847e-01
+Reconstruction output has 38 cases
+----------------------------------------------------------------------------------------------------
+case (6, 14)
+Cut into  [6, 5, 5] clusters
+qasm metric = 2.980e-08
+hw metric = 1.414e+00
+mitigated_hw metric = 1.414e+00
+cutting metric = 1.040e+00
+mitigated_cutting metric = 1.040e+00
+Reconstruction output has 39 cases
+----------------------------------------------------------------------------------------------------
+case (7, 14)
+Cut into  [3, 7, 6] clusters
+qasm metric = 2.980e-08
+hw metric = 1.414e+00
+mitigated_hw metric = 1.414e+00
+cutting metric = 1.070e+00
+mitigated_cutting metric = 1.070e+00
+Reconstruction output has 40 cases
+----------------------------------------------------------------------------------------------------
+case (8, 14)
+Cut into  [8, 7] clusters
+qasm metric = 2.980e-08
+hw metric = 1.414e+00
+mitigated_hw metric = 1.414e+00
+cutting metric = 1.087e+00
+mitigated_cutting metric = 1.087e+00
+Reconstruction output has 41 cases
+----------------------------------------------------------------------------------------------------
+case (9, 14)
+Cut into  [9, 6] clusters
+qasm metric = 2.980e-08
+hw metric = 1.414e+00
+mitigated_hw metric = 1.414e+00
+cutting metric = 1.052e+00
+mitigated_cutting metric = 1.052e+00
+Reconstruction output has 42 cases
+----------------------------------------------------------------------------------------------------
+case (6, 15)
+Cut into  [5, 6, 6] clusters
+qasm metric = 9.872e-06
+hw metric = 1.474e+00
+mitigated_hw metric = 1.474e+00
+cutting metric = 1.101e+00
+mitigated_cutting metric = 1.101e+00
+Reconstruction output has 43 cases
+----------------------------------------------------------------------------------------------------
+case (7, 15)
+Cut into  [3, 7, 7] clusters
+qasm metric = 9.872e-06
+hw metric = 1.474e+00
+mitigated_hw metric = 1.474e+00
+cutting metric = 1.119e+00
+mitigated_cutting metric = 1.119e+00
+Reconstruction output has 44 cases
+----------------------------------------------------------------------------------------------------
+case (8, 15)
+Cut into  [8, 8] clusters
+qasm metric = 9.872e-06
+hw metric = 1.474e+00
+mitigated_hw metric = 1.474e+00
+cutting metric = 1.135e+00
+mitigated_cutting metric = 1.135e+00
+Reconstruction output has 45 cases
+----------------------------------------------------------------------------------------------------
+case (9, 15)
+Cut into  [9, 7] clusters
+qasm metric = 9.872e-06
+hw metric = 1.474e+00
+mitigated_hw metric = 1.474e+00
+cutting metric = 1.117e+00
+mitigated_cutting metric = 1.117e+00
+Reconstruction output has 46 cases
+----------------------------------------------------------------------------------------------------
+case (7, 16)
+Cut into  [5, 6, 7] clusters
+qasm metric = 2.414e-06
+hw metric = 1.604e+00
+mitigated_hw metric = 1.604e+00
+cutting metric = 1.196e+00
+mitigated_cutting metric = 1.196e+00
+Reconstruction output has 47 cases
+----------------------------------------------------------------------------------------------------
+case (8, 16)
+Cut into  [8, 3, 7] clusters
+qasm metric = 2.414e-06
+hw metric = 1.604e+00
+mitigated_hw metric = 1.604e+00
+cutting metric = 1.201e+00
+mitigated_cutting metric = 1.201e+00
+Reconstruction output has 48 cases
+----------------------------------------------------------------------------------------------------
+case (9, 16)
+Cut into  [9, 8] clusters
+qasm metric = 2.414e-06
+hw metric = 1.604e+00
+mitigated_hw metric = 1.604e+00
+cutting metric = 1.191e+00
+mitigated_cutting metric = 1.191e+00
+Reconstruction output has 49 cases
+----------------------------------------------------------------------------------------------------
+case (7, 17)
+Cut into  [6, 7, 6] clusters
+qasm metric = 1.524e-06
+hw metric = 1.573e+00
+mitigated_hw metric = 1.573e+00
+cutting metric = 1.203e+00
+mitigated_cutting metric = 1.203e+00
+Reconstruction output has 50 cases
+----------------------------------------------------------------------------------------------------
+case (8, 17)
+Cut into  [3, 8, 8] clusters
+qasm metric = 1.524e-06
+hw metric = 1.573e+00
+mitigated_hw metric = 1.573e+00
+cutting metric = 1.234e+00
+mitigated_cutting metric = 1.234e+00
+Reconstruction output has 51 cases
+----------------------------------------------------------------------------------------------------
+case (9, 17)
+Cut into  [9, 9] clusters
+qasm metric = 1.524e-06
+hw metric = 1.573e+00
+mitigated_hw metric = 1.573e+00
+cutting metric = 1.236e+00
+mitigated_cutting metric = 1.236e+00
+Reconstruction output has 52 cases
+----------------------------------------------------------------------------------------------------
+case (7, 18)
+Cut into  [7, 6, 7] clusters
+qasm metric = 1.259e-08
+hw metric = 1.653e+00
+mitigated_hw metric = 1.653e+00
+cutting metric = 1.271e+00
+mitigated_cutting metric = 1.271e+00
+Reconstruction output has 53 cases
+----------------------------------------------------------------------------------------------------
+case (8, 18)
+Cut into  [8, 4, 8] clusters
+qasm metric = 1.259e-08
+hw metric = 1.653e+00
+mitigated_hw metric = 1.653e+00
+cutting metric = 1.301e+00
+mitigated_cutting metric = 1.301e+00
+Reconstruction output has 54 cases
+----------------------------------------------------------------------------------------------------
+case (9, 18)
+Cut into  [9, 3, 8] clusters
+qasm metric = 1.259e-08
+hw metric = 1.653e+00
+mitigated_hw metric = 1.653e+00
+cutting metric = 1.295e+00
+mitigated_cutting metric = 1.295e+00
+Reconstruction output has 55 cases
+----------------------------------------------------------------------------------------------------
+case (8, 19)
+Cut into  [8, 7, 6] clusters
+qasm metric = 1.460e-08
+hw metric = 1.657e+00
+mitigated_hw metric = 1.657e+00
+cutting metric = 1.336e+00
+mitigated_cutting metric = 1.336e+00
+Reconstruction output has 56 cases
+----------------------------------------------------------------------------------------------------
+case (9, 19)
+Cut into  [9, 9, 3] clusters
+qasm metric = 1.460e-08
+hw metric = 1.657e+00
+mitigated_hw metric = 1.657e+00
+cutting metric = 1.350e+00
+mitigated_cutting metric = 1.350e+00
+Reconstruction output has 57 cases
+----------------------------------------------------------------------------------------------------
+case (8, 20)
+Cut into  [7, 8, 7] clusters
+qasm metric = 6.976e-06
+hw metric = 1.798e+00
+mitigated_hw metric = 1.798e+00
+cutting metric = 1.406e+00
+mitigated_cutting metric = 1.406e+00
+Reconstruction output has 58 cases
+----------------------------------------------------------------------------------------------------
+case (9, 20)
+Cut into  [9, 4, 9] clusters
+qasm metric = 6.976e-06
+hw metric = 1.798e+00
+mitigated_hw metric = 1.798e+00
+cutting metric = 1.402e+00
+mitigated_cutting metric = 1.402e+00
+Reconstruction output has 59 cases
+----------------------------------------------------------------------------------------------------
+-------------------------------------------------- Plot --------------------------------------------------
+Processing ./hardware/benchmark_data/hwea_ibmq_poughkeepsie/hw_plotter_input_ibmq_poughkeepsie_saturated.p
+case (2, 3): ce percentage reduction = 77.356, fidelity improvement = 1.333, reconstruction time: 6.256e-04
+case (3, 4): ce percentage reduction = 72.576, fidelity improvement = 5.004, reconstruction time: 5.651e-04
+case (3, 5): ce percentage reduction = 63.129, fidelity improvement = 8.776, reconstruction time: 6.363e-04
+case (4, 5): ce percentage reduction = -4.846, fidelity improvement = -0.581, reconstruction time: 6.621e-04
+case (3, 6): ce percentage reduction = 76.399, fidelity improvement = 18.426, reconstruction time: 2.697e-03
+case (4, 6): ce percentage reduction = 20.757, fidelity improvement = 4.817, reconstruction time: 8.245e-04
+case (5, 6): ce percentage reduction = 8.141, fidelity improvement = 2.132, reconstruction time: 9.642e-04
+case (4, 7): ce percentage reduction = 7.951, fidelity improvement = 3.417, reconstruction time: 1.105e-03
+case (5, 7): ce percentage reduction = 34.063, fidelity improvement = 12.064, reconstruction time: 1.202e-03
+case (6, 7): ce percentage reduction = 17.011, fidelity improvement = 6.474, reconstruction time: 1.438e-03
+case (4, 8): ce percentage reduction = 53.715, fidelity improvement = 23.692, reconstruction time: 7.663e-03
+case (5, 8): ce percentage reduction = 17.484, fidelity improvement = 4.680, reconstruction time: 1.756e-03
+case (6, 8): ce percentage reduction = 26.436, fidelity improvement = 8.587, reconstruction time: 1.981e-03
+case (7, 8): ce percentage reduction = 17.779, fidelity improvement = 5.092, reconstruction time: 1.762e-03
+case (4, 9): ce percentage reduction = 44.321, fidelity improvement = 24.187, reconstruction time: 4.998e-03
+case (5, 9): ce percentage reduction = 23.206, fidelity improvement = 8.982, reconstruction time: 2.923e-03
+case (6, 9): ce percentage reduction = 21.102, fidelity improvement = 7.702, reconstruction time: 3.059e-03
+case (7, 9): ce percentage reduction = 34.145, fidelity improvement = 15.980, reconstruction time: 3.572e-03
+case (8, 9): ce percentage reduction = 19.424, fidelity improvement = 10.250, reconstruction time: 4.174e-03
+case (5, 10): ce percentage reduction = 20.975, fidelity improvement = 36.912, reconstruction time: 8.042e-03
+case (6, 10): ce percentage reduction = 18.237, fidelity improvement = 29.992, reconstruction time: 5.396e-03
+case (7, 10): ce percentage reduction = 18.043, fidelity improvement = 29.601, reconstruction time: 5.427e-03
+case (8, 10): ce percentage reduction = 20.474, fidelity improvement = 35.231, reconstruction time: 6.885e-03
+case (9, 10): ce percentage reduction = 20.248, fidelity improvement = 35.324, reconstruction time: 9.272e-03
+case (5, 11): ce percentage reduction = 17.242, fidelity improvement = 31.076, reconstruction time: 1.282e-02
+case (6, 11): ce percentage reduction = 15.372, fidelity improvement = 27.002, reconstruction time: 1.008e-02
+case (7, 11): ce percentage reduction = 15.228, fidelity improvement = 26.245, reconstruction time: 1.008e-02
+case (8, 11): ce percentage reduction = 14.602, fidelity improvement = 25.165, reconstruction time: 1.028e-02
+case (9, 11): ce percentage reduction = 18.208, fidelity improvement = 33.339, reconstruction time: 1.378e-02
+case (5, 12): ce percentage reduction = 14.097, fidelity improvement = 27.699, reconstruction time: 2.276e-02
+case (6, 12): ce percentage reduction = 15.079, fidelity improvement = 28.961, reconstruction time: 2.393e-02
+case (7, 12): ce percentage reduction = 16.038, fidelity improvement = 33.092, reconstruction time: 2.011e-02
+case (8, 12): ce percentage reduction = 15.893, fidelity improvement = 32.978, reconstruction time: 2.079e-02
+case (9, 12): ce percentage reduction = 15.580, fidelity improvement = 33.168, reconstruction time: 2.415e-02
+case (6, 13): ce percentage reduction = 13.285, fidelity improvement = 27.866, reconstruction time: 4.542e-02
+case (7, 13): ce percentage reduction = 17.933, fidelity improvement = 41.119, reconstruction time: 4.151e-02
+case (8, 13): ce percentage reduction = 18.340, fidelity improvement = 42.423, reconstruction time: 4.172e-02
+case (9, 13): ce percentage reduction = 19.685, fidelity improvement = 45.633, reconstruction time: 4.506e-02
+case (6, 14): ce percentage reduction = 22.269, fidelity improvement = 62.016, reconstruction time: 9.169e-02
+case (7, 14): ce percentage reduction = 21.337, fidelity improvement = 59.313, reconstruction time: 9.279e-02
+case (8, 14): ce percentage reduction = 18.115, fidelity improvement = 50.091, reconstruction time: 8.947e-02
+case (9, 14): ce percentage reduction = 19.152, fidelity improvement = 53.391, reconstruction time: 9.138e-02
+case (6, 15): ce percentage reduction = 19.137, fidelity improvement = 58.718, reconstruction time: 2.031e-01
+case (7, 15): ce percentage reduction = 19.224, fidelity improvement = 59.780, reconstruction time: 1.865e-01
+case (8, 15): ce percentage reduction = 16.947, fidelity improvement = 53.168, reconstruction time: 2.568e-01
+case (9, 15): ce percentage reduction = 19.113, fidelity improvement = 60.450, reconstruction time: 1.731e-01
+case (7, 16): ce percentage reduction = 19.114, fidelity improvement = 81.872, reconstruction time: 3.853e-01
+case (8, 16): ce percentage reduction = 20.599, fidelity improvement = 92.255, reconstruction time: 3.814e-01
+case (9, 16): ce percentage reduction = 20.714, fidelity improvement = 95.344, reconstruction time: 4.127e-01
+case (7, 17): ce percentage reduction = 17.035, fidelity improvement = 67.670, reconstruction time: 8.976e-01
+case (8, 17): ce percentage reduction = 16.973, fidelity improvement = 68.167, reconstruction time: 8.990e-01
+case (9, 17): ce percentage reduction = 16.423, fidelity improvement = 66.792, reconstruction time: 8.711e-01
+case (7, 18): ce percentage reduction = 17.124, fidelity improvement = 88.306, reconstruction time: 1.755e+00
+case (8, 18): ce percentage reduction = 17.053, fidelity improvement = 90.401, reconstruction time: 1.824e+00
+case (9, 18): ce percentage reduction = 17.105, fidelity improvement = 89.839, reconstruction time: 1.848e+00
+case (8, 19): ce percentage reduction = 16.189, fidelity improvement = 84.746, reconstruction time: 3.962e+00
+case (9, 19): ce percentage reduction = 15.130, fidelity improvement = 79.433, reconstruction time: 4.629e+00
+case (8, 20): ce percentage reduction = 16.305, fidelity improvement = 161.497, reconstruction time: 8.111e+00
+case (9, 20): ce percentage reduction = 14.538, fidelity improvement = 145.059, reconstruction time: 7.923e+00
+************************* Mitigated Best Cases *************************
+{'fid_percent': 1.3329624806875349, 'reconstructor_time': 0.0006256103515625, 'best_case': (2, 3), 'hw_fid': 0.9834723502062108, 'cutting_fid': 0.9965816676423955}
+{'fid_percent': 5.004302036774453, 'reconstructor_time': 0.0005650520324707031, 'best_case': (3, 4), 'hw_fid': 0.9352179615981618, 'cutting_fid': 0.9820190930986992}
+{'fid_percent': 8.775775134250377, 'reconstructor_time': 0.0006363391876220703, 'best_case': (3, 5), 'hw_fid': 0.8757145080533624, 'cutting_fid': 0.9525652440981324}
+{'fid_percent': 18.42618843919059, 'reconstructor_time': 0.0026972293853759766, 'best_case': (3, 6), 'hw_fid': 0.8005772027865949, 'cutting_fid': 0.9480930667732539}
+{'fid_percent': 12.064342470737461, 'reconstructor_time': 0.001201629638671875, 'best_case': (5, 7), 'hw_fid': 0.7218491390077788, 'cutting_fid': 0.808935491259747}
+{'fid_percent': 23.69193027543726, 'reconstructor_time': 0.007662534713745117, 'best_case': (4, 8), 'hw_fid': 0.6648983876765951, 'cutting_fid': 0.8224256500874406}
+{'fid_percent': 24.186857466169876, 'reconstructor_time': 0.004998445510864258, 'best_case': (4, 9), 'hw_fid': 0.6019488960545287, 'cutting_fid': 0.7475414175624207}
+{'fid_percent': 36.91176779959769, 'reconstructor_time': 0.008042335510253906, 'best_case': (5, 10), 'hw_fid': 0.27480468749999903, 'cutting_fid': 0.37623995565240875}
+{'fid_percent': 33.33866750099329, 'reconstructor_time': 0.0137786865234375, 'best_case': (9, 11), 'hw_fid': 0.2599853515624981, 'cutting_fid': 0.34666100347120776}
+{'fid_percent': 33.167764005275295, 'reconstructor_time': 0.02414989471435547, 'best_case': (9, 12), 'hw_fid': 0.2237792968749956, 'cutting_fid': 0.29800188595515853}
+{'fid_percent': 45.63276252170619, 'reconstructor_time': 0.04506230354309082, 'best_case': (9, 13), 'hw_fid': 0.221289062499994, 'cutting_fid': 0.32226937487712626}
+{'fid_percent': 62.01614581578822, 'reconstructor_time': 0.09168815612792969, 'best_case': (6, 14), 'hw_fid': 0.18331298828123926, 'cutting_fid': 0.2969966383930114}
+{'fid_percent': 60.45023275313597, 'reconstructor_time': 0.1730639934539795, 'best_case': (9, 15), 'hw_fid': 0.163732910156232, 'cutting_fid': 0.26270983543915727}
+{'fid_percent': 95.34392768291575, 'reconstructor_time': 0.4127335548400879, 'best_case': (9, 16), 'hw_fid': 0.11892700195309852, 'cutting_fid': 0.23231667669072056}
+{'fid_percent': 68.16745491162713, 'reconstructor_time': 0.8989710807800293, 'best_case': (8, 17), 'hw_fid': 0.13013305664058947, 'cutting_fid': 0.2188414493511855}
+{'fid_percent': 90.40123377131853, 'reconstructor_time': 1.8241283893585205, 'best_case': (8, 18), 'hw_fid': 0.10233764648433401, 'cutting_fid': 0.19485214151870234}
+{'fid_percent': 84.74557056148888, 'reconstructor_time': 3.962218761444092, 'best_case': (8, 19), 'hw_fid': 0.10172729492181999, 'cutting_fid': 0.18793667142008486}
+{'fid_percent': 161.49688429182433, 'reconstructor_time': 8.111444234848022, 'best_case': (8, 20), 'hw_fid': 0.05605468749994753, 'cutting_fid': 0.14658126131188148}
+**************************************************
+Processing ./hardware/benchmark_data/hwea_ibmq_poughkeepsie/hw_plotter_input_ibmq_poughkeepsie_sametotal.p
+case (2, 3): ce percentage reduction = -9.286, fidelity improvement = 0.101, reconstruction time: 6.304e-04
+case (3, 4): ce percentage reduction = 59.522, fidelity improvement = 4.033, reconstruction time: 5.662e-04
+case (3, 5): ce percentage reduction = 55.455, fidelity improvement = 7.564, reconstruction time: 5.996e-04
+case (4, 5): ce percentage reduction = 59.012, fidelity improvement = 8.266, reconstruction time: 6.170e-04
+case (3, 6): ce percentage reduction = 72.712, fidelity improvement = 17.528, reconstruction time: 2.521e-03
+case (4, 6): ce percentage reduction = 69.325, fidelity improvement = 16.615, reconstruction time: 7.749e-04
+case (5, 6): ce percentage reduction = 65.402, fidelity improvement = 15.484, reconstruction time: 8.798e-04
+case (4, 7): ce percentage reduction = 72.245, fidelity improvement = 26.575, reconstruction time: 1.034e-03
+case (5, 7): ce percentage reduction = 66.838, fidelity improvement = 24.081, reconstruction time: 1.123e-03
+case (6, 7): ce percentage reduction = 51.222, fidelity improvement = 18.356, reconstruction time: 1.352e-03
+case (4, 8): ce percentage reduction = 75.888, fidelity improvement = 35.465, reconstruction time: 3.522e-03
+case (5, 8): ce percentage reduction = 66.904, fidelity improvement = 30.694, reconstruction time: 1.625e-03
+case (6, 8): ce percentage reduction = 50.084, fidelity improvement = 20.816, reconstruction time: 1.867e-03
+case (7, 8): ce percentage reduction = 61.115, fidelity improvement = 27.165, reconstruction time: 1.640e-03
+case (4, 9): ce percentage reduction = 81.296, fidelity improvement = 50.454, reconstruction time: 4.725e-03
+case (5, 9): ce percentage reduction = 72.911, fidelity improvement = 43.884, reconstruction time: 2.718e-03
+case (6, 9): ce percentage reduction = 57.950, fidelity improvement = 32.198, reconstruction time: 2.851e-03
+case (7, 9): ce percentage reduction = 62.110, fidelity improvement = 36.122, reconstruction time: 3.348e-03
+case (8, 9): ce percentage reduction = 46.939, fidelity improvement = 25.561, reconstruction time: 3.944e-03
+case (5, 10): ce percentage reduction = 31.061, fidelity improvement = 55.716, reconstruction time: 7.554e-03
+case (6, 10): ce percentage reduction = 35.877, fidelity improvement = 67.101, reconstruction time: 5.167e-03
+case (7, 10): ce percentage reduction = 35.264, fidelity improvement = 65.553, reconstruction time: 5.000e-03
+case (8, 10): ce percentage reduction = 31.513, fidelity improvement = 58.368, reconstruction time: 6.430e-03
+case (9, 10): ce percentage reduction = 32.327, fidelity improvement = 60.849, reconstruction time: 8.543e-03
+case (5, 11): ce percentage reduction = 29.435, fidelity improvement = 55.649, reconstruction time: 1.204e-02
+case (6, 11): ce percentage reduction = 30.934, fidelity improvement = 60.787, reconstruction time: 9.335e-03
+case (7, 11): ce percentage reduction = 31.733, fidelity improvement = 62.559, reconstruction time: 9.341e-03
+case (8, 11): ce percentage reduction = 31.347, fidelity improvement = 61.995, reconstruction time: 9.398e-03
+case (9, 11): ce percentage reduction = 27.887, fidelity improvement = 55.087, reconstruction time: 1.267e-02
+case (5, 12): ce percentage reduction = 29.571, fidelity improvement = 66.562, reconstruction time: 2.104e-02
+case (6, 12): ce percentage reduction = 27.153, fidelity improvement = 59.825, reconstruction time: 2.224e-02
+case (7, 12): ce percentage reduction = 29.760, fidelity improvement = 68.273, reconstruction time: 1.862e-02
+case (8, 12): ce percentage reduction = 29.680, fidelity improvement = 68.484, reconstruction time: 1.927e-02
+case (9, 12): ce percentage reduction = 29.216, fidelity improvement = 67.715, reconstruction time: 2.172e-02
+case (6, 13): ce percentage reduction = 20.887, fidelity improvement = 46.558, reconstruction time: 4.099e-02
+case (7, 13): ce percentage reduction = 22.762, fidelity improvement = 53.307, reconstruction time: 3.918e-02
+case (8, 13): ce percentage reduction = 24.189, fidelity improvement = 57.582, reconstruction time: 3.766e-02
+case (9, 13): ce percentage reduction = 24.320, fidelity improvement = 57.486, reconstruction time: 3.968e-02
+case (6, 14): ce percentage reduction = 26.473, fidelity improvement = 74.241, reconstruction time: 8.064e-02
+case (7, 14): ce percentage reduction = 24.291, fidelity improvement = 68.098, reconstruction time: 8.221e-02
+case (8, 14): ce percentage reduction = 23.120, fidelity improvement = 65.468, reconstruction time: 7.563e-02
+case (9, 14): ce percentage reduction = 25.556, fidelity improvement = 73.540, reconstruction time: 7.877e-02
+case (6, 15): ce percentage reduction = 25.346, fidelity improvement = 79.698, reconstruction time: 1.619e-01
+case (7, 15): ce percentage reduction = 24.126, fidelity improvement = 77.215, reconstruction time: 1.616e-01
+case (8, 15): ce percentage reduction = 23.001, fidelity improvement = 73.821, reconstruction time: 1.574e-01
+case (9, 15): ce percentage reduction = 24.257, fidelity improvement = 78.268, reconstruction time: 1.561e-01
+case (7, 16): ce percentage reduction = 25.467, fidelity improvement = 114.557, reconstruction time: 3.294e-01
+case (8, 16): ce percentage reduction = 25.110, fidelity improvement = 114.899, reconstruction time: 3.324e-01
+case (9, 16): ce percentage reduction = 25.762, fidelity improvement = 120.786, reconstruction time: 3.173e-01
+case (7, 17): ce percentage reduction = 23.491, fidelity improvement = 95.656, reconstruction time: 6.886e-01
+case (8, 17): ce percentage reduction = 21.509, fidelity improvement = 88.118, reconstruction time: 6.815e-01
+case (9, 17): ce percentage reduction = 21.391, fidelity improvement = 89.352, reconstruction time: 6.654e-01
+case (7, 18): ce percentage reduction = 23.118, fidelity improvement = 122.543, reconstruction time: 1.401e+00
+case (8, 18): ce percentage reduction = 21.275, fidelity improvement = 112.896, reconstruction time: 1.410e+00
+case (9, 18): ce percentage reduction = 21.688, fidelity improvement = 116.392, reconstruction time: 1.403e+00
+case (8, 19): ce percentage reduction = 19.374, fidelity improvement = 100.796, reconstruction time: 2.919e+00
+case (9, 19): ce percentage reduction = 18.542, fidelity improvement = 97.057, reconstruction time: 3.350e+00
+case (8, 20): ce percentage reduction = 21.790, fidelity improvement = 219.419, reconstruction time: 5.966e+00
+case (9, 20): ce percentage reduction = 22.031, fidelity improvement = 223.918, reconstruction time: 5.931e+00
+************************* Mitigated Best Cases *************************
+{'fid_percent': 0.10111258779149486, 'reconstructor_time': 0.0006303787231445312, 'best_case': (2, 3), 'hw_fid': 0.9834723502062108, 'cutting_fid': 0.9844667645497182}
+{'fid_percent': 4.03306284582785, 'reconstructor_time': 0.0005662441253662109, 'best_case': (3, 4), 'hw_fid': 0.9352179615981618, 'cutting_fid': 0.9729358897348859}
+{'fid_percent': 8.265619472166016, 'reconstructor_time': 0.0006170272827148438, 'best_case': (4, 5), 'hw_fid': 0.8757145080533624, 'cutting_fid': 0.9480977369516039}
+{'fid_percent': 17.527751287301896, 'reconstructor_time': 0.0025212764739990234, 'best_case': (3, 6), 'hw_fid': 0.8005772027865949, 'cutting_fid': 0.9409003837538679}
+{'fid_percent': 26.575251791529368, 'reconstructor_time': 0.0010340213775634766, 'best_case': (4, 7), 'hw_fid': 0.7218491390077788, 'cutting_fid': 0.9136823652540829}
+{'fid_percent': 35.465494801646464, 'reconstructor_time': 0.0035223960876464844, 'best_case': (4, 8), 'hw_fid': 0.6648983876765951, 'cutting_fid': 0.9007078907942692}
+{'fid_percent': 50.453797010243335, 'reconstructor_time': 0.004724740982055664, 'best_case': (4, 9), 'hw_fid': 0.6019488960545287, 'cutting_fid': 0.9056549701752813}
+{'fid_percent': 67.10060759035774, 'reconstructor_time': 0.005167245864868164, 'best_case': (6, 10), 'hw_fid': 0.27480468749999903, 'cutting_fid': 0.45920030249928223}
+{'fid_percent': 62.55862112309181, 'reconstructor_time': 0.009340524673461914, 'best_case': (7, 11), 'hw_fid': 0.2599853515624981, 'cutting_fid': 0.4226286026220195}
+{'fid_percent': 68.48370310390578, 'reconstructor_time': 0.01926732063293457, 'best_case': (8, 12), 'hw_fid': 0.2237792968749956, 'cutting_fid': 0.3770316461548755}
+{'fid_percent': 57.582352076725925, 'reconstructor_time': 0.0376584529876709, 'best_case': (8, 13), 'hw_fid': 0.221289062499994, 'cutting_fid': 0.3487125095760266}
+{'fid_percent': 74.24059191277921, 'reconstructor_time': 0.08063983917236328, 'best_case': (6, 14), 'hw_fid': 0.18331298828123926, 'cutting_fid': 0.31940563583423487}
+{'fid_percent': 79.69771316157654, 'reconstructor_time': 0.16187238693237305, 'best_case': (6, 15), 'hw_fid': 0.163732910156232, 'cutting_fid': 0.2942242952436476}
+{'fid_percent': 120.786425573435, 'reconstructor_time': 0.31726813316345215, 'best_case': (9, 16), 'hw_fid': 0.11892700195309852, 'cutting_fid': 0.26257467665389544}
+{'fid_percent': 95.65565372588854, 'reconstructor_time': 0.6886334419250488, 'best_case': (7, 17), 'hw_fid': 0.13013305664058947, 'cutting_fid': 0.25461268268362613}
+{'fid_percent': 122.54318491881723, 'reconstructor_time': 1.4005992412567139, 'best_case': (7, 18), 'hw_fid': 0.10233764648433401, 'cutting_fid': 0.2277454578571969}
+{'fid_percent': 100.79619339102057, 'reconstructor_time': 2.919384479522705, 'best_case': (8, 19), 'hw_fid': 0.10172729492181999, 'cutting_fid': 0.2042645358426715}
+{'fid_percent': 223.9178017343669, 'reconstructor_time': 5.931295394897461, 'best_case': (9, 20), 'hw_fid': 0.05605468749994753, 'cutting_fid': 0.18157111151889896}
+**************************************************
+----------------------------------------------------------------------------------------------------
+Processing ./hardware/benchmark_data/hwea_ibmq_poughkeepsie/hw_plotter_input_ibmq_poughkeepsie_saturated.p
+case (2, 3): ce percentage reduction = -5.379, fidelity improvement = -0.946, reconstruction time: 6.256e-04
+case (3, 4): ce percentage reduction = 20.928, fidelity improvement = 7.321, reconstruction time: 5.651e-04
+case (3, 5): ce percentage reduction = 16.126, fidelity improvement = 7.578, reconstruction time: 6.363e-04
+case (4, 5): ce percentage reduction = 3.721, fidelity improvement = 1.791, reconstruction time: 6.621e-04
+case (3, 6): ce percentage reduction = 23.211, fidelity improvement = 15.310, reconstruction time: 2.697e-03
+case (4, 6): ce percentage reduction = 8.493, fidelity improvement = 5.414, reconstruction time: 8.245e-04
+case (5, 6): ce percentage reduction = 10.483, fidelity improvement = 6.525, reconstruction time: 9.642e-04
+case (4, 7): ce percentage reduction = 4.100, fidelity improvement = 4.203, reconstruction time: 1.105e-03
+case (5, 7): ce percentage reduction = 14.479, fidelity improvement = 12.054, reconstruction time: 1.202e-03
+case (6, 7): ce percentage reduction = 12.104, fidelity improvement = 10.460, reconstruction time: 1.438e-03
+case (4, 8): ce percentage reduction = 17.260, fidelity improvement = 19.591, reconstruction time: 7.663e-03
+case (5, 8): ce percentage reduction = 10.580, fidelity improvement = 10.848, reconstruction time: 1.756e-03
+case (6, 8): ce percentage reduction = 15.268, fidelity improvement = 15.981, reconstruction time: 1.981e-03
+case (7, 8): ce percentage reduction = 10.015, fidelity improvement = 10.295, reconstruction time: 1.762e-03
+case (4, 9): ce percentage reduction = 12.456, fidelity improvement = 16.397, reconstruction time: 4.998e-03
+case (5, 9): ce percentage reduction = 9.784, fidelity improvement = 10.713, reconstruction time: 2.923e-03
+case (6, 9): ce percentage reduction = 8.519, fidelity improvement = 9.368, reconstruction time: 3.059e-03
+case (7, 9): ce percentage reduction = 13.686, fidelity improvement = 16.064, reconstruction time: 3.572e-03
+case (8, 9): ce percentage reduction = 11.374, fidelity improvement = 16.009, reconstruction time: 4.174e-03
+case (5, 10): ce percentage reduction = 20.975, fidelity improvement = 36.912, reconstruction time: 8.042e-03
+case (6, 10): ce percentage reduction = 18.237, fidelity improvement = 29.992, reconstruction time: 5.396e-03
+case (7, 10): ce percentage reduction = 18.043, fidelity improvement = 29.601, reconstruction time: 5.427e-03
+case (8, 10): ce percentage reduction = 20.474, fidelity improvement = 35.231, reconstruction time: 6.885e-03
+case (9, 10): ce percentage reduction = 20.248, fidelity improvement = 35.324, reconstruction time: 9.272e-03
+case (5, 11): ce percentage reduction = 17.242, fidelity improvement = 31.076, reconstruction time: 1.282e-02
+case (6, 11): ce percentage reduction = 15.372, fidelity improvement = 27.002, reconstruction time: 1.008e-02
+case (7, 11): ce percentage reduction = 15.228, fidelity improvement = 26.245, reconstruction time: 1.008e-02
+case (8, 11): ce percentage reduction = 14.602, fidelity improvement = 25.165, reconstruction time: 1.028e-02
+case (9, 11): ce percentage reduction = 18.208, fidelity improvement = 33.339, reconstruction time: 1.378e-02
+case (5, 12): ce percentage reduction = 14.097, fidelity improvement = 27.699, reconstruction time: 2.276e-02
+case (6, 12): ce percentage reduction = 15.079, fidelity improvement = 28.961, reconstruction time: 2.393e-02
+case (7, 12): ce percentage reduction = 16.038, fidelity improvement = 33.092, reconstruction time: 2.011e-02
+case (8, 12): ce percentage reduction = 15.893, fidelity improvement = 32.978, reconstruction time: 2.079e-02
+case (9, 12): ce percentage reduction = 15.580, fidelity improvement = 33.168, reconstruction time: 2.415e-02
+case (6, 13): ce percentage reduction = 13.285, fidelity improvement = 27.866, reconstruction time: 4.542e-02
+case (7, 13): ce percentage reduction = 17.933, fidelity improvement = 41.119, reconstruction time: 4.151e-02
+case (8, 13): ce percentage reduction = 18.340, fidelity improvement = 42.423, reconstruction time: 4.172e-02
+case (9, 13): ce percentage reduction = 19.685, fidelity improvement = 45.633, reconstruction time: 4.506e-02
+case (6, 14): ce percentage reduction = 22.269, fidelity improvement = 62.016, reconstruction time: 9.169e-02
+case (7, 14): ce percentage reduction = 21.337, fidelity improvement = 59.313, reconstruction time: 9.279e-02
+case (8, 14): ce percentage reduction = 18.115, fidelity improvement = 50.091, reconstruction time: 8.947e-02
+case (9, 14): ce percentage reduction = 19.152, fidelity improvement = 53.391, reconstruction time: 9.138e-02
+case (6, 15): ce percentage reduction = 19.137, fidelity improvement = 58.718, reconstruction time: 2.031e-01
+case (7, 15): ce percentage reduction = 19.224, fidelity improvement = 59.780, reconstruction time: 1.865e-01
+case (8, 15): ce percentage reduction = 16.947, fidelity improvement = 53.168, reconstruction time: 2.568e-01
+case (9, 15): ce percentage reduction = 19.113, fidelity improvement = 60.450, reconstruction time: 1.731e-01
+case (7, 16): ce percentage reduction = 19.114, fidelity improvement = 81.872, reconstruction time: 3.853e-01
+case (8, 16): ce percentage reduction = 20.599, fidelity improvement = 92.255, reconstruction time: 3.814e-01
+case (9, 16): ce percentage reduction = 20.714, fidelity improvement = 95.344, reconstruction time: 4.127e-01
+case (7, 17): ce percentage reduction = 17.035, fidelity improvement = 67.670, reconstruction time: 8.976e-01
+case (8, 17): ce percentage reduction = 16.973, fidelity improvement = 68.167, reconstruction time: 8.990e-01
+case (9, 17): ce percentage reduction = 16.423, fidelity improvement = 66.792, reconstruction time: 8.711e-01
+case (7, 18): ce percentage reduction = 17.124, fidelity improvement = 88.306, reconstruction time: 1.755e+00
+case (8, 18): ce percentage reduction = 17.053, fidelity improvement = 90.401, reconstruction time: 1.824e+00
+case (9, 18): ce percentage reduction = 17.105, fidelity improvement = 89.839, reconstruction time: 1.848e+00
+case (8, 19): ce percentage reduction = 16.189, fidelity improvement = 84.746, reconstruction time: 3.962e+00
+case (9, 19): ce percentage reduction = 15.130, fidelity improvement = 79.433, reconstruction time: 4.629e+00
+case (8, 20): ce percentage reduction = 16.305, fidelity improvement = 161.497, reconstruction time: 8.111e+00
+case (9, 20): ce percentage reduction = 14.538, fidelity improvement = 145.059, reconstruction time: 7.923e+00
+************************* Best Cases *************************
+{'fid_percent': -0.9464907215583521, 'reconstructor_time': 0.0006256103515625, 'best_case': (2, 3), 'hw_fid': 0.84149169921875, 'cutting_fid': 0.8335270583629608}
+{'fid_percent': 7.321444280943654, 'reconstructor_time': 0.0005650520324707031, 'best_case': (3, 4), 'hw_fid': 0.7066650390625, 'cutting_fid': 0.7584031261503696}
+{'fid_percent': 7.578017256642116, 'reconstructor_time': 0.0006363391876220703, 'best_case': (3, 5), 'hw_fid': 0.6396484375, 'cutting_fid': 0.6881211064755917}
+{'fid_percent': 15.31031423093008, 'reconstructor_time': 0.0026972293853759766, 'best_case': (3, 6), 'hw_fid': 0.54266357421875, 'cutting_fid': 0.6257470726484371}
+{'fid_percent': 12.053882400424495, 'reconstructor_time': 0.001201629638671875, 'best_case': (5, 7), 'hw_fid': 0.47515869140625, 'cutting_fid': 0.5324337612837553}
+{'fid_percent': 19.590644875477338, 'reconstructor_time': 0.007662534713745117, 'best_case': (4, 8), 'hw_fid': 0.3944091796875, 'cutting_fid': 0.47167648143636143}
+{'fid_percent': 16.396765163646755, 'reconstructor_time': 0.004998445510864258, 'best_case': (4, 9), 'hw_fid': 0.3602294921875, 'cutting_fid': 0.4192954760716816}
+{'fid_percent': 36.91176779959769, 'reconstructor_time': 0.008042335510253906, 'best_case': (5, 10), 'hw_fid': 0.27480468749999903, 'cutting_fid': 0.37623995565240875}
+{'fid_percent': 33.33866750099329, 'reconstructor_time': 0.0137786865234375, 'best_case': (9, 11), 'hw_fid': 0.2599853515624981, 'cutting_fid': 0.34666100347120776}
+{'fid_percent': 33.167764005275295, 'reconstructor_time': 0.02414989471435547, 'best_case': (9, 12), 'hw_fid': 0.2237792968749956, 'cutting_fid': 0.29800188595515853}
+{'fid_percent': 45.63276252170619, 'reconstructor_time': 0.04506230354309082, 'best_case': (9, 13), 'hw_fid': 0.221289062499994, 'cutting_fid': 0.32226937487712626}
+{'fid_percent': 62.01614581578822, 'reconstructor_time': 0.09168815612792969, 'best_case': (6, 14), 'hw_fid': 0.18331298828123926, 'cutting_fid': 0.2969966383930114}
+{'fid_percent': 60.45023275313597, 'reconstructor_time': 0.1730639934539795, 'best_case': (9, 15), 'hw_fid': 0.163732910156232, 'cutting_fid': 0.26270983543915727}
+{'fid_percent': 95.34392768291575, 'reconstructor_time': 0.4127335548400879, 'best_case': (9, 16), 'hw_fid': 0.11892700195309852, 'cutting_fid': 0.23231667669072056}
+{'fid_percent': 68.16745491162713, 'reconstructor_time': 0.8989710807800293, 'best_case': (8, 17), 'hw_fid': 0.13013305664058947, 'cutting_fid': 0.2188414493511855}
+{'fid_percent': 90.40123377131853, 'reconstructor_time': 1.8241283893585205, 'best_case': (8, 18), 'hw_fid': 0.10233764648433401, 'cutting_fid': 0.19485214151870234}
+{'fid_percent': 84.74557056148888, 'reconstructor_time': 3.962218761444092, 'best_case': (8, 19), 'hw_fid': 0.10172729492181999, 'cutting_fid': 0.18793667142008486}
+{'fid_percent': 161.49688429182433, 'reconstructor_time': 8.111444234848022, 'best_case': (8, 20), 'hw_fid': 0.05605468749994753, 'cutting_fid': 0.14658126131188148}
+**************************************************
+Processing ./hardware/benchmark_data/hwea_ibmq_poughkeepsie/hw_plotter_input_ibmq_poughkeepsie_sametotal.p
+case (2, 3): ce percentage reduction = -29.978, fidelity improvement = -4.868, reconstruction time: 6.304e-04
+case (3, 4): ce percentage reduction = 8.023, fidelity improvement = 2.302, reconstruction time: 5.662e-04
+case (3, 5): ce percentage reduction = 8.252, fidelity improvement = 3.566, reconstruction time: 5.996e-04
+case (4, 5): ce percentage reduction = 13.086, fidelity improvement = 5.766, reconstruction time: 6.170e-04
+case (3, 6): ce percentage reduction = 14.652, fidelity improvement = 9.138, reconstruction time: 2.521e-03
+case (4, 6): ce percentage reduction = 18.216, fidelity improvement = 11.471, reconstruction time: 7.749e-04
+case (5, 6): ce percentage reduction = 23.582, fidelity improvement = 15.085, reconstruction time: 8.798e-04
+case (4, 7): ce percentage reduction = 23.351, fidelity improvement = 19.553, reconstruction time: 1.034e-03
+case (5, 7): ce percentage reduction = 23.065, fidelity improvement = 18.927, reconstruction time: 1.123e-03
+case (6, 7): ce percentage reduction = 23.200, fidelity improvement = 19.507, reconstruction time: 1.352e-03
+case (4, 8): ce percentage reduction = 21.565, fidelity improvement = 23.824, reconstruction time: 3.522e-03
+case (5, 8): ce percentage reduction = 27.274, fidelity improvement = 31.315, reconstruction time: 1.625e-03
+case (6, 8): ce percentage reduction = 21.650, fidelity improvement = 23.692, reconstruction time: 1.867e-03
+case (7, 8): ce percentage reduction = 24.986, fidelity improvement = 28.085, reconstruction time: 1.640e-03
+case (4, 9): ce percentage reduction = 23.082, fidelity improvement = 29.146, reconstruction time: 4.725e-03
+case (5, 9): ce percentage reduction = 29.511, fidelity improvement = 38.206, reconstruction time: 2.718e-03
+case (6, 9): ce percentage reduction = 22.444, fidelity improvement = 27.771, reconstruction time: 2.851e-03
+case (7, 9): ce percentage reduction = 23.572, fidelity improvement = 30.157, reconstruction time: 3.348e-03
+case (8, 9): ce percentage reduction = 21.551, fidelity improvement = 27.060, reconstruction time: 3.944e-03
+case (5, 10): ce percentage reduction = 31.061, fidelity improvement = 55.716, reconstruction time: 7.554e-03
+case (6, 10): ce percentage reduction = 35.877, fidelity improvement = 67.101, reconstruction time: 5.167e-03
+case (7, 10): ce percentage reduction = 35.264, fidelity improvement = 65.553, reconstruction time: 5.000e-03
+case (8, 10): ce percentage reduction = 31.513, fidelity improvement = 58.368, reconstruction time: 6.430e-03
+case (9, 10): ce percentage reduction = 32.327, fidelity improvement = 60.849, reconstruction time: 8.543e-03
+case (5, 11): ce percentage reduction = 29.435, fidelity improvement = 55.649, reconstruction time: 1.204e-02
+case (6, 11): ce percentage reduction = 30.934, fidelity improvement = 60.787, reconstruction time: 9.335e-03
+case (7, 11): ce percentage reduction = 31.733, fidelity improvement = 62.559, reconstruction time: 9.341e-03
+case (8, 11): ce percentage reduction = 31.347, fidelity improvement = 61.995, reconstruction time: 9.398e-03
+case (9, 11): ce percentage reduction = 27.887, fidelity improvement = 55.087, reconstruction time: 1.267e-02
+case (5, 12): ce percentage reduction = 29.571, fidelity improvement = 66.562, reconstruction time: 2.104e-02
+case (6, 12): ce percentage reduction = 27.153, fidelity improvement = 59.825, reconstruction time: 2.224e-02
+case (7, 12): ce percentage reduction = 29.760, fidelity improvement = 68.273, reconstruction time: 1.862e-02
+case (8, 12): ce percentage reduction = 29.680, fidelity improvement = 68.484, reconstruction time: 1.927e-02
+case (9, 12): ce percentage reduction = 29.216, fidelity improvement = 67.715, reconstruction time: 2.172e-02
+case (6, 13): ce percentage reduction = 20.887, fidelity improvement = 46.558, reconstruction time: 4.099e-02
+case (7, 13): ce percentage reduction = 22.762, fidelity improvement = 53.307, reconstruction time: 3.918e-02
+case (8, 13): ce percentage reduction = 24.189, fidelity improvement = 57.582, reconstruction time: 3.766e-02
+case (9, 13): ce percentage reduction = 24.320, fidelity improvement = 57.486, reconstruction time: 3.968e-02
+case (6, 14): ce percentage reduction = 26.473, fidelity improvement = 74.241, reconstruction time: 8.064e-02
+case (7, 14): ce percentage reduction = 24.291, fidelity improvement = 68.098, reconstruction time: 8.221e-02
+case (8, 14): ce percentage reduction = 23.120, fidelity improvement = 65.468, reconstruction time: 7.563e-02
+case (9, 14): ce percentage reduction = 25.556, fidelity improvement = 73.540, reconstruction time: 7.877e-02
+case (6, 15): ce percentage reduction = 25.346, fidelity improvement = 79.698, reconstruction time: 1.619e-01
+case (7, 15): ce percentage reduction = 24.126, fidelity improvement = 77.215, reconstruction time: 1.616e-01
+case (8, 15): ce percentage reduction = 23.001, fidelity improvement = 73.821, reconstruction time: 1.574e-01
+case (9, 15): ce percentage reduction = 24.257, fidelity improvement = 78.268, reconstruction time: 1.561e-01
+case (7, 16): ce percentage reduction = 25.467, fidelity improvement = 114.557, reconstruction time: 3.294e-01
+case (8, 16): ce percentage reduction = 25.110, fidelity improvement = 114.899, reconstruction time: 3.324e-01
+case (9, 16): ce percentage reduction = 25.762, fidelity improvement = 120.786, reconstruction time: 3.173e-01
+case (7, 17): ce percentage reduction = 23.491, fidelity improvement = 95.656, reconstruction time: 6.886e-01
+case (8, 17): ce percentage reduction = 21.509, fidelity improvement = 88.118, reconstruction time: 6.815e-01
+case (9, 17): ce percentage reduction = 21.391, fidelity improvement = 89.352, reconstruction time: 6.654e-01
+case (7, 18): ce percentage reduction = 23.118, fidelity improvement = 122.543, reconstruction time: 1.401e+00
+case (8, 18): ce percentage reduction = 21.275, fidelity improvement = 112.896, reconstruction time: 1.410e+00
+case (9, 18): ce percentage reduction = 21.688, fidelity improvement = 116.392, reconstruction time: 1.403e+00
+case (8, 19): ce percentage reduction = 19.374, fidelity improvement = 100.796, reconstruction time: 2.919e+00
+case (9, 19): ce percentage reduction = 18.542, fidelity improvement = 97.057, reconstruction time: 3.350e+00
+case (8, 20): ce percentage reduction = 21.790, fidelity improvement = 219.419, reconstruction time: 5.966e+00
+case (9, 20): ce percentage reduction = 22.031, fidelity improvement = 223.918, reconstruction time: 5.931e+00
+************************* Best Cases *************************
+{'fid_percent': -4.868143192087313, 'reconstructor_time': 0.0006303787231445312, 'best_case': (2, 3), 'hw_fid': 0.84149169921875, 'cutting_fid': 0.8005266783512526}
+{'fid_percent': 2.3018966235826506, 'reconstructor_time': 0.0005662441253662109, 'best_case': (3, 4), 'hw_fid': 0.7066650390625, 'cutting_fid': 0.7229317377367187}
+{'fid_percent': 5.766432611919927, 'reconstructor_time': 0.0006170272827148438, 'best_case': (4, 5), 'hw_fid': 0.6396484375, 'cutting_fid': 0.6765333336016363}
+{'fid_percent': 15.08491506735763, 'reconstructor_time': 0.0008797645568847656, 'best_case': (5, 6), 'hw_fid': 0.54266357421875, 'cutting_fid': 0.6245239134911357}
+{'fid_percent': 19.552872739739556, 'reconstructor_time': 0.0010340213775634766, 'best_case': (4, 7), 'hw_fid': 0.47515869140625, 'cutting_fid': 0.5680658656487259}
+{'fid_percent': 31.315498000898064, 'reconstructor_time': 0.0016245841979980469, 'best_case': (5, 8), 'hw_fid': 0.3944091796875, 'cutting_fid': 0.5179203784678975}
+{'fid_percent': 38.206392185329534, 'reconstructor_time': 0.002717733383178711, 'best_case': (5, 9), 'hw_fid': 0.3602294921875, 'cutting_fid': 0.49786018473987725}
+{'fid_percent': 67.10060759035774, 'reconstructor_time': 0.005167245864868164, 'best_case': (6, 10), 'hw_fid': 0.27480468749999903, 'cutting_fid': 0.45920030249928223}
+{'fid_percent': 62.55862112309181, 'reconstructor_time': 0.009340524673461914, 'best_case': (7, 11), 'hw_fid': 0.2599853515624981, 'cutting_fid': 0.4226286026220195}
+{'fid_percent': 68.48370310390578, 'reconstructor_time': 0.01926732063293457, 'best_case': (8, 12), 'hw_fid': 0.2237792968749956, 'cutting_fid': 0.3770316461548755}
+{'fid_percent': 57.582352076725925, 'reconstructor_time': 0.0376584529876709, 'best_case': (8, 13), 'hw_fid': 0.221289062499994, 'cutting_fid': 0.3487125095760266}
+{'fid_percent': 74.24059191277921, 'reconstructor_time': 0.08063983917236328, 'best_case': (6, 14), 'hw_fid': 0.18331298828123926, 'cutting_fid': 0.31940563583423487}
+{'fid_percent': 79.69771316157654, 'reconstructor_time': 0.16187238693237305, 'best_case': (6, 15), 'hw_fid': 0.163732910156232, 'cutting_fid': 0.2942242952436476}
+{'fid_percent': 120.786425573435, 'reconstructor_time': 0.31726813316345215, 'best_case': (9, 16), 'hw_fid': 0.11892700195309852, 'cutting_fid': 0.26257467665389544}
+{'fid_percent': 95.65565372588854, 'reconstructor_time': 0.6886334419250488, 'best_case': (7, 17), 'hw_fid': 0.13013305664058947, 'cutting_fid': 0.25461268268362613}
+{'fid_percent': 122.54318491881723, 'reconstructor_time': 1.4005992412567139, 'best_case': (7, 18), 'hw_fid': 0.10233764648433401, 'cutting_fid': 0.2277454578571969}
+{'fid_percent': 100.79619339102057, 'reconstructor_time': 2.919384479522705, 'best_case': (8, 19), 'hw_fid': 0.10172729492181999, 'cutting_fid': 0.2042645358426715}
+{'fid_percent': 223.9178017343669, 'reconstructor_time': 5.931295394897461, 'best_case': (9, 20), 'hw_fid': 0.05605468749994753, 'cutting_fid': 0.18157111151889896}
+**************************************************
+----------------------------------------------------------------------------------------------------
