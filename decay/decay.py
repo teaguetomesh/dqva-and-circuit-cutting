@@ -30,10 +30,12 @@ def find_rank_tasks(tasks,rank,num_workers):
             print('Should not reach here')
     return rank_tasks
 
-def accumulate_batch(circ,accumulated_prob,counter,shots_increment,evaluation_method):
+def accumulate_batch(circ,accumulated_prob,counter,evaluator_info,evaluation_method):
     if evaluation_method == 'qasm_simulator':
-        qasm_evaluator_info = {'num_shots':shots_increment}
-        prob_batch = evaluate_circ(circ=circ,backend='noiseless_qasm_simulator',evaluator_info=qasm_evaluator_info,force_prob=True)
+        prob_batch = evaluate_circ(circ=circ,backend='noiseless_qasm_simulator',evaluator_info=evaluator_info,force_prob=True)
+        prob_batch = dict_to_array(distribution_dict=prob_batch,force_prob=True)
+    elif evaluation_method == 'noisy_qasm_simulator':
+        prob_batch = evaluate_circ(circ=circ,backend='noisy_qasm_simulator',evaluator_info=evaluator_info,force_prob=True)
         prob_batch = dict_to_array(distribution_dict=prob_batch,force_prob=True)
     else:
         raise Exception('Illegal evaluation method:',evaluation_method)
@@ -51,10 +53,10 @@ def noiseless_decay(circuit,shots_increment,device_max_experiments):
     chi2_l = []
     distance_l = []
     max_counter = max(20,int(20*np.power(2,full_circ_size)/shots_increment))
-    max_counter = min(max_counter,device_max_experiments)
+    max_counter = min(max_counter,device_max_experiments/10)
     for counter in range(1,max_counter+1):
         noiseless_accumulated_prob = accumulate_batch(circ=circuit,accumulated_prob=noiseless_accumulated_prob,
-        counter=counter,shots_increment=shots_increment,evaluation_method='qasm_simulator')
+        counter=counter,evaluator_info={'num_shots':shots_increment},evaluation_method='qasm_simulator')
         chi2 = chi2_distance(target=ground_truth,obs=noiseless_accumulated_prob)
         distance = wasserstein_distance(u_values=ground_truth,v_values=noiseless_accumulated_prob)
         chi2_l.append(chi2)
@@ -62,7 +64,34 @@ def noiseless_decay(circuit,shots_increment,device_max_experiments):
         if full_circ_size>=15 and counter%50==0:
             time_elapsed = time()-decay_begin
             eta = time_elapsed/counter*max_counter-time_elapsed
-            print('%d qubit circuit, counter %d/%d, ETA = %.1e'%(full_circ_size,counter,max_counter,eta),flush=True)
+            print('%d qubit circuit, counter %d/%d, noiseless ETA = %.1e'%(full_circ_size,counter,max_counter,eta),flush=True)
+    return chi2_l, distance_l
+
+def noisy_decay(circuit,shots_increment,device_max_experiments):
+    decay_begin = time()
+    ground_truth = evaluate_circ(circ=circuit,backend='statevector_simulator',evaluator_info=None,force_prob=True)
+    ground_truth = dict_to_array(distribution_dict=ground_truth,force_prob=True)
+    full_circ_size = len(circuit.qubits)
+    # print('%d qubit full circuit, shots increment = %d'%(full_circ_size,shots_increment))
+    noisy_accumulated_prob = np.zeros(2**full_circ_size,dtype=float)
+    chi2_l = []
+    distance_l = []
+    max_counter = max(20,int(20*np.power(2,full_circ_size)/shots_increment))
+    max_counter = min(max_counter,int(device_max_experiments/10))
+    evaluator_info = get_evaluator_info(circ=circuit,device_name='ibmq_boeblingen',fields=['device','basis_gates',
+    'coupling_map','properties','initial_layout','noise_model'])
+    evaluator_info['num_shots'] = shots_increment
+    for counter in range(1,max_counter+1):
+        noisy_accumulated_prob = accumulate_batch(circ=circuit,accumulated_prob=noisy_accumulated_prob,
+        counter=counter,evaluator_info=evaluator_info,evaluation_method='noisy_qasm_simulator')
+        chi2 = chi2_distance(target=ground_truth,obs=noisy_accumulated_prob)
+        distance = wasserstein_distance(u_values=ground_truth,v_values=noisy_accumulated_prob)
+        chi2_l.append(chi2)
+        distance_l.append(distance)
+        if full_circ_size>=15 and counter%50==0:
+            time_elapsed = time()-decay_begin
+            eta = time_elapsed/counter*max_counter-time_elapsed
+            print('%d qubit circuit, counter %d/%d, noisy ETA = %.1e'%(full_circ_size,counter,max_counter,eta),flush=True)
     return chi2_l, distance_l
 
 if __name__ == '__main__':
@@ -91,18 +120,21 @@ if __name__ == '__main__':
 
         shots_increment = device_max_shots
     
-        chi2_l, distance_l = noiseless_decay(circuit=circ,shots_increment=shots_increment,device_max_experiments=device_max_experiments)
-        rank_decay_dict[full_circ_size] = {'circ':circ,'chi2_l':chi2_l,'distance':distance_l,'shots_increment':shots_increment}
+        noiseless_chi2_l, noiseless_distance_l = noiseless_decay(circuit=circ,shots_increment=shots_increment,device_max_experiments=device_max_experiments)
+        noisy_chi2_l, noisy_distance_l = noisy_decay(circuit=circ,shots_increment=shots_increment,device_max_experiments=device_max_experiments)
+        rank_decay_dict[full_circ_size] = {'circ':circ,'shots_increment':shots_increment,
+        'noiseless_chi2_l':noiseless_chi2_l,'noiseless_distance_l':noiseless_distance_l,
+        'noisy_chi2_l':noisy_chi2_l,'noisy_distance_l':noisy_distance_l
+        }
     
     if rank == size - 1:
         decay_dict.update(rank_decay_dict)
         print('Decay results have :',decay_dict.keys())
-        pickle.dump(decay_dict,open('./decay/decay.pickle','wb'))
         for i in range(num_workers-1):
             state = MPI.Status()
             rank_decay_dict = comm.recv(source=i,status=state)
             decay_dict.update(rank_decay_dict)
             print('Decay results have :',decay_dict.keys())
-            pickle.dump(decay_dict,open('./decay/decay.pickle','wb'))
+        pickle.dump(decay_dict,open('./decay/decay.pickle','wb'))
     else:
         comm.send(rank_decay_dict, dest=size-1)
