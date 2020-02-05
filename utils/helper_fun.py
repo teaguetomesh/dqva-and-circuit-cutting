@@ -135,8 +135,10 @@ def get_circ_saturated_shots(circs,device_name):
             min_saturated_shots = 8192
         elif full_circ_size<15:
             min_saturated_shots = 8192*10
-        else:
+        elif full_circ_size<18:
             min_saturated_shots = 8192*20
+        else:
+            min_saturated_shots = 8192*50
         ground_truth = evaluate_circ(circ=circ,backend='statevector_simulator',evaluator_info=None,force_prob=True)
         ground_truth = dict_to_array(distribution_dict=ground_truth,force_prob=True)
 
