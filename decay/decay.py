@@ -53,7 +53,7 @@ def noiseless_decay(circuit,shots_increment,device_max_experiments):
     chi2_l = []
     distance_l = []
     max_counter = max(20,int(20*np.power(2,full_circ_size)/shots_increment))
-    max_counter = min(max_counter,device_max_experiments/10)
+    max_counter = min(max_counter,int(device_max_experiments/10))
     for counter in range(1,max_counter+1):
         noiseless_accumulated_prob = accumulate_batch(circ=circuit,accumulated_prob=noiseless_accumulated_prob,
         counter=counter,evaluator_info={'num_shots':shots_increment},evaluation_method='qasm_simulator')
@@ -88,7 +88,7 @@ def noisy_decay(circuit,shots_increment,device_max_experiments):
         distance = wasserstein_distance(u_values=ground_truth,v_values=noisy_accumulated_prob)
         chi2_l.append(chi2)
         distance_l.append(distance)
-        if full_circ_size>=15 and counter%50==0:
+        if counter%10==0:
             time_elapsed = time()-decay_begin
             eta = time_elapsed/counter*max_counter-time_elapsed
             print('%d qubit circuit, counter %d/%d, noisy ETA = %.1e'%(full_circ_size,counter,max_counter,eta),flush=True)
