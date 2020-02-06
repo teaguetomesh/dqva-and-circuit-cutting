@@ -5,7 +5,7 @@ from time import time
 
 fc_size = 40
 circ = generate_circ(full_circ_size=fc_size,circuit_type='supremacy')
-max_clusters = 30
+max_clusters = 2
 cluster_max_qubit = 35
 searcher_begin = time()
 hardness, positions, ancilla, d, num_cluster, m = searcher.find_cuts(circ=circ,reconstructor_runtime_params=[4.275e-9,6.863e-1],reconstructor_weight=0,

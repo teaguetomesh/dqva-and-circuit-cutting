@@ -78,7 +78,7 @@ class Basic_Model(object):
             self.model.addConstr(quicksum([self.vertex_y[cluster][vertex] for cluster in range(vertex+1,num_cluster)]) == 0)
         
         # Objective function
-        double_total_num_cuts = self.model.addVar(lb=0, ub=40, vtype=GRB.INTEGER, name='double_total_num_cuts')
+        double_total_num_cuts = self.model.addVar(lb=0, ub=1e8, vtype=GRB.INTEGER, name='double_total_num_cuts')
         self.model.addConstr(double_total_num_cuts == 
         quicksum(
             [self.edge_x[cluster][i] for i in range(self.n_edges) for cluster in range(num_cluster)]
@@ -101,7 +101,7 @@ class Basic_Model(object):
             quicksum([self.edge_x[cluster][i] * self.vertex_y[cluster][self.edges[i][0]]
             for i in range(self.n_edges)]))
 
-            cluster_d = self.model.addVar(lb=0.1, ub=self.cluster_max_qubit, vtype=GRB.INTEGER, name='cluster_d_%d'%cluster)
+            cluster_d = self.model.addVar(lb=0.1, ub=1e8, vtype=GRB.INTEGER, name='cluster_d_%d'%cluster)
             self.model.addConstr(cluster_d == cluster_original_qubit + cluster_rho_qubits)
             list_of_cluster_d.append(cluster_d)
             list_of_cluster_O.append(cluster_O_qubits)
@@ -113,13 +113,13 @@ class Basic_Model(object):
             self.model.addConstr(evaluator_cost_exponent == np.log(6)*cluster_rho_qubits+np.log(3)*cluster_O_qubits)
             self.model.setPWLObj(evaluator_cost_exponent, ptx, ptf)
 
-            if len(list_of_cluster_d)>1:
-                lb = 0
-                ub = np.log(4)*20/reconstructor_runtime_params[1]+25
-                ptx, ptf = self.pwl_exp(params=reconstructor_runtime_params,lb=lb,ub=ub,weight=self.reconstructor_weight)
-                reconstructor_time_exponent = self.model.addVar(lb=lb,ub=ub,vtype=GRB.CONTINUOUS, name='reconstructor_time_exponent_%d'%cluster)
-                self.model.addConstr(reconstructor_time_exponent == np.log(4)*double_total_num_cuts/2/reconstructor_runtime_params[1]+quicksum(list_of_cluster_d)-quicksum(list_of_cluster_O))
-                self.model.setPWLObj(reconstructor_time_exponent, ptx, ptf)
+            # if len(list_of_cluster_d)>1:
+            #     lb = 0
+            #     ub = np.log(4)*20/reconstructor_runtime_params[1]+25
+            #     ptx, ptf = self.pwl_exp(params=reconstructor_runtime_params,lb=lb,ub=ub,weight=self.reconstructor_weight)
+            #     reconstructor_time_exponent = self.model.addVar(lb=lb,ub=ub,vtype=GRB.CONTINUOUS, name='reconstructor_time_exponent_%d'%cluster)
+            #     self.model.addConstr(reconstructor_time_exponent == np.log(4)*double_total_num_cuts/2/reconstructor_runtime_params[1]+quicksum(list_of_cluster_d)-quicksum(list_of_cluster_O))
+            #     self.model.setPWLObj(reconstructor_time_exponent, ptx, ptf)
 
         self.model.update()
     
