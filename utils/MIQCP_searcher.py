@@ -232,7 +232,7 @@ class Basic_Model(object):
         else:
             print('NOT OPTIMAL')
         print('*'*20)
-
+        
 def read_circ(circ):
     dag = circuit_to_dag(circ)
     edges = []
