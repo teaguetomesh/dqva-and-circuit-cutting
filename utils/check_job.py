@@ -28,7 +28,7 @@ if __name__ == '__main__':
     terminal_status = [JobStatus['DONE'],JobStatus['CANCELLED'],JobStatus['ERROR']]
 
     time_now = datetime.now(timezone.utc)
-    time_delta = format_time(hours=24)
+    time_delta = format_time(hours=5)
 
     for x in provider.backends():
         if 'qasm' not in str(x) and 'tokyo' not in str(x):
@@ -40,7 +40,6 @@ if __name__ == '__main__':
                 run_jobs = []
                 done_jobs = []
                 error_jobs = []
-                total_queued = 0
                 for job in x.jobs(limit=200):
                     if job.status() == JobStatus['QUEUED']:
                         queued_jobs.append(job)
@@ -53,7 +52,7 @@ if __name__ == '__main__':
                 print_ctr = 0
                 print('Most recently QUEUED:')
                 for job in queued_jobs[-10:]:
-                    print(job.creation_date(),job.status(),job.queue_position(),'ETA:',job.queue_info().estimated_complete_time-time_now)
+                    print(job.creation_date(),job.status(),job.queue_position(),job.job_id(),'ETA:',job.queue_info().estimated_complete_time-time_now)
                 print('Total queued = {:d}.'.format(len(queued_jobs)))
                 print('RUNNING:')
                 for job in run_jobs:
@@ -68,7 +67,8 @@ if __name__ == '__main__':
                     for i in range(5):
                         print('Warning!!! Cancelling jobs! 5 seconds count down')
                         time.sleep(1.2)
-                    for job in queued_jobs:
+                    jobs_to_cancel = queued_jobs + run_jobs
+                    for job in jobs_to_cancel:
                         print(job.creation_date(),job.status(),job.queue_position(),job.job_id())
                         job.cancel()
                         print('cancelled')
