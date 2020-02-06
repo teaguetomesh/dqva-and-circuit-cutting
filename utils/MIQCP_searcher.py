@@ -154,11 +154,12 @@ class Basic_Model(object):
         print('solving for %d clusters'%self.num_cluster)
         # print('model has %d variables, %d linear constraints,%d quadratic constraints, %d general constraints'
         # % (self.model.NumVars,self.model.NumConstrs, self.model.NumQConstrs, self.model.NumGenConstrs))
-        try:
-            self.model.optimize()
-        except GurobiError:
-            print(GurobiError)
-            print(GurobiError.message)
+        # try:
+        #     self.model.optimize()
+        # except GurobiError:
+        #     print(GurobiError)
+        #     print(GurobiError.message)
+        self.model.optimize()
         
         if self.model.solcount > 0:
             self.objective = None
@@ -232,7 +233,7 @@ class Basic_Model(object):
         else:
             print('NOT OPTIMAL')
         print('*'*20)
-        
+
 def read_circ(circ):
     dag = circuit_to_dag(circ)
     edges = []
