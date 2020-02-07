@@ -166,7 +166,7 @@ class Qgrid:
 
 
     def gen_circuit(self):
-        print('Generating {}x{}, 1+{}+1 supremacy circuit'.format(self.n,self.m,self.d))
+        # print('Generating {}x{}, 1+{}+1 supremacy circuit'.format(self.n,self.m,self.d))
 
         # Initialize with Hadamards
         self.hadamard_layer()
