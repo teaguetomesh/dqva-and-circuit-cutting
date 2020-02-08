@@ -57,6 +57,7 @@ if __name__ == '__main__':
             else:
                 fc_shots = case_dict['fc_shots']
                 cluster_shots = int(fc_shots/len(case_dict['all_cluster_prob'][cluster_idx]))
+                cluster_shots = max(cluster_shots,1024)
                 print('Cluster %d sametotal shots = %d'%(cluster_idx,cluster_shots))
             for init_meas in case_dict['all_cluster_prob'][cluster_idx]:
                 init_str = ','.join(init_meas[0])

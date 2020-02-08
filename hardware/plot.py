@@ -134,12 +134,12 @@ def annotate_heatmap(im, data=None, valfmt="{x:.2f}",
 
     return texts
 
-def plot_tradeoff(best_cc,circuit_type,filename,mitigated):
+def plot_tradeoff(best_cc,circuit_type,filename):
     plt.figure(figsize=(10,5))
     plt.subplot(121)
     plt.xlabel('Number of qubits',size=12)
     if circuit_type == 'supremacy':
-        plt.plot([fc for fc in best_cc], [best_cc[fc]['ce_percent'] for fc in best_cc], 'bX')
+        plt.plot([fc for fc in best_cc], [best_cc[fc]['metric_percent'] for fc in best_cc], 'bX')
         plt.ylabel('metric reduction (%)',size=12)
         plt.ylim(0,100)
     elif circuit_type == 'bv' or circuit_type=='hwea':
@@ -152,10 +152,10 @@ def plot_tradeoff(best_cc,circuit_type,filename,mitigated):
     plt.ylabel('Reconstruction time (s)',size=12)
     plt.xticks([x for x in best_cc])
     plt.tight_layout()
-    plt.savefig('%s_tradeoff%s.png'%(filename[:-2],'_mitigated' if mitigated else ''),dpi=400)
+    plt.savefig('%s_tradeoff.png'%(filename[:-2]),dpi=400)
     plt.close()
 
-def plot_heatmap(plotter_input,hw_qubits,fc_qubits,circuit_type,filename,mitigated):
+def plot_heatmap(plotter_input,hw_qubits,fc_qubits,circuit_type,filename):
     hw_qubits_unique = list(np.unique(hw_qubits))
     fc_qubits_unique = list(np.unique(fc_qubits))
     fc_qubits_unique.sort(reverse=True)
@@ -164,7 +164,7 @@ def plot_heatmap(plotter_input,hw_qubits,fc_qubits,circuit_type,filename,mitigat
         for hw_qubit in hw_qubits_unique:
             case = (hw_qubit,fc_qubit)
             if circuit_type == 'supremacy':
-                percent = plotter_input[case]['ce_percent_reduction'] if case in plotter_input else 0
+                percent = plotter_input[case]['metric_percent_reduction'] if case in plotter_input else 0
             elif circuit_type == 'bv' or circuit_type=='hwea':
                 percent = plotter_input[case]['fid_percent_improvement'] if case in plotter_input else 0
             row_idx = fc_qubits_unique.index(fc_qubit)
@@ -182,36 +182,22 @@ def plot_heatmap(plotter_input,hw_qubits,fc_qubits,circuit_type,filename,mitigat
     ax.set_ylabel('Full circuit qubits',fontsize=18,labelpad=10)
 
     fig.tight_layout()
-    plt.savefig('%s_heatmap%s.png'%(filename[:-2],'_mitigated' if mitigated else ''),dpi=400)
+    plt.savefig('%s_heatmap.png'%(filename[:-2]),dpi=400)
     plt.close()
 
-def plot_fid_bar(saturated_best_cc,sametotal_best_cc,circuit_type,dirname,device_name,mitigated):
-    sametotal_fc_size = list(sametotal_best_cc.keys())
-    saturated_fc_size = list(saturated_best_cc.keys())
-    all_fc_size = list(set().union(sametotal_fc_size,saturated_fc_size))
+def plot_fid_bar(sametotal_best_cc,circuit_type,dirname,device_name):
+    all_fc_size = list(sametotal_best_cc.keys())
     all_fc_size.sort()
     std = []
-    saturated_cutting = []
     sametotal_cutting = []
     for fc_size in all_fc_size:
-        has_std = False
-        if fc_size in saturated_best_cc:
-            std.append(saturated_best_cc[fc_size]['hw_ce'] if circuit_type=='supremacy' else saturated_best_cc[fc_size]['hw_fid'])
-            has_std = True
-            saturated_cutting.append(saturated_best_cc[fc_size]['cutting_ce'] if circuit_type=='supremacy' else saturated_best_cc[fc_size]['cutting_fid'])
-        else:
-            saturated_cutting.append(-1)
-        if fc_size in sametotal_best_cc:
-            if not has_std:
-                std.append(sametotal_best_cc[fc_size]['hw_ce'] if circuit_type=='supremacy' else sametotal_best_cc[fc_size]['hw_fid'])
-            sametotal_cutting.append(sametotal_best_cc[fc_size]['cutting_ce'] if circuit_type=='supremacy' else sametotal_best_cc[fc_size]['cutting_fid'])
-        else:
-            sametotal_cutting.append(-1)
+        std.append(sametotal_best_cc[fc_size]['hw_metric'] if circuit_type=='supremacy' else sametotal_best_cc[fc_size]['hw_fid'])
+        sametotal_cutting.append(sametotal_best_cc[fc_size]['cutting_metric'] if circuit_type=='supremacy' else sametotal_best_cc[fc_size]['cutting_fid'])
 
     n_groups = len(all_fc_size)
     fig, ax = plt.subplots()
     index = np.arange(n_groups)
-    bar_width = 0.2
+    bar_width = 0.4
     opacity = 0.8
 
     if circuit_type == 'supremacy':
@@ -222,33 +208,27 @@ def plot_fid_bar(saturated_best_cc,sametotal_best_cc,circuit_type,dirname,device
         ax.set_ylabel('Fidelity, higher is better',size=12)
         # plt.title('Fidelity Improvement')
     else:
-        std = None
-        cutting = None
+        raise Exception('Illegal circuit type %s'%circuit_type)
 
-    rects1 = ax.bar(index, std, bar_width,
+    rects1 = ax.bar(index - bar_width/2, std, bar_width,
     alpha=opacity,
     color='b',
     label='Standard Mode')
 
-    rects2 = ax.bar(index + bar_width, saturated_cutting, bar_width,
-    alpha=opacity,
-    color='g',
-    label='Cutting Mode, Saturated')
-
-    rects3 = ax.bar(index + bar_width + bar_width, sametotal_cutting, bar_width,
+    rects2 = ax.bar(index + bar_width/2, sametotal_cutting, bar_width,
     alpha=opacity,
     color='r',
-    label='Cutting Mode, Sametotal')
+    label='Cutting Mode')
 
     ax.set_xlabel('Full circuit size',size=12)
-    plt.xticks(index + bar_width, all_fc_size)
+    plt.xticks(index, all_fc_size)
     plt.legend()
 
     plt.tight_layout()
-    plt.savefig('%s/%s_shots_comparison%s.png'%(dirname,device_name,'_mitigated' if mitigated else ''),dpi=400)
+    plt.savefig('%s/%s_shots_comparison.png'%(dirname,device_name),dpi=400)
     plt.close()
 
-def process_data(filename,circuit_type,mitigated):
+def process_data(filename,circuit_type):
     plotter_input = read_file(filename)
     print('Processing',filename)
 
@@ -256,18 +236,18 @@ def process_data(filename,circuit_type,mitigated):
     fc_qubits = [case[1] for case in plotter_input]
 
     for case in plotter_input:
-        ground_truth_ce = chi2_distance(target=plotter_input[case]['sv'],
+        ground_truth_metric = chi2_distance(target=plotter_input[case]['sv'],
         obs= plotter_input[case]['sv'])
-        qasm_ce = chi2_distance(target=plotter_input[case]['sv'],
+        qasm_metric = chi2_distance(target=plotter_input[case]['sv'],
         obs= plotter_input[case]['qasm'])
-        hw_ce = chi2_distance(target=plotter_input[case]['sv'],
-        obs= plotter_input[case]['%shw'%('mitigated_' if mitigated else '')])
-        cutting_ce = chi2_distance(target=plotter_input[case]['sv'],
-        obs= plotter_input[case]['%scutting'%('mitigated_' if mitigated else '')])
-        ce_percent_change = 100*(hw_ce - cutting_ce)/hw_ce
-        assert ce_percent_change <= 100+1e-10
-        plotter_input[case]['ce_comparisons'] = (hw_ce,cutting_ce)
-        plotter_input[case]['ce_percent_reduction'] = ce_percent_change
+        hw_metric = chi2_distance(target=plotter_input[case]['sv'],
+        obs= plotter_input[case]['hw'])
+        cutting_metric = chi2_distance(target=plotter_input[case]['sv'],
+        obs= plotter_input[case]['cutting'])
+        metric_percent_change = 100*(hw_metric - cutting_metric)/hw_metric
+        assert metric_percent_change <= 100+1e-10
+        plotter_input[case]['metric_comparisons'] = (hw_metric,cutting_metric)
+        plotter_input[case]['metric_percent_reduction'] = metric_percent_change
 
         ground_truth_fid = fidelity(target=plotter_input[case]['sv'],
         obs= plotter_input[case]['sv'])
@@ -276,29 +256,29 @@ def process_data(filename,circuit_type,mitigated):
         qasm_noise_fid = fidelity(target=plotter_input[case]['sv'],
         obs= plotter_input[case]['qasm+noise'])
         hw_fid = fidelity(target=plotter_input[case]['sv'],
-        obs= plotter_input[case]['%shw'%('mitigated_' if mitigated else '')])
+        obs= plotter_input[case]['hw'])
         cutting_fid = fidelity(target=plotter_input[case]['sv'],
-        obs= plotter_input[case]['%scutting'%('mitigated_' if mitigated else '')])
+        obs= plotter_input[case]['cutting'])
         fid_percent_change = 100*(cutting_fid-hw_fid)/hw_fid
         if circuit_type == 'bv' or circuit_type=='hwea':
             assert abs(ground_truth_fid-1)<1e-10 and abs(qasm_fid-1)<1e-10 and cutting_fid-1<1e-10
         plotter_input[case]['fid_comparisons'] = (hw_fid,cutting_fid)
         plotter_input[case]['fid_percent_improvement'] = fid_percent_change
 
-        print('case {}: ce percentage reduction = {:.3f}, fidelity improvement = {:.3f}, reconstruction time: {:.3e}'.format(case,ce_percent_change,fid_percent_change,plotter_input[case]['reconstructor_time']))
-    print('*'*25,'%sBest Cases'%('Mitigated ' if mitigated else ''),'*'*25)
+        print('case {}: \u03C7^2 percentage reduction = {:.3f}, fidelity improvement = {:.3f}, reconstruction time: {:.3e}'.format(case,metric_percent_change,fid_percent_change,plotter_input[case]['reconstructor_time']))
+    print('*'*25,'Best Cases','*'*25)
 
     best_cc = {}
     for case in plotter_input:
-        ce_percent = plotter_input[case]['ce_percent_reduction']
+        metric_percent = plotter_input[case]['metric_percent_reduction']
         fid_percent = plotter_input[case]['fid_percent_improvement']
         reconstructor_time = plotter_input[case]['reconstructor_time']
         hw_fid, cutting_fid = plotter_input[case]['fid_comparisons']
-        hw_ce, cutting_ce = plotter_input[case]['ce_comparisons']
+        hw_metric, cutting_metric = plotter_input[case]['metric_comparisons']
         hw, fc = case
         if circuit_type == 'supremacy':
-            if (fc in best_cc and ce_percent>best_cc[fc]['ce_percent']) or (fc not in best_cc):
-                best_cc[fc] = {'ce_percent':ce_percent,'reconstructor_time':reconstructor_time,'best_case':case,'hw_ce':hw_ce,'cutting_ce':cutting_ce}
+            if (fc in best_cc and metric_percent>best_cc[fc]['metric_percent']) or (fc not in best_cc):
+                best_cc[fc] = {'metric_percent':metric_percent,'reconstructor_time':reconstructor_time,'best_case':case,'hw_metric':hw_metric,'cutting_metric':cutting_metric}
         elif circuit_type == 'bv' or circuit_type=='hwea':
             if (fc in best_cc and fid_percent>best_cc[fc]['fid_percent']) or (fc not in best_cc):
                 best_cc[fc] = {'fid_percent':fid_percent,'reconstructor_time':reconstructor_time,'best_case':case,'hw_fid':hw_fid,'cutting_fid':cutting_fid}
@@ -319,16 +299,10 @@ if __name__ == '__main__':
 
     print('-'*50,'Plot','-'*50,flush=True)
 
-    for mitigated in [True, False]:
-        dirname, saturated_filename = get_filename(experiment_name='hardware',circuit_type=args.circuit_type,device_name=args.device_name,field='plotter_input',evaluation_method=args.evaluation_method,shots_mode='saturated')
-        saturated_plotter_input, saturated_best_cc, saturated_hw_qubits, saturated_fc_qubits = process_data(filename=dirname+saturated_filename,circuit_type=args.circuit_type,mitigated=mitigated)
-        plot_tradeoff(best_cc=saturated_best_cc,circuit_type=args.circuit_type,filename=dirname+saturated_filename,mitigated=mitigated)
-        plot_heatmap(plotter_input=saturated_plotter_input,hw_qubits=saturated_hw_qubits,fc_qubits=saturated_fc_qubits,circuit_type=args.circuit_type,filename=dirname+saturated_filename,mitigated=mitigated)
-
-        dirname, sametotal_filename = get_filename(experiment_name='hardware',circuit_type=args.circuit_type,device_name=args.device_name,field='plotter_input',evaluation_method=args.evaluation_method,shots_mode='sametotal')
-        sametotal_plotter_input, sametotal_best_cc, sametotal_hw_qubits, sametotal_fc_qubits = process_data(filename=dirname+sametotal_filename,circuit_type=args.circuit_type,mitigated=mitigated)
-        plot_tradeoff(best_cc=sametotal_best_cc,circuit_type=args.circuit_type,filename=dirname+sametotal_filename,mitigated=mitigated)
-        plot_heatmap(plotter_input=sametotal_plotter_input,hw_qubits=sametotal_hw_qubits,fc_qubits=sametotal_fc_qubits,circuit_type=args.circuit_type,filename=dirname+sametotal_filename,mitigated=mitigated)
-        
-        plot_fid_bar(saturated_best_cc=saturated_best_cc, sametotal_best_cc=sametotal_best_cc,circuit_type=args.circuit_type,dirname=dirname,device_name=args.device_name,mitigated=mitigated)
-        print('-'*100)
+    dirname, sametotal_filename = get_filename(experiment_name='hardware',circuit_type=args.circuit_type,device_name=args.device_name,field='plotter_input',evaluation_method=args.evaluation_method,shots_mode='sametotal')
+    sametotal_plotter_input, sametotal_best_cc, sametotal_hw_qubits, sametotal_fc_qubits = process_data(filename=dirname+sametotal_filename,circuit_type=args.circuit_type)
+    plot_tradeoff(best_cc=sametotal_best_cc,circuit_type=args.circuit_type,filename=dirname+sametotal_filename)
+    plot_heatmap(plotter_input=sametotal_plotter_input,hw_qubits=sametotal_hw_qubits,fc_qubits=sametotal_fc_qubits,circuit_type=args.circuit_type,filename=dirname+sametotal_filename)
+    
+    plot_fid_bar(sametotal_best_cc=sametotal_best_cc,circuit_type=args.circuit_type,dirname=dirname,device_name=args.device_name)
+    print('-'*100)
