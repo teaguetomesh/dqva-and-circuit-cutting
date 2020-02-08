@@ -4,7 +4,6 @@ import argparse
 from qiskit.compiler import transpile, assemble
 from utils.helper_fun import get_evaluator_info, get_circ_saturated_shots, get_filename, read_file
 from utils.schedule import Scheduler
-from utils.mitigation import TensoredMitigation
 from utils.conversions import reverse_prob
 from time import time
 import copy
@@ -41,7 +40,6 @@ if __name__ == '__main__':
 
     circ_dict = {}
     mitigation_circ_dict = {}
-    mitigation_correspondence_dict = {}
     for case in cases_to_run:
         print('Case {}'.format(case))
         case_dict = cases_to_run[case]
@@ -53,7 +51,6 @@ if __name__ == '__main__':
             if 2**case[1]<=device_max_experiments:
                 mitigation_circ_key = '{},{},{}'.format(case[0],case[1],cluster_idx)
                 mitigation_circ_dict[mitigation_circ_key] = {'circ':cluster_base_circ,'initial_layout':evaluator_info['initial_layout']}
-                mitigation_correspondence_dict[mitigation_circ_key] = []
             if args.shots_mode == 'saturated':
                 cluster_shots = get_circ_saturated_shots(circs=[cluster_base_circ],device_name=args.device_name)[0][0]
                 print('Cluster %d saturated shots = %d'%(cluster_idx,cluster_shots))
@@ -67,29 +64,18 @@ if __name__ == '__main__':
                 key = '{},{},{}|{},{}'.format(case[0],case[1],cluster_idx,init_str,meas_str)
                 circ = case_dict['all_cluster_prob'][cluster_idx][init_meas]
                 circ_dict[key] = {'circ':circ,'shots':cluster_shots,'initial_layout':evaluator_info['initial_layout']}
-                if 2**case[1]<=device_max_experiments:
-                    mitigation_correspondence_dict[mitigation_circ_key].append(key)
 
     scheduler = Scheduler(circ_dict=circ_dict,device_name=args.device_name)
-    scheduler.run(real_device=True)
-    tensored_mitigation = TensoredMitigation(circ_dict=mitigation_circ_dict,device_name=args.device_name)
-    tensored_mitigation.run(real_device=True)
-
+    scheduler.run(real_device=False)
     scheduler.retrieve(force_prob=True)
-    tensored_mitigation.retrieve()
-
-    tensored_mitigation.apply(unmitigated=scheduler.circ_dict,mitigation_correspondence_dict=mitigation_correspondence_dict)
-    circ_dict = tensored_mitigation.circ_dict
+    circ_dict = scheduler.circ_dict
 
     for case in cases_to_run:
         case_dict = cases_to_run[case]
-        case_dict['mitigated_all_cluster_prob'] = {}
         for cluster_idx in case_dict['all_cluster_prob']:
-            case_dict['mitigated_all_cluster_prob'][cluster_idx] = {}
             for init_meas in case_dict['all_cluster_prob'][cluster_idx]:
                 init_str = ','.join(init_meas[0])
                 meas_str = ','.join(init_meas[1])
                 key = '{},{},{}|{},{}'.format(case[0],case[1],cluster_idx,init_str,meas_str)
                 case_dict['all_cluster_prob'][cluster_idx][init_meas] = copy.deepcopy(reverse_prob(prob_l=circ_dict[key]['hw']))
-                case_dict['mitigated_all_cluster_prob'][cluster_idx][init_meas] = copy.deepcopy(reverse_prob(prob_l=circ_dict[key]['mitigated_hw']))
         pickle.dump({case:case_dict}, open(dirname+uniter_input_filename,'ab'))

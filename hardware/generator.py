@@ -6,7 +6,6 @@ import utils.MIQCP_searcher as searcher
 import utils.cutter as cutter
 from utils.helper_fun import get_evaluator_info, get_circ_saturated_shots, get_filename, read_file, generate_circ, evaluate_circ
 from utils.schedule import Scheduler
-from utils.mitigation import TensoredMitigation
 from utils.metrics import chi2_distance
 import argparse
 import math
@@ -59,7 +58,6 @@ if __name__ == '__main__':
     full_circuit_sizes = range(args.min_size,args.max_size+1)
     cases_to_run = {}
     circ_dict = {}
-    mitigation_correspondence_dict = {}
     for full_circ_size in full_circuit_sizes:
         if full_circ_size in circ_dict:
             full_circ = circ_dict[full_circ_size]['circ']
@@ -88,36 +86,28 @@ if __name__ == '__main__':
                         circ_dict[full_circ_size] = copy.deepcopy({'circ':full_circ,'shots':saturated_shots[0],
                         'initial_layout':evaluator_info['initial_layout'],
                         'sv':ground_truths[0],'qasm':saturated_probs[0]})
-                        mitigation_correspondence_dict[full_circ_size] = [full_circ_size]
                         print('Adding %d qubit full circuit to run, %d shots'%(full_circ_size,saturated_shots[0]))
                     else:
                         print('Use currently running %d qubit full circuit, %d shots'%(full_circ_size,saturated_shots[0]))
             print('-'*100)
     print('{:d} cases, {:d} full circuits to run : {}'.format(len(cases_to_run),len(circ_dict),cases_to_run.keys()))
-    
+
     scheduler = Scheduler(circ_dict=circ_dict,device_name=args.device_name)
-    scheduler.run(real_device=True)
-    tensored_mitigation = TensoredMitigation(circ_dict=circ_dict,device_name=args.device_name)
-    tensored_mitigation.run(real_device=True)
-
+    scheduler.run(real_device=False)
     scheduler.retrieve(force_prob=True)
-    tensored_mitigation.retrieve()
-
-    tensored_mitigation.apply(unmitigated=scheduler.circ_dict,mitigation_correspondence_dict=mitigation_correspondence_dict)
-    circ_dict = tensored_mitigation.circ_dict
+    circ_dict = scheduler.circ_dict
 
     for case in cases_to_run:
         uniform_prob = [1/2**case[1] for i in range(2**case[1])]
         case_dict = {'full_circ':circ_dict[case[1]]['circ'],'fc_shots':circ_dict[case[1]]['shots'],
         'sv':circ_dict[case[1]]['sv'],'qasm':circ_dict[case[1]]['qasm'],
-        'qasm+noise':uniform_prob,'hw':circ_dict[case[1]]['hw'],'mitigated_hw':circ_dict[case[1]]['mitigated_hw'],
+        'qasm+noise':uniform_prob,'hw':circ_dict[case[1]]['hw'],
         'searcher_time':cases_to_run[case]['searcher_time'],'clusters':cases_to_run[case]['clusters'],'complete_path_map':cases_to_run[case]['complete_path_map']}
         # print('Case {}: {:d} qubit full circuit has {:d} clusters, searcher time = {:.3e}'.format(case,len(case_dict['full_circ'].qubits),len(case_dict['clusters']),case_dict['searcher_time']))
         assert case[1] == len(case_dict['full_circ'].qubits)
-        for key in ['sv','qasm','qasm+noise','hw','mitigated_hw']:
+        for key in ['sv','qasm','qasm+noise','hw']:
             assert len(case_dict[key])==2**case[1] and abs(sum(case_dict[key])-1)<1e-10
         pickle.dump({case:case_dict},open(dirname+evaluator_input_filename,'ab'))
         sv_distance = chi2_distance(target=case_dict['sv'],obs=case_dict['sv'])
         hw_distance = chi2_distance(target=case_dict['sv'],obs=case_dict['hw'])
-        mitigated_hw_distance = chi2_distance(target=case_dict['sv'],obs=case_dict['mitigated_hw'])
-        print('Case {} sv distance = {:.3e}, hw distance = {:.3e}, mitigated_hw distance = {:.3e}'.format(case,sv_distance,hw_distance,mitigated_hw_distance))
+        print('Case {} sv distance = {:.3e}, hw distance = {:.3e}'.format(case,sv_distance,hw_distance))
