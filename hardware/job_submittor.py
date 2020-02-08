@@ -67,7 +67,7 @@ if __name__ == '__main__':
                 circ_dict[key] = {'circ':circ,'shots':cluster_shots,'initial_layout':evaluator_info['initial_layout']}
 
     scheduler = Scheduler(circ_dict=circ_dict,device_name=args.device_name)
-    scheduler.run(real_device=False)
+    scheduler.run(real_device=True)
     scheduler.retrieve(force_prob=True)
     circ_dict = scheduler.circ_dict
 

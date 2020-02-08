@@ -171,7 +171,7 @@ class Scheduler:
             mem_dict = memory_to_dict(memory=memory[:shots])
             hw_prob = dict_to_array(distribution_dict=mem_dict,force_prob=force_prob)
             circ_dict[key]['hw'] = copy.deepcopy(hw_prob)
-            circ_dict[key]['memory'] = copy.deepcopy(memory)
+            # circ_dict[key]['memory'] = copy.deepcopy(memory)
             # print('Key {} has {:d} qubit circuit, hw has {:d}/{:d} shots'.format(key,len(full_circ.qubits),sum(hw.values()),shots))
             # print('Expecting {:d} shots, got {:d} shots'.format(shots,sum(mem_dict.values())),flush=True)
             if len(full_circ.clbits)>0:
