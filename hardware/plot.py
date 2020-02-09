@@ -176,7 +176,7 @@ def plot_heatmap(plotter_input,hw_qubits,fc_qubits,circuit_type,filename):
     data =np.ma.masked_where(reduction_map==0, reduction_map)
 
     im, cbar = heatmap(data, fc_qubits_unique, hw_qubits_unique, ax=ax,
-                    cmap="YlGn", cbarlabel="metric Reduction, higher is better [%]" if circuit_type == 'supremacy' or circuit_type == 'qft' else "Fidelity Improvement [%]")
+                    cmap="YlGn", cbarlabel="\u03C7^2 Reduction, higher is better [%]" if circuit_type == 'supremacy' or circuit_type == 'qft' else "Fidelity Improvement [%]")
     texts = annotate_heatmap(im, valfmt="{x:.1f}")
     ax.set_xlabel('Hardware qubits',fontsize=18,labelpad=10)
     ax.set_ylabel('Full circuit qubits',fontsize=18,labelpad=10)
@@ -201,12 +201,10 @@ def plot_fid_bar(sametotal_best_cc,circuit_type,dirname,device_name):
     opacity = 0.8
 
     if circuit_type == 'supremacy':
-        ax.set_ylabel('metric, lower is better',size=12)
-        # plt.title('\u03C7^2 Reduction')
+        ax.set_ylabel('\u03C7^2, lower is better',size=12)
     elif circuit_type == 'bv' or circuit_type=='hwea':
         ax.set_ylim(0,1)
         ax.set_ylabel('Fidelity, higher is better',size=12)
-        # plt.title('Fidelity Improvement')
     else:
         raise Exception('Illegal circuit type %s'%circuit_type)
 
@@ -299,7 +297,7 @@ if __name__ == '__main__':
 
     print('-'*50,'Plot','-'*50,flush=True)
 
-    dirname, sametotal_filename = get_filename(experiment_name='hardware',circuit_type=args.circuit_type,device_name=args.device_name,field='plotter_input',evaluation_method=args.evaluation_method,shots_mode='sametotal')
+    dirname, sametotal_filename = get_filename(experiment_name='hardware',circuit_type=args.circuit_type,device_name=args.device_name,field='plotter_input',evaluation_method=args.evaluation_method)
     sametotal_plotter_input, sametotal_best_cc, sametotal_hw_qubits, sametotal_fc_qubits = process_data(filename=dirname+sametotal_filename,circuit_type=args.circuit_type)
     plot_tradeoff(best_cc=sametotal_best_cc,circuit_type=args.circuit_type,filename=dirname+sametotal_filename)
     plot_heatmap(plotter_input=sametotal_plotter_input,hw_qubits=sametotal_hw_qubits,fc_qubits=sametotal_fc_qubits,circuit_type=args.circuit_type,filename=dirname+sametotal_filename)

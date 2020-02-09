@@ -94,7 +94,7 @@ def evaluate_cluster(complete_path_map, cluster_circ, combinations, backend, eva
         # print(inits, meas)
         # print(cluster_circ_inst)
         if backend=='statevector_simulator':
-            cluster_inst_prob = evaluate_circ(circ=cluster_circ_inst,backend=backend,evaluator_info=None)
+            cluster_inst_prob = evaluate_circ(circ=cluster_circ_inst,backend=backend,evaluator_info=None,force_prob=True)
             cluster_prob[(tuple(inits),tuple(meas))] = cluster_inst_prob
         elif backend=='noisy_qasm_simulator':
             cluster_inst_prob = evaluate_circ(circ=cluster_circ_inst,backend=backend,evaluator_info=evaluator_info)
@@ -145,14 +145,14 @@ if __name__ == '__main__':
 
     if rank == size-1:
         print('-'*50,'Evaluator','-'*50,flush=True)
-        dirname, evaluator_input_filename = get_filename(experiment_name=args.experiment_name,circuit_type=args.circuit_type,device_name=args.device_name,field='evaluator_input',evaluation_method=None,shots_mode=None)
+        dirname, evaluator_input_filename = get_filename(experiment_name=args.experiment_name,circuit_type=args.circuit_type,device_name=args.device_name,field='evaluator_input',evaluation_method=None)
         evaluator_input = read_file(dirname+evaluator_input_filename)
         if args.evaluation_method == 'hardware':
             dirname, job_submittor_input_filename = get_filename(experiment_name=args.experiment_name,circuit_type=args.circuit_type,device_name=args.device_name,field='job_submittor_input',evaluation_method=None,shots_mode=None)
             output_filename = dirname + job_submittor_input_filename
             evaluator_output = read_file(output_filename)
         else:
-            dirname, uniter_input_filename = get_filename(experiment_name=args.experiment_name,circuit_type=args.circuit_type,device_name=args.device_name,field='uniter_input',evaluation_method=args.evaluation_method,shots_mode=args.shots_mode)
+            dirname, uniter_input_filename = get_filename(experiment_name=args.experiment_name,circuit_type=args.circuit_type,device_name=args.device_name,field='uniter_input',evaluation_method=args.evaluation_method)
             output_filename = dirname + uniter_input_filename
             evaluator_output = read_file(output_filename)
         print('Existing cases:',evaluator_output.keys())

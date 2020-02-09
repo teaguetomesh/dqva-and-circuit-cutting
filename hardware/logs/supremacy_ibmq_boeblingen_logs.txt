@@ -1200,3 +1200,54 @@ case (10, 20): χ^2 percentage reduction = 46.015, fidelity improvement = 0.000,
 {'metric_percent': 46.01526614246375, 'reconstructor_time': 156.73001074790955, 'best_case': (10, 20), 'hw_metric': 1.293518614252513, 'cutting_metric': 0.6983025813019101}
 **************************************************
 ----------------------------------------------------------------------------------------------------
+-------------------------------------------------- Plot --------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/weitang/opt/anaconda3/envs/cc-env/lib/python3.7/runpy.py", line 193, in _run_module_as_main
+    "__main__", mod_spec)
+  File "/Users/weitang/opt/anaconda3/envs/cc-env/lib/python3.7/runpy.py", line 85, in _run_code
+    exec(code, run_globals)
+  File "/Users/weitang/Documents/circuit_cutting/hardware/plot.py", line 300, in <module>
+    dirname, sametotal_filename = get_filename(experiment_name='hardware',circuit_type=args.circuit_type,device_name=args.device_name,field='plotter_input',evaluation_method=args.evaluation_method,shots_mode='sametotal')
+TypeError: get_filename() got an unexpected keyword argument 'shots_mode'
+-------------------------------------------------- Plot --------------------------------------------------
+Processing ./hardware/benchmark_data/supremacy_ibmq_boeblingen/hw_plotter_input_ibmq_boeblingen.p
+case (3, 4): χ^2 percentage reduction = 47.380, fidelity improvement = 0.000, reconstruction time: 2.087e-03
+case (4, 6): χ^2 percentage reduction = 25.371, fidelity improvement = -0.000, reconstruction time: 3.866e-02
+case (5, 6): χ^2 percentage reduction = 21.774, fidelity improvement = -0.000, reconstruction time: 2.686e-03
+case (4, 8): χ^2 percentage reduction = 12.000, fidelity improvement = 0.000, reconstruction time: 4.529e-02
+case (5, 8): χ^2 percentage reduction = 25.440, fidelity improvement = 0.000, reconstruction time: 4.367e-02
+case (6, 8): χ^2 percentage reduction = -40.618, fidelity improvement = -0.000, reconstruction time: 4.112e-03
+case (7, 8): χ^2 percentage reduction = -27.861, fidelity improvement = -0.000, reconstruction time: 5.470e-03
+case (5, 10): χ^2 percentage reduction = 24.219, fidelity improvement = 0.000, reconstruction time: 7.398e-02
+case (6, 10): χ^2 percentage reduction = 14.606, fidelity improvement = -0.000, reconstruction time: 9.811e-03
+case (7, 10): χ^2 percentage reduction = -3.726, fidelity improvement = 0.000, reconstruction time: 9.788e-03
+case (8, 10): χ^2 percentage reduction = 14.917, fidelity improvement = -0.000, reconstruction time: 9.778e-03
+case (9, 10): χ^2 percentage reduction = 0.936, fidelity improvement = -0.000, reconstruction time: 1.155e-02
+case (6, 12): χ^2 percentage reduction = -8.605, fidelity improvement = -0.000, reconstruction time: 1.452e+00
+case (7, 12): χ^2 percentage reduction = -4.859, fidelity improvement = -0.000, reconstruction time: 5.727e-01
+case (8, 12): χ^2 percentage reduction = 3.742, fidelity improvement = 0.000, reconstruction time: 8.470e-02
+case (9, 12): χ^2 percentage reduction = 10.947, fidelity improvement = 0.000, reconstruction time: 6.228e-02
+case (10, 12): χ^2 percentage reduction = -5.473, fidelity improvement = -0.000, reconstruction time: 1.071e-01
+case (6, 14): χ^2 percentage reduction = 11.019, fidelity improvement = 0.000, reconstruction time: 2.351e-01
+case (7, 14): χ^2 percentage reduction = 5.108, fidelity improvement = 0.000, reconstruction time: 3.853e-01
+case (8, 14): χ^2 percentage reduction = -11.091, fidelity improvement = 0.000, reconstruction time: 8.731e-02
+case (9, 14): χ^2 percentage reduction = -3.983, fidelity improvement = 0.000, reconstruction time: 8.950e-02
+case (10, 14): χ^2 percentage reduction = 0.876, fidelity improvement = 0.000, reconstruction time: 1.095e-01
+case (8, 16): χ^2 percentage reduction = 16.421, fidelity improvement = -0.000, reconstruction time: 4.080e+01
+case (9, 16): χ^2 percentage reduction = 1.315, fidelity improvement = -0.000, reconstruction time: 1.656e+01
+case (10, 16): χ^2 percentage reduction = -1.242, fidelity improvement = -0.000, reconstruction time: 2.003e+01
+case (9, 18): χ^2 percentage reduction = 26.128, fidelity improvement = 0.000, reconstruction time: 4.830e+01
+case (10, 18): χ^2 percentage reduction = 19.782, fidelity improvement = 0.000, reconstruction time: 1.786e+01
+case (10, 20): χ^2 percentage reduction = 46.015, fidelity improvement = 0.000, reconstruction time: 1.567e+02
+************************* Best Cases *************************
+{'metric_percent': 47.380094344779764, 'reconstructor_time': 0.002087116241455078, 'best_case': (3, 4), 'hw_metric': 0.08816342292131936, 'cutting_metric': 0.04639150996361106}
+{'metric_percent': 25.370988635916344, 'reconstructor_time': 0.03865981101989746, 'best_case': (4, 6), 'hw_metric': 0.34262600225396156, 'cutting_metric': 0.2556983981584145}
+{'metric_percent': 25.440069394785784, 'reconstructor_time': 0.043666839599609375, 'best_case': (5, 8), 'hw_metric': 0.3431497787232867, 'cutting_metric': 0.2558522368880287}
+{'metric_percent': 24.21881446039059, 'reconstructor_time': 0.07397985458374023, 'best_case': (5, 10), 'hw_metric': 0.538968847957153, 'cutting_metric': 0.4084369826711055}
+{'metric_percent': 10.946564585163205, 'reconstructor_time': 0.06228041648864746, 'best_case': (9, 12), 'hw_metric': 0.4655448544756695, 'cutting_metric': 0.4145836863075863}
+{'metric_percent': 11.019295649120883, 'reconstructor_time': 0.23508119583129883, 'best_case': (6, 14), 'hw_metric': 0.495963799069338, 'cutting_metric': 0.4413120817372758}
+{'metric_percent': 16.421308776245276, 'reconstructor_time': 40.80446815490723, 'best_case': (8, 16), 'hw_metric': 0.5387763303484688, 'cutting_metric': 0.4503022055286235}
+{'metric_percent': 26.127884342106267, 'reconstructor_time': 48.29704308509827, 'best_case': (9, 18), 'hw_metric': 0.7903059179200332, 'cutting_metric': 0.5838157017370657}
+{'metric_percent': 46.01526614246375, 'reconstructor_time': 156.73001074790955, 'best_case': (10, 20), 'hw_metric': 1.293518614252513, 'cutting_metric': 0.6983025813019101}
+**************************************************
+----------------------------------------------------------------------------------------------------

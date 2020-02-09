@@ -41,7 +41,7 @@ def generate_circ(full_circ_size,circuit_type):
         raise Exception('Illegal circuit type:',circuit_type)
     return full_circ
 
-def get_filename(experiment_name,circuit_type,device_name,field,evaluation_method=None,shots_mode=None):
+def get_filename(experiment_name,circuit_type,device_name,field,evaluation_method=None):
     dirname = './{}/benchmark_data/{}_{}/'.format(experiment_name,circuit_type,device_name)
     if field == 'evaluator_input':
         evaluator_input_filename = 'evaluator_input_{}.p'.format(device_name)
@@ -51,25 +51,23 @@ def get_filename(experiment_name,circuit_type,device_name,field,evaluation_metho
         return dirname, job_submittor_input_filename
     elif field == 'uniter_input':
         if evaluation_method == 'statevector_simulator':
-            uniter_input_filename = 'classical_uniter_input_{}_'.format(device_name)
+            uniter_input_filename = 'classical_uniter_input_{}.p'.format(device_name)
         elif evaluation_method == 'noisy_qasm_simulator':
-            uniter_input_filename = 'quantum_uniter_input_{}_'.format(device_name)
+            uniter_input_filename = 'quantum_uniter_input_{}.p'.format(device_name)
         elif evaluation_method == 'hardware':
-            uniter_input_filename = 'hw_uniter_input_{}_'.format(device_name)
+            uniter_input_filename = 'hw_uniter_input_{}.p'.format(device_name)
         else:
             raise Exception('Illegal evaluation method :',evaluation_method)
-        uniter_input_filename += shots_mode + '.p'
         return dirname, uniter_input_filename
     elif field == 'plotter_input':
         if evaluation_method == 'statevector_simulator':
-            plotter_input_filename = 'classical_plotter_input_{}_'.format(device_name)
+            plotter_input_filename = 'classical_plotter_input_{}.p'.format(device_name)
         elif evaluation_method == 'noisy_qasm_simulator':
-            plotter_input_filename = 'quantum_plotter_input_{}_'.format(device_name)
+            plotter_input_filename = 'quantum_plotter_input_{}.p'.format(device_name)
         elif evaluation_method == 'hardware':
-            plotter_input_filename = 'hw_plotter_input_{}_'.format(device_name)
+            plotter_input_filename = 'hw_plotter_input_{}.p'.format(device_name)
         else:
             raise Exception('Illegal evaluation method :',evaluation_method)
-        plotter_input_filename += shots_mode + '.p'
         return dirname, plotter_input_filename
     elif field == 'plotter_output':
         return dirname

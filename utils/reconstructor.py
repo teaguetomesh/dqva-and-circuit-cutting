@@ -237,10 +237,9 @@ def calculate_cluster(cluster_idx,cluster_probs,init_meas,O_qubit_positions,effe
             # print('-1*',effective_cluster_prob)
     
     # print('length of effective cluster prob:',len(kronecker_term))
-    
+    kronecker_term = np.array(kronecker_term)
     return kronecker_term, collapsed_cluster_prob
 
-# TODO: optimize this
 def reconstruct(complete_path_map, full_circ, cluster_circs, cluster_sim_probs):
     O_rho_pairs = find_cuts_pairs(complete_path_map)
     num_cuts = len(O_rho_pairs)
@@ -260,7 +259,7 @@ def reconstruct(complete_path_map, full_circ, cluster_circs, cluster_sim_probs):
     for i,s in enumerate(combinations):
         # print('s_{} = {}'.format(i,s))
         clusters_init_meas = find_inits_meas(cluster_circs, O_rho_pairs, s)
-        summation_term = [1]
+        summation_term = np.array([1])
         for cluster_idx in range(len(cluster_circs)):
             # print('Cluster {} inits meas = {}'.format(cluster_idx,clusters_init_meas[cluster_idx]))
             kronecker_term, collapsed_cluster_prob = calculate_cluster(cluster_idx=cluster_idx,
@@ -272,12 +271,12 @@ def reconstruct(complete_path_map, full_circ, cluster_circs, cluster_sim_probs):
             # print('cluster %d collapsed = '%cluster_idx,kronecker_term)
             summation_term = np.kron(summation_term,kronecker_term)
         reconstructed_prob += summation_term
-        # print('-'*100)
+        print('-'*100)
     # print()
-    reconstructed_prob = [x/scaling_factor for x in reconstructed_prob]
+    reconstructed_prob = reconstructed_prob/scaling_factor
     reconstructed_prob = reconstructed_reorder(reconstructed_prob,complete_path_map)
     norm = sum(reconstructed_prob)
-    reconstructed_prob = [x/norm for x in reconstructed_prob]
+    reconstructed_prob = reconstructed_prob/norm
     # print('reconstruction len = ', len(reconstructed_prob),'probabilities sum = ', sum(reconstructed_prob))
     return reconstructed_prob
 
@@ -299,7 +298,9 @@ if __name__ == '__main__':
 
     counter = len(plotter_input.keys())
     for case in uniter_input:
-        if case in plotter_input:
+        # if case in plotter_input:
+        #     continue
+        if case!=(6,8):
             continue
         print('case {}'.format(case),flush=True)
         case_dict = copy.deepcopy(uniter_input[case])
@@ -316,8 +317,9 @@ if __name__ == '__main__':
         print('qasm metric = %.3e'%chi2_distance(target=case_dict['sv'],obs=case_dict['qasm']))
         print('hw metric = %.3e'%chi2_distance(target=case_dict['sv'],obs=case_dict['hw']))
         print('cutting metric = %.3e'%(chi2_distance(target=case_dict['sv'],obs=case_dict['cutting'])))
+        print('Reconstruction took %.2f seconds'%uniter_time)
 
-        pickle.dump({case:case_dict}, open('%s'%(dirname+plotter_input_filename),'ab'))
+        # pickle.dump({case:case_dict}, open('%s'%(dirname+plotter_input_filename),'ab'))
         counter += 1
         print('Reconstruction output has %d cases'%counter,flush=True)
         print('-'*100)

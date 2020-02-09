@@ -30,7 +30,7 @@ def fidelity(target,obs):
 
 def chi2_distance(target,obs):
     assert len(target)==len(obs)
-    obs = [abs(x) for x in obs]
+    obs = np.absolute(obs)
     obs = obs / sum(obs)
     assert abs(sum(obs)-1)<1e-10
     distance = 0
