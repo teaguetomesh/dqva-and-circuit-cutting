@@ -93,7 +93,7 @@ if __name__ == '__main__':
     print('{:d} cases, {:d} full circuits to run : {}'.format(len(cases_to_run),len(circ_dict),cases_to_run.keys()))
 
     scheduler = Scheduler(circ_dict=circ_dict,device_name=args.device_name)
-    scheduler.run(real_device=True)
+    scheduler.run(real_device=False)
     scheduler.retrieve(force_prob=True)
     circ_dict = scheduler.circ_dict
 

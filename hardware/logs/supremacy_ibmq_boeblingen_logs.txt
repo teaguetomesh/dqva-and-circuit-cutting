@@ -938,3 +938,265 @@ Retrieving job 11/34 5e3e74759d3baf0018edfa11 --> 900 circuits, 900 * 1024 shots
 Retrieving job 12/34 5e3e752d6594ff00185bb636 --> 900 circuits, 900 * 1024 shots
 Retrieving job 13/34 5e3e75f6288a3b00184741e1 --> 900 circuits, 900 * 1024 shots
 Retrieving job 14/34 5e3e76ae6594ff00185bb63a --> 900 circuits, 900 * 1024 shots
+Retrieving job 15/34 5e3e77680f13e200197a317d --> 900 circuits, 900 * 1024 shots
+Retrieving job 16/34 5e3e7812c2a54100189e153c --> 900 circuits, 900 * 7585 shots
+Retrieving job 17/34 5e3e78af5be0a700182b742e --> 900 circuits, 900 * 1024 shots
+Retrieving job 18/34 5e3e794e5143a40018a65987 --> 900 circuits, 900 * 1024 shots
+Retrieving job 19/34 5e3e79ed288a3b00184741eb --> 900 circuits, 900 * 1024 shots
+Retrieving job 20/34 5e3e7a8b86bbf10018d3ebd8 --> 900 circuits, 900 * 1024 shots
+Retrieving job 21/34 5e3e7b17d7ebdc0018b8693d --> 900 circuits, 900 * 1024 shots
+Retrieving job 22/34 5e3e7bb49c0589001822271a --> 900 circuits, 900 * 1024 shots
+Retrieving job 23/34 5e3e7c529d3baf0018edfa21 --> 900 circuits, 900 * 1024 shots
+Retrieving job 24/34 5e3e7cf06594ff00185bb640 --> 900 circuits, 900 * 1024 shots
+Retrieving job 25/34 5e3e7d8fb73f3a00182b9fa8 --> 900 circuits, 900 * 1024 shots
+Retrieving job 26/34 5e3e7e31c2a54100189e1550 --> 900 circuits, 900 * 1024 shots
+Retrieving job 27/34 5e3e7ed10f13e200197a3189 --> 900 circuits, 900 * 1024 shots
+Retrieving job 28/34 5e3e7f7086bbf10018d3ebdd --> 900 circuits, 900 * 1024 shots
+Retrieving job 29/34 5e3e7ffbb73f3a00182b9fad --> 873 circuits, 900 * 8192 shots
+Retrieving job 30/34 5e3e80a35143a40018a6598d --> 864 circuits, 900 * 8192 shots
+Retrieving job 31/34 5e3e81610f13e200197a318b --> 900 circuits, 900 * 1024 shots
+Retrieving job 32/34 5e3e821f9c05890018222728 --> 900 circuits, 900 * 1024 shots
+Retrieving job 33/34 5e3e82d65be0a700182b743b --> 900 circuits, 900 * 1024 shots
+Retrieving job 34/34 5e3e832ac2a54100189e1558 --> 387 circuits, 387 * 1024 shots
+/home/weit/anaconda3/envs/cc-env/lib/python3.7/site-packages/qiskit/providers/models/backendconfiguration.py:337: UserWarning: `dt` and `dtm` now have units of seconds(s) rather than nanoseconds(ns).
+  warnings.warn('`dt` and `dtm` now have units of seconds(s) rather '
+-------------------------------------------------- Reconstructor --------------------------------------------------
+Existing cases: dict_keys([])
+case (3, 4)
+Cut into  [3, 3] clusters
+qasm metric = 4.625e-04
+hw metric = 8.816e-02
+cutting metric = 4.639e-02
+Reconstruction output has 1 cases
+----------------------------------------------------------------------------------------------------
+case (4, 6)
+Cut into  [4, 3, 3] clusters
+qasm metric = 7.593e-04
+hw metric = 3.426e-01
+cutting metric = 2.557e-01
+Reconstruction output has 2 cases
+----------------------------------------------------------------------------------------------------
+case (5, 6)
+Cut into  [5, 3] clusters
+qasm metric = 7.593e-04
+hw metric = 3.426e-01
+cutting metric = 2.680e-01
+Reconstruction output has 3 cases
+----------------------------------------------------------------------------------------------------
+case (4, 8)
+Cut into  [4, 4, 4] clusters
+qasm metric = 9.999e-04
+hw metric = 3.431e-01
+cutting metric = 3.020e-01
+Reconstruction output has 4 cases
+----------------------------------------------------------------------------------------------------
+case (5, 8)
+Cut into  [4, 4, 4] clusters
+qasm metric = 9.999e-04
+hw metric = 3.431e-01
+cutting metric = 2.559e-01
+Reconstruction output has 5 cases
+----------------------------------------------------------------------------------------------------
+case (6, 8)
+Cut into  [4, 6] clusters
+qasm metric = 9.999e-04
+hw metric = 3.431e-01
+cutting metric = 4.825e-01
+Reconstruction output has 6 cases
+----------------------------------------------------------------------------------------------------
+case (7, 8)
+Cut into  [7, 3] clusters
+qasm metric = 9.999e-04
+hw metric = 3.431e-01
+cutting metric = 4.388e-01
+Reconstruction output has 7 cases
+----------------------------------------------------------------------------------------------------
+case (5, 10)
+Cut into  [4, 5, 5] clusters
+qasm metric = 3.231e-03
+hw metric = 5.390e-01
+cutting metric = 4.084e-01
+Reconstruction output has 8 cases
+----------------------------------------------------------------------------------------------------
+case (6, 10)
+Cut into  [6, 6] clusters
+qasm metric = 3.231e-03
+hw metric = 5.390e-01
+cutting metric = 4.602e-01
+Reconstruction output has 9 cases
+----------------------------------------------------------------------------------------------------
+case (7, 10)
+Cut into  [6, 6] clusters
+qasm metric = 3.231e-03
+hw metric = 5.390e-01
+cutting metric = 5.591e-01
+Reconstruction output has 10 cases
+----------------------------------------------------------------------------------------------------
+case (8, 10)
+Cut into  [6, 6] clusters
+qasm metric = 3.231e-03
+hw metric = 5.390e-01
+cutting metric = 4.586e-01
+Reconstruction output has 11 cases
+----------------------------------------------------------------------------------------------------
+case (9, 10)
+Cut into  [8, 4] clusters
+qasm metric = 3.231e-03
+hw metric = 5.390e-01
+cutting metric = 5.339e-01
+Reconstruction output has 12 cases
+----------------------------------------------------------------------------------------------------
+case (6, 12)
+Cut into  [6, 6, 6] clusters
+qasm metric = 1.284e-02
+hw metric = 4.655e-01
+cutting metric = 5.056e-01
+Reconstruction output has 13 cases
+----------------------------------------------------------------------------------------------------
+case (7, 12)
+Cut into  [7, 7, 2] clusters
+qasm metric = 1.284e-02
+hw metric = 4.655e-01
+cutting metric = 4.882e-01
+Reconstruction output has 14 cases
+----------------------------------------------------------------------------------------------------
+case (8, 12)
+Cut into  [8, 7] clusters
+qasm metric = 1.284e-02
+hw metric = 4.655e-01
+cutting metric = 4.481e-01
+Reconstruction output has 15 cases
+----------------------------------------------------------------------------------------------------
+case (9, 12)
+Cut into  [7, 8] clusters
+qasm metric = 1.284e-02
+hw metric = 4.655e-01
+cutting metric = 4.146e-01
+Reconstruction output has 16 cases
+----------------------------------------------------------------------------------------------------
+case (10, 12)
+Cut into  [10, 5] clusters
+qasm metric = 1.284e-02
+hw metric = 4.655e-01
+cutting metric = 4.910e-01
+Reconstruction output has 17 cases
+----------------------------------------------------------------------------------------------------
+case (6, 14)
+Cut into  [6, 6, 6] clusters
+qasm metric = 5.383e-02
+hw metric = 4.960e-01
+cutting metric = 4.413e-01
+Reconstruction output has 18 cases
+----------------------------------------------------------------------------------------------------
+case (7, 14)
+Cut into  [7, 6, 5] clusters
+qasm metric = 5.383e-02
+hw metric = 4.960e-01
+cutting metric = 4.706e-01
+Reconstruction output has 19 cases
+----------------------------------------------------------------------------------------------------
+case (8, 14)
+Cut into  [8, 8] clusters
+qasm metric = 5.383e-02
+hw metric = 4.960e-01
+cutting metric = 5.510e-01
+Reconstruction output has 20 cases
+----------------------------------------------------------------------------------------------------
+case (9, 14)
+Cut into  [7, 9] clusters
+qasm metric = 5.383e-02
+hw metric = 4.960e-01
+cutting metric = 5.157e-01
+Reconstruction output has 21 cases
+----------------------------------------------------------------------------------------------------
+case (10, 14)
+Cut into  [6, 10] clusters
+qasm metric = 5.383e-02
+hw metric = 4.960e-01
+cutting metric = 4.916e-01
+Reconstruction output has 22 cases
+----------------------------------------------------------------------------------------------------
+case (8, 16)
+Cut into  [2, 8, 8, 5] clusters
+qasm metric = 1.928e-01
+hw metric = 5.388e-01
+cutting metric = 4.503e-01
+Reconstruction output has 23 cases
+----------------------------------------------------------------------------------------------------
+case (9, 16)
+Cut into  [9, 9, 4] clusters
+qasm metric = 1.928e-01
+hw metric = 5.388e-01
+cutting metric = 5.317e-01
+Reconstruction output has 24 cases
+----------------------------------------------------------------------------------------------------
+case (10, 16)
+Cut into  [10, 3, 9] clusters
+qasm metric = 1.928e-01
+hw metric = 5.388e-01
+cutting metric = 5.455e-01
+Reconstruction output has 25 cases
+----------------------------------------------------------------------------------------------------
+case (9, 18)
+Cut into  [9, 9, 6] clusters
+qasm metric = 2.698e-01
+hw metric = 7.903e-01
+cutting metric = 5.838e-01
+Reconstruction output has 26 cases
+----------------------------------------------------------------------------------------------------
+case (10, 18)
+Cut into  [10, 10, 2] clusters
+qasm metric = 2.698e-01
+hw metric = 7.903e-01
+cutting metric = 6.340e-01
+Reconstruction output has 27 cases
+----------------------------------------------------------------------------------------------------
+case (10, 20)
+Cut into  [9, 10, 8] clusters
+qasm metric = 6.765e-01
+hw metric = 1.294e+00
+cutting metric = 6.983e-01
+Reconstruction output has 28 cases
+----------------------------------------------------------------------------------------------------
+-------------------------------------------------- Plot --------------------------------------------------
+Processing ./hardware/benchmark_data/supremacy_ibmq_boeblingen/hw_plotter_input_ibmq_boeblingen_sametotal.p
+case (3, 4): χ^2 percentage reduction = 47.380, fidelity improvement = 0.000, reconstruction time: 2.087e-03
+case (4, 6): χ^2 percentage reduction = 25.371, fidelity improvement = -0.000, reconstruction time: 3.866e-02
+case (5, 6): χ^2 percentage reduction = 21.774, fidelity improvement = -0.000, reconstruction time: 2.686e-03
+case (4, 8): χ^2 percentage reduction = 12.000, fidelity improvement = 0.000, reconstruction time: 4.529e-02
+case (5, 8): χ^2 percentage reduction = 25.440, fidelity improvement = 0.000, reconstruction time: 4.367e-02
+case (6, 8): χ^2 percentage reduction = -40.618, fidelity improvement = -0.000, reconstruction time: 4.112e-03
+case (7, 8): χ^2 percentage reduction = -27.861, fidelity improvement = -0.000, reconstruction time: 5.470e-03
+case (5, 10): χ^2 percentage reduction = 24.219, fidelity improvement = 0.000, reconstruction time: 7.398e-02
+case (6, 10): χ^2 percentage reduction = 14.606, fidelity improvement = -0.000, reconstruction time: 9.811e-03
+case (7, 10): χ^2 percentage reduction = -3.726, fidelity improvement = 0.000, reconstruction time: 9.788e-03
+case (8, 10): χ^2 percentage reduction = 14.917, fidelity improvement = -0.000, reconstruction time: 9.778e-03
+case (9, 10): χ^2 percentage reduction = 0.936, fidelity improvement = -0.000, reconstruction time: 1.155e-02
+case (6, 12): χ^2 percentage reduction = -8.605, fidelity improvement = -0.000, reconstruction time: 1.452e+00
+case (7, 12): χ^2 percentage reduction = -4.859, fidelity improvement = -0.000, reconstruction time: 5.727e-01
+case (8, 12): χ^2 percentage reduction = 3.742, fidelity improvement = 0.000, reconstruction time: 8.470e-02
+case (9, 12): χ^2 percentage reduction = 10.947, fidelity improvement = 0.000, reconstruction time: 6.228e-02
+case (10, 12): χ^2 percentage reduction = -5.473, fidelity improvement = -0.000, reconstruction time: 1.071e-01
+case (6, 14): χ^2 percentage reduction = 11.019, fidelity improvement = 0.000, reconstruction time: 2.351e-01
+case (7, 14): χ^2 percentage reduction = 5.108, fidelity improvement = 0.000, reconstruction time: 3.853e-01
+case (8, 14): χ^2 percentage reduction = -11.091, fidelity improvement = 0.000, reconstruction time: 8.731e-02
+case (9, 14): χ^2 percentage reduction = -3.983, fidelity improvement = 0.000, reconstruction time: 8.950e-02
+case (10, 14): χ^2 percentage reduction = 0.876, fidelity improvement = 0.000, reconstruction time: 1.095e-01
+case (8, 16): χ^2 percentage reduction = 16.421, fidelity improvement = -0.000, reconstruction time: 4.080e+01
+case (9, 16): χ^2 percentage reduction = 1.315, fidelity improvement = -0.000, reconstruction time: 1.656e+01
+case (10, 16): χ^2 percentage reduction = -1.242, fidelity improvement = -0.000, reconstruction time: 2.003e+01
+case (9, 18): χ^2 percentage reduction = 26.128, fidelity improvement = 0.000, reconstruction time: 4.830e+01
+case (10, 18): χ^2 percentage reduction = 19.782, fidelity improvement = 0.000, reconstruction time: 1.786e+01
+case (10, 20): χ^2 percentage reduction = 46.015, fidelity improvement = 0.000, reconstruction time: 1.567e+02
+************************* Best Cases *************************
+{'metric_percent': 47.380094344779764, 'reconstructor_time': 0.002087116241455078, 'best_case': (3, 4), 'hw_metric': 0.08816342292131936, 'cutting_metric': 0.04639150996361106}
+{'metric_percent': 25.370988635916344, 'reconstructor_time': 0.03865981101989746, 'best_case': (4, 6), 'hw_metric': 0.34262600225396156, 'cutting_metric': 0.2556983981584145}
+{'metric_percent': 25.440069394785784, 'reconstructor_time': 0.043666839599609375, 'best_case': (5, 8), 'hw_metric': 0.3431497787232867, 'cutting_metric': 0.2558522368880287}
+{'metric_percent': 24.21881446039059, 'reconstructor_time': 0.07397985458374023, 'best_case': (5, 10), 'hw_metric': 0.538968847957153, 'cutting_metric': 0.4084369826711055}
+{'metric_percent': 10.946564585163205, 'reconstructor_time': 0.06228041648864746, 'best_case': (9, 12), 'hw_metric': 0.4655448544756695, 'cutting_metric': 0.4145836863075863}
+{'metric_percent': 11.019295649120883, 'reconstructor_time': 0.23508119583129883, 'best_case': (6, 14), 'hw_metric': 0.495963799069338, 'cutting_metric': 0.4413120817372758}
+{'metric_percent': 16.421308776245276, 'reconstructor_time': 40.80446815490723, 'best_case': (8, 16), 'hw_metric': 0.5387763303484688, 'cutting_metric': 0.4503022055286235}
+{'metric_percent': 26.127884342106267, 'reconstructor_time': 48.29704308509827, 'best_case': (9, 18), 'hw_metric': 0.7903059179200332, 'cutting_metric': 0.5838157017370657}
+{'metric_percent': 46.01526614246375, 'reconstructor_time': 156.73001074790955, 'best_case': (10, 20), 'hw_metric': 1.293518614252513, 'cutting_metric': 0.6983025813019101}
+**************************************************
+----------------------------------------------------------------------------------------------------

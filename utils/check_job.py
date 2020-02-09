@@ -51,7 +51,7 @@ if __name__ == '__main__':
                         error_jobs.append(job)
                 print_ctr = 0
                 print('Most recently QUEUED:')
-                for job in queued_jobs[-10:]:
+                for job in queued_jobs[:10]:
                     print(job.creation_date(),job.status(),job.queue_position(),job.job_id(),'ETA:',job.queue_info().estimated_complete_time-time_now)
                 print('Total queued = {:d}.'.format(len(queued_jobs)))
                 print('RUNNING:')
