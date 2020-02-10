@@ -177,7 +177,7 @@ def get_circ_saturated_shots(circs,device_name):
         saturated_probs.append(saturated_prob)
         saturated_chi2 = chi2_distance(target=ground_truth,obs=saturated_prob)
         # saturated_chi2 = wasserstein_distance(u_values=ground_truth,v_values=saturated_prob)
-        print('%d qubit circuit saturated shots = %d, metric = %.3e'%(full_circ_size,saturated_shot,saturated_chi2))
+        print('%d qubit circuit saturated shots = %d, \u03C7^2 = %.3e'%(full_circ_size,saturated_shot,saturated_chi2))
         
     return saturated_shots, ground_truths, saturated_probs
 

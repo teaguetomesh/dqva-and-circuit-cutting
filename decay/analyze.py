@@ -30,20 +30,20 @@ def make_plot(metrics_list,cutoffs,full_circ_size,shots_increment,derivative_thr
     cutoff = cutoffs[0]
     xvals = range(1,len(metric_l)+1)
     ax1.plot(xvals,metric_l,color='b')
+    ax1.axvline(x=cutoffs[0],label='noiseless cutoff = %d'%cutoffs[0] if len(metrics_list[0])>=cutoffs[0]+1 else 'noiseless diverged = %d'%cutoffs[0],color='b',linestyle='--')
     ax1.set_ylabel('noiseless metric, lower is better',color='b')
     ax1.set_xlabel('shots [*%d]'%shots_increment)
     ax1.tick_params(axis='y', labelcolor='b')
 
-    ax2 = ax1.twinx()
-    metric_l = metrics_list[1]
-    cutoff = cutoffs[1]
-    xvals = range(1,len(metric_l)+1)
-    ax2.axvline(x=cutoffs[0],label='noiseless cutoff = %d'%cutoffs[0] if len(metrics_list[0])>=cutoffs[0]+1 else 'noiseless diverged = %d'%cutoffs[0],color='b',linestyle='--')
-    ax2.axvline(x=cutoffs[1],label='noisy cutoff = %d'%cutoffs[1] if len(metrics_list[1])>=cutoffs[1]+1 else 'noisy diverged = %d'%cutoffs[1],color='r',linestyle='--')
-    ax2.plot(xvals,metric_l,color='r')
-    ax2.set_ylabel('noisy metric, lower is better',color='r')
-    ax2.tick_params(axis='y', labelcolor='r')
-    ax2.legend()
+    # ax2 = ax1.twinx()
+    # metric_l = metrics_list[1]
+    # cutoff = cutoffs[1]
+    # xvals = range(1,len(metric_l)+1)
+    # ax2.axvline(x=cutoffs[1],label='noisy cutoff = %d'%cutoffs[1] if len(metrics_list[1])>=cutoffs[1]+1 else 'noisy diverged = %d'%cutoffs[1],color='r',linestyle='--')
+    # ax2.plot(xvals,metric_l,color='r')
+    # ax2.set_ylabel('noisy metric, lower is better',color='r')
+    # ax2.tick_params(axis='y', labelcolor='r')
+    # ax2.legend()
     
     plt.title('%d qubit circuit, derivative_thresholds : %.3e, %.3e'%(full_circ_size,first_derivative_threshold,second_derivative_threshold))
     # plt.legend()
@@ -77,9 +77,8 @@ if __name__ == '__main__':
     for full_circ_size in decay_dict:
         circ = decay_dict[full_circ_size]['circ']
         noiseless_chi2_l = decay_dict[full_circ_size]['noiseless_chi2_l']
-        noisy_chi2_l = decay_dict[full_circ_size]['noisy_chi2_l']
         shots_increment = decay_dict[full_circ_size]['shots_increment']
-        cutoffs = find_saturation(metrics_list=[noiseless_chi2_l,noisy_chi2_l],derivative_thresholds=(args.first_derivative,args.second_derivative))
+        cutoffs = find_saturation(metrics_list=[noiseless_chi2_l],derivative_thresholds=(args.first_derivative,args.second_derivative))
         print('%d qubit circuit, noiseless cutoff = %d, noisy cutoff = %d'%(full_circ_size,cutoffs[0],cutoffs[1]),flush=True)
-        make_plot(metrics_list=[noiseless_chi2_l,noisy_chi2_l],cutoffs=cutoffs,
+        make_plot(metrics_list=[noiseless_chi2_l],cutoffs=cutoffs,
         full_circ_size=full_circ_size,shots_increment=shots_increment,derivative_thresholds=(args.first_derivative,args.second_derivative))

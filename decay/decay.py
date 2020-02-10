@@ -121,11 +121,9 @@ if __name__ == '__main__':
         shots_increment = device_max_shots
     
         noiseless_chi2_l, noiseless_distance_l = noiseless_decay(circuit=circ,shots_increment=shots_increment,device_max_experiments=device_max_experiments)
-        noisy_chi2_l, noisy_distance_l = noisy_decay(circuit=circ,shots_increment=shots_increment,device_max_experiments=device_max_experiments)
+        # noisy_chi2_l, noisy_distance_l = noisy_decay(circuit=circ,shots_increment=shots_increment,device_max_experiments=device_max_experiments)
         rank_decay_dict[full_circ_size] = {'circ':circ,'shots_increment':shots_increment,
-        'noiseless_chi2_l':noiseless_chi2_l,'noiseless_distance_l':noiseless_distance_l,
-        'noisy_chi2_l':noisy_chi2_l,'noisy_distance_l':noisy_distance_l
-        }
+        'noiseless_chi2_l':noiseless_chi2_l,'noiseless_distance_l':noiseless_distance_l}
     
     if rank == size - 1:
         decay_dict.update(rank_decay_dict)

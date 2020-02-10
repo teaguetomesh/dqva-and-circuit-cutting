@@ -44,7 +44,7 @@ if __name__ == '__main__':
     parser.add_argument('--circuit-type', metavar='S', type=str,help='which circuit input file to run')
     args = parser.parse_args()
 
-    dirname, evaluator_input_filename = get_filename(experiment_name='hardware',circuit_type=args.circuit_type,device_name=args.device_name,field='evaluator_input',evaluation_method=None,shots_mode=None)
+    dirname, evaluator_input_filename = get_filename(experiment_name='hardware',circuit_type=args.circuit_type,device_name=args.device_name,field='evaluator_input',evaluation_method=None)
     if not os.path.exists(dirname):
         os.makedirs(dirname)
 
