@@ -14528,3 +14528,50 @@ cutting metric = 3.038e-01
 Reconstruction took 8.32 seconds
 Reconstruction output has 1 cases
 ----------------------------------------------------------------------------------------------------
+-------------------------------------------------- Reconstructor --------------------------------------------------
+Existing cases: dict_keys([])
+case (8, 15)
+Traceback (most recent call last):
+  File "/Users/weitang/opt/anaconda3/envs/cc-env/lib/python3.7/runpy.py", line 193, in _run_module_as_main
+    "__main__", mod_spec)
+  File "/Users/weitang/opt/anaconda3/envs/cc-env/lib/python3.7/runpy.py", line 85, in _run_code
+    exec(code, run_globals)
+  File "/Users/weitang/Documents/circuit_cutting/utils/reconstructor.py", line 329, in <module>
+    reconstructed_prob = reconstructed_prob/norm
+TypeError: __array_prepare__ must return an ndarray or subclass thereof which is otherwise identical to its input
+Cut into  [7, 6, 8] clusters
+prep took 0.18 seconds
+reconstruction len =  1 probabilities sum =  [[3.72035269e-04 1.18901036e-04 2.02835741e-04 ... 1.33042980e-04
+  5.85213711e-05 1.38064148e-04]]
+-------------------------------------------------- Reconstructor --------------------------------------------------
+Existing cases: dict_keys([])
+case (8, 15)
+Traceback (most recent call last):
+  File "/Users/weitang/opt/anaconda3/envs/cc-env/lib/python3.7/runpy.py", line 193, in _run_module_as_main
+    "__main__", mod_spec)
+  File "/Users/weitang/opt/anaconda3/envs/cc-env/lib/python3.7/runpy.py", line 85, in _run_code
+    exec(code, run_globals)
+  File "/Users/weitang/Documents/circuit_cutting/utils/reconstructor.py", line 324, in <module>
+    cluster_sim_probs=uniter_input[case]['all_cluster_prob'],cluster_init_meas_combinations=cluster_init_meas_combinations)
+  File "/Users/weitang/Documents/circuit_cutting/utils/reconstructor.py", line 241, in reconstruct
+    sparse_reconstructed_prob = csr_matrix(sparse_reconstructed_prob)
+UnboundLocalError: local variable 'sparse_reconstructed_prob' referenced before assignment
+Cut into  [7, 6, 8] clusters
+prep took 0.19 seconds
+-------------------------------------------------- Reconstructor --------------------------------------------------
+Existing cases: dict_keys([])
+case (8, 15)
+Traceback (most recent call last):
+  File "/Users/weitang/opt/anaconda3/envs/cc-env/lib/python3.7/runpy.py", line 193, in _run_module_as_main
+    "__main__", mod_spec)
+  File "/Users/weitang/opt/anaconda3/envs/cc-env/lib/python3.7/runpy.py", line 85, in _run_code
+    exec(code, run_globals)
+  File "/Users/weitang/Documents/circuit_cutting/utils/reconstructor.py", line 324, in <module>
+    cluster_sim_probs=uniter_input[case]['all_cluster_prob'],cluster_init_meas_combinations=cluster_init_meas_combinations)
+  File "/Users/weitang/Documents/circuit_cutting/utils/reconstructor.py", line 264, in reconstruct
+    print('reconstruction len = ', len(sparse_reconstructed_prob),'probabilities sum = ', sum(sparse_reconstructed_prob))
+  File "/Users/weitang/opt/anaconda3/envs/cc-env/lib/python3.7/site-packages/scipy/sparse/base.py", line 295, in __len__
+    raise TypeError("sparse matrix length is ambiguous; use getnnz()"
+TypeError: sparse matrix length is ambiguous; use getnnz() or shape[0]
+Cut into  [7, 6, 8] clusters
+prep took 0.18 seconds

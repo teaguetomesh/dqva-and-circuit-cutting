@@ -4,7 +4,7 @@ import math
 import pickle
 import glob
 from time import time
-from scipy.sparse import kron
+from scipy.sparse import kron, csr_matrix
 import argparse
 from utils.helper_fun import get_filename, read_file
 from utils.metrics import chi2_distance
@@ -238,10 +238,12 @@ def calculate_cluster(cluster_idx,cluster_probs,init_meas,O_qubit_positions,effe
 
 def reconstruct(combinations, cluster_O_qubit_positions, correspondence_map, num_qubits, num_clusters, cluster_sim_probs, cluster_init_meas_combinations):
     reconstructed_prob = np.zeros(2**num_qubits)
+    sparse_reconstructed_prob = csr_matrix(reconstructed_prob)
     for i,s in enumerate(combinations):
         # print('s_{} = {}'.format(i,s))
         clusters_init_meas = cluster_init_meas_combinations[s]
         summation_term = np.ones(1)
+        sparse_summation_term = csr_matrix(summation_term)
         for cluster_idx in range(len(cluster_sim_probs)):
             # print('Cluster {} inits meas = {}'.format(cluster_idx,clusters_init_meas[cluster_idx]))
             kronecker_term = calculate_cluster(cluster_idx=cluster_idx,
@@ -252,14 +254,15 @@ def reconstruct(combinations, cluster_O_qubit_positions, correspondence_map, num
             num_qubits = len(clusters_init_meas[cluster_idx][0])
             sub_threshold_indices = kronecker_term < 1e-5
             kronecker_term[sub_threshold_indices] = 0
+            sparse_kronecker_term = csr_matrix(kronecker_term)
             # print('cluster %d collapsed = '%cluster_idx,kronecker_term)
-            summation_term = kron(summation_term,kronecker_term).toarray()[0]
-        reconstructed_prob += summation_term
+            sparse_summation_term = kron(sparse_summation_term,sparse_kronecker_term)
+        sparse_reconstructed_prob += sparse_summation_term
         # print('-'*100)
     # print()
-    reconstructed_prob = reconstructed_prob/scaling_factor
-    print('reconstruction len = ', len(reconstructed_prob),'probabilities sum = ', sum(reconstructed_prob))
-    return reconstructed_prob
+    sparse_reconstructed_prob = sparse_reconstructed_prob/scaling_factor
+    print('reconstruction len = ', len(sparse_reconstructed_prob),'probabilities sum = ', sum(sparse_reconstructed_prob))
+    return sparse_reconstructed_prob
 
 def prepare_reconstruct(complete_path_map, full_circ, cluster_circs, cluster_sim_probs):
     O_rho_pairs = find_cuts_pairs(complete_path_map)
