@@ -1,0 +1,72 @@
+-------------------------------------------------- Generator --------------------------------------------------
+Existing cases: dict_keys([])
+Using license file /Users/weitang/gurobi.lic
+Academic license - for non-commercial use only
+********************
+MIQCP stats:
+6 cuts, 3 clusters, max qubit = 8
+cluster 0: original input = 6.00, ρ_qubits = 1.00, O_qubits = 3.00, d = 7.00
+cluster 1: original input = 4.00, ρ_qubits = 2.00, O_qubits = 3.00, d = 6.00
+cluster 2: original input = 5.00, ρ_qubits = 3.00, O_qubits = 0.00, d = 8.00
+objective value = 6.000e+00
+manually calculated objective value: 1.350e+03
+evaluator_cost = 1350, reconstructor_cost = 5.199e-01, reconstructor_weight = 0.000e+00
+runtime: 0.25136590003967285
+OPTIMAL
+********************
+Adding case (8, 15) to run
+15 qubit circuit saturated shots = 163840, χ^2 = 9.883e-02
+Adding 15 qubit full circuit to run, 163840 shots
+----------------------------------------------------------------------------------------------------
+1 cases, 1 full circuits to run : dict_keys([(8, 15)])
+******************** Submitting jobs ********************
+Submitting job 1/1 26aeb119-affb-453c-b6ed-442da95329f2 --> 1 circuits, 20 * 8192 shots
+******************** Retrieving jobs ********************
+Retrieving job 1/1 26aeb119-affb-453c-b6ed-442da95329f2 --> 1 circuits, 20 * 8192 shots
+Case (8, 15) sv distance = 1.395e-30, hw distance = 9.857e-02
+-------------------------------------------------- Evaluator --------------------------------------------------
+Existing cases: dict_keys([])
+Running case: (8, 15)
+case (8, 15), cluster_0 7_qubits * 162_instances on ibmq_boeblingen QUANTUM HARDWARE
+case (8, 15), cluster_1 6_qubits * 972_instances on ibmq_boeblingen QUANTUM HARDWARE
+case (8, 15), cluster_2 8_qubits * 216_instances on ibmq_boeblingen QUANTUM HARDWARE
+Rank MASTER dumped case (8, 15), 1/1 cases
+----------------------------------------------------------------------------------------------------
+-------------------------------------------------- Job Submittor --------------------------------------------------
+Existing cases: dict_keys([])
+Run cases: dict_keys([(8, 15)])
+**************************************************
+Case (8, 15)
+Cluster 0 sametotal shots = 1024
+Cluster 1 sametotal shots = 1024
+Cluster 2 sametotal shots = 1024
+******************** Submitting jobs ********************
+Submitting job 1/2 04f02efa-3a6c-4d19-8708-9cf8b6c5dfd8 --> 900 circuits, 900 * 1024 shots
+Submitting job 2/2 c917083b-5e22-4225-a944-d06b4fe1bf52 --> 450 circuits, 450 * 1024 shots
+******************** Retrieving jobs ********************
+Retrieving job 1/2 04f02efa-3a6c-4d19-8708-9cf8b6c5dfd8 --> 900 circuits, 900 * 1024 shots
+Retrieving job 2/2 c917083b-5e22-4225-a944-d06b4fe1bf52 --> 450 circuits, 450 * 1024 shots
+-------------------------------------------------- Reconstructor --------------------------------------------------
+Existing cases: dict_keys([])
+case (8, 15)
+Cut into  [7, 6, 8] clusters
+prep took 0.20 seconds
+reorder took 0.18 seconds
+qasm metric = 9.883e-02
+hw metric = 9.857e-02
+cutting metric = 1.835e-01
+Reconstruction took 6.01 seconds
+Reconstruction output has 1 cases
+----------------------------------------------------------------------------------------------------
+-------------------------------------------------- Reconstructor --------------------------------------------------
+Existing cases: dict_keys([])
+case (8, 15)
+Cut into  [7, 6, 8] clusters
+prep took 0.18 seconds
+reorder took 0.16 seconds
+qasm metric = 9.883e-02
+hw metric = 9.857e-02
+cutting metric = 1.835e-01
+Reconstruction took 5.52 seconds
+Reconstruction output has 1 cases
+----------------------------------------------------------------------------------------------------

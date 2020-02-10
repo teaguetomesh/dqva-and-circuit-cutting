@@ -222,7 +222,7 @@ class Basic_Model(object):
             accumulated_kron_length += cluster_d.X-cluster_O_qubits.X
             print('cluster %d: original input = %.2f, \u03C1_qubits = %.2f, O_qubits = %.2f, d = %.2f' % 
             (i,cluster_input.X,cluster_rho_qubits.X,cluster_O_qubits.X,cluster_d.X))
-            print('Model evaluator_cost_exponent = %.3f, manually calculated = %.3f'%(evaluator_cost_exponent.X,manual_evaluator_cost_exponent))
+            # print('Model evaluator_cost_exponent = %.3f, manually calculated = %.3f'%(evaluator_cost_exponent.X,manual_evaluator_cost_exponent))
             if i>0:
                 reconstructor_cost_verify += np.power(4,len(self.cut_edges))*reconstructor_runtime_params[0]*np.exp(reconstructor_runtime_params[1]*accumulated_kron_length)
 

@@ -125,7 +125,7 @@ def effective_full_state_corresppndence(O_rho_pairs,cluster_circs):
             O_qubit_states = list(itertools.product(range(2),repeat=len(cluster_O_qubits)))
             cluster_correspondence = {}
             for effective_state in effective_states:
-                print('effective state:',effective_state)
+                # print('effective state:',effective_state)
                 effective_state_index = int("".join(str(x) for x in effective_state), 2)
                 corresponding_full_states = []
                 for O_qubit_state in O_qubit_states:
@@ -236,7 +236,7 @@ def calculate_cluster(cluster_idx,cluster_probs,init_meas,O_qubit_positions,effe
     kronecker_term = np.array(kronecker_term)
     return kronecker_term
 
-def _reconstruct(combinations, cluster_O_qubit_positions, correspondence_map, num_qubits, num_clusters, cluster_sim_probs, cluster_init_meas_combinations):
+def reconstruct(combinations, cluster_O_qubit_positions, correspondence_map, num_qubits, num_clusters, cluster_sim_probs, cluster_init_meas_combinations):
     reconstructed_prob = np.zeros(2**num_qubits)
     for i,s in enumerate(combinations):
         # print('s_{} = {}'.format(i,s))
@@ -266,19 +266,17 @@ def prepare_reconstruct(complete_path_map, full_circ, cluster_circs, cluster_sim
     basis = ['I','X','Y','Z']
 
     combinations = list(itertools.product(basis,repeat=len(O_rho_pairs)))
-    print('%d combinations'%len(combinations))
     correspondence_map = effective_full_state_corresppndence(O_rho_pairs,cluster_circs)
-    # # print('Effective states, full states correspondence map:')
-    # # [print('cluster %d' % cluster_idx,correspondence_map[cluster_idx],'\n') for cluster_idx in correspondence_map]
-    # cluster_O_qubit_positions = find_cluster_O_qubit_positions(O_rho_pairs, cluster_circs)
+    # print('Effective states, full states correspondence map:')
+    # [print('cluster %d' % cluster_idx,correspondence_map[cluster_idx],'\n') for cluster_idx in correspondence_map]
+    cluster_O_qubit_positions = find_cluster_O_qubit_positions(O_rho_pairs, cluster_circs)
 
-    # cluster_init_meas_combinations = {}
-    # for s in combinations:
-    #     clusters_init_meas = find_inits_meas(cluster_circs, O_rho_pairs, s)
-    #     cluster_init_meas_combinations[s] = clusters_init_meas
+    cluster_init_meas_combinations = {}
+    for s in combinations:
+        clusters_init_meas = find_inits_meas(cluster_circs, O_rho_pairs, s)
+        cluster_init_meas_combinations[s] = clusters_init_meas
 
-    # return combinations, cluster_O_qubit_positions, correspondence_map, scaling_factor, cluster_init_meas_combinations
-
+    return combinations, cluster_O_qubit_positions, correspondence_map, scaling_factor, cluster_init_meas_combinations
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Uniter')
@@ -300,40 +298,40 @@ if __name__ == '__main__':
     for case in uniter_input:
         # if case in plotter_input:
         #     continue
-        if case!=(6,14):
+        if case!=(8,15):
             continue
         print('case {}'.format(case),flush=True)
         case_dict = copy.deepcopy(uniter_input[case])
         print('Cut into ',[len(x.qubits) for x in case_dict['clusters']],'clusters')
         
         prep_begin = time()
-        prepare_reconstruct(
+        combinations, cluster_O_qubit_positions, correspondence_map, scaling_factor, cluster_init_meas_combinations = prepare_reconstruct(
         complete_path_map=uniter_input[case]['complete_path_map'],
         full_circ=uniter_input[case]['full_circ'],cluster_circs=uniter_input[case]['clusters'],
         cluster_sim_probs=uniter_input[case]['all_cluster_prob'])
         print('prep took %.2f seconds'%(time()-prep_begin))
         
-        # uniter_begin = time()
-        # reconstructed_prob = reconstruct(combinations,cluster_O_qubit_positions,correspondence_map,
-        # num_qubits=len(uniter_input[case]['full_circ'].qubits),num_clusters=len(uniter_input[case]['clusters']),
-        # cluster_sim_probs=uniter_input[case]['all_cluster_prob'],cluster_init_meas_combinations=cluster_init_meas_combinations)
-        # uniter_time = time()-uniter_begin
+        uniter_begin = time()
+        reconstructed_prob = reconstruct(combinations,cluster_O_qubit_positions,correspondence_map,
+        num_qubits=len(uniter_input[case]['full_circ'].qubits),num_clusters=len(uniter_input[case]['clusters']),
+        cluster_sim_probs=uniter_input[case]['all_cluster_prob'],cluster_init_meas_combinations=cluster_init_meas_combinations)
+        uniter_time = time()-uniter_begin
         
-        # reorder_begin = time()
-        # reconstructed_prob = reconstructed_reorder(reconstructed_prob,uniter_input[case]['complete_path_map'])
-        # norm = sum(reconstructed_prob)
-        # reconstructed_prob = reconstructed_prob/norm
-        # # print('reconstruction len = ', len(reconstructed_prob),'probabilities sum = ', sum(reconstructed_prob))
-        # reconstructed_prob = reverse_prob(prob_l=reconstructed_prob)
-        # print('reorder took %.2f seconds'%(time()-reorder_begin))
-        # case_dict['reconstructor_time'] = uniter_time
-        # case_dict['cutting'] = reconstructed_prob
-        # print('qasm metric = %.3e'%chi2_distance(target=case_dict['sv'],obs=case_dict['qasm']))
-        # print('hw metric = %.3e'%chi2_distance(target=case_dict['sv'],obs=case_dict['hw']))
-        # print('cutting metric = %.3e'%(chi2_distance(target=case_dict['sv'],obs=case_dict['cutting'])))
-        # print('Reconstruction took %.2f seconds'%uniter_time)
+        reorder_begin = time()
+        reconstructed_prob = reconstructed_reorder(reconstructed_prob,uniter_input[case]['complete_path_map'])
+        norm = sum(reconstructed_prob)
+        reconstructed_prob = reconstructed_prob/norm
+        # print('reconstruction len = ', len(reconstructed_prob),'probabilities sum = ', sum(reconstructed_prob))
+        reconstructed_prob = reverse_prob(prob_l=reconstructed_prob)
+        print('reorder took %.2f seconds'%(time()-reorder_begin))
+        case_dict['reconstructor_time'] = uniter_time
+        case_dict['cutting'] = reconstructed_prob
+        print('qasm metric = %.3e'%chi2_distance(target=case_dict['sv'],obs=case_dict['qasm']))
+        print('hw metric = %.3e'%chi2_distance(target=case_dict['sv'],obs=case_dict['hw']))
+        print('cutting metric = %.3e'%(chi2_distance(target=case_dict['sv'],obs=case_dict['cutting'])))
+        print('Reconstruction took %.2f seconds'%uniter_time)
 
-        # # pickle.dump({case:case_dict}, open('%s'%(dirname+plotter_input_filename),'ab'))
-        # counter += 1
-        # print('Reconstruction output has %d cases'%counter,flush=True)
-        # print('-'*100)
+        # pickle.dump({case:case_dict}, open('%s'%(dirname+plotter_input_filename),'ab'))
+        counter += 1
+        print('Reconstruction output has %d cases'%counter,flush=True)
+        print('-'*100)
