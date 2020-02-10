@@ -44,10 +44,9 @@ if __name__ == '__main__':
             cluster_base_circ = case_dict['clusters'][cluster_idx]
             evaluator_info = get_evaluator_info(circ=cluster_base_circ,device_name=args.device_name,
             fields=['basis_gates','coupling_map','properties','initial_layout'])
-            backend_device = get_evaluator_info(circ=None,device_name=args.device_name,fields=['device'])['device']
             fc_shots = case_dict['fc_shots']
             cluster_shots = int(fc_shots/len(case_dict['all_cluster_prob'][cluster_idx]))
-            cluster_shots = max(cluster_shots,1024)
+            cluster_shots = max(cluster_shots,device_max_shots)
             print('Cluster %d sametotal shots = %d'%(cluster_idx,cluster_shots))
             for init_meas in case_dict['all_cluster_prob'][cluster_idx]:
                 init_str = ','.join(init_meas[0])
