@@ -4,7 +4,7 @@ import math
 import pickle
 import glob
 from time import time
-from scipy.stats import wasserstein_distance
+from scipy.sparse import kron
 import argparse
 from utils.helper_fun import get_filename, read_file
 from utils.metrics import chi2_distance
@@ -249,12 +249,16 @@ def reconstruct(combinations, cluster_O_qubit_positions, correspondence_map, num
             init_meas=clusters_init_meas[cluster_idx],
             O_qubit_positions=cluster_O_qubit_positions[cluster_idx],
             effective_state_tranlsation=correspondence_map[cluster_idx])
+            num_qubits = len(clusters_init_meas[cluster_idx][0])
+            sub_threshold_indices = kronecker_term < 1e-5
+            kronecker_term[sub_threshold_indices] = 0
             # print('cluster %d collapsed = '%cluster_idx,kronecker_term)
-            summation_term = np.kron(summation_term,kronecker_term)
+            summation_term = kron(summation_term,kronecker_term).toarray()[0]
         reconstructed_prob += summation_term
         # print('-'*100)
     # print()
     reconstructed_prob = reconstructed_prob/scaling_factor
+    print('reconstruction len = ', len(reconstructed_prob),'probabilities sum = ', sum(reconstructed_prob))
     return reconstructed_prob
 
 def prepare_reconstruct(complete_path_map, full_circ, cluster_circs, cluster_sim_probs):
@@ -321,7 +325,6 @@ if __name__ == '__main__':
         reconstructed_prob = reconstructed_reorder(reconstructed_prob,uniter_input[case]['complete_path_map'])
         norm = sum(reconstructed_prob)
         reconstructed_prob = reconstructed_prob/norm
-        # print('reconstruction len = ', len(reconstructed_prob),'probabilities sum = ', sum(reconstructed_prob))
         reconstructed_prob = reverse_prob(prob_l=reconstructed_prob)
         print('reorder took %.2f seconds'%(time()-reorder_begin))
         case_dict['reconstructor_time'] = uniter_time
