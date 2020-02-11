@@ -11,8 +11,8 @@ fi
 
 # mpiexec -n 2 python -m utils.evaluator --experiment-name hardware --device-name $DEVICE_NAME --circuit-type $CIRCUIT_TYPE --evaluation-method hardware 2>&1 | tee -a ./hardware/logs/$CIRCUIT_TYPE\_$DEVICE_NAME\_logs.txt
 # python -m hardware.job_submittor --device-name $DEVICE_NAME --circuit-type $CIRCUIT_TYPE 2>&1 | tee -a ./hardware/logs/$CIRCUIT_TYPE\_$DEVICE_NAME\_logs.txt
-# python -m utils.reconstructor --experiment-name hardware --device-name $DEVICE_NAME --circuit-type $CIRCUIT_TYPE --evaluation-method hardware 2>&1 | tee -a ./hardware/logs/$CIRCUIT_TYPE\_$DEVICE_NAME\_logs.txt
-mpiexec -n 4 python -m utils.reconstructor_parallel --experiment-name hardware --device-name $DEVICE_NAME --circuit-type $CIRCUIT_TYPE --evaluation-method hardware 2>&1 | tee -a ./hardware/logs/$CIRCUIT_TYPE\_$DEVICE_NAME\_logs.txt
+python -m utils.reconstructor --experiment-name hardware --device-name $DEVICE_NAME --circuit-type $CIRCUIT_TYPE --evaluation-method hardware 2>&1 | tee -a ./hardware/logs/$CIRCUIT_TYPE\_$DEVICE_NAME\_logs.txt
+# mpiexec -n 4 python -m utils.reconstructor_parallel --experiment-name hardware --device-name $DEVICE_NAME --circuit-type $CIRCUIT_TYPE --evaluation-method hardware 2>&1 | tee -a ./hardware/logs/$CIRCUIT_TYPE\_$DEVICE_NAME\_logs.txt
 
 # python -m hardware.plot --device-name $DEVICE_NAME --circuit-type $CIRCUIT_TYPE --evaluation-method hardware 2>&1 | tee -a ./hardware/logs/$CIRCUIT_TYPE\_$DEVICE_NAME\_logs.txt
 
