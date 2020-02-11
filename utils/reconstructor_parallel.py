@@ -70,7 +70,7 @@ def multiply_sigma(full_cluster_prob,cluster_s,cluster_O_qubit_positions,effecti
             # contributing_term = sigma*full_cluster_prob[full_state]
             contributing_term = sigma*prob
             contracted_prob += contributing_term
-        return [contracted_prob]
+        return np.array([contracted_prob])
     else:
         effective_cluster_prob = []
         for effective_state in effective_state_tranlsation:
@@ -94,7 +94,7 @@ def multiply_sigma(full_cluster_prob,cluster_s,cluster_O_qubit_positions,effecti
             # print(' =',effective_state_prob)
             effective_cluster_prob.append(effective_state_prob)
         # print('effective cluster inst prob len = ', len(effective_cluster_prob))
-        return effective_cluster_prob
+        return np.array(effective_cluster_prob)
 
 def find_cluster_O_qubit_positions(O_rho_pairs, cluster_circs):
     cluster_O_qubit_positions = {}
@@ -181,7 +181,8 @@ def calculate_cluster(cluster_idx,cluster_probs,init_meas,O_qubit_positions,effe
     # print('O qubit positions:',O_qubit_positions)
     initilizations, measurement = init_meas
     num_effective_states = np.power(2,len(measurement)-len(O_qubit_positions))
-    kronecker_term = [0 for i in range(num_effective_states)]
+    # kronecker_term = [0 for i in range(num_effective_states)]
+    kronecker_term = np.zeros(num_effective_states)
     # print('Cluster %d has %d effective states'%(cluster_idx,num_effective_states))
     meas = tuple([x if x!='Z' else 'I' for x in measurement])
     measurement = tuple(measurement)
@@ -231,34 +232,35 @@ def calculate_cluster(cluster_idx,cluster_probs,init_meas,O_qubit_positions,effe
             effective_cluster_prob = collapsed_cluster_prob[cluster_idx][sigma_key]
         
         if sign == 1:
-            kronecker_term = [kronecker_term[i]+effective_cluster_prob[i] for i in range(len(effective_cluster_prob))]
+            # kronecker_term = [kronecker_term[i]+effective_cluster_prob[i] for i in range(len(effective_cluster_prob))]
+            kronecker_term = kronecker_term + effective_cluster_prob
             # print(effective_cluster_prob)
         else:
-            kronecker_term = [kronecker_term[i]-effective_cluster_prob[i] for i in range(len(effective_cluster_prob))]
+            # kronecker_term = [kronecker_term[i]-effective_cluster_prob[i] for i in range(len(effective_cluster_prob))]
+            kronecker_term = kronecker_term - effective_cluster_prob
             # print('-1*',effective_cluster_prob)
     
     # print('length of effective cluster prob:',len(kronecker_term))
     kronecker_term = np.array(kronecker_term)
     return kronecker_term, collapsed_cluster_prob
 
-def get_reconstruction_terms(complete_path_map, combinations, full_circ, cluster_circs, cluster_sim_probs):
+def reconstruct(complete_path_map, combinations, full_circ, cluster_circs, cluster_sim_probs):
     O_rho_pairs = find_cuts_pairs(complete_path_map)
     num_cuts = len(O_rho_pairs)
     scaling_factor = np.power(2,num_cuts)
     # print('O rho qubits pairs:',O_rho_pairs)
 
-    reconstructed_prob = [0 for i in range(np.power(2,len(full_circ.qubits)))]
+    reconstructed_prob = np.zeros(2**len(full_circ.qubits))
     correspondence_map = effective_full_state_corresppndence(O_rho_pairs,cluster_circs)
     # print('Effective states, full states correspondence map:')
     # [print('cluster %d' % cluster_idx,correspondence_map[cluster_idx],'\n') for cluster_idx in correspondence_map]
     cluster_O_qubit_positions = find_cluster_O_qubit_positions(O_rho_pairs, cluster_circs)
 
     collapsed_cluster_prob = [{} for c in cluster_circs]
-    reconstruction_terms = []
     for i,s in enumerate(combinations):
         # print('s_{} = {}'.format(i,s))
         clusters_init_meas = find_inits_meas(cluster_circs, O_rho_pairs, s)
-        reconstruction_term = []
+        summation_term = np.ones(1)
         for cluster_idx in range(len(cluster_circs)):
             # print('Cluster {} inits meas = {}'.format(cluster_idx,clusters_init_meas[cluster_idx]))
             kronecker_term, collapsed_cluster_prob = calculate_cluster(cluster_idx=cluster_idx,
@@ -267,12 +269,12 @@ def get_reconstruction_terms(complete_path_map, combinations, full_circ, cluster
             O_qubit_positions=cluster_O_qubit_positions[cluster_idx],
             effective_state_tranlsation=correspondence_map[cluster_idx],
             collapsed_cluster_prob=collapsed_cluster_prob)
-            reconstruction_term.append(kronecker_term)
             # print('cluster %d collapsed = '%cluster_idx,kronecker_term)
-        reconstruction_terms.append(reconstruction_term)
+            summation_term = np.kron(summation_term,kronecker_term)
+        reconstructed_prob += summation_term
         # print('-'*100)
     # print()
-    return reconstruction_terms, scaling_factor
+    return reconstructed_prob, scaling_factor
 
 def compute(reconstruction_terms, num_qubits):
     reconstructed_prob = np.zeros(2**num_qubits)
@@ -388,17 +390,17 @@ if __name__ == '__main__':
         
         
                 get_terms_begin = time()
-                reconstruction_terms, scaling_factor = get_reconstruction_terms(complete_path_map=uniter_input[case]['complete_path_map'],
+                reconstructed_prob, scaling_factor = reconstruct(complete_path_map=uniter_input[case]['complete_path_map'],
                 combinations=rank_combinations,
                 full_circ=uniter_input[case]['full_circ'], cluster_circs=uniter_input[case]['clusters'],
                 cluster_sim_probs=uniter_input[case]['all_cluster_prob'])
                 get_terms_time = time() - get_terms_begin
-                print('Rank %d getting reconstruction terms took %.3f seconds'%(rank,get_terms_time))
+                print('Rank %d reconstruction took %.3f seconds'%(rank,get_terms_time))
 
-                compute_begin = time()
-                reconstructed_prob = compute(reconstruction_terms=reconstruction_terms, num_qubits=case[1])
-                compute_time = time() - compute_begin
-                print('Rank %d compute took %.3f seconds'%(rank,compute_time))
+                # compute_begin = time()
+                # reconstructed_prob = compute(reconstruction_terms=reconstruction_terms, num_qubits=case[1])
+                # compute_time = time() - compute_begin
+                # print('Rank %d compute took %.3f seconds'%(rank,compute_time))
 
                 reconstructed_prob = reconstructed_prob/scaling_factor
 
