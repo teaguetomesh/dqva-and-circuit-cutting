@@ -4,7 +4,6 @@ import math
 import pickle
 import glob
 from time import time
-from scipy.sparse import kron, csr_matrix
 from scipy.stats import wasserstein_distance
 import argparse
 from utils.helper_fun import get_filename, read_file
@@ -140,12 +139,13 @@ def effective_full_state_corresppndence(O_rho_pairs,cluster_circs):
             correspondence_map[cluster_idx] = cluster_correspondence
         else:
             correspondence_map[cluster_idx] = None
+    # print(correspondence_map)
     return correspondence_map
 
 def reconstructed_reorder(unordered,complete_path_map):
     # print(complete_path_map)
     # print('ordering reconstructed sv')
-    ordered = np.zeros(unordered.shape)
+    ordered  = [0 for sv in unordered]
     cluster_out_qubits = {}
     for input_qubit in complete_path_map:
         path = complete_path_map[input_qubit]
@@ -176,7 +176,7 @@ def reconstructed_reorder(unordered,complete_path_map):
         # print('unordered %d --> ordered %d'%(idx,ordered_idx),'sv=',sv)
     return ordered
 
-def calculate_cluster(cluster_idx,cluster_probs,init_meas,O_qubit_positions,effective_state_tranlsation):
+def calculate_cluster(cluster_idx,cluster_probs,init_meas,O_qubit_positions,effective_state_tranlsation,collapsed_cluster_prob):
     # print('O qubit positions:',O_qubit_positions)
     initilizations, measurement = init_meas
     num_effective_states = np.power(2,len(measurement)-len(O_qubit_positions))
@@ -220,10 +220,14 @@ def calculate_cluster(cluster_idx,cluster_probs,init_meas,O_qubit_positions,effe
         
         sigma_key = (init,meas,tuple([measurement[i] for i in O_qubit_positions]))
         # print('sigma key = ',sigma_key)
-        effective_cluster_prob = multiply_sigma(full_cluster_prob=cluster_probs[(init,meas)],
-        cluster_s=[measurement[i] for i in O_qubit_positions],
-        cluster_O_qubit_positions=O_qubit_positions,
-        effective_state_tranlsation=effective_state_tranlsation)
+        if sigma_key not in collapsed_cluster_prob[cluster_idx]:
+            effective_cluster_prob = multiply_sigma(full_cluster_prob=cluster_probs[(init,meas)],
+            cluster_s=[measurement[i] for i in O_qubit_positions],
+            cluster_O_qubit_positions=O_qubit_positions,
+            effective_state_tranlsation=effective_state_tranlsation)
+            collapsed_cluster_prob[cluster_idx][sigma_key] = effective_cluster_prob
+        else:
+            effective_cluster_prob = collapsed_cluster_prob[cluster_idx][sigma_key]
         
         if sign == 1:
             kronecker_term = [kronecker_term[i]+effective_cluster_prob[i] for i in range(len(effective_cluster_prob))]
@@ -234,70 +238,47 @@ def calculate_cluster(cluster_idx,cluster_probs,init_meas,O_qubit_positions,effe
     
     # print('length of effective cluster prob:',len(kronecker_term))
     kronecker_term = np.array(kronecker_term)
-    return kronecker_term
+    return kronecker_term, collapsed_cluster_prob
 
-def reconstruct(combinations, cluster_O_qubit_positions, correspondence_map, num_qubits, num_clusters, cluster_sim_probs, cluster_init_meas_combinations, scaling_factor):
-    reconstruction_terms = []
-    calculate_time = 0
-    for i,s in enumerate(combinations):
-        # print('s_{} = {}'.format(i,s))
-        clusters_init_meas = cluster_init_meas_combinations[s]
-        term = []
-        for cluster_idx in range(len(cluster_sim_probs)):
-            # print('Cluster {} inits meas = {}'.format(cluster_idx,clusters_init_meas[cluster_idx]))
-            begin = time()
-            kronecker_term = calculate_cluster(cluster_idx=cluster_idx,
-            cluster_probs=cluster_sim_probs[cluster_idx],
-            init_meas=clusters_init_meas[cluster_idx],
-            O_qubit_positions=cluster_O_qubit_positions[cluster_idx],
-            effective_state_tranlsation=correspondence_map[cluster_idx])
-            calculate_time += time()-begin
-            # print('cluster %d collapsed = '%cluster_idx,kronecker_term)
-            term.append(kronecker_term)
-        reconstruction_terms.append(term)
-        # print('-'*100)
-    # print()
-    # print('reconstruction len = ', len(reconstructed_prob),'probabilities sum = ', sum(reconstructed_prob))
-    reconstruction_terms = np.array(reconstruction_terms)
-    print('calculate_cluster took %.2f seconds'%calculate_time)
-    return reconstruction_terms
-
-def prepare_reconstruct(complete_path_map, full_circ, cluster_circs, cluster_sim_probs):
+def reconstruct(complete_path_map, full_circ, cluster_circs, cluster_sim_probs):
     O_rho_pairs = find_cuts_pairs(complete_path_map)
     num_cuts = len(O_rho_pairs)
-    scaling_factor = 2**num_cuts
+    scaling_factor = np.power(2,num_cuts)
     # print('O rho qubits pairs:',O_rho_pairs)
 
     basis = ['I','X','Y','Z']
 
     combinations = list(itertools.product(basis,repeat=len(O_rho_pairs)))
+    reconstructed_prob = [0 for i in range(np.power(2,len(full_circ.qubits)))]
     correspondence_map = effective_full_state_corresppndence(O_rho_pairs,cluster_circs)
     # print('Effective states, full states correspondence map:')
     # [print('cluster %d' % cluster_idx,correspondence_map[cluster_idx],'\n') for cluster_idx in correspondence_map]
     cluster_O_qubit_positions = find_cluster_O_qubit_positions(O_rho_pairs, cluster_circs)
 
-    cluster_init_meas_combinations = {}
-    for s in combinations:
+    collapsed_cluster_prob = [{} for c in cluster_circs]
+    for i,s in enumerate(combinations):
+        # print('s_{} = {}'.format(i,s))
         clusters_init_meas = find_inits_meas(cluster_circs, O_rho_pairs, s)
-        cluster_init_meas_combinations[s] = clusters_init_meas
-
-    return combinations, cluster_O_qubit_positions, correspondence_map, scaling_factor, cluster_init_meas_combinations
-
-def compute(reconstruction_terms,reconstructed_prob):
-    for term in reconstruction_terms:
-        summation_term = np.ones(1)
-        for cluster_prob in term:
-            summation_term = np.kron(summation_term,cluster_prob)
+        summation_term = np.array([1])
+        for cluster_idx in range(len(cluster_circs)):
+            # print('Cluster {} inits meas = {}'.format(cluster_idx,clusters_init_meas[cluster_idx]))
+            kronecker_term, collapsed_cluster_prob = calculate_cluster(cluster_idx=cluster_idx,
+            cluster_probs=cluster_sim_probs[cluster_idx],
+            init_meas=clusters_init_meas[cluster_idx],
+            O_qubit_positions=cluster_O_qubit_positions[cluster_idx],
+            effective_state_tranlsation=correspondence_map[cluster_idx],
+            collapsed_cluster_prob=collapsed_cluster_prob)
+            # print('cluster %d collapsed = '%cluster_idx,kronecker_term)
+            summation_term = np.kron(summation_term,kronecker_term)
         reconstructed_prob += summation_term
+        # print('-'*100)
+    # print()
+    reconstructed_prob = reconstructed_prob/scaling_factor
+    reconstructed_prob = reconstructed_reorder(reconstructed_prob,complete_path_map)
+    norm = sum(reconstructed_prob)
+    reconstructed_prob = reconstructed_prob/norm
+    # print('reconstruction len = ', len(reconstructed_prob),'probabilities sum = ', sum(reconstructed_prob))
     return reconstructed_prob
-
-def get_reconstruction_terms(combinations, O_rho_pairs, cluster_circs):
-    reconstruction_terms = np.zeros(1)
-    for s in combinations:
-        for s_logit, O_rho_pair in zip(s, O_rho_pairs):
-            print(s_logit, O_rho_pair)
-        break
-    return reconstruction_terms
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Uniter')
@@ -306,7 +287,7 @@ if __name__ == '__main__':
     parser.add_argument('--circuit-type', metavar='S', type=str,help='which circuit input file to run')
     parser.add_argument('--evaluation-method', metavar='S', type=str,help='which evaluator backend file to reconstruct')
     args = parser.parse_args()
-    
+
     dirname, uniter_input_filename = get_filename(experiment_name=args.experiment_name,circuit_type=args.circuit_type,device_name=args.device_name,field='uniter_input',evaluation_method=args.evaluation_method)
     uniter_input = read_file(dirname+uniter_input_filename)
     dirname, plotter_input_filename = get_filename(experiment_name=args.experiment_name,circuit_type=args.circuit_type,device_name=args.device_name,field='plotter_input',evaluation_method=args.evaluation_method)
@@ -323,54 +304,21 @@ if __name__ == '__main__':
         print('case {}'.format(case),flush=True)
         case_dict = copy.deepcopy(uniter_input[case])
         print('Cut into ',[len(x.qubits) for x in case_dict['clusters']],'clusters')
-
-        complete_path_map = uniter_input[case]['complete_path_map']
-        full_circ = uniter_input[case]['full_circ']
-        cluster_circs = uniter_input[case]['clusters']
-        cluster_probs = uniter_input[case]['all_cluster_prob']
-
-        print(cluster_probs[0].keys())
-
-        basis = ['I','X','Y','Z']
-        O_rho_pairs = find_cuts_pairs(complete_path_map)
-        combinations = list(itertools.product(basis,repeat=len(O_rho_pairs)))
-        reconstruction_terms = get_reconstruction_terms(combinations, O_rho_pairs, cluster_circs)
-
-        # prep_begin = time()
-        # combinations, cluster_O_qubit_positions, correspondence_map, scaling_factor, cluster_init_meas_combinations = prepare_reconstruct(
-        #     complete_path_map=uniter_input[case]['complete_path_map'],
-        #     full_circ=uniter_input[case]['full_circ'],
-        #     cluster_circs=uniter_input[case]['clusters'],
-        #     cluster_sim_probs=uniter_input[case]['all_cluster_prob']
-        # )
-        # print('prep took %.2f seconds'%(time()-prep_begin))
         
-        # terms_begin = time()
-        # reconstruction_terms = reconstruct(combinations,cluster_O_qubit_positions,correspondence_map,
-        # num_qubits=len(uniter_input[case]['full_circ'].qubits),num_clusters=len(uniter_input[case]['clusters']),
-        # cluster_sim_probs=uniter_input[case]['all_cluster_prob'],cluster_init_meas_combinations=cluster_init_meas_combinations,
-        # scaling_factor=scaling_factor)
-        # print('getting reconstruction terms took %.2f seconds'%(time()-terms_begin))
+        uniter_begin = time()
+        reconstructed_prob = reconstruct(complete_path_map=uniter_input[case]['complete_path_map'],
+        full_circ=uniter_input[case]['full_circ'], cluster_circs=uniter_input[case]['clusters'],
+        cluster_sim_probs=uniter_input[case]['all_cluster_prob'])
+        reconstructed_prob = reverse_prob(prob_l=reconstructed_prob)
+        uniter_time = time()-uniter_begin
+        case_dict['reconstructor_time'] = uniter_time
+        case_dict['cutting'] = reconstructed_prob
+        print('qasm metric = %.3e'%chi2_distance(target=case_dict['sv'],obs=case_dict['qasm']))
+        print('hw metric = %.3e'%chi2_distance(target=case_dict['sv'],obs=case_dict['hw']))
+        print('cutting metric = %.3e'%(chi2_distance(target=case_dict['sv'],obs=case_dict['cutting'])))
+        print('Reconstruction took %.2f seconds'%uniter_time)
 
-        # uniter_begin = time()
-        # reconstruction_length = np.prod([len(x) for x in reconstruction_terms[0]])
-        # reconstructed_prob = compute(reconstruction_terms,np.zeros(reconstruction_length))
-        # uniter_time = time()-uniter_begin
-        # print('Reconstruction took %.2f seconds'%uniter_time)
-        
-        # reorder_begin = time()
-        # reconstructed_prob = reconstructed_reorder(reconstructed_prob,uniter_input[case]['complete_path_map'])
-        # norm = reconstructed_prob.sum()
-        # reconstructed_prob = reconstructed_prob/norm
-        # reconstructed_prob = reverse_prob(prob_l=reconstructed_prob)
-        # print('reorder took %.2f seconds'%(time()-reorder_begin))
-        # case_dict['reconstructor_time'] = uniter_time
-        # case_dict['cutting'] = reconstructed_prob
-        # print('qasm metric = %.3e'%chi2_distance(target=case_dict['sv'],obs=case_dict['qasm']))
-        # print('hw metric = %.3e'%chi2_distance(target=case_dict['sv'],obs=case_dict['hw']))
-        # print('cutting metric = %.3e'%(chi2_distance(target=case_dict['sv'],obs=case_dict['cutting'])))
-
-        # # pickle.dump({case:case_dict}, open('%s'%(dirname+plotter_input_filename),'ab'))
-        # counter += 1
-        # print('Reconstruction output has %d cases'%counter,flush=True)
-        # print('-'*100)
+        # pickle.dump({case:case_dict}, open('%s'%(dirname+plotter_input_filename),'ab'))
+        counter += 1
+        print('Reconstruction output has %d cases'%counter,flush=True)
+        print('-'*100)
