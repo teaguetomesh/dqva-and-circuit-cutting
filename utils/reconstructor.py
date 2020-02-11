@@ -240,7 +240,7 @@ def calculate_cluster(cluster_idx,cluster_probs,init_meas,O_qubit_positions,effe
     kronecker_term = np.array(kronecker_term)
     return kronecker_term, collapsed_cluster_prob
 
-def reconstruct(complete_path_map, full_circ, cluster_circs, cluster_sim_probs):
+def get_reconstruction_terms(complete_path_map, full_circ, cluster_circs, cluster_sim_probs):
     O_rho_pairs = find_cuts_pairs(complete_path_map)
     num_cuts = len(O_rho_pairs)
     scaling_factor = np.power(2,num_cuts)
@@ -256,10 +256,11 @@ def reconstruct(complete_path_map, full_circ, cluster_circs, cluster_sim_probs):
     cluster_O_qubit_positions = find_cluster_O_qubit_positions(O_rho_pairs, cluster_circs)
 
     collapsed_cluster_prob = [{} for c in cluster_circs]
+    reconstruction_terms = []
     for i,s in enumerate(combinations):
         # print('s_{} = {}'.format(i,s))
         clusters_init_meas = find_inits_meas(cluster_circs, O_rho_pairs, s)
-        summation_term = np.array([1])
+        reconstruction_term = []
         for cluster_idx in range(len(cluster_circs)):
             # print('Cluster {} inits meas = {}'.format(cluster_idx,clusters_init_meas[cluster_idx]))
             kronecker_term, collapsed_cluster_prob = calculate_cluster(cluster_idx=cluster_idx,
@@ -268,16 +269,20 @@ def reconstruct(complete_path_map, full_circ, cluster_circs, cluster_sim_probs):
             O_qubit_positions=cluster_O_qubit_positions[cluster_idx],
             effective_state_tranlsation=correspondence_map[cluster_idx],
             collapsed_cluster_prob=collapsed_cluster_prob)
+            reconstruction_term.append(kronecker_term)
             # print('cluster %d collapsed = '%cluster_idx,kronecker_term)
-            summation_term = np.kron(summation_term,kronecker_term)
-        reconstructed_prob += summation_term
+        reconstruction_terms.append(reconstruction_term)
         # print('-'*100)
     # print()
-    reconstructed_prob = reconstructed_prob/scaling_factor
-    reconstructed_prob = reconstructed_reorder(reconstructed_prob,complete_path_map)
-    norm = sum(reconstructed_prob)
-    reconstructed_prob = reconstructed_prob/norm
-    # print('reconstruction len = ', len(reconstructed_prob),'probabilities sum = ', sum(reconstructed_prob))
+    return reconstruction_terms, scaling_factor
+
+def compute(reconstruction_terms, num_qubits):
+    reconstructed_prob = np.zeros(2**num_qubits)
+    for reconstruction_term in reconstruction_terms:
+        summation_term = np.ones(1)
+        for kronecker_term in reconstruction_term:
+            summation_term = np.kron(summation_term,kronecker_term)
+        reconstructed_prob += summation_term
     return reconstructed_prob
 
 if __name__ == '__main__':
@@ -305,12 +310,30 @@ if __name__ == '__main__':
         case_dict = copy.deepcopy(uniter_input[case])
         print('Cut into ',[len(x.qubits) for x in case_dict['clusters']],'clusters')
         
-        uniter_begin = time()
-        reconstructed_prob = reconstruct(complete_path_map=uniter_input[case]['complete_path_map'],
+        get_terms_begin = time()
+        reconstruction_terms, scaling_factor = get_reconstruction_terms(complete_path_map=uniter_input[case]['complete_path_map'],
         full_circ=uniter_input[case]['full_circ'], cluster_circs=uniter_input[case]['clusters'],
         cluster_sim_probs=uniter_input[case]['all_cluster_prob'])
+        get_terms_time = time() - get_terms_begin
+        print('Getting reconstruction terms took %.3f seconds'%get_terms_time)
+
+        compute_begin = time()
+        reconstructed_prob = compute(reconstruction_terms=reconstruction_terms, num_qubits=case[1])
+        compute_time = time() - compute_begin
+        print('Compute took %.3f seconds'%compute_time)
+        
+        reorder_begin = time()
+        reconstructed_prob = reconstructed_prob/scaling_factor
+        reconstructed_prob = reconstructed_reorder(reconstructed_prob,complete_path_map=uniter_input[case]['complete_path_map'])
+        norm = sum(reconstructed_prob)
+        reconstructed_prob = reconstructed_prob/norm
         reconstructed_prob = reverse_prob(prob_l=reconstructed_prob)
-        uniter_time = time()-uniter_begin
+        reorder_time = time() - reorder_begin
+        print('Reorder took %.3f seconds'%reorder_time)
+
+        print('reconstruction len = ', len(reconstructed_prob),'probabilities sum = ', sum(reconstructed_prob))
+        
+        uniter_time = get_terms_time + compute_time + reorder_time
         case_dict['reconstructor_time'] = uniter_time
         case_dict['cutting'] = reconstructed_prob
         print('qasm metric = %.3e'%chi2_distance(target=case_dict['sv'],obs=case_dict['qasm']))
