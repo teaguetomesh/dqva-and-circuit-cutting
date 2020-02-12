@@ -238,7 +238,7 @@ def calculate_cluster(cluster_idx,cluster_probs,init_meas,O_qubit_positions,effe
     return kronecker_term
 
 def reconstruct(complete_path_map, combinations, full_circ, cluster_circs, cluster_sim_probs):
-    [print(x,complete_path_map[x]) for x in complete_path_map]
+    #[print(x,complete_path_map[x]) for x in complete_path_map]
     O_rho_pairs = find_cuts_pairs(complete_path_map)
     num_cuts = len(O_rho_pairs)
     scaling_factor = np.power(2,num_cuts)

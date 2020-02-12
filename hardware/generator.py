@@ -14,7 +14,7 @@ import copy
 def case_feasible(full_circ,cluster_max_qubit,max_clusters):
     searcher_begin = time()
     hardness, positions, ancilla, d, num_cluster, m = searcher.find_cuts(circ=full_circ,reconstructor_runtime_params=[4.275e-9,6.863e-1],reconstructor_weight=0,
-    num_clusters=range(5,min(len(full_circ.qubits),max_clusters)+1),cluster_max_qubit=cluster_max_qubit)
+    num_clusters=range(2,min(len(full_circ.qubits),max_clusters)+1),cluster_max_qubit=cluster_max_qubit)
     searcher_time = time() - searcher_begin
     if m == None:
         return None
