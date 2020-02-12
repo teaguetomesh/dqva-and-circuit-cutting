@@ -402,15 +402,18 @@ if __name__ == '__main__':
             
             reorder_begin = time()
             reconstructed_prob = reconstructed_reorder(reconstructed_prob,complete_path_map=uniter_input[case]['complete_path_map'],smart_order=smart_order)
+            reorder_time = time() - reorder_begin
+            print('Reorder took %.3f seconds'%reorder_time)
+            reverse_begin = time()
             norm = sum(reconstructed_prob)
             reconstructed_prob = reconstructed_prob/norm
             reconstructed_prob = reverse_prob(prob_l=reconstructed_prob)
-            reorder_time = time() - reorder_begin
-            print('Reorder took %.3f seconds'%reorder_time)
+            reverse_time = time() - reverse_begin
+            print('Reverse took %.3f seconds'%reverse_time)
 
             print('reconstruction len =', len(reconstructed_prob),'probabilities sum = ', sum(reconstructed_prob))
 
-            uniter_time = reconstruct_time + reorder_time
+            uniter_time = reconstruct_time + reorder_time + reverse_time
             case_dict['reconstructor_time'] = uniter_time
             case_dict['cutting'] = reconstructed_prob
             print('Reconstruction + reorder took %.2f seconds'%uniter_time)
