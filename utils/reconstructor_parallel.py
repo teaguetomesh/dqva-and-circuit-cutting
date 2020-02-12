@@ -238,6 +238,7 @@ def calculate_cluster(cluster_idx,cluster_probs,init_meas,O_qubit_positions,effe
     return kronecker_term
 
 def reconstruct(complete_path_map, combinations, full_circ, cluster_circs, cluster_sim_probs):
+    [print(x,complete_path_map[x]) for x in complete_path_map]
     O_rho_pairs = find_cuts_pairs(complete_path_map)
     num_cuts = len(O_rho_pairs)
     scaling_factor = np.power(2,num_cuts)
@@ -250,26 +251,41 @@ def reconstruct(complete_path_map, combinations, full_circ, cluster_circs, clust
     cluster_O_qubit_positions = find_cluster_O_qubit_positions(O_rho_pairs, cluster_circs)
 
     collapsed_cluster_prob = [{} for c in cluster_circs]
+    summation_term_memoization_dict = {}
+    total_counter = 0
+    collapsed_cluster_prob_memoization_counter = 0
+    summation_term_memoization_counter = 0
     for i,s in enumerate(combinations):
         # print('s_{} = {}'.format(i,s))
         clusters_init_meas = find_inits_meas(cluster_circs, O_rho_pairs, s)
+        accumulated_clusters_init_meas = ()
         summation_term = np.ones(1)
         for cluster_idx in range(len(cluster_circs)):
+            total_counter += 1
             # print('Cluster {} inits meas = {}'.format(cluster_idx,clusters_init_meas[cluster_idx]))
             init_meas = tuple(clusters_init_meas[cluster_idx])
-            if init_meas in collapsed_cluster_prob[cluster_idx]:
-                kronecker_term = collapsed_cluster_prob[cluster_idx][clusters_init_meas[cluster_idx]]
+            accumulated_clusters_init_meas += init_meas
+            if len(accumulated_clusters_init_meas)>1 and accumulated_clusters_init_meas in summation_term_memoization_dict:
+                summation_term = summation_term_memoization_dict[accumulated_clusters_init_meas]
+                summation_term_memoization_counter += 1
+            elif init_meas in collapsed_cluster_prob[cluster_idx]:
+                kronecker_term = collapsed_cluster_prob[cluster_idx][init_meas]
+                summation_term = np.kron(summation_term,kronecker_term)
+                summation_term_memoization_dict[accumulated_clusters_init_meas] = summation_term
+                collapsed_cluster_prob_memoization_counter += 1
             else:
                 kronecker_term = calculate_cluster(cluster_idx=cluster_idx,
                 cluster_probs=cluster_sim_probs[cluster_idx],
                 init_meas=clusters_init_meas[cluster_idx],
                 O_qubit_positions=cluster_O_qubit_positions[cluster_idx],
                 effective_state_tranlsation=correspondence_map[cluster_idx])
+                summation_term = np.kron(summation_term,kronecker_term)
                 collapsed_cluster_prob[cluster_idx][init_meas] = kronecker_term
-            summation_term = np.kron(summation_term,kronecker_term)
+                summation_term_memoization_dict[accumulated_clusters_init_meas] = summation_term
         reconstructed_prob += summation_term
         # print('-'*100)
     # print()
+    print('Summation term memoized %d/%d, collapsed_term memoized %d/%d'%(summation_term_memoization_counter,total_counter,collapsed_cluster_prob_memoization_counter,total_counter))
     return reconstructed_prob, scaling_factor
 
 def compute(reconstruction_terms, num_qubits):
