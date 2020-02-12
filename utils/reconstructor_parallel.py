@@ -307,9 +307,9 @@ def reconstruct(complete_path_map, combinations, full_circ, cluster_circs, clust
         reconstructed_prob += summation_term
         # print('-'*100)
     # print()
-    print('Summation term memoized %d/%d, collapsed_term memoized %d/%d, called kron %d times, collapse %d times'%(
-        summation_term_memoization_counter,
-    total_counter,collapsed_cluster_prob_memoization_counter,total_counter,kron_calls,collapse_calls))
+    #print('Summation term memoized %d/%d, collapsed_term memoized %d/%d, called kron %d times, collapse %d times'%(
+    #    summation_term_memoization_counter,
+    #total_counter,collapsed_cluster_prob_memoization_counter,total_counter,kron_calls,collapse_calls))
     return reconstructed_prob, scaling_factor, smart_order
 
 def compute(reconstruction_terms, num_qubits):
@@ -442,7 +442,7 @@ if __name__ == '__main__':
                 full_circ=uniter_input[case]['full_circ'], cluster_circs=uniter_input[case]['clusters'],
                 cluster_sim_probs=uniter_input[case]['all_cluster_prob'])
                 get_terms_time = time() - get_terms_begin
-                print('Rank %d reconstruction took %.3f seconds'%(rank,get_terms_time))
+                #print('Rank %d reconstruction took %.3f seconds'%(rank,get_terms_time))
 
                 # compute_begin = time()
                 # reconstructed_prob = compute(reconstruction_terms=reconstruction_terms, num_qubits=case[1])

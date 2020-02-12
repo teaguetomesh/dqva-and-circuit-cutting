@@ -1,0 +1,32 @@
+-------------------------------------------------- Reconstructor --------------------------------------------------
+Existing cases: dict_keys([])
+case (10, 16)
+Cut into  [10, 3, 9] clusters
+Reorder took 0.405 seconds
+reconstruction len = 65536 probabilities sum =  1.0000000000000064
+qasm metric = 1.911e-01
+hw metric = 1.932e-01
+cutting metric = 1.086e-01
+Reconstruction took 1.64 seconds
+Reconstruction output has 1 cases
+----------------------------------------------------------------------------------------------------
+case (10, 18)
+Cut into  [10, 10, 2] clusters
+Reorder took 1.717 seconds
+reconstruction len = 262144 probabilities sum =  0.9999999999999852
+qasm metric = 2.680e-01
+hw metric = 2.672e-01
+cutting metric = 1.026e-01
+Reconstruction took 1.84 seconds
+Reconstruction output has 2 cases
+----------------------------------------------------------------------------------------------------
+case (10, 20)
+Cut into  [9, 10, 8] clusters
+Reorder took 7.548 seconds
+reconstruction len = 1048576 probabilities sum =  1.0000000000000224
+qasm metric = 7.693e-01
+hw metric = 7.700e-01
+cutting metric = 1.204e-01
+Reconstruction took 19.39 seconds
+Reconstruction output has 3 cases
+----------------------------------------------------------------------------------------------------
