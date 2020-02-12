@@ -5,6 +5,7 @@ from utils.conversions import dict_to_array
 from time import time
 import pickle
 import os
+import math
 
 if __name__ == '__main__':
     dirname, evaluator_input_filename = get_filename(experiment_name='large_on_small',circuit_type='supremacy',
@@ -17,7 +18,7 @@ if __name__ == '__main__':
         ground_truth = evaluate_circ(circ=circ,backend='statevector_simulator',evaluator_info=None,force_prob=True)
         ground_truth = dict_to_array(distribution_dict=ground_truth,force_prob=True)
         max_clusters = 3
-        cluster_max_qubit = int(fc_size/1.5)
+        cluster_max_qubit = math.ceil(fc_size/1.5)
         case = (cluster_max_qubit,fc_size)
         searcher_begin = time()
         hardness, positions, ancilla, d, num_cluster, m = searcher.find_cuts(circ=circ,reconstructor_runtime_params=[4.275e-9,6.863e-1],reconstructor_weight=0,
