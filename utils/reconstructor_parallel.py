@@ -389,7 +389,7 @@ if __name__ == '__main__':
             combinations = get_combinations(uniter_input[case]['complete_path_map'])
             reconstructed_prob = np.zeros(2**case[1])
 
-            uniter_begin = time()
+            reconstruct_begin = time()
             for i in range(num_workers):
                 rank_combinations = find_rank_combinations(combinations,i,num_workers)
                 comm.send((case,rank_combinations), dest=i)
@@ -397,6 +397,8 @@ if __name__ == '__main__':
                 state = MPI.Status()
                 rank_reconstructed_prob, smart_order = comm.recv(source=MPI.ANY_SOURCE,status=state)
                 reconstructed_prob += rank_reconstructed_prob
+            reconstruct_time = time() - reconstruct_begin
+            print('Reconstruction took %.3f seconds'%reconstruct_time)
             
             reorder_begin = time()
             reconstructed_prob = reconstructed_reorder(reconstructed_prob,complete_path_map=uniter_input[case]['complete_path_map'],smart_order=smart_order)
@@ -408,13 +410,14 @@ if __name__ == '__main__':
 
             print('reconstruction len =', len(reconstructed_prob),'probabilities sum = ', sum(reconstructed_prob))
 
-            uniter_time = time() - uniter_begin
+            uniter_time = reconstruct_time + reorder_time
             case_dict['reconstructor_time'] = uniter_time
             case_dict['cutting'] = reconstructed_prob
-            print('qasm metric = %.3e'%chi2_distance(target=case_dict['sv'],obs=case_dict['qasm']))
+            print('Reconstruction + reorder took %.2f seconds'%uniter_time)
+            if args.evaluation_method != 'statevector_simulator':
+                print('qasm metric = %.3e'%chi2_distance(target=case_dict['sv'],obs=case_dict['qasm']))
             print('hw metric = %.3e'%chi2_distance(target=case_dict['sv'],obs=case_dict['hw']))
             print('cutting metric = %.3e'%(chi2_distance(target=case_dict['sv'],obs=case_dict['cutting'])))
-            print('Reconstruction took %.2f seconds'%uniter_time)
 
             # pickle.dump({case:case_dict}, open('%s'%(dirname+plotter_input_filename),'ab'))
             counter += 1

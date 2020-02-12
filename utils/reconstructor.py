@@ -397,7 +397,8 @@ if __name__ == '__main__':
         case_dict['reconstructor_time'] = uniter_time
         case_dict['cutting'] = reconstructed_prob
         print('Reconstruction + reorder took %.2f seconds'%uniter_time)
-        print('qasm metric = %.3e'%chi2_distance(target=case_dict['sv'],obs=case_dict['qasm']))
+        if args.evaluation_method != 'statevector_simulator':
+            print('qasm metric = %.3e'%chi2_distance(target=case_dict['sv'],obs=case_dict['qasm']))
         print('hw metric = %.3e'%chi2_distance(target=case_dict['sv'],obs=case_dict['hw']))
         print('cutting metric = %.3e'%(chi2_distance(target=case_dict['sv'],obs=case_dict['cutting'])))
 

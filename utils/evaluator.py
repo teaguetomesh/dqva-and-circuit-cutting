@@ -13,6 +13,7 @@ from time import time
 from mpi4py import MPI
 import argparse
 from utils.helper_fun import evaluate_circ, get_evaluator_info, get_circ_saturated_shots, distribute_cluster_shots, get_filename, read_file
+from utils.conversions import dict_to_array, reverse_prob
 
 def find_cluster_O_rho_qubits(complete_path_map,cluster_idx):
     O_qubits = []
@@ -95,9 +96,11 @@ def evaluate_cluster(complete_path_map, cluster_circ, combinations, backend, eva
         # print(cluster_circ_inst)
         if backend=='statevector_simulator':
             cluster_inst_prob = evaluate_circ(circ=cluster_circ_inst,backend=backend,evaluator_info=None,force_prob=True)
+            cluster_inst_prob = dict_to_array(distribution_dict=cluster_inst_prob,force_prob=True)
+            cluster_inst_prob = reverse_prob(prob_l=cluster_inst_prob)
             cluster_prob[(tuple(inits),tuple(meas))] = cluster_inst_prob
         elif backend=='noisy_qasm_simulator':
-            cluster_inst_prob = evaluate_circ(circ=cluster_circ_inst,backend=backend,evaluator_info=evaluator_info)
+            cluster_inst_prob = evaluate_circ(circ=cluster_circ_inst,backend=backend,evaluator_info=evaluator_info,force_prob=True)
             cluster_prob[(tuple(inits),tuple(meas))] = cluster_inst_prob
         elif backend=='hardware':
             cluster_prob[(tuple(inits),tuple(meas))] = copy.deepcopy(cluster_circ_inst)

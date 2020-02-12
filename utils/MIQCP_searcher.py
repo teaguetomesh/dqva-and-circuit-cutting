@@ -105,17 +105,17 @@ class Basic_Model(object):
             quicksum([self.edge_x[cluster][i] * self.vertex_y[cluster][self.edges[i][0]]
             for i in range(self.n_edges)]))
 
-            cluster_d = self.model.addVar(lb=0.1, ub=self.cluster_max_qubit, vtype=GRB.INTEGER, name='cluster_d_%d'%cluster)
+            cluster_d = self.model.addVar(lb=0, ub=self.cluster_max_qubit, vtype=GRB.INTEGER, name='cluster_d_%d'%cluster)
             self.model.addConstr(cluster_d == cluster_original_qubit + cluster_rho_qubits)
             list_of_cluster_d.append(cluster_d)
             list_of_cluster_O.append(cluster_O_qubits)
             
-            lb = 0
-            ub = self.cluster_max_qubit*np.log(6)*2
-            ptx, ptf = self.pwl_exp(params=[1,1],lb=lb,ub=ub,weight=1-self.reconstructor_weight)
-            evaluator_cost_exponent = self.model.addVar(lb=lb,ub=ub,vtype=GRB.CONTINUOUS, name='evaluator_cost_exponent_%d'%cluster)
-            self.model.addConstr(evaluator_cost_exponent == np.log(6)*cluster_rho_qubits+np.log(3)*cluster_O_qubits)
-            list_of_exponents.append(evaluator_cost_exponent)
+            # lb = 0
+            # ub = self.cluster_max_qubit*np.log(6)*2
+            # ptx, ptf = self.pwl_exp(params=[1,1],lb=lb,ub=ub,weight=1-self.reconstructor_weight)
+            # evaluator_cost_exponent = self.model.addVar(lb=lb,ub=ub,vtype=GRB.CONTINUOUS, name='evaluator_cost_exponent_%d'%cluster)
+            # self.model.addConstr(evaluator_cost_exponent == np.log(6)*cluster_rho_qubits+np.log(3)*cluster_O_qubits)
+            # list_of_exponents.append(evaluator_cost_exponent)
             # self.model.setPWLObj(evaluator_cost_exponent, ptx, ptf)
 
             # if len(list_of_cluster_d)>1:
@@ -216,8 +216,8 @@ class Basic_Model(object):
             cluster_O_qubits = self.model.getVarByName('cluster_O_qubits_%d'%i)
             cluster_d = self.model.getVarByName('cluster_d_%d'%i)
             cluster_K = self.model.getVarByName('cluster_K_%d'%i)
-            evaluator_cost_exponent = self.model.getVarByName(name='evaluator_cost_exponent_%d'%i)
-            manual_evaluator_cost_exponent = np.log(6)*cluster_rho_qubits.X+np.log(3)*cluster_O_qubits.X
+            # evaluator_cost_exponent = self.model.getVarByName(name='evaluator_cost_exponent_%d'%i)
+            # manual_evaluator_cost_exponent = np.log(6)*cluster_rho_qubits.X+np.log(3)*cluster_O_qubits.X
             evaluator_cost_verify += np.power(6,cluster_rho_qubits.X)*np.power(3,cluster_O_qubits.X)
             accumulated_kron_length += cluster_d.X-cluster_O_qubits.X
             print('cluster %d: original input = %.2f, \u03C1_qubits = %.2f, O_qubits = %.2f, d = %.2f' % 
