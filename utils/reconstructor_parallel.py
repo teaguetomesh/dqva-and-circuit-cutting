@@ -151,10 +151,10 @@ def effective_full_state_corresppndence(O_rho_pairs,cluster_circs):
     # print(correspondence_map)
     return correspondence_map
 
-def reconstructed_reorder(unordered,complete_path_map,smart_order):
+def reconstructed_reorder(unordered,complete_path_map,smart_order,unordered_start,unordered_end):
     # print(complete_path_map)
     # print('ordering reconstructed sv')
-    ordered  = [0 for sv in unordered]
+    ordered = np.zeros(len(unordered))
     cluster_out_qubits = {}
     for input_qubit in complete_path_map:
         path = complete_path_map[input_qubit]
@@ -174,7 +174,8 @@ def reconstructed_reorder(unordered,complete_path_map,smart_order):
         if cluster_idx in cluster_out_qubits:
             unordered_qubit_idx += cluster_out_qubits[cluster_idx]
     # print(unordered_qubit_idx)
-    for idx, sv in enumerate(unordered):
+    for idx, sv in enumerate(unordered[unordered_start:unordered_end]):
+        idx += unordered_start
         bin_idx = bin(idx)[2:].zfill(len(unordered_qubit_idx))
         # print('sv bin_idx=',bin_idx)
         ordered_idx = [0 for i in unordered_qubit_idx]
@@ -353,8 +354,8 @@ def find_rank_combinations(combinations,rank,num_workers):
     else:
         combinations_start = rank * count + remainder
         combinations_stop = combinations_start + (count - 1) + 1
-    rank_combinations = combinations[combinations_start:combinations_stop]
-    return rank_combinations
+    # rank_combinations = combinations[combinations_start:combinations_stop]
+    return combinations_start, combinations_stop
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Uniter')
@@ -391,17 +392,25 @@ if __name__ == '__main__':
 
             reconstruct_begin = time()
             for i in range(num_workers):
-                rank_combinations = find_rank_combinations(combinations,i,num_workers)
+                combinations_start, combinations_stop = find_rank_combinations(combinations,i,num_workers)
+                rank_combinations = combinations[combinations_start:combinations_stop]
                 comm.send((case,rank_combinations), dest=i)
             for i in range(num_workers):
                 state = MPI.Status()
                 rank_reconstructed_prob, smart_order = comm.recv(source=MPI.ANY_SOURCE,status=state)
                 reconstructed_prob += rank_reconstructed_prob
             reconstruct_time = time() - reconstruct_begin
-            print('Reconstruction took %.3f seconds'%reconstruct_time)
+            print('Compute took %.3f seconds'%reconstruct_time)
             
             reorder_begin = time()
-            reconstructed_prob = reconstructed_reorder(reconstructed_prob,complete_path_map=uniter_input[case]['complete_path_map'],smart_order=smart_order)
+            for i in range(num_workers):
+                combinations_start, combinations_stop = find_rank_combinations(reconstructed_prob,i,num_workers)
+                comm.send((reconstructed_prob,combinations_start,combinations_stop), dest=i)
+            reconstructed_prob = np.zeros(2**case[1])
+            for i in range(num_workers):
+                state = MPI.Status()
+                rank_reconstructed_prob = comm.recv(source=MPI.ANY_SOURCE,status=state)
+                reconstructed_prob += rank_reconstructed_prob
             reorder_time = time() - reorder_begin
             print('Reorder took %.3f seconds'%reorder_time)
             reverse_begin = time()
@@ -416,7 +425,7 @@ if __name__ == '__main__':
             uniter_time = reconstruct_time + reorder_time + reverse_time
             case_dict['reconstructor_time'] = uniter_time
             case_dict['cutting'] = reconstructed_prob
-            print('Reconstruction + reorder took %.2f seconds'%uniter_time)
+            print('Reconstruction + reorder + reverse took %.3f seconds, standard took %.3f seconds'%(uniter_time,uniter_input[case]['std_time']))
             if args.evaluation_method != 'statevector_simulator':
                 print('qasm metric = %.3e'%chi2_distance(target=case_dict['sv'],obs=case_dict['qasm']))
             print('hw metric = %.3e'%chi2_distance(target=case_dict['sv'],obs=case_dict['hw']))
@@ -458,3 +467,11 @@ if __name__ == '__main__':
                 reconstructed_prob = reconstructed_prob/scaling_factor
 
                 comm.send((reconstructed_prob,smart_order), dest=size-1)
+
+                state = MPI.Status()
+                reconstructed_prob,combinations_start,combinations_stop = comm.recv(source=size-1,status=state)
+                rank_reconstructed_prob = reconstructed_reorder(reconstructed_prob,complete_path_map=uniter_input[case]['complete_path_map'],smart_order=smart_order,
+                unordered_start=combinations_start,unordered_end=combinations_stop)
+                # print('Rank %d reordered %d-%d, len = %d, sum = %.2f'%(rank,combinations_start,combinations_stop,
+                # len(rank_reconstructed_prob),sum(rank_reconstructed_prob)))
+                comm.send(rank_reconstructed_prob, dest=size-1)

@@ -384,19 +384,22 @@ if __name__ == '__main__':
         reorder_begin = time()
         reconstructed_prob = reconstructed_prob/scaling_factor
         reconstructed_prob = reconstructed_reorder(reconstructed_prob,complete_path_map=uniter_input[case]['complete_path_map'],smart_order=smart_order)
+        reorder_time = time() - reorder_begin
+        print('Reorder took %.3f seconds'%reorder_time)
+        reverse_begin = time()
         norm = sum(reconstructed_prob)
         reconstructed_prob = reconstructed_prob/norm
         reconstructed_prob = reverse_prob(prob_l=reconstructed_prob)
-        reorder_time = time() - reorder_begin
-        print('Reorder took %.3f seconds'%reorder_time)
+        reverse_time = time() - reverse_begin
+        print('Reverse took %.3f seconds'%reverse_time)
 
         # print('reconstruction len = ', len(reconstructed_prob),'probabilities sum = ', sum(reconstructed_prob))
         assert len(reconstructed_prob) == 2**case[1] and abs(sum(reconstructed_prob)-1)<1e-5
         
-        uniter_time = reconstruct_time + reorder_time
+        uniter_time = reconstruct_time + reorder_time + reverse_time
         case_dict['reconstructor_time'] = uniter_time
         case_dict['cutting'] = reconstructed_prob
-        print('Reconstruction + reorder took %.2f seconds'%uniter_time)
+        print('Reconstruction + reorder + reverse took %.2f seconds'%uniter_time)
         if args.evaluation_method != 'statevector_simulator':
             print('qasm metric = %.3e'%chi2_distance(target=case_dict['sv'],obs=case_dict['qasm']))
         print('hw metric = %.3e'%chi2_distance(target=case_dict['sv'],obs=case_dict['hw']))

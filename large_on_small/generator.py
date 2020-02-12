@@ -13,10 +13,12 @@ if __name__ == '__main__':
     if not os.path.exists(dirname):
         os.makedirs(dirname)
     circ_dict = {}
-    for fc_size in range(10,25,2):
+    for fc_size in range(20,25,2):
         circ = generate_circ(full_circ_size=fc_size,circuit_type='supremacy')
+        std_begin = time()
         ground_truth = evaluate_circ(circ=circ,backend='statevector_simulator',evaluator_info=None,force_prob=True)
         ground_truth = dict_to_array(distribution_dict=ground_truth,force_prob=True)
+        std_time = time() - std_begin
         max_clusters = 3
         cluster_max_qubit = math.ceil(fc_size/1.5)
         case = (cluster_max_qubit,fc_size)
@@ -32,6 +34,6 @@ if __name__ == '__main__':
             clusters, complete_path_map, K, d = cutter.cut_circuit(circ, positions)
             print('{:d} cuts --> {}, searcher time = {}'.format(K,d,searcher_time))
             circ_dict[case] = {'full_circ':circ,'clusters':clusters,'complete_path_map':complete_path_map,
-            'sv':ground_truth,'hw':ground_truth,'searcher_time':searcher_time}
+            'sv':ground_truth,'hw':ground_truth,'searcher_time':searcher_time,'std_time':std_time}
             print('-'*50)
     pickle.dump(circ_dict, open(dirname+evaluator_input_filename,'wb'))
