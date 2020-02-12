@@ -56,6 +56,8 @@ def get_filename(experiment_name,circuit_type,device_name,field,evaluation_metho
             uniter_input_filename = 'quantum_uniter_input_{}.p'.format(device_name)
         elif evaluation_method == 'hardware':
             uniter_input_filename = 'hw_uniter_input_{}.p'.format(device_name)
+        elif evaluation_method == 'fake':
+            uniter_input_filename = 'fake_uniter_input_{}.p'.format(device_name)
         else:
             raise Exception('Illegal evaluation method :',evaluation_method)
         return dirname, uniter_input_filename
@@ -66,6 +68,8 @@ def get_filename(experiment_name,circuit_type,device_name,field,evaluation_metho
             plotter_input_filename = 'quantum_plotter_input_{}.p'.format(device_name)
         elif evaluation_method == 'hardware':
             plotter_input_filename = 'hw_plotter_input_{}.p'.format(device_name)
+        elif evaluation_method == 'fake':
+            plotter_input_filename = 'fake_plotter_input_{}.p'.format(device_name)
         else:
             raise Exception('Illegal evaluation method :',evaluation_method)
         return dirname, plotter_input_filename
@@ -286,3 +290,36 @@ def get_evaluator_info(circ,device_name,fields):
         evaluator_info[field] = _evaluator_info[field]
     
     return evaluator_info
+
+def find_cluster_O_rho_qubit_positions(O_rho_pairs, cluster_circs):
+    cluster_O_qubit_positions = {}
+    cluster_rho_qubit_positions = {}
+    for pair in O_rho_pairs:
+        O_qubit, rho_qubit = pair
+        O_cluster_idx, O_qubit_idx = O_qubit
+        rho_cluster_idx, rho_qubit_idx = rho_qubit
+        if O_cluster_idx not in cluster_O_qubit_positions:
+            cluster_O_qubit_positions[O_cluster_idx] = [O_qubit_idx]
+        else:
+            cluster_O_qubit_positions[O_cluster_idx].append(O_qubit_idx)
+        if rho_cluster_idx not in cluster_rho_qubit_positions:
+            cluster_rho_qubit_positions[rho_cluster_idx] = [rho_qubit_idx]
+        else:
+            cluster_rho_qubit_positions[rho_cluster_idx].append(rho_qubit_idx)
+    for cluster_idx in range(len(cluster_circs)):
+        if cluster_idx not in cluster_O_qubit_positions:
+            cluster_O_qubit_positions[cluster_idx] = []
+        if cluster_idx not in cluster_rho_qubit_positions:
+            cluster_rho_qubit_positions[cluster_idx] = []
+    return cluster_O_qubit_positions, cluster_rho_qubit_positions
+
+def find_cuts_pairs(complete_path_map):
+    O_rho_pairs = []
+    for input_qubit in complete_path_map:
+        path = complete_path_map[input_qubit]
+        if len(path)>1:
+            for path_ctr, item in enumerate(path[:-1]):
+                O_qubit_tuple = item
+                rho_qubit_tuple = path[path_ctr+1]
+                O_rho_pairs.append((O_qubit_tuple, rho_qubit_tuple))
+    return O_rho_pairs

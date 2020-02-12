@@ -104,6 +104,11 @@ def evaluate_cluster(complete_path_map, cluster_circ, combinations, backend, eva
             cluster_prob[(tuple(inits),tuple(meas))] = cluster_inst_prob
         elif backend=='hardware':
             cluster_prob[(tuple(inits),tuple(meas))] = copy.deepcopy(cluster_circ_inst)
+        elif backend=='fake':
+            num_qubits = len(cluster_circ_inst.qubits)
+            cluster_inst_prob = np.random.rand(2**num_qubits)
+            cluster_inst_prob /= sum(cluster_inst_prob)
+            cluster_prob[(tuple(inits),tuple(meas))] = cluster_inst_prob
         else:
             raise Exception('Illegal backend:',backend)
     return cluster_prob
@@ -237,6 +242,16 @@ if __name__ == '__main__':
                         print('case {}, cluster_{} {}_qubits * {}_instances on {} QUANTUM HARDWARE'.format(
                             case,cluster_idx,len(clusters[cluster_idx].qubits),
                             len(rank_combinations[cluster_idx]),args.device_name),flush=True)
+                    elif args.evaluation_method == 'fake':
+                        classical_evaluator_begin = time()
+                        cluster_prob = evaluate_cluster(complete_path_map=complete_path_map,
+                        cluster_circ=clusters[cluster_idx],
+                        combinations=rank_combinations[cluster_idx],
+                        backend='fake',evaluator_info=None)
+                        elapsed_time = time()-classical_evaluator_begin
+                        print('Rank {} runs case {}, cluster_{} {}_qubits * {}_instances on FAKE_CLASSICAL, fake_classical time = {:.3e}'.format(
+                            rank,case,cluster_idx,len(clusters[cluster_idx].qubits),
+                            len(rank_combinations[cluster_idx]),elapsed_time),flush=True)
                     else:
                         raise Exception('Illegal evaluation method:',args.evaluation_method)
                     rank_results[cluster_idx] = cluster_prob

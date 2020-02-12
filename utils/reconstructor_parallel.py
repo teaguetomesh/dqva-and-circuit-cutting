@@ -6,24 +6,13 @@ import glob
 from time import time
 from scipy.stats import wasserstein_distance
 import argparse
-from utils.helper_fun import get_filename, read_file
+from utils.helper_fun import get_filename, read_file, find_cluster_O_rho_qubit_positions, find_cuts_pairs
 from utils.metrics import chi2_distance
 from utils.conversions import reverse_prob
 import copy
 import os.path
 from numba import jit, njit, prange
 from mpi4py import MPI
-
-def find_cuts_pairs(complete_path_map):
-    O_rho_pairs = []
-    for input_qubit in complete_path_map:
-        path = complete_path_map[input_qubit]
-        if len(path)>1:
-            for path_ctr, item in enumerate(path[:-1]):
-                O_qubit_tuple = item
-                rho_qubit_tuple = path[path_ctr+1]
-                O_rho_pairs.append((O_qubit_tuple, rho_qubit_tuple))
-    return O_rho_pairs
 
 def find_inits_meas(cluster_circs, O_rho_pairs, s):
     # print('find initializations, measurement basis for:',s)
@@ -95,28 +84,6 @@ def multiply_sigma(full_cluster_prob,cluster_s,cluster_O_qubit_positions,effecti
             effective_cluster_prob.append(effective_state_prob)
         # print('effective cluster inst prob len = ', len(effective_cluster_prob))
         return np.array(effective_cluster_prob)
-
-def find_cluster_O_rho_qubit_positions(O_rho_pairs, cluster_circs):
-    cluster_O_qubit_positions = {}
-    cluster_rho_qubit_positions = {}
-    for pair in O_rho_pairs:
-        O_qubit, rho_qubit = pair
-        O_cluster_idx, O_qubit_idx = O_qubit
-        rho_cluster_idx, rho_qubit_idx = rho_qubit
-        if O_cluster_idx not in cluster_O_qubit_positions:
-            cluster_O_qubit_positions[O_cluster_idx] = [O_qubit_idx]
-        else:
-            cluster_O_qubit_positions[O_cluster_idx].append(O_qubit_idx)
-        if rho_cluster_idx not in cluster_rho_qubit_positions:
-            cluster_rho_qubit_positions[rho_cluster_idx] = [rho_qubit_idx]
-        else:
-            cluster_rho_qubit_positions[rho_cluster_idx].append(rho_qubit_idx)
-    for cluster_idx in range(len(cluster_circs)):
-        if cluster_idx not in cluster_O_qubit_positions:
-            cluster_O_qubit_positions[cluster_idx] = []
-        if cluster_idx not in cluster_rho_qubit_positions:
-            cluster_rho_qubit_positions[cluster_idx] = []
-    return cluster_O_qubit_positions, cluster_rho_qubit_positions
 
 def effective_full_state_corresppndence(O_rho_pairs,cluster_circs):
     correspondence_map = {}
@@ -420,18 +387,20 @@ if __name__ == '__main__':
             reverse_time = time() - reverse_begin
             print('Reverse took %.3f seconds'%reverse_time)
 
-            print('reconstruction len =', len(reconstructed_prob),'probabilities sum = ', sum(reconstructed_prob))
+            # print('reconstruction len =', len(reconstructed_prob),'probabilities sum = ', sum(reconstructed_prob))
+            assert len(reconstructed_prob) == 2**case[1] and abs(sum(reconstructed_prob)-1)<1e-5
 
             uniter_time = reconstruct_time + reorder_time + reverse_time
             case_dict['reconstructor_time'] = uniter_time
             case_dict['cutting'] = reconstructed_prob
             print('Reconstruction + reorder + reverse took %.3f seconds, standard took %.3f seconds'%(uniter_time,uniter_input[case]['std_time']))
-            if args.evaluation_method != 'statevector_simulator':
-                print('qasm metric = %.3e'%chi2_distance(target=case_dict['sv'],obs=case_dict['qasm']))
-            print('hw metric = %.3e'%chi2_distance(target=case_dict['sv'],obs=case_dict['hw']))
-            print('cutting metric = %.3e'%(chi2_distance(target=case_dict['sv'],obs=case_dict['cutting'])))
+            if args.evaluation_method != 'fake':
+                if args.evaluation_method != 'statevector_simulator':
+                    print('qasm metric = %.3e'%chi2_distance(target=case_dict['sv'],obs=case_dict['qasm']))
+                print('hw metric = %.3e'%chi2_distance(target=case_dict['sv'],obs=case_dict['hw']))
+                print('cutting metric = %.3e'%(chi2_distance(target=case_dict['sv'],obs=case_dict['cutting'])))
 
-            # pickle.dump({case:case_dict}, open('%s'%(dirname+plotter_input_filename),'ab'))
+            # pickle.dump({case:case_dict}, open('%s'%(dirname+plotter_input_filename),'wb'))
             counter += 1
             print('Reconstruction output has %d cases'%counter,flush=True)
             print('-'*100)

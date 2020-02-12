@@ -4,7 +4,7 @@ import numpy as np
 from time import time
 from qiskit import Aer, execute
 
-full_circ = generate_circ(full_circ_size=20,circuit_type='supremacy')
+full_circ = generate_circ(full_circ_size=16,circuit_type='supremacy')
 backend = Aer.get_backend('statevector_simulator')
 
 begin = time()
