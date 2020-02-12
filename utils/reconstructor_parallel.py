@@ -96,19 +96,27 @@ def multiply_sigma(full_cluster_prob,cluster_s,cluster_O_qubit_positions,effecti
         # print('effective cluster inst prob len = ', len(effective_cluster_prob))
         return np.array(effective_cluster_prob)
 
-def find_cluster_O_qubit_positions(O_rho_pairs, cluster_circs):
+def find_cluster_O_rho_qubit_positions(O_rho_pairs, cluster_circs):
     cluster_O_qubit_positions = {}
+    cluster_rho_qubit_positions = {}
     for pair in O_rho_pairs:
-        O_qubit, _ = pair
-        cluster_idx, O_qubit_idx = O_qubit
-        if cluster_idx not in cluster_O_qubit_positions:
-            cluster_O_qubit_positions[cluster_idx] = [O_qubit_idx]
+        O_qubit, rho_qubit = pair
+        O_cluster_idx, O_qubit_idx = O_qubit
+        rho_cluster_idx, rho_qubit_idx = rho_qubit
+        if O_cluster_idx not in cluster_O_qubit_positions:
+            cluster_O_qubit_positions[O_cluster_idx] = [O_qubit_idx]
         else:
-            cluster_O_qubit_positions[cluster_idx].append(O_qubit_idx)
+            cluster_O_qubit_positions[O_cluster_idx].append(O_qubit_idx)
+        if rho_cluster_idx not in cluster_rho_qubit_positions:
+            cluster_rho_qubit_positions[rho_cluster_idx] = [rho_qubit_idx]
+        else:
+            cluster_rho_qubit_positions[rho_cluster_idx].append(rho_qubit_idx)
     for cluster_idx in range(len(cluster_circs)):
         if cluster_idx not in cluster_O_qubit_positions:
             cluster_O_qubit_positions[cluster_idx] = []
-    return cluster_O_qubit_positions
+        if cluster_idx not in cluster_rho_qubit_positions:
+            cluster_rho_qubit_positions[cluster_idx] = []
+    return cluster_O_qubit_positions, cluster_rho_qubit_positions
 
 def effective_full_state_corresppndence(O_rho_pairs,cluster_circs):
     correspondence_map = {}
@@ -143,7 +151,7 @@ def effective_full_state_corresppndence(O_rho_pairs,cluster_circs):
     # print(correspondence_map)
     return correspondence_map
 
-def reconstructed_reorder(unordered,complete_path_map):
+def reconstructed_reorder(unordered,complete_path_map,smart_order):
     # print(complete_path_map)
     # print('ordering reconstructed sv')
     ordered  = [0 for sv in unordered]
@@ -162,8 +170,9 @@ def reconstructed_reorder(unordered,complete_path_map):
         cluster_out_qubits[cluster_idx] = [x[1] for x in cluster_out_qubits[cluster_idx]]
     # print(cluster_out_qubits)
     unordered_qubit_idx = []
-    for cluster_idx in sorted(cluster_out_qubits.keys()):
-        unordered_qubit_idx += cluster_out_qubits[cluster_idx]
+    for cluster_idx in smart_order:
+        if cluster_idx in cluster_out_qubits:
+            unordered_qubit_idx += cluster_out_qubits[cluster_idx]
     # print(unordered_qubit_idx)
     for idx, sv in enumerate(unordered):
         bin_idx = bin(idx)[2:].zfill(len(unordered_qubit_idx))
@@ -248,29 +257,37 @@ def reconstruct(complete_path_map, combinations, full_circ, cluster_circs, clust
     correspondence_map = effective_full_state_corresppndence(O_rho_pairs,cluster_circs)
     # print('Effective states, full states correspondence map:')
     # [print('cluster %d' % cluster_idx,correspondence_map[cluster_idx],'\n') for cluster_idx in correspondence_map]
-    cluster_O_qubit_positions = find_cluster_O_qubit_positions(O_rho_pairs, cluster_circs)
+    cluster_O_qubit_positions, cluster_rho_qubit_positions = find_cluster_O_rho_qubit_positions(O_rho_pairs, cluster_circs)
+    smart_order = smart_cluster_order(O_rho_pairs, cluster_circs)
+    # smart_order = range(len(cluster_circs))
 
     collapsed_cluster_prob = [{} for c in cluster_circs]
     summation_term_memoization_dict = {}
     total_counter = 0
     collapsed_cluster_prob_memoization_counter = 0
     summation_term_memoization_counter = 0
+    kron_calls = 0
+    collapse_calls = 0
     for i,s in enumerate(combinations):
         # print('s_{} = {}'.format(i,s))
         clusters_init_meas = find_inits_meas(cluster_circs, O_rho_pairs, s)
         accumulated_clusters_init_meas = ()
-        summation_term = np.ones(1)
-        for cluster_idx in range(len(cluster_circs)):
+        summation_term = None
+        for cluster_idx in smart_order:
             total_counter += 1
             # print('Cluster {} inits meas = {}'.format(cluster_idx,clusters_init_meas[cluster_idx]))
             init_meas = tuple(clusters_init_meas[cluster_idx])
             accumulated_clusters_init_meas += init_meas
-            if len(accumulated_clusters_init_meas)>1 and accumulated_clusters_init_meas in summation_term_memoization_dict:
+            if len(accumulated_clusters_init_meas)>2 and accumulated_clusters_init_meas in summation_term_memoization_dict:
                 summation_term = summation_term_memoization_dict[accumulated_clusters_init_meas]
                 summation_term_memoization_counter += 1
             elif init_meas in collapsed_cluster_prob[cluster_idx]:
                 kronecker_term = collapsed_cluster_prob[cluster_idx][init_meas]
-                summation_term = np.kron(summation_term,kronecker_term)
+                if isinstance(summation_term,np.ndarray):
+                    summation_term = np.kron(summation_term,kronecker_term)
+                    kron_calls += 1
+                else:
+                    summation_term = kronecker_term
                 summation_term_memoization_dict[accumulated_clusters_init_meas] = summation_term
                 collapsed_cluster_prob_memoization_counter += 1
             else:
@@ -279,14 +296,21 @@ def reconstruct(complete_path_map, combinations, full_circ, cluster_circs, clust
                 init_meas=clusters_init_meas[cluster_idx],
                 O_qubit_positions=cluster_O_qubit_positions[cluster_idx],
                 effective_state_tranlsation=correspondence_map[cluster_idx])
-                summation_term = np.kron(summation_term,kronecker_term)
+                collapse_calls += 1
+                if isinstance(summation_term,np.ndarray):
+                    summation_term = np.kron(summation_term,kronecker_term)
+                    kron_calls += 1
+                else:
+                    summation_term = kronecker_term
                 collapsed_cluster_prob[cluster_idx][init_meas] = kronecker_term
                 summation_term_memoization_dict[accumulated_clusters_init_meas] = summation_term
         reconstructed_prob += summation_term
         # print('-'*100)
     # print()
-    print('Summation term memoized %d/%d, collapsed_term memoized %d/%d'%(summation_term_memoization_counter,total_counter,collapsed_cluster_prob_memoization_counter,total_counter))
-    return reconstructed_prob, scaling_factor
+    print('Summation term memoized %d/%d, collapsed_term memoized %d/%d, called kron %d times, collapse %d times'%(
+        summation_term_memoization_counter,
+    total_counter,collapsed_cluster_prob_memoization_counter,total_counter,kron_calls,collapse_calls))
+    return reconstructed_prob, scaling_factor, smart_order
 
 def compute(reconstruction_terms, num_qubits):
     reconstructed_prob = np.zeros(2**num_qubits)
@@ -305,6 +329,20 @@ def get_combinations(complete_path_map):
 
     combinations = list(itertools.product(basis,repeat=len(O_rho_pairs)))
     return combinations
+
+def smart_cluster_order(O_rho_pairs, cluster_circs):
+    cluster_O_qubit_positions, cluster_rho_qubit_positions = find_cluster_O_rho_qubit_positions(O_rho_pairs, cluster_circs)
+    smart_order = []
+    cluster_Orho_qubits = []
+    for cluster_idx in cluster_O_qubit_positions:
+        num_O = len(cluster_O_qubit_positions[cluster_idx])
+        num_rho = len(cluster_rho_qubit_positions[cluster_idx])
+        cluster_Orho_qubits.append(num_O + num_rho)
+        smart_order.append(cluster_idx)
+        # print('Cluster %d has %d rho %d O'%(cluster_idx,num_O,num_rho))
+    cluster_Orho_qubits, smart_order = zip(*sorted(zip(cluster_Orho_qubits, smart_order)))
+    # print('smart order is:',smart_order)
+    return smart_order
 
 def find_rank_combinations(combinations,rank,num_workers):
     count = int(len(combinations)/num_workers)
@@ -342,9 +380,7 @@ if __name__ == '__main__':
         print('Existing cases:',plotter_input.keys())
         counter = len(plotter_input.keys())
         for case in uniter_input:
-            # if case in plotter_input:
-            #     continue
-            if case!=(9,16):
+            if case in plotter_input:
                 continue
             print('case {}'.format(case),flush=True)
             case_dict = copy.deepcopy(uniter_input[case])
@@ -359,11 +395,11 @@ if __name__ == '__main__':
                 comm.send((case,rank_combinations), dest=i)
             for i in range(num_workers):
                 state = MPI.Status()
-                rank_reconstructed_prob = comm.recv(source=MPI.ANY_SOURCE,status=state)
+                rank_reconstructed_prob, smart_order = comm.recv(source=MPI.ANY_SOURCE,status=state)
                 reconstructed_prob += rank_reconstructed_prob
             
             reorder_begin = time()
-            reconstructed_prob = reconstructed_reorder(reconstructed_prob,complete_path_map=uniter_input[case]['complete_path_map'])
+            reconstructed_prob = reconstructed_reorder(reconstructed_prob,complete_path_map=uniter_input[case]['complete_path_map'],smart_order=smart_order)
             norm = sum(reconstructed_prob)
             reconstructed_prob = reconstructed_prob/norm
             reconstructed_prob = reverse_prob(prob_l=reconstructed_prob)
@@ -401,7 +437,7 @@ if __name__ == '__main__':
                 cluster_probs = uniter_input[case]['all_cluster_prob']
         
                 get_terms_begin = time()
-                reconstructed_prob, scaling_factor = reconstruct(complete_path_map=uniter_input[case]['complete_path_map'],
+                reconstructed_prob, scaling_factor, smart_order = reconstruct(complete_path_map=uniter_input[case]['complete_path_map'],
                 combinations=rank_combinations,
                 full_circ=uniter_input[case]['full_circ'], cluster_circs=uniter_input[case]['clusters'],
                 cluster_sim_probs=uniter_input[case]['all_cluster_prob'])
@@ -415,4 +451,4 @@ if __name__ == '__main__':
 
                 reconstructed_prob = reconstructed_prob/scaling_factor
 
-                comm.send(reconstructed_prob, dest=size-1)
+                comm.send((reconstructed_prob,smart_order), dest=size-1)
