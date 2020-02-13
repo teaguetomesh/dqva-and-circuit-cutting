@@ -79,11 +79,11 @@ if __name__ == '__main__':
         combinations = get_combinations(case_dict['complete_path_map'])
         
         compute_begin = time()
-        reconstructed_prob, scaling_factor, smart_order = fake_reconstruct(complete_path_map=case_dict['complete_path_map'],
+        reconstructed_prob, scaling_factor, smart_order, total_estimated_kron_time = fake_reconstruct(complete_path_map=case_dict['complete_path_map'],
         combinations=combinations,
         full_circ=case_dict['full_circ'], cluster_circs=case_dict['clusters'],
-        cluster_sim_probs=case_dict['all_cluster_prob'])
-        compute_time = time() - compute_begin
+        cluster_sim_probs=case_dict['all_cluster_prob'],run_kron=True)
+        compute_time = time() - compute_begin + total_estimated_kron_time
         print('Searcher took %.3f seconds'%case_dict['searcher_time'])
         print('Quantum took %.3f seconds'%case_dict['quantum_time'])
         print('Compute took %.3f seconds'%compute_time)
@@ -96,18 +96,18 @@ if __name__ == '__main__':
         print('Reorder took %.3f seconds'%reorder_time)
         case_dict['reorder_time'] = reorder_time
 
-        reverse_begin = time()
-        norm = sum(reconstructed_prob)
-        reconstructed_prob = reconstructed_prob/norm
-        reconstructed_prob = reverse_prob(prob_l=reconstructed_prob)
-        reverse_time = time() - reverse_begin
-        print('Reverse took %.3f seconds'%reverse_time)
-        case_dict['reverse_time'] = reverse_time
+        # reverse_begin = time()
+        # norm = sum(reconstructed_prob)
+        # reconstructed_prob = reconstructed_prob/norm
+        # reconstructed_prob = reverse_prob(prob_l=reconstructed_prob)
+        # reverse_time = time() - reverse_begin
+        # print('Reverse took %.3f seconds'%reverse_time)
+        # case_dict['reverse_time'] = reverse_time
 
         # print('reconstruction len = ', len(reconstructed_prob),'probabilities sum = ', sum(reconstructed_prob))
         assert len(reconstructed_prob) == 2**case[1]
         
-        hybrid_time = case_dict['searcher_time'] + case_dict['quantum_time'] + compute_time + reorder_time + reverse_time
+        hybrid_time = case_dict['searcher_time'] + case_dict['quantum_time'] + compute_time + reorder_time
         print('QC hybrid took %.3f seconds, classical took %.3f seconds'%(hybrid_time,case_dict['std_time']))
 
         # [print(x,case_dict['complete_path_map'][x]) for x in case_dict['complete_path_map']]

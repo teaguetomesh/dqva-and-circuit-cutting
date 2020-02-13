@@ -10,4 +10,4 @@ python -m scalability.fake_generator --circuit-type $CIRCUIT_TYPE --min-size $MI
 python -m scalability.fake_evaluator --circuit-type $CIRCUIT_TYPE 2>&1 | tee -a ./scalability/logs/$CIRCUIT_TYPE\_logs.txt
 
 # python -m scalability.fake_reconstructor --circuit-type $CIRCUIT_TYPE 2>&1 | tee -a ./scalability/logs/$CIRCUIT_TYPE\_logs.txt
-mpiexec -n 50 python -m scalability.fake_reconstructor_parallel --circuit-type $CIRCUIT_TYPE 2>&1 | tee -a ./scalability/logs/$CIRCUIT_TYPE\_logs.txt
+mpiexec -n 4 python -m scalability.fake_reconstructor_parallel --circuit-type $CIRCUIT_TYPE 2>&1 | tee -a ./scalability/logs/$CIRCUIT_TYPE\_logs.txt

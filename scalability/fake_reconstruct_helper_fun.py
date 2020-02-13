@@ -3,15 +3,21 @@ import itertools
 from utils.helper_fun import find_cuts_pairs, find_cluster_O_rho_qubit_positions, effective_full_state_corresppndence, smart_cluster_order, find_inits_meas
 from time import time
 
-def fake_kron(len_a,len_b):
-    prob_a = 1/len_a
-    prob_b = 1/len_b
-    arr_a = np.array([prob_a for x in range(len_a)])
-    arr_b = np.array([prob_b for x in range(len_b)])
-    np.kron(arr_a,arr_b)
-    return len_a * len_b
+def fake_kron(len_a,len_b,run_kron):
+    if run_kron:
+        prob_a = 1/len_a
+        prob_b = 1/len_b
+        arr_a = np.array([prob_a for x in range(len_a)])
+        arr_b = np.array([prob_b for x in range(len_b)])
+        np.kron(arr_a,arr_b)
+        return len_a * len_b, 0
+    else:
+        assert len_a * len_b <= 2**34
+        runtime_exponent = np.log2(len_a * len_b)
+        estimated_time = (2e-10)*np.exp(0.8*runtime_exponent)
+        return len_a * len_b , estimated_time
 
-def fake_reconstruct(complete_path_map, combinations, full_circ, cluster_circs, cluster_sim_probs):
+def fake_reconstruct(complete_path_map, combinations, full_circ, cluster_circs, cluster_sim_probs, run_kron):
     #[print(x,complete_path_map[x]) for x in complete_path_map]
     O_rho_pairs = find_cuts_pairs(complete_path_map)
     num_cuts = len(O_rho_pairs)
@@ -37,6 +43,7 @@ def fake_reconstruct(complete_path_map, combinations, full_circ, cluster_circs, 
     summation_term_memoization_counter = 0
     kron_calls = 0
     collapse_calls = 0
+    total_estimated_kron_time = 0
 
     for i,s in enumerate(combinations):
         # print('s_{} = {}'.format(i,s))
@@ -54,7 +61,8 @@ def fake_reconstruct(complete_path_map, combinations, full_circ, cluster_circs, 
             elif init_meas in collapsed_cluster_prob[cluster_idx]:
                 kronecker_term = collapsed_cluster_prob[cluster_idx][init_meas]
                 if summation_term != None:
-                    summation_term = fake_kron(len_a=summation_term,len_b=kronecker_term)
+                    summation_term, estimated_time = fake_kron(len_a=summation_term,len_b=kronecker_term,run_kron=run_kron)
+                    total_estimated_kron_time += estimated_time
                     kron_calls += 1
                 else:
                     summation_term = kronecker_term
@@ -68,7 +76,8 @@ def fake_reconstruct(complete_path_map, combinations, full_circ, cluster_circs, 
                 effective_state_tranlsation=correspondence_map[cluster_idx])
                 collapse_calls += 1
                 if summation_term != None:
-                    summation_term = fake_kron(len_a=summation_term,len_b=kronecker_term)
+                    summation_term, estimated_time = fake_kron(len_a=summation_term,len_b=kronecker_term,run_kron=run_kron)
+                    total_estimated_kron_time += estimated_time
                     kron_calls += 1
                 else:
                     summation_term = kronecker_term
@@ -80,7 +89,7 @@ def fake_reconstruct(complete_path_map, combinations, full_circ, cluster_circs, 
     # print('Summation term memoized %d/%d, collapsed_term memoized %d/%d, called kron %d times, collapse %d times'%(
     #     summation_term_memoization_counter,
     # total_counter,collapsed_cluster_prob_memoization_counter,total_counter,kron_calls,collapse_calls))
-    return reconstructed_prob, scaling_factor, smart_order
+    return reconstructed_prob, scaling_factor, smart_order, total_estimated_kron_time
 
 def fake_calculate_cluster(cluster_idx,cluster_probs,init_meas,O_qubit_positions,effective_state_tranlsation):
     multiply_sigma_counter = 0
