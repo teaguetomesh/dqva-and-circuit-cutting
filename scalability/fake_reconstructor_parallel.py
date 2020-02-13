@@ -141,17 +141,17 @@ if __name__ == '__main__':
             reorder_time = time() - reorder_begin
             print('Reorder took %.3f seconds'%reorder_time)
             
-            reverse_begin = time()
-            norm = sum(reconstructed_prob)
-            reconstructed_prob = reconstructed_prob/norm
-            reconstructed_prob = reverse_prob(prob_l=reconstructed_prob)
-            reverse_time = time() - reverse_begin
-            print('Reverse took %.3f seconds'%reverse_time)
+            # reverse_begin = time()
+            # norm = sum(reconstructed_prob)
+            # reconstructed_prob = reconstructed_prob/norm
+            # reconstructed_prob = reverse_prob(prob_l=reconstructed_prob)
+            # reverse_time = time() - reverse_begin
+            # print('Reverse took %.3f seconds'%reverse_time)
 
             # print('reconstruction len =', len(reconstructed_prob),'probabilities sum = ', sum(reconstructed_prob))
             assert len(reconstructed_prob) == 2**case[1] and abs(sum(reconstructed_prob)-1)<1e-5
 
-            hybrid_time = case_dict['searcher_time'] + case_dict['quantum_time'] + compute_time + reorder_time + reverse_time
+            hybrid_time = case_dict['searcher_time'] + case_dict['quantum_time'] + compute_time + reorder_time
             print('QC hybrid took %.3f seconds, classical took %.3f seconds'%(hybrid_time,case_dict['std_time']))
 
             # pickle.dump({case:case_dict}, open('%s'%(dirname+plotter_input_filename),'wb'))
