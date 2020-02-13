@@ -186,6 +186,8 @@ if __name__ == '__main__':
 
                 reconstructed_prob = reconstructed_prob/scaling_factor
 
+                assert len(reconstructed_prob) == 2**case[1]
+
                 comm.send((len(reconstructed_prob),smart_order,total_estimated_kron_time), dest=size-1)
 
                 # state = MPI.Status()
