@@ -7,6 +7,7 @@ import pickle
 import os
 import math
 import numpy as np
+import argparse
 
 def cluster_runtime_estimate(complete_path_map,clusters):
     O_rho_pairs = find_cuts_pairs(complete_path_map=complete_path_map)
@@ -31,13 +32,19 @@ def classical_time(num_qubits):
     return 9*1e-6*np.exp(0.7*num_qubits)
 
 if __name__ == '__main__':
-    dirname, evaluator_input_filename = get_filename(experiment_name='large_on_small',circuit_type='supremacy',
-    device_name='fake',field='evaluator_input',evaluation_method='statevector_simulator')
+    parser = argparse.ArgumentParser(description='generate evaluator inputs')
+    parser.add_argument('--circuit-type', metavar='S', type=str,help='which circuit input file to run')
+    parser.add_argument('--min-size', metavar='N', type=int,help='Benchmark minimum circuit size')
+    parser.add_argument('--max-size', metavar='N', type=int,help='Benchmark maximum circuit size')
+    args = parser.parse_args()
+
+    dirname, evaluator_input_filename = get_filename(experiment_name='scalability',circuit_type=args.circuit_type,
+    device_name='fake',field='evaluator_input',evaluation_method='fake')
     if not os.path.exists(dirname):
         os.makedirs(dirname)
     circ_dict = {}
-    for fc_size in range(16,17,2):
-        circ = generate_circ(full_circ_size=fc_size,circuit_type='supremacy')
+    for fc_size in range(args.min_size,args.max_size+1,2):
+        circ = generate_circ(full_circ_size=fc_size,circuit_type=args.circuit_type)
         max_clusters = 3
         cluster_max_qubit = math.ceil(fc_size/1.5)
         case = (cluster_max_qubit,fc_size)
