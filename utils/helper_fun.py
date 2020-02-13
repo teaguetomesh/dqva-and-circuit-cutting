@@ -17,6 +17,7 @@ from qcg.generators import gen_supremacy, gen_hwea, gen_BV, gen_qft, gen_sycamor
 from utils.conversions import list_to_dict, dict_to_array
 from utils.metrics import chi2_distance
 from scipy.stats import wasserstein_distance
+import itertools
 
 def generate_circ(full_circ_size,circuit_type):
     def gen_secret(num_qubit):
@@ -323,3 +324,72 @@ def find_cuts_pairs(complete_path_map):
                 rho_qubit_tuple = path[path_ctr+1]
                 O_rho_pairs.append((O_qubit_tuple, rho_qubit_tuple))
     return O_rho_pairs
+
+def effective_full_state_corresppndence(O_rho_pairs,cluster_circs):
+    correspondence_map = {}
+    for cluster_idx,circ in enumerate(cluster_circs):
+        cluster_O_qubits = []
+        total_num_qubits = len(circ.qubits)
+        for pair in O_rho_pairs:
+            O_qubit, _ = pair
+            if O_qubit[0] == cluster_idx:
+                cluster_O_qubits.append(O_qubit[1])
+        effective_num_qubits = total_num_qubits - len(cluster_O_qubits)
+        # print('cluster O qubits:',cluster_O_qubits)
+        if effective_num_qubits>0:
+            effective_states = itertools.product(range(2),repeat=effective_num_qubits)
+            O_qubit_states = list(itertools.product(range(2),repeat=len(cluster_O_qubits)))
+            cluster_correspondence = {}
+            for effective_state in effective_states:
+                # print('effective state:',effective_state)
+                effective_state_index = int("".join(str(x) for x in effective_state), 2)
+                corresponding_full_states = []
+                for O_qubit_state in O_qubit_states:
+                    full_state = list(effective_state)
+                    for p,i in zip(cluster_O_qubits,O_qubit_state):
+                        full_state.insert(p,i)
+                    # print('O qubit state: {} --> full state: {}'.format(O_qubit_state,full_state))
+                    full_state_index = int("".join(str(x) for x in full_state), 2)
+                    corresponding_full_states.append(full_state_index)
+                cluster_correspondence[effective_state_index] = corresponding_full_states
+            correspondence_map[cluster_idx] = cluster_correspondence
+        else:
+            correspondence_map[cluster_idx] = None
+    # print(correspondence_map)
+    return correspondence_map
+
+def smart_cluster_order(O_rho_pairs, cluster_circs):
+    cluster_O_qubit_positions, cluster_rho_qubit_positions = find_cluster_O_rho_qubit_positions(O_rho_pairs, cluster_circs)
+    smart_order = []
+    cluster_Orho_qubits = []
+    for cluster_idx in cluster_O_qubit_positions:
+        num_O = len(cluster_O_qubit_positions[cluster_idx])
+        num_rho = len(cluster_rho_qubit_positions[cluster_idx])
+        cluster_Orho_qubits.append(num_O + num_rho)
+        smart_order.append(cluster_idx)
+        # print('Cluster %d has %d rho %d O'%(cluster_idx,num_O,num_rho))
+    cluster_Orho_qubits, smart_order = zip(*sorted(zip(cluster_Orho_qubits, smart_order)))
+    # print('smart order is:',smart_order)
+    return smart_order
+
+def find_inits_meas(cluster_circs, O_rho_pairs, s):
+    # print('find initializations, measurement basis for:',s)
+    clean_inits = []
+    clean_meas = []
+    for circ in cluster_circs:
+        cluster_init = ['zero' for q in circ.qubits]
+        cluster_meas = ['I' for q in circ.qubits]
+        clean_inits.append(cluster_init)
+        clean_meas.append(cluster_meas)
+    
+    clusters_init_meas = []
+    cluster_meas = clean_meas
+    cluster_inits = clean_inits
+    for pair, s_i in zip(O_rho_pairs,s):
+        O_qubit, rho_qubit = pair
+        cluster_meas[O_qubit[0]][O_qubit[1]] = s_i
+        cluster_inits[rho_qubit[0]][rho_qubit[1]] = s_i
+    # print('inits:',cluster_inits)
+    for i,m in zip(cluster_inits,cluster_meas):
+        clusters_init_meas.append((tuple(i),tuple(m)))
+    return tuple(clusters_init_meas)

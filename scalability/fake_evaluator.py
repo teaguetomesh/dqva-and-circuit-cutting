@@ -58,43 +58,11 @@ def evaluate_cluster(complete_path_map, cluster_circ, combinations, backend, eva
     cluster_prob = {}
     num_qubits = len(cluster_circ.qubits)
     uniform_p = 1/2**num_qubits
-    uniform_prob = np.array([uniform_p for x in range(2**num_qubits)])
+    # uniform_prob = np.array([uniform_p for x in range(2**num_qubits)])
     for _, combination in enumerate(combinations):
         cluster_dag = circuit_to_dag(cluster_circ)
         inits, meas = combination
-        for i,x in enumerate(inits):
-            q = cluster_circ.qubits[i]
-            if x == 'zero':
-                continue
-            elif x == 'one':
-                cluster_dag.apply_operation_front(op=XGate(),qargs=[q],cargs=[])
-            elif x == 'plus':
-                cluster_dag.apply_operation_front(op=HGate(),qargs=[q],cargs=[])
-            elif x == 'minus':
-                cluster_dag.apply_operation_front(op=HGate(),qargs=[q],cargs=[])
-                cluster_dag.apply_operation_front(op=XGate(),qargs=[q],cargs=[])
-            elif x == 'plus_i':
-                cluster_dag.apply_operation_front(op=SGate(),qargs=[q],cargs=[])
-                cluster_dag.apply_operation_front(op=HGate(),qargs=[q],cargs=[])
-            elif x == 'minus_i':
-                cluster_dag.apply_operation_front(op=SGate(),qargs=[q],cargs=[])
-                cluster_dag.apply_operation_front(op=HGate(),qargs=[q],cargs=[])
-                cluster_dag.apply_operation_front(op=XGate(),qargs=[q],cargs=[])
-            else:
-                raise Exception('Illegal initialization : ',x)
-        for i,x in enumerate(meas):
-            q = cluster_circ.qubits[i]
-            if x == 'I':
-                continue
-            elif x == 'X':
-                cluster_dag.apply_operation_back(op=HGate(),qargs=[q],cargs=[])
-            elif x == 'Y':
-                cluster_dag.apply_operation_back(op=SdgGate(),qargs=[q],cargs=[])
-                cluster_dag.apply_operation_back(op=HGate(),qargs=[q],cargs=[])
-            else:
-                raise Exception('Illegal measurement basis:',x)
-        cluster_circ_inst = dag_to_circuit(cluster_dag)
-        cluster_prob[(tuple(inits),tuple(meas))] = uniform_prob
+        cluster_prob[(tuple(inits),tuple(meas))] = 2**num_qubits
     return cluster_prob
 
 if __name__ == '__main__':
