@@ -27,7 +27,7 @@ if __name__ == '__main__':
         ground_truth = dict_to_array(distribution_dict=ground_truth,force_prob=True)
         std_time = time() - std_begin
         max_clusters = 5
-        cluster_max_qubit = math.ceil(fc_size/3)
+        cluster_max_qubit = math.ceil(fc_size/2)
         case = (cluster_max_qubit,fc_size)
         searcher_begin = time()
         hardness, positions, ancilla, num_O_qubits, d, num_cluster, m = searcher.find_cuts(circ=circ,reconstructor_runtime_params=[4.275e-9,6.863e-1],reconstructor_weight=0,

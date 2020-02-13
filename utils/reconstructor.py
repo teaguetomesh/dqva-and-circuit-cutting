@@ -399,7 +399,7 @@ if __name__ == '__main__':
         uniter_time = reconstruct_time + reorder_time + reverse_time
         case_dict['reconstructor_time'] = uniter_time
         case_dict['cutting'] = reconstructed_prob
-        print('Reconstruction + reorder + reverse took %.2f seconds'%uniter_time)
+        print('Reconstruction + reorder + reverse took %.3f seconds, standard took %.3f seconds'%(uniter_time,uniter_input[case]['std_time']))
         if args.evaluation_method != 'fake':
             if args.evaluation_method != 'statevector_simulator':
                 print('qasm metric = %.3e'%chi2_distance(target=case_dict['sv'],obs=case_dict['qasm']))
