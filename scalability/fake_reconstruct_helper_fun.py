@@ -26,9 +26,9 @@ def fake_reconstruct(complete_path_map, combinations, full_circ, cluster_circs, 
 
     reconstructed_prob = np.zeros(2**len(full_circ.qubits))
     if len(combinations)>0:
-        dummy_summation_term = np.array([scaling_factor/len(combinations) for x in range(2**len(full_circ.qubits))])
+        dummy_summation_term = scaling_factor/len(combinations)
     else:
-        dummy_summation_term = np.zeros(2**len(full_circ.qubits))
+        dummy_summation_term = 0
     correspondence_map = effective_full_state_corresppndence(O_rho_pairs,cluster_circs)
     # print('Effective states, full states correspondence map:')
     # [print('cluster %d' % cluster_idx,correspondence_map[cluster_idx],'\n') for cluster_idx in correspondence_map]
@@ -83,7 +83,7 @@ def fake_reconstruct(complete_path_map, combinations, full_circ, cluster_circs, 
                     summation_term = kronecker_term
                 collapsed_cluster_prob[cluster_idx][init_meas] = kronecker_term
                 summation_term_memoization_dict[accumulated_clusters_init_meas] = summation_term
-        reconstructed_prob += dummy_summation_term
+        reconstructed_prob = reconstructed_prob + dummy_summation_term
         # print('-'*100)
     # print()
     # print('Summation term memoized %d/%d, collapsed_term memoized %d/%d, called kron %d times, collapse %d times'%(
