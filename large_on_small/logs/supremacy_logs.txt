@@ -1,0 +1,235 @@
+Using license file /home/weit/gurobi.lic
+Academic license - for non-commercial use only
+case (8, 16)
+MIP searcher clusters: [7.0, 8.0, 8.0]
+7 cuts --> [2, 8, 8, 5], searcher time = 3.962189197540283
+--------------------------------------------------
+case (9, 18)
+MIP searcher clusters: [9.0, 9.0, 6.0]
+6 cuts --> [9, 9, 6], searcher time = 3.3538148403167725
+--------------------------------------------------
+case (10, 20)
+MIP searcher clusters: [9.0, 8.0, 10.0]
+7 cuts --> [9, 10, 8], searcher time = 10.913205623626709
+--------------------------------------------------
+case (11, 22)
+MIP searcher clusters: [10.0, 10.0, 6.0]
+4 cuts --> [10, 10, 6], searcher time = 3.695667028427124
+--------------------------------------------------
+case (12, 24)
+MIP searcher clusters: [12.0, 6.0, 12.0]
+6 cuts --> [12, 12, 6], searcher time = 11.104789018630981
+--------------------------------------------------
+-------------------------------------------------- Evaluator --------------------------------------------------
+Existing cases: dict_keys([])
+Running case: (8, 16)
+Rank 0 runs case (8, 16), cluster_0 2_qubits * 1_instances on CLASSICAL, classical time = 5.379e-02
+Rank 1 runs case (8, 16), cluster_0 2_qubits * 1_instances on CLASSICAL, classical time = 5.609e-02
+Rank 2 runs case (8, 16), cluster_0 2_qubits * 1_instances on CLASSICAL, classical time = 5.711e-02
+Rank 3 runs case (8, 16), cluster_0 2_qubits * 1_instances on CLASSICAL, classical time = 5.648e-02
+Rank 6 runs case (8, 16), cluster_0 2_qubits * 1_instances on CLASSICAL, classical time = 5.639e-02
+Rank 4 runs case (8, 16), cluster_0 2_qubits * 1_instances on CLASSICAL, classical time = 5.794e-02
+Rank 5 runs case (8, 16), cluster_0 2_qubits * 1_instances on CLASSICAL, classical time = 5.775e-02
+Rank 7 runs case (8, 16), cluster_0 2_qubits * 1_instances on CLASSICAL, classical time = 5.677e-02
+Rank 8 runs case (8, 16), cluster_0 2_qubits * 1_instances on CLASSICAL, classical time = 5.606e-02
+Rank 0 runs case (8, 16), cluster_1 8_qubits * 72_instances on CLASSICAL, classical time = 3.498e+00
+Rank 6 runs case (8, 16), cluster_1 8_qubits * 72_instances on CLASSICAL, classical time = 3.522e+00
+Rank 3 runs case (8, 16), cluster_1 8_qubits * 72_instances on CLASSICAL, classical time = 3.596e+00
+Rank 5 runs case (8, 16), cluster_1 8_qubits * 72_instances on CLASSICAL, classical time = 3.619e+00
+Rank 2 runs case (8, 16), cluster_1 8_qubits * 72_instances on CLASSICAL, classical time = 3.640e+00
+Rank 4 runs case (8, 16), cluster_1 8_qubits * 72_instances on CLASSICAL, classical time = 3.661e+00
+Rank 8 runs case (8, 16), cluster_1 8_qubits * 72_instances on CLASSICAL, classical time = 3.690e+00
+Rank 7 runs case (8, 16), cluster_1 8_qubits * 72_instances on CLASSICAL, classical time = 3.734e+00
+Rank 1 runs case (8, 16), cluster_1 8_qubits * 72_instances on CLASSICAL, classical time = 3.757e+00
+Rank 0 runs case (8, 16), cluster_2 8_qubits * 108_instances on CLASSICAL, classical time = 5.055e+00
+Rank 6 runs case (8, 16), cluster_2 8_qubits * 108_instances on CLASSICAL, classical time = 5.073e+00
+Rank 3 runs case (8, 16), cluster_2 8_qubits * 108_instances on CLASSICAL, classical time = 5.010e+00
+Rank 2 runs case (8, 16), cluster_2 8_qubits * 108_instances on CLASSICAL, classical time = 5.092e+00
+Rank 5 runs case (8, 16), cluster_2 8_qubits * 108_instances on CLASSICAL, classical time = 5.205e+00
+Rank 1 runs case (8, 16), cluster_2 8_qubits * 108_instances on CLASSICAL, classical time = 5.094e+00
+Rank 8 runs case (8, 16), cluster_2 8_qubits * 108_instances on CLASSICAL, classical time = 5.189e+00
+Rank 4 runs case (8, 16), cluster_2 8_qubits * 108_instances on CLASSICAL, classical time = 5.260e+00
+Rank 7 runs case (8, 16), cluster_2 8_qubits * 108_instances on CLASSICAL, classical time = 5.263e+00
+Rank 0 runs case (8, 16), cluster_3 5_qubits * 12_instances on CLASSICAL, classical time = 5.214e-01
+Rank 6 runs case (8, 16), cluster_3 5_qubits * 12_instances on CLASSICAL, classical time = 5.048e-01
+Rank 3 runs case (8, 16), cluster_3 5_qubits * 12_instances on CLASSICAL, classical time = 5.226e-01
+Rank 2 runs case (8, 16), cluster_3 5_qubits * 12_instances on CLASSICAL, classical time = 4.748e-01
+Rank 5 runs case (8, 16), cluster_3 5_qubits * 12_instances on CLASSICAL, classical time = 4.865e-01
+Rank 1 runs case (8, 16), cluster_3 5_qubits * 12_instances on CLASSICAL, classical time = 4.982e-01
+Rank 8 runs case (8, 16), cluster_3 5_qubits * 12_instances on CLASSICAL, classical time = 5.045e-01
+Rank 4 runs case (8, 16), cluster_3 5_qubits * 12_instances on CLASSICAL, classical time = 5.136e-01
+Rank 7 runs case (8, 16), cluster_3 5_qubits * 12_instances on CLASSICAL, classical time = 4.884e-01
+Rank MASTER dumped case (8, 16), 1/5 cases
+----------------------------------------------------------------------------------------------------
+Running case: (9, 18)
+Rank 1 runs case (9, 18), cluster_0 9_qubits * 6_instances on CLASSICAL, classical time = 3.180e-01
+Rank 0 runs case (9, 18), cluster_0 9_qubits * 6_instances on CLASSICAL, classical time = 3.298e-01
+Rank 2 runs case (9, 18), cluster_0 9_qubits * 6_instances on CLASSICAL, classical time = 3.306e-01
+Rank 3 runs case (9, 18), cluster_0 9_qubits * 6_instances on CLASSICAL, classical time = 3.350e-01
+Rank 8 runs case (9, 18), cluster_0 9_qubits * 6_instances on CLASSICAL, classical time = 3.266e-01
+Rank 6 runs case (9, 18), cluster_0 9_qubits * 6_instances on CLASSICAL, classical time = 3.348e-01
+Rank 5 runs case (9, 18), cluster_0 9_qubits * 6_instances on CLASSICAL, classical time = 3.414e-01
+Rank 4 runs case (9, 18), cluster_0 9_qubits * 6_instances on CLASSICAL, classical time = 3.448e-01
+Rank 7 runs case (9, 18), cluster_0 9_qubits * 6_instances on CLASSICAL, classical time = 3.407e-01
+Rank 2 runs case (9, 18), cluster_1 9_qubits * 1296_instances on CLASSICAL, classical time = 6.635e+01
+Rank 2 runs case (9, 18), cluster_2 6_qubits * 6_instances on CLASSICAL, classical time = 2.140e-01
+Rank 5 runs case (9, 18), cluster_1 9_qubits * 1296_instances on CLASSICAL, classical time = 6.707e+01
+Rank 0 runs case (9, 18), cluster_1 9_qubits * 1296_instances on CLASSICAL, classical time = 6.713e+01
+Rank 5 runs case (9, 18), cluster_2 6_qubits * 6_instances on CLASSICAL, classical time = 2.220e-01
+Rank 0 runs case (9, 18), cluster_2 6_qubits * 6_instances on CLASSICAL, classical time = 2.047e-01
+Rank 1 runs case (9, 18), cluster_1 9_qubits * 1296_instances on CLASSICAL, classical time = 6.750e+01
+Rank 3 runs case (9, 18), cluster_1 9_qubits * 1296_instances on CLASSICAL, classical time = 6.756e+01
+Rank 1 runs case (9, 18), cluster_2 6_qubits * 6_instances on CLASSICAL, classical time = 2.095e-01
+Rank 3 runs case (9, 18), cluster_2 6_qubits * 6_instances on CLASSICAL, classical time = 2.062e-01
+Rank 8 runs case (9, 18), cluster_1 9_qubits * 1296_instances on CLASSICAL, classical time = 6.779e+01
+Rank 6 runs case (9, 18), cluster_1 9_qubits * 1296_instances on CLASSICAL, classical time = 6.798e+01
+Rank 8 runs case (9, 18), cluster_2 6_qubits * 6_instances on CLASSICAL, classical time = 2.180e-01
+Rank 7 runs case (9, 18), cluster_1 9_qubits * 1296_instances on CLASSICAL, classical time = 6.817e+01
+Rank 6 runs case (9, 18), cluster_2 6_qubits * 6_instances on CLASSICAL, classical time = 2.294e-01
+Rank 7 runs case (9, 18), cluster_2 6_qubits * 6_instances on CLASSICAL, classical time = 2.407e-01
+Rank 4 runs case (9, 18), cluster_1 9_qubits * 1296_instances on CLASSICAL, classical time = 6.948e+01
+Rank 4 runs case (9, 18), cluster_2 6_qubits * 6_instances on CLASSICAL, classical time = 2.243e-01
+Rank MASTER dumped case (9, 18), 2/5 cases
+----------------------------------------------------------------------------------------------------
+Running case: (10, 20)
+Rank 0 runs case (10, 20), cluster_0 9_qubits * 36_instances on CLASSICAL, classical time = 1.764e+00
+Rank 5 runs case (10, 20), cluster_0 9_qubits * 36_instances on CLASSICAL, classical time = 1.801e+00
+Rank 2 runs case (10, 20), cluster_0 9_qubits * 36_instances on CLASSICAL, classical time = 1.760e+00
+Rank 3 runs case (10, 20), cluster_0 9_qubits * 36_instances on CLASSICAL, classical time = 1.787e+00
+Rank 6 runs case (10, 20), cluster_0 9_qubits * 36_instances on CLASSICAL, classical time = 1.836e+00
+Rank 8 runs case (10, 20), cluster_0 9_qubits * 36_instances on CLASSICAL, classical time = 1.824e+00
+Rank 7 runs case (10, 20), cluster_0 9_qubits * 36_instances on CLASSICAL, classical time = 1.857e+00
+Rank 4 runs case (10, 20), cluster_0 9_qubits * 36_instances on CLASSICAL, classical time = 1.836e+00
+Rank 1 runs case (10, 20), cluster_0 9_qubits * 36_instances on CLASSICAL, classical time = 1.820e+00
+Rank 5 runs case (10, 20), cluster_1 10_qubits * 324_instances on CLASSICAL, classical time = 1.852e+01
+Rank 2 runs case (10, 20), cluster_1 10_qubits * 324_instances on CLASSICAL, classical time = 1.873e+01
+Rank 7 runs case (10, 20), cluster_1 10_qubits * 324_instances on CLASSICAL, classical time = 1.896e+01
+Rank 0 runs case (10, 20), cluster_1 10_qubits * 324_instances on CLASSICAL, classical time = 1.911e+01
+Rank 1 runs case (10, 20), cluster_1 10_qubits * 324_instances on CLASSICAL, classical time = 1.903e+01
+Rank 3 runs case (10, 20), cluster_1 10_qubits * 324_instances on CLASSICAL, classical time = 1.923e+01
+Rank 6 runs case (10, 20), cluster_1 10_qubits * 324_instances on CLASSICAL, classical time = 1.935e+01
+Rank 4 runs case (10, 20), cluster_1 10_qubits * 324_instances on CLASSICAL, classical time = 1.944e+01
+Rank 8 runs case (10, 20), cluster_1 10_qubits * 324_instances on CLASSICAL, classical time = 1.979e+01
+Rank 5 runs case (10, 20), cluster_2 8_qubits * 72_instances on CLASSICAL, classical time = 3.409e+00
+Rank 2 runs case (10, 20), cluster_2 8_qubits * 72_instances on CLASSICAL, classical time = 3.411e+00
+Rank 7 runs case (10, 20), cluster_2 8_qubits * 72_instances on CLASSICAL, classical time = 3.350e+00
+Rank 1 runs case (10, 20), cluster_2 8_qubits * 72_instances on CLASSICAL, classical time = 3.327e+00
+Rank 0 runs case (10, 20), cluster_2 8_qubits * 72_instances on CLASSICAL, classical time = 3.429e+00
+Rank 3 runs case (10, 20), cluster_2 8_qubits * 72_instances on CLASSICAL, classical time = 3.510e+00
+Rank 6 runs case (10, 20), cluster_2 8_qubits * 72_instances on CLASSICAL, classical time = 3.387e+00
+Rank 4 runs case (10, 20), cluster_2 8_qubits * 72_instances on CLASSICAL, classical time = 3.647e+00
+Rank 8 runs case (10, 20), cluster_2 8_qubits * 72_instances on CLASSICAL, classical time = 3.635e+00
+Rank MASTER dumped case (10, 20), 3/5 cases
+----------------------------------------------------------------------------------------------------
+Running case: (11, 22)
+Rank 0 runs case (11, 22), cluster_0 10_qubits * 2_instances on CLASSICAL, classical time = 1.287e-01
+Rank 2 runs case (11, 22), cluster_0 10_qubits * 2_instances on CLASSICAL, classical time = 1.306e-01
+Rank 3 runs case (11, 22), cluster_0 10_qubits * 2_instances on CLASSICAL, classical time = 1.314e-01
+Rank 1 runs case (11, 22), cluster_0 10_qubits * 2_instances on CLASSICAL, classical time = 2.451e-01
+Rank 4 runs case (11, 22), cluster_0 10_qubits * 2_instances on CLASSICAL, classical time = 1.174e-01
+Rank 5 runs case (11, 22), cluster_0 10_qubits * 2_instances on CLASSICAL, classical time = 1.273e-01
+Rank 6 runs case (11, 22), cluster_0 10_qubits * 2_instances on CLASSICAL, classical time = 1.286e-01
+Rank 7 runs case (11, 22), cluster_0 10_qubits * 2_instances on CLASSICAL, classical time = 1.197e-01
+Rank 8 runs case (11, 22), cluster_0 10_qubits * 2_instances on CLASSICAL, classical time = 1.370e-01
+Rank 0 runs case (11, 22), cluster_1 10_qubits * 36_instances on CLASSICAL, classical time = 2.210e+00
+Rank 2 runs case (11, 22), cluster_1 10_qubits * 36_instances on CLASSICAL, classical time = 2.134e+00
+Rank 0 runs case (11, 22), cluster_2 6_qubits * 2_instances on CLASSICAL, classical time = 6.742e-02
+Rank 1 runs case (11, 22), cluster_1 10_qubits * 36_instances on CLASSICAL, classical time = 2.159e+00
+Rank 2 runs case (11, 22), cluster_2 6_qubits * 2_instances on CLASSICAL, classical time = 1.254e-01
+Rank 3 runs case (11, 22), cluster_1 10_qubits * 36_instances on CLASSICAL, classical time = 2.216e+00
+Rank 1 runs case (11, 22), cluster_2 6_qubits * 2_instances on CLASSICAL, classical time = 6.762e-02
+Rank 5 runs case (11, 22), cluster_1 10_qubits * 36_instances on CLASSICAL, classical time = 2.161e+00
+Rank 3 runs case (11, 22), cluster_2 6_qubits * 2_instances on CLASSICAL, classical time = 6.136e-02
+Rank 4 runs case (11, 22), cluster_1 10_qubits * 36_instances on CLASSICAL, classical time = 2.271e+00
+Rank 5 runs case (11, 22), cluster_2 6_qubits * 2_instances on CLASSICAL, classical time = 6.355e-02
+Rank 4 runs case (11, 22), cluster_2 6_qubits * 2_instances on CLASSICAL, classical time = 6.498e-02
+Rank 7 runs case (11, 22), cluster_1 10_qubits * 36_instances on CLASSICAL, classical time = 2.231e+00
+Rank 6 runs case (11, 22), cluster_1 10_qubits * 36_instances on CLASSICAL, classical time = 2.313e+00
+Rank 7 runs case (11, 22), cluster_2 6_qubits * 2_instances on CLASSICAL, classical time = 6.915e-02
+Rank 6 runs case (11, 22), cluster_2 6_qubits * 2_instances on CLASSICAL, classical time = 6.673e-02
+Rank 8 runs case (11, 22), cluster_1 10_qubits * 36_instances on CLASSICAL, classical time = 2.283e+00
+Rank 8 runs case (11, 22), cluster_2 6_qubits * 2_instances on CLASSICAL, classical time = 6.770e-02
+Rank MASTER dumped case (11, 22), 4/5 cases
+----------------------------------------------------------------------------------------------------
+Running case: (12, 24)
+Rank 0 runs case (12, 24), cluster_0 12_qubits * 9_instances on CLASSICAL, classical time = 8.767e-01
+Rank 1 runs case (12, 24), cluster_0 12_qubits * 9_instances on CLASSICAL, classical time = 9.112e-01
+Rank 2 runs case (12, 24), cluster_0 12_qubits * 9_instances on CLASSICAL, classical time = 8.172e-01
+Rank 3 runs case (12, 24), cluster_0 12_qubits * 9_instances on CLASSICAL, classical time = 9.324e-01
+Rank 4 runs case (12, 24), cluster_0 12_qubits * 9_instances on CLASSICAL, classical time = 9.189e-01
+Rank 5 runs case (12, 24), cluster_0 12_qubits * 9_instances on CLASSICAL, classical time = 9.003e-01
+Rank 6 runs case (12, 24), cluster_0 12_qubits * 9_instances on CLASSICAL, classical time = 8.176e-01
+Rank 7 runs case (12, 24), cluster_0 12_qubits * 9_instances on CLASSICAL, classical time = 8.780e-01
+Rank 8 runs case (12, 24), cluster_0 12_qubits * 9_instances on CLASSICAL, classical time = 8.117e-01
+Rank 2 runs case (12, 24), cluster_1 12_qubits * 144_instances on CLASSICAL, classical time = 1.334e+01
+Rank 0 runs case (12, 24), cluster_1 12_qubits * 144_instances on CLASSICAL, classical time = 1.415e+01
+Rank 1 runs case (12, 24), cluster_1 12_qubits * 144_instances on CLASSICAL, classical time = 1.422e+01
+Rank 5 runs case (12, 24), cluster_1 12_qubits * 144_instances on CLASSICAL, classical time = 1.339e+01
+Rank 4 runs case (12, 24), cluster_1 12_qubits * 144_instances on CLASSICAL, classical time = 1.406e+01
+Rank 2 runs case (12, 24), cluster_2 6_qubits * 36_instances on CLASSICAL, classical time = 1.469e+00
+Rank 3 runs case (12, 24), cluster_1 12_qubits * 144_instances on CLASSICAL, classical time = 1.452e+01
+Rank 6 runs case (12, 24), cluster_1 12_qubits * 144_instances on CLASSICAL, classical time = 1.427e+01
+Rank 7 runs case (12, 24), cluster_1 12_qubits * 144_instances on CLASSICAL, classical time = 1.401e+01
+Rank 0 runs case (12, 24), cluster_2 6_qubits * 36_instances on CLASSICAL, classical time = 1.509e+00
+Rank 8 runs case (12, 24), cluster_1 12_qubits * 144_instances on CLASSICAL, classical time = 1.411e+01
+Rank 1 runs case (12, 24), cluster_2 6_qubits * 36_instances on CLASSICAL, classical time = 1.560e+00
+Rank 5 runs case (12, 24), cluster_2 6_qubits * 36_instances on CLASSICAL, classical time = 1.506e+00
+Rank 4 runs case (12, 24), cluster_2 6_qubits * 36_instances on CLASSICAL, classical time = 1.495e+00
+Rank 3 runs case (12, 24), cluster_2 6_qubits * 36_instances on CLASSICAL, classical time = 1.547e+00
+Rank 7 runs case (12, 24), cluster_2 6_qubits * 36_instances on CLASSICAL, classical time = 1.570e+00
+Rank 6 runs case (12, 24), cluster_2 6_qubits * 36_instances on CLASSICAL, classical time = 1.618e+00
+Rank 8 runs case (12, 24), cluster_2 6_qubits * 36_instances on CLASSICAL, classical time = 1.500e+00
+Rank MASTER dumped case (12, 24), 5/5 cases
+----------------------------------------------------------------------------------------------------
+-------------------------------------------------- Reconstructor --------------------------------------------------
+Existing cases: dict_keys([])
+case (8, 16)
+Cut into  [2, 8, 8, 5] clusters
+Compute took 0.842 seconds
+Reorder took 0.022 seconds
+Reverse took 0.064 seconds
+Reconstruction + reorder + reverse took 0.928 seconds, standard took 0.656 seconds
+hw metric = 1.394e-30
+cutting metric = 4.914e-20
+Reconstruction output has 1 cases
+----------------------------------------------------------------------------------------------------
+case (9, 18)
+Cut into  [9, 9, 6] clusters
+Compute took 1.325 seconds
+Reorder took 0.086 seconds
+Reverse took 0.265 seconds
+Reconstruction + reorder + reverse took 1.676 seconds, standard took 2.686 seconds
+hw metric = 3.558e-29
+cutting metric = 1.618e-29
+Reconstruction output has 2 cases
+----------------------------------------------------------------------------------------------------
+case (10, 20)
+Cut into  [9, 10, 8] clusters
+Compute took 8.761 seconds
+Reorder took 0.433 seconds
+Reverse took 1.068 seconds
+Reconstruction + reorder + reverse took 10.261 seconds, standard took 10.022 seconds
+hw metric = 1.207e-30
+cutting metric = 4.357e-29
+Reconstruction output has 3 cases
+----------------------------------------------------------------------------------------------------
+case (11, 22)
+Cut into  [10, 10, 6] clusters
+Compute took 1.839 seconds
+Reorder took 3.734 seconds
+Reverse took 4.505 seconds
+Reconstruction + reorder + reverse took 10.077 seconds, standard took 38.398 seconds
+hw metric = 1.424e-28
+cutting metric = 6.776e-29
+Reconstruction output has 4 cases
+----------------------------------------------------------------------------------------------------
+case (12, 24)
+Cut into  [12, 12, 6] clusters
+Compute took 75.853 seconds
+Reorder took 20.515 seconds
+Reverse took 18.494 seconds
+Reconstruction + reorder + reverse took 114.861 seconds, standard took 151.959 seconds
+hw metric = 8.166e-28
+cutting metric = 9.997e-28
+Reconstruction output has 5 cases
+----------------------------------------------------------------------------------------------------
