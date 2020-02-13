@@ -356,6 +356,7 @@ def find_cuts(circ, reconstructor_runtime_params, reconstructor_weight, num_clus
             num_O_qubits = []
             num_d_qubits = []
             best_model = m
+            searcher_time = m.runtime
             for i in range(m.num_cluster):
                 cluster_rho_qubits = m.model.getVarByName('cluster_rho_qubits_%d'%i)
                 cluster_O_qubits = m.model.getVarByName('cluster_O_qubits_%d'%i)
@@ -364,7 +365,7 @@ def find_cuts(circ, reconstructor_runtime_params, reconstructor_weight, num_clus
                 num_O_qubits.append(cluster_O_qubits.X)
                 num_d_qubits.append(cluster_d.X)
 
-    return min_objective, best_positions, num_rho_qubits, num_O_qubits, num_d_qubits, best_num_cluster, best_model
+    return min_objective, best_positions, num_rho_qubits, num_O_qubits, num_d_qubits, best_num_cluster, best_model, searcher_time
 
 if __name__ == '__main__':
     circ = gen_supremacy(1,3,4)

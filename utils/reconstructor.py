@@ -334,15 +334,6 @@ def reconstruct(complete_path_map, combinations, full_circ, cluster_circs, clust
     total_counter,collapsed_cluster_prob_memoization_counter,total_counter,kron_calls,collapse_calls))
     return reconstructed_prob, scaling_factor, smart_order
 
-def compute(reconstruction_terms, num_qubits):
-    reconstructed_prob = np.zeros(2**num_qubits)
-    for reconstruction_term in reconstruction_terms:
-        summation_term = np.ones(1)
-        for kronecker_term in reconstruction_term:
-            summation_term = np.kron(summation_term,kronecker_term)
-        reconstructed_prob += summation_term
-    return reconstructed_prob
-
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Uniter')
     parser.add_argument('--experiment-name', metavar='S', type=str,help='which experiment to run')
@@ -368,18 +359,13 @@ if __name__ == '__main__':
 
         combinations = get_combinations(uniter_input[case]['complete_path_map'])
         
-        reconstruct_begin = time()
+        compute_begin = time()
         reconstructed_prob, scaling_factor, smart_order = reconstruct(complete_path_map=uniter_input[case]['complete_path_map'],
         combinations=combinations,
         full_circ=uniter_input[case]['full_circ'], cluster_circs=uniter_input[case]['clusters'],
         cluster_sim_probs=uniter_input[case]['all_cluster_prob'])
-        reconstruct_time = time() - reconstruct_begin
-        print('Reconstruction took %.3f seconds'%reconstruct_time)
-
-        # compute_begin = time()
-        # reconstructed_prob = compute(reconstruction_terms=reconstruction_terms, num_qubits=case[1])
-        # compute_time = time() - compute_begin
-        # print('Compute took %.3f seconds'%compute_time)
+        compute_time = time() - compute_begin
+        print('Compute took %.3f seconds'%compute_time)
         
         reorder_begin = time()
         reconstructed_prob = reconstructed_prob/scaling_factor
@@ -396,10 +382,10 @@ if __name__ == '__main__':
         # print('reconstruction len = ', len(reconstructed_prob),'probabilities sum = ', sum(reconstructed_prob))
         assert len(reconstructed_prob) == 2**case[1] and abs(sum(reconstructed_prob)-1)<1e-5
         
-        uniter_time = reconstruct_time + reorder_time + reverse_time
-        case_dict['reconstructor_time'] = uniter_time
+        hybrid_time = case_dict['searcher_time'] + case_dict['quantum_time'] + compute_time + reorder_time
+        case_dict['reconstructor_time'] = hybrid_time
         case_dict['cutting'] = reconstructed_prob
-        print('Reconstruction + reorder + reverse took %.3f seconds, standard took %.3f seconds'%(uniter_time,uniter_input[case]['std_time']))
+        print('QC hybrid took %.3f seconds, classical took %.3f seconds'%(hybrid_time,case_dict['std_time']))
         if args.evaluation_method != 'fake':
             if args.evaluation_method != 'statevector_simulator':
                 print('qasm metric = %.3e'%chi2_distance(target=case_dict['sv'],obs=case_dict['qasm']))
