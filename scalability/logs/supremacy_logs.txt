@@ -1,0 +1,52 @@
+Using license file /home/weit/gurobi.lic
+Academic license - for non-commercial use only
+case (20, 30)
+MIP searcher clusters: [15.0, 20.0]
+5 cuts --> [15, 20], searcher time = 1.3393824100494385
+--------------------------------------------------
+case (22, 32)
+MIP searcher clusters: [15.0, 21.0]
+4 cuts --> [15, 21], searcher time = 1.138991355895996
+--------------------------------------------------
+case (23, 34)
+MIP searcher clusters: [14.0, 22.0]
+2 cuts --> [14, 22], searcher time = 0.3651604652404785
+--------------------------------------------------
+-------------------------------------------------- Evaluator --------------------------------------------------
+Existing cases: dict_keys([])
+Running case: (20, 30)
+Case (20, 30), cluster_0 15_qubits * 3888_instances on fake QUANTUM SIMULATOR, 
+Case (20, 30), cluster_1 20_qubits * 486_instances on fake QUANTUM SIMULATOR, 
+dumped case (20, 30), 1/3 cases
+----------------------------------------------------------------------------------------------------
+Running case: (22, 32)
+Case (22, 32), cluster_0 15_qubits * 162_instances on fake QUANTUM SIMULATOR, 
+Case (22, 32), cluster_1 21_qubits * 648_instances on fake QUANTUM SIMULATOR, 
+dumped case (22, 32), 2/3 cases
+----------------------------------------------------------------------------------------------------
+Running case: (23, 34)
+Case (23, 34), cluster_0 14_qubits * 18_instances on fake QUANTUM SIMULATOR, 
+Case (23, 34), cluster_1 22_qubits * 18_instances on fake QUANTUM SIMULATOR, 
+dumped case (23, 34), 3/3 cases
+----------------------------------------------------------------------------------------------------
+-------------------------------------------------- Reconstructor --------------------------------------------------
+Existing cases: dict_keys([])
+case (20, 30)
+Cut into  [15, 20] clusters
+Quantum took 3185.050 seconds
+Compute took 292.000 seconds + 190.722 seconds estimated
+QC hybrid took 3669.110 seconds, classical took 11869.342 seconds
+Reconstruction output has 1 cases
+----------------------------------------------------------------------------------------------------
+case (22, 32)
+
+===================================================================================
+=   BAD TERMINATION OF ONE OF YOUR APPLICATION PROCESSES
+=   PID 68113 RUNNING AT chai
+=   EXIT CODE: 9
+=   CLEANING UP REMAINING PROCESSES
+=   YOU CAN IGNORE THE BELOW CLEANUP MESSAGES
+===================================================================================
+YOUR APPLICATION TERMINATED WITH THE EXIT STRING: Killed (signal 9)
+This typically refers to a problem with your application.
+Please see the FAQ page for debugging suggestions
