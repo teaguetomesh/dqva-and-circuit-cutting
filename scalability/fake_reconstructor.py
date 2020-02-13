@@ -47,13 +47,11 @@ def reconstructed_reorder(unordered,complete_path_map,smart_order):
         # print('unordered %d --> ordered %d'%(idx,ordered_idx),'sv=',sv)
     return ordered
 
-def get_combinations(complete_path_map):
-    O_rho_pairs = find_cuts_pairs(complete_path_map)
-    # print('O rho qubits pairs:',O_rho_pairs)
+def get_combinations(num_cuts):
 
     basis = ['I','X','Y','Z']
 
-    combinations = list(itertools.product(basis,repeat=len(O_rho_pairs)))
+    combinations = list(itertools.product(basis,repeat=num_cuts))
     return combinations
 
 if __name__ == '__main__':
@@ -74,45 +72,50 @@ if __name__ == '__main__':
             continue
         print('case {}'.format(case),flush=True)
         case_dict = copy.deepcopy(uniter_input[case])
-        print('Cut into ',[len(x.qubits) for x in case_dict['clusters']],'clusters')
+        print('Cut into {} clusters'.format(case_dict['num_d_qubits']))
 
-        combinations = get_combinations(case_dict['complete_path_map'])
+        combinations = get_combinations(case_dict['num_cuts'])
         
         compute_begin = time()
-        reconstructed_prob, scaling_factor, smart_order, total_estimated_kron_time = fake_reconstruct(complete_path_map=case_dict['complete_path_map'],
-        combinations=combinations,
-        full_circ=case_dict['full_circ'], cluster_circs=case_dict['clusters'],
-        cluster_sim_probs=case_dict['all_cluster_prob'],run_kron=True)
-        compute_time = time() - compute_begin + total_estimated_kron_time
+        reconstructed_prob, scaling_factor, smart_order = fake_reconstruct(
+            combinations=combinations,
+            full_circ=case_dict['full_circ'],
+            cluster_sim_probs=case_dict['all_cluster_prob'],
+            num_cuts=case_dict['num_cuts'],
+            num_d_qubits=case_dict['num_d_qubits'],
+            num_rho_qubits=case_dict['num_rho_qubits'],
+            num_O_qubits=case_dict['num_O_qubits'],
+            states=range(1000))
+        compute_time = time() - compute_begin
         print('Searcher took %.3f seconds'%case_dict['searcher_time'])
         print('Quantum took %.3f seconds'%case_dict['quantum_time'])
         print('Compute took %.3f seconds'%compute_time)
         case_dict['compute_time'] = compute_time
         
-        reorder_begin = time()
-        reconstructed_prob = reconstructed_prob/scaling_factor
-        reconstructed_prob = reconstructed_reorder(reconstructed_prob,complete_path_map=case_dict['complete_path_map'],smart_order=smart_order)
-        reorder_time = time() - reorder_begin
-        print('Reorder took %.3f seconds'%reorder_time)
-        case_dict['reorder_time'] = reorder_time
+        # reorder_begin = time()
+        # reconstructed_prob = reconstructed_prob/scaling_factor
+        # reconstructed_prob = reconstructed_reorder(reconstructed_prob,complete_path_map=case_dict['complete_path_map'],smart_order=smart_order)
+        # reorder_time = time() - reorder_begin
+        # print('Reorder took %.3f seconds'%reorder_time)
+        # case_dict['reorder_time'] = reorder_time
 
-        # reverse_begin = time()
-        # norm = sum(reconstructed_prob)
-        # reconstructed_prob = reconstructed_prob/norm
-        # reconstructed_prob = reverse_prob(prob_l=reconstructed_prob)
-        # reverse_time = time() - reverse_begin
-        # print('Reverse took %.3f seconds'%reverse_time)
-        # case_dict['reverse_time'] = reverse_time
+        # # reverse_begin = time()
+        # # norm = sum(reconstructed_prob)
+        # # reconstructed_prob = reconstructed_prob/norm
+        # # reconstructed_prob = reverse_prob(prob_l=reconstructed_prob)
+        # # reverse_time = time() - reverse_begin
+        # # print('Reverse took %.3f seconds'%reverse_time)
+        # # case_dict['reverse_time'] = reverse_time
 
-        # print('reconstruction len = ', len(reconstructed_prob),'probabilities sum = ', sum(reconstructed_prob))
-        assert len(reconstructed_prob) == 2**case[1]
+        # # print('reconstruction len = ', len(reconstructed_prob),'probabilities sum = ', sum(reconstructed_prob))
+        # assert len(reconstructed_prob) == 2**case[1]
         
-        hybrid_time = case_dict['searcher_time'] + case_dict['quantum_time'] + compute_time + reorder_time
-        print('QC hybrid took %.3f seconds, classical took %.3f seconds'%(hybrid_time,case_dict['std_time']))
+        # hybrid_time = case_dict['searcher_time'] + case_dict['quantum_time'] + compute_time + reorder_time
+        # print('QC hybrid took %.3f seconds, classical took %.3f seconds'%(hybrid_time,case_dict['std_time']))
 
-        # [print(x,case_dict['complete_path_map'][x]) for x in case_dict['complete_path_map']]
+        # # [print(x,case_dict['complete_path_map'][x]) for x in case_dict['complete_path_map']]
 
-        # pickle.dump({case:case_dict}, open('%s'%(dirname+plotter_input_filename),'ab'))
-        counter += 1
-        print('Reconstruction output has %d cases'%counter,flush=True)
-        print('-'*100)
+        # # pickle.dump({case:case_dict}, open('%s'%(dirname+plotter_input_filename),'ab'))
+        # counter += 1
+        # print('Reconstruction output has %d cases'%counter,flush=True)
+        # print('-'*100)

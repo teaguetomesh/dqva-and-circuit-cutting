@@ -228,6 +228,7 @@ def reconstruct(complete_path_map, combinations, full_circ, cluster_circs, clust
     cluster_O_qubit_positions, cluster_rho_qubit_positions = find_cluster_O_rho_qubit_positions(O_rho_pairs, cluster_circs)
     smart_order = smart_cluster_order(O_rho_pairs, cluster_circs)
     # smart_order = range(len(cluster_circs))
+    # print('smart order =',smart_order)
 
     collapsed_cluster_prob = [{} for c in cluster_circs]
     summation_term_memoization_dict = {}
@@ -275,9 +276,9 @@ def reconstruct(complete_path_map, combinations, full_circ, cluster_circs, clust
         reconstructed_prob += summation_term
         # print('-'*100)
     # print()
-    #print('Summation term memoized %d/%d, collapsed_term memoized %d/%d, called kron %d times, collapse %d times'%(
+    # print('Summation term memoized %d/%d, collapsed_term memoized %d/%d, called kron %d times, collapse %d times'%(
     #    summation_term_memoization_counter,
-    #total_counter,collapsed_cluster_prob_memoization_counter,total_counter,kron_calls,collapse_calls))
+    # total_counter,collapsed_cluster_prob_memoization_counter,total_counter,kron_calls,collapse_calls))
     return reconstructed_prob, scaling_factor, smart_order
 
 def compute(reconstruction_terms, num_qubits):

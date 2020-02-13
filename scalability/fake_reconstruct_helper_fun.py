@@ -3,52 +3,26 @@ import itertools
 from utils.helper_fun import find_cuts_pairs, find_cluster_O_rho_qubit_positions, effective_full_state_corresppndence, smart_cluster_order, find_inits_meas
 from time import time
 
-def fake_kron(len_a,len_b,run_kron):
-    if run_kron:
-        prob_a = 1/len_a
-        prob_b = 1/len_b
-        arr_a = np.array([prob_a for x in range(len_a)])
-        arr_b = np.array([prob_b for x in range(len_b)])
-        np.kron(arr_a,arr_b)
-        return len_a * len_b, 0
-    else:
-        assert len_a * len_b <= 2**34
-        runtime_exponent = np.log2(len_a * len_b)
-        estimated_time = (2e-10)*np.exp(0.8*runtime_exponent)
-        return len_a * len_b , estimated_time
-
-def fake_reconstruct(complete_path_map, combinations, full_circ, cluster_circs, cluster_sim_probs, run_kron):
-    #[print(x,complete_path_map[x]) for x in complete_path_map]
-    O_rho_pairs = find_cuts_pairs(complete_path_map)
-    num_cuts = len(O_rho_pairs)
+def fake_reconstruct(combinations,full_circ,cluster_sim_probs,num_cuts,num_d_qubits,num_rho_qubits,num_O_qubits,states):
+    num_clusters = len(num_d_qubits)
     scaling_factor = np.power(2,num_cuts)
-    # print('O rho qubits pairs:',O_rho_pairs)
 
-    reconstructed_prob = np.zeros(2**len(full_circ.qubits))
-    if len(combinations)>0:
-        # dummy_summation_term = np.array([scaling_factor/len(combinations) for x in range(2**len(full_circ.qubits))])
-        dummy_summation_term = scaling_factor/len(combinations)
-    else:
-        # dummy_summation_term = np.zeros(2**len(full_circ.qubits))
-        dummy_summation_term = 0
-    correspondence_map = effective_full_state_corresppndence(O_rho_pairs,cluster_circs)
-    # print('Effective states, full states correspondence map:')
-    # [print('cluster %d' % cluster_idx,correspondence_map[cluster_idx],'\n') for cluster_idx in correspondence_map]
-    cluster_O_qubit_positions, cluster_rho_qubit_positions = find_cluster_O_rho_qubit_positions(O_rho_pairs, cluster_circs)
-    smart_order = smart_cluster_order(O_rho_pairs, cluster_circs)
-    # smart_order = range(len(cluster_circs))
+    reconstructed_prob = np.zeros(len(states))
+    num_Orho_qubits = num_rho_qubits + num_O_qubits
+    smart_order = range(num_clusters)
+    num_Orho_qubits, smart_order = zip(*sorted(zip(num_Orho_qubits, smart_order)))
+    print('smart order:',smart_order)
 
-    collapsed_cluster_prob = [{} for c in cluster_circs]
+    collapsed_cluster_prob = [{} for c in range(num_clusters)]
     summation_term_memoization_dict = {}
     total_counter = 0
     collapsed_cluster_prob_memoization_counter = 0
     summation_term_memoization_counter = 0
     kron_calls = 0
     collapse_calls = 0
-    total_estimated_kron_time = 0
 
     for i,s in enumerate(combinations):
-        # print('s_{} = {}'.format(i,s))
+        print('s_{} = {}'.format(i,s))
         clusters_init_meas = find_inits_meas(cluster_circs, O_rho_pairs, s)
         accumulated_clusters_init_meas = ()
         summation_term = None
@@ -62,9 +36,8 @@ def fake_reconstruct(complete_path_map, combinations, full_circ, cluster_circs, 
                 summation_term_memoization_counter += 1
             elif init_meas in collapsed_cluster_prob[cluster_idx]:
                 kronecker_term = collapsed_cluster_prob[cluster_idx][init_meas]
-                if summation_term != None:
-                    summation_term, estimated_time = fake_kron(len_a=summation_term,len_b=kronecker_term,run_kron=run_kron)
-                    total_estimated_kron_time += estimated_time
+                if isinstance(summation_term,np.ndarray):
+                    summation_term = np.kron(summation_term,kronecker_term)
                     kron_calls += 1
                 else:
                     summation_term = kronecker_term
@@ -78,7 +51,7 @@ def fake_reconstruct(complete_path_map, combinations, full_circ, cluster_circs, 
                 effective_state_tranlsation=correspondence_map[cluster_idx])
                 collapse_calls += 1
                 if summation_term != None:
-                    summation_term, estimated_time = fake_kron(len_a=summation_term,len_b=kronecker_term,run_kron=run_kron)
+                    summation_term = fake_kron(len_a=summation_term,len_b=kronecker_term)
                     total_estimated_kron_time += estimated_time
                     kron_calls += 1
                 else:
@@ -91,15 +64,9 @@ def fake_reconstruct(complete_path_map, combinations, full_circ, cluster_circs, 
     # print('Summation term memoized %d/%d, collapsed_term memoized %d/%d, called kron %d times, collapse %d times'%(
     #     summation_term_memoization_counter,
     # total_counter,collapsed_cluster_prob_memoization_counter,total_counter,kron_calls,collapse_calls))
-    if run_kron:
-        assert total_estimated_kron_time == 0
-    else:
-        if len(combinations)>0:
-            assert total_estimated_kron_time > 0
-    return reconstructed_prob, scaling_factor, smart_order, total_estimated_kron_time
+    return reconstructed_prob, scaling_factor, smart_order
 
 def fake_calculate_cluster(cluster_idx,cluster_probs,init_meas,O_qubit_positions,effective_state_tranlsation):
-    multiply_sigma_counter = 0
     # print('O qubit positions:',O_qubit_positions)
     initilizations, measurement = init_meas
     num_effective_states = np.power(2,len(measurement)-len(O_qubit_positions))
@@ -148,7 +115,6 @@ def fake_calculate_cluster(cluster_idx,cluster_probs,init_meas,O_qubit_positions
         cluster_s=[measurement[i] for i in O_qubit_positions],
         cluster_O_qubit_positions=O_qubit_positions,
         effective_state_tranlsation=effective_state_tranlsation)
-        multiply_sigma_counter += 1
         
         # kronecker_term += sign*effective_cluster_prob
         arr_b = np.ones(num_effective_states)
@@ -156,7 +122,6 @@ def fake_calculate_cluster(cluster_idx,cluster_probs,init_meas,O_qubit_positions
     
     # print('length of effective cluster prob:',len(kronecker_term))
     dummy = np.array(dummy)
-    # print('called multiply_sigma %d times'%multiply_sigma_counter)
     return num_effective_states
 
 def fake_multiply_sigma(full_cluster_prob_len,cluster_s,cluster_O_qubit_positions,effective_state_tranlsation):

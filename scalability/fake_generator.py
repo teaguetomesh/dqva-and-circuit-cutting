@@ -1,6 +1,5 @@
 from utils.helper_fun import generate_circ, apply_measurement, get_filename, find_cluster_O_rho_qubit_positions, find_cuts_pairs
 import utils.MIQCP_searcher as searcher
-import utils.cutter as cutter
 from utils.conversions import dict_to_array
 from time import time
 import pickle
@@ -9,27 +8,23 @@ import math
 import numpy as np
 import argparse
 
-def cluster_runtime_estimate(complete_path_map,clusters):
-    O_rho_pairs = find_cuts_pairs(complete_path_map=complete_path_map)
-    cluster_O_qubit_positions, cluster_rho_qubit_positions = find_cluster_O_rho_qubit_positions(O_rho_pairs=O_rho_pairs,cluster_circs=clusters)
-    total_QC_time = 0
-    for cluster_idx in cluster_O_qubit_positions:
-        cluster_O_qubits = cluster_O_qubit_positions[cluster_idx]
-        cluster_rho_qubits = cluster_rho_qubit_positions[cluster_idx]
-        num_qubits = len(clusters[cluster_idx].qubits)
-        depth = clusters[cluster_idx].depth()
-        shots = 2**num_qubits
-        single_time = 500*1e-9*depth*shots
-        reps = 6**len(cluster_rho_qubits)*3**len(cluster_O_qubits)
-        estimated_time = reps * single_time
-        total_QC_time += estimated_time
-        # print('%d O qubits, %d rho qubits, %d qubit circuit depth %d'%(len(cluster_O_qubits),len(cluster_rho_qubits),num_qubits,depth))
-        # print('estimated_time = %.3f * %d = %.5f seconds'%(single_time,reps,estimated_time))
-    # print('Total QC runtime = %.5f'%total_QC_time)
-    return total_QC_time
+def quantum_resource_estimate(num_d_qubits,num_rho_qubits,num_O_qubits):
+    qc_time = 0
+    qc_mem = 0
+    for cluster_idx in range(len(num_d_qubits)):
+        d = num_d_qubits[cluster_idx]
+        rho = num_rho_qubits[cluster_idx]
+        O = num_O_qubits[cluster_idx]
+        num_inst = 6**rho*3**O
+        print('Cluster %d: %d-qubit, %d \u03C1-qubit + %d O-qubit = %d instances'%(cluster_idx,d,rho,O,num_inst))
+        circuit_depth = 10
+        shots = 2**d
+        qc_time += num_inst*circuit_depth*500*1e-9*shots
+        qc_mem += 2**d*4/1024/1024/1024/1024
+    return qc_time, qc_mem
 
-def classical_time(num_qubits):
-    return 9*1e-6*np.exp(0.7*num_qubits)
+def classical_resource_estimate(num_qubits):
+    return 9*1e-6*np.exp(0.7*num_qubits), 2**num_qubits*4/(1024**4)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='generate evaluator inputs')
@@ -49,20 +44,26 @@ if __name__ == '__main__':
         cluster_max_qubit = math.ceil(fc_size/1.5)
         case = (cluster_max_qubit,fc_size)
         searcher_begin = time()
-        hardness, positions, ancilla, d, num_cluster, m = searcher.find_cuts(circ=circ,reconstructor_runtime_params=[4.275e-9,6.863e-1],reconstructor_weight=0,
+        min_objective, positions, num_rho_qubits, num_O_qubits, num_d_qubits, best_num_cluster, m = searcher.find_cuts(circ=circ,reconstructor_runtime_params=[4.275e-9,6.863e-1],reconstructor_weight=0,
         num_clusters=range(2,min(len(circ.qubits),max_clusters)+1),cluster_max_qubit=cluster_max_qubit)
         searcher_time = time() - searcher_begin
-
-        std_time = classical_time(fc_size)
 
         if m != None:
             # m.print_stat()
             print('case {}'.format(case))
-            print('MIP searcher clusters:',d)
-            clusters, complete_path_map, K, d = cutter.cut_circuit(circ, positions)
-            print('{:d} cuts --> {}, searcher time = {}'.format(K,d,searcher_time))
-            total_QC_time = cluster_runtime_estimate(complete_path_map,clusters)
-            circ_dict[case] = {'full_circ':circ,'clusters':clusters,'complete_path_map':complete_path_map,
-            'searcher_time':searcher_time,'quantum_time':total_QC_time,'std_time':std_time}
+            print('Searcher time = {:.3f}, {:d} cuts'.format(searcher_time,len(positions)))
+            
+            std_time, std_mem = classical_resource_estimate(fc_size)
+            qc_time, qc_mem = quantum_resource_estimate(num_d_qubits,num_rho_qubits,num_O_qubits)
+            
+            circ_dict[case] = {'full_circ':circ,'searcher_time':searcher_time,
+            'num_cuts':len(positions),
+            'num_d_qubits':np.array([int(x) for x in num_d_qubits]),
+            'num_rho_qubits':np.array([int(x) for x in num_rho_qubits]),
+            'num_O_qubits':np.array([int(x) for x in num_O_qubits]),
+            'quantum_time':qc_time,'quantum_mem':qc_mem,'std_time':std_time,'std_mem':std_mem}
+            
+            print('qc_time = %.3f seconds, qc_mem = %f TB'%(qc_time,qc_mem))
+            print('std_time = %.3f seconds, std_mem = %f TB'%(std_time,std_mem))
             print('-'*50)
     pickle.dump(circ_dict, open(dirname+evaluator_input_filename,'wb'))

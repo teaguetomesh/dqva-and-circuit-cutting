@@ -180,7 +180,7 @@ if __name__ == '__main__':
                 reconstructed_prob, scaling_factor, smart_order, total_estimated_kron_time = fake_reconstruct(complete_path_map=uniter_input[case]['complete_path_map'],
                 combinations=rank_combinations,
                 full_circ=uniter_input[case]['full_circ'], cluster_circs=uniter_input[case]['clusters'],
-                cluster_sim_probs=uniter_input[case]['all_cluster_prob'],run_kron=False)
+                cluster_sim_probs=uniter_input[case]['all_cluster_prob'],run_kron=True)
                 get_terms_time = time() - get_terms_begin
                 #print('Rank %d reconstruction took %.3f seconds'%(rank,get_terms_time))
 

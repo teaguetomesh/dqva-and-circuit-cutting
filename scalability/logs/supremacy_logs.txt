@@ -1,52 +1,89 @@
-Using license file /home/weit/gurobi.lic
+Using license file /Users/weitang/gurobi.lic
 Academic license - for non-commercial use only
-case (20, 30)
-MIP searcher clusters: [15.0, 20.0]
-5 cuts --> [15, 20], searcher time = 1.3393824100494385
---------------------------------------------------
-case (22, 32)
-MIP searcher clusters: [15.0, 21.0]
-4 cuts --> [15, 21], searcher time = 1.138991355895996
---------------------------------------------------
-case (23, 34)
-MIP searcher clusters: [14.0, 22.0]
-2 cuts --> [14, 22], searcher time = 0.3651604652404785
+case (11, 16)
+Searcher time = 0.424, 4 cuts
+Cluster 0: 9-qubit, 4 ρ-qubit + 0 O-qubit = 1296 instances
+Cluster 1: 11-qubit, 0 ρ-qubit + 4 O-qubit = 81 instances
+qc_time = 4.147 seconds, qc_mem = 0.000000 TB
+std_time = 0.658 seconds, std_mem = 0.000000 TB
 --------------------------------------------------
 -------------------------------------------------- Evaluator --------------------------------------------------
 Existing cases: dict_keys([])
-Running case: (20, 30)
-Case (20, 30), cluster_0 15_qubits * 3888_instances on fake QUANTUM SIMULATOR, 
-Case (20, 30), cluster_1 20_qubits * 486_instances on fake QUANTUM SIMULATOR, 
-dumped case (20, 30), 1/3 cases
-----------------------------------------------------------------------------------------------------
-Running case: (22, 32)
-Case (22, 32), cluster_0 15_qubits * 162_instances on fake QUANTUM SIMULATOR, 
-Case (22, 32), cluster_1 21_qubits * 648_instances on fake QUANTUM SIMULATOR, 
-dumped case (22, 32), 2/3 cases
-----------------------------------------------------------------------------------------------------
-Running case: (23, 34)
-Case (23, 34), cluster_0 14_qubits * 18_instances on fake QUANTUM SIMULATOR, 
-Case (23, 34), cluster_1 22_qubits * 18_instances on fake QUANTUM SIMULATOR, 
-dumped case (23, 34), 3/3 cases
+Running case: (11, 16)
+Case (11, 16), cluster_0 9_qubits * 1296_instances on fake QUANTUM SIMULATOR, 
+Case (11, 16), cluster_1 11_qubits * 81_instances on fake QUANTUM SIMULATOR, 
+dumped case (11, 16), 1/1 cases
 ----------------------------------------------------------------------------------------------------
 -------------------------------------------------- Reconstructor --------------------------------------------------
 Existing cases: dict_keys([])
-case (20, 30)
-Cut into  [15, 20] clusters
-Quantum took 3185.050 seconds
-Compute took 292.000 seconds + 190.722 seconds estimated
-QC hybrid took 3669.110 seconds, classical took 11869.342 seconds
-Reconstruction output has 1 cases
-----------------------------------------------------------------------------------------------------
-case (22, 32)
-
-===================================================================================
-=   BAD TERMINATION OF ONE OF YOUR APPLICATION PROCESSES
-=   PID 68113 RUNNING AT chai
-=   EXIT CODE: 9
-=   CLEANING UP REMAINING PROCESSES
-=   YOU CAN IGNORE THE BELOW CLEANUP MESSAGES
-===================================================================================
-YOUR APPLICATION TERMINATED WITH THE EXIT STRING: Killed (signal 9)
-This typically refers to a problem with your application.
-Please see the FAQ page for debugging suggestions
+case (11, 16)
+Traceback (most recent call last):
+  File "/Users/weitang/opt/anaconda3/envs/cc-env/lib/python3.7/runpy.py", line 193, in _run_module_as_main
+    "__main__", mod_spec)
+  File "/Users/weitang/opt/anaconda3/envs/cc-env/lib/python3.7/runpy.py", line 85, in _run_code
+    exec(code, run_globals)
+  File "/Users/weitang/Documents/circuit_cutting/scalability/fake_reconstructor.py", line 88, in <module>
+    states=range(1000))
+  File "/Users/weitang/Documents/circuit_cutting/scalability/fake_reconstruct_helper_fun.py", line 26, in fake_reconstruct
+    clusters_init_meas = find_inits_meas(cluster_circs, O_rho_pairs, s)
+NameError: name 'cluster_circs' is not defined
+Cut into [ 9 11] clusters
+smart order: (0, 1)
+-------------------------------------------------- Reconstructor --------------------------------------------------
+Existing cases: dict_keys([])
+case (11, 16)
+Traceback (most recent call last):
+  File "/Users/weitang/opt/anaconda3/envs/cc-env/lib/python3.7/runpy.py", line 193, in _run_module_as_main
+    "__main__", mod_spec)
+  File "/Users/weitang/opt/anaconda3/envs/cc-env/lib/python3.7/runpy.py", line 85, in _run_code
+    exec(code, run_globals)
+  File "/Users/weitang/Documents/circuit_cutting/scalability/fake_reconstructor.py", line 88, in <module>
+    states=range(1000))
+ValueError: not enough values to unpack (expected 4, got 3)
+Cut into [ 9 11] clusters
+smart order: (0, 1)
+-------------------------------------------------- Reconstructor --------------------------------------------------
+Existing cases: dict_keys([])
+case (11, 16)
+Traceback (most recent call last):
+  File "/Users/weitang/opt/anaconda3/envs/cc-env/lib/python3.7/runpy.py", line 193, in _run_module_as_main
+    "__main__", mod_spec)
+  File "/Users/weitang/opt/anaconda3/envs/cc-env/lib/python3.7/runpy.py", line 85, in _run_code
+    exec(code, run_globals)
+  File "/Users/weitang/Documents/circuit_cutting/scalability/fake_reconstructor.py", line 89, in <module>
+    compute_time = time() - compute_begin + total_estimated_kron_time
+NameError: name 'total_estimated_kron_time' is not defined
+Cut into [ 9 11] clusters
+smart order: (0, 1)
+-------------------------------------------------- Reconstructor --------------------------------------------------
+Existing cases: dict_keys([])
+case (11, 16)
+Traceback (most recent call last):
+  File "/Users/weitang/opt/anaconda3/envs/cc-env/lib/python3.7/runpy.py", line 193, in _run_module_as_main
+    "__main__", mod_spec)
+  File "/Users/weitang/opt/anaconda3/envs/cc-env/lib/python3.7/runpy.py", line 85, in _run_code
+    exec(code, run_globals)
+  File "/Users/weitang/Documents/circuit_cutting/scalability/fake_reconstructor.py", line 97, in <module>
+    reconstructed_prob = reconstructed_reorder(reconstructed_prob,complete_path_map=case_dict['complete_path_map'],smart_order=smart_order)
+KeyError: 'complete_path_map'
+Cut into [ 9 11] clusters
+smart order: (0, 1)
+Searcher took 0.424 seconds
+Quantum took 4.147 seconds
+Compute took 0.000 seconds
+-------------------------------------------------- Reconstructor --------------------------------------------------
+Existing cases: dict_keys([])
+case (11, 16)
+Traceback (most recent call last):
+  File "/Users/weitang/opt/anaconda3/envs/cc-env/lib/python3.7/runpy.py", line 193, in _run_module_as_main
+    "__main__", mod_spec)
+  File "/Users/weitang/opt/anaconda3/envs/cc-env/lib/python3.7/runpy.py", line 85, in _run_code
+    exec(code, run_globals)
+  File "/Users/weitang/Documents/circuit_cutting/scalability/fake_reconstructor.py", line 88, in <module>
+    states=range(1000))
+  File "/Users/weitang/Documents/circuit_cutting/scalability/fake_reconstruct_helper_fun.py", line 26, in fake_reconstruct
+    clusters_init_meas = find_inits_meas(cluster_circs, O_rho_pairs, s)
+NameError: name 'cluster_circs' is not defined
+Cut into [ 9 11] clusters
+smart order: (0, 1)
+s_0 = ('I', 'I', 'I', 'I')

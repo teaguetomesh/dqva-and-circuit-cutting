@@ -1,10 +1,3 @@
-from qiskit.converters import circuit_to_dag, dag_to_circuit
-from qiskit.extensions.standard import HGate, SGate, SdgGate, XGate
-from qiskit.circuit.classicalregister import ClassicalRegister
-from qiskit import QuantumCircuit
-from qiskit import Aer, execute
-from qiskit.compiler import transpile
-from qiskit.providers.aer import noise
 import pickle
 import itertools
 import copy
@@ -14,53 +7,36 @@ import argparse
 from utils.helper_fun import evaluate_circ, get_evaluator_info, get_circ_saturated_shots, distribute_cluster_shots, get_filename, read_file
 from utils.conversions import dict_to_array, reverse_prob
 
-def find_cluster_O_rho_qubits(complete_path_map,cluster_idx):
-    O_qubits = []
-    rho_qubits = []
-    for input_qubit in complete_path_map:
-        path = complete_path_map[input_qubit]
-        if len(path)>1:
-            for q in path[:-1]:
-                if q[0] == cluster_idx:
-                    O_qubits.append(q)
-            for q in path[1:]:
-                if q[0] == cluster_idx:
-                    rho_qubits.append(q)
-    return O_qubits, rho_qubits
-
-def find_all_simulation_combinations(O_qubits, rho_qubits, num_qubits):
+def find_all_simulation_combinations(O_qubits, rho_qubits, d_qubits):
     measurement_basis = ['I','X','Y']
     init_states = ['zero','one','plus','minus','plus_i','minus_i']
-    # print('Rho qubits:',rho_qubits)
-    all_inits = list(itertools.product(init_states,repeat=len(rho_qubits)))
+    all_inits = list(itertools.product(init_states,repeat=rho_qubits))
     complete_inits = []
     for init in all_inits:
-        complete_init = ['zero' for i in range(num_qubits)]
+        complete_init = ['zero' for i in range(d_qubits)]
         for i in range(len(init)):
-            complete_init[rho_qubits[i][1]] = init[i]
+            complete_init[i] = init[i]
         complete_inits.append(complete_init)
     # print('initializations:',complete_inits)
 
     # print('O qubits:',O_qubits)
-    all_meas = list(itertools.product(measurement_basis,repeat=len(O_qubits)))
+    all_meas = list(itertools.product(measurement_basis,repeat=O_qubits))
     complete_meas = []
     for meas in all_meas:
-        complete_m = ['I' for i in range(num_qubits)]
+        complete_m = ['I' for i in range(d_qubits)]
         for i in range(len(meas)):
-            complete_m[O_qubits[i][1]] = meas[i]
+            complete_m[i] = meas[i]
         complete_meas.append(complete_m)
     # print('measurement basis:',complete_meas)
 
     combinations = list(itertools.product(complete_inits,complete_meas))
     return combinations
 
-def evaluate_cluster(complete_path_map, cluster_circ, combinations, backend, evaluator_info):
+def evaluate_cluster(combinations,num_qubits):
     cluster_prob = {}
-    num_qubits = len(cluster_circ.qubits)
     uniform_p = 1/2**num_qubits
     # uniform_prob = np.array([uniform_p for x in range(2**num_qubits)])
     for _, combination in enumerate(combinations):
-        cluster_dag = circuit_to_dag(cluster_circ)
         inits, meas = combination
         cluster_prob[(tuple(inits),tuple(meas))] = 2**num_qubits
     return cluster_prob
@@ -88,17 +64,17 @@ if __name__ == '__main__':
         else:
             print('Running case:',case,flush=True)
             case_dict = copy.deepcopy(evaluator_input[case])
-            complete_path_map = case_dict['complete_path_map']
-            clusters = case_dict['clusters']
+            num_d_qubits = case_dict['num_d_qubits']
+            num_rho_qubits = case_dict['num_rho_qubits']
+            num_O_qubits = case_dict['num_O_qubits']
             case_dict['all_cluster_prob'] = {}
-            for cluster_idx, cluster_circ in enumerate(clusters):
-                O_qubits, rho_qubits = find_cluster_O_rho_qubits(complete_path_map,cluster_idx)
-                combinations = find_all_simulation_combinations(O_qubits, rho_qubits, len(cluster_circ.qubits))
-                print('Case {}, cluster_{:d} {:d}_qubits * {:d}_instances on fake QUANTUM SIMULATOR, '.format(case,cluster_idx,len(cluster_circ.qubits),len(combinations)))
-                cluster_prob = evaluate_cluster(complete_path_map=complete_path_map,
-                        cluster_circ=cluster_circ,
-                        combinations=combinations,
-                        backend='fake',evaluator_info=None)
+            for cluster_idx in range(len(num_d_qubits)):
+                d_qubits = num_d_qubits[cluster_idx]
+                rho_qubits = num_rho_qubits[cluster_idx]
+                O_qubits = num_O_qubits[cluster_idx]
+                combinations = find_all_simulation_combinations(O_qubits, rho_qubits, d_qubits)
+                print('Case {}, cluster_{:d} {:d}_qubits * {:d}_instances on fake QUANTUM SIMULATOR, '.format(case,cluster_idx,d_qubits,len(combinations)))
+                cluster_prob = evaluate_cluster(combinations=combinations,num_qubits=d_qubits)
                 case_dict['all_cluster_prob'][cluster_idx] = cluster_prob
             pickle.dump({case:case_dict}, open(output_filename,'ab'))
             counter += 1
