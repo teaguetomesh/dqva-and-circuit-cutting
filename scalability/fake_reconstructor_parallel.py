@@ -125,7 +125,7 @@ if __name__ == '__main__':
             for i in range(num_workers):
                 state = MPI.Status()
                 rank_reconstructed_prob_len, smart_order, rank_estimated_kron_time = comm.recv(source=MPI.ANY_SOURCE,status=state)
-                total_estimated_kron_time += rank_estimated_kron_time
+                total_estimated_kron_time = max(total_estimated_kron_time,rank_estimated_kron_time)
                 reconstructed_prob += np.ones(2**case[1])
             compute_time = time() - compute_begin + total_estimated_kron_time
             print('Quantum took %.3f seconds'%case_dict['quantum_time'],flush=True)

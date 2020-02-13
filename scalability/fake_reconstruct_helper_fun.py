@@ -89,6 +89,10 @@ def fake_reconstruct(complete_path_map, combinations, full_circ, cluster_circs, 
     # print('Summation term memoized %d/%d, collapsed_term memoized %d/%d, called kron %d times, collapse %d times'%(
     #     summation_term_memoization_counter,
     # total_counter,collapsed_cluster_prob_memoization_counter,total_counter,kron_calls,collapse_calls))
+    if run_kron:
+        assert total_estimated_kron_time == 0
+    else:
+        assert total_estimated_kron_time > 0
     return reconstructed_prob, scaling_factor, smart_order, total_estimated_kron_time
 
 def fake_calculate_cluster(cluster_idx,cluster_probs,init_meas,O_qubit_positions,effective_state_tranlsation):
