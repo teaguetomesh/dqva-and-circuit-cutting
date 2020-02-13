@@ -6,7 +6,7 @@ from scipy import optimize
 def exp_func(x, a, b):
     return a * np.exp(b*x)
 
-num_qubits = range(20,31,2)
+num_qubits = range(20,33,2)
 times = []
 for num_qubit in num_qubits:
     arr_len = int(num_qubit/2)
