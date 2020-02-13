@@ -127,9 +127,9 @@ if __name__ == '__main__':
                 rank_reconstructed_prob_len, smart_order, rank_estimated_kron_time = comm.recv(source=MPI.ANY_SOURCE,status=state)
                 total_estimated_kron_time = max(total_estimated_kron_time,rank_estimated_kron_time)
                 reconstructed_prob += np.ones(2**case[1])
-            compute_time = time() - compute_begin + total_estimated_kron_time
+            compute_time = time() - compute_begin
             print('Quantum took %.3f seconds'%case_dict['quantum_time'],flush=True)
-            print('Compute took %.3f seconds'%compute_time,flush=True)
+            print('Compute took %.3f seconds + %.3f seconds estimated'%(compute_time,total_estimated_kron_time),flush=True)
             
             # reorder_begin = time()
             # for i in range(num_workers):
@@ -153,7 +153,7 @@ if __name__ == '__main__':
             # print('reconstruction len =', len(reconstructed_prob),'probabilities sum = ', sum(reconstructed_prob))
             assert len(reconstructed_prob) == 2**case[1]
 
-            hybrid_time = case_dict['searcher_time'] + case_dict['quantum_time'] + compute_time
+            hybrid_time = case_dict['searcher_time'] + case_dict['quantum_time'] + compute_time + total_estimated_kron_time
             print('QC hybrid took %.3f seconds, classical took %.3f seconds'%(hybrid_time,case_dict['std_time']))
 
             # pickle.dump({case:case_dict}, open('%s'%(dirname+plotter_input_filename),'wb'))
