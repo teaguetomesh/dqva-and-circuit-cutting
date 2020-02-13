@@ -92,7 +92,8 @@ def fake_reconstruct(complete_path_map, combinations, full_circ, cluster_circs, 
     if run_kron:
         assert total_estimated_kron_time == 0
     else:
-        assert total_estimated_kron_time > 0
+        if len(combinations)>0:
+            assert total_estimated_kron_time > 0
     return reconstructed_prob, scaling_factor, smart_order, total_estimated_kron_time
 
 def fake_calculate_cluster(cluster_idx,cluster_probs,init_meas,O_qubit_positions,effective_state_tranlsation):
