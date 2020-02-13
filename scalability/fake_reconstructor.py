@@ -105,7 +105,7 @@ if __name__ == '__main__':
         case_dict['reverse_time'] = reverse_time
 
         # print('reconstruction len = ', len(reconstructed_prob),'probabilities sum = ', sum(reconstructed_prob))
-        assert len(reconstructed_prob) == 2**case[1] and abs(sum(reconstructed_prob)-1)<1e-5
+        assert len(reconstructed_prob) == 2**case[1]
         
         hybrid_time = case_dict['searcher_time'] + case_dict['quantum_time'] + compute_time + reorder_time + reverse_time
         print('QC hybrid took %.3f seconds, classical took %.3f seconds'%(hybrid_time,case_dict['std_time']))
