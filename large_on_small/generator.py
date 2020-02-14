@@ -47,7 +47,7 @@ if __name__ == '__main__':
         std_time = time() - std_begin
         max_clusters = 4
         cluster_max_qubit = math.ceil(fc_size/1.5)
-        cluster_max_qubit = 12
+        cluster_max_qubit = 16
         case = (cluster_max_qubit,fc_size)
         hardness, positions, num_rho_qubits, num_O_qubits, d, num_cluster, m, searcher_time = searcher.find_cuts(circ=circ,reconstructor_runtime_params=[4.275e-9,6.863e-1],reconstructor_weight=0,
         num_clusters=range(4,min(len(circ.qubits),max_clusters)+1),cluster_max_qubit=cluster_max_qubit)
