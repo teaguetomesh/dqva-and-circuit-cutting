@@ -19,7 +19,7 @@ p4 = plt.bar(ind, reorder_time, width,bottom=searcher_time+qc_time+compute_time)
 
 plt.ylabel('Time (s)')
 plt.title('24-qubit Supremacy Circuit Cut into [2,2,11,15] Clusters')
-plt.xticks(ind, ('Classical', 'Single thread', 'Smart Order', 'Parallel'))
+plt.xticks(ind, ('Classical', 'Single Thread', 'Smart Order', 'Parallel'))
 # plt.yticks(np.arange(0, 81, 10))
 plt.legend((p1[0], p2[0], p3[0], p4[0]), ('searcher', 'qc', 'compute', 'reorder'))
 
