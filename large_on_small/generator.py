@@ -45,7 +45,7 @@ if __name__ == '__main__':
         ground_truth = evaluate_circ(circ=circ,backend='statevector_simulator',evaluator_info=None,force_prob=True)
         ground_truth = dict_to_array(distribution_dict=ground_truth,force_prob=True)
         std_time = time() - std_begin
-        num_clusters = 3
+        num_clusters = 4
         for cluster_max_qubit in range(10,17,2):
             case = (cluster_max_qubit,fc_size)
             if fc_size<=cluster_max_qubit or fc_size>24 or (cluster_max_qubit-1)*num_clusters<fc_size:
