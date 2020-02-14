@@ -47,7 +47,7 @@ if __name__ == '__main__':
 
     plt.figure()
     plt.xticks([x for x in unique_fc_sizes])
-    plt.plot(unique_fc_sizes,std_times,marker='x',label='Classical')
+    plt.plot(unique_fc_sizes,std_times,linestyle='dashed',marker='x',label='Classical')
     for hw_size in organized_cases:
         print('plotting curve hw-%d'%hw_size)
         xvals = []
@@ -60,7 +60,7 @@ if __name__ == '__main__':
             print('case {} std_time = {}'.format(case,case_dict['std_time']))
         plt.plot(xvals,yvals,linestyle='dashed',marker='o',label='%d-hw'%hw_size)
     plt.xlabel('Circuit Size')
-    plt.ylabel('Hybrid Time (s)')
+    plt.ylabel('Time (s)')
     plt.title('%d Clusters'%num_clusters)
     plt.legend()
     plt.savefig(dirname+'%d_cluster_hybrid.png'%num_clusters,dpi=400)

@@ -50,6 +50,7 @@ if __name__ == '__main__':
             case = (cluster_max_qubit,fc_size)
             if fc_size<=cluster_max_qubit or fc_size>24 or (cluster_max_qubit-1)*num_clusters<fc_size:
                 print('Case {} impossible, skipped'.format(case))
+                continue
             hardness, positions, num_rho_qubits, num_O_qubits, d, num_cluster, m, searcher_time = searcher.find_cuts(circ=circ,reconstructor_runtime_params=[4.275e-9,6.863e-1],reconstructor_weight=0,
             num_clusters=[num_clusters],cluster_max_qubit=cluster_max_qubit)
 
