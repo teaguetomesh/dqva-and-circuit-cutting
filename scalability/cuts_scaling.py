@@ -42,7 +42,7 @@ def make_plot(fc_sizes,num_cuts,searcher_time):
 num_cuts = []
 fc_sizes = []
 searcher_times = []
-for fc_size in range(10,81,10):
+for fc_size in range(10,201,10):
     circ = generate_circ(full_circ_size=fc_size,circuit_type='supremacy')
     max_clusters = 3
     cluster_max_qubit = int(fc_size/1.5)
