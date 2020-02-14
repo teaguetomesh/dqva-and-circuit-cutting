@@ -11,7 +11,6 @@ from utils.metrics import chi2_distance
 from utils.conversions import reverse_prob
 import copy
 import os.path
-from numba import jit, njit, prange
 from mpi4py import MPI
 
 def find_inits_meas(cluster_circs, O_rho_pairs, s):
@@ -276,9 +275,9 @@ def reconstruct(complete_path_map, combinations, full_circ, cluster_circs, clust
         reconstructed_prob += summation_term
         # print('-'*100)
     # print()
-    # print('Summation term memoized %d/%d, collapsed_term memoized %d/%d, called kron %d times, collapse %d times'%(
-    #    summation_term_memoization_counter,
-    # total_counter,collapsed_cluster_prob_memoization_counter,total_counter,kron_calls,collapse_calls))
+    print('Summation term memoized %d/%d, collapsed_term memoized %d/%d, called kron %d times, collapse %d times'%(
+       summation_term_memoization_counter,
+    total_counter,collapsed_cluster_prob_memoization_counter,total_counter,kron_calls,collapse_calls))
     return reconstructed_prob, scaling_factor, smart_order
 
 def get_combinations(complete_path_map):
