@@ -1013,3 +1013,295 @@ hw metric = 3.914e-28
 cutting metric = 8.549e-28
 Reconstruction output has 12 cases
 ----------------------------------------------------------------------------------------------------
+-------------------------------------------------- Reconstructor --------------------------------------------------
+Existing cases: dict_keys([])
+case (10, 18)
+Cut into  [10, 10, 2] clusters
+Searcher took 0.129 seconds
+Quantum took 0.235 seconds
+Compute took 0.117 seconds
+Reorder took 0.082 seconds
+Reverse took 0.253 seconds
+QC hybrid took 0.563 seconds, classical took 2.648 seconds
+hw metric = 9.860e-30
+cutting metric = 1.269e-29
+Reconstruction output has 1 cases
+----------------------------------------------------------------------------------------------------
+case (12, 18)
+Cut into  [10, 10, 2] clusters
+Searcher took 0.366 seconds
+Quantum took 1.383 seconds
+Compute took 0.090 seconds
+Reorder took 0.081 seconds
+Reverse took 0.255 seconds
+QC hybrid took 1.919 seconds, classical took 2.648 seconds
+hw metric = 9.860e-30
+cutting metric = 1.320e-29
+Reconstruction output has 2 cases
+----------------------------------------------------------------------------------------------------
+case (14, 18)
+Cut into  [10, 2, 10] clusters
+Searcher took 0.287 seconds
+Quantum took 0.830 seconds
+Compute took 0.106 seconds
+Reorder took 0.079 seconds
+Reverse took 0.250 seconds
+QC hybrid took 1.302 seconds, classical took 2.648 seconds
+hw metric = 9.860e-30
+cutting metric = 1.078e-29
+Reconstruction output has 3 cases
+----------------------------------------------------------------------------------------------------
+case (16, 18)
+Cut into  [10, 10, 2] clusters
+Searcher took 0.423 seconds
+Quantum took 1.245 seconds
+Compute took 0.079 seconds
+Reorder took 0.080 seconds
+Reverse took 0.256 seconds
+QC hybrid took 1.826 seconds, classical took 2.648 seconds
+hw metric = 9.860e-30
+cutting metric = 1.214e-29
+Reconstruction output has 4 cases
+----------------------------------------------------------------------------------------------------
+case (10, 20)
+Cut into  [9, 10, 8] clusters
+Searcher took 0.510 seconds
+Quantum took 7.880 seconds
+Compute took 8.222 seconds
+Reorder took 0.580 seconds
+Reverse took 1.031 seconds
+QC hybrid took 17.191 seconds, classical took 10.023 seconds
+hw metric = 3.932e-31
+cutting metric = 2.562e-29
+Reconstruction output has 5 cases
+----------------------------------------------------------------------------------------------------
+case (14, 20)
+Cut into  [11, 13, 2] clusters
+Searcher took 0.677 seconds
+Quantum took 8.139 seconds
+Compute took 3.697 seconds
+Reorder took 0.431 seconds
+Reverse took 1.032 seconds
+QC hybrid took 12.945 seconds, classical took 10.023 seconds
+hw metric = 3.932e-31
+cutting metric = 3.560e-28
+Reconstruction output has 6 cases
+----------------------------------------------------------------------------------------------------
+case (10, 22)
+Cut into  [10, 10, 6] clusters
+Searcher took 0.105 seconds
+Quantum took 1.757 seconds
+Compute took 2.272 seconds
+Reorder took 4.051 seconds
+Reverse took 4.358 seconds
+QC hybrid took 8.185 seconds, classical took 39.068 seconds
+hw metric = 1.577e-30
+cutting metric = 1.778e-29
+Reconstruction output has 7 cases
+----------------------------------------------------------------------------------------------------
+case (12, 22)
+Cut into  [11, 12, 2] clusters
+Searcher took 0.184 seconds
+Quantum took 0.462 seconds
+Compute took 3.174 seconds
+Reorder took 2.747 seconds
+Reverse took 4.411 seconds
+QC hybrid took 6.566 seconds, classical took 39.068 seconds
+hw metric = 1.577e-30
+cutting metric = 1.900e-28
+Reconstruction output has 8 cases
+----------------------------------------------------------------------------------------------------
+case (14, 22)
+Cut into  [14, 2, 9] clusters
+Searcher took 0.255 seconds
+Quantum took 1.521 seconds
+Compute took 1.727 seconds
+Reorder took 3.017 seconds
+Reverse took 4.349 seconds
+QC hybrid took 6.520 seconds, classical took 39.068 seconds
+hw metric = 1.577e-30
+cutting metric = 4.468e-29
+Reconstruction output has 9 cases
+----------------------------------------------------------------------------------------------------
+case (16, 22)
+Cut into  [14, 2, 9] clusters
+Searcher took 0.121 seconds
+Quantum took 1.521 seconds
+Compute took 1.874 seconds
+Reorder took 3.072 seconds
+Reverse took 4.393 seconds
+QC hybrid took 6.588 seconds, classical took 39.068 seconds
+hw metric = 1.577e-30
+cutting metric = 4.604e-29
+Reconstruction output has 10 cases
+----------------------------------------------------------------------------------------------------
+case (12, 24)
+Cut into  [12, 12, 6] clusters
+Searcher took 1.029 seconds
+Quantum took 8.709 seconds
+Compute took 75.782 seconds
+Reorder took 21.290 seconds
+Reverse took 18.302 seconds
+QC hybrid took 106.810 seconds, classical took 154.742 seconds
+hw metric = 3.914e-28
+cutting metric = 6.757e-28
+Reconstruction output has 11 cases
+----------------------------------------------------------------------------------------------------
+case (14, 24)
+Cut into  [13, 13, 4] clusters
+Searcher took 0.627 seconds
+Quantum took 106.170 seconds
+Compute took 26.326 seconds
+Reorder took 21.294 seconds
+Reverse took 18.387 seconds
+QC hybrid took 154.418 seconds, classical took 154.742 seconds
+hw metric = 3.914e-28
+cutting metric = 8.521e-28
+Reconstruction output has 12 cases
+----------------------------------------------------------------------------------------------------
+-------------------------------------------------- Reconstructor --------------------------------------------------
+Existing cases: dict_keys([])
+case (10, 18)
+Cut into  [10, 10, 2] clusters
+Searcher took 0.129 seconds
+Quantum took 0.235 seconds
+Compute took 0.249 seconds
+Reorder took 0.085 seconds
+Reverse took 0.266 seconds
+QC hybrid took 0.697 seconds, classical took 2.648 seconds
+hw metric = 9.860e-30
+cutting metric = 1.222e-29
+Reconstruction output has 1 cases
+----------------------------------------------------------------------------------------------------
+case (12, 18)
+Cut into  [10, 10, 2] clusters
+Searcher took 0.366 seconds
+Quantum took 1.383 seconds
+Compute took 0.111 seconds
+Reorder took 0.077 seconds
+Reverse took 0.262 seconds
+QC hybrid took 1.936 seconds, classical took 2.648 seconds
+hw metric = 9.860e-30
+cutting metric = 1.288e-29
+Reconstruction output has 2 cases
+----------------------------------------------------------------------------------------------------
+case (14, 18)
+Cut into  [10, 2, 10] clusters
+Searcher took 0.287 seconds
+Quantum took 0.830 seconds
+Compute took 0.118 seconds
+Reorder took 0.071 seconds
+Reverse took 0.227 seconds
+QC hybrid took 1.306 seconds, classical took 2.648 seconds
+hw metric = 9.860e-30
+cutting metric = 1.105e-29
+Reconstruction output has 3 cases
+----------------------------------------------------------------------------------------------------
+case (16, 18)
+Cut into  [10, 10, 2] clusters
+Searcher took 0.423 seconds
+Quantum took 1.245 seconds
+Compute took 0.068 seconds
+Reorder took 0.079 seconds
+Reverse took 0.227 seconds
+QC hybrid took 1.815 seconds, classical took 2.648 seconds
+hw metric = 9.860e-30
+cutting metric = 1.275e-29
+Reconstruction output has 4 cases
+----------------------------------------------------------------------------------------------------
+case (10, 20)
+Cut into  [9, 10, 8] clusters
+Searcher took 0.510 seconds
+Quantum took 7.880 seconds
+Compute took 10.989 seconds
+Reorder took 0.419 seconds
+Reverse took 1.008 seconds
+QC hybrid took 19.797 seconds, classical took 10.023 seconds
+hw metric = 3.932e-31
+cutting metric = 2.561e-29
+Reconstruction output has 5 cases
+----------------------------------------------------------------------------------------------------
+case (14, 20)
+Cut into  [11, 13, 2] clusters
+Searcher took 0.677 seconds
+Quantum took 8.139 seconds
+Compute took 5.359 seconds
+Reorder took 0.337 seconds
+Reverse took 0.933 seconds
+QC hybrid took 14.512 seconds, classical took 10.023 seconds
+hw metric = 3.932e-31
+cutting metric = 3.568e-28
+Reconstruction output has 6 cases
+----------------------------------------------------------------------------------------------------
+case (10, 22)
+Cut into  [10, 10, 6] clusters
+Searcher took 0.105 seconds
+Quantum took 1.757 seconds
+Compute took 1.517 seconds
+Reorder took 2.344 seconds
+Reverse took 4.109 seconds
+QC hybrid took 5.723 seconds, classical took 39.068 seconds
+hw metric = 1.577e-30
+cutting metric = 1.627e-29
+Reconstruction output has 7 cases
+----------------------------------------------------------------------------------------------------
+case (12, 22)
+Cut into  [11, 12, 2] clusters
+Searcher took 0.184 seconds
+Quantum took 0.462 seconds
+Compute took 3.953 seconds
+Reorder took 1.791 seconds
+Reverse took 3.893 seconds
+QC hybrid took 6.390 seconds, classical took 39.068 seconds
+hw metric = 1.577e-30
+cutting metric = 1.882e-28
+Reconstruction output has 8 cases
+----------------------------------------------------------------------------------------------------
+case (14, 22)
+Cut into  [14, 2, 9] clusters
+Searcher took 0.255 seconds
+Quantum took 1.521 seconds
+Compute took 1.160 seconds
+Reorder took 2.061 seconds
+Reverse took 4.090 seconds
+QC hybrid took 4.997 seconds, classical took 39.068 seconds
+hw metric = 1.577e-30
+cutting metric = 4.702e-29
+Reconstruction output has 9 cases
+----------------------------------------------------------------------------------------------------
+case (16, 22)
+Cut into  [14, 2, 9] clusters
+Searcher took 0.121 seconds
+Quantum took 1.521 seconds
+Compute took 1.207 seconds
+Reorder took 1.870 seconds
+Reverse took 4.045 seconds
+QC hybrid took 4.719 seconds, classical took 39.068 seconds
+hw metric = 1.577e-30
+cutting metric = 4.429e-29
+Reconstruction output has 10 cases
+----------------------------------------------------------------------------------------------------
+case (12, 24)
+Cut into  [12, 12, 6] clusters
+Searcher took 1.029 seconds
+Quantum took 8.709 seconds
+Compute took 106.024 seconds
+Reorder took 12.099 seconds
+Reverse took 17.270 seconds
+QC hybrid took 127.862 seconds, classical took 154.742 seconds
+hw metric = 3.914e-28
+cutting metric = 6.674e-28
+Reconstruction output has 11 cases
+----------------------------------------------------------------------------------------------------
+case (14, 24)
+Cut into  [13, 13, 4] clusters
+Searcher took 0.627 seconds
+Quantum took 106.170 seconds
+Compute took 26.429 seconds
+Reorder took 11.720 seconds
+Reverse took 16.295 seconds
+QC hybrid took 144.946 seconds, classical took 154.742 seconds
+hw metric = 3.914e-28
+cutting metric = 8.612e-28
+Reconstruction output has 12 cases
+----------------------------------------------------------------------------------------------------
