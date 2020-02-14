@@ -359,6 +359,8 @@ if __name__ == '__main__':
                 rank_reconstructed_prob, smart_order = comm.recv(source=MPI.ANY_SOURCE,status=state)
                 reconstructed_prob += rank_reconstructed_prob
             compute_time = time() - compute_begin
+            print('Searcher took %.3f seconds'%case_dict['searcher_time'],flush=True)
+            print('Quantum took %.3f seconds'%case_dict['quantum_time'])
             print('Compute took %.3f seconds'%compute_time)
             
             reorder_begin = time()

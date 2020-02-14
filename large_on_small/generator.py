@@ -21,11 +21,11 @@ def quantum_resource_estimate(num_d_qubits,num_rho_qubits,num_O_qubits):
         circuit_depth = 10
         shots = 2**d
         qc_time += num_inst*circuit_depth*500*1e-9*shots
-        qc_mem += 2**d*4/1024/1024/1024/1024
+        qc_mem += 2**d*4/(1024**3)
     return qc_time, qc_mem
 
 def classical_resource_estimate(num_qubits):
-    return 9*1e-6*np.exp(0.7*num_qubits), 2**num_qubits*4/(1024**4)
+    return 9*1e-6*np.exp(0.7*num_qubits), 2**num_qubits*4/(1024**3)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='generate evaluator inputs')
@@ -45,8 +45,9 @@ if __name__ == '__main__':
         ground_truth = evaluate_circ(circ=circ,backend='statevector_simulator',evaluator_info=None,force_prob=True)
         ground_truth = dict_to_array(distribution_dict=ground_truth,force_prob=True)
         std_time = time() - std_begin
-        max_clusters = 5
+        max_clusters = 4
         cluster_max_qubit = math.ceil(fc_size/1.5)
+        cluster_max_qubit = 12
         case = (cluster_max_qubit,fc_size)
         hardness, positions, num_rho_qubits, num_O_qubits, d, num_cluster, m, searcher_time = searcher.find_cuts(circ=circ,reconstructor_runtime_params=[4.275e-9,6.863e-1],reconstructor_weight=0,
         num_clusters=range(4,min(len(circ.qubits),max_clusters)+1),cluster_max_qubit=cluster_max_qubit)
@@ -61,8 +62,8 @@ if __name__ == '__main__':
             qc_time, qc_mem = quantum_resource_estimate(d,num_rho_qubits,num_O_qubits)
             _, std_mem = classical_resource_estimate(fc_size)
 
-            print('qc_time = %.3f seconds, qc_mem = %f TB'%(qc_time,qc_mem))
-            print('std_time = %.3f seconds, std_mem = %f TB'%(std_time,std_mem))
+            print('qc_time = %.3f seconds, qc_mem = %f GB'%(qc_time,qc_mem))
+            print('std_time = %.3f seconds, std_mem = %f GB'%(std_time,std_mem))
 
             circ_dict[case] = {'full_circ':circ,'clusters':clusters,'complete_path_map':complete_path_map,
             'sv':ground_truth,'hw':ground_truth,'searcher_time':searcher_time,'std_time':std_time,'quantum_time':qc_time,'quantum_mem':qc_mem}

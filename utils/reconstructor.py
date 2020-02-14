@@ -365,6 +365,8 @@ if __name__ == '__main__':
         full_circ=uniter_input[case]['full_circ'], cluster_circs=uniter_input[case]['clusters'],
         cluster_sim_probs=uniter_input[case]['all_cluster_prob'])
         compute_time = time() - compute_begin
+        print('Searcher took %.3f seconds'%case_dict['searcher_time'])
+        print('Quantum took %.3f seconds'%case_dict['quantum_time'])
         print('Compute took %.3f seconds'%compute_time)
         
         reorder_begin = time()

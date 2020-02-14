@@ -1,0 +1,24 @@
+import matplotlib.pyplot as plt
+import numpy as np
+
+searcher_time = np.array([0,0.464,0.464,0.464])
+qc_time = np.array([0,0.096,0.096,0.096])
+
+compute_time = np.array([9.062,11.757,2.637,0.586])
+reorder_time = np.array([0,5.772,5.046,1.039])
+
+reverse_time = np.array([0,0.899,0.832,1.064])
+
+ind = np.arange(len(compute_time))    # the x locations for the groups
+width = 0.35       # the width of the bars: can also be len(x) sequence
+
+p1 = plt.bar(ind, compute_time, width)
+p2 = plt.bar(ind, reorder_time, width,bottom=compute_time)
+
+plt.ylabel('Time (s)')
+plt.title('Demonstration')
+plt.xticks(ind, ('Classical', 'Single thread', 'Smart order', 'Parallel'))
+# plt.yticks(np.arange(0, 81, 10))
+plt.legend((p1[0], p2[0]), ('compute', 'reorder'))
+
+plt.savefig('./large_on_small/techniques_demonstration.png',dpi=400)
