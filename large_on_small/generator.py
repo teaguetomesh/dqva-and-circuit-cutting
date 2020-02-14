@@ -55,7 +55,7 @@ if __name__ == '__main__':
 
             if m != None:
                 # m.print_stat()
-                print('case {}'.format(case))
+                print('Case {}'.format(case))
                 print('MIP searcher clusters:',d)
                 clusters, complete_path_map, K, d = cutter.cut_circuit(circ, positions)
                 print('{:d} cuts --> {}, searcher time = {}'.format(K,d,searcher_time))
@@ -70,4 +70,7 @@ if __name__ == '__main__':
                     case_dict = {'full_circ':circ,'clusters':clusters,'complete_path_map':complete_path_map,
                     'sv':ground_truth,'hw':ground_truth,'searcher_time':searcher_time,'std_time':std_time,'quantum_time':qc_time,'quantum_mem':qc_mem}
                     pickle.dump({case:case_dict}, open(dirname+evaluator_input_filename,'ab'))
-                print('-'*50)
+                    print()
+            else:
+                print('Case {} not feasible'.format(case))
+            print('-'*50)
