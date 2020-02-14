@@ -66,4 +66,4 @@ if __name__ == '__main__':
             print('qc_time = %.3f seconds, qc_mem = %f TB'%(qc_time,qc_mem))
             print('std_time = %.3f seconds, std_mem = %f TB'%(std_time,std_mem))
             print('-'*50)
-    pickle.dump(circ_dict, open(dirname+evaluator_input_filename,'wb'))
+    # pickle.dump(circ_dict, open(dirname+evaluator_input_filename,'wb'))
