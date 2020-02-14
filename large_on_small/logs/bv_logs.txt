@@ -1,0 +1,81 @@
+Using license file /Users/weitang/gurobi.lic
+Academic license - for non-commercial use only
+Case (10, 20)
+MIP searcher clusters: [6.0, 10.0, 5.0, 2.0]
+3 cuts --> [6, 10, 5, 2], searcher time = 0.47034311294555664
+Cluster 0: 6-qubit, 0 ρ-qubit + 1 O-qubit = 3 instances
+Cluster 1: 10-qubit, 1 ρ-qubit + 1 O-qubit = 18 instances
+Cluster 2: 5-qubit, 1 ρ-qubit + 1 O-qubit = 18 instances
+Cluster 3: 2-qubit, 1 ρ-qubit + 0 O-qubit = 6 instances
+qc_time = 0.096 seconds, qc_mem = 0.000004 GB
+std_time = 9.454 seconds, std_mem = 0.003906 GB
+
+--------------------------------------------------
+-------------------------------------------------- Evaluator --------------------------------------------------
+Existing cases: dict_keys([])
+Running case: (10, 20)
+Rank 0 runs case (10, 20), cluster_0 6_qubits * 1_instances on CLASSICAL, classical time = 3.958e-02
+Rank 1 runs case (10, 20), cluster_0 6_qubits * 1_instances on CLASSICAL, classical time = 4.056e-02
+Rank 2 runs case (10, 20), cluster_0 6_qubits * 1_instances on CLASSICAL, classical time = 4.176e-02
+Rank 0 runs case (10, 20), cluster_1 10_qubits * 1_instances on CLASSICAL, classical time = 6.586e-02
+Rank 3 runs case (10, 20), cluster_1 10_qubits * 1_instances on CLASSICAL, classical time = 7.353e-02
+Rank 1 runs case (10, 20), cluster_1 10_qubits * 1_instances on CLASSICAL, classical time = 6.852e-02
+Rank 4 runs case (10, 20), cluster_1 10_qubits * 1_instances on CLASSICAL, classical time = 7.533e-02
+Rank 0 runs case (10, 20), cluster_2 5_qubits * 1_instances on CLASSICAL, classical time = 2.416e-02
+Rank 3 runs case (10, 20), cluster_2 5_qubits * 1_instances on CLASSICAL, classical time = 2.496e-02
+Rank 5 runs case (10, 20), cluster_1 10_qubits * 1_instances on CLASSICAL, classical time = 7.616e-02
+Rank 2 runs case (10, 20), cluster_1 10_qubits * 1_instances on CLASSICAL, classical time = 6.999e-02
+Rank 0 runs case (10, 20), cluster_3 2_qubits * 1_instances on CLASSICAL, classical time = 1.242e-02
+Rank 6 runs case (10, 20), cluster_1 10_qubits * 1_instances on CLASSICAL, classical time = 7.397e-02
+Rank 1 runs case (10, 20), cluster_2 5_qubits * 1_instances on CLASSICAL, classical time = 2.603e-02
+Rank 3 runs case (10, 20), cluster_3 2_qubits * 1_instances on CLASSICAL, classical time = 1.513e-02
+Rank 4 runs case (10, 20), cluster_2 5_qubits * 1_instances on CLASSICAL, classical time = 2.656e-02
+Rank 7 runs case (10, 20), cluster_1 10_qubits * 1_instances on CLASSICAL, classical time = 7.637e-02
+Rank 1 runs case (10, 20), cluster_3 2_qubits * 1_instances on CLASSICAL, classical time = 1.407e-02
+Rank 5 runs case (10, 20), cluster_2 5_qubits * 1_instances on CLASSICAL, classical time = 2.839e-02
+Rank 2 runs case (10, 20), cluster_2 5_qubits * 1_instances on CLASSICAL, classical time = 2.784e-02
+Rank 4 runs case (10, 20), cluster_3 2_qubits * 1_instances on CLASSICAL, classical time = 1.481e-02
+Rank 6 runs case (10, 20), cluster_2 5_qubits * 1_instances on CLASSICAL, classical time = 2.661e-02
+Rank 8 runs case (10, 20), cluster_1 10_qubits * 1_instances on CLASSICAL, classical time = 8.082e-02
+Rank 2 runs case (10, 20), cluster_3 2_qubits * 1_instances on CLASSICAL, classical time = 1.470e-02
+Rank 5 runs case (10, 20), cluster_3 2_qubits * 1_instances on CLASSICAL, classical time = 1.564e-02
+Rank 7 runs case (10, 20), cluster_2 5_qubits * 1_instances on CLASSICAL, classical time = 2.714e-02
+Rank 9 runs case (10, 20), cluster_1 10_qubits * 1_instances on CLASSICAL, classical time = 7.641e-02
+Rank 8 runs case (10, 20), cluster_2 5_qubits * 1_instances on CLASSICAL, classical time = 2.863e-02
+Rank 10 runs case (10, 20), cluster_1 10_qubits * 1_instances on CLASSICAL, classical time = 8.316e-02
+Rank 9 runs case (10, 20), cluster_2 5_qubits * 1_instances on CLASSICAL, classical time = 2.587e-02
+Rank 11 runs case (10, 20), cluster_1 10_qubits * 1_instances on CLASSICAL, classical time = 7.970e-02
+Rank 10 runs case (10, 20), cluster_2 5_qubits * 1_instances on CLASSICAL, classical time = 2.903e-02
+Rank 12 runs case (10, 20), cluster_1 10_qubits * 1_instances on CLASSICAL, classical time = 8.139e-02
+Rank 11 runs case (10, 20), cluster_2 5_qubits * 1_instances on CLASSICAL, classical time = 2.920e-02
+Rank 13 runs case (10, 20), cluster_1 10_qubits * 1_instances on CLASSICAL, classical time = 7.689e-02
+Rank 12 runs case (10, 20), cluster_2 5_qubits * 1_instances on CLASSICAL, classical time = 2.421e-02
+Rank 14 runs case (10, 20), cluster_1 10_qubits * 1_instances on CLASSICAL, classical time = 8.056e-02
+Rank 15 runs case (10, 20), cluster_1 10_qubits * 1_instances on CLASSICAL, classical time = 7.554e-02
+Rank 13 runs case (10, 20), cluster_2 5_qubits * 1_instances on CLASSICAL, classical time = 2.586e-02
+Rank 16 runs case (10, 20), cluster_1 10_qubits * 1_instances on CLASSICAL, classical time = 7.643e-02
+Rank 14 runs case (10, 20), cluster_2 5_qubits * 1_instances on CLASSICAL, classical time = 2.793e-02
+Rank 15 runs case (10, 20), cluster_2 5_qubits * 1_instances on CLASSICAL, classical time = 2.553e-02
+Rank 17 runs case (10, 20), cluster_1 10_qubits * 1_instances on CLASSICAL, classical time = 7.683e-02
+Rank 16 runs case (10, 20), cluster_2 5_qubits * 1_instances on CLASSICAL, classical time = 2.329e-02
+Rank 17 runs case (10, 20), cluster_2 5_qubits * 1_instances on CLASSICAL, classical time = 2.757e-02
+Rank MASTER dumped case (10, 20), 1/1 cases
+----------------------------------------------------------------------------------------------------
+-------------------------------------------------- Reconstructor --------------------------------------------------
+Existing cases: dict_keys([])
+case (10, 20)
+Cut into  [6, 10, 5, 2] clusters
+Searcher took 0.470 seconds
+Quantum took 0.096 seconds
+Compute took 0.940 seconds
+Reorder took 1.735 seconds
+Reverse took 0.895 seconds
+QC hybrid took 3.242 seconds, classical took 9.454 seconds
+hw metric = 0.000e+00
+cutting metric = 8.327e-17
+Reconstruction output has 1 cases
+Summation term memoized 12/64, collapsed_term memoized 27/64, called kron 36 times, collapse 25 times
+Summation term memoized 12/64, collapsed_term memoized 27/64, called kron 36 times, collapse 25 times
+Summation term memoized 12/64, collapsed_term memoized 27/64, called kron 36 times, collapse 25 times
+Summation term memoized 12/64, collapsed_term memoized 27/64, called kron 36 times, collapse 25 times
+----------------------------------------------------------------------------------------------------

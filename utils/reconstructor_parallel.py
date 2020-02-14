@@ -393,7 +393,7 @@ if __name__ == '__main__':
                 print('hw metric = %.3e'%chi2_distance(target=case_dict['sv'],obs=case_dict['hw']))
                 print('cutting metric = %.3e'%(chi2_distance(target=case_dict['sv'],obs=case_dict['cutting'])))
 
-            pickle.dump({case:case_dict}, open('%s'%(dirname+plotter_input_filename),'ab'))
+            # pickle.dump({case:case_dict}, open('%s'%(dirname+plotter_input_filename),'ab'))
             counter += 1
             print('Reconstruction output has %d cases'%counter,flush=True)
             print('-'*100)
