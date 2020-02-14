@@ -97,3 +97,15 @@ Reconstruction output has 1 cases
 -------------------------------------------------- Reconstructor --------------------------------------------------
 Existing cases: dict_keys([])
 case (16, 24)
+Cut into  [11, 2, 15, 2] clusters
+Summation term memoized 3840/16384, collapsed_term memoized 12000/16384, called kron 8448 times, collapse 544 times
+Searcher took 1.683 seconds
+Quantum took 3.160 seconds
+Compute took 538.582 seconds
+Reorder took 91.241 seconds
+Reverse took 15.540 seconds
+QC hybrid took 634.665 seconds, classical took 156.533 seconds
+hw metric = 4.348e-29
+cutting metric = 2.503e-27
+Reconstruction output has 1 cases
+----------------------------------------------------------------------------------------------------
