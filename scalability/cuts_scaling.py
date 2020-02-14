@@ -22,7 +22,7 @@ def make_plot(fc_sizes,num_cuts,searcher_time):
     plt.yticks(ticks=num_cuts,labels=num_cuts)
     
     ax1.plot(fc_sizes,num_cuts,marker='x',color='b')
-    ax1.set_ylabel('Number of cuts')
+    ax1.set_ylabel('Number of cuts',color='b')
     ax1.set_xlabel('full circuit size')
     ax1.tick_params(axis='y', labelcolor='b')
 
@@ -31,10 +31,10 @@ def make_plot(fc_sizes,num_cuts,searcher_time):
     ax2.set_ylabel('MIP Solver Time (s)',color='r')
     ax2.tick_params(axis='y', labelcolor='r')
     # ax2.set_yscale('log')
-    ax2.legend()
+    # ax2.legend()
     
     plt.title('')
-    plt.legend()
+    # plt.legend()
     plt.tight_layout()
     plt.savefig('./scalability/cuts_scaling.png',dpi=400)
     plt.close()
@@ -42,7 +42,7 @@ def make_plot(fc_sizes,num_cuts,searcher_time):
 num_cuts = []
 fc_sizes = []
 searcher_times = []
-for fc_size in range(10,201,10):
+for fc_size in range(10,31,5):
     circ = generate_circ(full_circ_size=fc_size,circuit_type='supremacy')
     max_clusters = 3
     cluster_max_qubit = int(fc_size/1.5)
