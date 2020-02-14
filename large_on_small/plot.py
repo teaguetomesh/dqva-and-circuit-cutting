@@ -58,7 +58,7 @@ if __name__ == '__main__':
             yvals.append(case_dict['hybrid_time'])
             num_clusters = len(case_dict['clusters'])
             print('case {} std_time = {}'.format(case,case_dict['std_time']))
-        plt.plot(xvals,yvals,marker='o',label='%d-hw'%hw_size)
+        plt.plot(xvals,yvals,linestyle='dashed',marker='o',label='%d-hw'%hw_size)
     plt.xlabel('Circuit Size')
     plt.ylabel('Hybrid Time (s)')
     plt.title('%d Clusters'%num_clusters)
