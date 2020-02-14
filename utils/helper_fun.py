@@ -13,7 +13,7 @@ import pickle
 import copy
 from time import time
 import os
-from qcg.generators import gen_supremacy, gen_hwea, gen_BV, gen_qft, gen_sycamore
+from qcg.generators import gen_supremacy, gen_hwea, gen_BV, gen_qft, gen_sycamore, gen_adder
 from utils.conversions import list_to_dict, dict_to_array
 from utils.metrics import chi2_distance
 from scipy.stats import wasserstein_distance
@@ -38,6 +38,8 @@ def generate_circ(full_circ_size,circuit_type):
         full_circ = gen_qft(width=i*j, barriers=False)
     elif circuit_type == 'sycamore':
         full_circ = gen_sycamore(i,j,8)
+    elif circuit_type == 'adder':
+        full_circ = gen_adder(nbits=int((full_circ_size-2)/2),barriers=False)
     else:
         raise Exception('Illegal circuit type:',circuit_type)
     return full_circ

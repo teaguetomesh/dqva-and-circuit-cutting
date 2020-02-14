@@ -15,7 +15,7 @@ def get_xticks(xvals,compulsory):
                 x_ticks.append(x)
         return x_ticks
 
-def make_plot(fc_sizes,num_cuts,searcher_time):
+def _make_plot(fc_sizes,num_cuts,searcher_time):
     fig, ax1 = plt.subplots()
     x_ticks = get_xticks(xvals=fc_sizes,compulsory=fc_sizes)
     plt.xticks(ticks=x_ticks,labels=x_ticks)
@@ -36,31 +36,67 @@ def make_plot(fc_sizes,num_cuts,searcher_time):
     plt.title('')
     # plt.legend()
     plt.tight_layout()
+    plt.savefig('./scalability/bv_cuts_scaling.png',dpi=400)
+    plt.close()
+
+def make_plot(fc_sizes,num_cuts,searcher_time):
+    plt.figure()
+    all_fc_sizes = []
+    all_num_cuts = []
+    for circuit_type in fc_sizes:
+        for x in fc_sizes[circuit_type]:
+            if x not in all_fc_sizes:
+                all_fc_sizes.append(x)
+        for x in num_cuts[circuit_type]:
+            if x not in all_num_cuts:
+                all_num_cuts.append(x)
+    print('all_fc_sizes :',all_fc_sizes)
+    print('all_num_cuts :',all_num_cuts)
+
+    x_ticks = get_xticks(xvals=all_fc_sizes,compulsory=all_fc_sizes)
+    plt.xticks(ticks=x_ticks,labels=x_ticks)
+    plt.yticks(ticks=all_num_cuts,labels=all_num_cuts)
+    
+    for circuit_type in fc_sizes:
+        print('plotting',fc_sizes[circuit_type],num_cuts[circuit_type])
+        plt.plot(fc_sizes[circuit_type],num_cuts[circuit_type],marker='x',linestyle='dashed',label='%s'%circuit_type)
+    
+    plt.ylabel('Number of cuts')
+    plt.xlabel('Full Circuit Size')
+    
+    plt.title('')
+    plt.legend()
+    plt.tight_layout()
     plt.savefig('./scalability/cuts_scaling.png',dpi=400)
     plt.close()
 
-num_cuts = []
-fc_sizes = []
-searcher_times = []
-for fc_size in range(10,81,10):
-    circ = generate_circ(full_circ_size=fc_size,circuit_type='supremacy')
-    max_clusters = 3
-    cluster_max_qubit = int(fc_size/1.5)
-    min_objective, best_positions, num_rho_qubits, num_O_qubits, num_d_qubits, best_num_cluster, m, searcher_time = searcher.find_cuts(circ=circ,
-    reconstructor_runtime_params=[4.275e-9,6.863e-1],reconstructor_weight=0,
-    num_clusters=range(2,min(len(circ.qubits),max_clusters)+1),cluster_max_qubit=cluster_max_qubit)
+num_cuts = {}
+fc_sizes = {}
+searcher_times = {}
+for circuit_type in ['bv','hwea','supremacy','adder']:
+    num_cuts[circuit_type] = []
+    fc_sizes[circuit_type] = []
+    searcher_times[circuit_type] = []
+    for fc_size in range(10,81,10):
+        circ = generate_circ(full_circ_size=fc_size,circuit_type=circuit_type)
+        max_clusters = 3
+        cluster_max_qubit = int(fc_size/1.5)
+        min_objective, best_positions, num_rho_qubits, num_O_qubits, num_d_qubits, best_num_cluster, m, searcher_time = searcher.find_cuts(circ=circ,
+        reconstructor_runtime_params=[4.275e-9,6.863e-1],reconstructor_weight=0,
+        num_clusters=range(2,min(len(circ.qubits),max_clusters)+1),cluster_max_qubit=cluster_max_qubit)
 
-    if m != None:
-        # m.print_stat()
-        fc_sizes.append(fc_size)
-        num_cuts.append(len(best_positions))
-        searcher_times.append(searcher_time)
-        print('%d-on-%d'%(fc_size,cluster_max_qubit))
-        print('{:d} cuts --> {}, searcher time = {}'.format(len(best_positions),num_d_qubits,searcher_time))
-    else:
-        print('NOT feasible')
+        if m != None:
+            # m.print_stat()
+            fc_sizes[circuit_type].append(fc_size)
+            num_cuts[circuit_type].append(len(best_positions))
+            searcher_times[circuit_type].append(searcher_time)
+            print('%s %d-on-%d'%(circuit_type,fc_size,cluster_max_qubit))
+            print('{:d} cuts --> {}, searcher time = {}'.format(len(best_positions),num_d_qubits,searcher_time))
+        else:
+            print('NOT feasible')
 
-print(fc_sizes)
-print(num_cuts)
-print(searcher_times)
+    print(fc_sizes[circuit_type])
+    print(num_cuts[circuit_type])
+    print(searcher_times[circuit_type])
+    print('-'*50)
 make_plot(fc_sizes,num_cuts,searcher_times)
