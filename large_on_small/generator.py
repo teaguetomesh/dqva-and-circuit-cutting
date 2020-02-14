@@ -45,27 +45,29 @@ if __name__ == '__main__':
         ground_truth = evaluate_circ(circ=circ,backend='statevector_simulator',evaluator_info=None,force_prob=True)
         ground_truth = dict_to_array(distribution_dict=ground_truth,force_prob=True)
         std_time = time() - std_begin
-        max_clusters = 4
-        cluster_max_qubit = math.ceil(fc_size/1.5)
-        cluster_max_qubit = 16
-        case = (cluster_max_qubit,fc_size)
-        hardness, positions, num_rho_qubits, num_O_qubits, d, num_cluster, m, searcher_time = searcher.find_cuts(circ=circ,reconstructor_runtime_params=[4.275e-9,6.863e-1],reconstructor_weight=0,
-        num_clusters=range(4,min(len(circ.qubits),max_clusters)+1),cluster_max_qubit=cluster_max_qubit)
+        num_clusters = 3
+        for cluster_max_qubit in range(10,17,2):
+            case = (cluster_max_qubit,fc_size)
+            if fc_size<=cluster_max_qubit or fc_size>24 or (cluster_max_qubit-1)*num_clusters<fc_size:
+                print('Case {} impossible, skipped'.format(case))
+            hardness, positions, num_rho_qubits, num_O_qubits, d, num_cluster, m, searcher_time = searcher.find_cuts(circ=circ,reconstructor_runtime_params=[4.275e-9,6.863e-1],reconstructor_weight=0,
+            num_clusters=[num_clusters],cluster_max_qubit=cluster_max_qubit)
 
-        if m != None:
-            # m.print_stat()
-            print('case {}'.format(case))
-            print('MIP searcher clusters:',d)
-            clusters, complete_path_map, K, d = cutter.cut_circuit(circ, positions)
-            print('{:d} cuts --> {}, searcher time = {}'.format(K,d,searcher_time))
-            
-            qc_time, qc_mem = quantum_resource_estimate(d,num_rho_qubits,num_O_qubits)
-            _, std_mem = classical_resource_estimate(fc_size)
+            if m != None:
+                # m.print_stat()
+                print('case {}'.format(case))
+                print('MIP searcher clusters:',d)
+                clusters, complete_path_map, K, d = cutter.cut_circuit(circ, positions)
+                print('{:d} cuts --> {}, searcher time = {}'.format(K,d,searcher_time))
+                
+                qc_time, qc_mem = quantum_resource_estimate(d,num_rho_qubits,num_O_qubits)
+                _, std_mem = classical_resource_estimate(fc_size)
 
-            print('qc_time = %.3f seconds, qc_mem = %f GB'%(qc_time,qc_mem))
-            print('std_time = %.3f seconds, std_mem = %f GB'%(std_time,std_mem))
+                print('qc_time = %.3f seconds, qc_mem = %f GB'%(qc_time,qc_mem))
+                print('std_time = %.3f seconds, std_mem = %f GB'%(std_time,std_mem))
 
-            circ_dict[case] = {'full_circ':circ,'clusters':clusters,'complete_path_map':complete_path_map,
-            'sv':ground_truth,'hw':ground_truth,'searcher_time':searcher_time,'std_time':std_time,'quantum_time':qc_time,'quantum_mem':qc_mem}
-            print('-'*50)
-    pickle.dump(circ_dict, open(dirname+evaluator_input_filename,'wb'))
+                if std_time>qc_time:
+                    case_dict = {'full_circ':circ,'clusters':clusters,'complete_path_map':complete_path_map,
+                    'sv':ground_truth,'hw':ground_truth,'searcher_time':searcher_time,'std_time':std_time,'quantum_time':qc_time,'quantum_mem':qc_mem}
+                    pickle.dump({case:case_dict}, open(dirname+evaluator_input_filename,'ab'))
+                print('-'*50)

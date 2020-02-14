@@ -164,28 +164,25 @@ if __name__ == '__main__':
         print('Existing cases:',evaluator_output.keys())
         counter = len(evaluator_output.keys())
         for case in evaluator_input:
-            if case in evaluator_output:
-                continue
-            else:
-                print('Running case:',case,flush=True)
-                case_dict = copy.deepcopy(evaluator_input[case])
-                case_dict['classical_time'] = 0
-                for i in range(num_workers):
-                    comm.send({case:case_dict}, dest=i)
-                case_dict['all_cluster_prob'] = {}
-                for i in range(num_workers):
-                    state = MPI.Status()
-                    rank_results, rank_classical_time, rank_quantum_time = comm.recv(source=MPI.ANY_SOURCE,status=state)
-                    case_dict['classical_time'] = max(case_dict['classical_time'],rank_classical_time)
-                    for cluster_idx in rank_results:
-                        if cluster_idx in case_dict['all_cluster_prob']:
-                            case_dict['all_cluster_prob'][cluster_idx].update(rank_results[cluster_idx])
-                        else:
-                            case_dict['all_cluster_prob'][cluster_idx] = rank_results[cluster_idx]
-                pickle.dump({case:case_dict}, open(output_filename,'ab'))
-                counter += 1
-                print('Rank MASTER dumped case {}, {:d}/{:d} cases'.format(case,counter,len(evaluator_input)))
-                print('-'*100)
+            print('Running case:',case,flush=True)
+            case_dict = copy.deepcopy(evaluator_input[case])
+            case_dict['classical_time'] = 0
+            for i in range(num_workers):
+                comm.send({case:case_dict}, dest=i)
+            case_dict['all_cluster_prob'] = {}
+            for i in range(num_workers):
+                state = MPI.Status()
+                rank_results, rank_classical_time, rank_quantum_time = comm.recv(source=MPI.ANY_SOURCE,status=state)
+                case_dict['classical_time'] = max(case_dict['classical_time'],rank_classical_time)
+                for cluster_idx in rank_results:
+                    if cluster_idx in case_dict['all_cluster_prob']:
+                        case_dict['all_cluster_prob'][cluster_idx].update(rank_results[cluster_idx])
+                    else:
+                        case_dict['all_cluster_prob'][cluster_idx] = rank_results[cluster_idx]
+            pickle.dump({case:case_dict}, open(output_filename,'ab'))
+            counter += 1
+            print('Rank MASTER dumped case {}, {:d}/{:d} cases'.format(case,counter,len(evaluator_input)))
+            print('-'*100)
         for i in range(num_workers):
             comm.send('DONE', dest=i)
     else:

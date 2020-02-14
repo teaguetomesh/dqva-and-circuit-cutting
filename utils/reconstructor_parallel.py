@@ -385,7 +385,7 @@ if __name__ == '__main__':
             assert len(reconstructed_prob) == 2**case[1] and abs(sum(reconstructed_prob)-1)<1e-5
 
             hybrid_time = case_dict['searcher_time'] + case_dict['quantum_time'] + compute_time + reorder_time
-            case_dict['reconstructor_time'] = hybrid_time
+            case_dict['hybrid_time'] = hybrid_time
             case_dict['cutting'] = reconstructed_prob
             print('QC hybrid took %.3f seconds, classical took %.3f seconds'%(hybrid_time,case_dict['std_time']))
             if args.evaluation_method != 'fake':
@@ -394,7 +394,7 @@ if __name__ == '__main__':
                 print('hw metric = %.3e'%chi2_distance(target=case_dict['sv'],obs=case_dict['hw']))
                 print('cutting metric = %.3e'%(chi2_distance(target=case_dict['sv'],obs=case_dict['cutting'])))
 
-            # pickle.dump({case:case_dict}, open('%s'%(dirname+plotter_input_filename),'wb'))
+            pickle.dump({case:case_dict}, open('%s'%(dirname+plotter_input_filename),'ab'))
             counter += 1
             print('Reconstruction output has %d cases'%counter,flush=True)
             print('-'*100)

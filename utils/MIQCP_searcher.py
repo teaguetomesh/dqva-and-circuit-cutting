@@ -322,11 +322,13 @@ def circ_stripping(circ):
 
 def find_cuts(circ, reconstructor_runtime_params, reconstructor_weight, num_clusters = range(1,5), cluster_max_qubit=20):
     min_objective = float('inf')
-    best_positions = None
-    best_ancilla = None
-    best_d = None
     best_num_cluster = None
+    best_positions = None
+    num_rho_qubits = None
+    num_O_qubits = None
+    num_d_qubits = None
     best_model = None
+    searcher_time = None
     stripped_circ = circ_stripping(circ)
     n_vertices, edges, vertex_ids, id_vertices = read_circ(stripped_circ)
     num_qubits = len(circ.qubits)
