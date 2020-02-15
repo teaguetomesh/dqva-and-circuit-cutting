@@ -365,7 +365,7 @@ if __name__ == '__main__':
         cluster_sim_probs=uniter_input[case]['all_cluster_prob'])
         compute_time = time() - compute_begin
         print('Searcher took %.3f seconds'%case_dict['searcher_time'])
-        print('Quantum took %.3f seconds'%case_dict['quantum_time'])
+        # print('Quantum took %.3f seconds'%case_dict['quantum_time'])
         print('Compute took %.3f seconds'%compute_time)
         
         reorder_begin = time()
@@ -374,24 +374,24 @@ if __name__ == '__main__':
         reorder_time = time() - reorder_begin
         print('Reorder took %.3f seconds'%reorder_time)
         reverse_begin = time()
-        norm = sum(reconstructed_prob)
-        reconstructed_prob = reconstructed_prob/norm
-        reconstructed_prob = reverse_prob(prob_l=reconstructed_prob)
+        # norm = sum(reconstructed_prob)
+        # reconstructed_prob = reconstructed_prob/norm
+        # reconstructed_prob = reverse_prob(prob_l=reconstructed_prob)
         reverse_time = time() - reverse_begin
         print('Reverse took %.3f seconds'%reverse_time)
 
         # print('reconstruction len = ', len(reconstructed_prob),'probabilities sum = ', sum(reconstructed_prob))
         assert len(reconstructed_prob) == 2**case[1] and abs(sum(reconstructed_prob)-1)<1e-5
         
-        hybrid_time = case_dict['searcher_time'] + case_dict['quantum_time'] + compute_time + reorder_time
-        case_dict['reconstructor_time'] = hybrid_time
+        # hybrid_time = case_dict['searcher_time'] + case_dict['quantum_time'] + compute_time + reorder_time
+        # case_dict['reconstructor_time'] = hybrid_time
         case_dict['cutting'] = reconstructed_prob
-        print('QC hybrid took %.3f seconds, classical took %.3f seconds'%(hybrid_time,case_dict['std_time']))
-        if args.evaluation_method != 'fake':
-            if args.evaluation_method != 'statevector_simulator':
-                print('qasm metric = %.3e'%chi2_distance(target=case_dict['sv'],obs=case_dict['qasm']))
-            print('hw metric = %.3e'%chi2_distance(target=case_dict['sv'],obs=case_dict['hw']))
-            print('cutting metric = %.3e'%(chi2_distance(target=case_dict['sv'],obs=case_dict['cutting'])))
+        # print('QC hybrid took %.3f seconds, classical took %.3f seconds'%(hybrid_time,case_dict['std_time']))
+        # if args.evaluation_method != 'fake':
+        #     if args.evaluation_method != 'statevector_simulator':
+        #         print('qasm metric = %.3e'%chi2_distance(target=case_dict['sv'],obs=case_dict['qasm']))
+        #     print('hw metric = %.3e'%chi2_distance(target=case_dict['sv'],obs=case_dict['hw']))
+        #     print('cutting metric = %.3e'%(chi2_distance(target=case_dict['sv'],obs=case_dict['cutting'])))
 
         # pickle.dump({case:case_dict}, open('%s'%(dirname+plotter_input_filename),'ab'))
         counter += 1
