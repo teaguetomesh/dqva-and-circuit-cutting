@@ -41,23 +41,20 @@ if __name__ == '__main__':
     circ_dict = {}
     for fc_size in range(args.min_size,args.max_size+1,1):
         circ = generate_circ(full_circ_size=fc_size,circuit_type=args.circuit_type)
-        for cluster_max_qubit in range(24,25,2):
-            case = (cluster_max_qubit,fc_size)
-            if fc_size<=cluster_max_qubit or (cluster_max_qubit-1)*3<fc_size:
-                print('Case {} impossible, skipped'.format(case))
-                continue
-            hardness, positions, num_rho_qubits, num_O_qubits, d, num_cluster, m, searcher_time = searcher.find_cuts(circ=circ,reconstructor_runtime_params=[4.275e-9,6.863e-1],reconstructor_weight=0,
-            num_clusters=[2,3],cluster_max_qubit=cluster_max_qubit)
+        cluster_max_qubit = math.ceil(fc_size/2)+1
+        case = (cluster_max_qubit,fc_size)
+        hardness, positions, num_rho_qubits, num_O_qubits, d, num_cluster, m, searcher_time = searcher.find_cuts(circ=circ,reconstructor_runtime_params=[4.275e-9,6.863e-1],reconstructor_weight=0,
+        num_clusters=[2],cluster_max_qubit=cluster_max_qubit)
 
-            if m != None:
-                # m.print_stat()
-                print('Case {}'.format(case))
-                print('MIP searcher clusters:',d)
-                clusters, complete_path_map, K, d = cutter.cut_circuit(circ, positions)
-                print('{:d} cuts --> {}, searcher time = {}'.format(K,d,searcher_time))
+        if m != None:
+            # m.print_stat()
+            print('Case {}'.format(case))
+            print('MIP searcher clusters:',d)
+            clusters, complete_path_map, K, d = cutter.cut_circuit(circ, positions)
+            print('{:d} cuts --> {}, searcher time = {}'.format(K,d,searcher_time))
 
-                case_dict = {'full_circ':circ,'clusters':clusters,'complete_path_map':complete_path_map,'searcher_time':searcher_time}
-                pickle.dump({case:case_dict}, open(dirname+evaluator_input_filename,'ab'))
-            else:
-                print('Case {} not feasible'.format(case))
-            print('-'*50)
+            case_dict = {'full_circ':circ,'clusters':clusters,'complete_path_map':complete_path_map,'searcher_time':searcher_time}
+            pickle.dump({case:case_dict}, open(dirname+evaluator_input_filename,'ab'))
+        else:
+            print('Case {} not feasible'.format(case))
+        print('-'*50)
