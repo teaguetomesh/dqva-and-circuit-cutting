@@ -349,15 +349,22 @@ if __name__ == '__main__':
             reconstructed_prob = np.zeros(2**case[1])
 
             compute_begin = time()
-            for i in range(num_workers):
-                combinations_start, combinations_stop = find_rank_combinations(combinations,i,num_workers)
-                rank_combinations = combinations[combinations_start:combinations_stop]
-                comm.send((case,rank_combinations), dest=i)
-            for i in range(num_workers):
-                state = MPI.Status()
-                rank_reconstructed_prob, smart_order = comm.recv(source=MPI.ANY_SOURCE,status=state)
-                reconstructed_prob += rank_reconstructed_prob
+            reconstructed_prob, scaling_factor, smart_order = reconstruct(complete_path_map=uniter_input[case]['complete_path_map'],
+            combinations=combinations,
+            full_circ=uniter_input[case]['full_circ'], cluster_circs=uniter_input[case]['clusters'],
+            cluster_sim_probs=uniter_input[case]['all_cluster_prob'])
             compute_time = time() - compute_begin
+
+            # compute_begin = time()
+            # for i in range(num_workers):
+            #     combinations_start, combinations_stop = find_rank_combinations(combinations,i,num_workers)
+            #     rank_combinations = combinations[combinations_start:combinations_stop]
+            #     comm.send((case,rank_combinations), dest=i)
+            # for i in range(num_workers):
+            #     state = MPI.Status()
+            #     rank_reconstructed_prob, smart_order = comm.recv(source=MPI.ANY_SOURCE,status=state)
+            #     reconstructed_prob += rank_reconstructed_prob
+            # compute_time = time() - compute_begin
             print('Searcher took %.3f seconds'%case_dict['searcher_time'],flush=True)
             # print('Quantum took %.3f seconds'%case_dict['quantum_time'])
             print('Compute took %.3f seconds'%compute_time)
@@ -407,23 +414,23 @@ if __name__ == '__main__':
             if rank_input == 'DONE':
                 break
             else:
-                case,rank_combinations = rank_input
-                complete_path_map = uniter_input[case]['complete_path_map']
-                full_circ = uniter_input[case]['full_circ']
-                cluster_circs = uniter_input[case]['clusters']
-                cluster_probs = uniter_input[case]['all_cluster_prob']
+                # case,rank_combinations = rank_input
+                # complete_path_map = uniter_input[case]['complete_path_map']
+                # full_circ = uniter_input[case]['full_circ']
+                # cluster_circs = uniter_input[case]['clusters']
+                # cluster_probs = uniter_input[case]['all_cluster_prob']
         
-                get_terms_begin = time()
-                reconstructed_prob, scaling_factor, smart_order = reconstruct(complete_path_map=uniter_input[case]['complete_path_map'],
-                combinations=rank_combinations,
-                full_circ=uniter_input[case]['full_circ'], cluster_circs=uniter_input[case]['clusters'],
-                cluster_sim_probs=uniter_input[case]['all_cluster_prob'])
-                get_terms_time = time() - get_terms_begin
-                #print('Rank %d reconstruction took %.3f seconds'%(rank,get_terms_time))
+                # get_terms_begin = time()
+                # reconstructed_prob, scaling_factor, smart_order = reconstruct(complete_path_map=uniter_input[case]['complete_path_map'],
+                # combinations=rank_combinations,
+                # full_circ=uniter_input[case]['full_circ'], cluster_circs=uniter_input[case]['clusters'],
+                # cluster_sim_probs=uniter_input[case]['all_cluster_prob'])
+                # get_terms_time = time() - get_terms_begin
+                # #print('Rank %d reconstruction took %.3f seconds'%(rank,get_terms_time))
 
-                reconstructed_prob = reconstructed_prob/scaling_factor
+                # reconstructed_prob = reconstructed_prob/scaling_factor
 
-                comm.send((reconstructed_prob,smart_order), dest=size-1)
+                # comm.send((reconstructed_prob,smart_order), dest=size-1)
 
                 state = MPI.Status()
                 reconstructed_prob,combinations_start,combinations_stop = comm.recv(source=size-1,status=state)
