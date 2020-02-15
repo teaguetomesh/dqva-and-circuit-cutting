@@ -39,7 +39,7 @@ if __name__ == '__main__':
     if not os.path.exists(dirname):
         os.makedirs(dirname)
     circ_dict = {}
-    for fc_size in range(args.min_size,args.max_size+1,2):
+    for fc_size in range(args.min_size,args.max_size+1,1):
         circ = generate_circ(full_circ_size=fc_size,circuit_type=args.circuit_type)
         for cluster_max_qubit in range(24,25,2):
             case = (cluster_max_qubit,fc_size)
