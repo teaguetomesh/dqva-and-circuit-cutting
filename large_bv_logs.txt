@@ -1,0 +1,91 @@
+-------------------------------------------------- Reconstructor --------------------------------------------------
+Existing cases: dict_keys([])
+case (14, 25)
+Cut into  [14, 12] clusters
+Searcher took 0.022 seconds
+Compute took 2.336 seconds
+Reorder took 50.048 seconds
+Reverse took 0.000 seconds
+Reconstruction output has 1 cases
+----------------------------------------------------------------------------------------------------
+case (14, 26)
+Cut into  [14, 13] clusters
+Searcher took 0.017 seconds
+Compute took 4.426 seconds
+Reorder took 103.376 seconds
+Reverse took 0.000 seconds
+Reconstruction output has 2 cases
+----------------------------------------------------------------------------------------------------
+case (15, 27)
+Cut into  [15, 13] clusters
+Searcher took 0.018 seconds
+Compute took 8.774 seconds
+Reorder took 211.417 seconds
+Reverse took 0.000 seconds
+Reconstruction output has 3 cases
+----------------------------------------------------------------------------------------------------
+case (15, 28)
+Summation term memoized 0/2, collapsed_term memoized 0/2, called kron 1 times, collapse 2 times
+Summation term memoized 0/2, collapsed_term memoized 0/2, called kron 1 times, collapse 2 times
+Summation term memoized 0/2, collapsed_term memoized 0/2, called kron 1 times, collapse 2 times
+Summation term memoized 0/2, collapsed_term memoized 0/2, called kron 1 times, collapse 2 times
+Traceback (most recent call last):
+  File "/home/weit/anaconda3/envs/cc-env/lib/python3.7/runpy.py", line 193, in _run_module_as_main
+    "__main__", mod_spec)
+  File "/home/weit/anaconda3/envs/cc-env/lib/python3.7/runpy.py", line 85, in _run_code
+    exec(code, run_globals)
+  File "/home/weit/circuit_cutting/utils/reconstructor_parallel.py", line 426, in <module>
+    comm.send((reconstructed_prob,smart_order), dest=size-1)
+  File "mpi4py/MPI/Comm.pyx", line 1156, in mpi4py.MPI.Comm.send
+  File "mpi4py/MPI/msgpickle.pxi", line 173, in mpi4py.MPI.PyMPI_send
+  File "mpi4py/MPI/msgpickle.pxi", line 106, in mpi4py.MPI.Pickle.dump
+  File "mpi4py/MPI/msgbuffer.pxi", line 44, in mpi4py.MPI.downcast
+OverflowError: integer 2147483819 does not fit in 'int'
+Traceback (most recent call last):
+  File "/home/weit/anaconda3/envs/cc-env/lib/python3.7/runpy.py", line 193, in _run_module_as_main
+    "__main__", mod_spec)
+  File "/home/weit/anaconda3/envs/cc-env/lib/python3.7/runpy.py", line 85, in _run_code
+    exec(code, run_globals)
+  File "/home/weit/circuit_cutting/utils/reconstructor_parallel.py", line 426, in <module>
+    comm.send((reconstructed_prob,smart_order), dest=size-1)
+  File "mpi4py/MPI/Comm.pyx", line 1156, in mpi4py.MPI.Comm.send
+  File "mpi4py/MPI/msgpickle.pxi", line 173, in mpi4py.MPI.PyMPI_send
+  File "mpi4py/MPI/msgpickle.pxi", line 106, in mpi4py.MPI.Pickle.dump
+  File "mpi4py/MPI/msgbuffer.pxi", line 44, in mpi4py.MPI.downcast
+OverflowError: integer 2147483819 does not fit in 'int'
+Summation term memoized 0/2, collapsed_term memoized 0/2, called kron 1 times, collapse 2 times
+Summation term memoized 0/2, collapsed_term memoized 0/2, called kron 1 times, collapse 2 times
+Summation term memoized 0/2, collapsed_term memoized 0/2, called kron 1 times, collapse 2 times
+Summation term memoized 0/2, collapsed_term memoized 0/2, called kron 1 times, collapse 2 times
+Traceback (most recent call last):
+  File "/home/weit/anaconda3/envs/cc-env/lib/python3.7/runpy.py", line 193, in _run_module_as_main
+    "__main__", mod_spec)
+  File "/home/weit/anaconda3/envs/cc-env/lib/python3.7/runpy.py", line 85, in _run_code
+    exec(code, run_globals)
+  File "/home/weit/circuit_cutting/utils/reconstructor_parallel.py", line 426, in <module>
+    comm.send((reconstructed_prob,smart_order), dest=size-1)
+  File "mpi4py/MPI/Comm.pyx", line 1156, in mpi4py.MPI.Comm.send
+  File "mpi4py/MPI/msgpickle.pxi", line 173, in mpi4py.MPI.PyMPI_send
+  File "mpi4py/MPI/msgpickle.pxi", line 106, in mpi4py.MPI.Pickle.dump
+  File "mpi4py/MPI/msgbuffer.pxi", line 44, in mpi4py.MPI.downcast
+OverflowError: integer 2147483819 does not fit in 'int'
+Summation term memoized 0/2, collapsed_term memoized 0/2, called kron 1 times, collapse 2 times
+Summation term memoized 0/2, collapsed_term memoized 0/2, called kron 1 times, collapse 2 times
+Summation term memoized 0/2, collapsed_term memoized 0/2, called kron 1 times, collapse 2 times
+Summation term memoized 0/2, collapsed_term memoized 0/2, called kron 1 times, collapse 2 times
+Traceback (most recent call last):
+  File "/home/weit/anaconda3/envs/cc-env/lib/python3.7/runpy.py", line 193, in _run_module_as_main
+    "__main__", mod_spec)
+  File "/home/weit/anaconda3/envs/cc-env/lib/python3.7/runpy.py", line 85, in _run_code
+    exec(code, run_globals)
+  File "/home/weit/circuit_cutting/utils/reconstructor_parallel.py", line 426, in <module>
+    comm.send((reconstructed_prob,smart_order), dest=size-1)
+  File "mpi4py/MPI/Comm.pyx", line 1156, in mpi4py.MPI.Comm.send
+  File "mpi4py/MPI/msgpickle.pxi", line 173, in mpi4py.MPI.PyMPI_send
+  File "mpi4py/MPI/msgpickle.pxi", line 106, in mpi4py.MPI.Pickle.dump
+  File "mpi4py/MPI/msgbuffer.pxi", line 44, in mpi4py.MPI.downcast
+OverflowError: integer 2147483819 does not fit in 'int'
+Summation term memoized 0/2, collapsed_term memoized 0/2, called kron 1 times, collapse 2 times
+Summation term memoized 0/2, collapsed_term memoized 0/2, called kron 1 times, collapse 2 times
+Summation term memoized 0/2, collapsed_term memoized 0/2, called kron 1 times, collapse 2 times
+Summation term memoized 0/2, collapsed_term memoized 0/2, called kron 1 times, collapse 2 times

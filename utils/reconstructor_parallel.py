@@ -374,9 +374,9 @@ if __name__ == '__main__':
             reorder_time = time() - reorder_begin
             print('Reorder took %.3f seconds'%reorder_time)
             reverse_begin = time()
-            norm = sum(reconstructed_prob)
-            reconstructed_prob = reconstructed_prob/norm
-            reconstructed_prob = reverse_prob(prob_l=reconstructed_prob)
+            #norm = sum(reconstructed_prob)
+            #reconstructed_prob = reconstructed_prob/norm
+            #reconstructed_prob = reverse_prob(prob_l=reconstructed_prob)
             reverse_time = time() - reverse_begin
             print('Reverse took %.3f seconds'%reverse_time)
 
