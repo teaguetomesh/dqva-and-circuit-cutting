@@ -1,2 +1,0 @@
-Using license file /home/weit/gurobi.lic
-Academic license - for non-commercial use only
