@@ -1,5 +1,5 @@
 from utils.helper_fun import generate_circ, get_evaluator_info, evaluate_circ, apply_measurement, get_filename
-import utils.MIQCP_searcher as searcher
+import utils.MIP_searcher as searcher
 import utils.cutter as cutter
 from utils.conversions import dict_to_array
 from time import time
