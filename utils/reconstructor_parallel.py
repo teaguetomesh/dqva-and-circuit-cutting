@@ -367,7 +367,7 @@ if __name__ == '__main__':
             # compute_time = time() - compute_begin
             print('Searcher took %.3f seconds'%case_dict['searcher_time'],flush=True)
             # print('Quantum took %.3f seconds'%case_dict['quantum_time'])
-            print('Compute took %.3f seconds'%compute_time)
+            print('Compute took %.3f seconds'%compute_time,flush=True)
             
             reorder_begin = time()
             for i in range(num_workers):
@@ -379,13 +379,13 @@ if __name__ == '__main__':
                 rank_reconstructed_prob = comm.recv(source=MPI.ANY_SOURCE,status=state)
                 reconstructed_prob += rank_reconstructed_prob
             reorder_time = time() - reorder_begin
-            print('Reorder took %.3f seconds'%reorder_time)
+            print('Reorder took %.3f seconds'%reorder_time,flush=True)
             reverse_begin = time()
             #norm = sum(reconstructed_prob)
             #reconstructed_prob = reconstructed_prob/norm
             #reconstructed_prob = reverse_prob(prob_l=reconstructed_prob)
             reverse_time = time() - reverse_begin
-            print('Reverse took %.3f seconds'%reverse_time)
+            print('Reverse took %.3f seconds'%reverse_time,flush=True)
 
             # print('reconstruction len =', len(reconstructed_prob),'probabilities sum = ', sum(reconstructed_prob))
             assert len(reconstructed_prob) == 2**case[1] and abs(sum(reconstructed_prob)-1)<1e-5

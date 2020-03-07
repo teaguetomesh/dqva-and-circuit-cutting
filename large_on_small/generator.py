@@ -45,16 +45,21 @@ if __name__ == '__main__':
         ground_truth = evaluate_circ(circ=circ,backend='statevector_simulator',evaluator_info=None,force_prob=True)
         ground_truth = dict_to_array(distribution_dict=ground_truth,force_prob=True)
         std_time = time() - std_begin
-        num_clusters = 2
         for cluster_max_qubit in range(24,25,2):
+            cluster_max_qubit = int(fc_size/3*2)
             case = (cluster_max_qubit,fc_size)
-            if fc_size<=cluster_max_qubit or fc_size>24 or (cluster_max_qubit-1)*num_clusters<fc_size:
+            if fc_size<=cluster_max_qubit or fc_size>24:
                 print('Case {} impossible, skipped'.format(case))
                 continue
-            hardness, positions, num_rho_qubits, num_O_qubits, d, num_cluster, m, searcher_time = searcher.find_cuts(circ=circ,reconstructor_runtime_params=[4.275e-9,6.863e-1],reconstructor_weight=0,
-            num_clusters=[num_clusters],cluster_max_qubit=cluster_max_qubit)
+            solution_dict = searcher.find_cuts(circ=circ, max_cluster_qubit=cluster_max_qubit)
 
-            if m != None:
+            if len(solution_dict) > 0:
+                m = solution_dict['model']
+                d = solution_dict['num_d_qubits']
+                positions = solution_dict['positions']
+                searcher_time = solution_dict['searcher_time']
+                num_rho_qubits = solution_dict['num_rho_qubits']
+                num_O_qubits = solution_dict['num_O_qubits']
                 # m.print_stat()
                 print('Case {}'.format(case))
                 print('MIP searcher clusters:',d)
@@ -67,11 +72,11 @@ if __name__ == '__main__':
                 print('qc_time = %.3f seconds, qc_mem = %f GB'%(qc_time,qc_mem))
                 print('std_time = %.3f seconds, std_mem = %f GB'%(std_time,std_mem))
 
-                if std_time>qc_time:
-                    case_dict = {'full_circ':circ,'clusters':clusters,'complete_path_map':complete_path_map,
-                    'sv':ground_truth,'hw':ground_truth,'searcher_time':searcher_time,'std_time':std_time,'quantum_time':qc_time,'quantum_mem':qc_mem}
-                    pickle.dump({case:case_dict}, open(dirname+evaluator_input_filename,'ab'))
-                    print()
+                # if std_time>qc_time:
+                case_dict = {'full_circ':circ,'clusters':clusters,'complete_path_map':complete_path_map,
+                'sv':ground_truth,'hw':ground_truth,'searcher_time':solution_dict['searcher_time'],'std_time':std_time,'quantum_time':qc_time,'quantum_mem':qc_mem}
+                pickle.dump({case:case_dict}, open(dirname+evaluator_input_filename,'ab'))
+                print()
             else:
                 print('Case {} not feasible'.format(case))
             print('-'*50)

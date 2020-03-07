@@ -8,15 +8,15 @@ import numpy as np
 import math
 
 class Basic_Model(object):
-    def __init__(self, num_cuts, n_vertices, edges, vertex_ids, id_vertices, num_cluster, num_qubits):
+    def __init__(self, n_vertices, edges, vertex_ids, id_vertices, num_cluster, max_cluster_qubit, num_qubits):
         self.check_graph(n_vertices, edges)
-        self.num_cuts = num_cuts
         self.n_vertices = n_vertices
         self.edges = edges
         self.n_edges = len(edges)
         self.vertex_ids = vertex_ids
         self.id_vertices = id_vertices
         self.num_cluster = num_cluster
+        self.max_cluster_qubit = max_cluster_qubit
         self.num_qubits = num_qubits
 
         self.model = Model('cut_searching')
@@ -74,49 +74,52 @@ class Basic_Model(object):
         for vertex in range(num_cluster):
             self.model.addConstr(quicksum([self.vertex_y[cluster][vertex] for cluster in range(vertex+1,num_cluster)]) == 0)
         
+        self.num_cuts = self.model.addVar(lb=0, ub=self.num_qubits/2, vtype=GRB.INTEGER, name='num_cuts')
         self.model.addConstr(self.num_cuts == 
         quicksum(
             [self.edge_x[cluster][i] for i in range(self.n_edges) for cluster in range(num_cluster)]
             )/2)
         
         for cluster in range(num_cluster):
-            cluster_original_qubit = self.model.addVar(lb=0, ub=self.num_qubits-1, vtype=GRB.INTEGER, name='cluster_input_%d'%cluster)
+            cluster_original_qubit = self.model.addVar(lb=0, ub=self.max_cluster_qubit, vtype=GRB.INTEGER, name='cluster_input_%d'%cluster)
             self.model.addConstr(cluster_original_qubit ==
             quicksum([self.vertex_weight[id_vertices[i]]*self.vertex_y[cluster][i]
             for i in range(self.n_vertices)]))
             
-            cluster_rho_qubits = self.model.addVar(lb=0, ub=self.num_qubits-1, vtype=GRB.INTEGER, name='cluster_rho_qubits_%d'%cluster)
+            cluster_rho_qubits = self.model.addVar(lb=0, ub=self.max_cluster_qubit, vtype=GRB.INTEGER, name='cluster_rho_qubits_%d'%cluster)
             self.model.addConstr(cluster_rho_qubits ==
             quicksum([self.edge_x[cluster][i] * self.vertex_y[cluster][self.edges[i][1]]
             for i in range(self.n_edges)]))
 
-            cluster_O_qubits = self.model.addVar(lb=0, ub=self.num_qubits-1, vtype=GRB.INTEGER, name='cluster_O_qubits_%d'%cluster)
+            cluster_O_qubits = self.model.addVar(lb=0, ub=self.max_cluster_qubit, vtype=GRB.INTEGER, name='cluster_O_qubits_%d'%cluster)
             self.model.addConstr(cluster_O_qubits ==
             quicksum([self.edge_x[cluster][i] * self.vertex_y[cluster][self.edges[i][0]]
             for i in range(self.n_edges)]))
 
-            cluster_d = self.model.addVar(lb=0.1, ub=self.num_qubits-1, vtype=GRB.INTEGER, name='cluster_d_%d'%cluster)
+            cluster_d = self.model.addVar(lb=0.1, ub=self.max_cluster_qubit, vtype=GRB.INTEGER, name='cluster_d_%d'%cluster)
             self.model.addConstr(cluster_d == cluster_original_qubit + cluster_rho_qubits)
             
             lb = 0
-            ub = self.num_qubits*np.log(2)*2
-            ptx, ptf = self.pwl_exp(params=[1,1],lb=lb,ub=ub,weight=1)
+            ub = self.num_qubits*np.log(6)*3
+            ptx, ptf = self.pwl_exp(params=[1,1,0],lb=lb,ub=ub,weight=1)
             evaluator_cost_exponent = self.model.addVar(lb=lb,ub=ub,vtype=GRB.CONTINUOUS, name='evaluator_cost_exponent_%d'%cluster)
-            self.model.addConstr(evaluator_cost_exponent == np.log(2)*(cluster_rho_qubits+cluster_d))
+            self.model.addConstr(evaluator_cost_exponent == np.log(6)*cluster_rho_qubits+np.log(3)*cluster_O_qubits+np.log(2)*cluster_d)
             self.model.setPWLObj(evaluator_cost_exponent, ptx, ptf)
 
+        # self.model.setObjective(self.num_cuts,GRB.MINIMIZE)
         self.model.update()
     
     def pwl_exp(self, params, lb, ub, weight):
-        # Piecewise linear approximation of w*p_0*e^(p_1*x)
+        # Piecewise linear approximation of w*p_0*e^[p_1*(x+p_2)]
         ptx = []
         ptf = []
 
-        num_pt = 500
+        # NOTE: The granularity greatly affects speed
+        num_pt = int(1e3)
 
         for i in range(num_pt):
             x = (ub-lb)/(num_pt-1)*i+lb
-            y = weight*params[0]*np.exp(params[1]*x)
+            y = weight*params[0]*np.exp(params[1]*(x+params[2]))
             ptx.append(x)
             ptf.append(y)
         return ptx, ptf
@@ -180,7 +183,7 @@ class Basic_Model(object):
         # print('node count:', self.node_count)
         # print('%d vertices %d edges graph. Max qubit = %d'%
         # (self.n_vertices, self.n_edges, self.cluster_max_qubit))
-        print('%d cuts, %d clusters, max qubit = %d'%(len(self.cut_edges),self.num_cluster,self.cluster_max_qubit))
+        print('%d cuts, %d clusters'%(len(self.cut_edges),self.num_cluster))
 
         evaluator_cost_verify = 0
         for i in range(self.num_cluster):
@@ -188,12 +191,14 @@ class Basic_Model(object):
             cluster_rho_qubits = self.model.getVarByName('cluster_rho_qubits_%d'%i)
             cluster_O_qubits = self.model.getVarByName('cluster_O_qubits_%d'%i)
             cluster_d = self.model.getVarByName('cluster_d_%d'%i)
-            evaluator_cost_verify += 2**cluster_rho_qubits.X
-            print('cluster %d: original input = %.2f, \u03C1_qubits = %.2f, O_qubits = %.2f, d = %.2f' % 
-            (i,cluster_input.X,cluster_rho_qubits.X,cluster_O_qubits.X,cluster_d.X))
+            evaluator_cost_exponent = self.model.getVarByName(name='evaluator_cost_exponent_%d'%i)
+            evaluator_cost_verify += 6**cluster_rho_qubits.X*3**cluster_O_qubits.X*2**cluster_d.X
+            
+            # evaluator_cost_verify += cluster_rho_qubits.X
+            print('cluster %d: original input = %.2f, \u03C1_qubits = %.2f, O_qubits = %.2f, d = %.2f, exponent = %.3f' % 
+            (i,cluster_input.X,cluster_rho_qubits.X,cluster_O_qubits.X,cluster_d.X,evaluator_cost_exponent.X))
 
-        print('objective value = %.3e'%self.objective)
-        print('manually calculated objective value: %.3e'%evaluator_cost_verify)
+        print('Model objective value = %.3e, should be : %.3e'%(self.objective,evaluator_cost_verify))
         # print('mip gap:', self.mip_gap)
         print('runtime:', self.runtime)
 
@@ -217,8 +222,8 @@ def read_circ(circ):
         if len(vertex.qargs) != 2:
             raise Exception('vertex does not have 2 qargs!')
         arg0, arg1 = vertex.qargs
-        vertex_name = '%s[%d]%d %s[%d]%d' % (arg0.register.name, arg0.index,qubit_gate_idx[arg0],
-                                                arg1.register.name, arg1.index,qubit_gate_idx[arg1])
+        vertex_name = '%s[%d]%d %s[%d]%d' % (arg0.register.name, arg0.index, qubit_gate_idx[arg0],
+                                                arg1.register.name, arg1.index, qubit_gate_idx[arg1])
         qubit_gate_idx[arg0] += 1
         qubit_gate_idx[arg1] += 1
         if vertex_name not in node_name_ids and id(vertex) not in vertex_ids:
@@ -285,48 +290,46 @@ def circ_stripping(circ):
             stripped_dag.apply_operation_back(op=vertex.op, qargs=vertex.qargs)
     return dag_to_circuit(stripped_dag)
 
-def find_cuts(circ, num_cuts):
+def find_cuts(circ, max_cluster_qubit):
     stripped_circ = circ_stripping(circ)
     n_vertices, edges, vertex_ids, id_vertices = read_circ(stripped_circ)
     num_qubits = len(circ.qubits)
-    num_clusters = range(2,num_cuts+2) # 2 to K+1
-    min_objective = float('inf')
     solution_dict = {}
-
-    for num_cluster in num_clusters:
         
-        kwargs = dict(num_cuts=num_cuts,
-                    n_vertices=n_vertices,
-                    edges=edges,
-                    vertex_ids=vertex_ids,
-                    id_vertices=id_vertices,
-                    num_cluster=num_cluster,
-                    num_qubits=num_qubits)
+    num_cluster = 2
+    
+    kwargs = dict(n_vertices=n_vertices,
+                edges=edges,
+                vertex_ids=vertex_ids,
+                id_vertices=id_vertices,
+                num_cluster=num_cluster,
+                max_cluster_qubit=max_cluster_qubit,
+                num_qubits=num_qubits)
 
-        m = Basic_Model(**kwargs)
-        feasible = m.solve()
-        if not feasible or m.objective>min_objective:
-            continue
-        else:
-            min_objective = m.objective
-            positions = cuts_parser(m.cut_edges, circ)
-            num_rho_qubits = []
-            num_O_qubits = []
-            num_d_qubits = []
-            for i in range(m.num_cluster):
-                cluster_rho_qubits = m.model.getVarByName('cluster_rho_qubits_%d'%i)
-                cluster_O_qubits = m.model.getVarByName('cluster_O_qubits_%d'%i)
-                cluster_d = m.model.getVarByName('cluster_d_%d'%i)
-                num_rho_qubits.append(cluster_rho_qubits.X)
-                num_O_qubits.append(cluster_O_qubits.X)
-                num_d_qubits.append(cluster_d.X)
-            solution_dict = {'model':m,
-            'circ':circ,
-            'searcher_time':m.runtime,
-            'num_rho_qubits':num_rho_qubits,
-            'num_O_qubits':num_O_qubits,
-            'num_d_qubits':num_d_qubits,
-            'objective':m.objective,
-            'positions':positions,
-            'num_cluster':m.num_cluster}
+    m = Basic_Model(**kwargs)
+    feasible = m.solve()
+    if not feasible:
+        print('%d-qubit circuit %d-clusters not feasible'%(num_qubits,num_cluster))
+    else:
+        min_objective = m.objective
+        positions = cuts_parser(m.cut_edges, circ)
+        num_rho_qubits = []
+        num_O_qubits = []
+        num_d_qubits = []
+        for i in range(m.num_cluster):
+            cluster_rho_qubits = m.model.getVarByName('cluster_rho_qubits_%d'%i)
+            cluster_O_qubits = m.model.getVarByName('cluster_O_qubits_%d'%i)
+            cluster_d = m.model.getVarByName('cluster_d_%d'%i)
+            num_rho_qubits.append(cluster_rho_qubits.X)
+            num_O_qubits.append(cluster_O_qubits.X)
+            num_d_qubits.append(cluster_d.X)
+        solution_dict = {'model':m,
+        'circ':circ,
+        'searcher_time':m.runtime,
+        'num_rho_qubits':num_rho_qubits,
+        'num_O_qubits':num_O_qubits,
+        'num_d_qubits':num_d_qubits,
+        'objective':m.objective,
+        'positions':positions,
+        'num_cluster':m.num_cluster}
     return solution_dict
