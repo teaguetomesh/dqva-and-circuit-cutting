@@ -2,7 +2,7 @@ import pickle
 import os
 from time import time
 import numpy as np
-import utils.MIQCP_searcher as searcher
+import utils.MIP_searcher as searcher
 import utils.cutter as cutter
 from utils.helper_fun import get_evaluator_info, get_circ_saturated_shots, get_filename, read_file, generate_circ, evaluate_circ
 from utils.schedule import Scheduler

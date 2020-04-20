@@ -201,34 +201,74 @@ def plot_fid_bar(sametotal_best_cc,circuit_type,dirname,device_name):
     opacity = 0.8
 
     if circuit_type == 'supremacy':
-        ax.set_ylabel('\u03C7^2, lower is better',size=12)
+        ax.set_ylabel('\u03C7^2, lower is better',fontsize=18)
     elif circuit_type == 'bv' or circuit_type=='hwea':
         ax.set_ylim(0,1)
-        ax.set_ylabel('Fidelity, higher is better',size=12)
+        ax.set_ylabel('Fidelity, higher is better',fontsize=18)
+    else:
+        raise Exception('Illegal circuit type %s'%circuit_type)
+
+    rects = ax.bar(index, std, bar_width,
+    alpha=opacity,
+    color='b',
+    label='%s Fidelity'%device_name)
+
+    ax.set_xlabel('Full circuit size',fontsize=18)
+    plt.yticks(fontsize=18)
+    plt.xticks(index, all_fc_size, fontsize=18)
+    plt.title('More qubits may not bring \nmore quantum capability',fontsize=18)
+    # plt.legend(fontsize=18)
+
+    plt.tight_layout()
+    plt.savefig('%s/decreasing_fidelity.pdf'%(dirname),dpi=400)
+    plt.close()
+
+def plot_fid_bar_2(sametotal_best_cc,circuit_type,dirname,device_name):
+    all_fc_size = list(sametotal_best_cc.keys())
+    all_fc_size.sort()
+    std = []
+    sametotal_cutting = []
+    for fc_size in all_fc_size:
+        std.append(sametotal_best_cc[fc_size]['hw_metric'] if circuit_type=='supremacy' else sametotal_best_cc[fc_size]['hw_fid'])
+        sametotal_cutting.append(sametotal_best_cc[fc_size]['cutting_metric'] if circuit_type=='supremacy' else sametotal_best_cc[fc_size]['cutting_fid'])
+
+    n_groups = len(all_fc_size)
+    fig, ax = plt.subplots()
+    index = np.arange(n_groups)
+    bar_width = 0.4
+    opacity = 0.8
+
+    if circuit_type == 'supremacy':
+        ax.set_ylabel('\u03C7^2, lower is better',fontsize=18)
+    elif circuit_type == 'bv' or circuit_type=='hwea':
+        ax.set_ylim(0,1)
+        ax.set_ylabel('Fidelity, higher is better',fontsize=18)
     else:
         raise Exception('Illegal circuit type %s'%circuit_type)
 
     rects1 = ax.bar(index - bar_width/2, std, bar_width,
     alpha=opacity,
     color='b',
-    label='Standard Mode')
+    label='QC Evaluation')
 
     rects2 = ax.bar(index + bar_width/2, sametotal_cutting, bar_width,
     alpha=opacity,
     color='r',
-    label='Cutting Mode')
+    label='HyQC Evaluation')
 
-    ax.set_xlabel('Full circuit size',size=12)
-    plt.xticks(index, all_fc_size)
-    plt.legend()
+    ax.set_xlabel('Full circuit size',fontsize=18)
+    plt.yticks(fontsize=18)
+    plt.xticks(index, all_fc_size, fontsize=18)
+    # plt.title('',fontsize=18)
+    plt.legend(fontsize=18)
 
     plt.tight_layout()
-    plt.savefig('%s/%s_shots_comparison.png'%(dirname,device_name),dpi=400)
+    plt.savefig('%s/%s_shots_comparison.pdf'%(dirname,device_name),dpi=400)
     plt.close()
 
 def process_data(filename,circuit_type):
     plotter_input = read_file(filename)
-    print('Processing',filename)
+    print('Processing',filename,flush=True)
 
     hw_qubits = [case[0] for case in plotter_input]
     fc_qubits = [case[1] for case in plotter_input]
@@ -264,7 +304,7 @@ def process_data(filename,circuit_type):
         plotter_input[case]['fid_percent_improvement'] = fid_percent_change
 
         print('case {}: \u03C7^2 percentage reduction = {:.3f}, fidelity improvement = {:.3f}, reconstruction time: {:.3e}'.format(case,metric_percent_change,fid_percent_change,plotter_input[case]['reconstructor_time']))
-    print('*'*25,'Best Cases','*'*25)
+    print('*'*25,'Best Cases','*'*25,flush=True)
 
     best_cc = {}
     for case in plotter_input:
@@ -303,4 +343,5 @@ if __name__ == '__main__':
     plot_heatmap(plotter_input=sametotal_plotter_input,hw_qubits=sametotal_hw_qubits,fc_qubits=sametotal_fc_qubits,circuit_type=args.circuit_type,filename=dirname+sametotal_filename)
     
     plot_fid_bar(sametotal_best_cc=sametotal_best_cc,circuit_type=args.circuit_type,dirname=dirname,device_name=args.device_name)
+    plot_fid_bar_2(sametotal_best_cc=sametotal_best_cc,circuit_type=args.circuit_type,dirname=dirname,device_name=args.device_name)
     print('-'*100)
