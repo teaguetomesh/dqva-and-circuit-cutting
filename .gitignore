@@ -1,13 +1,10 @@
-venv
 __pycache__
 .vscode
 .ipynb_checkpoints
 gurobi.log
-*.p
 .DS_Store
-*.pdf
+*.pckl
+*.pyc
 
-
-
-
-.DS_Store
+*.txt
+!*_logs.txt

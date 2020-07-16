@@ -11,7 +11,6 @@ from utils.helper_fun import get_evaluator_info, apply_measurement
 from utils.conversions import dict_to_array, memory_to_dict
 from qiskit.compiler import transpile, assemble
 from qiskit import Aer
-from qiskit.providers.aer import noise
 import random
 
 class ScheduleItem:
@@ -22,7 +21,7 @@ class ScheduleItem:
         self.shots = 0
         self.total_circs = 0
     
-    def update(self, key, circ, shots, initial_layout):
+    def update(self, key, circ, shots):
         reps_vacant = self.max_experiments - self.total_circs
         if reps_vacant>0:
             circ_shots = max(shots,self.shots)
@@ -30,7 +29,6 @@ class ScheduleItem:
             total_reps = math.ceil(shots/circ_shots)
             reps_to_add = min(total_reps,reps_vacant)
             circ_list_item = {'key':key,'circ':circ,'reps':reps_to_add}
-            circ_list_item['initial_layout'] = initial_layout
             self.circ_list.append(circ_list_item)
             self.shots = circ_shots
             self.total_circs += reps_to_add
@@ -43,8 +41,9 @@ class Scheduler:
     def __init__(self,circ_dict,device_name):
         self.circ_dict = copy.deepcopy(circ_dict)
         self.device_name = device_name
+        evaluator_info = get_evaluator_info(circ=None,device_name=self.device_name,fields=['device','properties'])
+        self.device_size = len(evaluator_info['properties'].qubits)
         self.check_input()
-        evaluator_info = get_evaluator_info(circ=None,device_name=self.device_name,fields=['device'])
         self.schedule = self.get_schedule(device_max_shots=evaluator_info['device'].configuration().max_shots,
         device_max_experiments=evaluator_info['device'].configuration().max_experiments)
 
@@ -52,8 +51,10 @@ class Scheduler:
         assert isinstance(self.circ_dict,dict)
         for key in self.circ_dict:
             value = self.circ_dict[key]
-            if 'circ' not in value or 'shots' not in value:
-                raise Exception('Input circ_dict should have circ, shots for key {}'.format(key))
+            if 'circuit' not in value or 'shots' not in value:
+                raise Exception('Input circ_dict should have `circuit`, `shots` for key {}'.format(key))
+            elif value['circuit'].n_qubits > self.device_size:
+                raise Exception('Input `circuit` for key {} has {:d}-q ({:d}-q device)'.format(key,value['circuit'].n_qubits,self.device_size))
 
     def get_schedule(self,device_max_shots,device_max_experiments):
         circ_dict = copy.deepcopy(self.circ_dict)
@@ -62,11 +63,10 @@ class Scheduler:
         key_idx = 0
         while key_idx<len(circ_dict):
             key = list(circ_dict.keys())[key_idx]
-            circ = circ_dict[key]['circ']
+            circ = circ_dict[key]['circuit']
             shots = circ_dict[key]['shots']
-            initial_layout = circ_dict[key]['initial_layout'] if 'initial_layout' in circ_dict[key] else 'None'
             # print('adding %d qubit circuit with %d shots to job'%(len(circ.qubits),shots))
-            shots_remaining = schedule_item.update(key,circ,shots,initial_layout)
+            shots_remaining = schedule_item.update(key,circ,shots)
             if shots_remaining>0:
                 # print('OVERFLOW, has %d total circuits * %d shots'%(job.total_circs,job.shots))
                 schedule.append(schedule_item)
@@ -95,19 +95,25 @@ class Scheduler:
                 # print('Key {}, {:d} qubit circuit * {:d} reps'.format(key,len(circ.qubits),reps))
                 
                 if len(circ.clbits)>0:
+                    # Assume circ was alredy mapped
                     mapped_circuit = circ
                 elif real_device:
-                    initial_layout = element['initial_layout']
+                    initial_layout = get_evaluator_info(circ=circ,device_name=self.device_name,fields=['initial_layout'])['initial_layout']
                     qc=apply_measurement(circ=circ)
-                    mapped_circuit = transpile(qc,
-                    backend=device_evaluator_info['device'], basis_gates=device_evaluator_info['basis_gates'],
-                    coupling_map=device_evaluator_info['coupling_map'],backend_properties=device_evaluator_info['properties'],
-                    initial_layout=initial_layout)
+                    # mapped_circuit = transpile(qc,
+                    # backend=device_evaluator_info['device'], basis_gates=device_evaluator_info['basis_gates'],
+                    # coupling_map=device_evaluator_info['coupling_map'],backend_properties=device_evaluator_info['properties'],
+                    # initial_layout=initial_layout)
+                    mapped_circuit = transpile(qc,backend=device_evaluator_info['device'],initial_layout=initial_layout)
                 else:
+                    initial_layout = get_evaluator_info(circ=circ,device_name=self.device_name,fields=['initial_layout'])['initial_layout']
                     qc=apply_measurement(circ=circ)
-                    mapped_circuit = transpile(qc,basis_gates=device_evaluator_info['basis_gates'],
-                    initial_layout={circ.qregs[0][x]:x for x in range(len(circ.qubits))})
+                    # mapped_circuit = transpile(qc,basis_gates=device_evaluator_info['basis_gates'],
+                    # initial_layout={circ.qregs[0][x]:x for x in range(len(circ.qubits))})
+                    mapped_circuit = transpile(qc,backend=device_evaluator_info['device'],initial_layout=initial_layout)
 
+                # print('scheduler:')
+                # print(qc)
                 # print(mapped_circuit)
                 circs_to_add = [mapped_circuit]*reps
                 job_circuits += circs_to_add
@@ -119,17 +125,7 @@ class Scheduler:
                 hw_job = device_evaluator_info['device'].run(qobj)
             else:
                 qobj = assemble(job_circuits, backend=Aer.get_backend('qasm_simulator'), shots=schedule_item.shots, memory=True)
-                # Generate a noise model for the qubits
-                noise_model = noise.NoiseModel()
-                device_qubits = len(device_evaluator_info['properties'].qubits)
-                for qi in range(device_qubits):
-                    if qi < 4:
-                        read_err = noise.errors.readout_error.ReadoutError([[1, 0],[0, 1]])
-                    else:
-                        correct_p = 1-qi/30
-                        correct_p = 0.1
-                        read_err = noise.errors.readout_error.ReadoutError([[correct_p, 1-correct_p],[1-correct_p, correct_p]])
-                    noise_model.add_readout_error(read_err, [qi])
+                noise_model = get_evaluator_info(circ=None,device_name=self.device_name,fields=['noise_model'])['noise_model']
                 # hw_job = Aer.get_backend('qasm_simulator').run(qobj,noise_model=noise_model)
                 hw_job = Aer.get_backend('qasm_simulator').run(qobj)
             jobs.append(hw_job)
@@ -140,8 +136,6 @@ class Scheduler:
         print('*'*20,'Retrieving jobs','*'*20)
         assert len(self.schedule) == len(self.jobs)
         circ_dict = copy.deepcopy(self.circ_dict)
-        for key in circ_dict:
-            circ_dict[key]['hw'] = {}
         memories = {}
         for job_idx in range(len(self.jobs)):
             schedule_item = self.schedule[job_idx]
@@ -165,16 +159,16 @@ class Scheduler:
                         memories[key] = experiment_hw_memory
                 start_idx = end_idx
         for key in circ_dict:
-            full_circ = circ_dict[key]['circ']
+            full_circ = circ_dict[key]['circuit']
             shots = circ_dict[key]['shots']
             memory = memories[key]
             mem_dict = memory_to_dict(memory=memory[:shots])
             hw_prob = dict_to_array(distribution_dict=mem_dict,force_prob=force_prob)
-            circ_dict[key]['hw'] = copy.deepcopy(hw_prob)
+            circ_dict[key]['prob'] = copy.deepcopy(hw_prob)
             # print('Key {} has {:d} qubit circuit, hw has {:d}/{:d} shots'.format(key,len(full_circ.qubits),sum(hw.values()),shots))
             # print('Expecting {:d} shots, got {:d} shots'.format(shots,sum(mem_dict.values())),flush=True)
             if len(full_circ.clbits)>0:
-                assert len(circ_dict[key]['hw']) == 2**len(full_circ.clbits)
+                assert len(circ_dict[key]['prob']) == 2**len(full_circ.clbits)
             else:
-                assert len(circ_dict[key]['hw']) == 2**len(full_circ.qubits)
+                assert len(circ_dict[key]['prob']) == 2**len(full_circ.qubits)
         self.circ_dict = copy.deepcopy(circ_dict)

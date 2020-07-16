@@ -73,13 +73,13 @@ def gen_uccsd(width, parameters='random', seed=None, barriers=False,
     return circ
 
 
-def gen_qft(width, inverse=False, kvals=False, barriers=True, measure=False,
+def gen_qft(width, approximation_degree, inverse=False, kvals=False, barriers=True, measure=False,
             regname=None):
     """
     Generate a QFT (or iQFT) circuit with the given number of qubits
     """
 
-    qft = qft_circ.QFT(width, inverse=inverse, kvals=kvals, barriers=barriers,
+    qft = qft_circ.QFT(width, approximation_degree, inverse=inverse, kvals=kvals, barriers=barriers,
                        measure=measure, regname=regname)
 
     circ = qft.gen_circuit()

@@ -4,13 +4,41 @@ A circuit cutting project
 ## Prerequisites
 
 ```
-conda create -n venv python=3.7
-conda activate venv
-pip install numpy qiskit matplotlib nxpd pydot pillow progressbar2 jupyterlab
-conda install -c conda-forge mpich-mpicc
-pip install mpi4py
+conda create -n cc-env python=3.7.7
+conda activate cc-env
+pip install numpy qiskit==0.17 matplotlib pillow pydot termcolor
 conda config --add channels http://conda.anaconda.org/gurobi
 conda install gurobi
+conda install -c conda-forge mpich-mpicc
+pip install mpi4py
+```
+
+Install Intel MKL
+```
+source /opt/intel/bin/compilervars.sh intel64
+```
+
+On Chai:
+```
+source ~/anaconda3/etc/profile.d/conda.sh
+```
+
+Local:
+```
+source ~/.bash_profile
+```
+
+## Commands
+```
+python master.py --circuit_type supremacy_grid --stage generator --size_range 6 9 --cc_size 5
+
+python master.py --circuit_type supremacy_grid --stage evaluator --size_range 6 9 --cc_size 5 --eval_mode sv
+
+python master.py --circuit_type supremacy_grid --stage process --size_range 6 9 --cc_size 5 --techniques 1 1 8 10 --eval_mode sv
+
+python master.py --circuit_type supremacy_grid --stage verify --size_range 6 9 --cc_size 5 --techniques 1 1 8 10 --eval_mode sv
+
+python master.py --circuit_type supremacy_grid --stage plot --size_range 6 9 --cc_size 5 --techniques 1 1 8 10 --eval_mode sv
 ```
 
 ## Qiskit paralllel test notes:
@@ -18,16 +46,22 @@ conda install gurobi
 - ```max_parallel_experiments``` affects the ```parallel_experiments``` metadata, helps when there are multiple circuits
 - ```max_parallel_shots``` does not change the ```parallel_shots``` parameter, does not affect runtime
 
-## Design choices
-- Always ```assemble``` and ```run```
-- APIs do not reverse default Qiskit orders. Only manually reverse when saving to output.
-- Use as few default parameters as possible
+## Notes
+- More workers need more disk space to store reconstructed_prob
 
 ## TODO
-- [x] Update to be compatible with Qiskit 0.14
-- [ ] Report IBMQ.load_account() warning
-- [x] Edit job_submittor to use same mitigation for each cluster
-- [x] Edit mitigation for robust key names
-- [ ] Implement 'least_squares' mitigation (currently is pseudo inverse)
-- [ ] Fix job_submittor for the new mitigation method
-- [ ] Test if ```assemble``` does any transpilation
+- [x] Add time logs
+- [x] Add plots
+- [ ] Deep parallel
+- [ ] Add `sim_percent` option for `runtime` mdoe
+- [x] Add toggles for techniques
+- [x] Synchronize all plot colors. Use same color for same circuit
+- [x] Add evaluation backend options of `device`, `sv`, and `runtime`
+- [x] Add toggle for `verify` after CC
+- [x] Improve init cost from 6 to 4, adopt new `build` pattern
+- [ ] Improve `horizontal_collapse` (I+Z, I-Z)
+- [ ] Improve `vertical_collapse` (0+1)
+
+## Techniques
+- [ ] Reconstruct largest states? Recurse on largest bins?
+- [ ] Sample, instead of reconstruct?

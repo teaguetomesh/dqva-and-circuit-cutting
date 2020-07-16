@@ -44,11 +44,12 @@ class QFT:
         Qiskit QuantumCircuit that represents the uccsd circuit
     """
 
-    def __init__(self, width, inverse=False, kvals=False, barriers=True,
+    def __init__(self, width, approximation_degree, inverse=False, kvals=False, barriers=True,
                  measure=False, regname=None):
 
         # number of qubits
         self.nq = width
+        self.approximation_degree = approximation_degree
 
         # set flags for circuit generation
         self.inverse = inverse
@@ -116,7 +117,8 @@ class QFT:
                 if self.kvals:
                     self.circ.cu1(k-j+1, self.qr[k], self.qr[j])
                 else:
-                    self.circ.cu1((2*np.pi)/(2**(k-j+1)),self.qr[k],self.qr[j])
+                    if k-j+1<=self.approximation_degree:
+                        self.circ.cu1((2*np.pi)/(2**(k-j+1)),self.qr[k],self.qr[j])
 
             if self.barriers:
                 self.circ.barrier()

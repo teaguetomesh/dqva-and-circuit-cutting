@@ -8,15 +8,15 @@ import numpy as np
 import math
 
 class Basic_Model(object):
-    def __init__(self, n_vertices, edges, vertex_ids, id_vertices, num_cluster, max_cluster_qubit, num_qubits):
+    def __init__(self, n_vertices, edges, vertex_ids, id_vertices, num_subcircuit, max_subcircuit_qubit, num_qubits):
         self.check_graph(n_vertices, edges)
         self.n_vertices = n_vertices
         self.edges = edges
         self.n_edges = len(edges)
         self.vertex_ids = vertex_ids
         self.id_vertices = id_vertices
-        self.num_cluster = num_cluster
-        self.max_cluster_qubit = max_cluster_qubit
+        self.num_subcircuit = num_subcircuit
+        self.max_subcircuit_qubit = max_subcircuit_qubit
         self.num_qubits = num_qubits
 
         self.model = Model('cut_searching')
@@ -31,31 +31,34 @@ class Basic_Model(object):
                     num_in_qubits += 1
             self.vertex_weight[node] = num_in_qubits
 
-        # Indicate if a vertex is in some cluster
+        # Indicate if a vertex is in some subcircuit
         self.vertex_y = []
-        for i in range(num_cluster):
-            cluster_y = []
+        for i in range(num_subcircuit):
+            subcircuit_y = []
             for j in range(n_vertices):
                 j_in_i = self.model.addVar(lb=0.0, ub=1.0, vtype=GRB.BINARY)
-                cluster_y.append(j_in_i)
-            self.vertex_y.append(cluster_y)
+                subcircuit_y.append(j_in_i)
+            self.vertex_y.append(subcircuit_y)
 
-        # Indicate if an edge has one and only one vertex in some cluster
+        # Indicate if an edge has one and only one vertex in some subcircuit
         self.edge_x = []
-        for i in range(num_cluster):
-            cluster_x = []
+        for i in range(num_subcircuit):
+            subcircuit_x = []
             for j in range(self.n_edges):
                 v = self.model.addVar(lb=0.0, ub=1.0, vtype=GRB.BINARY)
-                cluster_x.append(v)
-            self.edge_x.append(cluster_x)
+                subcircuit_x.append(v)
+            self.edge_x.append(subcircuit_x)
         
-        # constraint: each vertex in exactly one cluster
+        # constraint: each vertex in exactly one subcircuit
         for v in range(n_vertices):
-            self.model.addConstr(quicksum([self.vertex_y[i][v] for i in range(num_cluster)]), GRB.EQUAL, 1)
+            self.model.addConstr(quicksum([self.vertex_y[i][v] for i in range(num_subcircuit)]), GRB.EQUAL, 1)
         
-        # constraint: edge_var=1 indicates one and only one vertex of an edge is in cluster
-        # edge_var[cluster][edge] = node_var[cluster][u] XOR node_var[cluster][v]
-        for i in range(num_cluster):
+        # for i in range(1, num_subcircuit):
+        #     self.model.addConstr(quicksum([self.vertex_y[i-1][j] for j in range(n_vertices)]), GRB.LESS_EQUAL, quicksum([self.vertex_y[i][j] for j in range(n_vertices)]))
+        
+        # constraint: edge_var=1 indicates one and only one vertex of an edge is in subcircuit
+        # edge_var[subcircuit][edge] = node_var[subcircuit][u] XOR node_var[subcircuit][v]
+        for i in range(num_subcircuit):
             for e in range(self.n_edges):
                 u, v = self.edges[e]
                 u_vertex_y = self.vertex_y[i][u]
@@ -66,60 +69,70 @@ class Basic_Model(object):
                 self.model.addConstr(self.edge_x[i][e] <= 2-u_vertex_y-v_vertex_y)
 
         # Better (but not best) symmetry-breaking constraints
-        #   Force small-numbered vertices into small-numbered clusters:
-        #     v0: in cluster 0
+        #   Force small-numbered vertices into small-numbered subcircuits:
+        #     v0: in subcircuit 0
         #     v1: in c0 or c1
         #     v2: in c0 or c1 or c2
         #     ....
-        for vertex in range(num_cluster):
-            self.model.addConstr(quicksum([self.vertex_y[cluster][vertex] for cluster in range(vertex+1,num_cluster)]) == 0)
+        for vertex in range(num_subcircuit):
+            self.model.addConstr(quicksum([self.vertex_y[subcircuit][vertex] for subcircuit in range(vertex+1,num_subcircuit)]) == 0)
         
-        self.num_cuts = self.model.addVar(lb=0, ub=self.num_qubits/2, vtype=GRB.INTEGER, name='num_cuts')
+        # NOTE: max cuts is hard coded here
+        self.num_cuts = self.model.addVar(lb=0, ub=10, vtype=GRB.INTEGER, name='num_cuts')
         self.model.addConstr(self.num_cuts == 
         quicksum(
-            [self.edge_x[cluster][i] for i in range(self.n_edges) for cluster in range(num_cluster)]
+            [self.edge_x[subcircuit][i] for i in range(self.n_edges) for subcircuit in range(num_subcircuit)]
             )/2)
         
-        for cluster in range(num_cluster):
-            cluster_original_qubit = self.model.addVar(lb=0, ub=self.max_cluster_qubit, vtype=GRB.INTEGER, name='cluster_input_%d'%cluster)
-            self.model.addConstr(cluster_original_qubit ==
-            quicksum([self.vertex_weight[id_vertices[i]]*self.vertex_y[cluster][i]
+        num_effective_qubits = []
+        for subcircuit in range(num_subcircuit):
+            subcircuit_original_qubit = self.model.addVar(lb=0, ub=self.max_subcircuit_qubit, vtype=GRB.INTEGER, name='subcircuit_input_%d'%subcircuit)
+            self.model.addConstr(subcircuit_original_qubit ==
+            quicksum([self.vertex_weight[id_vertices[i]]*self.vertex_y[subcircuit][i]
             for i in range(self.n_vertices)]))
             
-            cluster_rho_qubits = self.model.addVar(lb=0, ub=self.max_cluster_qubit, vtype=GRB.INTEGER, name='cluster_rho_qubits_%d'%cluster)
-            self.model.addConstr(cluster_rho_qubits ==
-            quicksum([self.edge_x[cluster][i] * self.vertex_y[cluster][self.edges[i][1]]
+            subcircuit_rho_qubits = self.model.addVar(lb=0, ub=self.max_subcircuit_qubit, vtype=GRB.INTEGER, name='subcircuit_rho_qubits_%d'%subcircuit)
+            self.model.addConstr(subcircuit_rho_qubits ==
+            quicksum([self.edge_x[subcircuit][i] * self.vertex_y[subcircuit][self.edges[i][1]]
             for i in range(self.n_edges)]))
 
-            cluster_O_qubits = self.model.addVar(lb=0, ub=self.max_cluster_qubit, vtype=GRB.INTEGER, name='cluster_O_qubits_%d'%cluster)
-            self.model.addConstr(cluster_O_qubits ==
-            quicksum([self.edge_x[cluster][i] * self.vertex_y[cluster][self.edges[i][0]]
+            subcircuit_O_qubits = self.model.addVar(lb=0, ub=self.max_subcircuit_qubit, vtype=GRB.INTEGER, name='subcircuit_O_qubits_%d'%subcircuit)
+            self.model.addConstr(subcircuit_O_qubits ==
+            quicksum([self.edge_x[subcircuit][i] * self.vertex_y[subcircuit][self.edges[i][0]]
             for i in range(self.n_edges)]))
 
-            cluster_d = self.model.addVar(lb=0.1, ub=self.max_cluster_qubit, vtype=GRB.INTEGER, name='cluster_d_%d'%cluster)
-            self.model.addConstr(cluster_d == cluster_original_qubit + cluster_rho_qubits)
+            subcircuit_d = self.model.addVar(lb=0.1, ub=self.max_subcircuit_qubit, vtype=GRB.INTEGER, name='subcircuit_d_%d'%subcircuit)
+            self.model.addConstr(subcircuit_d == subcircuit_original_qubit + subcircuit_rho_qubits)
+
+            num_effective_qubits.append(subcircuit_d-subcircuit_O_qubits)
+
+            lb = 0.0
+            ub = np.log(2)*30+np.log(4)*10+np.log(4)*10
+            ptx, ptf = self.pwl_exp(lb=lb,ub=ub,base=math.e,integer_only=False)
+            collapse_cost_exponent = self.model.addVar(lb=lb, ub=ub, vtype=GRB.CONTINUOUS, name='collapse_cost_exponent_%d'%subcircuit)
+            self.model.addConstr(collapse_cost_exponent == np.log(2)*subcircuit_d+np.log(4)*subcircuit_rho_qubits+np.log(4)*subcircuit_O_qubits)
+            self.model.setPWLObj(collapse_cost_exponent, ptx, ptf)
             
-            lb = 0
-            ub = self.num_qubits*np.log(6)*3
-            ptx, ptf = self.pwl_exp(params=[1,1,0],lb=lb,ub=ub,weight=1)
-            evaluator_cost_exponent = self.model.addVar(lb=lb,ub=ub,vtype=GRB.CONTINUOUS, name='evaluator_cost_exponent_%d'%cluster)
-            self.model.addConstr(evaluator_cost_exponent == np.log(6)*cluster_rho_qubits+np.log(3)*cluster_O_qubits+np.log(2)*cluster_d)
-            self.model.setPWLObj(evaluator_cost_exponent, ptx, ptf)
+            if subcircuit>0:
+                lb = 0
+                ub = self.num_qubits+2*20
+                ptx, ptf = self.pwl_exp(lb=lb,ub=ub,base=2,integer_only=True)
+                build_cost_exponent = self.model.addVar(lb=lb, ub=ub, vtype=GRB.INTEGER, name='build_cost_exponent_%d'%subcircuit)
+                self.model.addConstr(build_cost_exponent == quicksum(num_effective_qubits)+2*self.num_cuts)
+                self.model.setPWLObj(build_cost_exponent, ptx, ptf)
 
         # self.model.setObjective(self.num_cuts,GRB.MINIMIZE)
         self.model.update()
     
-    def pwl_exp(self, params, lb, ub, weight):
-        # Piecewise linear approximation of w*p_0*e^[p_1*(x+p_2)]
+    def pwl_exp(self, lb, ub, base, integer_only):
+        # Piecewise linear approximation of base**x
         ptx = []
         ptf = []
 
-        # NOTE: The granularity greatly affects speed
-        num_pt = int(1e3)
-
-        for i in range(num_pt):
-            x = (ub-lb)/(num_pt-1)*i+lb
-            y = weight*params[0]*np.exp(params[1]*(x+params[2]))
+        x_range = range(lb,ub+1) if integer_only else np.linspace(lb,ub,200)
+        # print('x_range : {}, integer_only : {}'.format(x_range,integer_only))
+        for x in x_range:
+            y = base**x
             ptx.append(x)
             ptf.append(y)
         return ptx, ptf
@@ -134,8 +147,8 @@ class Basic_Model(object):
             assert(u < v)
             assert(u < n_vertices)
     
-    def solve(self):
-        # print('solving for %d clusters'%self.num_cluster)
+    def solve(self,min_postprocessing_cost):
+        # print('solving for %d subcircuits'%self.num_subcircuit)
         # print('model has %d variables, %d linear constraints,%d quadratic constraints, %d general constraints'
         # % (self.model.NumVars,self.model.NumConstrs, self.model.NumQConstrs, self.model.NumGenConstrs))
         # try:
@@ -143,29 +156,34 @@ class Basic_Model(object):
         # except GurobiError:
         #     print(GurobiError)
         #     print(GurobiError.message)
-        self.model.optimize()
+        try:
+            self.model.Params.TimeLimit = 300
+            self.model.Params.cutoff = min_postprocessing_cost
+            self.model.optimize()
+        except (GurobiError, AttributeError, Exception) as e:
+            print('Caught: ' + e.message)
         
         if self.model.solcount > 0:
             self.objective = None
-            self.clusters = None
+            self.subcircuits = None
             self.optimal = (self.model.Status == GRB.OPTIMAL)
             self.runtime = self.model.Runtime
             self.node_count = self.model.nodecount
             self.mip_gap = self.model.mipgap
             self.objective = self.model.ObjVal
 
-            clusters = []
-            for i in range(self.num_cluster):
-                cluster = []
+            subcircuits = []
+            for i in range(self.num_subcircuit):
+                subcircuit = []
                 for j in range(self.n_vertices):
                     if abs(self.vertex_y[i][j].x) > 1e-4:
-                        cluster.append(self.id_vertices[j])
-                clusters.append(cluster)
-            self.clusters = clusters
+                        subcircuit.append(self.id_vertices[j])
+                subcircuits.append(subcircuit)
+            self.subcircuits = subcircuits
 
             cut_edges_idx = []
             cut_edges = []
-            for i in range(self.num_cluster):
+            for i in range(self.num_subcircuit):
                 for j in range(self.n_edges):
                     if abs(self.edge_x[i][j].x) > 1e-4 and j not in cut_edges_idx:
                         cut_edges_idx.append(j)
@@ -182,23 +200,31 @@ class Basic_Model(object):
         print('MIQCP stats:')
         # print('node count:', self.node_count)
         # print('%d vertices %d edges graph. Max qubit = %d'%
-        # (self.n_vertices, self.n_edges, self.cluster_max_qubit))
-        print('%d cuts, %d clusters'%(len(self.cut_edges),self.num_cluster))
+        # (self.n_vertices, self.n_edges, self.max_subcircuit_qubit))
+        print('%d cuts, %d subcircuits'%(len(self.cut_edges),self.num_subcircuit))
 
-        evaluator_cost_verify = 0
-        for i in range(self.num_cluster):
-            cluster_input = self.model.getVarByName('cluster_input_%d'%i)
-            cluster_rho_qubits = self.model.getVarByName('cluster_rho_qubits_%d'%i)
-            cluster_O_qubits = self.model.getVarByName('cluster_O_qubits_%d'%i)
-            cluster_d = self.model.getVarByName('cluster_d_%d'%i)
-            evaluator_cost_exponent = self.model.getVarByName(name='evaluator_cost_exponent_%d'%i)
-            evaluator_cost_verify += 6**cluster_rho_qubits.X*3**cluster_O_qubits.X*2**cluster_d.X
-            
-            # evaluator_cost_verify += cluster_rho_qubits.X
-            print('cluster %d: original input = %.2f, \u03C1_qubits = %.2f, O_qubits = %.2f, d = %.2f, exponent = %.3f' % 
-            (i,cluster_input.X,cluster_rho_qubits.X,cluster_O_qubits.X,cluster_d.X,evaluator_cost_exponent.X))
+        collapse_cost_verify = 0
+        build_cost_verify = 0
+        subcircuit_effective = []
 
-        print('Model objective value = %.3e, should be : %.3e'%(self.objective,evaluator_cost_verify))
+        for i in range(self.num_subcircuit):
+            subcircuit_input = self.model.getVarByName('subcircuit_input_%d'%i)
+            subcircuit_rho_qubits = self.model.getVarByName('subcircuit_rho_qubits_%d'%i)
+            subcircuit_O_qubits = self.model.getVarByName('subcircuit_O_qubits_%d'%i)
+            subcircuit_d = self.model.getVarByName('subcircuit_d_%d'%i)
+            print('subcircuit %d: original input = %.2f, \u03C1_qubits = %.2f, O_qubits = %.2f, d = %.2f, effective = %.2f' % 
+            (i,subcircuit_input.X,subcircuit_rho_qubits.X,subcircuit_O_qubits.X,subcircuit_d.X,subcircuit_d.X-subcircuit_O_qubits.X),end='')
+            collapse_cost_verify += 6**subcircuit_rho_qubits.X*4**subcircuit_O_qubits.X*2**subcircuit_d.X
+            subcircuit_effective.append(subcircuit_d.X-subcircuit_O_qubits.X)
+            if i>0:
+                build_cost_exponent = self.model.getVarByName('build_cost_exponent_%d'%i)
+                print(', build_cost_exponent = %.2f'%build_cost_exponent.X)
+                build_cost_verify += 4**len(self.cut_edges)*2**sum(subcircuit_effective)
+            else:
+                print()
+
+        print('Model objective value = %.2e'%(self.objective))
+        print('Collapse cost verify = %.2e, build cost verify = %.2e, total = %.2e'%(collapse_cost_verify,build_cost_verify,collapse_cost_verify+build_cost_verify))
         # print('mip gap:', self.mip_gap)
         print('runtime:', self.runtime)
 
@@ -290,46 +316,78 @@ def circ_stripping(circ):
             stripped_dag.apply_operation_back(op=vertex.op, qargs=vertex.qargs)
     return dag_to_circuit(stripped_dag)
 
-def find_cuts(circ, max_cluster_qubit):
+def cost_estimate(num_rho_qubits,num_O_qubits,num_d_qubits):
+    num_cuts = sum(num_rho_qubits)
+    num_rho_qubits = np.array(num_rho_qubits)
+    num_O_qubits = np.array(num_O_qubits)
+    num_d_qubits = np.array(num_d_qubits)
+    num_effective_qubits = num_d_qubits - num_O_qubits
+    num_effective_qubits, smart_order = zip(*sorted(zip(num_effective_qubits, range(len(num_d_qubits)))))
+    collapse_cost = 0
+    reconstruction_cost = 0
+    accumulated_kron_len = 1
+    for counter, subcircuit_idx in enumerate(smart_order):
+        rho = num_rho_qubits[subcircuit_idx]
+        O = num_O_qubits[subcircuit_idx]
+        d = num_d_qubits[subcircuit_idx]
+        effective = d - O
+        collapse_cost += 6**rho*4**O*2**d
+        accumulated_kron_len *= 2**effective
+        if counter > 0:
+            reconstruction_cost += accumulated_kron_len
+    reconstruction_cost *= 4**num_cuts
+    return collapse_cost, reconstruction_cost
+
+def find_cuts(circ, max_subcircuit_qubit):
     stripped_circ = circ_stripping(circ)
     n_vertices, edges, vertex_ids, id_vertices = read_circ(stripped_circ)
-    num_qubits = len(circ.qubits)
+    num_qubits = circ.n_qubits
     solution_dict = {}
-        
-    num_cluster = 2
+    min_postprocessing_cost = float('inf')
     
-    kwargs = dict(n_vertices=n_vertices,
-                edges=edges,
-                vertex_ids=vertex_ids,
-                id_vertices=id_vertices,
-                num_cluster=num_cluster,
-                max_cluster_qubit=max_cluster_qubit,
-                num_qubits=num_qubits)
+    # NOTE: max number of subcircuits is hard coded
+    for num_subcircuit in range(2,5):
+        if num_subcircuit*max_subcircuit_qubit-(num_subcircuit-1)<num_qubits or num_subcircuit>num_qubits:
+            # print('%d-qubit circuit %d*%d subcircuits : IMPOSSIBLE'%(num_qubits,num_subcircuit,max_subcircuit_qubit))
+            continue
+        kwargs = dict(n_vertices=n_vertices,
+                    edges=edges,
+                    vertex_ids=vertex_ids,
+                    id_vertices=id_vertices,
+                    num_subcircuit=num_subcircuit,
+                    max_subcircuit_qubit=max_subcircuit_qubit,
+                    num_qubits=num_qubits)
 
-    m = Basic_Model(**kwargs)
-    feasible = m.solve()
-    if not feasible:
-        print('%d-qubit circuit %d-clusters not feasible'%(num_qubits,num_cluster))
-    else:
-        min_objective = m.objective
-        positions = cuts_parser(m.cut_edges, circ)
-        num_rho_qubits = []
-        num_O_qubits = []
-        num_d_qubits = []
-        for i in range(m.num_cluster):
-            cluster_rho_qubits = m.model.getVarByName('cluster_rho_qubits_%d'%i)
-            cluster_O_qubits = m.model.getVarByName('cluster_O_qubits_%d'%i)
-            cluster_d = m.model.getVarByName('cluster_d_%d'%i)
-            num_rho_qubits.append(cluster_rho_qubits.X)
-            num_O_qubits.append(cluster_O_qubits.X)
-            num_d_qubits.append(cluster_d.X)
-        solution_dict = {'model':m,
-        'circ':circ,
-        'searcher_time':m.runtime,
-        'num_rho_qubits':num_rho_qubits,
-        'num_O_qubits':num_O_qubits,
-        'num_d_qubits':num_d_qubits,
-        'objective':m.objective,
-        'positions':positions,
-        'num_cluster':m.num_cluster}
+        m = Basic_Model(**kwargs)
+        feasible = m.solve(min_postprocessing_cost)
+        if not feasible:
+            # print('%d-qubit circuit %d*%d subcircuits : NOT FEASIBLE'%(num_qubits,num_subcircuit,max_subcircuit_qubit),flush=True)
+            continue
+        else:
+            min_objective = m.objective
+            positions = cuts_parser(m.cut_edges, circ)
+            num_rho_qubits = []
+            num_O_qubits = []
+            num_d_qubits = []
+            for i in range(m.num_subcircuit):
+                subcircuit_rho_qubits = m.model.getVarByName('subcircuit_rho_qubits_%d'%i)
+                subcircuit_O_qubits = m.model.getVarByName('subcircuit_O_qubits_%d'%i)
+                subcircuit_d = m.model.getVarByName('subcircuit_d_%d'%i)
+                num_rho_qubits.append(subcircuit_rho_qubits.X)
+                num_O_qubits.append(subcircuit_O_qubits.X)
+                num_d_qubits.append(subcircuit_d.X)
+            collapse_cost, reconstruction_cost = cost_estimate(num_rho_qubits,num_O_qubits,num_d_qubits)
+            # print('%d-qubit circuit %d*%d subcircuits : collapse cost = %.3e reconstruction_cost = %.3e'%(num_qubits,num_subcircuit,max_subcircuit_qubit,collapse_cost,reconstruction_cost),flush=True)
+            cost = collapse_cost + reconstruction_cost
+            if cost < min_postprocessing_cost:
+                min_postprocessing_cost = cost
+                solution_dict = {'model':m,
+                'circ':circ,
+                'searcher_time':m.runtime,
+                'num_rho_qubits':num_rho_qubits,
+                'num_O_qubits':num_O_qubits,
+                'num_d_qubits':num_d_qubits,
+                'objective':m.objective,
+                'positions':positions,
+                'num_subcircuit':m.num_subcircuit}
     return solution_dict
