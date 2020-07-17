@@ -30,11 +30,11 @@ source ~/.bash_profile
 
 ## Commands
 ```
-python master.py --circuit_type supremacy_grid --stage generator --size_range 6 9 --cc_size 5
+python master.py --circuit_type supremacy_grid --stage generator --size_range 6 6 --cc_size 5
 
-python master.py --circuit_type supremacy_grid --stage evaluator --size_range 6 9 --cc_size 5 --eval_mode sv
+python master.py --circuit_type supremacy_grid --stage evaluator --size_range 6 6 --cc_size 5 --eval_mode qasm
 
-python master.py --circuit_type supremacy_grid --stage process --size_range 6 9 --cc_size 5 --techniques 1 1 8 10 --eval_mode sv
+python master.py --circuit_type supremacy_grid --stage process --size_range 6 6 --cc_size 5 --techniques 1 1 8 10 --eval_mode qasm
 
 python master.py --circuit_type supremacy_grid --stage verify --size_range 6 9 --cc_size 5 --techniques 1 1 8 10 --eval_mode sv
 
@@ -59,8 +59,8 @@ python master.py --circuit_type supremacy_grid --stage plot --size_range 6 9 --c
 - [x] Add evaluation backend options of `device`, `sv`, and `runtime`
 - [x] Add toggle for `verify` after CC
 - [x] Improve init cost from 6 to 4, adopt new `build` pattern
-- [ ] Improve `horizontal_collapse` (I+Z, I-Z)
-- [ ] Improve `vertical_collapse` (0+1)
+- [x] Change `scheduler` to use noiseless qasm or real device shots
+- [ ] Send shots memory to correct places
 
 ## Techniques
 - [ ] Reconstruct largest states? Recurse on largest bins?

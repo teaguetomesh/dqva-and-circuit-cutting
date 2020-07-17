@@ -11,9 +11,10 @@ from utils.helper_fun import find_process_jobs, get_dirname, read_file
 
 def generator(circuit_type,all_circ_sizes,cc_size):
     random.Random(4).shuffle(all_circ_sizes)
+    num_generator_workers = 1
     child_processes = []
-    for i in range(8):
-        process_jobs = find_process_jobs(jobs=all_circ_sizes,rank=i,num_workers=8)
+    for rank in range(num_generator_workers):
+        process_jobs = find_process_jobs(jobs=all_circ_sizes,rank=rank,num_workers=num_generator_workers)
         if len(process_jobs)==0:
             continue
         else:
@@ -39,7 +40,7 @@ def evaluator(circuit_type,all_circ_sizes,cc_size,eval_mode):
                 subprocess.run(['rm','-r',eval_folder])
             os.makedirs(eval_folder)
     child_processes = []
-    num_eval_workers = 8
+    num_eval_workers = 1
     for rank in range(num_eval_workers):
         p = subprocess.Popen(args=['python', 'evaluator.py',
         '--circuit_type',circuit_type,
@@ -207,7 +208,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     if args.stage!='generator':
-        assert args.eval_mode=='sv' or 'runtime_' in args.eval_mode or 'ibmq' in args.eval_mode
+        assert args.eval_mode=='qasm' or args.eval_mode=='runtime' or 'ibmq' in args.eval_mode
 
     full_circ_sizes = []
     for full_circ_size in range(args.size_range[0],args.size_range[1]+1):
@@ -230,8 +231,8 @@ if __name__ == '__main__':
         cc_size=args.cc_size,
         eval_mode=args.eval_mode)
 
-        print('-'*50,'Measure','-'*50,flush=True)
-        measure(circuit_type=args.circuit_type,all_circ_sizes=full_circ_sizes,cc_size=args.cc_size,eval_mode=args.eval_mode)
+        # print('-'*50,'Measure','-'*50,flush=True)
+        # measure(circuit_type=args.circuit_type,all_circ_sizes=full_circ_sizes,cc_size=args.cc_size,eval_mode=args.eval_mode)
     elif args.stage=='process':
         print('-'*50,'Distribute Workload','-'*50,flush=True)
         distributor(circuit_type=args.circuit_type,
@@ -240,12 +241,12 @@ if __name__ == '__main__':
         techniques=args.techniques,
         eval_mode=args.eval_mode)
 
-        print('-'*50,'Vertical Collapse','-'*50,flush=True)
-        vertical_collapse(circuit_type=args.circuit_type,all_circ_sizes=full_circ_sizes,
-        cc_size=args.cc_size,techniques=args.techniques,eval_mode=args.eval_mode)
+        # print('-'*50,'Vertical Collapse','-'*50,flush=True)
+        # vertical_collapse(circuit_type=args.circuit_type,all_circ_sizes=full_circ_sizes,
+        # cc_size=args.cc_size,techniques=args.techniques,eval_mode=args.eval_mode)
 
-        print('-'*50,'Build','-'*50,flush=True)
-        bulid(circuit_type=args.circuit_type,all_circ_sizes=full_circ_sizes,cc_size=args.cc_size,techniques=args.techniques,eval_mode=args.eval_mode)
+        # print('-'*50,'Build','-'*50,flush=True)
+        # bulid(circuit_type=args.circuit_type,all_circ_sizes=full_circ_sizes,cc_size=args.cc_size,techniques=args.techniques,eval_mode=args.eval_mode)
     
     elif args.stage=='verify':
         print('-'*50,'Verify','-'*50,flush=True)
