@@ -404,12 +404,6 @@ def generate_subcircuits(subcircuit_op_nodes, complete_path_map, subcircuit_size
         subcircuits[subcircuit_idx].append(instruction=op_node.op,qargs=subcircuit_qargs,cargs=None)
     return subcircuits
 
-def check_valid(circuit):
-    assert circuit.num_unitary_factors()==1
-    dag = circuit_to_dag(circuit)
-    for op_node in dag.topological_op_nodes():
-        assert len(op_node.qargs)<=2 or op_node.op.name=='barrier'
-
 def circuit_stripping(circuit):
     # Remove all single qubit gates and barriers in the circuit
     dag = circuit_to_dag(circuit)
@@ -443,11 +437,10 @@ def cost_estimate(num_rho_qubits,num_O_qubits,num_d_qubits):
     return collapse_cost, reconstruction_cost
 
 def find_cuts(circuit, max_subcircuit_qubit, num_subcircuits, max_cuts):
-    check_valid(circuit=circuit)
     stripped_circ = circuit_stripping(circuit=circuit)
     n_vertices, edges, vertex_ids, id_vertices = read_circ(circuit=stripped_circ)
     num_qubits = circuit.num_qubits
-    solution_dict = {}
+    cut_solution = {}
     min_postprocessing_cost = float('inf')
     
     for num_subcircuit in num_subcircuits:
@@ -488,7 +481,7 @@ def find_cuts(circuit, max_subcircuit_qubit, num_subcircuits, max_cuts):
             cost = reconstruction_cost
             if cost < min_postprocessing_cost:
                 min_postprocessing_cost = cost
-                solution_dict = {'model':m,
+                cut_solution = {'model':m,
                 'circuit':circuit,
                 'subcircuits':subcircuits,
                 'complete_path_map':complete_path_map,
@@ -498,4 +491,4 @@ def find_cuts(circuit, max_subcircuit_qubit, num_subcircuits, max_cuts):
                 'num_d_qubits':num_d_qubits,
                 'objective':m.objective,
                 'positions':positions}
-    return solution_dict
+    return cut_solution
