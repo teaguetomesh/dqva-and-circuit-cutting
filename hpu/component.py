@@ -11,7 +11,7 @@ class ComponentInterface(metaclass=abc.ABCMeta):
         return is_subclass
 
     @abc.abstractmethod
-    def load_input(self, input: dict):
+    def load_input(self, input):
         '''Load in the input'''
         raise NotImplementedError
 
@@ -26,6 +26,6 @@ class ComponentInterface(metaclass=abc.ABCMeta):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def close(self, message:str):
+    def close(self, message: str):
         '''Shut down the component'''
         raise NotImplementedError

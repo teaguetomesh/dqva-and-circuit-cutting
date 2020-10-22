@@ -436,6 +436,30 @@ def cost_estimate(num_rho_qubits,num_O_qubits,num_d_qubits):
     reconstruction_cost *= 4**num_cuts
     return collapse_cost, reconstruction_cost
 
+def get_pairs(complete_path_map):
+    O_rho_pairs = []
+    for input_qubit in complete_path_map:
+        path = complete_path_map[input_qubit]
+        if len(path)>1:
+            for path_ctr, item in enumerate(path[:-1]):
+                O_qubit_tuple = item
+                rho_qubit_tuple = path[path_ctr+1]
+                O_rho_pairs.append((O_qubit_tuple, rho_qubit_tuple))
+    return O_rho_pairs
+
+def get_counter(subcircuits, O_rho_pairs):
+    counter = {}
+    for subcircuit_idx, subcircuit in enumerate(subcircuits):
+        counter[subcircuit_idx] = {'effective':subcircuit.num_qubits,'rho':0,'O':0,'d':subcircuit.num_qubits}
+    for pair in O_rho_pairs:
+        O_qubit, rho_qubit = pair
+        # print(O_qubit,rho_qubit)
+        counter[O_qubit['subcircuit_idx']]['effective'] -= 1
+        counter[O_qubit['subcircuit_idx']]['O'] += 1
+        counter[rho_qubit['subcircuit_idx']]['rho'] += 1
+    # print(counter)
+    return counter
+
 def find_cuts(circuit, max_subcircuit_qubit, num_subcircuits, max_cuts):
     stripped_circ = circuit_stripping(circuit=circuit)
     n_vertices, edges, vertex_ids, id_vertices = read_circ(circuit=stripped_circ)
@@ -475,6 +499,10 @@ def find_cuts(circuit, max_subcircuit_qubit, num_subcircuits, max_cuts):
                 num_rho_qubits.append(subcircuit_rho_qubits.X)
                 num_O_qubits.append(subcircuit_O_qubits.X)
                 num_d_qubits.append(subcircuit_d.X)
+            
+            O_rho_pairs = get_pairs(complete_path_map=complete_path_map)
+            counter = get_counter(subcircuits=subcircuits, O_rho_pairs=O_rho_pairs)
+
             collapse_cost, reconstruction_cost = cost_estimate(num_rho_qubits,num_O_qubits,num_d_qubits)
             # print('%d-qubit circuit %d*%d subcircuits : collapse cost = %.3e reconstruction_cost = %.3e'%(num_qubits,num_subcircuit,max_subcircuit_qubit,collapse_cost,reconstruction_cost),flush=True)
             # cost = collapse_cost + reconstruction_cost
@@ -490,5 +518,6 @@ def find_cuts(circuit, max_subcircuit_qubit, num_subcircuits, max_cuts):
                 'num_O_qubits':num_O_qubits,
                 'num_d_qubits':num_d_qubits,
                 'objective':m.objective,
-                'positions':positions}
+                'positions':positions,
+                'counter':counter}
     return cut_solution
