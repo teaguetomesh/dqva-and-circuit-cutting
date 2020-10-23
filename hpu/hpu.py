@@ -10,7 +10,7 @@ class HPU(ComponentInterface):
         print('}')
         self.ppu = PPU()
         self.nisq = NISQ(token=config['token'],hub=config['hub'],group=config['group'],project=config['project'],device_name=config['device_name'])
-        self.mux = MUX()
+        self.mux = MUX(num_memory=config['num_memory'])
     
     def load_input(self,hpu_input):
         print('--> HPU loading input <--')
@@ -22,12 +22,14 @@ class HPU(ComponentInterface):
         if len(ppu_output)==0:
             self.close(message=message)
         self.nisq.load_input(subcircuits=ppu_output['subcircuits'])
-        nisq_output = self.nisq.run(options=options['nisq'])
         self.mux.load_input(mux_control=ppu_output['mux_control'])
+        # NOTE: this is emulating an online NISQ device in HPU
+        nisq_output = self.nisq.run(options=options['nisq'])
         for key in nisq_output:
             subcircuit_idx,inits,meas = key
             for subcircuit_output in nisq_output[key]['memory']:
                 self.mux.run(options={'subcircuit_idx':subcircuit_idx,'inits':inits,'meas':meas,'output':subcircuit_output})
+                break
         self.close(message='Finished')
     
     def observe(self):
