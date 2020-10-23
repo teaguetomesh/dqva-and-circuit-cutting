@@ -1,3 +1,4 @@
+from qiskit import QuantumCircuit
 from cutqc.initialization import check_valid
 from cutqc.cutter import find_cuts
 from cutqc.evaluator import find_subcircuit_O_rho_qubits, find_all_combinations, get_subcircuit_instance
@@ -13,8 +14,9 @@ class PPU(ComponentInterface):
         pass
     
     def load_input(self,circuit):
-        print('PPU gets circuit:')
+        print('PPU loads input')
         print(circuit)
+        assert isinstance(circuit,QuantumCircuit)
         self.circuit = circuit
         valid = check_valid(circuit=self.circuit)
         assert valid

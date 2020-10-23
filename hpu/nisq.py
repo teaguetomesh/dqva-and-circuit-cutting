@@ -11,6 +11,7 @@ class NISQ(ComponentInterface):
         self.device_name = device_name
 
     def load_input(self,subcircuits):
+        print('NISQ loads input')
         self.nisq_device = Scheduler(circ_dict=subcircuits,token=self.token,hub=self.hub,group=self.group,project=self.project,device_name=self.device_name)
     
     def run(self,options):

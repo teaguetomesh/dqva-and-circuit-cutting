@@ -16,7 +16,7 @@ if __name__ == '__main__':
     nisq_options = {'real_device':False}
 
     hybrid_processor = HPU(config=hpu_config)
-    hybrid_processor.load_input(input={'circuit':circuit})
+    hybrid_processor.load_input(hpu_input={'circuit':circuit})
     hybrid_processor.run(options={
         'ppu':ppu_options,
         'nisq':nisq_options

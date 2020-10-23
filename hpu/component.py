@@ -11,8 +11,8 @@ class ComponentInterface(metaclass=abc.ABCMeta):
         return is_subclass
 
     @abc.abstractmethod
-    def load_input(self, input):
-        '''Load in the input'''
+    def load_input(self, component_input):
+        '''Load the input'''
         raise NotImplementedError
 
     @abc.abstractmethod
