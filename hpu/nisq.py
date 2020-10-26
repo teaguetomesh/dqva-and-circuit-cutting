@@ -10,12 +10,18 @@ class NISQ(ComponentInterface):
         self.project = config['project']
         self.device_name = config['device_name']
         self.real_device = config['real_device']
-    
-    def run(self,subcircuits):
+
+    def process(self,subcircuits):
         self.nisq_device = Scheduler(circ_dict=subcircuits,token=self.token,hub=self.hub,group=self.group,project=self.project,device_name=self.device_name)
         self.nisq_device.run(real_device=self.real_device)
-        self.nisq_device.retrieve(save_memory=True,force_prob=False)
-        return self.nisq_device.circ_dict
+        self.nisq_device.retrieve(save_memory=True,force_prob=True)
+    
+    def run(self):
+        for key in self.nisq_device.circ_dict:
+            subcircuit_idx, inits, meas = key
+            memory = self.nisq_device.circ_dict[key]['memory']
+            for shot_bitstring in memory:
+                yield {'subcircuit_idx':subcircuit_idx, 'inits':inits, 'meas':meas, 'shot_bitstring':shot_bitstring}
     
     def observe(self):
         pass

@@ -109,5 +109,8 @@ def get_subcircuit_instance(subcircuit_idx, subcircuit, combinations):
             else:
                 raise Exception('Illegal measurement basis:',x)
         subcircuit_inst = dag_to_circuit(subcircuit_dag)
-        circ_dict[(subcircuit_idx,tuple(inits),tuple(meas))] = {'circuit':subcircuit_inst,'shots':max(8192,int(2**subcircuit_inst.num_qubits))}
+        # NOTE: Adjust subcircuit shots here
+        num_shots = max(8192,int(2**subcircuit_inst.num_qubits))
+        num_shots = 1
+        circ_dict[(subcircuit_idx,tuple(inits),tuple(meas))] = {'circuit':subcircuit_inst,'shots':num_shots}
     return circ_dict

@@ -23,15 +23,14 @@ class HPU(ComponentInterface):
         For emulation, we compute all NISQ output then process shot by shot
         In reality, this can be done entirely online
         '''
-        self.nisq.run(subcircuits=ppu_output['subcircuits'])
-        # for key in nisq_output:
-        #     subcircuit_idx,inits,meas = key
-        #     mutated_meas = mutate_measurement_basis(meas)
-        #     print(nisq_output[key].keys())
-            # for subcircuit_output in nisq_output[key]['memory']:
-        #         for meas in mutated_meas:
-        #             dram_unit_index = self.mux.run(options={'subcircuit_idx':subcircuit_idx,'inits':inits,'meas':meas,'output':subcircuit_output})
-        #             self.drams[dram_unit_index].load_input()
+        self.nisq.process(subcircuits=ppu_output['subcircuits'])
+        shot_generator = self.nisq.run()
+        while True:
+            try:
+                shot = next(shot_generator)
+            except StopIteration:
+                break
+            print(shot)
         self.close(message='Finished')
     
     def observe(self):
