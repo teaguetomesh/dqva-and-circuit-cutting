@@ -7,13 +7,7 @@ class ComponentInterface(metaclass=abc.ABCMeta):
         functions = ['load_input', 'run', 'observe', 'close']
         for function in functions:
             is_subclass = is_subclass and hasattr(subclass, function) and callable(getattr(subclass, function))
-        is_subclass = is_subclass or NotImplemented
         return is_subclass
-
-    @abc.abstractmethod
-    def load_input(self, component_input):
-        '''Load the input'''
-        raise NotImplementedError
 
     @abc.abstractmethod
     def run(self, options: dict):

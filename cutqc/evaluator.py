@@ -1,6 +1,5 @@
 import itertools
 import numpy as np
-import pickle
 import copy
 from time import time
 import argparse

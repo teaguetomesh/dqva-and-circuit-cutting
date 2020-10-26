@@ -460,7 +460,7 @@ def get_counter(subcircuits, O_rho_pairs):
     # print(counter)
     return counter
 
-def find_cuts(circuit, max_subcircuit_qubit, num_subcircuits, max_cuts):
+def find_cuts(circuit, max_subcircuit_qubit, num_subcircuits, max_cuts, verbose):
     stripped_circ = circuit_stripping(circuit=circuit)
     n_vertices, edges, vertex_ids, id_vertices = read_circ(circuit=stripped_circ)
     num_qubits = circuit.num_qubits
@@ -469,7 +469,8 @@ def find_cuts(circuit, max_subcircuit_qubit, num_subcircuits, max_cuts):
     
     for num_subcircuit in num_subcircuits:
         if num_subcircuit*max_subcircuit_qubit-(num_subcircuit-1)<num_qubits or num_subcircuit>num_qubits:
-            # print('%d-qubit circuit %d*%d subcircuits : IMPOSSIBLE'%(num_qubits,num_subcircuit,max_subcircuit_qubit))
+            if verbose:
+                print('%d-qubit circuit %d*%d subcircuits : IMPOSSIBLE'%(num_qubits,num_subcircuit,max_subcircuit_qubit))
             continue
         kwargs = dict(n_vertices=n_vertices,
                     edges=edges,
@@ -483,9 +484,12 @@ def find_cuts(circuit, max_subcircuit_qubit, num_subcircuits, max_cuts):
         m = MIP_Model(**kwargs)
         feasible = m.solve(min_postprocessing_cost)
         if not feasible:
-            # print('%d-qubit circuit %d*%d subcircuits : NOT FEASIBLE'%(num_qubits,num_subcircuit,max_subcircuit_qubit),flush=True)
+            if verbose:
+                print('%d-qubit circuit %d*%d subcircuits : NOT FEASIBLE'%(num_qubits,num_subcircuit,max_subcircuit_qubit),flush=True)
             continue
         else:
+            if verbose:
+                m.print_stat()
             min_objective = m.objective
             positions = cuts_parser(m.cut_edges, circuit)
             subcircuits, complete_path_map = subcircuits_parser(subcircuit_gates=m.subcircuits_vertices, circuit=circuit)
@@ -504,7 +508,8 @@ def find_cuts(circuit, max_subcircuit_qubit, num_subcircuits, max_cuts):
             counter = get_counter(subcircuits=subcircuits, O_rho_pairs=O_rho_pairs)
 
             collapse_cost, reconstruction_cost = cost_estimate(num_rho_qubits,num_O_qubits,num_d_qubits)
-            # print('%d-qubit circuit %d*%d subcircuits : collapse cost = %.3e reconstruction_cost = %.3e'%(num_qubits,num_subcircuit,max_subcircuit_qubit,collapse_cost,reconstruction_cost),flush=True)
+            if verbose:
+                print('%d-qubit circuit %d*%d subcircuits : collapse cost = %.3e reconstruction_cost = %.3e'%(num_qubits,num_subcircuit,max_subcircuit_qubit,collapse_cost,reconstruction_cost),flush=True)
             # cost = collapse_cost + reconstruction_cost
             cost = reconstruction_cost
             if cost < min_postprocessing_cost:

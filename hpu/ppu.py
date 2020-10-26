@@ -10,25 +10,21 @@ class PPU(ComponentInterface):
     cuts an input circuit
     returns the cut_solution found and control signals for the MUX to attribute shots
     '''
-    def __init__(self):
-        pass
-    
-    def load_input(self,circuit):
-        print('PPU loads input')
-        print(circuit)
-        assert isinstance(circuit,QuantumCircuit)
-        self.circuit = circuit
-        valid = check_valid(circuit=self.circuit)
-        assert valid
+    def __init__(self, config):
+        self.max_subcircuit_qubit = config['max_subcircuit_qubit']
+        self.num_subcircuits = config['num_subcircuits']
+        self.max_cuts = config['max_cuts']
 
-    def run(self,options):
-        print('PPU options : {')
-        [print(x,'=',options[x]) for x in options]
-        print('}')
+    def run(self, circuit):
+        assert isinstance(circuit,QuantumCircuit)
+        valid = check_valid(circuit=circuit)
+        assert valid
+        self.circuit = circuit
+
         cut_solution = find_cuts(circuit=self.circuit,
-        max_subcircuit_qubit=options['max_subcircuit_qubit'],
-        num_subcircuits=options['num_subcircuits'],
-        max_cuts=options['max_cuts'])
+        max_subcircuit_qubit=self.max_subcircuit_qubit,
+        num_subcircuits=self.num_subcircuits,
+        max_cuts=self.max_cuts,verbose=False)
         if len(cut_solution)==0:
             return RuntimeError, 'PPU found no cuts'
         else:
@@ -46,7 +42,10 @@ class PPU(ComponentInterface):
         return {'subcircuits':circ_dict, 'mux_control':all_indexed_combinations}, 'OK'
 
     def observe(self):
-        pass
+        print('PPU info:')
+        print('max_subcircuit_qubit = %d'%self.max_subcircuit_qubit)
+        print('num_subcircuits = {}'.format(self.num_subcircuits))
+        print('max_cuts = %d'%self.max_cuts)
 
     def close(self):
         pass
