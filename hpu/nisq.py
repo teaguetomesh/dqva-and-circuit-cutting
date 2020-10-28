@@ -16,12 +16,14 @@ class NISQ(ComponentInterface):
         self.nisq_device.run(real_device=self.real_device)
         self.nisq_device.retrieve(save_memory=True,force_prob=True)
     
-    def run(self):
+    def run(self, all_indexed_combinations):
         for key in self.nisq_device.circ_dict:
             subcircuit_idx, inits, meas = key
+            inits_meas = (tuple(inits),tuple(meas))
+            combination_index = all_indexed_combinations[subcircuit_idx][inits_meas]
             memory = self.nisq_device.circ_dict[key]['memory']
             for shot_bitstring in memory:
-                yield {'subcircuit_idx':subcircuit_idx, 'inits':inits, 'meas':meas, 'shot_bitstring':shot_bitstring}
+                yield {'subcircuit_idx':subcircuit_idx, 'combination_index':combination_index, 'shot_bitstring':shot_bitstring}
     
     def observe(self):
         pass

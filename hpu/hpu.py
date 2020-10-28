@@ -1,17 +1,13 @@
-from cutqc.evaluator import mutate_measurement_basis
-
 from hpu.component import ComponentInterface
 from hpu.ppu import PPU
 from hpu.nisq import NISQ
-from hpu.mux import MUX
 from hpu.dram import DRAM
 
 class HPU(ComponentInterface):
     def __init__(self,config):
         self.ppu = PPU(config=config['ppu'])
         self.nisq = NISQ(config=config['nisq'])
-        # self.mux = MUX(num_dram=config['num_dram'])
-        # self.drams = [DRAM() for dram_unit_index in range(config['num_dram'])]
+        self.dram = DRAM(config=config['dram'])
     
     def run(self,circuit):
         print('--> HPU running <--')
@@ -24,13 +20,13 @@ class HPU(ComponentInterface):
         In reality, this can be done entirely online
         '''
         self.nisq.process(subcircuits=ppu_output['subcircuits'])
-        shot_generator = self.nisq.run()
+        shot_generator = self.nisq.run(all_indexed_combinations=ppu_output['all_indexed_combinations'])
         while True:
             try:
                 shot = next(shot_generator)
             except StopIteration:
                 break
-            print(shot)
+            self.dram.run(shot=shot)
         self.close(message='Finished')
     
     def observe(self):

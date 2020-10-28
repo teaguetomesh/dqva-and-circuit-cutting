@@ -39,7 +39,7 @@ class PPU(ComponentInterface):
                 combinations, indexed_combinations = find_all_combinations(O_qubits, rho_qubits, subcircuit.qubits)
                 circ_dict.update(get_subcircuit_instance(subcircuit_idx=subcircuit_idx,subcircuit=subcircuit, combinations=combinations))
                 all_indexed_combinations[subcircuit_idx] = indexed_combinations
-        return {'subcircuits':circ_dict, 'mux_control':all_indexed_combinations}, 'OK'
+        return {'subcircuits':circ_dict, 'all_indexed_combinations':all_indexed_combinations}, 'OK'
 
     def observe(self):
         print('PPU info:')

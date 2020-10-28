@@ -15,8 +15,9 @@ if __name__ == '__main__':
     'project':'csc430',
     'device_name':'ibmq_bogota',
     'real_device':False}
+    dram_config = {'save_directory':'./hpu_test'}
 
-    hpu_config = {'ppu':ppu_config,'nisq':nisq_config}
+    hpu_config = {'ppu':ppu_config,'nisq':nisq_config,'dram':dram_config}
 
     hybrid_processor = HPU(config=hpu_config)
     hybrid_processor.run(circuit=circuit)
