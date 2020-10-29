@@ -9,3 +9,4 @@ if __name__ == '__main__':
 
     cutqc = CutQC(circuits={'bv':circuit})
     cutqc.cut(max_subcircuit_qubit=3, num_subcircuits=[2], max_cuts=10)
+    cutqc.evaluate()

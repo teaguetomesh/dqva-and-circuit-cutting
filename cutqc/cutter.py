@@ -516,6 +516,7 @@ def find_cuts(circuit, max_subcircuit_qubit, num_subcircuits, max_cuts, verbose)
                 min_postprocessing_cost = cost
                 cut_solution = {
                 'circuit':circuit,
+                'max_subcircuit_qubit':max_subcircuit_qubit,
                 'subcircuits':subcircuits,
                 'complete_path_map':complete_path_map,
                 'searcher_time':m.runtime,
