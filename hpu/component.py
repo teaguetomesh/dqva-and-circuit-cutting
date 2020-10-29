@@ -10,13 +10,13 @@ class ComponentInterface(metaclass=abc.ABCMeta):
         return is_subclass
 
     @abc.abstractmethod
-    def run(self, options: dict):
-        '''Run and return output'''
+    def run(self, input_content):
+        '''Run the input_content'''
         raise NotImplementedError
 
     @abc.abstractmethod
-    def observe(self):
-        '''Observe the state of the component'''
+    def get_output(self, options):
+        '''Get the output of the component'''
         raise NotImplementedError
 
     @abc.abstractmethod

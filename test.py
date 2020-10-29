@@ -15,7 +15,7 @@ if __name__ == '__main__':
     'project':'csc430',
     'device_name':'ibmq_bogota',
     'real_device':False}
-    dram_config = {'save_directory':'./hpu_test'}
+    dram_config = {'dram_directory':'./hpu_test/dram','snapshot_directory':'./hpu_test/snapshot','approximation_threshold':0.1}
 
     hpu_config = {'ppu':ppu_config,'nisq':nisq_config,'dram':dram_config}
 

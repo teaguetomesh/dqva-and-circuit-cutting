@@ -11,16 +11,17 @@ class HPU(ComponentInterface):
     
     def run(self,circuit):
         print('--> HPU running <--')
-        ppu_output, message = self.ppu.run(circuit=circuit)
+        self.ppu.run(circuit=circuit)
+        ppu_output = self.ppu.get_output()
         if len(ppu_output)==0:
-            self.close(message=message)
+            self.close(message='PPU found no cut solutions')
         '''
         NOTE: this is emulating an online NISQ device in HPU
         For emulation, we compute all NISQ output then process shot by shot
         In reality, this can be done entirely online
         '''
-        self.nisq.process(subcircuits=ppu_output['subcircuits'])
-        shot_generator = self.nisq.run(all_indexed_combinations=ppu_output['all_indexed_combinations'])
+        self.nisq.run(subcircuits=ppu_output['subcircuit_instances'])
+        shot_generator = self.nisq.get_output(all_indexed_combinations=ppu_output['all_indexed_combinations'])
         while True:
             try:
                 shot = next(shot_generator)
@@ -29,7 +30,7 @@ class HPU(ComponentInterface):
             self.dram.run(shot=shot)
         self.close(message='Finished')
     
-    def observe(self):
+    def get_output(self):
         pass
 
     def close(self, message):

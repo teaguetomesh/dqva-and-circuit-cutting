@@ -25,9 +25,7 @@ class PPU(ComponentInterface):
         max_subcircuit_qubit=self.max_subcircuit_qubit,
         num_subcircuits=self.num_subcircuits,
         max_cuts=self.max_cuts,verbose=False)
-        if len(cut_solution)==0:
-            return RuntimeError, 'PPU found no cuts'
-        else:
+        if len(cut_solution)>0:
             full_circuit = cut_solution['circuit']
             subcircuits = cut_solution['subcircuits']
             complete_path_map = cut_solution['complete_path_map']
@@ -39,13 +37,12 @@ class PPU(ComponentInterface):
                 combinations, indexed_combinations = find_all_combinations(O_qubits, rho_qubits, subcircuit.qubits)
                 circ_dict.update(get_subcircuit_instance(subcircuit_idx=subcircuit_idx,subcircuit=subcircuit, combinations=combinations))
                 all_indexed_combinations[subcircuit_idx] = indexed_combinations
-        return {'subcircuits':circ_dict, 'all_indexed_combinations':all_indexed_combinations}, 'OK'
+            cut_solution['subcircuit_instances'] = circ_dict
+            cut_solution['all_indexed_combinations'] = all_indexed_combinations
+        self.cut_solution = cut_solution
 
-    def observe(self):
-        print('PPU info:')
-        print('max_subcircuit_qubit = %d'%self.max_subcircuit_qubit)
-        print('num_subcircuits = {}'.format(self.num_subcircuits))
-        print('max_cuts = %d'%self.max_cuts)
+    def get_output(self):
+        return self.cut_solution
 
     def close(self):
         pass

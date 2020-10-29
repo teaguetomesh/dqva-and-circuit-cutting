@@ -11,22 +11,19 @@ class NISQ(ComponentInterface):
         self.device_name = config['device_name']
         self.real_device = config['real_device']
 
-    def process(self,subcircuits):
-        self.nisq_device = Scheduler(circ_dict=subcircuits,token=self.token,hub=self.hub,group=self.group,project=self.project,device_name=self.device_name)
-        self.nisq_device.run(real_device=self.real_device)
-        self.nisq_device.retrieve(save_memory=True,force_prob=True)
+    def run(self,subcircuits):
+        self.nisq_scheduler = Scheduler(circ_dict=subcircuits,token=self.token,hub=self.hub,group=self.group,project=self.project,device_name=self.device_name)
+        self.nisq_scheduler.run(real_device=self.real_device)
+        self.nisq_scheduler.retrieve(save_memory=True,force_prob=True)
     
-    def run(self, all_indexed_combinations):
-        for key in self.nisq_device.circ_dict:
+    def get_output(self, all_indexed_combinations):
+        for key in self.nisq_scheduler.circ_dict:
             subcircuit_idx, inits, meas = key
             inits_meas = (tuple(inits),tuple(meas))
-            combination_index = all_indexed_combinations[subcircuit_idx][inits_meas]
-            memory = self.nisq_device.circ_dict[key]['memory']
+            subcircuit_instance_index = all_indexed_combinations[subcircuit_idx][inits_meas]
+            memory = self.nisq_scheduler.circ_dict[key]['memory']
             for shot_bitstring in memory:
-                yield {'subcircuit_idx':subcircuit_idx, 'combination_index':combination_index, 'shot_bitstring':shot_bitstring}
-    
-    def observe(self):
-        pass
+                yield {'subcircuit_idx':subcircuit_idx, 'subcircuit_instance_index':subcircuit_instance_index, 'shot_bitstring':shot_bitstring}
 
     def close(self, message):
         pass
