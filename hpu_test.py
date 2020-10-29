@@ -1,5 +1,4 @@
 from hpu.hpu import HPU
-from hpu.component import ComponentInterface
 
 from helper_functions.non_ibmq_functions import generate_circ
 import matplotlib.pyplot as plt

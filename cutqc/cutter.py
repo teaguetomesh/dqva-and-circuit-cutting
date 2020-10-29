@@ -514,7 +514,7 @@ def find_cuts(circuit, max_subcircuit_qubit, num_subcircuits, max_cuts, verbose)
             cost = reconstruction_cost
             if cost < min_postprocessing_cost:
                 min_postprocessing_cost = cost
-                cut_solution = {'model':m,
+                cut_solution = {
                 'circuit':circuit,
                 'subcircuits':subcircuits,
                 'complete_path_map':complete_path_map,
