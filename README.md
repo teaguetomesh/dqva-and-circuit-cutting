@@ -6,6 +6,9 @@ Install Intel MKL
 source /opt/intel/bin/compilervars.sh intel64
 ```
 
+## Todo
+- [ ] Write the cutQC package
+
 # HPU
 A hybrid processing unit
 ## Todo
