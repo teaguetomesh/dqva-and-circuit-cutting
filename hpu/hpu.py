@@ -1,3 +1,5 @@
+import os, subprocess
+
 from hpu.component import ComponentInterface
 from hpu.ppu import PPU
 from hpu.nisq import NISQ
@@ -8,6 +10,13 @@ class HPU(ComponentInterface):
         self.ppu = PPU(config=config['ppu'])
         self.nisq = NISQ(config=config['nisq'])
         self.dram = DRAM(config=config['dram'])
+
+        dram_directory = config['dram']['dram_directory']
+        snapshot_directory = config['dram']['snapshot_directory']
+        for directory in [dram_directory,snapshot_directory]:
+            if os.path.exists(directory):
+                subprocess.run(['rm','-r',directory])
+            os.makedirs(directory)
     
     def run(self,circuit):
         print('--> HPU running <--')
@@ -27,7 +36,9 @@ class HPU(ComponentInterface):
                 shot = next(shot_generator)
             except StopIteration:
                 break
+            print('subcircuit instance %d_%d state %d'%(shot['subcircuit_idx'],shot['subcircuit_instance_index'],int(shot['shot_bitstring'],2)))
             self.dram.run(shot=shot)
+            self.dram.get_output(options={'subcircuit_idx':shot['subcircuit_idx'],'subcircuit_instance_index':shot['subcircuit_instance_index']})
         self.close(message='Finished')
     
     def get_output(self):
