@@ -1,4 +1,4 @@
-import os, subprocess, pickle
+import os, subprocess, pickle, glob
 
 from helper_functions.non_ibmq_functions import evaluate_circ
 
@@ -35,6 +35,7 @@ class CutQC:
     
     def evaluate(self):
         self._run_subcircuits()
+        self._measure()
     
     def _run_subcircuits(self):
         for circuit_name in self.circuits:
@@ -66,6 +67,7 @@ class CutQC:
                 for meas in mutated_meas:
                     index = all_indexed_combinations[subcircuit_idx][(tuple(inits),tuple(meas))]
                     eval_file_name = '%s/raw_%d_%d.txt'%(eval_folder,subcircuit_idx,index)
+                    # print('running',eval_file_name)
                     eval_file = open(eval_file_name,'w')
                     eval_file.write('d=%d effective=%d\n'%(counter[subcircuit_idx]['d'],counter[subcircuit_idx]['effective']))
                     [eval_file.write('%s '%x) for x in inits]
@@ -74,3 +76,20 @@ class CutQC:
                     eval_file.write('\n')
                     [eval_file.write('%e '%x) for x in subcircuit_inst_prob]
                     eval_file.close()
+    
+    def _measure(self):
+        subprocess.run(['rm','./cutqc/measure'])
+        subprocess.run(['icc','./cutqc/measure.c','-o','./cutqc/measure','-lm'])
+
+        for circuit_name in self.circuits:
+            full_circuit = self.circuits[circuit_name]['circuit']
+            subcircuits = self.circuits[circuit_name]['subcircuits']
+            max_subcircuit_qubit = self.circuits[circuit_name]['max_subcircuit_qubit']
+
+            eval_folder = get_dirname(circuit_name=circuit_name,max_subcircuit_qubit=max_subcircuit_qubit,
+            early_termination=None,num_workers=None,eval_mode='sv',qubit_limit=None,field='evaluator')
+            for subcircuit_idx in range(len(subcircuits)):
+                eval_files = glob.glob('%s/raw_%d_*.txt'%(eval_folder,subcircuit_idx))
+                eval_files = [str(x) for x in range(len(eval_files))]
+                subprocess.run(args=['./cutqc/measure', '0', eval_folder,
+                '%d'%full_circuit.num_qubits,'%d'%subcircuit_idx, '%d'%len(eval_files), *eval_files])
