@@ -20,10 +20,10 @@ class NISQ(ComponentInterface):
         for key in self.nisq_scheduler.circ_dict:
             subcircuit_idx, inits, meas = key
             inits_meas = (tuple(inits),tuple(meas))
-            subcircuit_instance_index = all_indexed_combinations[subcircuit_idx][inits_meas]
+            subcircuit_instance_idx = all_indexed_combinations[subcircuit_idx][inits_meas]
             memory = self.nisq_scheduler.circ_dict[key]['memory']
             for shot_bitstring in memory:
-                yield {'subcircuit_idx':subcircuit_idx, 'subcircuit_instance_index':subcircuit_instance_index, 'shot_bitstring':shot_bitstring}
+                yield {'subcircuit_idx':subcircuit_idx, 'subcircuit_instance_idx':subcircuit_instance_idx, 'shot_bitstring':shot_bitstring}
 
     def close(self, message):
         pass

@@ -111,6 +111,5 @@ def get_subcircuit_instance(subcircuit_idx, subcircuit, combinations):
         subcircuit_inst = dag_to_circuit(subcircuit_dag)
         # NOTE: Adjust subcircuit shots here
         num_shots = max(8192,int(2**subcircuit_inst.num_qubits))
-        num_shots = 5
         circ_dict[(subcircuit_idx,tuple(inits),tuple(meas))] = {'circuit':subcircuit_inst,'shots':num_shots}
     return circ_dict

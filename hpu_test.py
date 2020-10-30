@@ -5,9 +5,9 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 if __name__ == '__main__':
-    circuit = generate_circ(full_circ_size=5,circuit_type='bv')
+    circuit = generate_circ(full_circ_size=6,circuit_type='supremacy')
 
-    ppu_config = {'max_subcircuit_qubit':3,'num_subcircuits':[2],'max_cuts':10}
+    ppu_config = {'max_subcircuit_qubit':5,'num_subcircuits':[2,3],'max_cuts':10,'verbose':True}
     nisq_config = {'token':'5a928096df5e3c865028e0fc0908fb7c324846d5f135c0d1db304639fa2f701d919fc0cdbcd5824104e28cbc695d7a7993fd38887c1b286af56acd6a21653e78',
     'hub':'ibm-q-ornl',
     'group':'anl',
@@ -15,8 +15,9 @@ if __name__ == '__main__':
     'device_name':'ibmq_bogota',
     'real_device':False}
     dram_config = {'dram_directory':'./hpu_test/dram','snapshot_directory':'./hpu_test/snapshot','approximation_threshold':0.1}
+    compute_config = {}
 
-    hpu_config = {'ppu':ppu_config,'nisq':nisq_config,'dram':dram_config}
+    hpu_config = {'ppu':ppu_config,'nisq':nisq_config,'dram':dram_config,'compute':compute_config}
 
     hybrid_processor = HPU(config=hpu_config)
     hybrid_processor.run(circuit=circuit)

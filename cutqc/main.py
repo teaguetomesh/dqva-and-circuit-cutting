@@ -39,7 +39,7 @@ class CutQC:
         self._measure()
         self._organize(num_workers=1)
         self._vertical_collapse(early_termination=0)
-        self._vertical_collapse(early_termination=1)
+        # self._vertical_collapse(early_termination=1)
     
     def _run_subcircuits(self):
         for circuit_name in self.circuits:
