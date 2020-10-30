@@ -34,6 +34,7 @@ class HPU(ComponentInterface):
         self.nisq.run(subcircuits=ppu_output['subcircuit_instances'])
         shot_generator = self.nisq.get_output(all_indexed_combinations=ppu_output['all_indexed_combinations'])
         shots_ctr = 0
+        self.total_compute_required = 0
         while True:
             try:
                 shot = next(shot_generator)
@@ -43,12 +44,15 @@ class HPU(ComponentInterface):
             # TODO: frequency of update is hardcoded for now
             if shots_ctr%50==49:
                 flagged_states = self.dram.get_output(options={'subcircuit_idx':shot['subcircuit_idx'],'subcircuit_instance_idx':shot['subcircuit_instance_idx'],'top_k':3})
-                self.compute.run(kronecker_terms=ppu_output['kronecker_terms'],flagged_states=flagged_states)
+                compute_required = self.compute.run(kronecker_terms=ppu_output['kronecker_terms'],summation_terms=ppu_output['summation_terms'],counter=ppu_output['counter'],flagged_states=flagged_states)
+                self.total_compute_required += compute_required
             shots_ctr += 1
+        print('Online update requires %d compute, offline requires %d compute'%(self.total_compute_required,ppu_output['cost_estimate']))
+        self.offline_cost = ppu_output['cost_estimate']
         self.close(message='Finished')
     
     def get_output(self):
-        pass
+        return self.total_compute_required, self.offline_cost
 
     def close(self, message):
         print('--> HPU shuts down <--')

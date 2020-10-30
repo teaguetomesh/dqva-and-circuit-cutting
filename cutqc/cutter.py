@@ -525,5 +525,6 @@ def find_cuts(circuit, max_subcircuit_qubit, num_subcircuits, max_cuts, verbose)
                 'num_d_qubits':num_d_qubits,
                 'objective':m.objective,
                 'positions':positions,
-                'counter':counter}
+                'counter':counter,
+                'cost_estimate':cost}
     return cut_solution

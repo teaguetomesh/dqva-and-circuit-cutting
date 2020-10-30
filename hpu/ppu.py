@@ -43,9 +43,10 @@ class PPU(ComponentInterface):
             cut_solution['all_indexed_combinations'] = all_indexed_combinations
 
             O_rho_pairs, combinations = get_combinations(complete_path_map=complete_path_map)
-            kronecker_terms, _ = build(full_circuit=full_circuit, combinations=combinations,
+            kronecker_terms, summation_terms = build(full_circuit=full_circuit, combinations=combinations,
             O_rho_pairs=O_rho_pairs, subcircuits=subcircuits, all_indexed_combinations=all_indexed_combinations)
             cut_solution['kronecker_terms'] = kronecker_terms
+            cut_solution['summation_terms'] = summation_terms
 
         self.cut_solution = cut_solution
 

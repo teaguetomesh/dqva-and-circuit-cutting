@@ -116,13 +116,12 @@ def build(full_circuit, combinations, O_rho_pairs, subcircuits, all_indexed_comb
                 subcircuit_kron_term.append((coefficient,subcircuit_inst_index))
                 # print(coefficient,init_meas)
             subcircuit_kron_term = tuple(subcircuit_kron_term)
-            # print('Subcircuit_%d kron term %d ='%(subcircuit_idx,subcircuit_inst_index),subcircuit_kron_term)
             if subcircuit_kron_term not in kronecker_terms[subcircuit_idx]:
                 subcircuit_kron_index = len(kronecker_terms[subcircuit_idx])
                 kronecker_terms[subcircuit_idx][subcircuit_kron_term] = subcircuit_kron_index
             else:
                 subcircuit_kron_index = kronecker_terms[subcircuit_idx][subcircuit_kron_term]
-            # summation_term.append(subcircuit_kron_index)
+            # print('Subcircuit_%d kron term %d ='%(subcircuit_idx,subcircuit_kron_index),subcircuit_kron_term)
             summation_term[subcircuit_idx] = subcircuit_kron_index
         # print('Summation term =',summation_term,'\n')
         summation_terms.append(summation_term)
