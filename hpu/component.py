@@ -4,7 +4,7 @@ class ComponentInterface(metaclass=abc.ABCMeta):
     @classmethod
     def __subclasshook__(cls, subclass):
         is_subclass = True
-        functions = ['load_input', 'run', 'observe', 'close']
+        functions = ['run', 'get_output', 'close']
         for function in functions:
             is_subclass = is_subclass and hasattr(subclass, function) and callable(getattr(subclass, function))
         return is_subclass

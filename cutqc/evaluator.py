@@ -7,7 +7,7 @@ from termcolor import colored
 from qiskit.converters import circuit_to_dag, dag_to_circuit
 from qiskit.circuit.library.standard_gates import HGate, SGate, SdgGate, XGate
 
-from helper_functions.non_ibmq_functions import read_dict, find_process_jobs, evaluate_circ
+from qiskit_helper_functions.non_ibmq_functions import read_dict, find_process_jobs, evaluate_circ
 
 def find_subcircuit_O_rho_qubits(complete_path_map,subcircuit_idx):
     O_qubits = []

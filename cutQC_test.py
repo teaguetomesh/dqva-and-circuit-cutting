@@ -1,5 +1,4 @@
-from helper_functions.non_ibmq_functions import generate_circ
-import matplotlib.pyplot as plt
+from qiskit_helper_functions.non_ibmq_functions import generate_circ
 import numpy as np
 
 from cutqc.main import CutQC

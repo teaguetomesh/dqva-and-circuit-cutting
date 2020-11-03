@@ -1,6 +1,6 @@
 import os, subprocess, pickle, glob
 
-from helper_functions.non_ibmq_functions import evaluate_circ, read_dict, find_process_jobs
+from qiskit_helper_functions.non_ibmq_functions import evaluate_circ, read_dict, find_process_jobs
 
 from cutqc.initialization import check_valid
 from cutqc.cutter import find_cuts
@@ -39,7 +39,7 @@ class CutQC:
         self._measure()
         self._organize(num_workers=1)
         self._vertical_collapse(early_termination=0)
-        # self._vertical_collapse(early_termination=1)
+        self._vertical_collapse(early_termination=1)
     
     def _run_subcircuits(self):
         for circuit_name in self.circuits:
