@@ -1,12 +1,11 @@
-import os, subprocess, pickle, glob
+import os, subprocess, pickle, glob, random
 
 from qiskit_helper_functions.non_ibmq_functions import evaluate_circ, read_dict, find_process_jobs
 
-from cutqc.initialization import check_valid
+from cutqc.helper_fun import check_valid, get_dirname
 from cutqc.cutter import find_cuts
 from cutqc.evaluator import find_subcircuit_O_rho_qubits, find_all_combinations, get_subcircuit_instance, mutate_measurement_basis
 from cutqc.post_process import get_combinations, build
-from cutqc.file_manage import get_dirname
 
 class CutQC:
     def __init__(self, circuits):
@@ -34,14 +33,14 @@ class CutQC:
             os.makedirs(dirname)
             pickle.dump(cut_solution, open('%s/subcircuits.pckl'%(dirname),'wb'))
     
-    def evaluate(self):
-        self._run_subcircuits()
+    def evaluate(self,num_workers,eval_mode):
+        self._run_subcircuits(eval_mode=eval_mode)
         self._measure()
-        self._organize(num_workers=1)
+        self._organize(num_workers=num_workers)
         self._vertical_collapse(early_termination=0)
         self._vertical_collapse(early_termination=1)
     
-    def _run_subcircuits(self):
+    def _run_subcircuits(self,eval_mode):
         for circuit_name in self.circuits:
             full_circuit = self.circuits[circuit_name]['circuit']
             max_subcircuit_qubit = self.circuits[circuit_name]['max_subcircuit_qubit']
@@ -50,7 +49,7 @@ class CutQC:
             counter = self.circuits[circuit_name]['counter']
 
             eval_folder = get_dirname(circuit_name=circuit_name,max_subcircuit_qubit=max_subcircuit_qubit,
-            early_termination=None,num_workers=None,eval_mode='sv',qubit_limit=None,field='evaluator')
+            early_termination=None,num_workers=None,eval_mode=eval_mode,qubit_limit=None,field='evaluator')
             if os.path.exists(eval_folder):
                 subprocess.run(['rm','-r',eval_folder])
             os.makedirs(eval_folder)
@@ -96,10 +95,14 @@ class CutQC:
             for subcircuit_idx in range(len(subcircuits)):
                 eval_files = glob.glob('%s/raw_%d_*.txt'%(eval_folder,subcircuit_idx))
                 eval_files = [str(x) for x in range(len(eval_files))]
-                subprocess.run(args=['./cutqc/measure', '0', eval_folder,
+                rank = 0
+                subprocess.run(args=['./cutqc/measure', '%d'%rank, eval_folder,
                 '%d'%full_circuit.num_qubits,'%d'%subcircuit_idx, '%d'%len(eval_files), *eval_files])
     
     def _organize(self, num_workers):
+        '''
+        Organize parallel processing for the subsequent vertical collapse procedure
+        '''
         for circuit_name in self.circuits:
             full_circuit = self.circuits[circuit_name]['circuit']
             max_subcircuit_qubit = self.circuits[circuit_name]['max_subcircuit_qubit']

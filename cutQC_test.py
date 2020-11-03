@@ -8,4 +8,4 @@ if __name__ == '__main__':
 
     cutqc = CutQC(circuits={'supremacy':circuit})
     cutqc.cut(max_subcircuit_qubit=5, num_subcircuits=[2,3], max_cuts=10)
-    cutqc.evaluate()
+    cutqc.evaluate(num_workers=1,eval_mode='sv')
