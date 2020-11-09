@@ -87,6 +87,15 @@ class CutQC:
                 reconstructed_prob = self._build(full_circuit=full_circuit,circuit_name=circuit_name,max_subcircuit_qubit=max_subcircuit_qubit,
                 dest_folder=dest_folder,recursion_layer=recursion_layer)
     
+    def verify(self,circuit_name, max_subcircuit_qubit, early_termination, num_workers, qubit_limit, eval_mode):
+        subprocess.run(['python','-m','cutqc.verify',
+        '--circuit_name',circuit_name,
+        '--max_subcircuit_qubit',str(max_subcircuit_qubit),
+        '--early_termination',str(early_termination),
+        '--num_workers',str(num_workers),
+        '--qubit_limit',str(qubit_limit),
+        '--eval_mode',eval_mode])
+    
     def _run_subcircuits(self,eval_mode):
         for circuit_name in self.circuits:
             full_circuit = self.circuits[circuit_name]['circuit']
