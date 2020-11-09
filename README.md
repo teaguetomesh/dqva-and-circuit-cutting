@@ -20,7 +20,7 @@ source /opt/intel/bin/compilervars.sh intel64
 ```
 
 ## Todo
-- [ ] Update codes with the new helper functions package
+- [x] Update codes with the new helper functions package
 - [ ] Write the cutQC package
 
 # HPU

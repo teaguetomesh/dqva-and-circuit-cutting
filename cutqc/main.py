@@ -33,12 +33,48 @@ class CutQC:
             os.makedirs(dirname)
             pickle.dump(cut_solution, open('%s/subcircuits.pckl'%(dirname),'wb'))
     
-    def evaluate(self,num_workers,eval_mode):
+    def evaluate(self,num_workers,eval_mode,early_termination):
         self._run_subcircuits(eval_mode=eval_mode)
-        self._measure()
-        self._organize(num_workers=num_workers)
-        self._vertical_collapse(early_termination=0)
-        self._vertical_collapse(early_termination=1)
+        self._measure(eval_mode=eval_mode)
+        self._organize(num_workers=num_workers,eval_mode=eval_mode)
+        if 0 in early_termination:
+            self._vertical_collapse(early_termination=0,eval_mode=eval_mode)
+        if 1 in early_termination:
+            self._vertical_collapse(early_termination=1,eval_mode=eval_mode)
+    
+    def post_process(self,num_workers,eval_mode,early_termination,qubit_limit,recursion_depth):
+        subprocess.run(['rm','./cutqc/merge'])
+        subprocess.run(['icc','-mkl','./cutqc/merge.c','-o','./cutqc/merge','-lm'])
+        subprocess.run(['rm','./cutqc/build'])
+        subprocess.run(['icc','-fopenmp','-mkl','-lpthread','-march=native','./cutqc/build.c','-o','./cutqc/build','-lm'])
+
+        for circuit_name in self.circuits:
+            full_circuit = self.circuits[circuit_name]['circuit']
+            max_subcircuit_qubit = self.circuits[circuit_name]['max_subcircuit_qubit']
+            subcircuits = self.circuits[circuit_name]['subcircuits']
+            complete_path_map = self.circuits[circuit_name]['complete_path_map']
+            counter = self.circuits[circuit_name]['counter']
+
+            print('-'*10,'%d-qubit %s on %d-q NISQ'%(full_circuit.num_qubits,circuit_name,max_subcircuit_qubit),'-'*10,flush=True)
+
+            dest_folder = get_dirname(circuit_name=circuit_name,max_subcircuit_qubit=max_subcircuit_qubit,
+            early_termination=early_termination,num_workers=num_workers,eval_mode=eval_mode,qubit_limit=qubit_limit,field='build')
+
+            if os.path.exists('%s'%dest_folder):
+                subprocess.run(['rm','-r',dest_folder])
+            os.makedirs(dest_folder)
+
+            vertical_collapse_folder = get_dirname(circuit_name=circuit_name,max_subcircuit_qubit=max_subcircuit_qubit,
+            early_termination=early_termination,num_workers=None,eval_mode=eval_mode,qubit_limit=None,field='vertical_collapse')
+
+            for recursion_layer in range(recursion_depth):
+                print('--> Recursion layer %d <--'%(recursion_layer),flush=True)
+                print('__Distribute Workload__',flush=True)
+                subprocess.run(args=['python', '-m','cutqc.distributor',
+                '--circuit_name',circuit_name,'--max_subcircuit_qubit',str(max_subcircuit_qubit),'--early_termination',str(early_termination),
+                '--recursion_layer',str(recursion_layer),'--qubit_limit',str(qubit_limit),'--num_workers',str(num_workers),
+                '--eval_mode',eval_mode])
+                print('__Merge__',flush=True)
     
     def _run_subcircuits(self,eval_mode):
         for circuit_name in self.circuits:
@@ -81,7 +117,7 @@ class CutQC:
                     eval_file.close()
             pickle.dump(all_indexed_combinations, open('%s/all_indexed_combinations.pckl'%(eval_folder),'wb'))
     
-    def _measure(self):
+    def _measure(self, eval_mode):
         subprocess.run(['rm','./cutqc/measure'])
         subprocess.run(['icc','./cutqc/measure.c','-o','./cutqc/measure','-lm'])
 
@@ -91,7 +127,7 @@ class CutQC:
             max_subcircuit_qubit = self.circuits[circuit_name]['max_subcircuit_qubit']
 
             eval_folder = get_dirname(circuit_name=circuit_name,max_subcircuit_qubit=max_subcircuit_qubit,
-            early_termination=None,num_workers=None,eval_mode='sv',qubit_limit=None,field='evaluator')
+            early_termination=None,num_workers=None,eval_mode=eval_mode,qubit_limit=None,field='evaluator')
             for subcircuit_idx in range(len(subcircuits)):
                 eval_files = glob.glob('%s/raw_%d_*.txt'%(eval_folder,subcircuit_idx))
                 eval_files = [str(x) for x in range(len(eval_files))]
@@ -99,7 +135,7 @@ class CutQC:
                 subprocess.run(args=['./cutqc/measure', '%d'%rank, eval_folder,
                 '%d'%full_circuit.num_qubits,'%d'%subcircuit_idx, '%d'%len(eval_files), *eval_files])
     
-    def _organize(self, num_workers):
+    def _organize(self, num_workers, eval_mode):
         '''
         Organize parallel processing for the subsequent vertical collapse procedure
         '''
@@ -111,7 +147,7 @@ class CutQC:
             counter = self.circuits[circuit_name]['counter']
 
             eval_folder = get_dirname(circuit_name=circuit_name,max_subcircuit_qubit=max_subcircuit_qubit,
-            early_termination=None,num_workers=None,eval_mode='sv',qubit_limit=None,field='evaluator')
+            early_termination=None,num_workers=None,eval_mode=eval_mode,qubit_limit=None,field='evaluator')
 
             all_indexed_combinations = read_dict(filename='%s/all_indexed_combinations.pckl'%(eval_folder))
             O_rho_pairs, combinations = get_combinations(complete_path_map=complete_path_map)
@@ -133,7 +169,7 @@ class CutQC:
                         print('Rank %d needs to vertical collapse %d/%d instances of subcircuit %d'%(rank,len(rank_subcircuit_kron_terms),len(kronecker_terms[subcircuit_idx]),subcircuit_idx),flush=True)
                 subcircuit_kron_terms_file.close()
     
-    def _vertical_collapse(self,early_termination):
+    def _vertical_collapse(self,early_termination,eval_mode):
         subprocess.run(['rm','./cutqc/vertical_collapse'])
         subprocess.run(['icc','-mkl','./cutqc/vertical_collapse.c','-o','./cutqc/vertical_collapse','-lm'])
 
@@ -145,9 +181,9 @@ class CutQC:
             counter = self.circuits[circuit_name]['counter']
 
             eval_folder = get_dirname(circuit_name=circuit_name,max_subcircuit_qubit=max_subcircuit_qubit,
-            early_termination=None,num_workers=None,eval_mode='sv',qubit_limit=None,field='evaluator')
+            early_termination=None,num_workers=None,eval_mode=eval_mode,qubit_limit=None,field='evaluator')
             vertical_collapse_folder = get_dirname(circuit_name=circuit_name,max_subcircuit_qubit=max_subcircuit_qubit,
-            early_termination=early_termination,num_workers=None,eval_mode='sv',qubit_limit=None,field='vertical_collapse')
+            early_termination=early_termination,num_workers=None,eval_mode=eval_mode,qubit_limit=None,field='vertical_collapse')
 
             rank_files = glob.glob('%s/subcircuit_kron_terms_*.txt'%eval_folder)
             if len(rank_files)==0:
