@@ -40,7 +40,7 @@ class CutQC:
     
     def evaluate(self,circuit_cases,eval_mode,num_workers,early_termination,ibmq):
         self._run_subcircuits(circuit_cases=circuit_cases,eval_mode=eval_mode,num_workers=num_workers,ibmq=ibmq)
-        # self._measure(eval_mode=eval_mode)
+        self._measure(eval_mode=eval_mode)
         # self._organize(num_workers=num_workers,eval_mode=eval_mode)
         # if 0 in early_termination:
         #     self._vertical_collapse(early_termination=0,eval_mode=eval_mode)
@@ -137,9 +137,10 @@ class CutQC:
                 pool = mp.Pool(processes=num_workers)
                 pool.starmap(simulate_subcircuit,data,chunksize=chunksize)
             elif 'ibmq' in eval_mode:
+                # NOTE: control whether to use real device
                 scheduler = Scheduler(circ_dict=circ_dict,
                 token=ibmq['token'],hub=ibmq['hub'],group=ibmq['group'],project=ibmq['project'],device_name=eval_mode,datetime=datetime.now())
-                scheduler.submit_jobs(real_device=False,transpilation=True,verbose=True)
+                scheduler.submit_jobs(real_device=True,transpilation=True,verbose=True)
                 scheduler.retrieve_jobs(force_prob=True,save_memory=False,save_directory=None,verbose=True)
                 data = []
                 for key in scheduler.circ_dict:
