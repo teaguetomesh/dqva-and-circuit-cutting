@@ -152,8 +152,8 @@ if __name__ == '__main__':
     all_chi2 = {}
     ordered = {}
 
-    fig, axs = plt.subplots(2, 2)
-    recursion_ax = {0:axs[0,0],1:axs[0,1],2:axs[1,0],3:axs[1,1]}
+    # fig, axs = plt.subplots(2, 2)
+    # recursion_ax = {0:axs[0,0],1:axs[0,1],2:axs[1,0],3:axs[1,1]}
 
     for recursion_layer in range(recursion_depth):
         print('Recursion layer %d'%recursion_layer)
@@ -183,21 +183,21 @@ if __name__ == '__main__':
             blurred_chi2,cumulative_chi2,verify_chi2))
 
         xdata = np.arange(2**full_circuit.num_qubits)
-        recursion_ax[recursion_layer].plot(xdata,sv,'k--',label='Ground Truth')
-        recursion_ax[recursion_layer].bar(xdata, ordered_list, label='Recursion %d'%(recursion_layer+1))
-        recursion_ax[recursion_layer].set_ylim(0,max(sv)*1.1)
-        recursion_ax[recursion_layer].legend()
-        recursion_ax[recursion_layer].set_xticks(x_ticks_to_plot)
-        recursion_ax[recursion_layer].set_xticklabels(x_ticks_to_plot)
-        recursion_ax[recursion_layer].tick_params(axis='y', labelsize=13)
-        recursion_ax[recursion_layer].tick_params(axis='x', labelsize=13)
-        if recursion_layer==0 or recursion_layer==2:
-            recursion_ax[recursion_layer].set_ylabel('Probability',fontsize=13)
-        if recursion_layer==2 or recursion_layer==3:
-            recursion_ax[recursion_layer].set_xlabel('Output States',fontsize=13)
+        # recursion_ax[recursion_layer].plot(xdata,sv,'k--',label='Ground Truth')
+        # recursion_ax[recursion_layer].bar(xdata, ordered_list, label='Recursion %d'%(recursion_layer+1))
+        # recursion_ax[recursion_layer].set_ylim(0,max(sv)*1.1)
+        # recursion_ax[recursion_layer].legend()
+        # recursion_ax[recursion_layer].set_xticks(x_ticks_to_plot)
+        # recursion_ax[recursion_layer].set_xticklabels(x_ticks_to_plot)
+        # recursion_ax[recursion_layer].tick_params(axis='y', labelsize=13)
+        # recursion_ax[recursion_layer].tick_params(axis='x', labelsize=13)
+        # if recursion_layer==0 or recursion_layer==2:
+        #     recursion_ax[recursion_layer].set_ylabel('Probability',fontsize=13)
+        # if recursion_layer==2 or recursion_layer==3:
+        #     recursion_ax[recursion_layer].set_xlabel('Output States',fontsize=13)
         print('-'*50)
-    fig.tight_layout()
-    if not os.path.exists('./paper_plots'):
-        os.makedirs('./paper_plots')
-    plt.savefig('./paper_plots/DD_%s_example.pdf'%args.circuit_name,dpi=400)
-    plt.close()
+    # fig.tight_layout()
+    # if not os.path.exists('./paper_plots'):
+    #     os.makedirs('./paper_plots')
+    # plt.savefig('./paper_plots/DD_%s_example.pdf'%args.circuit_name,dpi=400)
+    # plt.close()

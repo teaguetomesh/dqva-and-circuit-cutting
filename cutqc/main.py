@@ -72,10 +72,12 @@ class CutQC:
             for recursion_layer in range(recursion_depth):
                 print('--> Recursion layer %d <--'%(recursion_layer),flush=True)
                 print('__Distribute Workload__',flush=True)
+                # NOTE: hardcode recursion_qubit here for ASPLOS rebuttal experiment
+                recursion_qubit = [1,10,10][recursion_layer]
                 subprocess.run(args=['python', '-m','cutqc.distributor',
                 '--circuit_name',circuit_name,'--max_subcircuit_qubit',str(max_subcircuit_qubit),'--early_termination',str(early_termination),
-                '--recursion_layer',str(recursion_layer),'--qubit_limit',str(qubit_limit),'--num_workers',str(num_workers),
-                '--eval_mode',eval_mode])
+                '--recursion_layer',str(recursion_layer),'--qubit_limit',str(qubit_limit),'--recursion_qubit',str(recursion_qubit),
+                '--num_workers',str(num_workers),'--eval_mode',eval_mode])
                 print('__Merge__',flush=True)
                 terminated = self._merge(full_circuit=full_circuit,circuit_name=circuit_name,
                 max_subcircuit_qubit=max_subcircuit_qubit,
@@ -98,7 +100,6 @@ class CutQC:
     
     def _run_subcircuits(self,eval_mode):
         for circuit_name in self.circuits:
-            full_circuit = self.circuits[circuit_name]['circuit']
             max_subcircuit_qubit = self.circuits[circuit_name]['max_subcircuit_qubit']
             subcircuits = self.circuits[circuit_name]['subcircuits']
             complete_path_map = self.circuits[circuit_name]['complete_path_map']

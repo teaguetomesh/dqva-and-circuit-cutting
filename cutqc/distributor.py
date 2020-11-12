@@ -27,12 +27,12 @@ def distribute_load(total_load,capacities):
     assert total_load==0
     return loads
 
-def initialize_dynamic_definition_schedule(counter,qubit_limit):
+def initialize_dynamic_definition_schedule(counter,recursion_qubit):
     '''
     schedule[recursion_layer] =  {'smart_order','subcircuit_state','upper_bin'}
     subcircuit_state[subcircuit_idx] = ['0','1','active','merged']
     '''
-    print('Initializing first DD recursion, qubit_limit=%d. counter:'%qubit_limit,flush=True)
+    print('Initializing first DD recursion, recursion_qubit=%d. counter:'%recursion_qubit,flush=True)
     # print(counter)
     schedule = {0:{}}
     smart_order = sorted(list(counter.keys()),key=lambda x:counter[x]['effective'])
@@ -43,10 +43,10 @@ def initialize_dynamic_definition_schedule(counter,qubit_limit):
 
     subcircuit_capacities = [counter[subcircuit_idx]['effective'] for subcircuit_idx in smart_order]
     # print('subcircuit_capacities:',subcircuit_capacities)
-    if sum(subcircuit_capacities)<=qubit_limit:
+    if sum(subcircuit_capacities)<=recursion_qubit:
         subcircuit_active_qubits = distribute_load(total_load=sum(subcircuit_capacities),capacities=subcircuit_capacities)
     else:
-        subcircuit_active_qubits = distribute_load(total_load=qubit_limit,capacities=subcircuit_capacities)
+        subcircuit_active_qubits = distribute_load(total_load=recursion_qubit,capacities=subcircuit_capacities)
     # print('subcircuit_active_qubits:',subcircuit_active_qubits)
     for subcircuit_idx, subcircuit_active_qubit in zip(smart_order,subcircuit_active_qubits):
         num_zoomed = 0
@@ -56,7 +56,7 @@ def initialize_dynamic_definition_schedule(counter,qubit_limit):
     print('First recursion layer :',schedule,flush=True)
     return schedule
 
-def next_dynamic_definition_schedule(recursion_layer,schedule,state_idx,qubit_limit):
+def next_dynamic_definition_schedule(recursion_layer,schedule,state_idx,recursion_qubit):
     num_active = 0
     for subcircuit_idx in schedule['subcircuit_state']:
         num_active += schedule['subcircuit_state'][subcircuit_idx].count('active')
@@ -71,10 +71,10 @@ def next_dynamic_definition_schedule(recursion_layer,schedule,state_idx,qubit_li
     schedule['smart_order'] = sorted(schedule['smart_order'],key=lambda x:schedule['subcircuit_state'][x].count('merged'))
     subcircuit_capacities = [schedule['subcircuit_state'][subcircuit_idx].count('merged') for subcircuit_idx in schedule['smart_order']]
     # print('subcircuit_capacities:',subcircuit_capacities)
-    if sum(subcircuit_capacities)<=qubit_limit:
+    if sum(subcircuit_capacities)<=recursion_qubit:
         subcircuit_active_qubits = distribute_load(total_load=sum(subcircuit_capacities),capacities=subcircuit_capacities)
     else:
-        subcircuit_active_qubits = distribute_load(total_load=qubit_limit,capacities=subcircuit_capacities)
+        subcircuit_active_qubits = distribute_load(total_load=recursion_qubit,capacities=subcircuit_capacities)
     # print('subcircuit_active_qubits:',subcircuit_active_qubits)
     for subcircuit_idx, subcircuit_active_qubit in zip(schedule['smart_order'],subcircuit_active_qubits):
         for qubit_ctr, qubit_state in enumerate(schedule['subcircuit_state'][subcircuit_idx]):
@@ -91,7 +91,8 @@ if __name__ == '__main__':
     parser.add_argument('--max_subcircuit_qubit', metavar='N',type=int,help='Max subcircuit qubit')
     parser.add_argument('--early_termination', type=int,choices=[0,1],help='use early_termination')
     parser.add_argument('--recursion_layer', type=int,help='Current recursion depth of dynamic definition')
-    parser.add_argument('--qubit_limit', type=int,help='Determines number of bins during dynamic definition')
+    parser.add_argument('--recursion_qubit', type=int,help='Number of active qubits during current DD recursion')
+    parser.add_argument('--qubit_limit', type=int,help='Determines max number of bins during dynamic definition')
     parser.add_argument('--num_workers', type=int,help='Number of parallel workers for merge and build')
     parser.add_argument('--eval_mode', type=str,help='Evaluation backend mode')
     args = parser.parse_args()
@@ -117,7 +118,7 @@ if __name__ == '__main__':
     num_subcircuits = len(subcircuits)
 
     if args.recursion_layer==0:
-        dynamic_definition_schedule = initialize_dynamic_definition_schedule(counter=counter,qubit_limit=args.qubit_limit)
+        dynamic_definition_schedule = initialize_dynamic_definition_schedule(counter=counter,recursion_qubit=args.recursion_qubit)
         pickle.dump({'counter':counter,'dynamic_definition_schedule':dynamic_definition_schedule}, open('%s/meta_data.pckl'%(dest_folder),'wb'))
     else:
         meta_data = read_dict(filename='%s/meta_data.pckl'%(dest_folder))
@@ -154,7 +155,7 @@ if __name__ == '__main__':
         print('Zoom in for results of recursion_layer %d'%max_recursion_layer,schedule,flush=True)
         print('state_idx = %d, p = %e'%(max_states[zoomed_ctr],reconstructed_prob[max_states[zoomed_ctr]]),flush=True)
         next_schedule = next_dynamic_definition_schedule(recursion_layer=max_recursion_layer,
-        schedule=copy.deepcopy(schedule),state_idx=max_states[zoomed_ctr],qubit_limit=args.qubit_limit)
+        schedule=copy.deepcopy(schedule),state_idx=max_states[zoomed_ctr],recursion_qubit=args.recursion_qubit)
         build_output['zoomed_ctr'] += 1
         pickle.dump(build_output, open('%s/build_output.pckl'%(dynamic_definition_folder),'wb'))
 
