@@ -35,14 +35,14 @@ class CutQC:
             os.makedirs(dirname)
             pickle.dump(cut_solution, open('%s/subcircuits.pckl'%(dirname),'wb'))
     
-    def evaluate(self,num_workers,eval_mode,early_termination):
-        self._run_subcircuits(eval_mode=eval_mode)
-        self._measure(eval_mode=eval_mode)
-        self._organize(num_workers=num_workers,eval_mode=eval_mode)
-        if 0 in early_termination:
-            self._vertical_collapse(early_termination=0,eval_mode=eval_mode)
-        if 1 in early_termination:
-            self._vertical_collapse(early_termination=1,eval_mode=eval_mode)
+    def evaluate(self,circuit_cases,num_workers,eval_mode,early_termination):
+        self._run_subcircuits(circuit_cases=circuit_cases,eval_mode=eval_mode)
+        # self._measure(eval_mode=eval_mode)
+        # self._organize(num_workers=num_workers,eval_mode=eval_mode)
+        # if 0 in early_termination:
+        #     self._vertical_collapse(early_termination=0,eval_mode=eval_mode)
+        # if 1 in early_termination:
+        #     self._vertical_collapse(early_termination=1,eval_mode=eval_mode)
     
     def post_process(self,num_workers,eval_mode,early_termination,qubit_limit,recursion_depth):
         subprocess.run(['rm','./cutqc/merge'])
@@ -98,12 +98,17 @@ class CutQC:
         '--qubit_limit',str(qubit_limit),
         '--eval_mode',eval_mode])
     
-    def _run_subcircuits(self,eval_mode):
-        for circuit_name in self.circuits:
-            max_subcircuit_qubit = self.circuits[circuit_name]['max_subcircuit_qubit']
-            subcircuits = self.circuits[circuit_name]['subcircuits']
-            complete_path_map = self.circuits[circuit_name]['complete_path_map']
-            counter = self.circuits[circuit_name]['counter']
+    def _run_subcircuits(self,circuit_cases,eval_mode):
+        for circuit_case in circuit_cases:
+            circuit_name = circuit_case['name']
+            max_subcircuit_qubit = circuit_case['max_subcircuit_qubit']
+            dirname = get_dirname(circuit_name=circuit_name,max_subcircuit_qubit=max_subcircuit_qubit,
+            early_termination=None,eval_mode=None,num_workers=None,qubit_limit=None,field='cutter')
+            cut_solution = read_dict('%s/subcircuits.pckl'%(dirname))
+            max_subcircuit_qubit = cut_solution['max_subcircuit_qubit']
+            subcircuits = cut_solution['subcircuits']
+            complete_path_map = cut_solution['complete_path_map']
+            counter = cut_solution['counter']
 
             eval_folder = get_dirname(circuit_name=circuit_name,max_subcircuit_qubit=max_subcircuit_qubit,
             early_termination=None,num_workers=None,eval_mode=eval_mode,qubit_limit=None,field='evaluator')
@@ -113,10 +118,8 @@ class CutQC:
 
             circ_dict = {}
             all_indexed_combinations = {}
-            total_subcircuit_instances = 0
             for subcircuit_idx, subcircuit in enumerate(subcircuits):
                 O_qubits, rho_qubits = find_subcircuit_O_rho_qubits(complete_path_map=complete_path_map,subcircuit_idx=subcircuit_idx)
-                total_subcircuit_instances += 4**len(rho_qubits)*3**len(O_qubits)
                 combinations, indexed_combinations = find_all_combinations(O_qubits, rho_qubits, subcircuit.qubits)
                 circ_dict.update(get_subcircuit_instance(subcircuit_idx=subcircuit_idx,subcircuit=subcircuit, combinations=combinations))
                 all_indexed_combinations[subcircuit_idx] = indexed_combinations
