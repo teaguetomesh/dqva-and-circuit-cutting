@@ -1,3 +1,5 @@
+from time import time
+
 from qiskit_helper_functions.non_ibmq_functions import generate_circ
 
 from cutqc.main import CutQC
@@ -15,6 +17,9 @@ if __name__ == '__main__':
 
         cutqc = CutQC(circuits={circuit_name:circuit})
         cutqc.cut(max_subcircuit_qubit=max_subcircuit_qubit, num_subcircuits=[2,3], max_cuts=10)
-        cutqc.evaluate(num_workers=1,eval_mode='sv',early_termination=[1])
+        evaluate_begin = time()
+        cutqc.evaluate(circuit_cases=[{'name':circuit_name,'max_subcircuit_qubit':max_subcircuit_qubit}],
+        eval_mode='sv',num_workers=1,early_termination=[1])
+        print(time()-evaluate_begin)
         # cutqc.post_process(num_workers=1,eval_mode='sv',early_termination=1,qubit_limit=qubit_limit,recursion_depth=3)
         # cutqc.verify(circuit_name='supremacy_20',max_subcircuit_qubit=max_subcircuit_qubit,early_termination=1,num_workers=1,qubit_limit=qubit_limit,eval_mode='sv')

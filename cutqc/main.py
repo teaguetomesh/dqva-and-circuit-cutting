@@ -1,12 +1,13 @@
 import os, subprocess, pickle, glob, random, time
 from termcolor import colored
 import numpy as np
+import multiprocessing as mp
 
 from qiskit_helper_functions.non_ibmq_functions import evaluate_circ, read_dict, find_process_jobs
 
 from cutqc.helper_fun import check_valid, get_dirname
 from cutqc.cutter import find_cuts
-from cutqc.evaluator import find_subcircuit_O_rho_qubits, find_all_combinations, get_subcircuit_instance, mutate_measurement_basis
+from cutqc.evaluator import find_subcircuit_O_rho_qubits, find_all_combinations, get_subcircuit_instance, sv_simulate
 from cutqc.post_process import get_combinations, build
 
 class CutQC:
@@ -35,8 +36,8 @@ class CutQC:
             os.makedirs(dirname)
             pickle.dump(cut_solution, open('%s/subcircuits.pckl'%(dirname),'wb'))
     
-    def evaluate(self,circuit_cases,num_workers,eval_mode,early_termination):
-        self._run_subcircuits(circuit_cases=circuit_cases,eval_mode=eval_mode)
+    def evaluate(self,circuit_cases,eval_mode,num_workers,early_termination):
+        self._run_subcircuits(circuit_cases=circuit_cases,eval_mode=eval_mode,num_workers=num_workers)
         # self._measure(eval_mode=eval_mode)
         # self._organize(num_workers=num_workers,eval_mode=eval_mode)
         # if 0 in early_termination:
@@ -98,7 +99,7 @@ class CutQC:
         '--qubit_limit',str(qubit_limit),
         '--eval_mode',eval_mode])
     
-    def _run_subcircuits(self,circuit_cases,eval_mode):
+    def _run_subcircuits(self,circuit_cases,eval_mode,num_workers):
         for circuit_case in circuit_cases:
             circuit_name = circuit_case['name']
             max_subcircuit_qubit = circuit_case['max_subcircuit_qubit']
@@ -123,23 +124,17 @@ class CutQC:
                 combinations, indexed_combinations = find_all_combinations(O_qubits, rho_qubits, subcircuit.qubits)
                 circ_dict.update(get_subcircuit_instance(subcircuit_idx=subcircuit_idx,subcircuit=subcircuit, combinations=combinations))
                 all_indexed_combinations[subcircuit_idx] = indexed_combinations
-            for key in circ_dict:
-                subcircuit_idx, inits, meas = key
-                subcircuit_inst_prob = evaluate_circ(circuit=circ_dict[key]['circuit'],backend='statevector_simulator')
-                mutated_meas = mutate_measurement_basis(meas)
-                for meas in mutated_meas:
-                    index = all_indexed_combinations[subcircuit_idx][(tuple(inits),tuple(meas))]
-                    eval_file_name = '%s/raw_%d_%d.txt'%(eval_folder,subcircuit_idx,index)
-                    # print('running',eval_file_name)
-                    eval_file = open(eval_file_name,'w')
-                    eval_file.write('d=%d effective=%d\n'%(counter[subcircuit_idx]['d'],counter[subcircuit_idx]['effective']))
-                    [eval_file.write('%s '%x) for x in inits]
-                    eval_file.write('\n')
-                    [eval_file.write('%s '%x) for x in meas]
-                    eval_file.write('\n')
-                    [eval_file.write('%e '%x) for x in subcircuit_inst_prob]
-                    eval_file.close()
             pickle.dump(all_indexed_combinations, open('%s/all_indexed_combinations.pckl'%(eval_folder),'wb'))
+
+            data = []
+            for key in circ_dict:
+                data.append([key,circ_dict[key]['circuit'],eval_folder,counter])
+            random.shuffle(data) # Ensure a somewhat fair distribution of workloads
+            chunksize = max(len(data)//num_workers//10,1)
+            
+            pool = mp.Pool(processes=num_workers)
+            if eval_mode=='sv':
+                pool.starmap(sv_simulate,data,chunksize=chunksize)
     
     def _measure(self, eval_mode):
         subprocess.run(['rm','./cutqc/measure'])
