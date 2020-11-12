@@ -2,12 +2,14 @@ import os, subprocess, pickle, glob, random, time
 from termcolor import colored
 import numpy as np
 import multiprocessing as mp
+from datetime import datetime
 
 from qiskit_helper_functions.non_ibmq_functions import evaluate_circ, read_dict, find_process_jobs
+from qiskit_helper_functions.schedule import Scheduler
 
 from cutqc.helper_fun import check_valid, get_dirname
 from cutqc.cutter import find_cuts
-from cutqc.evaluator import find_subcircuit_O_rho_qubits, find_all_combinations, get_subcircuit_instance, sv_simulate, runtime_simulate
+from cutqc.evaluator import find_subcircuit_O_rho_qubits, find_all_combinations, get_subcircuit_instance, simulate_subcircuit, write_subcircuit
 from cutqc.post_process import get_combinations, build
 
 class CutQC:
@@ -36,8 +38,8 @@ class CutQC:
             os.makedirs(dirname)
             pickle.dump(cut_solution, open('%s/subcircuits.pckl'%(dirname),'wb'))
     
-    def evaluate(self,circuit_cases,eval_mode,num_workers,early_termination):
-        self._run_subcircuits(circuit_cases=circuit_cases,eval_mode=eval_mode,num_workers=num_workers)
+    def evaluate(self,circuit_cases,eval_mode,num_workers,early_termination,ibmq):
+        self._run_subcircuits(circuit_cases=circuit_cases,eval_mode=eval_mode,num_workers=num_workers,ibmq=ibmq)
         # self._measure(eval_mode=eval_mode)
         # self._organize(num_workers=num_workers,eval_mode=eval_mode)
         # if 0 in early_termination:
@@ -99,7 +101,7 @@ class CutQC:
         '--qubit_limit',str(qubit_limit),
         '--eval_mode',eval_mode])
     
-    def _run_subcircuits(self,circuit_cases,eval_mode,num_workers):
+    def _run_subcircuits(self,circuit_cases,eval_mode,num_workers,ibmq):
         for circuit_case in circuit_cases:
             circuit_name = circuit_case['name']
             max_subcircuit_qubit = circuit_case['max_subcircuit_qubit']
@@ -126,17 +128,26 @@ class CutQC:
                 all_indexed_combinations[subcircuit_idx] = indexed_combinations
             pickle.dump(all_indexed_combinations, open('%s/all_indexed_combinations.pckl'%(eval_folder),'wb'))
 
-            data = []
-            for key in circ_dict:
-                data.append([key,circ_dict[key]['circuit'],eval_folder,counter])
-            random.shuffle(data) # Ensure a somewhat fair distribution of workloads
-            chunksize = max(len(data)//num_workers//10,1)
-            
-            pool = mp.Pool(processes=num_workers)
-            if eval_mode=='sv':
-                pool.starmap(sv_simulate,data,chunksize=chunksize)
-            elif eval_mode=='runtime':
-                pool.starmap(runtime_simulate,data,chunksize=chunksize)
+            if eval_mode=='sv' or eval_mode=='runtime':
+                data = []
+                for key in circ_dict:
+                    data.append([key,circ_dict[key]['circuit'],eval_mode,eval_folder,counter])
+                random.shuffle(data) # Ensure a somewhat fair distribution of workloads
+                chunksize = max(len(data)//num_workers//10,1)
+                pool = mp.Pool(processes=num_workers)
+                pool.starmap(simulate_subcircuit,data,chunksize=chunksize)
+            elif 'ibmq' in eval_mode:
+                scheduler = Scheduler(circ_dict=circ_dict,
+                token=ibmq['token'],hub=ibmq['hub'],group=ibmq['group'],project=ibmq['project'],device_name=eval_mode,datetime=datetime.now())
+                scheduler.submit_jobs(real_device=False,transpilation=True,verbose=True)
+                scheduler.retrieve_jobs(force_prob=True,save_memory=False,save_directory=None,verbose=True)
+                data = []
+                for key in scheduler.circ_dict:
+                    data.append([key,eval_folder,counter,scheduler.circ_dict[key]['prob']])
+                random.shuffle(data) # Ensure a somewhat fair distribution of workloads
+                chunksize = max(len(data)//num_workers//10,1)
+                pool = mp.Pool(processes=num_workers)
+                pool.starmap(write_subcircuit,data,chunksize=chunksize)
     
     def _measure(self, eval_mode):
         subprocess.run(['rm','./cutqc/measure'])

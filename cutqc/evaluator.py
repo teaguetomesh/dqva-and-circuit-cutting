@@ -113,29 +113,18 @@ def get_subcircuit_instance(subcircuit_idx, subcircuit, combinations):
         circ_dict[(subcircuit_idx,tuple(inits),tuple(meas))] = {'circuit':subcircuit_inst,'shots':num_shots}
     return circ_dict
 
-def sv_simulate(key,circuit,eval_folder,counter):
-    all_indexed_combinations = read_dict('%s/all_indexed_combinations.pckl'%(eval_folder))
-    subcircuit_idx, inits, meas = key
-    subcircuit_inst_prob = evaluate_circ(circuit=circuit,backend='statevector_simulator')
-    mutated_meas = mutate_measurement_basis(meas)
-    for meas in mutated_meas:
-        index = all_indexed_combinations[subcircuit_idx][(tuple(inits),tuple(meas))]
-        eval_file_name = '%s/raw_%d_%d.txt'%(eval_folder,subcircuit_idx,index)
-        # print('running',eval_file_name)
-        eval_file = open(eval_file_name,'w')
-        eval_file.write('d=%d effective=%d\n'%(counter[subcircuit_idx]['d'],counter[subcircuit_idx]['effective']))
-        [eval_file.write('%s '%x) for x in inits]
-        eval_file.write('\n')
-        [eval_file.write('%s '%x) for x in meas]
-        eval_file.write('\n')
-        [eval_file.write('%e '%x) for x in subcircuit_inst_prob]
-        eval_file.close()
+def simulate_subcircuit(key,circuit,eval_mode,eval_folder,counter):
+    if eval_mode=='sv':
+        subcircuit_inst_prob = evaluate_circ(circuit=circuit,backend='statevector_simulator')
+    elif eval_mode=='runtime':
+        uniform_p = 1/2**circuit.num_qubits
+        subcircuit_inst_prob = [uniform_p] * int(2**circuit.num_qubits)
+    write_subcircuit(key=key,eval_folder=eval_folder,counter=counter,subcircuit_inst_prob=subcircuit_inst_prob)
 
-def runtime_simulate(key,circuit,eval_folder,counter):
+def write_subcircuit(key,eval_folder,counter,subcircuit_inst_prob):
     all_indexed_combinations = read_dict('%s/all_indexed_combinations.pckl'%(eval_folder))
     subcircuit_idx, inits, meas = key
-    uniform_p = 1/2**circuit.num_qubits
-    subcircuit_inst_prob = [uniform_p] * int(2**circuit.num_qubits)
+
     mutated_meas = mutate_measurement_basis(meas)
     for meas in mutated_meas:
         index = all_indexed_combinations[subcircuit_idx][(tuple(inits),tuple(meas))]
