@@ -130,3 +130,22 @@ def sv_simulate(key,circuit,eval_folder,counter):
         eval_file.write('\n')
         [eval_file.write('%e '%x) for x in subcircuit_inst_prob]
         eval_file.close()
+
+def runtime_simulate(key,circuit,eval_folder,counter):
+    all_indexed_combinations = read_dict('%s/all_indexed_combinations.pckl'%(eval_folder))
+    subcircuit_idx, inits, meas = key
+    uniform_p = 1/2**circuit.num_qubits
+    subcircuit_inst_prob = [uniform_p] * int(2**circuit.num_qubits)
+    mutated_meas = mutate_measurement_basis(meas)
+    for meas in mutated_meas:
+        index = all_indexed_combinations[subcircuit_idx][(tuple(inits),tuple(meas))]
+        eval_file_name = '%s/raw_%d_%d.txt'%(eval_folder,subcircuit_idx,index)
+        # print('running',eval_file_name)
+        eval_file = open(eval_file_name,'w')
+        eval_file.write('d=%d effective=%d\n'%(counter[subcircuit_idx]['d'],counter[subcircuit_idx]['effective']))
+        [eval_file.write('%s '%x) for x in inits]
+        eval_file.write('\n')
+        [eval_file.write('%s '%x) for x in meas]
+        eval_file.write('\n')
+        [eval_file.write('%e '%x) for x in subcircuit_inst_prob]
+        eval_file.close()

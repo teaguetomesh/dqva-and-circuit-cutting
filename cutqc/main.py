@@ -7,7 +7,7 @@ from qiskit_helper_functions.non_ibmq_functions import evaluate_circ, read_dict,
 
 from cutqc.helper_fun import check_valid, get_dirname
 from cutqc.cutter import find_cuts
-from cutqc.evaluator import find_subcircuit_O_rho_qubits, find_all_combinations, get_subcircuit_instance, sv_simulate
+from cutqc.evaluator import find_subcircuit_O_rho_qubits, find_all_combinations, get_subcircuit_instance, sv_simulate, runtime_simulate
 from cutqc.post_process import get_combinations, build
 
 class CutQC:
@@ -135,6 +135,8 @@ class CutQC:
             pool = mp.Pool(processes=num_workers)
             if eval_mode=='sv':
                 pool.starmap(sv_simulate,data,chunksize=chunksize)
+            elif eval_mode=='runtime':
+                pool.starmap(runtime_simulate,data,chunksize=chunksize)
     
     def _measure(self, eval_mode):
         subprocess.run(['rm','./cutqc/measure'])
