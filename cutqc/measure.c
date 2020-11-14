@@ -35,7 +35,7 @@ int main(int argc, char** argv) {
     measure(eval_folder,subcircuit_idx,num_eval_files,eval_files,rank);
     
     free(eval_files);
-    printf("%d-q subcircuit %d measure rank %d DONE\n",full_circ_size,subcircuit_idx,rank);
+    printf("%s subcircuit %d (%d instances) measure rank %d DONE\n",eval_folder,subcircuit_idx,num_eval_files,rank);
     return 0;
 }
 

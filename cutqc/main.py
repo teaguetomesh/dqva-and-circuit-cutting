@@ -24,6 +24,7 @@ class CutQC:
             assert valid
     
     def cut(self, max_subcircuit_qubit, num_subcircuits, max_cuts):
+        # TODO: make this parallel
         for circuit_name in self.circuits:
             circuit = self.circuits[circuit_name]
             cut_solution = find_cuts(circuit=circuit,
@@ -31,16 +32,16 @@ class CutQC:
             num_subcircuits=num_subcircuits,
             max_cuts=max_cuts,verbose=True)
             self.circuits[circuit_name] = cut_solution
-            dirname = get_dirname(circuit_name=circuit_name,max_subcircuit_qubit=max_subcircuit_qubit,
-            early_termination=None,eval_mode=None,num_workers=None,qubit_limit=None,field='cutter')
-            if os.path.exists(dirname):
-                subprocess.run(['rm','-r',dirname])
-            os.makedirs(dirname)
-            pickle.dump(cut_solution, open('%s/subcircuits.pckl'%(dirname),'wb'))
+            source_folder = get_dirname(circuit_name=circuit_name,max_subcircuit_qubit=max_subcircuit_qubit,
+            early_termination=None,eval_mode=None,num_threads=None,qubit_limit=None,field='cutter')
+            if os.path.exists(source_folder):
+                subprocess.run(['rm','-r',source_folder])
+            os.makedirs(source_folder)
+            pickle.dump(cut_solution, open('%s/subcircuits.pckl'%(source_folder),'wb'))
     
-    def evaluate(self,circuit_cases,eval_mode,num_workers,early_termination,ibmq):
-        self._run_subcircuits(circuit_cases=circuit_cases,eval_mode=eval_mode,num_workers=num_workers,ibmq=ibmq)
-        self._measure(eval_mode=eval_mode)
+    def evaluate(self,circuit_cases,eval_mode,num_nodes,num_threads,early_termination,ibmq):
+        self._run_subcircuits(circuit_cases=circuit_cases,eval_mode=eval_mode,num_nodes=num_nodes,num_threads=num_threads,ibmq=ibmq)
+        self._measure(circuit_cases=circuit_cases,eval_mode=eval_mode,num_nodes=num_nodes,num_threads=num_threads,)
         # self._organize(num_workers=num_workers,eval_mode=eval_mode)
         # if 0 in early_termination:
         #     self._vertical_collapse(early_termination=0,eval_mode=eval_mode)
@@ -63,14 +64,14 @@ class CutQC:
             print('-'*10,'%d-qubit %s on %d-q NISQ'%(full_circuit.num_qubits,circuit_name,max_subcircuit_qubit),'-'*10,flush=True)
 
             dest_folder = get_dirname(circuit_name=circuit_name,max_subcircuit_qubit=max_subcircuit_qubit,
-            early_termination=early_termination,num_workers=num_workers,eval_mode=eval_mode,qubit_limit=qubit_limit,field='build')
+            early_termination=early_termination,num_threads=num_workers,eval_mode=eval_mode,qubit_limit=qubit_limit,field='build')
 
             if os.path.exists('%s'%dest_folder):
                 subprocess.run(['rm','-r',dest_folder])
             os.makedirs(dest_folder)
 
             vertical_collapse_folder = get_dirname(circuit_name=circuit_name,max_subcircuit_qubit=max_subcircuit_qubit,
-            early_termination=early_termination,num_workers=None,eval_mode=eval_mode,qubit_limit=None,field='vertical_collapse')
+            early_termination=early_termination,num_threads=None,eval_mode=eval_mode,qubit_limit=None,field='vertical_collapse')
 
             for recursion_layer in range(recursion_depth):
                 print('--> Recursion layer %d <--'%(recursion_layer),flush=True)
@@ -101,20 +102,20 @@ class CutQC:
         '--qubit_limit',str(qubit_limit),
         '--eval_mode',eval_mode])
     
-    def _run_subcircuits(self,circuit_cases,eval_mode,num_workers,ibmq):
+    def _run_subcircuits(self,circuit_cases,eval_mode,num_nodes,num_threads,ibmq):
         for circuit_case in circuit_cases:
-            circuit_name = circuit_case['name']
-            max_subcircuit_qubit = circuit_case['max_subcircuit_qubit']
-            dirname = get_dirname(circuit_name=circuit_name,max_subcircuit_qubit=max_subcircuit_qubit,
-            early_termination=None,eval_mode=None,num_workers=None,qubit_limit=None,field='cutter')
-            cut_solution = read_dict('%s/subcircuits.pckl'%(dirname))
-            max_subcircuit_qubit = cut_solution['max_subcircuit_qubit']
+            circuit_name = circuit_case.split('|')[0]
+            max_subcircuit_qubit = int(circuit_case.split('|')[1])
+            source_folder = get_dirname(circuit_name=circuit_name,max_subcircuit_qubit=max_subcircuit_qubit,
+            early_termination=None,eval_mode=None,num_threads=None,qubit_limit=None,field='cutter')
+            cut_solution = read_dict('%s/subcircuits.pckl'%(source_folder))
+            assert(max_subcircuit_qubit == cut_solution['max_subcircuit_qubit'])
             subcircuits = cut_solution['subcircuits']
             complete_path_map = cut_solution['complete_path_map']
             counter = cut_solution['counter']
 
             eval_folder = get_dirname(circuit_name=circuit_name,max_subcircuit_qubit=max_subcircuit_qubit,
-            early_termination=None,num_workers=None,eval_mode=eval_mode,qubit_limit=None,field='evaluator')
+            early_termination=None,num_threads=None,eval_mode=eval_mode,qubit_limit=None,field='evaluator')
             if os.path.exists(eval_folder):
                 subprocess.run(['rm','-r',eval_folder])
             os.makedirs(eval_folder)
@@ -133,8 +134,8 @@ class CutQC:
                 for key in circ_dict:
                     data.append([key,circ_dict[key]['circuit'],eval_mode,eval_folder,counter])
                 random.shuffle(data) # Ensure a somewhat fair distribution of workloads
-                chunksize = max(len(data)//num_workers//10,1)
-                pool = mp.Pool(processes=num_workers)
+                chunksize = max(len(data)//num_threads//10,1)
+                pool = mp.Pool(processes=num_threads)
                 pool.starmap(simulate_subcircuit,data,chunksize=chunksize)
             elif 'ibmq' in eval_mode:
                 # NOTE: control whether to use real device
@@ -146,27 +147,36 @@ class CutQC:
                 for key in scheduler.circ_dict:
                     data.append([key,eval_folder,counter,scheduler.circ_dict[key]['prob']])
                 random.shuffle(data) # Ensure a somewhat fair distribution of workloads
-                chunksize = max(len(data)//num_workers//10,1)
-                pool = mp.Pool(processes=num_workers)
+                chunksize = max(len(data)//num_threads//10,1)
+                pool = mp.Pool(processes=num_threads)
                 pool.starmap(write_subcircuit,data,chunksize=chunksize)
     
-    def _measure(self, eval_mode):
+    def _measure(self, circuit_cases, eval_mode, num_nodes, num_threads):
         subprocess.run(['rm','./cutqc/measure'])
         subprocess.run(['icc','./cutqc/measure.c','-o','./cutqc/measure','-lm'])
 
-        for circuit_name in self.circuits:
-            full_circuit = self.circuits[circuit_name]['circuit']
-            subcircuits = self.circuits[circuit_name]['subcircuits']
-            max_subcircuit_qubit = self.circuits[circuit_name]['max_subcircuit_qubit']
+        for circuit_case in circuit_cases:
+            circuit_name = circuit_case.split('|')[0]
+            max_subcircuit_qubit = int(circuit_case.split('|')[1])
+            source_folder = get_dirname(circuit_name=circuit_name,max_subcircuit_qubit=max_subcircuit_qubit,
+            early_termination=None,eval_mode=None,num_threads=None,qubit_limit=None,field='cutter')
+            cut_solution = read_dict('%s/subcircuits.pckl'%(source_folder))
+            assert(max_subcircuit_qubit == cut_solution['max_subcircuit_qubit'])
+            full_circuit = cut_solution['circuit']
+            subcircuits = cut_solution['subcircuits']
 
             eval_folder = get_dirname(circuit_name=circuit_name,max_subcircuit_qubit=max_subcircuit_qubit,
-            early_termination=None,num_workers=None,eval_mode=eval_mode,qubit_limit=None,field='evaluator')
+            early_termination=None,num_threads=None,eval_mode=eval_mode,qubit_limit=None,field='evaluator')
             for subcircuit_idx in range(len(subcircuits)):
                 eval_files = glob.glob('%s/raw_%d_*.txt'%(eval_folder,subcircuit_idx))
-                eval_files = [str(x) for x in range(len(eval_files))]
-                rank = 0
-                subprocess.run(args=['./cutqc/measure', '%d'%rank, eval_folder,
-                '%d'%full_circuit.num_qubits,'%d'%subcircuit_idx, '%d'%len(eval_files), *eval_files])
+                child_processes = []
+                for rank in range(num_threads):
+                    process_eval_files = find_process_jobs(jobs=range(len(eval_files)),rank=rank,num_threads=num_threads)
+                    process_eval_files = [str(x) for x in process_eval_files]
+                    p = subprocess.Popen(args=['./cutqc/measure', '%d'%rank, eval_folder,
+                    '%d'%full_circuit.num_qubits,'%d'%subcircuit_idx, '%d'%len(process_eval_files), *process_eval_files])
+                    child_processes.append(p)
+                [cp.wait() for cp in child_processes]
     
     def _organize(self, num_workers, eval_mode):
         '''
@@ -180,7 +190,7 @@ class CutQC:
             counter = self.circuits[circuit_name]['counter']
 
             eval_folder = get_dirname(circuit_name=circuit_name,max_subcircuit_qubit=max_subcircuit_qubit,
-            early_termination=None,num_workers=None,eval_mode=eval_mode,qubit_limit=None,field='evaluator')
+            early_termination=None,num_threads=None,eval_mode=eval_mode,qubit_limit=None,field='evaluator')
 
             all_indexed_combinations = read_dict(filename='%s/all_indexed_combinations.pckl'%(eval_folder))
             O_rho_pairs, combinations = get_combinations(complete_path_map=complete_path_map)
@@ -191,7 +201,7 @@ class CutQC:
                 subcircuit_kron_terms_file = open('%s/subcircuit_kron_terms_%d.txt'%(eval_folder,rank),'w')
                 subcircuit_kron_terms_file.write('%d subcircuits\n'%len(kronecker_terms))
                 for subcircuit_idx in kronecker_terms:
-                    rank_subcircuit_kron_terms = find_process_jobs(jobs=list(kronecker_terms[subcircuit_idx].keys()),rank=rank,num_workers=num_workers)
+                    rank_subcircuit_kron_terms = find_process_jobs(jobs=list(kronecker_terms[subcircuit_idx].keys()),rank=rank,num_threads=num_workers)
                     subcircuit_kron_terms_file.write('subcircuit %d kron_terms %d num_effective %d\n'%(
                         subcircuit_idx,len(rank_subcircuit_kron_terms),counter[subcircuit_idx]['effective']))
                     for subcircuit_kron_term in rank_subcircuit_kron_terms:
@@ -214,9 +224,9 @@ class CutQC:
             counter = self.circuits[circuit_name]['counter']
 
             eval_folder = get_dirname(circuit_name=circuit_name,max_subcircuit_qubit=max_subcircuit_qubit,
-            early_termination=None,num_workers=None,eval_mode=eval_mode,qubit_limit=None,field='evaluator')
+            early_termination=None,num_threads=None,eval_mode=eval_mode,qubit_limit=None,field='evaluator')
             vertical_collapse_folder = get_dirname(circuit_name=circuit_name,max_subcircuit_qubit=max_subcircuit_qubit,
-            early_termination=early_termination,num_workers=None,eval_mode=eval_mode,qubit_limit=None,field='vertical_collapse')
+            early_termination=early_termination,num_threads=None,eval_mode=eval_mode,qubit_limit=None,field='vertical_collapse')
 
             rank_files = glob.glob('%s/subcircuit_kron_terms_*.txt'%eval_folder)
             if len(rank_files)==0:
