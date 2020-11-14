@@ -6,7 +6,6 @@ import pickle
 import os
 import subprocess
 import glob
-from termcolor import colored
 import copy
 
 from cutqc.helper_fun import get_dirname
@@ -32,7 +31,7 @@ def initialize_dynamic_definition_schedule(counter,recursion_qubit):
     schedule[recursion_layer] =  {'smart_order','subcircuit_state','upper_bin'}
     subcircuit_state[subcircuit_idx] = ['0','1','active','merged']
     '''
-    print('Initializing first DD recursion, recursion_qubit=%d. counter:'%recursion_qubit,flush=True)
+    print('Initializing first DD recursion, recursion_qubit=%d.'%recursion_qubit,flush=True)
     # print(counter)
     schedule = {0:{}}
     smart_order = sorted(list(counter.keys()),key=lambda x:counter[x]['effective'])
@@ -93,18 +92,18 @@ if __name__ == '__main__':
     parser.add_argument('--recursion_layer', type=int,help='Current recursion depth of dynamic definition')
     parser.add_argument('--recursion_qubit', type=int,help='Number of active qubits during current DD recursion')
     parser.add_argument('--qubit_limit', type=int,help='Determines max number of bins during dynamic definition')
-    parser.add_argument('--num_workers', type=int,help='Number of parallel workers for merge and build')
+    parser.add_argument('--num_threads', type=int,help='Number of parallel threads for merge and build')
     parser.add_argument('--eval_mode', type=str,help='Evaluation backend mode')
     args = parser.parse_args()
 
     source_folder = get_dirname(circuit_name=args.circuit_name,max_subcircuit_qubit=args.max_subcircuit_qubit,
-    early_termination=None,eval_mode=None,num_workers=None,qubit_limit=None,field='cutter')
+    early_termination=None,eval_mode=None,num_threads=None,qubit_limit=None,field='cutter')
     eval_folder = get_dirname(circuit_name=args.circuit_name,max_subcircuit_qubit=args.max_subcircuit_qubit,
-    early_termination=None,eval_mode=args.eval_mode,num_workers=None,qubit_limit=None,field='evaluator')
+    early_termination=None,eval_mode=args.eval_mode,num_threads=None,qubit_limit=None,field='evaluator')
     vertical_collapse_folder = get_dirname(circuit_name=args.circuit_name,max_subcircuit_qubit=args.max_subcircuit_qubit,
-    early_termination=args.early_termination,num_workers=None,eval_mode=args.eval_mode,qubit_limit=None,field='vertical_collapse')
+    early_termination=args.early_termination,num_threads=None,eval_mode=args.eval_mode,qubit_limit=None,field='vertical_collapse')
     dest_folder = get_dirname(circuit_name=args.circuit_name,max_subcircuit_qubit=args.max_subcircuit_qubit,
-    early_termination=args.early_termination,num_workers=args.num_workers,eval_mode=args.eval_mode,qubit_limit=args.qubit_limit,field='build')
+    early_termination=args.early_termination,num_threads=args.num_threads,eval_mode=args.eval_mode,qubit_limit=args.qubit_limit,field='build')
 
     case_dict = read_dict(filename='%s/subcircuits.pckl'%source_folder)
     all_indexed_combinations = read_dict(filename='%s/all_indexed_combinations.pckl'%(eval_folder))
@@ -168,19 +167,16 @@ if __name__ == '__main__':
 
     _, summation_terms = build(full_circuit=full_circuit, combinations=combinations,
     O_rho_pairs=O_rho_pairs, subcircuits=subcircuits, all_indexed_combinations=all_indexed_combinations)
-
-    info_str = colored('Distributing %d-qubit %s : %d summation_terms'%(full_circuit.num_qubits,args.circuit_name,len(combinations)),'blue')
-    print(info_str,flush=True)
     
     dynamic_definition_folder = '%s/dynamic_definition_%d'%(dest_folder,args.recursion_layer)
     if os.path.exists(dynamic_definition_folder):
         subprocess.run(['rm','-r',dynamic_definition_folder])
     os.makedirs(dynamic_definition_folder)
-    for rank in range(args.num_workers):
+    for rank in range(args.num_threads):
         all_rank_kron_files = []
         for subcircuit_idx in counter:
             kron_files = glob.glob('%s/kron_%d_*.txt'%(vertical_collapse_folder,subcircuit_idx))
-            rank_kron_files = find_process_jobs(jobs=kron_files,rank=rank,num_workers=args.num_workers)
+            rank_kron_files = find_process_jobs(jobs=kron_files,rank=rank,num_threads=args.num_threads)
             all_rank_kron_files += rank_kron_files
         merge_file = open('%s/merge_%d.txt'%(dynamic_definition_folder,rank),'w')
         merge_file.write('num_files_to_merge=%d\n'%(len(all_rank_kron_files)))
@@ -201,7 +197,7 @@ if __name__ == '__main__':
             merge_file.write('\n')
         merge_file.close()
 
-        rank_summation_terms = find_process_jobs(jobs=summation_terms,rank=rank,num_workers=args.num_workers)
+        rank_summation_terms = find_process_jobs(jobs=summation_terms,rank=rank,num_threads=args.num_threads)
         num_summation_terms = len(rank_summation_terms)
         print('Rank %d has %d/%d summation terms'%(rank,num_summation_terms,len(summation_terms)),flush=True)
         

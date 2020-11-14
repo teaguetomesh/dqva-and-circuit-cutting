@@ -49,23 +49,29 @@ class CutQC:
         if 1 in early_termination:
             self._vertical_collapse(early_termination=1,eval_mode=eval_mode)
     
-    def post_process(self,num_workers,eval_mode,early_termination,qubit_limit,recursion_depth):
+    def post_process(self,circuit_cases,eval_mode,num_nodes,num_threads,early_termination,qubit_limit,recursion_depth):
+        self.circuit_cases = circuit_cases
         subprocess.run(['rm','./cutqc/merge'])
         subprocess.run(['icc','-mkl','./cutqc/merge.c','-o','./cutqc/merge','-lm'])
         subprocess.run(['rm','./cutqc/build'])
         subprocess.run(['icc','-fopenmp','-mkl','-lpthread','-march=native','./cutqc/build.c','-o','./cutqc/build','-lm'])
 
-        for circuit_name in self.circuits:
-            full_circuit = self.circuits[circuit_name]['circuit']
-            max_subcircuit_qubit = self.circuits[circuit_name]['max_subcircuit_qubit']
-            subcircuits = self.circuits[circuit_name]['subcircuits']
-            complete_path_map = self.circuits[circuit_name]['complete_path_map']
-            counter = self.circuits[circuit_name]['counter']
+        for circuit_case in self.circuit_cases:
+            circuit_name = circuit_case.split('|')[0]
+            max_subcircuit_qubit = int(circuit_case.split('|')[1])
+            source_folder = get_dirname(circuit_name=circuit_name,max_subcircuit_qubit=max_subcircuit_qubit,
+            early_termination=None,eval_mode=None,num_threads=None,qubit_limit=None,field='cutter')
+            cut_solution = read_dict('%s/subcircuits.pckl'%(source_folder))
+            assert(max_subcircuit_qubit == cut_solution['max_subcircuit_qubit'])
+            full_circuit = cut_solution['circuit']
+            subcircuits = cut_solution['subcircuits']
+            complete_path_map = cut_solution['complete_path_map']
+            counter = cut_solution['counter']
 
-            print('-'*10,'%d-qubit %s on %d-q NISQ'%(full_circuit.num_qubits,circuit_name,max_subcircuit_qubit),'-'*10,flush=True)
+            print('-'*10,circuit_case,'-'*10,flush=True)
 
             dest_folder = get_dirname(circuit_name=circuit_name,max_subcircuit_qubit=max_subcircuit_qubit,
-            early_termination=early_termination,num_threads=num_workers,eval_mode=eval_mode,qubit_limit=qubit_limit,field='build')
+            early_termination=early_termination,num_threads=num_threads,eval_mode=eval_mode,qubit_limit=qubit_limit,field='build')
 
             if os.path.exists('%s'%dest_folder):
                 subprocess.run(['rm','-r',dest_folder])
@@ -75,24 +81,22 @@ class CutQC:
             early_termination=early_termination,num_threads=None,eval_mode=eval_mode,qubit_limit=None,field='vertical_collapse')
 
             for recursion_layer in range(recursion_depth):
-                print('--> Recursion layer %d <--'%(recursion_layer),flush=True)
+                info_str = colored('--> Recursion layer %d <--'%(recursion_layer),'blue')
+                print(info_str,flush=True)
                 print('__Distribute Workload__',flush=True)
                 # NOTE: hardcode recursion_qubit here for ASPLOS rebuttal experiment
                 recursion_qubit = [1,10,10][recursion_layer]
                 subprocess.run(args=['python', '-m','cutqc.distributor',
                 '--circuit_name',circuit_name,'--max_subcircuit_qubit',str(max_subcircuit_qubit),'--early_termination',str(early_termination),
                 '--recursion_layer',str(recursion_layer),'--qubit_limit',str(qubit_limit),'--recursion_qubit',str(recursion_qubit),
-                '--num_workers',str(num_workers),'--eval_mode',eval_mode])
+                '--num_threads',str(num_threads),'--eval_mode',eval_mode])
                 print('__Merge__',flush=True)
-                terminated = self._merge(full_circuit=full_circuit,circuit_name=circuit_name,
-                max_subcircuit_qubit=max_subcircuit_qubit,
-                vertical_collapse_folder=vertical_collapse_folder,dest_folder=dest_folder,
+                terminated = self._merge(circuit_case=circuit_case,vertical_collapse_folder=vertical_collapse_folder,dest_folder=dest_folder,
                 recursion_layer=recursion_layer)
                 if terminated:
                     break
                 print('__Build__',flush=True)
-                reconstructed_prob = self._build(full_circuit=full_circuit,circuit_name=circuit_name,max_subcircuit_qubit=max_subcircuit_qubit,
-                dest_folder=dest_folder,recursion_layer=recursion_layer)
+                reconstructed_prob = self._build(circuit_case=circuit_case,dest_folder=dest_folder,recursion_layer=recursion_layer)
     
     def verify(self,circuit_name, max_subcircuit_qubit, early_termination, num_workers, qubit_limit, eval_mode):
         subprocess.run(['python','-m','cutqc.verify',
@@ -260,20 +264,20 @@ class CutQC:
                 [subprocess.run(['rm',measured_file]) for measured_file in measured_files]
                 [subprocess.run(['rm','%s/subcircuit_kron_terms_%d.txt'%(eval_folder,rank)]) for rank in range(len(rank_files))]
     
-    def _merge(self, full_circuit, circuit_name, max_subcircuit_qubit, dest_folder, recursion_layer, vertical_collapse_folder):
+    def _merge(self, circuit_case, dest_folder, recursion_layer, vertical_collapse_folder):
         dynamic_definition_folder = '%s/dynamic_definition_%d'%(dest_folder,recursion_layer)
         if not os.path.exists(dynamic_definition_folder):
             return True
         merge_files = glob.glob('%s/merge_*.txt'%dynamic_definition_folder)
-        num_workers = len(merge_files)
+        num_threads = len(merge_files)
         child_processes = []
-        for rank in range(num_workers):
+        for rank in range(num_threads):
             merge_file = '%s/merge_%d.txt'%(dynamic_definition_folder,rank)
             p = subprocess.Popen(args=['./cutqc/merge', '%s'%merge_file, '%s'%vertical_collapse_folder, '%s'%dynamic_definition_folder,
             '%d'%rank, '%d'%recursion_layer])
             child_processes.append(p)
         elapsed = 0
-        for rank in range(num_workers):
+        for rank in range(num_threads):
             cp = child_processes[rank]
             cp.wait()
         time.sleep(1)
@@ -282,17 +286,17 @@ class CutQC:
         assert lines[-2].split(' = ')[0]=='Total merge time' and lines[-1]=='DONE'
         elapsed = max(elapsed,float(lines[-2].split(' = ')[1]))
 
-        time_str = colored('%d-q %s on %d-q NISQ took %.3e seconds'%(full_circuit.num_qubits,circuit_name,max_subcircuit_qubit,elapsed),'blue')
+        time_str = colored('%s _merge took %.3e seconds'%(circuit_case,elapsed),'blue')
         print(time_str,flush=True)
         pickle.dump({'merge_time_%d'%recursion_layer:elapsed}, open('%s/summary.pckl'%(dest_folder),'ab'))
         return False
     
-    def _build(self, full_circuit, circuit_name, max_subcircuit_qubit, dest_folder, recursion_layer):
+    def _build(self, circuit_case, dest_folder, recursion_layer):
         dynamic_definition_folder = '%s/dynamic_definition_%d'%(dest_folder,recursion_layer)
         build_files = glob.glob('%s/build_*.txt'%dynamic_definition_folder)
-        num_workers = len(build_files)
+        num_threads = len(build_files)
         child_processes = []
-        for rank in range(num_workers):
+        for rank in range(num_threads):
             build_file = '%s/build_%d.txt'%(dynamic_definition_folder,rank)
             p = subprocess.Popen(args=['./cutqc/build', '%s'%build_file, '%s'%dynamic_definition_folder, 
             '%s'%dynamic_definition_folder, '%d'%rank, '%d'%recursion_layer])
@@ -300,7 +304,7 @@ class CutQC:
         
         elapsed = []
         reconstructed_prob = None
-        for rank in range(num_workers):
+        for rank in range(num_threads):
             cp = child_processes[rank]
             cp.wait()
             rank_logs = open('%s/rank_%d_summary.txt'%(dynamic_definition_folder,rank), 'r')
@@ -321,7 +325,7 @@ class CutQC:
                 reconstructed_prob += rank_reconstructed_prob
             else:
                 reconstructed_prob = rank_reconstructed_prob
-        time_str = colored('%d-q %s on %d-q cc_size took %.3e seconds'%(full_circuit.num_qubits,circuit_name,max_subcircuit_qubit,max(elapsed)),'blue')
+        time_str = colored('%s _build took %.3e seconds'%(circuit_case,max(elapsed)),'blue')
         print(time_str,flush=True)
         pickle.dump({'build_time_%d'%recursion_layer:np.array(elapsed)}, open('%s/summary.pckl'%(dest_folder),'ab'))
         max_states = sorted(range(len(reconstructed_prob)),key=lambda x:reconstructed_prob[x],reverse=True)

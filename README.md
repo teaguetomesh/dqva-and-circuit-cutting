@@ -22,7 +22,7 @@ source /opt/intel/bin/compilervars.sh intel64
 ## Todo
 - [x] Update codes with the new helper functions package
 - [ ] Write the cutQC package
-- [ ] Write the parallel version of `measure`
+- [x] Write the parallel version of `measure`
 
 # HPU
 A hybrid processing unit
