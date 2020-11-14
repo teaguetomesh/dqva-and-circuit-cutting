@@ -42,7 +42,7 @@ class CutQC:
     def evaluate(self,circuit_cases,eval_mode,num_nodes,num_threads,early_termination,ibmq):
         self._run_subcircuits(circuit_cases=circuit_cases,eval_mode=eval_mode,num_nodes=num_nodes,num_threads=num_threads,ibmq=ibmq)
         self._measure(circuit_cases=circuit_cases,eval_mode=eval_mode,num_nodes=num_nodes,num_threads=num_threads,)
-        # self._organize(num_workers=num_workers,eval_mode=eval_mode)
+        self._organize(circuit_cases=circuit_cases,eval_mode=eval_mode,num_threads=num_threads)
         # if 0 in early_termination:
         #     self._vertical_collapse(early_termination=0,eval_mode=eval_mode)
         # if 1 in early_termination:
@@ -178,16 +178,21 @@ class CutQC:
                     child_processes.append(p)
                 [cp.wait() for cp in child_processes]
     
-    def _organize(self, num_workers, eval_mode):
+    def _organize(self, circuit_cases, eval_mode, num_threads):
         '''
         Organize parallel processing for the subsequent vertical collapse procedure
         '''
-        for circuit_name in self.circuits:
-            full_circuit = self.circuits[circuit_name]['circuit']
-            max_subcircuit_qubit = self.circuits[circuit_name]['max_subcircuit_qubit']
-            subcircuits = self.circuits[circuit_name]['subcircuits']
-            complete_path_map = self.circuits[circuit_name]['complete_path_map']
-            counter = self.circuits[circuit_name]['counter']
+        for circuit_case in circuit_cases:
+            circuit_name = circuit_case.split('|')[0]
+            max_subcircuit_qubit = int(circuit_case.split('|')[1])
+            source_folder = get_dirname(circuit_name=circuit_name,max_subcircuit_qubit=max_subcircuit_qubit,
+            early_termination=None,eval_mode=None,num_threads=None,qubit_limit=None,field='cutter')
+            cut_solution = read_dict('%s/subcircuits.pckl'%(source_folder))
+            assert(max_subcircuit_qubit == cut_solution['max_subcircuit_qubit'])
+            full_circuit = cut_solution['circuit']
+            subcircuits = cut_solution['subcircuits']
+            complete_path_map = cut_solution['complete_path_map']
+            counter = cut_solution['counter']
 
             eval_folder = get_dirname(circuit_name=circuit_name,max_subcircuit_qubit=max_subcircuit_qubit,
             early_termination=None,num_threads=None,eval_mode=eval_mode,qubit_limit=None,field='evaluator')
@@ -197,11 +202,11 @@ class CutQC:
             kronecker_terms, _ = build(full_circuit=full_circuit, combinations=combinations,
             O_rho_pairs=O_rho_pairs, subcircuits=subcircuits, all_indexed_combinations=all_indexed_combinations)
 
-            for rank in range(num_workers):
+            for rank in range(num_threads):
                 subcircuit_kron_terms_file = open('%s/subcircuit_kron_terms_%d.txt'%(eval_folder,rank),'w')
                 subcircuit_kron_terms_file.write('%d subcircuits\n'%len(kronecker_terms))
                 for subcircuit_idx in kronecker_terms:
-                    rank_subcircuit_kron_terms = find_process_jobs(jobs=list(kronecker_terms[subcircuit_idx].keys()),rank=rank,num_threads=num_workers)
+                    rank_subcircuit_kron_terms = find_process_jobs(jobs=list(kronecker_terms[subcircuit_idx].keys()),rank=rank,num_threads=num_threads)
                     subcircuit_kron_terms_file.write('subcircuit %d kron_terms %d num_effective %d\n'%(
                         subcircuit_idx,len(rank_subcircuit_kron_terms),counter[subcircuit_idx]['effective']))
                     for subcircuit_kron_term in rank_subcircuit_kron_terms:
