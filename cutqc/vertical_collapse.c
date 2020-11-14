@@ -20,7 +20,7 @@ int main(int argc, char** argv) {
     int early_termination = atoi(argv[5]);
     int rank = atoi(argv[6]);
     vertical_collapse(subcircuit_kron_terms_file,eval_folder,vertical_collapse_folder,early_termination,rank);
-    printf("%d-q vertical_collapse early_termination %d rank %d DONE\n",full_circ_size,early_termination,rank);
+    // printf("%d-q vertical_collapse early_termination %d rank %d DONE\n",full_circ_size,early_termination,rank);
     return 0;
 }
 
