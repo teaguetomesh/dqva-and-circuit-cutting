@@ -98,14 +98,17 @@ class CutQC:
                 print('__Build__',flush=True)
                 reconstructed_prob = self._build(circuit_case=circuit_case,dest_folder=dest_folder,recursion_layer=recursion_layer)
     
-    def verify(self,circuit_name, max_subcircuit_qubit, early_termination, num_workers, qubit_limit, eval_mode):
-        subprocess.run(['python','-m','cutqc.verify',
-        '--circuit_name',circuit_name,
-        '--max_subcircuit_qubit',str(max_subcircuit_qubit),
-        '--early_termination',str(early_termination),
-        '--num_workers',str(num_workers),
-        '--qubit_limit',str(qubit_limit),
-        '--eval_mode',eval_mode])
+    def verify(self,circuit_cases, early_termination, num_threads, qubit_limit, eval_mode):
+        for circuit_case in circuit_cases:
+            circuit_name = circuit_case.split('|')[0]
+            max_subcircuit_qubit = int(circuit_case.split('|')[1])
+            subprocess.run(['python','-m','cutqc.verify',
+            '--circuit_name',circuit_name,
+            '--max_subcircuit_qubit',str(max_subcircuit_qubit),
+            '--early_termination',str(early_termination),
+            '--num_threads',str(num_threads),
+            '--qubit_limit',str(qubit_limit),
+            '--eval_mode',eval_mode])
     
     def _run_subcircuits(self,eval_mode,num_nodes,num_threads,ibmq):
         for circuit_case in self.circuit_cases:

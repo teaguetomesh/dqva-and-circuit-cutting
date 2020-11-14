@@ -119,14 +119,14 @@ if __name__ == '__main__':
     parser.add_argument('--max_subcircuit_qubit', metavar='N',type=int,help='Max subcircuit qubit')
     parser.add_argument('--early_termination', type=int,choices=[0,1],help='use early_termination')
     parser.add_argument('--qubit_limit', type=int,help='Determines number of bins during dynamic definition')
-    parser.add_argument('--num_workers', type=int,help='Number of parallel workers for horizontal_collapse and build')
+    parser.add_argument('--num_threads', type=int,help='Number of parallel threads for post-process')
     parser.add_argument('--eval_mode', type=str,help='Evaluation backend mode')
     args = parser.parse_args()
 
     source_folder = get_dirname(circuit_name=args.circuit_name,max_subcircuit_qubit=args.max_subcircuit_qubit,
-    early_termination=None,eval_mode=None,num_workers=None,qubit_limit=None,field='cutter')
+    early_termination=None,eval_mode=None,num_threads=None,qubit_limit=None,field='cutter')
     dest_folder = get_dirname(circuit_name=args.circuit_name,max_subcircuit_qubit=args.max_subcircuit_qubit,
-    early_termination=args.early_termination,num_workers=args.num_workers,eval_mode=args.eval_mode,qubit_limit=args.qubit_limit,field='build')
+    early_termination=args.early_termination,num_threads=args.num_threads,eval_mode=args.eval_mode,qubit_limit=args.qubit_limit,field='build')
     case_dict = read_dict(filename='%s/subcircuits.pckl'%source_folder)
     if len(case_dict)==0:
         exit(0)
@@ -135,7 +135,7 @@ if __name__ == '__main__':
     subcircuits = case_dict['subcircuits']
     complete_path_map = case_dict['complete_path_map']
     # [print(x,complete_path_map[x]) for x in complete_path_map]
-    print('--> Verifying %d-qubit %s <--'%(full_circuit.num_qubits,args.circuit_name))
+    print('--> Verifying %s <--'%(args.circuit_name))
 
     sv = evaluate_circ(circuit=full_circuit,backend='statevector_simulator')
     # for state, p in enumerate(sv):

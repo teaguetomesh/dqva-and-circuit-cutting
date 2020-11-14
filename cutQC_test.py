@@ -26,4 +26,5 @@ if __name__ == '__main__':
         eval_mode='sv',num_nodes=1,num_threads=2,early_termination=[1],ibmq=ibmq)
         cutqc.post_process(circuit_cases=['%s|%d'%(circuit_name,max_subcircuit_qubit)],
             eval_mode='sv',num_nodes=1,num_threads=2,early_termination=1,qubit_limit=qubit_limit,recursion_depth=3)
-        # cutqc.verify(circuit_name='supremacy_20',max_subcircuit_qubit=max_subcircuit_qubit,early_termination=1,num_workers=1,qubit_limit=qubit_limit,eval_mode='sv')
+        cutqc.verify(circuit_cases=['%s|%d'%(circuit_name,max_subcircuit_qubit)],
+        early_termination=1,num_threads=2,qubit_limit=qubit_limit,eval_mode='sv')
