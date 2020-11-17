@@ -7,6 +7,16 @@ from qiskit.circuit.library.standard_gates import HGate, SGate, SdgGate, XGate
 
 from qiskit_helper_functions.non_ibmq_functions import read_dict, find_process_jobs, evaluate_circ
 
+def generate_subcircuit_instances(subcircuits,complete_path_map):
+    circ_dict = {}
+    all_indexed_combinations = {}
+    for subcircuit_idx, subcircuit in enumerate(subcircuits):
+        O_qubits, rho_qubits = find_subcircuit_O_rho_qubits(complete_path_map=complete_path_map,subcircuit_idx=subcircuit_idx)
+        combinations, indexed_combinations = find_all_combinations(O_qubits, rho_qubits, subcircuit.qubits)
+        circ_dict.update(get_subcircuit_instance(subcircuit_idx=subcircuit_idx,subcircuit=subcircuit, combinations=combinations))
+        all_indexed_combinations[subcircuit_idx] = indexed_combinations
+    return circ_dict, all_indexed_combinations
+
 def find_subcircuit_O_rho_qubits(complete_path_map,subcircuit_idx):
     O_qubits = []
     rho_qubits = []
@@ -119,17 +129,20 @@ def simulate_subcircuit(key,circuit,eval_mode,eval_folder,counter):
     elif eval_mode=='runtime':
         uniform_p = 1/2**circuit.num_qubits
         subcircuit_inst_prob = [uniform_p] * int(2**circuit.num_qubits)
-    write_subcircuit(key=key,eval_folder=eval_folder,counter=counter,subcircuit_inst_prob=subcircuit_inst_prob)
+    write_subcircuit(key=key,eval_folder=eval_folder,counter=counter,subcircuit_inst_prob=subcircuit_inst_prob,eval_mode=eval_mode)
 
-def write_subcircuit(key,eval_folder,counter,subcircuit_inst_prob):
+def write_subcircuit(key,eval_folder,counter,subcircuit_inst_prob,eval_mode):
     all_indexed_combinations = read_dict('%s/all_indexed_combinations.pckl'%(eval_folder))
     subcircuit_idx, inits, meas = key
 
     mutated_meas = mutate_measurement_basis(meas)
     for meas in mutated_meas:
         index = all_indexed_combinations[subcircuit_idx][(tuple(inits),tuple(meas))]
-        eval_file_name = '%s/raw_%d_%d.txt'%(eval_folder,subcircuit_idx,index)
-        # print('running',eval_file_name)
+        if eval_mode=='runtime':
+            eval_file_name = '%s/raw_%d_0.txt'%(eval_folder,subcircuit_idx)
+        else:
+            eval_file_name = '%s/raw_%d_%d.txt'%(eval_folder,subcircuit_idx,index)
+        # print('writting',eval_file_name)
         eval_file = open(eval_file_name,'w')
         eval_file.write('d=%d effective=%d\n'%(counter[subcircuit_idx]['d'],counter[subcircuit_idx]['effective']))
         [eval_file.write('%s '%x) for x in inits]
@@ -138,3 +151,5 @@ def write_subcircuit(key,eval_folder,counter,subcircuit_inst_prob):
         eval_file.write('\n')
         [eval_file.write('%e '%x) for x in subcircuit_inst_prob]
         eval_file.close()
+        if eval_mode=='runtime':
+            break

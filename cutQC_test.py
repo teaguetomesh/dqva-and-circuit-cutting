@@ -11,6 +11,7 @@ if __name__ == '__main__':
             'project':'csc430'}
     
     circuits = {}
+    circuit_cases = []
     for full_circ_size in [12,15,16]:
         circuit_type = 'supremacy'
         max_subcircuit_qubit = 10
@@ -22,11 +23,10 @@ if __name__ == '__main__':
             continue
         else:
             circuits[circuit_name] = circuit
+            circuit_cases.append('%s|%d'%(circuit_name,max_subcircuit_qubit))
 
-    print(circuits.keys())
     cutqc = CutQC(circuits=circuits,max_subcircuit_qubit=max_subcircuit_qubit, num_subcircuits=[2,3], max_cuts=10)
-    # cutqc.evaluate(circuit_cases=['%s|%d'%(circuit_name,max_subcircuit_qubit)],
-    # eval_mode='sv',num_nodes=1,num_threads=2,early_termination=[1],ibmq=ibmq)
+    cutqc.evaluate(circuit_cases=circuit_cases,eval_mode='runtime',num_nodes=1,num_threads=4,early_termination=[1],ibmq=ibmq)
     # cutqc.post_process(circuit_cases=['%s|%d'%(circuit_name,max_subcircuit_qubit)],
     #     eval_mode='sv',num_nodes=1,num_threads=2,early_termination=1,qubit_limit=qubit_limit,recursion_depth=3)
     # cutqc.verify(circuit_cases=['%s|%d'%(circuit_name,max_subcircuit_qubit)],

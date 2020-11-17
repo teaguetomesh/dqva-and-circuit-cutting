@@ -508,8 +508,9 @@ def find_cuts(circuit, max_subcircuit_qubit, num_subcircuits, max_cuts, verbose)
             counter = get_counter(subcircuits=subcircuits, O_rho_pairs=O_rho_pairs)
 
             collapse_cost, reconstruction_cost = cost_estimate(num_rho_qubits,num_O_qubits,num_d_qubits)
-            print('%d-qubit circuit %d*%d subcircuits : collapse cost = %.3e reconstruction_cost = % .3e\n'%(num_qubits,num_subcircuit,max_subcircuit_qubit,collapse_cost,reconstruction_cost)
-            +'-'*50,flush=True)
+            if verbose:
+                print('%d-qubit circuit %d*%d subcircuits : collapse cost = %.3e reconstruction_cost = % .3e\n'%(num_qubits,num_subcircuit,max_subcircuit_qubit,collapse_cost,reconstruction_cost)
+                +'-'*50,flush=True)
             # cost = collapse_cost + reconstruction_cost
             cost = reconstruction_cost
             if cost < min_postprocessing_cost:
