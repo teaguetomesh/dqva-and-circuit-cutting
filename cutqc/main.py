@@ -13,25 +13,26 @@ from cutqc.evaluator import find_subcircuit_O_rho_qubits, find_all_combinations,
 from cutqc.post_process import get_combinations, build
 
 class CutQC:
-    def __init__(self, circuits):
+    def __init__(self, circuits, max_subcircuit_qubit, num_subcircuits, max_cuts):
         self.circuits = circuits
-        self.check_input()
+        self._check_input()
+        self._cut(max_subcircuit_qubit=max_subcircuit_qubit,num_subcircuits=num_subcircuits,max_cuts=max_cuts)
 
-    def check_input(self):
+    def _check_input(self):
         for circuit_name in self.circuits:
             circuit = self.circuits[circuit_name]
             valid = check_valid(circuit=circuit)
             assert valid
     
-    def cut(self, max_subcircuit_qubit, num_subcircuits, max_cuts):
-        # TODO: make this parallel
+    def _cut(self, max_subcircuit_qubit, num_subcircuits, max_cuts):
+        pool = mp.Pool(processes=mp.cpu_count())
+        data = []
         for circuit_name in self.circuits:
             circuit = self.circuits[circuit_name]
-            cut_solution = find_cuts(circuit=circuit,
-            max_subcircuit_qubit=max_subcircuit_qubit,
-            num_subcircuits=num_subcircuits,
-            max_cuts=max_cuts,verbose=True)
-            self.circuits[circuit_name] = cut_solution
+            data.append([circuit,max_subcircuit_qubit,num_subcircuits,max_cuts,False])
+        cut_solutions = pool.starmap(find_cuts,data)
+
+        for circuit_name, cut_solution in zip(self.circuits,cut_solutions):
             source_folder = get_dirname(circuit_name=circuit_name,max_subcircuit_qubit=max_subcircuit_qubit,
             early_termination=None,eval_mode=None,num_threads=None,qubit_limit=None,field='cutter')
             if os.path.exists(source_folder):
@@ -41,6 +42,7 @@ class CutQC:
     
     def evaluate(self,circuit_cases,eval_mode,num_nodes,num_threads,early_termination,ibmq):
         self.circuit_cases = circuit_cases
+        # TODO: reduce the IO for runtime eval_mode
         self._run_subcircuits(eval_mode=eval_mode,num_nodes=num_nodes,num_threads=num_threads,ibmq=ibmq)
         self._measure(eval_mode=eval_mode,num_nodes=num_nodes,num_threads=num_threads)
         self._organize(eval_mode=eval_mode,num_threads=num_threads)
@@ -86,6 +88,7 @@ class CutQC:
                 print('__Distribute Workload__',flush=True)
                 # NOTE: hardcode recursion_qubit here for ASPLOS rebuttal experiment
                 recursion_qubit = [1,10,10][recursion_layer]
+                # TODO: reduce IO for runtime mode
                 subprocess.run(args=['python', '-m','cutqc.distributor',
                 '--circuit_name',circuit_name,'--max_subcircuit_qubit',str(max_subcircuit_qubit),'--early_termination',str(early_termination),
                 '--recursion_layer',str(recursion_layer),'--qubit_limit',str(qubit_limit),'--recursion_qubit',str(recursion_qubit),
@@ -99,6 +102,7 @@ class CutQC:
                 reconstructed_prob = self._build(circuit_case=circuit_case,dest_folder=dest_folder,recursion_layer=recursion_layer)
     
     def verify(self,circuit_cases, early_termination, num_threads, qubit_limit, eval_mode):
+        # TODO: make verify as functions
         for circuit_case in circuit_cases:
             circuit_name = circuit_case.split('|')[0]
             max_subcircuit_qubit = int(circuit_case.split('|')[1])

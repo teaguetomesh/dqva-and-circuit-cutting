@@ -24,6 +24,7 @@ source /opt/intel/bin/compilervars.sh intel64
 - [x] Write the cutQC package
 - [x] Write the single-node parallel version
 - [ ] Write the cluster parallel version
+- [ ] Make all codes as function calls, not python scripts calls
 
 # HPU
 A hybrid processing unit
