@@ -9,7 +9,7 @@ from qiskit_helper_functions.schedule import Scheduler
 
 from cutqc.helper_fun import check_valid, get_dirname
 from cutqc.cutter import find_cuts
-from cutqc.evaluator import find_subcircuit_O_rho_qubits, find_all_combinations, get_subcircuit_instance, simulate_subcircuit, write_subcircuit, generate_subcircuit_instances
+from cutqc.evaluator import simulate_subcircuit, write_subcircuit, generate_subcircuit_instances
 from cutqc.post_process import get_combinations, build
 
 class CutQC:
@@ -52,10 +52,10 @@ class CutQC:
         self._run_subcircuits(eval_mode=eval_mode,num_nodes=num_nodes,num_threads=num_threads,ibmq=ibmq)
         self._measure(eval_mode=eval_mode,num_nodes=num_nodes,num_threads=num_threads)
         self._organize(eval_mode=eval_mode,num_threads=num_threads)
-        # if 0 in early_termination:
-        #     self._vertical_collapse(early_termination=0,eval_mode=eval_mode)
-        # if 1 in early_termination:
-        #     self._vertical_collapse(early_termination=1,eval_mode=eval_mode)
+        if 0 in early_termination:
+            self._vertical_collapse(early_termination=0,eval_mode=eval_mode)
+        if 1 in early_termination:
+            self._vertical_collapse(early_termination=1,eval_mode=eval_mode)
     
     def post_process(self,circuit_cases,eval_mode,num_nodes,num_threads,early_termination,qubit_limit,recursion_depth):
         self.circuit_cases = circuit_cases
@@ -221,6 +221,8 @@ class CutQC:
             source_folder = get_dirname(circuit_name=circuit_name,max_subcircuit_qubit=max_subcircuit_qubit,
             early_termination=None,eval_mode=None,num_threads=None,qubit_limit=None,field='cutter')
             cut_solution = read_dict('%s/subcircuits.pckl'%(source_folder))
+            if len(cut_solution)==0:
+                continue
             assert(max_subcircuit_qubit == cut_solution['max_subcircuit_qubit'])
             full_circuit = cut_solution['circuit']
             subcircuits = cut_solution['subcircuits']
@@ -239,16 +241,22 @@ class CutQC:
                 subcircuit_kron_terms_file = open('%s/subcircuit_kron_terms_%d.txt'%(eval_folder,rank),'w')
                 subcircuit_kron_terms_file.write('%d subcircuits\n'%len(kronecker_terms))
                 for subcircuit_idx in kronecker_terms:
-                    rank_subcircuit_kron_terms = find_process_jobs(jobs=list(kronecker_terms[subcircuit_idx].keys()),rank=rank,num_threads=num_threads)
+                    if eval_mode=='runtime':
+                        rank_subcircuit_kron_terms = [list(kronecker_terms[subcircuit_idx].keys())[0]]
+                    else:
+                        rank_subcircuit_kron_terms = find_process_jobs(jobs=list(kronecker_terms[subcircuit_idx].keys()),rank=rank,num_threads=num_threads)
                     subcircuit_kron_terms_file.write('subcircuit %d kron_terms %d num_effective %d\n'%(
                         subcircuit_idx,len(rank_subcircuit_kron_terms),counter[subcircuit_idx]['effective']))
                     for subcircuit_kron_term in rank_subcircuit_kron_terms:
                         subcircuit_kron_terms_file.write('subcircuit_kron_index=%d kron_term_len=%d\n'%(kronecker_terms[subcircuit_idx][subcircuit_kron_term],len(subcircuit_kron_term)))
-                        [subcircuit_kron_terms_file.write('%d,%d '%(x[0],x[1])) for x in subcircuit_kron_term]
+                        if eval_mode=='runtime':
+                            [subcircuit_kron_terms_file.write('%d,0 '%(x[0])) for x in subcircuit_kron_term]
+                        else:
+                            [subcircuit_kron_terms_file.write('%d,%d '%(x[0],x[1])) for x in subcircuit_kron_term]
                         subcircuit_kron_terms_file.write('\n')
                     if rank==0:
-                        print('%s subcircuit %d : rank %d needs to vertical collapse %d/%d instances'%(
-                            circuit_case,subcircuit_idx,rank,len(rank_subcircuit_kron_terms),len(kronecker_terms[subcircuit_idx])),flush=True)
+                        print('%s subcircuit %d : rank %d/%d needs to vertical collapse %d/%d instances'%(
+                            circuit_case,subcircuit_idx,rank,num_threads,len(rank_subcircuit_kron_terms),len(kronecker_terms[subcircuit_idx])),flush=True)
                 subcircuit_kron_terms_file.close()
     
     def _vertical_collapse(self,early_termination,eval_mode):
@@ -261,6 +269,8 @@ class CutQC:
             source_folder = get_dirname(circuit_name=circuit_name,max_subcircuit_qubit=max_subcircuit_qubit,
             early_termination=None,eval_mode=None,num_threads=None,qubit_limit=None,field='cutter')
             cut_solution = read_dict('%s/subcircuits.pckl'%(source_folder))
+            if len(cut_solution)==0:
+                continue
             assert(max_subcircuit_qubit == cut_solution['max_subcircuit_qubit'])
             full_circuit = cut_solution['circuit']
             subcircuits = cut_solution['subcircuits']

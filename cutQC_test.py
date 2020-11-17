@@ -26,7 +26,7 @@ if __name__ == '__main__':
             circuit_cases.append('%s|%d'%(circuit_name,max_subcircuit_qubit))
 
     cutqc = CutQC(circuits=circuits,max_subcircuit_qubit=max_subcircuit_qubit, num_subcircuits=[2,3], max_cuts=10)
-    cutqc.evaluate(circuit_cases=circuit_cases,eval_mode='runtime',num_nodes=1,num_threads=4,early_termination=[1],ibmq=ibmq)
+    cutqc.evaluate(circuit_cases=circuit_cases,eval_mode='runtime',num_nodes=1,num_threads=1,early_termination=[1],ibmq=ibmq)
     # cutqc.post_process(circuit_cases=['%s|%d'%(circuit_name,max_subcircuit_qubit)],
     #     eval_mode='sv',num_nodes=1,num_threads=2,early_termination=1,qubit_limit=qubit_limit,recursion_depth=3)
     # cutqc.verify(circuit_cases=['%s|%d'%(circuit_name,max_subcircuit_qubit)],
