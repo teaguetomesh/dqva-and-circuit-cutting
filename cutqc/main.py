@@ -10,6 +10,7 @@ from qiskit_helper_functions.schedule import Scheduler
 from cutqc.helper_fun import check_valid, get_dirname
 from cutqc.cutter import find_cuts
 from cutqc.evaluator import simulate_subcircuit, write_subcircuit, generate_subcircuit_instances
+from cutqc.distributor import distribute
 from cutqc.post_process import get_combinations, build
 
 class CutQC:
@@ -58,6 +59,8 @@ class CutQC:
             self._vertical_collapse(early_termination=1,eval_mode=eval_mode)
     
     def post_process(self,circuit_cases,eval_mode,num_nodes,num_threads,early_termination,qubit_limit,recursion_depth):
+        print('-'*20,'Postprocess, mode = %s'%eval_mode,'-'*20)
+        # TODO: handle runtime mode
         self.circuit_cases = circuit_cases
         subprocess.run(['rm','./cutqc/merge'])
         subprocess.run(['icc','-mkl','./cutqc/merge.c','-o','./cutqc/merge','-lm'])
@@ -76,8 +79,6 @@ class CutQC:
             complete_path_map = cut_solution['complete_path_map']
             counter = cut_solution['counter']
 
-            print('-'*10,circuit_case,'-'*10,flush=True)
-
             dest_folder = get_dirname(circuit_name=circuit_name,max_subcircuit_qubit=max_subcircuit_qubit,
             early_termination=early_termination,num_threads=num_threads,eval_mode=eval_mode,qubit_limit=qubit_limit,field='build')
 
@@ -89,16 +90,13 @@ class CutQC:
             early_termination=early_termination,num_threads=None,eval_mode=eval_mode,qubit_limit=None,field='vertical_collapse')
 
             for recursion_layer in range(recursion_depth):
-                info_str = colored('--> Recursion layer %d <--'%(recursion_layer),'blue')
-                print(info_str,flush=True)
-                print('__Distribute Workload__',flush=True)
+                print('-----> %s Recursion Layer %d'%(circuit_case,recursion_layer),flush=True)
                 # NOTE: hardcode recursion_qubit here for ASPLOS rebuttal experiment
                 recursion_qubit = [1,10,10][recursion_layer]
                 # TODO: reduce IO for runtime mode
-                subprocess.run(args=['python', '-m','cutqc.distributor',
-                '--circuit_name',circuit_name,'--max_subcircuit_qubit',str(max_subcircuit_qubit),'--early_termination',str(early_termination),
-                '--recursion_layer',str(recursion_layer),'--qubit_limit',str(qubit_limit),'--recursion_qubit',str(recursion_qubit),
-                '--num_threads',str(num_threads),'--eval_mode',eval_mode])
+                distribute(circuit_name=circuit_name,max_subcircuit_qubit=max_subcircuit_qubit,
+                eval_mode=eval_mode,early_termination=early_termination,num_threads=num_threads,qubit_limit=qubit_limit,
+                recursion_layer=recursion_layer,recursion_qubit=recursion_qubit)
                 print('__Merge__',flush=True)
                 terminated = self._merge(circuit_case=circuit_case,vertical_collapse_folder=vertical_collapse_folder,dest_folder=dest_folder,
                 recursion_layer=recursion_layer)

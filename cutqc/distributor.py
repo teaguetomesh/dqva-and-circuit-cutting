@@ -52,10 +52,11 @@ def initialize_dynamic_definition_schedule(counter,recursion_qubit):
         num_active = subcircuit_active_qubit
         num_merged = counter[subcircuit_idx]['effective'] - num_zoomed - num_active
         schedule[0]['subcircuit_state'][subcircuit_idx] = ['active']*num_active + ['merged']*num_merged
-    print('First recursion layer :',schedule,flush=True)
+    [print(x,schedule[0][x],flush=True) for x in schedule[0]]
     return schedule
 
 def next_dynamic_definition_schedule(recursion_layer,schedule,state_idx,recursion_qubit):
+    print('Initializing DD recursion, recursion_qubit=%d.'%recursion_qubit,flush=True)
     num_active = 0
     for subcircuit_idx in schedule['subcircuit_state']:
         num_active += schedule['subcircuit_state'][subcircuit_idx].count('active')
@@ -81,70 +82,42 @@ def next_dynamic_definition_schedule(recursion_layer,schedule,state_idx,recursio
                 schedule['subcircuit_state'][subcircuit_idx][qubit_ctr] = 'active'
                 subcircuit_active_qubit -= 1
     schedule['upper_bin'] = (recursion_layer,state_idx)
-    print('New recursion layer:',schedule,flush=True)
+    [print(x,schedule[x],flush=True) for x in schedule]
     return schedule
 
-if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='generate evaluator inputs')
-    parser.add_argument('--circuit_name', metavar='S', type=str,help='which circuit input file to run')
-    parser.add_argument('--max_subcircuit_qubit', metavar='N',type=int,help='Max subcircuit qubit')
-    parser.add_argument('--early_termination', type=int,choices=[0,1],help='use early_termination')
-    parser.add_argument('--recursion_layer', type=int,help='Current recursion depth of dynamic definition')
-    parser.add_argument('--recursion_qubit', type=int,help='Number of active qubits during current DD recursion')
-    parser.add_argument('--qubit_limit', type=int,help='Determines max number of bins during dynamic definition')
-    parser.add_argument('--num_threads', type=int,help='Number of parallel threads for merge and build')
-    parser.add_argument('--eval_mode', type=str,help='Evaluation backend mode')
-    args = parser.parse_args()
+def find_max_recursion_layer(curr_recursion_layer,dest_folder,meta_data):
+    max_subgroup_prob = 0
+    max_recursion_layer = -1
+    for recursion_layer in range(curr_recursion_layer):
+        dynamic_definition_folder = '%s/dynamic_definition_%d'%(dest_folder,recursion_layer)
+        build_output = read_dict(filename='%s/build_output.pckl'%(dynamic_definition_folder))
+        zoomed_ctr = build_output['zoomed_ctr']
+        max_states = build_output['max_states']
+        reconstructed_prob = build_output['reconstructed_prob']
+        schedule = meta_data['dynamic_definition_schedule'][recursion_layer]
+        num_merged = 0
+        for subcircuit_idx in schedule['subcircuit_state']:
+            num_merged += schedule['subcircuit_state'][subcircuit_idx].count('merged')
+        if num_merged==0 or zoomed_ctr==len(max_states):
+            continue
+        # print('Examine recursion_layer %d, zoomed_ctr = %d, max_state = %d, p = %e'%(
+        #     recursion_layer,zoomed_ctr,max_states[zoomed_ctr],reconstructed_prob[max_states[zoomed_ctr]]))
+        # print(schedule)
+        if reconstructed_prob[max_states[zoomed_ctr]]>max_subgroup_prob and reconstructed_prob[max_states[zoomed_ctr]]>1e-16:
+            max_subgroup_prob = reconstructed_prob[max_states[zoomed_ctr]]
+            max_recursion_layer = recursion_layer
+    return max_recursion_layer
 
-    source_folder = get_dirname(circuit_name=args.circuit_name,max_subcircuit_qubit=args.max_subcircuit_qubit,
-    early_termination=None,eval_mode=None,num_threads=None,qubit_limit=None,field='cutter')
-    eval_folder = get_dirname(circuit_name=args.circuit_name,max_subcircuit_qubit=args.max_subcircuit_qubit,
-    early_termination=None,eval_mode=args.eval_mode,num_threads=None,qubit_limit=None,field='evaluator')
-    vertical_collapse_folder = get_dirname(circuit_name=args.circuit_name,max_subcircuit_qubit=args.max_subcircuit_qubit,
-    early_termination=args.early_termination,num_threads=None,eval_mode=args.eval_mode,qubit_limit=None,field='vertical_collapse')
-    dest_folder = get_dirname(circuit_name=args.circuit_name,max_subcircuit_qubit=args.max_subcircuit_qubit,
-    early_termination=args.early_termination,num_threads=args.num_threads,eval_mode=args.eval_mode,qubit_limit=args.qubit_limit,field='build')
-
-    case_dict = read_dict(filename='%s/subcircuits.pckl'%source_folder)
-    all_indexed_combinations = read_dict(filename='%s/all_indexed_combinations.pckl'%(eval_folder))
-    if len(case_dict)==0:
-        exit(0)
-    
-    full_circuit = case_dict['circuit']
-    subcircuits = case_dict['subcircuits']
-    complete_path_map = case_dict['complete_path_map']
-    counter = case_dict['counter']
-    num_subcircuits = len(subcircuits)
-
-    if args.recursion_layer==0:
-        dynamic_definition_schedule = initialize_dynamic_definition_schedule(counter=counter,recursion_qubit=args.recursion_qubit)
-        pickle.dump({'counter':counter,'dynamic_definition_schedule':dynamic_definition_schedule}, open('%s/meta_data.pckl'%(dest_folder),'wb'))
+def generate_meta_data(recursion_layer,counter,recursion_qubit,dest_folder):
+    if recursion_layer==0:
+        dynamic_definition_schedule = initialize_dynamic_definition_schedule(counter=counter,recursion_qubit=recursion_qubit)
+        return {'counter':counter,'dynamic_definition_schedule':dynamic_definition_schedule}
     else:
         meta_data = read_dict(filename='%s/meta_data.pckl'%(dest_folder))
-        max_subgroup_prob = 0
-        max_recursion_layer = -1
-        for recursion_layer in range(args.recursion_layer):
-            dynamic_definition_folder = '%s/dynamic_definition_%d'%(dest_folder,recursion_layer)
-            build_output = read_dict(filename='%s/build_output.pckl'%(dynamic_definition_folder))
-            zoomed_ctr = build_output['zoomed_ctr']
-            max_states = build_output['max_states']
-            reconstructed_prob = build_output['reconstructed_prob']
-            schedule = meta_data['dynamic_definition_schedule'][recursion_layer]
-            num_merged = 0
-            for subcircuit_idx in schedule['subcircuit_state']:
-                num_merged += schedule['subcircuit_state'][subcircuit_idx].count('merged')
-            if num_merged==0 or zoomed_ctr==len(max_states):
-                continue
-            # print('Examine recursion_layer %d, zoomed_ctr = %d, max_state = %d, p = %e'%(
-            #     recursion_layer,zoomed_ctr,max_states[zoomed_ctr],reconstructed_prob[max_states[zoomed_ctr]]))
-            # print(schedule)
-            if reconstructed_prob[max_states[zoomed_ctr]]>max_subgroup_prob and reconstructed_prob[max_states[zoomed_ctr]]>1e-16:
-                max_subgroup_prob = reconstructed_prob[max_states[zoomed_ctr]]
-                max_recursion_layer = recursion_layer
-        
+        max_recursion_layer = find_max_recursion_layer(curr_recursion_layer=recursion_layer,dest_folder=dest_folder,meta_data=meta_data)
         if max_recursion_layer==-1:
             print('-'*50,'DD recursions DONE','-'*50,flush=True)
-            exit(0)
+            return None
         dynamic_definition_folder = '%s/dynamic_definition_%d'%(dest_folder,max_recursion_layer)
         build_output = read_dict(filename='%s/build_output.pckl'%(dynamic_definition_folder))
         zoomed_ctr = build_output['zoomed_ctr']
@@ -154,29 +127,19 @@ if __name__ == '__main__':
         print('Zoom in for results of recursion_layer %d'%max_recursion_layer,schedule,flush=True)
         print('state_idx = %d, p = %e'%(max_states[zoomed_ctr],reconstructed_prob[max_states[zoomed_ctr]]),flush=True)
         next_schedule = next_dynamic_definition_schedule(recursion_layer=max_recursion_layer,
-        schedule=copy.deepcopy(schedule),state_idx=max_states[zoomed_ctr],recursion_qubit=args.recursion_qubit)
+        schedule=copy.deepcopy(schedule),state_idx=max_states[zoomed_ctr],recursion_qubit=recursion_qubit)
         build_output['zoomed_ctr'] += 1
         pickle.dump(build_output, open('%s/build_output.pckl'%(dynamic_definition_folder),'wb'))
 
-        meta_data['dynamic_definition_schedule'][args.recursion_layer] = next_schedule
-        dynamic_definition_schedule = meta_data['dynamic_definition_schedule']
-        pickle.dump(meta_data, open('%s/meta_data.pckl'%(dest_folder),'wb'))
-    
-    O_rho_pairs, combinations = get_combinations(complete_path_map=complete_path_map)
-    num_cuts = len(O_rho_pairs)
+        meta_data['dynamic_definition_schedule'][recursion_layer] = next_schedule
+        return meta_data
 
-    _, summation_terms = build(full_circuit=full_circuit, combinations=combinations,
-    O_rho_pairs=O_rho_pairs, subcircuits=subcircuits, all_indexed_combinations=all_indexed_combinations)
-    
-    dynamic_definition_folder = '%s/dynamic_definition_%d'%(dest_folder,args.recursion_layer)
-    if os.path.exists(dynamic_definition_folder):
-        subprocess.run(['rm','-r',dynamic_definition_folder])
-    os.makedirs(dynamic_definition_folder)
-    for rank in range(args.num_threads):
+def write_files(recursion_layer,num_threads,counter,vertical_collapse_folder,dynamic_definition_folder,dynamic_definition_schedule,summation_terms,num_cuts,num_subcircuits):
+    for rank in range(num_threads):
         all_rank_kron_files = []
         for subcircuit_idx in counter:
             kron_files = glob.glob('%s/kron_%d_*.txt'%(vertical_collapse_folder,subcircuit_idx))
-            rank_kron_files = find_process_jobs(jobs=kron_files,rank=rank,num_threads=args.num_threads)
+            rank_kron_files = find_process_jobs(jobs=kron_files,rank=rank,num_threads=num_threads)
             all_rank_kron_files += rank_kron_files
         merge_file = open('%s/merge_%d.txt'%(dynamic_definition_folder,rank),'w')
         merge_file.write('num_files_to_merge=%d\n'%(len(all_rank_kron_files)))
@@ -184,8 +147,8 @@ if __name__ == '__main__':
             subcircuit_idx, subcircuit_kron_index = [int(x) for x in rank_kron_file.split('kron_')[-1].split('.txt')[0].split('_')]
             merge_file.write('subcircuit_idx=%d subcircuit_kron_index=%d num_effective=%d num_active=%d\n'%(
                 subcircuit_idx,subcircuit_kron_index,counter[subcircuit_idx]['effective'],
-                dynamic_definition_schedule[args.recursion_layer]['subcircuit_state'][subcircuit_idx].count('active')))
-            for qubit_state in dynamic_definition_schedule[args.recursion_layer]['subcircuit_state'][subcircuit_idx]:
+                dynamic_definition_schedule[recursion_layer]['subcircuit_state'][subcircuit_idx].count('active')))
+            for qubit_state in dynamic_definition_schedule[recursion_layer]['subcircuit_state'][subcircuit_idx]:
                 if qubit_state=='merged':
                     merge_file.write('%d '%(-2))
                 elif qubit_state=='active':
@@ -197,20 +160,59 @@ if __name__ == '__main__':
             merge_file.write('\n')
         merge_file.close()
 
-        rank_summation_terms = find_process_jobs(jobs=summation_terms,rank=rank,num_threads=args.num_threads)
+        rank_summation_terms = find_process_jobs(jobs=summation_terms,rank=rank,num_threads=num_threads)
         num_summation_terms = len(rank_summation_terms)
         print('Rank %d has %d/%d summation terms'%(rank,num_summation_terms,len(summation_terms)),flush=True)
         
         summation_term_file = open('%s/build_%d.txt'%(dynamic_definition_folder,rank),'w')
         total_active = 0
-        for subcircuit_idx in dynamic_definition_schedule[args.recursion_layer]['subcircuit_state']:
-            total_active += dynamic_definition_schedule[args.recursion_layer]['subcircuit_state'][subcircuit_idx].count('active')
+        for subcircuit_idx in dynamic_definition_schedule[recursion_layer]['subcircuit_state']:
+            total_active += dynamic_definition_schedule[recursion_layer]['subcircuit_state'][subcircuit_idx].count('active')
         summation_term_file.write('total_active_qubit=%d num_subcircuits=%d num_summation_terms=%d num_cuts=%d\n'%(
             total_active,num_subcircuits,num_summation_terms,num_cuts))
-        smart_order = dynamic_definition_schedule[args.recursion_layer]['smart_order']
+        smart_order = dynamic_definition_schedule[recursion_layer]['smart_order']
         for summation_term in rank_summation_terms:
             for subcircuit_idx in smart_order:
                 subcircuit_kron_index = summation_term[subcircuit_idx]
                 summation_term_file.write('%d,%d '%(subcircuit_idx,subcircuit_kron_index))
             summation_term_file.write('\n')
         summation_term_file.close()
+
+def distribute(circuit_name,max_subcircuit_qubit,eval_mode,early_termination,num_threads,qubit_limit,recursion_layer,recursion_qubit):
+    source_folder = get_dirname(circuit_name=circuit_name,max_subcircuit_qubit=max_subcircuit_qubit,
+    early_termination=None,eval_mode=None,num_threads=None,qubit_limit=None,field='cutter')
+    eval_folder = get_dirname(circuit_name=circuit_name,max_subcircuit_qubit=max_subcircuit_qubit,
+    early_termination=None,eval_mode=eval_mode,num_threads=None,qubit_limit=None,field='evaluator')
+    vertical_collapse_folder = get_dirname(circuit_name=circuit_name,max_subcircuit_qubit=max_subcircuit_qubit,
+    early_termination=early_termination,num_threads=None,eval_mode=eval_mode,qubit_limit=None,field='vertical_collapse')
+    dest_folder = get_dirname(circuit_name=circuit_name,max_subcircuit_qubit=max_subcircuit_qubit,
+    early_termination=early_termination,num_threads=num_threads,eval_mode=eval_mode,qubit_limit=qubit_limit,field='build')
+
+    case_dict = read_dict(filename='%s/subcircuits.pckl'%source_folder)
+    all_indexed_combinations = read_dict(filename='%s/all_indexed_combinations.pckl'%(eval_folder))
+    if len(case_dict)==0:
+        return
+    
+    full_circuit = case_dict['circuit']
+    subcircuits = case_dict['subcircuits']
+    complete_path_map = case_dict['complete_path_map']
+    counter = case_dict['counter']
+    num_subcircuits = len(subcircuits)
+
+    meta_data = generate_meta_data(recursion_layer=recursion_layer,counter=counter,recursion_qubit=recursion_qubit,dest_folder=dest_folder)
+    pickle.dump(meta_data, open('%s/meta_data.pckl'%(dest_folder),'wb'))
+
+    O_rho_pairs, combinations = get_combinations(complete_path_map=complete_path_map)
+    num_cuts = len(O_rho_pairs)
+
+    _, summation_terms = build(full_circuit=full_circuit, combinations=combinations,
+    O_rho_pairs=O_rho_pairs, subcircuits=subcircuits, all_indexed_combinations=all_indexed_combinations)
+
+    dynamic_definition_folder = '%s/dynamic_definition_%d'%(dest_folder,recursion_layer)
+    if os.path.exists(dynamic_definition_folder):
+        subprocess.run(['rm','-r',dynamic_definition_folder])
+    os.makedirs(dynamic_definition_folder)
+
+    write_files(recursion_layer=recursion_layer,num_threads=num_threads,counter=counter,
+    vertical_collapse_folder=vertical_collapse_folder,dynamic_definition_folder=dynamic_definition_folder,
+    dynamic_definition_schedule=meta_data['dynamic_definition_schedule'],summation_terms=summation_terms,num_cuts=num_cuts,num_subcircuits=num_subcircuits)
