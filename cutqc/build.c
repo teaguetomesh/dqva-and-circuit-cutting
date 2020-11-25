@@ -91,11 +91,11 @@ void build(char* build_file, char* data_folder, char* dest_folder, int rank) {
     for (summation_term_ctr=0;summation_term_ctr<num_summation_terms;summation_term_ctr++) {
         double build_begin = get_sec();
         if (num_non_zero_summation_terms_remaining==0) {
-            // printf("Rank %d : no more remaining non_zero summation terms\n",rank);
+            printf("Rank %d : no more remaining non_zero summation terms\n",rank);
             break;
         }
         else if (summation_term_ctr==non_zero_summation_term_idx[non_zero_summation_term_ctr]) {
-            // printf("Rank %d : summation term %d is nonzero\n",rank,summation_term_ctr);
+            printf("Rank %d : summation term %d is nonzero\n",rank,summation_term_ctr);
             float *summation_term = (float*) calloc(reconstruction_len,sizeof(float));
             
             // Read first subcircuit

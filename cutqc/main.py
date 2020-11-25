@@ -319,8 +319,7 @@ class CutQC:
         assert lines[-2].split(' = ')[0]=='Total merge time' and lines[-1]=='DONE'
         elapsed = max(elapsed,float(lines[-2].split(' = ')[1]))
 
-        time_str = colored('%s _merge took %.3e seconds'%(circuit_case,elapsed),'blue')
-        print(time_str,flush=True)
+        print('%s _merge took %.3e seconds'%(circuit_case,elapsed),flush=True)
         pickle.dump({'merge_time_%d'%recursion_layer:elapsed}, open('%s/summary.pckl'%(dest_folder),'ab'))
         return False
     
@@ -358,8 +357,7 @@ class CutQC:
                 reconstructed_prob += rank_reconstructed_prob
             else:
                 reconstructed_prob = rank_reconstructed_prob
-        time_str = colored('%s _build took %.3e seconds'%(circuit_case,max(elapsed)),'blue')
-        print(time_str,flush=True)
+        print('%s _build took %.3e seconds'%(circuit_case,max(elapsed)),flush=True)
         pickle.dump({'build_time_%d'%recursion_layer:np.array(elapsed)}, open('%s/summary.pckl'%(dest_folder),'ab'))
         max_states = sorted(range(len(reconstructed_prob)),key=lambda x:reconstructed_prob[x],reverse=True)
         pickle.dump({'zoomed_ctr':0,'max_states':max_states,'reconstructed_prob':reconstructed_prob},open('%s/build_output.pckl'%(dynamic_definition_folder),'wb'))
