@@ -124,6 +124,8 @@ def apply_mixer(circ, alpha, init_state, G, anc_idx, cutedges, barriers, decompo
                 # This qubit is "cold", its mixer unitary = Identity
                 print('Qubit {} is cold! Apply Identity mixer'.format(qubit))
                 continue
+
+        print('qubit:', qubit, 'num_qubits =', len(circ.qubits), 'neighbors:', neighbors)
         
         # construct a multi-controlled Toffoli gate, with open-controls on q's neighbors
         # Qiskit has bugs when attempting to simulate custom controlled gates.
@@ -326,7 +328,9 @@ def brute_force_search(G):
     return best_str, best_hamming_weight
 
 def sim_with_cutting(circ, backend, sim, shots):
-    circuits = {'dqva_circuit':circ}
+    circuit_name = 'dqva_circuit'
+    circuits = {circuit_name:circ}
+    circuit_cases = []
     max_subcircuit_qubit = 8
     cutqc = CutQC(circuits=circuits, max_subcircuit_qubit=max_subcircuit_qubit, num_subcircuits=[2], max_cuts=3)
     subcircs = get_subcircs(cutqc, max_subcircuit_qubit)
@@ -338,6 +342,14 @@ def sim_with_cutting(circ, backend, sim, shots):
         print('Subcirc', i)
         print('\tqubits = {}, gate counts = {}'.format(len(sc.qubits), sc.count_ops()))
         #print(sc.draw(fold=200))
+
+    circuits[circuit_name] = circuit
+    circuit_cases.append('%s|%d'%(circuit_name,max_subcircuit_qubit))
+
+    cutqc.evaluate(circuit_cases=circuit_cases, eval_mode='sv', num_nodes=1, num_threads=1,
+                   early_termination=[1], ibmq=None)
+    cutqc.post_process(circuit_cases=circuit_cases, eval_mode='sv', num_nodes=1, num_threads=2,
+                       early_termination=1,qubit_limit=10,recursion_depth=1)
     
     #if sim == 'statevector':
     #    result = execute(dqv_circ, backend=backend).result()
