@@ -86,7 +86,7 @@ def ring_graph(n):
     return G
 
 def apply_mixer(circ, alpha, init_state, G, anc_idx, cutedges, barriers, decompose_toffoli,
-                mixer_order, hot_nodes):
+                mixer_order, hot_nodes, verbose=0):
     # Pad the given alpha parameters to account for the zeroed angles
     pad_alpha = []
     next_alpha = 0
@@ -106,14 +106,13 @@ def apply_mixer(circ, alpha, init_state, G, anc_idx, cutedges, barriers, decompo
         if list(reversed(init_state))[qubit] == '1' or not G.has_node(qubit):
             # Turn off mixers for qubits which are already 1
             continue
-        
+
         neighbors = list(G.neighbors(qubit))
-        
+
         if any([qubit in edge for edge in cutedges]):
             if qubit in hot_nodes:
                 # This qubit is "hot", add its neighbors in the other subgraph
                 # to the list of controls
-                print('Neighbors before:', neighbors)
                 other_neighbors = []
                 for edge in cutedges:
                     if edge[0] == qubit:
@@ -121,14 +120,15 @@ def apply_mixer(circ, alpha, init_state, G, anc_idx, cutedges, barriers, decompo
                     elif edge[1] == qubit:
                         other_neighbors.append(edge[0])
                 neighbors += other_neighbors
-                print('Neighbors after:', neighbors)
             else:
                 # This qubit is "cold", its mixer unitary = Identity
-                print('Qubit {} is cold! Apply Identity mixer'.format(qubit))
+                if verbose > 0:
+                    print('Qubit {} is cold! Apply Identity mixer'.format(qubit))
                 continue
 
-        print('qubit:', qubit, 'num_qubits =', len(circ.qubits), 'neighbors:', neighbors)
-        
+        if verbose > 0:
+            print('qubit:', qubit, 'num_qubits =', len(circ.qubits), 'neighbors:', neighbors)
+
         # construct a multi-controlled Toffoli gate, with open-controls on q's neighbors
         # Qiskit has bugs when attempting to simulate custom controlled gates.
         # Instead, wrap a regular toffoli with X-gates
@@ -144,10 +144,10 @@ def apply_mixer(circ, alpha, init_state, G, anc_idx, cutedges, barriers, decompo
             mc_toffoli = ControlledGate('mc_toffoli', len(neighbors)+1, [], num_ctrl_qubits=len(neighbors),
                                         ctrl_state='0'*len(neighbors), base_gate=XGate())
             circ.append(mc_toffoli, ctrl_qubits + [circ.ancillas[anc_idx]])
-        
+
         # apply an X rotation controlled by the state of the ancilla qubit
         circ.crx(2*pad_alpha[qubit], circ.ancillas[anc_idx], circ.qubits[qubit])
-        
+
         # apply the same multi-controlled Toffoli to uncompute the ancilla
         if decompose_toffoli > 0:
             for ctrl in ctrl_qubits:
@@ -157,7 +157,7 @@ def apply_mixer(circ, alpha, init_state, G, anc_idx, cutedges, barriers, decompo
                 circ.x(ctrl)
         else:
             circ.append(mc_toffoli, ctrl_qubits + [circ.ancillas[anc_idx]])
-        
+
         if barriers > 1:
             circ.barrier()
 
@@ -172,7 +172,7 @@ def view_partition(partition, G):
             node_colors.append('gold')
         else:
             node_colors.append('lightblue')
-    
+
     edge_colors = []
     for edge in G.edges:
         if (edge[0] in partition[0] and edge[1] in partition[1]) or \
@@ -189,15 +189,15 @@ def get_subgraphs(G, partition):
     for subgraph_nodes in partition:
         subG = nx.Graph()
         subG.add_nodes_from(subgraph_nodes)
-        
+
         for v1, v2 in all_edges:
             if v1 in subgraph_nodes and v2 in subgraph_nodes:
                 subG.add_edge(v1, v2)
             if v1 in subgraph_nodes and v2 not in subgraph_nodes:
                 cut_edges.append((v1, v2))
-        
+
         subgraphs.append(subG)
-    
+
     return subgraphs, cut_edges
 
 def strip_ancillas(counts, circ):
@@ -208,23 +208,24 @@ def strip_ancillas(counts, circ):
     return new_counts
 
 def gen_dqva(G, partition, params=[], init_state=None, barriers=1, cut=False,
-             decompose_toffoli=1, mixer_order=None, hot_nodes=[]):
-    
+             decompose_toffoli=1, mixer_order=None, hot_nodes=[], verbose=0):
+
     nq = len(G.nodes)
     if cut:
         subgraphs, cutedges = get_subgraphs(G, partition)
     else:
         subgraphs = [G]
         cutedges = []
-    
-    print('Current partition:', partition)
-    print('subgraphs:', [list(g.nodes) for g in subgraphs])
-    print('cutedges:', cutedges)
-    # The hot nodes parameter controls which of the nodes on the cut edges we will
-    # hit with a mixer unitary. The other nodes on the cut are "cold" and their
-    # mixer will be Identity
-    print('hot nodes:', hot_nodes)
-    
+
+    if verbose > 0:
+        print('Current partition:', partition)
+        print('subgraphs:', [list(g.nodes) for g in subgraphs])
+        print('cutedges:', cutedges)
+        # The hot nodes parameter controls which of the nodes on the cut edges we will
+        # hit with a mixer unitary. The other nodes on the cut are "cold" and their
+        # mixer will be Identity
+        print('hot nodes:', hot_nodes)
+
     # Step 1: Jump Start
     # Run an efficient classical approximation algorithm to warm-start the optimization
     # (For now, we will select the trivial set of bitstrings with Hamming weight equal to 1)
@@ -238,13 +239,12 @@ def gen_dqva(G, partition, params=[], init_state=None, barriers=1, cut=False,
                 bitstr[i] = '1'
                 cur_strs.append(''.join(bitstr))
             sub_strs.append(cur_strs)
-    
-    
+
         I_cl = []
         for combo in itertools.product(*sub_strs):
             I_cl.append(''.join(combo))
         init_state = I_cl[0] # for now, select the first initial bitstr
-    
+
     # Step 2: Mixer Initialization
     # Select any one of the initial strings and apply two mixing unitaries separated by the phase separator unitary
     dqv_circ = QuantumCircuit(nq, name='q')
@@ -252,7 +252,7 @@ def gen_dqva(G, partition, params=[], init_state=None, barriers=1, cut=False,
     # Add an ancilla qubit, 1 for each subgraph, for implementing the mixer unitaries
     anc_reg = AncillaRegister(len(subgraphs), 'anc')
     dqv_circ.add_register(anc_reg)
-    
+
     #print('Init state:', init_state)
     for qb, bit in enumerate(reversed(init_state)):
         if bit == '1':
@@ -270,10 +270,10 @@ def gen_dqva(G, partition, params=[], init_state=None, barriers=1, cut=False,
 
     for anc_idx, subgraph in enumerate(subgraphs):
         apply_mixer(dqv_circ, alpha_1, init_state, subgraph, anc_idx, cutedges,
-                    barriers, decompose_toffoli, mixer_order, hot_nodes)
+                    barriers, decompose_toffoli, mixer_order, hot_nodes, verbose=verbose)
     if barriers > 0:
         dqv_circ.barrier()
-    
+
     for subgraph in subgraphs:
         apply_phase_separator(dqv_circ, gamma_1, subgraph)
     if barriers > 0:
@@ -281,7 +281,7 @@ def gen_dqva(G, partition, params=[], init_state=None, barriers=1, cut=False,
 
     for anc_idx, subgraph in enumerate(subgraphs):
         apply_mixer(dqv_circ, alpha_2, init_state, subgraph, anc_idx, cutedges,
-                    barriers, decompose_toffoli, mixer_order, hot_nodes)
+                    barriers, decompose_toffoli, mixer_order, hot_nodes, verbose=verbose)
 
     if decompose_toffoli > 1:
         #basis_gates = ['x', 'cx', 'barrier', 'crx', 'tdg', 't', 'rz', 'h']
@@ -289,7 +289,7 @@ def gen_dqva(G, partition, params=[], init_state=None, barriers=1, cut=False,
         pass_ = Unroller(basis_gates)
         pm = PassManager(pass_)
         dqv_circ = pm.run(dqv_circ)
-    
+
     return dqv_circ
 
 def is_indset(bitstr, G):
@@ -379,7 +379,7 @@ def sim_with_cutting(circ, backend, sim, shots):
 
     return probs
 
-def cut_dqva(init_state, G, m=4, threshold=1e-5, cutoff=5, sim='statevector', shots=8192):
+def cut_dqva(init_state, G, m=4, threshold=1e-5, cutoff=5, sim='statevector', shots=8192, verbose=0):
 
     kl_bisection = kernighan_lin_bisection(G)
     
@@ -395,7 +395,7 @@ def cut_dqva(init_state, G, m=4, threshold=1e-5, cutoff=5, sim='statevector', sh
         # Circuit cutting is not required here, but the circuit should be generated using
         # as much info about the cutting as possible
         dqv_circ = gen_dqva(G, kl_bisection, params=params, init_state=cur_init_state, cut=True,
-                            mixer_order=cur_permutation)
+                            mixer_order=cur_permutation, verbose=verbose)
 
         # Compute the cost function
         # Circuit cutting will need to be used to perform the execution
@@ -439,7 +439,7 @@ def cut_dqva(init_state, G, m=4, threshold=1e-5, cutoff=5, sim='statevector', sh
 
             # Get the results of the optimized circuit
             dqv_circ = gen_dqva(G, kl_bisection, params=opt_params, init_state=cur_init_state,
-                                mixer_order=cur_permutation, cut=False)
+                                mixer_order=cur_permutation, cut=False, verbose=verbose)
             #result = execute(dqv_circ, backend=Aer.get_backend('statevector_simulator')).result()
             #statevector = Statevector(result.get_statevector(dqv_circ))
             #counts = strip_ancillas(statevector.probabilities_dict(decimals=5), dqv_circ)
@@ -497,7 +497,7 @@ def cut_dqva(init_state, G, m=4, threshold=1e-5, cutoff=5, sim='statevector', sh
 
 def main():
     G = test_graph(4, 0.7)
-    print(list(G.edges()))
+    #print(list(G.edges()))
     #nx.draw_spring(G, with_labels=True, node_color='gold')
     kl_bisection = kernighan_lin_bisection(G)
 
@@ -506,9 +506,9 @@ def main():
     cur_permutation = list(G.nodes)
     dqv_circ = gen_dqva(G, kl_bisection, params=[1]*num_params, init_state=cur_init_state, cut=True,
                         mixer_order=cur_permutation, decompose_toffoli=2, barriers=0,
-                        hot_nodes=[3])
-    print(dqv_circ.count_ops())
-    dqv_circ.draw(fold=250)
+                        hot_nodes=[3], verbose=0)
+    #print(dqv_circ.count_ops())
+    #dqv_circ.draw(fold=250)
 
     backend = Aer.get_backend('qasm_simulator')
 
@@ -521,6 +521,7 @@ def main():
     dqv_circ = newcirc
 
     probs = sim_with_cutting(dqv_circ, backend, 'qasm', 8192)
+    print(probs)
 
 if __name__ == '__main__':
     main()
