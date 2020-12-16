@@ -3,6 +3,7 @@ import pickle
 import numpy as np
 import networkx as nx
 import queue
+import glob
 import matplotlib.pyplot as plt
 
 from networkx.algorithms.community.kernighan_lin import kernighan_lin_bisection
@@ -10,6 +11,7 @@ import itertools
 from scipy.optimize import minimize
 
 from cutqc.main import CutQC
+from qiskit_helper_functions.non_ibmq_functions import read_dict
 from qiskit import *
 from qiskit.circuit import Qubit
 from qiskit.circuit.library.standard_gates import XGate
@@ -332,35 +334,50 @@ def sim_with_cutting(circ, backend, sim, shots):
     circuits = {circuit_name:circ}
     circuit_cases = []
     max_subcircuit_qubit = 8
-    cutqc = CutQC(circuits=circuits, max_subcircuit_qubit=max_subcircuit_qubit, num_subcircuits=[2], max_cuts=3)
+    cutqc = CutQC(circuits=circuits, max_subcircuit_qubit=max_subcircuit_qubit, num_subcircuits=[2], max_cuts=3)#verbose=0)
     subcircs = get_subcircs(cutqc, max_subcircuit_qubit)
-    print('Complete Path Map:')
-    for key in subcircs['complete_path_map']:
-        print(key, '->', subcircs['complete_path_map'][key])
-    print('positions:', subcircs['positions'])
-    for i, sc in enumerate(subcircs['subcircuits']):
-        print('Subcirc', i)
-        print('\tqubits = {}, gate counts = {}'.format(len(sc.qubits), sc.count_ops()))
+    #print('Complete Path Map:')
+    #for key in subcircs['complete_path_map']:
+    #    print(key, '->', subcircs['complete_path_map'][key])
+    #print('positions:', subcircs['positions'])
+    #for i, sc in enumerate(subcircs['subcircuits']):
+    #    print('Subcirc', i)
+    #    print('\tqubits = {}, gate counts = {}'.format(len(sc.qubits), sc.count_ops()))
         #print(sc.draw(fold=200))
 
-    circuits[circuit_name] = circuit
+    #circuits[circuit_name] = circuit
     circuit_cases.append('%s|%d'%(circuit_name,max_subcircuit_qubit))
 
     cutqc.evaluate(circuit_cases=circuit_cases, eval_mode='sv', num_nodes=1, num_threads=1,
                    early_termination=[1], ibmq=None)
-    cutqc.post_process(circuit_cases=circuit_cases, eval_mode='sv', num_nodes=1, num_threads=2,
-                       early_termination=1,qubit_limit=10,recursion_depth=1)
-    
-    #if sim == 'statevector':
-    #    result = execute(dqv_circ, backend=backend).result()
-    #    statevector = Statevector(result.get_statevector(dqv_circ))
-    #    probs = strip_ancillas(statevector.probabilities_dict(decimals=5), dqv_circ)
-    #elif sim == 'qasm':
-    #    dqv_circ.measure_all()
-    #    result = execute(dqv_circ, backend=backend, shots=shots).result()
-    #    counts = strip_ancillas(result.get_counts(dqv_circ), dqv_circ)
-    #    probs = {sample: counts[sample] / shots for sample in counts.keys()}
-    return
+    rec_layers = cutqc.post_process(circuit_cases=circuit_cases, eval_mode='sv', num_nodes=1, num_threads=2,
+                                    early_termination=1,qubit_limit=10,recursion_depth=1)
+
+    #print('rec_layers:')
+    reconstructed_prob = rec_layers[0]
+    #print(rec_layers)
+    #probs = {'{:0{}b}'.format(i, len(circ.qubits)): rec_layers[i] for i in range(len(rec_layers)) if rec_layers[i] > 0}
+    #print('probs:', probs)
+
+    #cutqc.verify(circuit_cases=circuit_cases, early_termination=1, num_threads=2,qubit_limit=10,eval_mode='sv')
+
+    dest_folder = './cutqc_data/dqva_circuit/cc_8/sv_1_10_2'
+    #print('dest_folder:', dest_folder)
+    meta_data = read_dict(filename='%s/meta_data.pckl'%dest_folder)
+    dynamic_definition_folders = glob.glob('%s/dynamic_definition_*'%dest_folder)
+    recursion_depth = len(dynamic_definition_folders)
+    #print('recursion depth =', recursion_depth)
+
+    for recursion_layer in range(recursion_depth):
+        #print('Recursion layer %d'%recursion_layer)
+        #dynamic_definition_folder = '%s/dynamic_definition_%d'%(dest_folder,recursion_layer)
+        #build_output = read_dict(filename='%s/build_output.pckl'%(dynamic_definition_folder))
+        #reconstructed_prob = build_output['reconstructed_prob']
+
+        probs = cutqc.reorder(circ, reconstructed_prob, subcircs['complete_path_map'], subcircs['subcircuits'],
+                              meta_data['dynamic_definition_schedule'][recursion_layer])
+
+    return probs
 
 def cut_dqva(init_state, G, m=4, threshold=1e-5, cutoff=5, sim='statevector', shots=8192):
 
@@ -494,6 +511,15 @@ def main():
     dqv_circ.draw(fold=250)
 
     backend = Aer.get_backend('qasm_simulator')
+
+    newcirc = QuantumCircuit(4)
+    newcirc.h([0])
+    for i in range(3):
+        newcirc.cx(i, i+1)
+    newcirc.x([2,3])
+    print(newcirc.draw())
+    dqv_circ = newcirc
+
     probs = sim_with_cutting(dqv_circ, backend, 'qasm', 8192)
 
 if __name__ == '__main__':

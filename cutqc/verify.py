@@ -163,9 +163,14 @@ if __name__ == '__main__':
     
         # `blurred_chi2` : reconstructed_prob vs blurred ground_truth, over current recursion bin, for checking purposes
         # `chi2_bins` : averaged reconstructed_prob vs sv for the bins in the current recursion
-        blurred_chi2, chi2_bins, recursion_ordered = verify(full_circuit=full_circuit,ground_truth=sv,unordered=reconstructed_prob,
-        complete_path_map=complete_path_map,subcircuits=subcircuits,counter=meta_data['counter'],
-        layer_schedule=meta_data['dynamic_definition_schedule'][recursion_layer])
+        print('full_circuit:', full_circuit)
+        print('reconstructed_prob:', reconstructed_prob)
+        print('meta data folder:', '%s/meta_data.pckl'%dest_folder)
+        blurred_chi2, chi2_bins, recursion_ordered = verify(full_circuit=full_circuit, ground_truth=sv,
+                                   unordered=reconstructed_prob, complete_path_map=complete_path_map,
+                                   subcircuits=subcircuits,counter=meta_data['counter'],
+                                   layer_schedule=meta_data['dynamic_definition_schedule'][recursion_layer])
+        print('recursion_ordered:', recursion_ordered)
         for state_idx, chi2_bin in enumerate(chi2_bins):
             all_chi2[(recursion_layer,state_idx)] = chi2_bin
         upper_bin = meta_data['dynamic_definition_schedule'][recursion_layer]['upper_bin']
@@ -178,6 +183,8 @@ if __name__ == '__main__':
         verify_chi2 = chi2_distance(target=sv,obs=ordered_list,normalize=True)
         cumulative_chi2 = sum(all_chi2.values())
 
+        print('ordered_list:', ordered_list)
+        print('sv:', sv)
         pickle.dump({'ordered':ordered_list,'sv':sv}, open('%s/DD_%d.pckl'%(dest_folder,recursion_layer),'wb'))
         print('blurred_\N{GREEK SMALL LETTER CHI}^2 = %.3e, cumulative_\N{GREEK SMALL LETTER CHI}^2 = %.3e, verify_\N{GREEK SMALL LETTER CHI}^2 = %.3e'%(
             blurred_chi2,cumulative_chi2,verify_chi2))

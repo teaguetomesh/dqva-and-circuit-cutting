@@ -1,6 +1,7 @@
 import os, subprocess, pickle, glob, random, time
 from termcolor import colored
 import numpy as np
+import itertools
 import multiprocessing as mp
 from datetime import datetime
 
@@ -79,32 +80,95 @@ class CutQC:
             complete_path_map = cut_solution['complete_path_map']
             counter = cut_solution['counter']
 
-            dest_folder = get_dirname(circuit_name=circuit_name,max_subcircuit_qubit=max_subcircuit_qubit,
-            early_termination=early_termination,num_threads=num_threads,eval_mode=eval_mode,qubit_limit=qubit_limit,field='build')
+            dest_folder = get_dirname(circuit_name=circuit_name, max_subcircuit_qubit=max_subcircuit_qubit,
+                                      early_termination=early_termination, num_threads=num_threads,
+                                      eval_mode=eval_mode,qubit_limit=qubit_limit,field='build')
+            print('DEST FOLDER:', dest_folder)
 
             if os.path.exists('%s'%dest_folder):
                 subprocess.run(['rm','-r',dest_folder])
             os.makedirs(dest_folder)
 
-            vertical_collapse_folder = get_dirname(circuit_name=circuit_name,max_subcircuit_qubit=max_subcircuit_qubit,
-            early_termination=early_termination,num_threads=None,eval_mode=eval_mode,qubit_limit=None,field='vertical_collapse')
+            vertical_collapse_folder = get_dirname(circuit_name=circuit_name,
+                    max_subcircuit_qubit=max_subcircuit_qubit, early_termination=early_termination,
+                    num_threads=None,eval_mode=eval_mode,qubit_limit=None,field='vertical_collapse')
 
+            rec_layers = []
             for recursion_layer in range(recursion_depth):
                 print('-----> %s Recursion Layer %d'%(circuit_case,recursion_layer),flush=True)
-                # NOTE: hardcode recursion_qubit here for ASPLOS rebuttal experiment
-                recursion_qubit = [1,10,10][recursion_layer]
+                recursion_qubit = qubit_limit
                 # TODO: reduce IO for runtime mode
-                distribute(circuit_name=circuit_name,max_subcircuit_qubit=max_subcircuit_qubit,
-                eval_mode=eval_mode,early_termination=early_termination,num_threads=num_threads,qubit_limit=qubit_limit,
-                recursion_layer=recursion_layer,recursion_qubit=recursion_qubit)
+                distribute(circuit_name=circuit_name, max_subcircuit_qubit=max_subcircuit_qubit,
+                           eval_mode=eval_mode, early_termination=early_termination, num_threads=num_threads,
+                           qubit_limit=qubit_limit, recursion_layer=recursion_layer,
+                           recursion_qubit=recursion_qubit)
                 print('__Merge__',flush=True)
-                terminated = self._merge(circuit_case=circuit_case,vertical_collapse_folder=vertical_collapse_folder,dest_folder=dest_folder,
-                recursion_layer=recursion_layer)
+                terminated = self._merge(circuit_case=circuit_case,
+                                         vertical_collapse_folder=vertical_collapse_folder,
+                                         dest_folder=dest_folder, recursion_layer=recursion_layer)
                 if terminated:
                     break
                 print('__Build__',flush=True)
-                reconstructed_prob = self._build(circuit_case=circuit_case,dest_folder=dest_folder,recursion_layer=recursion_layer)
-    
+                reconstructed_prob = self._build(circuit_case=circuit_case, dest_folder=dest_folder,
+                                                 recursion_layer=recursion_layer)
+                rec_layers.append(reconstructed_prob)
+            return rec_layers
+
+    def reorder(self, full_circuit, unordered, complete_path_map, subcircuits, layer_schedule):
+        subcircuit_out_qubits = {}
+        for input_qubit in complete_path_map:
+            path = complete_path_map[input_qubit]
+            output_qubit = path[-1]
+            if output_qubit['subcircuit_idx'] in subcircuit_out_qubits:
+                subcircuit_out_qubits[output_qubit['subcircuit_idx']].append((output_qubit['subcircuit_qubit'],full_circuit.qubits.index(input_qubit)))
+            else:
+                subcircuit_out_qubits[output_qubit['subcircuit_idx']] = [(output_qubit['subcircuit_qubit'],full_circuit.qubits.index(input_qubit))]
+
+        for subcircuit_idx in subcircuit_out_qubits:
+            subcircuit_out_qubits[subcircuit_idx] = sorted(subcircuit_out_qubits[subcircuit_idx],
+                                                           key=lambda x:subcircuits[subcircuit_idx].qubits.index(x[0]),
+                                                           reverse=True)
+            subcircuit_out_qubits[subcircuit_idx] = [x[1] for x in subcircuit_out_qubits[subcircuit_idx]]
+        print('subcircuit_out_qubits:',subcircuit_out_qubits,'smart_order:',layer_schedule['smart_order'])
+
+        unordered_qubit_format = []
+        unordered_qubit_state = []
+        for subcircuit_idx in layer_schedule['smart_order']:
+            print('subcircuit %d'%subcircuit_idx,layer_schedule['subcircuit_state'][subcircuit_idx])
+            if subcircuit_idx in subcircuit_out_qubits:
+                unordered_qubit_format += subcircuit_out_qubits[subcircuit_idx]
+                unordered_qubit_state += layer_schedule['subcircuit_state'][subcircuit_idx]
+
+        labelled_probs = {}
+        num_active = unordered_qubit_state.count('active')
+        num_merged = unordered_qubit_state.count('merged')
+        merged_states = list(itertools.product(['0','1'],repeat=num_merged))
+        for state_ctr, unordered_p in enumerate(unordered):
+            avg_unordered_p = unordered_p/2**num_merged
+            for merged_state in merged_states:
+                bin_state_ctr = bin(state_ctr)[2:].zfill(num_active)
+                bin_full_state = []
+                for qubit in unordered_qubit_state:
+                    if qubit=='active':
+                        bin_full_state.append(bin_state_ctr[0])
+                        bin_state_ctr = bin_state_ctr[1:]
+                    elif qubit=='merged':
+                        bin_full_state.append(merged_state[0])
+                        merged_state = merged_state[1:]
+                    elif qubit=='0' or qubit =='1':
+                        bin_full_state.append(qubit)
+                _, bin_full_state = zip(*sorted(zip(unordered_qubit_format, bin_full_state),reverse=True))
+                bin_full_state = ''.join(bin_full_state)
+                full_state = int(bin_full_state,2)
+                labelled_probs[full_state] = avg_unordered_p
+
+        # convert ordered into a probability dict
+        print('labelled_probs:', labelled_probs)
+        probability_dict = {'{:0{}b}'.format(key, len(full_circuit.qubits)): labelled_probs[key] for key in labelled_probs.keys() if labelled_probs[key] > 0}
+
+        print('probability_dict:', probability_dict)
+        return probability_dict
+
     def verify(self,circuit_cases, early_termination, num_threads, qubit_limit, eval_mode):
         # TODO: make verify as functions
         for circuit_case in circuit_cases:
