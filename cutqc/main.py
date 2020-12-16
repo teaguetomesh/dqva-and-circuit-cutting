@@ -19,8 +19,9 @@ class CutQC:
     The CutQC class should only handle the IOs
     Leave all actual functions to individual modules
     '''
-    def __init__(self, circuits, max_subcircuit_qubit, num_subcircuits, max_cuts):
+    def __init__(self, circuits, max_subcircuit_qubit, num_subcircuits, max_cuts, verbose):
         self.circuits = circuits
+        self.verbose = verbose
         self._check_input()
         self._cut(max_subcircuit_qubit=max_subcircuit_qubit,num_subcircuits=num_subcircuits,max_cuts=max_cuts)
 
@@ -29,9 +30,10 @@ class CutQC:
             circuit = self.circuits[circuit_name]
             valid = check_valid(circuit=circuit)
             assert valid
-    
+
     def _cut(self, max_subcircuit_qubit, num_subcircuits, max_cuts):
-        print('-'*20,'Cut','-'*20)
+        if self.verbose > 0:
+            print('-'*20,'Cut','-'*20)
         pool = mp.Pool(processes=mp.cpu_count())
         data = []
         for circuit_name in self.circuits:
@@ -46,10 +48,12 @@ class CutQC:
                 subprocess.run(['rm','-r',source_folder])
             os.makedirs(source_folder)
             pickle.dump(cut_solution, open('%s/subcircuits.pckl'%(source_folder),'wb'))
-            print('{:s} : {:d} cuts --> {}'.format(circuit_name,len(cut_solution['positions']),cut_solution['counter']))
-    
+            if self.verbose > 0:
+                print('{:s} : {:d} cuts --> {}'.format(circuit_name,len(cut_solution['positions']),cut_solution['counter']))
+
     def evaluate(self,circuit_cases,eval_mode,num_nodes,num_threads,early_termination,ibmq):
-        print('-'*20,'Evaluate, mode = %s'%eval_mode,'-'*20)
+        if self.verbose > 0:
+            print('-'*20,'Evaluate, mode = %s'%eval_mode,'-'*20)
         self.circuit_cases = circuit_cases
         self._run_subcircuits(eval_mode=eval_mode,num_nodes=num_nodes,num_threads=num_threads,ibmq=ibmq)
         self._measure(eval_mode=eval_mode,num_nodes=num_nodes,num_threads=num_threads)
@@ -58,9 +62,10 @@ class CutQC:
             self._vertical_collapse(early_termination=0,eval_mode=eval_mode)
         if 1 in early_termination:
             self._vertical_collapse(early_termination=1,eval_mode=eval_mode)
-    
+
     def post_process(self,circuit_cases,eval_mode,num_nodes,num_threads,early_termination,qubit_limit,recursion_depth):
-        print('-'*20,'Postprocess, mode = %s'%eval_mode,'-'*20)
+        if self.verbose > 0:
+            print('-'*20,'Postprocess, mode = %s'%eval_mode,'-'*20)
         # TODO: handle runtime mode
         self.circuit_cases = circuit_cases
         subprocess.run(['rm','./cutqc/merge'])
@@ -83,7 +88,6 @@ class CutQC:
             dest_folder = get_dirname(circuit_name=circuit_name, max_subcircuit_qubit=max_subcircuit_qubit,
                                       early_termination=early_termination, num_threads=num_threads,
                                       eval_mode=eval_mode,qubit_limit=qubit_limit,field='build')
-            print('DEST FOLDER:', dest_folder)
 
             if os.path.exists('%s'%dest_folder):
                 subprocess.run(['rm','-r',dest_folder])
@@ -95,20 +99,23 @@ class CutQC:
 
             rec_layers = []
             for recursion_layer in range(recursion_depth):
-                print('-----> %s Recursion Layer %d'%(circuit_case,recursion_layer),flush=True)
+                if self.verbose > 0:
+                    print('-----> %s Recursion Layer %d'%(circuit_case,recursion_layer),flush=True)
                 recursion_qubit = qubit_limit
                 # TODO: reduce IO for runtime mode
                 distribute(circuit_name=circuit_name, max_subcircuit_qubit=max_subcircuit_qubit,
                            eval_mode=eval_mode, early_termination=early_termination, num_threads=num_threads,
                            qubit_limit=qubit_limit, recursion_layer=recursion_layer,
-                           recursion_qubit=recursion_qubit)
-                print('__Merge__',flush=True)
+                           recursion_qubit=recursion_qubit, verbose=self.verbose)
+                if self.verbose > 0:
+                    print('__Merge__',flush=True)
                 terminated = self._merge(circuit_case=circuit_case,
                                          vertical_collapse_folder=vertical_collapse_folder,
                                          dest_folder=dest_folder, recursion_layer=recursion_layer)
                 if terminated:
                     break
-                print('__Build__',flush=True)
+                if self.verbose > 0:
+                    print('__Build__',flush=True)
                 reconstructed_prob = self._build(circuit_case=circuit_case, dest_folder=dest_folder,
                                                  recursion_layer=recursion_layer)
                 rec_layers.append(reconstructed_prob)
@@ -129,12 +136,15 @@ class CutQC:
                                                            key=lambda x:subcircuits[subcircuit_idx].qubits.index(x[0]),
                                                            reverse=True)
             subcircuit_out_qubits[subcircuit_idx] = [x[1] for x in subcircuit_out_qubits[subcircuit_idx]]
-        print('subcircuit_out_qubits:',subcircuit_out_qubits,'smart_order:',layer_schedule['smart_order'])
+
+        if self.verbose > 0:
+            print('subcircuit_out_qubits:',subcircuit_out_qubits,'smart_order:',layer_schedule['smart_order'])
 
         unordered_qubit_format = []
         unordered_qubit_state = []
         for subcircuit_idx in layer_schedule['smart_order']:
-            print('subcircuit %d'%subcircuit_idx,layer_schedule['subcircuit_state'][subcircuit_idx])
+            if self.verbose > 0:
+                print('subcircuit %d'%subcircuit_idx,layer_schedule['subcircuit_state'][subcircuit_idx])
             if subcircuit_idx in subcircuit_out_qubits:
                 unordered_qubit_format += subcircuit_out_qubits[subcircuit_idx]
                 unordered_qubit_state += layer_schedule['subcircuit_state'][subcircuit_idx]
@@ -163,10 +173,7 @@ class CutQC:
                 labelled_probs[full_state] = avg_unordered_p
 
         # convert ordered into a probability dict
-        print('labelled_probs:', labelled_probs)
         probability_dict = {'{:0{}b}'.format(key, len(full_circuit.qubits)): labelled_probs[key] for key in labelled_probs.keys() if labelled_probs[key] > 0}
-
-        print('probability_dict:', probability_dict)
         return probability_dict
 
     def verify(self,circuit_cases, early_termination, num_threads, qubit_limit, eval_mode):
@@ -181,7 +188,7 @@ class CutQC:
             '--num_threads',str(num_threads),
             '--qubit_limit',str(qubit_limit),
             '--eval_mode',eval_mode])
-    
+
     def _run_subcircuits(self,eval_mode,num_nodes,num_threads,ibmq):
         for circuit_case in self.circuit_cases:
             circuit_name = circuit_case.split('|')[0]
@@ -240,7 +247,7 @@ class CutQC:
                 pool.starmap(write_subcircuit,data,chunksize=chunksize)
             else:
                 raise NotImplementedError
-    
+
     def _measure(self, eval_mode, num_nodes, num_threads):
         subprocess.run(['rm','./cutqc/measure'])
         subprocess.run(['icc','./cutqc/measure.c','-o','./cutqc/measure','-lm'])
@@ -266,13 +273,14 @@ class CutQC:
                     process_eval_files = find_process_jobs(jobs=range(len(eval_files)),rank=rank,num_threads=num_threads)
                     process_eval_files = [str(x) for x in process_eval_files]
                     if rank==0:
-                        print('%s subcircuit %d : rank %d/%d needs to measure %d/%d instances'%(
+                        if self.verbose > 0:
+                            print('%s subcircuit %d : rank %d/%d needs to measure %d/%d instances'%(
                             circuit_case,subcircuit_idx,rank,num_threads,len(process_eval_files),len(eval_files)),flush=True)
                     p = subprocess.Popen(args=['./cutqc/measure', '%d'%rank, eval_folder,
                     '%d'%full_circuit.num_qubits,'%d'%subcircuit_idx, '%d'%len(process_eval_files), *process_eval_files])
                     child_processes.append(p)
                 [cp.wait() for cp in child_processes]
-    
+
     def _organize(self, eval_mode, num_threads):
         '''
         Organize parallel processing for the subsequent vertical collapse procedure
@@ -316,7 +324,7 @@ class CutQC:
                         else:
                             [subcircuit_kron_terms_file.write('%d,%d '%(x[0],x[1])) for x in subcircuit_kron_term]
                         subcircuit_kron_terms_file.write('\n')
-                    if rank==0:
+                    if rank==0 and self.verbose > 0:
                         print('%s subcircuit %d : rank %d/%d needs to vertical collapse %d/%d instances'%(
                             circuit_case,subcircuit_idx,rank,num_threads,len(rank_subcircuit_kron_terms),len(kronecker_terms[subcircuit_idx])),flush=True)
                 subcircuit_kron_terms_file.close()
@@ -360,7 +368,7 @@ class CutQC:
                 measured_files = glob.glob('%s/measured*.txt'%eval_folder)
                 [subprocess.run(['rm',measured_file]) for measured_file in measured_files]
                 [subprocess.run(['rm','%s/subcircuit_kron_terms_%d.txt'%(eval_folder,rank)]) for rank in range(len(rank_files))]
-    
+
     def _merge(self, circuit_case, dest_folder, recursion_layer, vertical_collapse_folder):
         dynamic_definition_folder = '%s/dynamic_definition_%d'%(dest_folder,recursion_layer)
         if not os.path.exists(dynamic_definition_folder):
@@ -383,10 +391,11 @@ class CutQC:
         assert lines[-2].split(' = ')[0]=='Total merge time' and lines[-1]=='DONE'
         elapsed = max(elapsed,float(lines[-2].split(' = ')[1]))
 
-        print('%s _merge took %.3e seconds'%(circuit_case,elapsed),flush=True)
+        if self.verbose > 0:
+            print('%s _merge took %.3e seconds'%(circuit_case,elapsed),flush=True)
         pickle.dump({'merge_time_%d'%recursion_layer:elapsed}, open('%s/summary.pckl'%(dest_folder),'ab'))
         return False
-    
+
     def _build(self, circuit_case, dest_folder, recursion_layer):
         dynamic_definition_folder = '%s/dynamic_definition_%d'%(dest_folder,recursion_layer)
         build_files = glob.glob('%s/build_*.txt'%dynamic_definition_folder)
@@ -397,7 +406,7 @@ class CutQC:
             p = subprocess.Popen(args=['./cutqc/build', '%s'%build_file, '%s'%dynamic_definition_folder, 
             '%s'%dynamic_definition_folder, '%d'%rank, '%d'%recursion_layer])
             child_processes.append(p)
-        
+
         elapsed = []
         reconstructed_prob = None
         for rank in range(num_threads):
@@ -421,7 +430,8 @@ class CutQC:
                 reconstructed_prob += rank_reconstructed_prob
             else:
                 reconstructed_prob = rank_reconstructed_prob
-        print('%s _build took %.3e seconds'%(circuit_case,max(elapsed)),flush=True)
+        if self.verbose > 0:
+            print('%s _build took %.3e seconds'%(circuit_case,max(elapsed)),flush=True)
         pickle.dump({'build_time_%d'%recursion_layer:np.array(elapsed)}, open('%s/summary.pckl'%(dest_folder),'ab'))
         max_states = sorted(range(len(reconstructed_prob)),key=lambda x:reconstructed_prob[x],reverse=True)
         pickle.dump({'zoomed_ctr':0,'max_states':max_states,'reconstructed_prob':reconstructed_prob},open('%s/build_output.pckl'%(dynamic_definition_folder),'wb'))

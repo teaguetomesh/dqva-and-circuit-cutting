@@ -21,7 +21,7 @@ int main(int argc, char** argv) {
     int rank = atoi(argv[4]);
     int recursion_layer = atoi(argv[5]);
     merge(merge_file, data_folder, dest_folder, rank);
-    printf("recursion_layer %d merge rank %d DONE\n",recursion_layer,rank);
+    //printf("recursion_layer %d merge rank %d DONE\n",recursion_layer,rank);
     return 0;
 }
 
@@ -110,7 +110,7 @@ void merge(char *merge_file, char *data_folder, char *dest_folder, int rank) {
         log_time = print_log(log_time,total_merge_time,merge_ctr+1,num_files_to_merge,300,rank);
     }
     fclose(merge_fptr);
-    
+
     char *summary_file = malloc(256*sizeof(char));
     sprintf(summary_file, "%s/rank_%d_summary.txt", dest_folder, rank);
     FILE *summary_fptr = fopen(summary_file, "w");
@@ -124,7 +124,7 @@ void merge(char *merge_file, char *data_folder, char *dest_folder, int rank) {
 int* decToBinary(int num, int num_digits) {
     int *bin = malloc(num_digits*sizeof(int));
     int i;
-    for (i = num_digits - 1; i >= 0; i--) { 
+    for (i = num_digits - 1; i >= 0; i--) {
         int k = num >> i;
         if (k & 1) {
             bin[num_digits - 1 - i] = 1;

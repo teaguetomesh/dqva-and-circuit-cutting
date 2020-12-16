@@ -26,9 +26,9 @@ int main(int argc, char** argv) {
     char *dest_folder = argv[3];
     int rank = atoi(argv[4]);
     int recursion_layer = atoi(argv[5]);
-    
+
     build(build_file,data_folder,dest_folder,rank);
-    printf("recursion_layer %d build rank %d DONE\n",recursion_layer,rank);
+    //printf("recursion_layer %d build rank %d DONE\n",recursion_layer,rank);
     return 0;
 }
 
@@ -68,7 +68,7 @@ int* get_nonzero_summation_term_idx(char* build_file, char* data_folder, int ran
 
 void build(char* build_file, char* data_folder, char* dest_folder, int rank) {
     int *non_zero_summation_term_idx = get_nonzero_summation_term_idx(build_file,data_folder,rank);
-    
+
     int total_active_qubit, num_subcircuits, num_summation_terms, num_cuts;
     FILE* build_fptr = fopen(build_file, "r");
     fscanf(build_fptr,"total_active_qubit=%d num_subcircuits=%d num_summation_terms=%d num_cuts=%d\n",\
@@ -82,7 +82,7 @@ void build(char* build_file, char* data_folder, char* dest_folder, int rank) {
     float alpha = 1;
     incx = 1;
     incy = 1;
-    
+
     int summation_term_ctr;
     int non_zero_summation_term_ctr = 1;
     int num_non_zero_summation_terms_remaining = non_zero_summation_term_idx[0];
@@ -91,13 +91,13 @@ void build(char* build_file, char* data_folder, char* dest_folder, int rank) {
     for (summation_term_ctr=0;summation_term_ctr<num_summation_terms;summation_term_ctr++) {
         double build_begin = get_sec();
         if (num_non_zero_summation_terms_remaining==0) {
-            printf("Rank %d : no more remaining non_zero summation terms\n",rank);
+            //printf("Rank %d : no more remaining non_zero summation terms\n",rank);
             break;
         }
         else if (summation_term_ctr==non_zero_summation_term_idx[non_zero_summation_term_ctr]) {
-            printf("Rank %d : summation term %d is nonzero\n",rank,summation_term_ctr);
+            //printf("Rank %d : summation term %d is nonzero\n",rank,summation_term_ctr);
             float *summation_term = (float*) calloc(reconstruction_len,sizeof(float));
-            
+
             // Read first subcircuit
             int subcircuit_idx_0, subcircuit_kron_index_0;
             fscanf(build_fptr,"%d,%d ",&subcircuit_idx_0,&subcircuit_kron_index_0);
@@ -178,7 +178,7 @@ void build(char* build_file, char* data_folder, char* dest_folder, int rank) {
     }
     fclose(build_data_fptr);
     free(build_result_file);
-    
+
     fclose(build_fptr);
     free(non_zero_summation_term_idx);
     free(reconstructed_prob);

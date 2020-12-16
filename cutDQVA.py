@@ -334,7 +334,7 @@ def sim_with_cutting(circ, backend, sim, shots):
     circuits = {circuit_name:circ}
     circuit_cases = []
     max_subcircuit_qubit = 8
-    cutqc = CutQC(circuits=circuits, max_subcircuit_qubit=max_subcircuit_qubit, num_subcircuits=[2], max_cuts=3)#verbose=0)
+    cutqc = CutQC(circuits=circuits, max_subcircuit_qubit=max_subcircuit_qubit, num_subcircuits=[2], max_cuts=3, verbose=0)
     subcircs = get_subcircs(cutqc, max_subcircuit_qubit)
     #print('Complete Path Map:')
     #for key in subcircs['complete_path_map']:
