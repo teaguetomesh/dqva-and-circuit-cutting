@@ -42,14 +42,16 @@ class CutQC:
         cut_solutions = pool.starmap(find_cuts,data)
 
         for circuit_name, cut_solution in zip(self.circuits,cut_solutions):
-            source_folder = get_dirname(circuit_name=circuit_name,max_subcircuit_qubit=max_subcircuit_qubit,
-            early_termination=None,eval_mode=None,num_threads=None,qubit_limit=None,field='cutter')
+            source_folder = get_dirname(circuit_name=circuit_name, max_subcircuit_qubit=max_subcircuit_qubit,
+                                        early_termination=None, eval_mode=None, num_threads=None,
+                                        qubit_limit=None, field='cutter')
             if os.path.exists(source_folder):
                 subprocess.run(['rm','-r',source_folder])
             os.makedirs(source_folder)
             pickle.dump(cut_solution, open('%s/subcircuits.pckl'%(source_folder),'wb'))
             if self.verbose > 0:
-                print('{:s} : {:d} cuts --> {}'.format(circuit_name,len(cut_solution['positions']),cut_solution['counter']))
+                print('{:s} : {:d} cuts --> {}'.format(circuit_name, len(cut_solution['positions']),
+                                                       cut_solution['counter']))
 
     def evaluate(self,circuit_cases,eval_mode,num_nodes,num_threads,early_termination,ibmq):
         if self.verbose > 0:
@@ -173,7 +175,9 @@ class CutQC:
                 labelled_probs[full_state] = avg_unordered_p
 
         # convert ordered into a probability dict
-        probability_dict = {'{:0{}b}'.format(key, len(full_circuit.qubits)): labelled_probs[key] for key in labelled_probs.keys() if labelled_probs[key] > 0}
+        threshold = 1e-10
+        probability_dict = {'{:0{}b}'.format(key, len(full_circuit.qubits)): labelled_probs[key] for key in labelled_probs.keys() \
+                            if labelled_probs[key] > threshold}
         return probability_dict
 
     def verify(self,circuit_cases, early_termination, num_threads, qubit_limit, eval_mode):

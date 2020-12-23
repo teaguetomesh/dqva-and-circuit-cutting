@@ -382,24 +382,23 @@ def sim_with_cutting(circ, backend, sim, shots):
 def cut_dqva(init_state, G, m=4, threshold=1e-5, cutoff=5, sim='statevector', shots=8192, verbose=0):
 
     kl_bisection = kernighan_lin_bisection(G)
-    
-    
-    
+    print('kl bisection:', kl_bisection)
     backend = Aer.get_backend(sim+'_simulator')
     cur_permutation = list(np.random.permutation(list(G.nodes)))
-    
+
     history = []
-    
+
     def f(params):
         # Generate a circuit
         # Circuit cutting is not required here, but the circuit should be generated using
         # as much info about the cutting as possible
         dqv_circ = gen_dqva(G, kl_bisection, params=params, init_state=cur_init_state, cut=True,
-                            mixer_order=cur_permutation, verbose=verbose)
+                            mixer_order=cur_permutation, verbose=verbose, decompose_toffoli=2,
+                            barriers=0, hot_nodes=[3])
 
         # Compute the cost function
         # Circuit cutting will need to be used to perform the execution
-        probs = sim_with_cutting(dvq_circ, backend, sim, shots)
+        probs = sim_with_cutting(dqv_circ, backend, sim, shots)
 
         avg_cost = 0
         for sample in probs.keys():
@@ -409,19 +408,19 @@ def cut_dqva(init_state, G, m=4, threshold=1e-5, cutoff=5, sim='statevector', sh
 
         # Return the negative of the cost for minimization
         return -avg_cost
-    
+
     # Step 3: Dynamic Ansatz Update
     # Begin outer optimization loop
     best_indset = init_state
     best_init_state = init_state
     cur_init_state = init_state
-    
+
     # Randomly permute the order of mixer unitaries m times
     for step4_round in range(1, m+1):
         step3_round = 1
         new_hamming_weight = hamming_weight(cur_init_state)
         old_hamming_weight = -1
-        
+
         # Attempt to improve the Hamming weight until no further improvements can be made
         while new_hamming_weight > old_hamming_weight:
             print('Start round {}.{}, Initial state = {}'.format(step4_round, step3_round, cur_init_state))
@@ -439,12 +438,13 @@ def cut_dqva(init_state, G, m=4, threshold=1e-5, cutoff=5, sim='statevector', sh
 
             # Get the results of the optimized circuit
             dqv_circ = gen_dqva(G, kl_bisection, params=opt_params, init_state=cur_init_state,
-                                mixer_order=cur_permutation, cut=False, verbose=verbose)
+                                mixer_order=cur_permutation, cut=True, verbose=verbose,
+                                decompose_toffoli=2, barriers=0, hot_nodes=[3])
             #result = execute(dqv_circ, backend=Aer.get_backend('statevector_simulator')).result()
             #statevector = Statevector(result.get_statevector(dqv_circ))
             #counts = strip_ancillas(statevector.probabilities_dict(decimals=5), dqv_circ)
             counts = sim_with_cutting(dqv_circ, backend, sim, shots)
-            
+
             # Select the top [cutoff] counts
             top_counts = sorted([(key, counts[key]) for key in counts if counts[key] > threshold],
                                 key=lambda tup: tup[1], reverse=True)[:cutoff]
@@ -457,18 +457,18 @@ def cut_dqva(init_state, G, m=4, threshold=1e-5, cutoff=5, sim='statevector', sh
                     better_strs.append((bitstr, this_hamming))
             better_strs = sorted(better_strs, key=lambda t: t[1], reverse=True)
             prev_init_state = cur_init_state
-            
+
             # Save current results to history
             temp_history = {'round':'{}.{}'.format(step4_round, step3_round),
                             'cost':opt_cost, 'permutation':cur_permutation, 'topcounts':top_counts,
                             'previnit':prev_init_state}
-            
+
             # If no improvement was made, break and go to next step4 round
             if len(better_strs) == 0:
                 print('\tNone of the measured bitstrings had higher Hamming weight than:', prev_init_state)
                 history.append(temp_history)
                 break
-            
+
             # Otherwise, save the new bitstring and check if it is better than all we have seen thus far
             cur_init_state, new_hamming_weight = better_strs[0]
             if new_hamming_weight > hamming_weight(best_indset):
@@ -478,7 +478,7 @@ def cut_dqva(init_state, G, m=4, threshold=1e-5, cutoff=5, sim='statevector', sh
             temp_history['curinit'] = cur_init_state
             history.append(temp_history)
             step3_round += 1
-        
+
         # Choose a new permutation of the mixer unitaries that have NOT been set to identity
         identity_mixers = [i for i in range(len(cur_init_state)) if list(reversed(cur_init_state))[i] == '1']
         non_identity_mixers = [i for i in range(len(cur_init_state)) if list(reversed(cur_init_state))[i] == '0']
@@ -491,37 +491,39 @@ def cut_dqva(init_state, G, m=4, threshold=1e-5, cutoff=5, sim='statevector', sh
                 continue
             else:
                 cur_permutation[i] = perm_queue.get()
-    
+
     print('\tRETURNING, best hamming weight:', new_hamming_weight)
     return best_indset, opt_params, best_init_state, kl_bisection, history
 
 def main():
     G = test_graph(4, 0.7)
-    #print(list(G.edges()))
+    print(list(G.edges()))
     #nx.draw_spring(G, with_labels=True, node_color='gold')
-    kl_bisection = kernighan_lin_bisection(G)
+    #kl_bisection = kernighan_lin_bisection(G)
 
-    cur_init_state = '0'*len(G.nodes)
-    num_params = 2 * (len(cur_init_state) - hamming_weight(cur_init_state)) + 1
-    cur_permutation = list(G.nodes)
-    dqv_circ = gen_dqva(G, kl_bisection, params=[1]*num_params, init_state=cur_init_state, cut=True,
-                        mixer_order=cur_permutation, decompose_toffoli=2, barriers=0,
-                        hot_nodes=[3], verbose=0)
+    #cur_init_state = '0'*len(G.nodes)
+    #num_params = 2 * (len(cur_init_state) - hamming_weight(cur_init_state)) + 1
+    #cur_permutation = list(G.nodes)
+    #dqv_circ = gen_dqva(G, kl_bisection, params=[1]*num_params, init_state=cur_init_state, cut=True,
+    #                    mixer_order=cur_permutation, decompose_toffoli=2, barriers=0,
+    #                    hot_nodes=[3], verbose=0)
     #print(dqv_circ.count_ops())
     #dqv_circ.draw(fold=250)
 
-    backend = Aer.get_backend('qasm_simulator')
+    #backend = Aer.get_backend('qasm_simulator')
 
-    newcirc = QuantumCircuit(4)
-    newcirc.h([0])
-    for i in range(3):
-        newcirc.cx(i, i+1)
-    newcirc.x([2,3])
-    print(newcirc.draw())
-    dqv_circ = newcirc
+    #newcirc = QuantumCircuit(4)
+    #newcirc.x([0])
+    #for i in range(3):
+    #    newcirc.cx(i, i+1)
+    #newcirc.x([2,3])
+    #print(newcirc.draw())
+    #dqv_circ = newcirc
 
-    probs = sim_with_cutting(dqv_circ, backend, 'qasm', 8192)
-    print(probs)
+    #probs = sim_with_cutting(dqv_circ, backend, 'qasm', 8192)
+    #print(probs)
+
+    out = cut_dqva('0'*len(G.nodes), G, m=4, threshold=1e-5, cutoff=5, sim='statevector', shots=8192, verbose=0)
 
 if __name__ == '__main__':
     main()
