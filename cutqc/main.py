@@ -40,6 +40,9 @@ class CutQC:
             circuit = self.circuits[circuit_name]
             data.append([circuit,max_subcircuit_qubit,num_subcircuits,max_cuts,False])
         cut_solutions = pool.starmap(find_cuts,data)
+        #circuit = self.circuits[list(self.circuits.keys())[0]]
+        #cut_solutions = [find_cuts(circuit, max_subcircuit_qubit, num_subcircuits,
+        #                          max_cuts, False)]
 
         for circuit_name, cut_solution in zip(self.circuits,cut_solutions):
             source_folder = get_dirname(circuit_name=circuit_name, max_subcircuit_qubit=max_subcircuit_qubit,
