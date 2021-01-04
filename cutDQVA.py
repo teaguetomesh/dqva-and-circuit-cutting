@@ -329,53 +329,49 @@ def brute_force_search(G):
             best_hamming_weight = hamming_weight(bitstr)
     return best_str, best_hamming_weight
 
-def sim_with_cutting(circ, backend, sim, shots):
-    circuit_name = 'dqva_circuit'
-    circuits = {circuit_name:circ}
-    circuit_cases = []
-    max_subcircuit_qubit = 8
-    cutqc = CutQC(circuits=circuits, max_subcircuit_qubit=max_subcircuit_qubit, num_subcircuits=[2], max_cuts=3, verbose=0)
-    subcircs = get_subcircs(cutqc, max_subcircuit_qubit)
-    #print('Complete Path Map:')
-    #for key in subcircs['complete_path_map']:
-    #    print(key, '->', subcircs['complete_path_map'][key])
-    #print('positions:', subcircs['positions'])
-    #for i, sc in enumerate(subcircs['subcircuits']):
-    #    print('Subcirc', i)
-    #    print('\tqubits = {}, gate counts = {}'.format(len(sc.qubits), sc.count_ops()))
-        #print(sc.draw(fold=200))
+def sim_with_cutting(circ, backend, sim, shots, G, verbose, mode='direct'):
+    circuits = {'my_circ':circ}
+    max_subcircuit_qubit = 6
+    num_subcircuits = [2]
+    max_cuts = 4
+    cutqc = CutQC(circuits=circuits, max_subcircuit_qubit=max_subcircuit_qubit,
+                  num_subcircuits=num_subcircuits, max_cuts=max_cuts, verbose=verbose)
 
-    #circuits[circuit_name] = circuit
-    circuit_cases.append('%s|%d'%(circuit_name,max_subcircuit_qubit))
+    # TODO: modify cutQC to return the cutcoln instead of using pickle
+    #cutsoln = get_cut_solution(cutqc, max_subcircuit_qubit)
+    cutsoln = cutqc.cut_solns[0]
+    print('Split circuit into {} subcircuits with {} qubits'.format(len(cutsoln['subcircuits']),
+                                                                    [len(circ.qubits) for circ in cutsoln['subcircuits']]))
 
-    cutqc.evaluate(circuit_cases=circuit_cases, eval_mode='sv', num_nodes=1, num_threads=1,
-                   early_termination=[1], ibmq=None)
-    rec_layers = cutqc.post_process(circuit_cases=circuit_cases, eval_mode='sv', num_nodes=1, num_threads=2,
-                                    early_termination=1,qubit_limit=10,recursion_depth=1)
+    wpm = {}
+    for key in cutsoln['complete_path_map']:
+        temp = []
+        for frag_qubit in cutsoln['complete_path_map'][key]:
+            temp.append((frag_qubit['subcircuit_idx'], frag_qubit['subcircuit_qubit']))
+        wpm[key] = tuple(temp)
 
-    #print('rec_layers:')
-    reconstructed_prob = rec_layers[0]
-    #print(rec_layers)
-    #probs = {'{:0{}b}'.format(i, len(circ.qubits)): rec_layers[i] for i in range(len(rec_layers)) if rec_layers[i] > 0}
-    #print('probs:', probs)
+    shots = 999999
+    total_variants = 7
+    simulation_backend = 'qasm_simulator'
+    frag_data = qmm.collect_fragment_data(cutsoln['subcircuits'], wpm, shots=15000, tomography_backend=simulation_backend)
 
-    #cutqc.verify(circuit_cases=circuit_cases, early_termination=1, num_threads=2,qubit_limit=10,eval_mode='sv')
+    direct_models = qmm.direct_fragment_model(frag_data)
+    if mode is 'direct':
+        direct_recombined_dist = qmm.recombine_fragment_models(direct_models, wpm)
+        dirty_probs = strip_ancillas(naive_fix(direct_recombined_dist), circ)
+    elif mode is 'likely':
+        likely_models = qmm.maximum_likelihood_model(direct_models)
+        dirty_probs = strip_ancillas(qmm.recombine_fragment_models(likely_models, wpm), circ)
+    else:
+        raise Exception('Unknown recombination mode:', mode)
 
-    dest_folder = './cutqc_data/dqva_circuit/cc_8/sv_1_10_2'
-    #print('dest_folder:', dest_folder)
-    meta_data = read_dict(filename='%s/meta_data.pckl'%dest_folder)
-    dynamic_definition_folders = glob.glob('%s/dynamic_definition_*'%dest_folder)
-    recursion_depth = len(dynamic_definition_folders)
-    #print('recursion depth =', recursion_depth)
+    clean_probs = {}
+    for bitstr, probability in dirty_probs.items():
+        if is_indset(bitstr, G):
+            clean_probs[bitstr] = probability
 
-    for recursion_layer in range(recursion_depth):
-        #print('Recursion layer %d'%recursion_layer)
-        #dynamic_definition_folder = '%s/dynamic_definition_%d'%(dest_folder,recursion_layer)
-        #build_output = read_dict(filename='%s/build_output.pckl'%(dynamic_definition_folder))
-        #reconstructed_prob = build_output['reconstructed_prob']
-
-        probs = cutqc.reorder(circ, reconstructed_prob, subcircs['complete_path_map'], subcircs['subcircuits'],
-                              meta_data['dynamic_definition_schedule'][recursion_layer])
+    factor = 1.0 / sum(clean_probs.values())
+    probs = {k: v*factor for k, v in clean_probs.items() }
 
     return probs
 
@@ -393,12 +389,12 @@ def cut_dqva(init_state, G, m=4, threshold=1e-5, cutoff=5, sim='statevector', sh
         # Circuit cutting is not required here, but the circuit should be generated using
         # as much info about the cutting as possible
         dqv_circ = gen_dqva(G, kl_bisection, params=params, init_state=cur_init_state, cut=True,
-                            mixer_order=cur_permutation, verbose=verbose, decompose_toffoli=2,
-                            barriers=0, hot_nodes=[3])
+                                 mixer_order=cur_permutation, verbose=verbose, decompose_toffoli=2,
+                                 barriers=0, hot_nodes=[2])
 
         # Compute the cost function
         # Circuit cutting will need to be used to perform the execution
-        probs = sim_with_cutting(dqv_circ, backend, sim, shots)
+        probs = sim_with_cutting(dqv_circ, backend, sim, shots, G, verbose)
 
         avg_cost = 0
         for sample in probs.keys():
@@ -437,13 +433,11 @@ def cut_dqva(init_state, G, m=4, threshold=1e-5, cutoff=5, sim='statevector', sh
             print('\tOptimal cost:', opt_cost)
 
             # Get the results of the optimized circuit
-            dqv_circ = gen_dqva(G, kl_bisection, params=opt_params, init_state=cur_init_state,
-                                mixer_order=cur_permutation, cut=True, verbose=verbose,
-                                decompose_toffoli=2, barriers=0, hot_nodes=[3])
-            #result = execute(dqv_circ, backend=Aer.get_backend('statevector_simulator')).result()
-            #statevector = Statevector(result.get_statevector(dqv_circ))
-            #counts = strip_ancillas(statevector.probabilities_dict(decimals=5), dqv_circ)
-            counts = sim_with_cutting(dqv_circ, backend, sim, shots)
+            dqv_circ = gen_dqva(G, kl_bisection, params=opt_params, init_state=cur_init_state, cut=True,
+                                     mixer_order=cur_permutation, verbose=verbose, decompose_toffoli=2,
+                                     barriers=0, hot_nodes=[2])
+
+            probs = sim_with_cutting(dqv_circ, backend, sim, shots, G, verbose)
 
             # Select the top [cutoff] counts
             top_counts = sorted([(key, counts[key]) for key in counts if counts[key] > threshold],
@@ -498,30 +492,6 @@ def cut_dqva(init_state, G, m=4, threshold=1e-5, cutoff=5, sim='statevector', sh
 def main():
     G = test_graph(4, 0.7)
     print(list(G.edges()))
-    #nx.draw_spring(G, with_labels=True, node_color='gold')
-    #kl_bisection = kernighan_lin_bisection(G)
-
-    #cur_init_state = '0'*len(G.nodes)
-    #num_params = 2 * (len(cur_init_state) - hamming_weight(cur_init_state)) + 1
-    #cur_permutation = list(G.nodes)
-    #dqv_circ = gen_dqva(G, kl_bisection, params=[1]*num_params, init_state=cur_init_state, cut=True,
-    #                    mixer_order=cur_permutation, decompose_toffoli=2, barriers=0,
-    #                    hot_nodes=[3], verbose=0)
-    #print(dqv_circ.count_ops())
-    #dqv_circ.draw(fold=250)
-
-    #backend = Aer.get_backend('qasm_simulator')
-
-    #newcirc = QuantumCircuit(4)
-    #newcirc.x([0])
-    #for i in range(3):
-    #    newcirc.cx(i, i+1)
-    #newcirc.x([2,3])
-    #print(newcirc.draw())
-    #dqv_circ = newcirc
-
-    #probs = sim_with_cutting(dqv_circ, backend, 'qasm', 8192)
-    #print(probs)
 
     out = cut_dqva('0'*len(G.nodes), G, m=4, threshold=1e-5, cutoff=5, sim='statevector', shots=8192, verbose=0)
 
