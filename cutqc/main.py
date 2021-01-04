@@ -40,18 +40,23 @@ class CutQC:
             circuit = self.circuits[circuit_name]
             data.append([circuit,max_subcircuit_qubit,num_subcircuits,max_cuts,False])
         cut_solutions = pool.starmap(find_cuts,data)
+        #circuit = self.circuits[list(self.circuits.keys())[0]]
+        #cut_solutions = [find_cuts(circuit, max_subcircuit_qubit, num_subcircuits,
+        #                          max_cuts, False)]
 
-        for circuit_name, cut_solution in zip(self.circuits,cut_solutions):
-            source_folder = get_dirname(circuit_name=circuit_name, max_subcircuit_qubit=max_subcircuit_qubit,
-                                        early_termination=None, eval_mode=None, num_threads=None,
-                                        qubit_limit=None, field='cutter')
-            if os.path.exists(source_folder):
-                subprocess.run(['rm','-r',source_folder])
-            os.makedirs(source_folder)
-            pickle.dump(cut_solution, open('%s/subcircuits.pckl'%(source_folder),'wb'))
-            if self.verbose > 0:
-                print('{:s} : {:d} cuts --> {}'.format(circuit_name, len(cut_solution['positions']),
-                                                       cut_solution['counter']))
+        self.cut_solns = cut_solutions
+        
+        #for circuit_name, cut_solution in zip(self.circuits,cut_solutions):
+        #    source_folder = get_dirname(circuit_name=circuit_name, max_subcircuit_qubit=max_subcircuit_qubit,
+        #                                early_termination=None, eval_mode=None, num_threads=None,
+        #                                qubit_limit=None, field='cutter')
+            #if os.path.exists(source_folder):
+            #    subprocess.run(['rm','-r',source_folder])
+            #os.makedirs(source_folder)
+            #pickle.dump(cut_solution, open('%s/subcircuits.pckl'%(source_folder),'wb'))
+            #if self.verbose > 0:
+            #    print('{:s} : {:d} cuts --> {}'.format(circuit_name, len(cut_solution['positions']),
+            #                                           cut_solution['counter']))
 
     def evaluate(self,circuit_cases,eval_mode,num_nodes,num_threads,early_termination,ibmq):
         if self.verbose > 0:
