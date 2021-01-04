@@ -334,7 +334,9 @@ def sim_with_cutting(circ, backend, sim, shots):
     circuits = {circuit_name:circ}
     circuit_cases = []
     max_subcircuit_qubit = 8
-    cutqc = CutQC(circuits=circuits, max_subcircuit_qubit=max_subcircuit_qubit, num_subcircuits=[2], max_cuts=3, verbose=0)
+
+    cutqc = CutQC(circuits=circuits, max_subcircuit_qubit=max_subcircuit_qubit,
+                  num_subcircuits=[2], max_cuts=3, verbose=0)
     subcircs = get_subcircs(cutqc, max_subcircuit_qubit)
     #print('Complete Path Map:')
     #for key in subcircs['complete_path_map']:
@@ -398,7 +400,11 @@ def cut_dqva(init_state, G, m=4, threshold=1e-5, cutoff=5, sim='statevector', sh
 
         # Compute the cost function
         # Circuit cutting will need to be used to perform the execution
+        # Time the full cutting+evaluating+reconstruction process
+        start_time = time.time()
         probs = sim_with_cutting(dqv_circ, backend, sim, shots)
+        end_time = time.time()
+        print('Elapsed time:', end_time-start_time)
 
         avg_cost = 0
         for sample in probs.keys():
@@ -407,6 +413,7 @@ def cut_dqva(init_state, G, m=4, threshold=1e-5, cutoff=5, sim='statevector', sh
             avg_cost += probs[sample] * sum(x)
 
         # Return the negative of the cost for minimization
+        print('Expectation value:', avg_cost)
         return -avg_cost
 
     # Step 3: Dynamic Ansatz Update
