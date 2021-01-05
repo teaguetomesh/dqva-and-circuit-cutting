@@ -400,7 +400,7 @@ def cut_dqva(init_state, G, m=4, threshold=1e-5, cutoff=5, sim='statevector', sh
 
     cut_options = {'max_subcircuit_qubit':len(G.nodes)+len(kl_bisection-1),
                    'num_subcircuits':[2],
-                   'max_cuts':4)}
+                   'max_cuts':4}
 
     history = []
 
