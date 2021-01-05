@@ -5,6 +5,10 @@
 import ast, itertools, numpy, scipy, qiskit, tensornetwork
 from qiskit.tools import monitor
 
+def naive_fix(dist):
+    norm = sum( value for value in dist.values() if value >= 0 )
+    return { bits : value / norm for bits, value in dist.items() if value >= 0 }
+
 # get the quantum state prepared by a circuit
 def get_statevector(circuit):
     simulator = qiskit.Aer.get_backend("statevector_simulator")
