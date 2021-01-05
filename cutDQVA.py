@@ -333,6 +333,9 @@ def brute_force_search(G):
     return best_str, best_hamming_weight
 
 def sim_with_cutting(circ, simulation_backend, shots, G, verbose, mode='direct', cut_options=None):
+
+    cut_start_time = time.time()
+
     circuits = {'my_circ':circ}
     if cut_options is None:
         max_subcircuit_qubit = len(circ.qubits) - 1
@@ -349,9 +352,11 @@ def sim_with_cutting(circ, simulation_backend, shots, G, verbose, mode='direct',
     cutsoln = cutqc.cut_solns[0]
     if len(cutsoln) == 0:
         raise Exception('Cut solution is empty!')
+    cut_end_time = time.time()
     print('Split circuit into {} subcircuits with {} qubits'.format(len(cutsoln['subcircuits']),
                                                                     [len(subcirc.qubits) for subcirc in cutsoln['subcircuits']]))
 
+    eval_start_time = time.time()
     wpm = {}
     for key in cutsoln['complete_path_map']:
         temp = []
@@ -380,6 +385,11 @@ def sim_with_cutting(circ, simulation_backend, shots, G, verbose, mode='direct',
 
     factor = 1.0 / sum(clean_probs.values())
     probs = {k: v*factor for k, v in clean_probs.items() }
+
+    eval_end_time = time.time()
+
+    print('Cut time: {:.3f}, Eval time: {:.3f}'.format(cut_end_time - cut_start_time,
+                                                       eval_end_time - eval_start_time))
 
     return probs
 
