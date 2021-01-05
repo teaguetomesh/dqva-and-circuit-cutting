@@ -21,6 +21,9 @@ from qiskit.visualization import plot_histogram
 from qiskit.transpiler.passes import Unroller
 from qiskit.transpiler import PassManager
 
+import qsplit_circuit_cutter as qcc
+import qsplit_mlrecon_methods as qmm
+
 from networkx.algorithms.approximation import independent_set
 
 
@@ -329,19 +332,25 @@ def brute_force_search(G):
             best_hamming_weight = hamming_weight(bitstr)
     return best_str, best_hamming_weight
 
-def sim_with_cutting(circ, backend, sim, shots, G, verbose, mode='direct'):
+def sim_with_cutting(circ, simulation_backend, shots, G, verbose, mode='direct', cut_options=None):
     circuits = {'my_circ':circ}
-    max_subcircuit_qubit = 6
-    num_subcircuits = [2]
-    max_cuts = 4
+    if cut_options is None:
+        max_subcircuit_qubit = len(circ.qubits) - 1
+        num_subcircuits = [2]
+        max_cuts = 4
+    else:
+        max_subcircuit_qubit = cut_options['max_subcircuit_qubit']
+        num_subcircuits = cut_options['num_subcircuits']
+        max_cuts = cut_options['max_cuts']
     cutqc = CutQC(circuits=circuits, max_subcircuit_qubit=max_subcircuit_qubit,
                   num_subcircuits=num_subcircuits, max_cuts=max_cuts, verbose=verbose)
 
-    # TODO: modify cutQC to return the cutcoln instead of using pickle
     #cutsoln = get_cut_solution(cutqc, max_subcircuit_qubit)
     cutsoln = cutqc.cut_solns[0]
+    if len(cutsoln) == 0:
+        raise Exception('Cut solution is empty!')
     print('Split circuit into {} subcircuits with {} qubits'.format(len(cutsoln['subcircuits']),
-                                                                    [len(circ.qubits) for circ in cutsoln['subcircuits']]))
+                                                                    [len(subcirc.qubits) for subcirc in cutsoln['subcircuits']]))
 
     wpm = {}
     for key in cutsoln['complete_path_map']:
@@ -350,15 +359,14 @@ def sim_with_cutting(circ, backend, sim, shots, G, verbose, mode='direct'):
             temp.append((frag_qubit['subcircuit_idx'], frag_qubit['subcircuit_qubit']))
         wpm[key] = tuple(temp)
 
-    shots = 999999
-    total_variants = 7
-    simulation_backend = 'qasm_simulator'
-    frag_data = qmm.collect_fragment_data(cutsoln['subcircuits'], wpm, shots=15000, tomography_backend=simulation_backend)
+    #shots = 999999
+    #total_variants = 7
+    frag_data = qmm.collect_fragment_data(cutsoln['subcircuits'], wpm, shots=shots, tomography_backend=simulation_backend)
 
     direct_models = qmm.direct_fragment_model(frag_data)
     if mode is 'direct':
         direct_recombined_dist = qmm.recombine_fragment_models(direct_models, wpm)
-        dirty_probs = strip_ancillas(naive_fix(direct_recombined_dist), circ)
+        dirty_probs = strip_ancillas(qmm.naive_fix(direct_recombined_dist), circ)
     elif mode is 'likely':
         likely_models = qmm.maximum_likelihood_model(direct_models)
         dirty_probs = strip_ancillas(qmm.recombine_fragment_models(likely_models, wpm), circ)
@@ -379,8 +387,20 @@ def cut_dqva(init_state, G, m=4, threshold=1e-5, cutoff=5, sim='statevector', sh
 
     kl_bisection = kernighan_lin_bisection(G)
     print('kl bisection:', kl_bisection)
+    cut_nodes = []
+    for node in kl_bisection[0]:
+        for neighbor in G.neighbors(node):
+            if neighbor in kl_bisection[1]:
+                cut_nodes.extend([node, neighbor])
+    cut_nodes = list(set(cut_nodes))
     backend = Aer.get_backend(sim+'_simulator')
+    hotnode = cut_nodes[0]
+    print(cut_nodes, hotnode)
     cur_permutation = list(np.random.permutation(list(G.nodes)))
+
+    cut_options = {'max_subcircuit_qubit':len(G.nodes)+len(kl_bisection-1,
+                   'num_subcircuits':[2],
+                   'max_cuts':4)}
 
     history = []
 
@@ -390,13 +410,14 @@ def cut_dqva(init_state, G, m=4, threshold=1e-5, cutoff=5, sim='statevector', sh
         # as much info about the cutting as possible
         dqv_circ = gen_dqva(G, kl_bisection, params=params, init_state=cur_init_state, cut=True,
                                  mixer_order=cur_permutation, verbose=verbose, decompose_toffoli=2,
-                                 barriers=0, hot_nodes=[2])
+                                 barriers=0, hot_nodes=[hotnode])
 
         # Compute the cost function
         # Circuit cutting will need to be used to perform the execution
         # Time the full cutting+evaluating+reconstruction process
         start_time = time.time()
-        probs = sim_with_cutting(dqv_circ, backend, sim, shots, G, verbose)
+        probs = sim_with_cutting(dqv_circ, 'qasm_simulator', shots, G, verbose,
+                                 cut_options=cut_options)
         end_time = time.time()
         print('Elapsed time:', end_time-start_time)
 
@@ -440,9 +461,10 @@ def cut_dqva(init_state, G, m=4, threshold=1e-5, cutoff=5, sim='statevector', sh
             # Get the results of the optimized circuit
             dqv_circ = gen_dqva(G, kl_bisection, params=opt_params, init_state=cur_init_state, cut=True,
                                      mixer_order=cur_permutation, verbose=verbose, decompose_toffoli=2,
-                                     barriers=0, hot_nodes=[2])
+                                     barriers=0, hot_nodes=[hotnode])
 
-            probs = sim_with_cutting(dqv_circ, backend, sim, shots, G, verbose)
+            probs = sim_with_cutting(dqv_circ, 'qasm_simulator', shots, G, verbose,
+                                     cut_options=cut_options)
 
             # Select the top [cutoff] counts
             top_counts = sorted([(key, counts[key]) for key in counts if counts[key] > threshold],
@@ -495,7 +517,8 @@ def cut_dqva(init_state, G, m=4, threshold=1e-5, cutoff=5, sim='statevector', sh
     return best_indset, opt_params, best_init_state, kl_bisection, history
 
 def main():
-    G = test_graph(4, 0.7)
+    G = nx.Graph()
+    G.add_edges_from([(0, 1), (0, 2), (0, 3), (1, 2), (1, 3), (2, 3), (3, 4), (4, 5), (4, 6), (5, 6), (5, 7), (6, 7)])
     print(list(G.edges()))
 
     out = cut_dqva('0'*len(G.nodes), G, m=4, threshold=1e-5, cutoff=5, sim='statevector', shots=8192, verbose=0)
