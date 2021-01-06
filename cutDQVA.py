@@ -27,12 +27,12 @@ import qsplit_mlrecon_methods as qmm
 from networkx.algorithms.approximation import independent_set
 
 
-def get_subcircs(cutqc, max_subcirc_qubit):
+def get_cut_solution(cutqc, max_subcirc_qubit):
     circname = list(cutqc.circuits.keys())[0]
     subcirc_file = 'cutqc_data/' + circname + '/cc_{}/subcircuits.pckl'.format(max_subcirc_qubit)
     picklefile = open(subcirc_file, 'rb')
-    subcircs = pickle.load(picklefile)
-    return subcircs
+    cutsoln = pickle.load(picklefile)
+    return cutsoln
 
 
 def square_graph():
@@ -332,43 +332,53 @@ def brute_force_search(G):
             best_hamming_weight = hamming_weight(bitstr)
     return best_str, best_hamming_weight
 
-def sim_with_cutting(circ, simulation_backend, shots, G, verbose, mode='direct', cut_options=None):
+def sim_with_cutting(circ, cutqc, mip_model, simulation_backend, shots, G,
+                     verbose, mode='direct'):
 
     cut_start_time = time.time()
 
-    circuits = {'my_circ':circ}
-    if cut_options is None:
-        max_subcircuit_qubit = len(circ.qubits) - 1
-        num_subcircuits = [2]
-        max_cuts = 4
-    else:
-        max_subcircuit_qubit = cut_options['max_subcircuit_qubit']
-        num_subcircuits = cut_options['num_subcircuits']
-        max_cuts = cut_options['max_cuts']
-    cutqc = CutQC(circuits=circuits, max_subcircuit_qubit=max_subcircuit_qubit,
-                  num_subcircuits=num_subcircuits, max_cuts=max_cuts, verbose=verbose)
+    #circuits = {'my_circ':circ}
+
+    #if cut_options is None:
+    #    max_subcircuit_qubit = len(circ.qubits) - 1
+    #    num_subcircuits = [2]
+    #    max_cuts = 4
+    #else:
+    #    max_subcircuit_qubit = cut_options['max_subcircuit_qubit']
+    #    num_subcircuits = cut_options['num_subcircuits']
+    #    max_cuts = cut_options['max_cuts']
+
+    #cutqc = CutQC(circuits=circuits, max_subcircuit_qubit=max_subcircuit_qubit,
+    #              num_subcircuits=num_subcircuits, max_cuts=max_cuts, verbose=verbose)
 
     #cutsoln = get_cut_solution(cutqc, max_subcircuit_qubit)
-    cutsoln = cutqc.cut_solns[0]
-    if len(cutsoln) == 0:
-        raise Exception('Cut solution is empty!')
+    #cutsoln = cutqc.cut_solns[0]
+    #if len(cutsoln) == 0:
+    #    raise Exception('Cut solution is empty!')
+    subcircs, cpm = cutqc.get_subcircs_from_model(circ, mip_model)
     cut_end_time = time.time()
-    print('Split circuit into {} subcircuits with {} qubits'.format(len(cutsoln['subcircuits']),
-                                                                    [len(subcirc.qubits) for subcirc in cutsoln['subcircuits']]))
+    print('Split circuit into {} subcircuits with {} qubits in {:.3f} s'.format(
+               len(subcircs),
+               [len(sc.qubits) for sc in subcircs],
+               cut_end_time - cut_start_time))
 
-    eval_start_time = time.time()
     wpm = {}
-    for key in cutsoln['complete_path_map']:
+    for key in cpm:
         temp = []
-        for frag_qubit in cutsoln['complete_path_map'][key]:
+        for frag_qubit in cpm[key]:
             temp.append((frag_qubit['subcircuit_idx'], frag_qubit['subcircuit_qubit']))
         wpm[key] = tuple(temp)
 
     #shots = 999999
     #total_variants = 7
-    frag_data = qmm.collect_fragment_data(cutsoln['subcircuits'], wpm, shots=shots, tomography_backend=simulation_backend)
+    model_start_time = time.time()
+    frag_data = qmm.collect_fragment_data(subcircs, wpm,
+                                          shots=shots,
+                                          tomography_backend=simulation_backend)
 
     direct_models = qmm.direct_fragment_model(frag_data)
+    model_end_time = time.time()
+    recombine_start_time = time.time()
     if mode is 'direct':
         direct_recombined_dist = qmm.recombine_fragment_models(direct_models, wpm)
         dirty_probs = strip_ancillas(qmm.naive_fix(direct_recombined_dist), circ)
@@ -377,7 +387,9 @@ def sim_with_cutting(circ, simulation_backend, shots, G, verbose, mode='direct',
         dirty_probs = strip_ancillas(qmm.recombine_fragment_models(likely_models, wpm), circ)
     else:
         raise Exception('Unknown recombination mode:', mode)
+    recombine_end_time = time.time()
 
+    clean_start_time = time.time()
     clean_probs = {}
     for bitstr, probability in dirty_probs.items():
         if is_indset(bitstr, G):
@@ -385,11 +397,12 @@ def sim_with_cutting(circ, simulation_backend, shots, G, verbose, mode='direct',
 
     factor = 1.0 / sum(clean_probs.values())
     probs = {k: v*factor for k, v in clean_probs.items() }
+    clean_end_time = time.time()
 
-    eval_end_time = time.time()
-
-    print('Cut time: {:.3f}, Eval time: {:.3f}'.format(cut_end_time - cut_start_time,
-                                                       eval_end_time - eval_start_time))
+    print('Model time: {:.3f}, Recombine time: {:.3f}, Clean time {:.3f}'.format(
+            model_end_time - model_start_time,
+            recombine_end_time - recombine_start_time,
+            clean_end_time - clean_start_time))
 
     return probs
 
@@ -403,9 +416,10 @@ def cut_dqva(init_state, G, m=4, threshold=1e-5, cutoff=5, sim='statevector', sh
             if neighbor in kl_bisection[1]:
                 cut_nodes.extend([node, neighbor])
     cut_nodes = list(set(cut_nodes))
-    backend = Aer.get_backend(sim+'_simulator')
     hotnode = cut_nodes[0]
     print(cut_nodes, hotnode)
+
+    backend = Aer.get_backend(sim+'_simulator')
     cur_permutation = list(np.random.permutation(list(G.nodes)))
 
     cut_options = {'max_subcircuit_qubit':len(G.nodes)+len(kl_bisection)-1,
@@ -414,22 +428,23 @@ def cut_dqva(init_state, G, m=4, threshold=1e-5, cutoff=5, sim='statevector', sh
 
     history = []
 
-    def f(params):
+    def f(params, cutqc, mip_model):
         # Generate a circuit
         # Circuit cutting is not required here, but the circuit should be generated using
         # as much info about the cutting as possible
-        dqv_circ = gen_dqva(G, kl_bisection, params=params, init_state=cur_init_state, cut=True,
-                                 mixer_order=cur_permutation, verbose=verbose, decompose_toffoli=2,
-                                 barriers=0, hot_nodes=[hotnode])
+        dqv_circ = gen_dqva(G, kl_bisection, params=params,
+                            init_state=cur_init_state, cut=True,
+                            mixer_order=cur_permutation, verbose=verbose,
+                            decompose_toffoli=2, barriers=0, hot_nodes=[hotnode])
 
         # Compute the cost function
         # Circuit cutting will need to be used to perform the execution
         # Time the full cutting+evaluating+reconstruction process
         start_time = time.time()
-        probs = sim_with_cutting(dqv_circ, 'qasm_simulator', shots, G, verbose,
-                                 cut_options=cut_options)
+        probs = sim_with_cutting(dqv_circ, cutqc, mip_model, 'qasm_simulator',
+                                 shots, G, verbose, cut_options=cut_options)
         end_time = time.time()
-        print('Elapsed time:', end_time-start_time)
+        print('Elapsed time: {:.3f}'.format(end_time-start_time))
 
         avg_cost = 0
         for sample in probs.keys():
@@ -462,19 +477,34 @@ def cut_dqva(init_state, G, m=4, threshold=1e-5, cutoff=5, sim='statevector', sh
             print('\tNum params =', num_params)
             init_params = np.random.uniform(low=0.0, high=2*np.pi, size=num_params)
             print('\tCurrent Mixer Order:', cur_permutation)
-            out = minimize(f, x0=init_params, method='COBYLA')
+            circuits = {'dqva_circ':gen_dqva(G, kl_bisection, params=init_params,
+                                             init_state=cur_init_state, cut=True,
+                                             mixer_order=cur_permutation,
+                                             verbose=0, decompose_toffoli=2,
+                                             barriers=0, hot_nodes=[hotnode])}
+            cutqc = CutQC(circuits, cut_options['max_subcircuit_qubit'],
+                          cut_options['num_subcircuits'],
+                          cut_options['max_cuts'], verbose)
+            mip_model = cutqc.get_MIP_model(cut_options['max_subcircuit_qubit'],
+                                            cut_options['num_subcircuits'],
+                                            cut_options['max_cuts'])
+            out = minimize(f, x0=init_params, args=(cutqc, mip_model), method='COBYLA')
             opt_params = out['x']
             opt_cost = out['fun']
             #print('\tOptimal Parameters:', opt_params)
             print('\tOptimal cost:', opt_cost)
 
             # Get the results of the optimized circuit
-            dqv_circ = gen_dqva(G, kl_bisection, params=opt_params, init_state=cur_init_state, cut=True,
-                                     mixer_order=cur_permutation, verbose=verbose, decompose_toffoli=2,
-                                     barriers=0, hot_nodes=[hotnode])
-
-            probs = sim_with_cutting(dqv_circ, 'qasm_simulator', shots, G, verbose,
-                                     cut_options=cut_options)
+            dqv_circ = gen_dqva(G, kl_bisection, params=opt_params,
+                                init_state=cur_init_state,
+                                mixer_order=cur_permutation, cut=True,
+                                verbose=verbose, decompose_toffoli=2,
+                                barriers=0, hot_nodes=[hotnode])
+            counts = sim_with_cutting(dqv_circ, 'qasm_simulator', shots, G,
+                                      verbose, cut_options=cut_options)
+            #result = execute(dqv_circ, backend=Aer.get_backend('statevector_simulator')).result()
+            #statevector = Statevector(result.get_statevector(dqv_circ))
+            #counts = strip_ancillas(statevector.probabilities_dict(decimals=5), dqv_circ)
 
             # Select the top [cutoff] counts
             top_counts = sorted([(key, counts[key]) for key in counts if counts[key] > threshold],
@@ -531,7 +561,7 @@ def main():
     G.add_edges_from([(0, 1), (0, 2), (0, 3), (1, 2), (1, 3), (2, 3), (3, 4), (4, 5), (4, 6), (5, 6), (5, 7), (6, 7)])
     print(list(G.edges()))
 
-    out = cut_dqva('0'*len(G.nodes), G, m=4, threshold=1e-5, cutoff=5, sim='statevector', shots=8192, verbose=0)
+    out = cut_dqva('0'*len(G.nodes), G, m=4, threshold=1e-5, cutoff=5, sim='qasm', shots=8192, verbose=0)
 
 if __name__ == '__main__':
     main()
