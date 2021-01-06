@@ -442,7 +442,7 @@ def cut_dqva(init_state, G, m=4, threshold=1e-5, cutoff=5, sim='statevector', sh
         # Time the full cutting+evaluating+reconstruction process
         start_time = time.time()
         probs = sim_with_cutting(dqv_circ, cutqc, mip_model, 'qasm_simulator',
-                                 shots, G, verbose, cut_options=cut_options)
+                                 shots, G, verbose)
         end_time = time.time()
         print('Elapsed time: {:.3f}'.format(end_time-start_time))
 
@@ -500,8 +500,9 @@ def cut_dqva(init_state, G, m=4, threshold=1e-5, cutoff=5, sim='statevector', sh
                                 mixer_order=cur_permutation, cut=True,
                                 verbose=verbose, decompose_toffoli=2,
                                 barriers=0, hot_nodes=[hotnode])
-            counts = sim_with_cutting(dqv_circ, 'qasm_simulator', shots, G,
-                                      verbose, cut_options=cut_options)
+            counts = sim_with_cutting(dqv_circ, cutqc, mip_model,
+                                      'qasm_simulator', shots, G, verbose)
+
             #result = execute(dqv_circ, backend=Aer.get_backend('statevector_simulator')).result()
             #statevector = Statevector(result.get_statevector(dqv_circ))
             #counts = strip_ancillas(statevector.probabilities_dict(decimals=5), dqv_circ)
@@ -521,8 +522,8 @@ def cut_dqva(init_state, G, m=4, threshold=1e-5, cutoff=5, sim='statevector', sh
 
             # Save current results to history
             temp_history = {'round':'{}.{}'.format(step4_round, step3_round),
-                            'cost':opt_cost, 'permutation':cur_permutation, 'topcounts':top_counts,
-                            'previnit':prev_init_state}
+                            'cost':opt_cost, 'permutation':cur_permutation,
+                            'topcounts':top_counts, 'previnit':prev_init_state}
 
             # If no improvement was made, break and go to next step4 round
             if len(better_strs) == 0:
