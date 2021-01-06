@@ -9,7 +9,7 @@ from qiskit_helper_functions.non_ibmq_functions import evaluate_circ, read_dict,
 from qiskit_helper_functions.schedule import Scheduler
 
 from cutqc.helper_fun import check_valid, get_dirname
-from cutqc.cutter import find_cuts
+from cutqc.cutter import find_cuts, solve_model, subcircuits_parser
 from cutqc.evaluator import simulate_subcircuit, write_subcircuit, generate_subcircuit_instances
 from cutqc.distributor import distribute
 from cutqc.post_process import get_combinations, build
@@ -23,13 +23,22 @@ class CutQC:
         self.circuits = circuits
         self.verbose = verbose
         self._check_input()
-        self._cut(max_subcircuit_qubit=max_subcircuit_qubit,num_subcircuits=num_subcircuits,max_cuts=max_cuts)
+        self.circuit = list(circuits.values())[0]
+        #self._cut(max_subcircuit_qubit=max_subcircuit_qubit,num_subcircuits=num_subcircuits,max_cuts=max_cuts)
 
     def _check_input(self):
         for circuit_name in self.circuits:
             circuit = self.circuits[circuit_name]
             valid = check_valid(circuit=circuit)
             assert valid
+
+    def get_MIP_model(self, max_subcircuit_qubit, num_subcircuits, max_cuts):
+        mip_model = solve_model(self.circuit, max_subcircuit_qubit,
+                                num_subcircuits, max_cuts, self.verbose)
+        return mip_model
+
+    def get_subcircs_from_model(self, fullcirc, model):
+        return subcircuits_parser(model.subcircuits_vertices, fullcirc)
 
     def _cut(self, max_subcircuit_qubit, num_subcircuits, max_cuts):
         if self.verbose > 0:
@@ -41,17 +50,19 @@ class CutQC:
             data.append([circuit,max_subcircuit_qubit,num_subcircuits,max_cuts,False])
         cut_solutions = pool.starmap(find_cuts,data)
 
-        for circuit_name, cut_solution in zip(self.circuits,cut_solutions):
-            source_folder = get_dirname(circuit_name=circuit_name, max_subcircuit_qubit=max_subcircuit_qubit,
-                                        early_termination=None, eval_mode=None, num_threads=None,
-                                        qubit_limit=None, field='cutter')
-            if os.path.exists(source_folder):
-                subprocess.run(['rm','-r',source_folder])
-            os.makedirs(source_folder)
-            pickle.dump(cut_solution, open('%s/subcircuits.pckl'%(source_folder),'wb'))
-            if self.verbose > 0:
-                print('{:s} : {:d} cuts --> {}'.format(circuit_name, len(cut_solution['positions']),
-                                                       cut_solution['counter']))
+        self.cut_solns = cut_solutions
+
+        #for circuit_name, cut_solution in zip(self.circuits,cut_solutions):
+        #    source_folder = get_dirname(circuit_name=circuit_name, max_subcircuit_qubit=max_subcircuit_qubit,
+        #                                early_termination=None, eval_mode=None, num_threads=None,
+        #                                qubit_limit=None, field='cutter')
+        #    if os.path.exists(source_folder):
+        #        subprocess.run(['rm','-r',source_folder])
+        #    os.makedirs(source_folder)
+        #    pickle.dump(cut_solution, open('%s/subcircuits.pckl'%(source_folder),'wb'))
+        #    if self.verbose > 0:
+        #        print('{:s} : {:d} cuts --> {}'.format(circuit_name, len(cut_solution['positions']),
+        #                                               cut_solution['counter']))
 
     def evaluate(self,circuit_cases,eval_mode,num_nodes,num_threads,early_termination,ibmq):
         if self.verbose > 0:

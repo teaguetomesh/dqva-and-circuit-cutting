@@ -460,6 +460,36 @@ def get_counter(subcircuits, O_rho_pairs):
     # print(counter)
     return counter
 
+def solve_model(circuit, max_subcircuit_qubit, num_subcircuits, max_cuts, verbose):
+    stripped_circ = circuit_stripping(circuit=circuit)
+    n_vertices, edges, vertex_ids, id_vertices = read_circ(circuit=stripped_circ)
+    num_qubits = circuit.num_qubits
+    cut_solution = {}
+    min_postprocessing_cost = float('inf')
+
+    for num_subcircuit in num_subcircuits:
+        if num_subcircuit*max_subcircuit_qubit-(num_subcircuit-1)<num_qubits or num_subcircuit>num_qubits:
+            if verbose:
+                print('%d-qubit circuit %d*%d subcircuits : IMPOSSIBLE'%(num_qubits,num_subcircuit,max_subcircuit_qubit))
+            continue
+        kwargs = dict(n_vertices=n_vertices,
+                    edges=edges,
+                    vertex_ids=vertex_ids,
+                    id_vertices=id_vertices,
+                    num_subcircuit=num_subcircuit,
+                    max_subcircuit_qubit=max_subcircuit_qubit,
+                    num_qubits=num_qubits,
+                    max_cuts=max_cuts)
+
+        m = MIP_Model(**kwargs)
+        feasible = m.solve(min_postprocessing_cost)
+        if not feasible:
+            if verbose:
+                print('%d-qubit circuit %d*%d subcircuits : NOT FEASIBLE'%(num_qubits,num_subcircuit,max_subcircuit_qubit),flush=True)
+            continue
+        else:
+            return m
+
 def find_cuts(circuit, max_subcircuit_qubit, num_subcircuits, max_cuts, verbose):
     stripped_circ = circuit_stripping(circuit=circuit)
     n_vertices, edges, vertex_ids, id_vertices = read_circ(circuit=stripped_circ)
