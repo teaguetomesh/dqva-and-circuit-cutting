@@ -270,6 +270,10 @@ def gen_dqva(G, partition, params=[], init_state=None, barriers=1, cut=False,
     alpha_1 = params[:num_nonzero]
     gamma_1 = params[num_nonzero:num_nonzero+1][0]
     alpha_2 = params[num_nonzero+1:]
+    if verbose > 0:
+        print('alpha_1:', alpha_1)
+        print('gamma_1:', gamma_1)
+        print('alpha_2:', alpha_2)
 
     for anc_idx, subgraph in enumerate(subgraphs):
         apply_mixer(dqv_circ, alpha_1, init_state, subgraph, anc_idx, cutedges,
@@ -283,6 +287,9 @@ def gen_dqva(G, partition, params=[], init_state=None, barriers=1, cut=False,
         dqv_circ.barrier()
 
     for anc_idx, subgraph in enumerate(subgraphs):
+        # in subsequent applications of the mixer unitary, all hot nodes
+        # should be turned cold
+        hot_nodes = []
         apply_mixer(dqv_circ, alpha_2, init_state, subgraph, anc_idx, cutedges,
                     barriers, decompose_toffoli, mixer_order, hot_nodes, verbose=verbose)
 
