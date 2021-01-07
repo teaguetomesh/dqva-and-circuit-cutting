@@ -570,6 +570,7 @@ def main():
     print(list(G.edges()))
 
     out = cut_dqva('0'*len(G.nodes), G, m=4, threshold=1e-5, cutoff=5, sim='qasm', shots=8192, verbose=0)
+    print('Best MIS:', out[0])
 
 if __name__ == '__main__':
     main()
