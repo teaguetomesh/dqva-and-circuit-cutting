@@ -9,3 +9,4 @@ gurobi.log
 *.txt
 !*_logs.txt
 paper_plots/
+qiskit_helper_functions/
