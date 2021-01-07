@@ -1,4 +1,5 @@
 import time
+import random
 import pickle
 import numpy as np
 import networkx as nx
@@ -423,15 +424,15 @@ def cut_dqva(init_state, G, m=4, threshold=1e-5, cutoff=5, sim='statevector', sh
             if neighbor in kl_bisection[1]:
                 cut_nodes.extend([node, neighbor])
     cut_nodes = list(set(cut_nodes))
-    hotnode = cut_nodes[0]
-    print(cut_nodes, hotnode)
+    hotnode = random.choice(cut_nodes)
+    print('Cut nodes and hotnode:', cut_nodes, hotnode)
 
     backend = Aer.get_backend(sim+'_simulator')
     cur_permutation = list(np.random.permutation(list(G.nodes)))
 
     cut_options = {'max_subcircuit_qubit':len(G.nodes)+len(kl_bisection)-1,
                    'num_subcircuits':[2],
-                   'max_cuts':4}
+                   'max_cuts':2}
 
     history = []
 
@@ -566,11 +567,17 @@ def cut_dqva(init_state, G, m=4, threshold=1e-5, cutoff=5, sim='statevector', sh
 
 def main():
     G = nx.Graph()
-    G.add_edges_from([(0, 1), (0, 2), (0, 3), (1, 2), (1, 3), (2, 3), (3, 4), (4, 5), (4, 6), (5, 6), (5, 7), (6, 7)])
+    G.add_edges_from([(0, 1), (0, 3), (1, 2), (2, 3), (3, 4), (4, 5), (4, 6), (5, 7), (6, 7)])
     print(list(G.edges()))
 
-    out = cut_dqva('0'*len(G.nodes), G, m=4, threshold=1e-5, cutoff=5, sim='qasm', shots=8192, verbose=0)
-    print('Best MIS:', out[0])
+    base_str = '0'*len(G.nodes)
+    all_init_strs = []
+    for i in range(len(G.nodes)):
+        init_str = list(base_str)
+        init_str[i] = '1'
+        out = cut_dqva(''.join(init_str), G, m=4, threshold=1e-5, cutoff=5, sim='qasm', shots=8192, verbose=0)
+        print('Init string: {}, Best MIS: {}'.format(''.join(init_str), out[0]))
+        print()
 
 if __name__ == '__main__':
     main()
