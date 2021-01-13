@@ -1,3 +1,5 @@
+from utils.graph_funcs import is_indset
+
 def strip_ancillas(counts, circ):
     num_anc = len(circ.ancillas)
     new_counts = {}

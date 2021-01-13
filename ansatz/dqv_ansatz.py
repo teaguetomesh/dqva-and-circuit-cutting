@@ -121,7 +121,7 @@ def gen_dqva(G, P=1, params=[], init_state=None, barriers=1,
     dynamic_list = params[P*chunk:]
     dyn_alpha = None
     dyn_gamma = None
-    if len(dynamic_list) < chunk:
+    if len(dynamic_list) < chunk and len(dynamic_list) > 0:
         dyn_alpha = dynamic_list
     elif len(dynamic_list) == chunk:
         dyn_alpha = dynamic_list[:-1]
@@ -138,11 +138,11 @@ def gen_dqva(G, P=1, params=[], init_state=None, barriers=1,
     for alphas, gamma in zip(alpha_list, gamma_list):
         apply_mixer(dqv_circ, alphas, init_state, G, anc_idx, barriers,
                     decompose_toffoli, mixer_order, verbose=verbose)
-        if barriers > 0:
+        if barriers == 1:
             dqv_circ.barrier()
 
         apply_phase_separator(dqv_circ, gamma, G)
-        if barriers > 0:
+        if barriers == 1:
             dqv_circ.barrier()
 
     if not dyn_alpha is None:
