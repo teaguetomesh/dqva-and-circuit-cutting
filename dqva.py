@@ -10,7 +10,7 @@ from networkx.algorithms.community.kernighan_lin import kernighan_lin_bisection
 import itertools
 from scipy.optimize import minimize
 
-from cutqc.main import CutQC
+#from cutqc.main import CutQC
 from qiskit import *
 from qiskit.quantum_info import Statevector
 
