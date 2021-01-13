@@ -76,7 +76,9 @@ def main():
                                          sim=args.sim, shots=args.shots,
                                          verbose=args.v)
             elif args.alg == 'dqva':
-                out = dqva.solve_mis_dqva()
+                out = dqva.solve_mis_dqva(init_state, G, P=args.P, m=args.m,
+                                          sim=args.sim, shots=args.shots,
+                                          verbose=args.v)
             elif args.alg == 'cut_dqva':
                 out = dqva.solve_mis_cut_dqva()
 

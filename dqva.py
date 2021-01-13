@@ -258,46 +258,40 @@ def solve_mis_cut_dqva(init_state, G, m=4, threshold=1e-5, cutoff=5,
     return best_indset, opt_params, best_init_state, kl_bisection, history
 
 
-def solve_mis_dqva(init_state, G, m=4, threshold=1e-5, cutoff=5,
-                      sim='statevector', shots=8192, verbose=0):
+def solve_mis_dqva(init_state, G, P=1, m=1, mixer_order=None, threshold=1e-5,
+                   cutoff=5, sim='statevector', shots=8192, verbose=0):
 
-    kl_bisection = kernighan_lin_bisection(G)
-    print('kl bisection:', kl_bisection)
-    cut_nodes = []
-    for node in kl_bisection[0]:
-        for neighbor in G.neighbors(node):
-            if neighbor in kl_bisection[1]:
-                cut_nodes.extend([node, neighbor])
-    cut_nodes = list(set(cut_nodes))
-    hotnode = random.choice(cut_nodes)
-    print('Cut nodes and hotnode:', cut_nodes, hotnode)
+    if sim == 'statevector' or sim == 'qasm':
+        backend = Aer.get_backend(sim+'_simulator')
+    elif sim == 'cloud':
+        raise Exception('NOT YET IMPLEMENTED')
+    else:
+        raise Exception('Unknown simulator:', sim)
 
-    backend = Aer.get_backend(sim+'_simulator')
-    cur_permutation = list(np.random.permutation(list(G.nodes)))
-
-    cut_options = {'max_subcircuit_qubit':len(G.nodes)+len(kl_bisection)-1,
-                   'num_subcircuits':[2],
-                   'max_cuts':2}
+    if mixer_order == None:
+        cur_permutation = list(np.random.permutation(list(G.nodes)))
+    else:
+        cur_permutation = mixer_order
 
     history = []
 
-    def f(params, cutqc, mip_model):
+    def f(params):
         # Generate a circuit
-        # Circuit cutting is not required here, but the circuit should be generated using
-        # as much info about the cutting as possible
-        dqv_circ = gen_dqva(G, kl_bisection, params=params,
-                            init_state=cur_init_state, cut=True,
-                            mixer_order=cur_permutation, verbose=verbose,
-                            decompose_toffoli=2, barriers=0, hot_nodes=[hotnode])
+        circ = dqv_ansatz.gen_dqva(G, P=P, params=params,
+                      init_state=cur_init_state, barriers=0, decompose_toffoli=1,
+                      mixer_order=cur_permutation, verbose=0)
+
+        if sim == 'qasm':
+            circ.measure_all()
 
         # Compute the cost function
-        # Circuit cutting will need to be used to perform the execution
-        # Time the full cutting+evaluating+reconstruction process
-        start_time = time.time()
-        probs = sim_with_cutting(dqv_circ, cutqc, mip_model, 'qasm_simulator',
-                                 shots, G, verbose)
-        end_time = time.time()
-        print('Elapsed time: {:.3f}'.format(end_time-start_time))
+        result = execute(circ, backend=backend, shots=shots).result()
+        if sim == 'statevector':
+            statevector = Statevector(result.get_statevector(circ))
+            probs = strip_ancillas(statevector.probabilities_dict(decimals=5), circ)
+        elif sim == 'qasm':
+            counts = result.get_counts(circ)
+            probs = strip_ancillas({key: val/shots for key, val in counts.items()}, circ)
 
         avg_cost = 0
         for sample in probs.keys():
@@ -306,7 +300,7 @@ def solve_mis_dqva(init_state, G, m=4, threshold=1e-5, cutoff=5,
             avg_cost += probs[sample] * sum(x)
 
         # Return the negative of the cost for minimization
-        print('Expectation value:', avg_cost)
+        #print('Expectation value:', avg_cost)
         return -avg_cost
 
     # Step 3: Dynamic Ansatz Update
@@ -316,83 +310,84 @@ def solve_mis_dqva(init_state, G, m=4, threshold=1e-5, cutoff=5,
     cur_init_state = init_state
 
     # Randomly permute the order of mixer unitaries m times
-    for step4_round in range(1, m+1):
-        step3_round = 1
+    for mixer_round in range(1, m+1):
+        mixer_history = []
+        inner_round = 1
         new_hamming_weight = hamming_weight(cur_init_state)
-        old_hamming_weight = -1
 
         # Attempt to improve the Hamming weight until no further improvements can be made
-        while new_hamming_weight > old_hamming_weight:
-            print('Start round {}.{}, Initial state = {}'.format(step4_round, step3_round, cur_init_state))
+        while True:
+            print('Start round {}.{}, Initial state = {}'.format(mixer_round,
+                  inner_round, cur_init_state))
 
             # Inner variational loop
-            num_params = 2 * (len(cur_init_state) - hamming_weight(cur_init_state)) + 1
+            num_nonzero = len(G.nodes()) - hamming_weight(cur_init_state)
+            num_params = min(P * (len(G.nodes()) + 1), (P+1) * (num_nonzero + 1))
             print('\tNum params =', num_params)
-            init_params = np.random.uniform(low=0.0, high=2*np.pi, size=num_params)
+            #init_params = np.random.uniform(low=0.0, high=2*np.pi, size=num_params)
+            init_params = np.zeros(num_params)
             print('\tCurrent Mixer Order:', cur_permutation)
-            circuits = {'dqva_circ':gen_dqva(G, kl_bisection, params=init_params,
-                                             init_state=cur_init_state, cut=True,
-                                             mixer_order=cur_permutation,
-                                             verbose=0, decompose_toffoli=2,
-                                             barriers=0, hot_nodes=[hotnode])}
-            cutqc = CutQC(circuits, cut_options['max_subcircuit_qubit'],
-                          cut_options['num_subcircuits'],
-                          cut_options['max_cuts'], verbose)
-            mip_model = cutqc.get_MIP_model(cut_options['max_subcircuit_qubit'],
-                                            cut_options['num_subcircuits'],
-                                            cut_options['max_cuts'])
-            out = minimize(f, x0=init_params, args=(cutqc, mip_model), method='COBYLA')
+            out = minimize(f, x0=init_params, method='COBYLA')
             opt_params = out['x']
             opt_cost = out['fun']
             #print('\tOptimal Parameters:', opt_params)
             print('\tOptimal cost:', opt_cost)
 
             # Get the results of the optimized circuit
-            dqv_circ = gen_dqva(G, kl_bisection, params=opt_params,
-                                init_state=cur_init_state,
-                                mixer_order=cur_permutation, cut=True,
-                                verbose=verbose, decompose_toffoli=2,
-                                barriers=0, hot_nodes=[hotnode])
-            counts = sim_with_cutting(dqv_circ, cutqc, mip_model,
-                                      'qasm_simulator', shots, G, verbose)
+            opt_circ = dqv_ansatz.gen_dqva(G, P=P, params=opt_params,
+                      init_state=cur_init_state, barriers=0,
+                      decompose_toffoli=1, mixer_order=cur_permutation,
+                      verbose=0)
 
-            #result = execute(dqv_circ, backend=Aer.get_backend('statevector_simulator')).result()
-            #statevector = Statevector(result.get_statevector(dqv_circ))
-            #counts = strip_ancillas(statevector.probabilities_dict(decimals=5), dqv_circ)
+            if sim == 'qasm':
+                opt_circ.measure_all()
+
+            result = execute(opt_circ, backend=backend, shots=shots).result()
+            if sim == 'statevector':
+                statevector = Statevector(result.get_statevector(opt_circ))
+                probs = strip_ancillas(statevector.probabilities_dict(decimals=5), opt_circ)
+            elif sim == 'qasm':
+                counts = result.get_counts(opt_circ)
+                probs = strip_ancillas({key: val/shots for key, val in counts.items()}, opt_circ)
 
             # Select the top [cutoff] counts
-            top_counts = sorted([(key, counts[key]) for key in counts if counts[key] > threshold],
+            top_counts = sorted([(key, val) for key, val in probs.items() if val > threshold],
                                 key=lambda tup: tup[1], reverse=True)[:cutoff]
             # Check if we have improved the Hamming weight
-            old_hamming_weight = hamming_weight(cur_init_state)
+            #old_hamming_weight = hamming_weight(cur_init_state)
+            best_hamming_weight = hamming_weight(best_indset)
             better_strs = []
             for bitstr, prob in top_counts:
                 this_hamming = hamming_weight(bitstr)
-                if is_indset(bitstr, G) and this_hamming > old_hamming_weight:
+                if is_indset(bitstr, G) and this_hamming > best_hamming_weight:
                     better_strs.append((bitstr, this_hamming))
             better_strs = sorted(better_strs, key=lambda t: t[1], reverse=True)
-            prev_init_state = cur_init_state
+            #prev_init_state = cur_init_state
 
             # Save current results to history
-            temp_history = {'round':'{}.{}'.format(step4_round, step3_round),
-                            'cost':opt_cost, 'permutation':cur_permutation,
-                            'topcounts':top_counts, 'previnit':prev_init_state}
+            inner_history = {'mixer_round':mixer_round, 'inner_round':inner_round,
+                             'cost':opt_cost, 'init_state':cur_init_state,
+                             'mixer_order':cur_permutation}
+            mixer_history.append(inner_history)
 
             # If no improvement was made, break and go to next step4 round
             if len(better_strs) == 0:
-                print('\tNone of the measured bitstrings had higher Hamming weight than:', prev_init_state)
-                history.append(temp_history)
+                print('\tNone of the measured bitstrings had higher Hamming weight than:', best_indset)
+                #history.append(temp_history)
                 break
 
-            # Otherwise, save the new bitstring and check if it is better than all we have seen thus far
-            cur_init_state, new_hamming_weight = better_strs[0]
-            if new_hamming_weight > hamming_weight(best_indset):
-                best_indset = cur_init_state
-                best_init_state = prev_init_state
-            print('\tFound new independent set: {}, Hamming weight = {}'.format(cur_init_state, new_hamming_weight))
-            temp_history['curinit'] = cur_init_state
-            history.append(temp_history)
-            step3_round += 1
+            # Otherwise, save the new bitstring and repeat
+            best_indset, new_hamming_weight = better_strs[0]
+            best_init_state = cur_init_state
+            best_params = opt_params
+            best_perm = cur_permutation
+            cur_init_state = best_indset
+            print('\tFound new independent set: {}, Hamming weight = {}'.format(
+                                               best_indset, new_hamming_weight))
+            inner_round += 1
+
+        # Save the history of the current mixer round
+        history.append(mixer_history)
 
         # Choose a new permutation of the mixer unitaries that have NOT been set to identity
         identity_mixers = [i for i in range(len(cur_init_state)) if list(reversed(cur_init_state))[i] == '1']
@@ -408,7 +403,7 @@ def solve_mis_dqva(init_state, G, m=4, threshold=1e-5, cutoff=5,
                 cur_permutation[i] = perm_queue.get()
 
     print('\tRETURNING, best hamming weight:', new_hamming_weight)
-    return best_indset, opt_params, best_init_state, kl_bisection, history
+    return best_indset, best_params, best_init_state, best_perm, history
 
 
 def solve_mis_qaoa(init_state, G, P=1, m=1, mixer_order=None, threshold=1e-5,
@@ -601,6 +596,7 @@ def solve_mis_qva(init_state, G, P=1, m=1, mixer_order=None, threshold=1e-5,
 
     # Randomly permute the order of mixer unitaries m times
     for mixer_round in range(1, m+1):
+        mixer_history = []
         inner_round = 1
         new_hamming_weight = hamming_weight(cur_init_state)
 
@@ -653,9 +649,10 @@ def solve_mis_qva(init_state, G, P=1, m=1, mixer_order=None, threshold=1e-5,
             #prev_init_state = cur_init_state
 
             # Save current results to history
-            #temp_history = {'round':'{}.{}'.format(step4_round, step3_round),
-            #                'cost':opt_cost, 'permutation':cur_permutation,
-            #                'topcounts':top_counts, 'previnit':cur_init_state}
+            inner_history = {'mixer_round':mixer_round, 'inner_round':inner_round,
+                             'cost':opt_cost, 'init_state':cur_init_state,
+                             'mixer_order':cur_permutation}
+            mixer_history.append(inner_history)
 
             # If no improvement was made, break and go to next mixer round
             if len(better_strs) == 0:
@@ -671,9 +668,10 @@ def solve_mis_qva(init_state, G, P=1, m=1, mixer_order=None, threshold=1e-5,
             cur_init_state = best_indset
             print('\tFound new independent set: {}, Hamming weight = {}'.format(
                                                best_indset, new_hamming_weight))
-            #temp_history['curinit'] = cur_init_state
-            #history.append(temp_history)
             inner_round += 1
+
+        # Save the history of the current mixer round
+        history.append(mixer_history)
 
         # Choose a new permutation of the mixer unitaries
         cur_permutation = list(np.random.permutation(list(G.nodes)))
