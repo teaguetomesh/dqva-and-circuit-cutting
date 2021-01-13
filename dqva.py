@@ -601,6 +601,7 @@ def solve_mis_qva(init_state, G, P=1, m=1, mixer_order=None, threshold=1e-5,
 
     # Randomly permute the order of mixer unitaries m times
     for mixer_round in range(1, m+1):
+        mixer_history = []
         inner_round = 1
         new_hamming_weight = hamming_weight(cur_init_state)
 
@@ -653,9 +654,10 @@ def solve_mis_qva(init_state, G, P=1, m=1, mixer_order=None, threshold=1e-5,
             #prev_init_state = cur_init_state
 
             # Save current results to history
-            #temp_history = {'round':'{}.{}'.format(step4_round, step3_round),
-            #                'cost':opt_cost, 'permutation':cur_permutation,
-            #                'topcounts':top_counts, 'previnit':cur_init_state}
+            inner_history = {'mixer_round':mixer_round, 'inner_round':inner_round,
+                             'cost':opt_cost, 'init_state':cur_init_state,
+                             'mixer_order':cur_permutation}
+            mixer_history.append(inner_history)
 
             # If no improvement was made, break and go to next mixer round
             if len(better_strs) == 0:
@@ -671,9 +673,10 @@ def solve_mis_qva(init_state, G, P=1, m=1, mixer_order=None, threshold=1e-5,
             cur_init_state = best_indset
             print('\tFound new independent set: {}, Hamming weight = {}'.format(
                                                best_indset, new_hamming_weight))
-            #temp_history['curinit'] = cur_init_state
-            #history.append(temp_history)
             inner_round += 1
+
+        # Save the history of the current mixer round
+        history.append(mixer_history)
 
         # Choose a new permutation of the mixer unitaries
         cur_permutation = list(np.random.permutation(list(G.nodes)))
