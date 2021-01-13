@@ -1,5 +1,5 @@
-# CutQC
-A Python package for CutQC
+# Scaling up Constrained Quantum Approximate Optimization
+A set of python codes for benchmarking a new quantum algorithm for solving the Maximum Independent Set problem.
 
 ## Notes
 1. Make a virtual environment and install required packages:
@@ -14,19 +14,3 @@ conda install gurobi
 ```
 pip install .
 ```
-3. Install Intel MKL to use the `C` backend:
-```
-source /opt/intel/bin/compilervars.sh intel64
-```
-
-## Todo
-- [x] Update codes with the new helper functions package
-- [x] Write the cutQC package
-- [x] Write the single-node parallel version
-- [ ] Write the cluster parallel version
-- [ ] Make all codes as function calls, not python scripts calls
-
-# HPU
-A hybrid processing unit
-## Todo
-- [ ] DRAM
