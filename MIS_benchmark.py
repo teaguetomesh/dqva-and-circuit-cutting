@@ -28,6 +28,8 @@ def parse_args():
                         help='Number of shots')
     parser.add_argument('-v', type=int, default=1,
                         help='verbose')
+    parser.add_argument('--plim', type=int, default=None,
+                        help='Limit the number of parameters')
     args = parser.parse_args()
     return args
 
@@ -78,12 +80,16 @@ def main():
             elif args.alg == 'dqva':
                 out = dqva.solve_mis_dqva(init_state, G, P=args.P, m=args.m,
                                           sim=args.sim, shots=args.shots,
-                                          verbose=args.v)
+                                          verbose=args.v, param_lim=args.plim)
             elif args.alg == 'cut_dqva':
                 out = dqva.solve_mis_cut_dqva()
 
-            savename = '{}_{}_P{}_{}_rep{}.pickle'.format(graphname, args.alg,
-                                                          args.P, args.sim, rep)
+            if args.plim is None:
+                savename = '{}_{}_P{}_{}_rep{}.pickle'.format(graphname,
+                                                args.alg, args.P, args.sim, rep)
+            else:
+                savename = '{}_{}_lim{}_{}_rep{}.pickle'.format(graphname,
+                                             args.alg, args.plim, args.sim, rep)
             with open(cur_savepath+savename, 'ab') as pf:
                 pickle.dump({'graph':graphfn, 'out':out}, pf)
 
