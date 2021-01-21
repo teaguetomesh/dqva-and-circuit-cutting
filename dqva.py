@@ -1,13 +1,10 @@
-import time
-import random
-import pickle
+import time, random, queue, copy, itertools
+#import pickle
 import numpy as np
 import networkx as nx
-import queue
 import matplotlib.pyplot as plt
 
 from networkx.algorithms.community.kernighan_lin import kernighan_lin_bisection
-import itertools
 from scipy.optimize import minimize
 
 from cutqc.main import CutQC
@@ -22,14 +19,12 @@ import qsplit_mlrecon_methods as qmm
 from utils.graph_funcs import *
 from utils.helper_funcs import *
 
-from networkx.algorithms.approximation import independent_set
-
-def get_cut_solution(cutqc, max_subcirc_qubit):
-    circname = list(cutqc.circuits.keys())[0]
-    subcirc_file = 'cutqc_data/' + circname + '/cc_{}/subcircuits.pckl'.format(max_subcirc_qubit)
-    picklefile = open(subcirc_file, 'rb')
-    cutsoln = pickle.load(picklefile)
-    return cutsoln
+#def get_cut_solution(cutqc, max_subcirc_qubit):
+#    circname = list(cutqc.circuits.keys())[0]
+#    subcirc_file = 'cutqc_data/' + circname + '/cc_{}/subcircuits.pckl'.format(max_subcirc_qubit)
+#    picklefile = open(subcirc_file, 'rb')
+#    cutsoln = pickle.load(picklefile)
+#    return cutsoln
 
 def sim_with_cutting(circ, cutqc, mip_model, simulation_backend, shots, G,
                      verbose, mode='direct'):
@@ -367,10 +362,10 @@ def solve_mis_dqva(init_state, G, P=1, m=1, mixer_order=None, threshold=1e-5,
             # Save current results to history
             inner_history = {'mixer_round':mixer_round, 'inner_round':inner_round,
                              'cost':opt_cost, 'init_state':cur_init_state,
-                             'mixer_order':cur_permutation}
+                             'mixer_order':copy.copy(cur_permutation), 'num_params':num_params}
             mixer_history.append(inner_history)
 
-            # If no improvement was made, break and go to next step4 round
+            # If no improvement was made, break and go to next mixer round
             if len(better_strs) == 0:
                 print('\tNone of the measured bitstrings had higher Hamming weight than:', best_indset)
                 #history.append(temp_history)
@@ -384,12 +379,16 @@ def solve_mis_dqva(init_state, G, P=1, m=1, mixer_order=None, threshold=1e-5,
             cur_init_state = best_indset
             print('\tFound new independent set: {}, Hamming weight = {}'.format(
                                                best_indset, new_hamming_weight))
+
+            # Go through another execution of this While loop, with the same
+            # mixer order
             inner_round += 1
 
         # Save the history of the current mixer round
         history.append(mixer_history)
 
         # Choose a new permutation of the mixer unitaries that have NOT been set to identity
+        print('cur_permutation before:', cur_permutation)
         identity_mixers = [i for i in range(len(cur_init_state)) if list(reversed(cur_init_state))[i] == '1']
         non_identity_mixers = [i for i in range(len(cur_init_state)) if list(reversed(cur_init_state))[i] == '0']
         permutation = np.random.permutation(non_identity_mixers)
@@ -401,6 +400,7 @@ def solve_mis_dqva(init_state, G, P=1, m=1, mixer_order=None, threshold=1e-5,
                 continue
             else:
                 cur_permutation[i] = perm_queue.get()
+        print('cur_permutation after:', cur_permutation)
 
     print('\tRETURNING, best hamming weight:', new_hamming_weight)
     return best_indset, best_params, best_init_state, best_perm, history
