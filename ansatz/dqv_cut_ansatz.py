@@ -1,3 +1,8 @@
+from qiskit import QuantumCircuit, AncillaRegister
+from qiskit.circuit import ControlledGate
+from qiskit.circuit.library.standard_gates import XGate
+from qiskit.transpiler.passes import Unroller
+from qiskit.transpiler import PassManager
 from utils.graph_funcs import *
 from utils.helper_funcs import *
 
@@ -81,15 +86,12 @@ def apply_phase_separator(circ, gamma, G):
     for qb in G.nodes:
         circ.rz(2*gamma, qb)
 
-def gen_cut_dqva(G, partition, params=[], init_state=None, barriers=1, cut=False,
-                 decompose_toffoli=1, mixer_order=None, hot_nodes=[], verbose=0):
+def gen_cut_dqva(G, partition, P=1, params=[], init_state=None, barriers=1,
+                 decompose_toffoli=1, mixer_order=None,
+                 hot_nodes=[], verbose=0):
 
     nq = len(G.nodes)
-    if cut:
-        subgraphs, cutedges = get_subgraphs(G, partition)
-    else:
-        subgraphs = [G]
-        cutedges = []
+    subgraphs, cutedges = get_subgraphs(G, partition)
 
     if verbose > 0:
         print('Current partition:', partition)

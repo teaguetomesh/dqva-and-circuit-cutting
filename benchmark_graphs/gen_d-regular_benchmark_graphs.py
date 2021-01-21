@@ -1,8 +1,10 @@
 import glob
 import networkx as nx
 
-
-dirs = glob.glob('N*')
+dirs = []
+for n in range(7, 19, 2):
+    temp_dirs = glob.glob('N{}*'.format(n))
+    dirs.extend(temp_dirs)
 
 for folder in dirs:
     n = int(folder.split('_')[0][1:])
