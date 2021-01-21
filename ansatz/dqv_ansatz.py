@@ -78,8 +78,8 @@ def apply_phase_separator(circ, gamma, G):
     for qb in G.nodes:
         circ.rz(2*gamma, qb)
 
-def gen_dqva(G, P=1, params=[], init_state=None, barriers=1,
-             decompose_toffoli=1, mixer_order=None, verbose=0):
+def gen_dqva(G, P=1, params=[], init_state=None, barriers=1, decompose_toffoli=1,
+             mixer_order=None, verbose=0, param_lim=None):
 
     nq = len(G.nodes)
 
@@ -104,55 +104,78 @@ def gen_dqva(G, P=1, params=[], init_state=None, barriers=1,
 
     # parse the variational parameters
     num_nonzero = nq - hamming_weight(init_state)
-    num_params = min(P * (nq + 1), (P+1) * (num_nonzero + 1))
+    if param_lim is None:
+        num_params = min(P * (nq + 1), (P+1) * (num_nonzero + 1))
+    else:
+        num_params = param_lim
     assert (len(params) == num_params),"Incorrect number of parameters!"
     alpha_list = []
     gamma_list = []
-    for p in range(P):
-        chunk = num_nonzero + 1
-        cur_selection = params[p*chunk:(p+1)*chunk]
-        alpha_list.append(cur_selection[:-1])
-        gamma_list.append(cur_selection[-1])
+    #for p in range(P):
+    #    chunk = num_nonzero + 1
+    #    cur_selection = params[p*chunk:(p+1)*chunk]
+    #    alpha_list.append(cur_selection[:-1])
+    #    gamma_list.append(cur_selection[-1])
+    param_index = 0
+    while param_index < len(params):
+        if param_index == 0:
+            gamma_list.append(params[param_index])
+            param_index += 1
+            need_new_driver = False
+        elif num_params - param_index >= num_nonzero:
+            alpha_list.append(params[param_index:param_index+num_nonzero])
+            param_index += num_nonzero
+            if param_index < len(params) and need_new_driver:
+                gamma_list.append(params[param_index])
+                param_index += 1
+            need_new_driver = True
+        elif num_params - param_index < num_nonzero:
+            alpha_list.append(params[param_index:])
+            param_index += len(params[param_index:])
 
     # If some bits of the initial state are 1, turn their
     # partial mixers off and add additional partial mixers
     # after the P-th U_C*U_M unitary block
-    chunk = num_nonzero + 1
-    dynamic_list = params[P*chunk:]
-    dyn_alpha = None
-    dyn_gamma = None
-    if len(dynamic_list) < chunk and len(dynamic_list) > 0:
-        dyn_alpha = dynamic_list
-    elif len(dynamic_list) == chunk:
-        dyn_alpha = dynamic_list[:-1]
-        dyn_gamma = dynamic_list[-1]
+    #chunk = num_nonzero + 1
+    #dynamic_list = params[P*chunk:]
+    #dyn_alpha = None
+    #dyn_gamma = None
+    #if len(dynamic_list) < chunk and len(dynamic_list) > 0:
+    #    dyn_alpha = dynamic_list
+    #elif len(dynamic_list) == chunk:
+    #    dyn_alpha = dynamic_list[:-1]
+    #    dyn_gamma = dynamic_list[-1]
 
     if verbose > 0:
-        for i in range(P):
+        for i in range(len(alpha_list)):
             print('alpha_{}: {}'.format(i, alpha_list[i]))
-            print('gamma_{}: {}'.format(i, gamma_list[i]))
-        print('dyn_alpha:', dyn_alpha)
-        print('dyn_gamma:', dyn_gamma)
+            if i < len(gamma_list):
+                print('gamma_{}: {}'.format(i, gamma_list[i]))
+    #    print('dyn_alpha:', dyn_alpha)
+    #    print('dyn_gamma:', dyn_gamma)
 
     anc_idx = 0
-    for alphas, gamma in zip(alpha_list, gamma_list):
+    for i in range(len(alpha_list)):
+        alphas = alpha_list[i]
         apply_mixer(dqv_circ, alphas, init_state, G, anc_idx, barriers,
                     decompose_toffoli, mixer_order, verbose=verbose)
         if barriers == 1:
             dqv_circ.barrier()
 
-        apply_phase_separator(dqv_circ, gamma, G)
-        if barriers == 1:
-            dqv_circ.barrier()
+        if i < len(gamma_list):
+            gamma = gamma_list[i]
+            apply_phase_separator(dqv_circ, gamma, G)
+            if barriers == 1:
+                dqv_circ.barrier()
 
-    if not dyn_alpha is None:
-        apply_mixer(dqv_circ, dyn_alpha, init_state, G, anc_idx,
-                    barriers, decompose_toffoli, mixer_order, verbose=verbose)
-        if barriers > 0:
-            dqv_circ.barrier()
+    #if not dyn_alpha is None:
+    #    apply_mixer(dqv_circ, dyn_alpha, init_state, G, anc_idx,
+    #                barriers, decompose_toffoli, mixer_order, verbose=verbose)
+    #    if barriers > 0:
+    #        dqv_circ.barrier()
 
-    if not dyn_gamma is None:
-        apply_phase_separator(dqv_circ, dyn_gamma, G)
+    #if not dyn_gamma is None:
+    #    apply_phase_separator(dqv_circ, dyn_gamma, G)
 
     if decompose_toffoli > 1:
         #basis_gates = ['x', 'cx', 'barrier', 'crx', 'tdg', 't', 'rz', 'h']
