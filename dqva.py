@@ -254,7 +254,8 @@ def solve_mis_cut_dqva(init_state, G, m=4, threshold=1e-5, cutoff=5,
 
 
 def solve_mis_dqva(init_state, G, P=1, m=1, mixer_order=None, threshold=1e-5,
-                   cutoff=5, sim='statevector', shots=8192, verbose=0):
+                   cutoff=5, sim='statevector', shots=8192, verbose=0,
+                   param_lim=None):
 
     if sim == 'statevector' or sim == 'qasm':
         backend = Aer.get_backend(sim+'_simulator')
@@ -274,7 +275,7 @@ def solve_mis_dqva(init_state, G, P=1, m=1, mixer_order=None, threshold=1e-5,
         # Generate a circuit
         circ = dqv_ansatz.gen_dqva(G, P=P, params=params,
                       init_state=cur_init_state, barriers=0, decompose_toffoli=1,
-                      mixer_order=cur_permutation, verbose=0)
+                      mixer_order=cur_permutation, verbose=0, param_lim=param_lim)
 
         if sim == 'qasm':
             circ.measure_all()
@@ -317,7 +318,10 @@ def solve_mis_dqva(init_state, G, P=1, m=1, mixer_order=None, threshold=1e-5,
 
             # Inner variational loop
             num_nonzero = len(G.nodes()) - hamming_weight(cur_init_state)
-            num_params = min(P * (len(G.nodes()) + 1), (P+1) * (num_nonzero + 1))
+            if param_lim is None:
+                num_params = min(P * (len(G.nodes()) + 1), (P+1) * (num_nonzero + 1))
+            else:
+                num_params = param_lim
             print('\tNum params =', num_params)
             #init_params = np.random.uniform(low=0.0, high=2*np.pi, size=num_params)
             init_params = np.zeros(num_params)
@@ -332,7 +336,7 @@ def solve_mis_dqva(init_state, G, P=1, m=1, mixer_order=None, threshold=1e-5,
             opt_circ = dqv_ansatz.gen_dqva(G, P=P, params=opt_params,
                       init_state=cur_init_state, barriers=0,
                       decompose_toffoli=1, mixer_order=cur_permutation,
-                      verbose=0)
+                      verbose=1, param_lim=param_lim)
 
             if sim == 'qasm':
                 opt_circ.measure_all()
@@ -375,7 +379,7 @@ def solve_mis_dqva(init_state, G, P=1, m=1, mixer_order=None, threshold=1e-5,
             best_indset, new_hamming_weight = better_strs[0]
             best_init_state = cur_init_state
             best_params = opt_params
-            best_perm = cur_permutation
+            best_perm = copy.copy(cur_permutation)
             cur_init_state = best_indset
             print('\tFound new independent set: {}, Hamming weight = {}'.format(
                                                best_indset, new_hamming_weight))
@@ -388,7 +392,6 @@ def solve_mis_dqva(init_state, G, P=1, m=1, mixer_order=None, threshold=1e-5,
         history.append(mixer_history)
 
         # Choose a new permutation of the mixer unitaries that have NOT been set to identity
-        print('cur_permutation before:', cur_permutation)
         identity_mixers = [i for i in range(len(cur_init_state)) if list(reversed(cur_init_state))[i] == '1']
         non_identity_mixers = [i for i in range(len(cur_init_state)) if list(reversed(cur_init_state))[i] == '0']
         permutation = np.random.permutation(non_identity_mixers)
@@ -400,7 +403,6 @@ def solve_mis_dqva(init_state, G, P=1, m=1, mixer_order=None, threshold=1e-5,
                 continue
             else:
                 cur_permutation[i] = perm_queue.get()
-        print('cur_permutation after:', cur_permutation)
 
     print('\tRETURNING, best hamming weight:', new_hamming_weight)
     return best_indset, best_params, best_init_state, best_perm, history
