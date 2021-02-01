@@ -1,8 +1,15 @@
+"""
+01/30/2021 - Teague Tomesh
+
+This file contains a set of functions for solving the maximum independent set
+(MIS) problem on a given graph using a variety of ansatzes.
+
+Each ansatz (qaoa, qva, dqva, dqva+cutting) has its own function which
+implements the variational algorithm used to find the MIS.
+"""
 import time, random, queue, copy, itertools
-#import pickle
 import numpy as np
 import networkx as nx
-import matplotlib.pyplot as plt
 
 from networkx.algorithms.community.kernighan_lin import kernighan_lin_bisection
 from scipy.optimize import minimize
@@ -28,6 +35,17 @@ from utils.helper_funcs import *
 
 def sim_with_cutting(circ, cutqc, mip_model, simulation_backend, shots, G,
                      verbose, mode='direct'):
+    """
+    A helper function which takes a large quantum circuit as input, cuts it into
+    two pieces, evaluates each piece independently, and finally stitches the
+    results together to simulate the execution of the larger, original circuit.
+
+    Output:
+    probs: dict{bitstring : float}
+        Outputs a dictionary containing the simulation results. Keys are the
+        bitstrings which were observed and their values are the probability that
+        they occurred with.
+    """
 
     cut_start_time = time.time()
 
@@ -102,27 +120,44 @@ def sim_with_cutting(circ, cutqc, mip_model, simulation_backend, shots, G,
 
 def solve_mis_cut_dqva(init_state, G, m=4, threshold=1e-5, cutoff=5,
                       sim='statevector', shots=8192, verbose=0):
+    """
+    Find the MIS of G using the dqva and circuit cutting
+    """
 
+    # Initialization
+    backend = Aer.get_backend(sim+'_simulator')
+
+    # Kernighan-Lin partitions G into two relatively equal subgraphs
     kl_bisection = kernighan_lin_bisection(G)
     print('kl bisection:', kl_bisection)
+
+    # Collect the nodes that have cut edges
     cut_nodes = []
     for node in kl_bisection[0]:
         for neighbor in G.neighbors(node):
             if neighbor in kl_bisection[1]:
                 cut_nodes.extend([node, neighbor])
     cut_nodes = list(set(cut_nodes))
+
+    # For now, randomly select a SINGLE node to be the "hot node" - its mixer
+    # will be applied across the cut (and so will require circuit cutting).
+    # Only using a single hot node now to keep the number of cuts low, but this
+    # requirement can be removed in the future.
     hotnode = random.choice(cut_nodes)
     print('Cut nodes and hotnode:', cut_nodes, hotnode)
 
-    backend = Aer.get_backend(sim+'_simulator')
+
+    # Randomly permute the order of the partial mixers
     cur_permutation = list(np.random.permutation(list(G.nodes)))
 
+    # Options relevant to the circuit cutting code
     cut_options = {'max_subcircuit_qubit':len(G.nodes)+len(kl_bisection)-1,
                    'num_subcircuits':[2],
                    'max_cuts':2}
 
     history = []
 
+    # This function will be what scipy.minimize optimizes
     def f(params, cutqc, mip_model):
         # Generate a circuit
         # Circuit cutting is not required here, but the circuit should be generated using
@@ -256,7 +291,19 @@ def solve_mis_cut_dqva(init_state, G, m=4, threshold=1e-5, cutoff=5,
 def solve_mis_dqva(init_state, G, P=1, m=1, mixer_order=None, threshold=1e-5,
                    cutoff=5, sim='statevector', shots=8192, verbose=0,
                    param_lim=None):
+    """
+    Find the MIS of G using the Dynamic Quantum Variational Ansatz (DQVA), this
+    ansatz is composed of two types of unitaries: the cost unitary U_C and the
+    mixer unitary U_M. The mixer U_M is made up of individual partial mixers
+    which are independently parametrized.
 
+    DQVA's key feature is the parameter limit which truncates the number of
+    partial mixers that are applied at any one time, and its dynamic reuse of
+    quantum resources (i.e. the partial mixers for qubits which are in the MIS
+    are turned off and applied to other qubits not currently in the set)
+    """
+
+    # Initialization
     if sim == 'statevector' or sim == 'qasm':
         backend = Aer.get_backend(sim+'_simulator')
     elif sim == 'cloud':
@@ -264,6 +311,7 @@ def solve_mis_dqva(init_state, G, P=1, m=1, mixer_order=None, threshold=1e-5,
     else:
         raise Exception('Unknown simulator:', sim)
 
+    # Select an ordering for the partial mixers
     if mixer_order == None:
         cur_permutation = list(np.random.permutation(list(G.nodes)))
     else:
@@ -271,6 +319,7 @@ def solve_mis_dqva(init_state, G, P=1, m=1, mixer_order=None, threshold=1e-5,
 
     history = []
 
+    # This function will be what scipy.minimize optimizes
     def f(params):
         # Generate a circuit
         circ = dqv_ansatz.gen_dqva(G, P=P, params=params,
@@ -299,7 +348,6 @@ def solve_mis_dqva(init_state, G, P=1, m=1, mixer_order=None, threshold=1e-5,
         #print('Expectation value:', avg_cost)
         return -avg_cost
 
-    # Step 3: Dynamic Ansatz Update
     # Begin outer optimization loop
     best_indset = init_state
     best_init_state = init_state
@@ -316,17 +364,18 @@ def solve_mis_dqva(init_state, G, P=1, m=1, mixer_order=None, threshold=1e-5,
             print('Start round {}.{}, Initial state = {}'.format(mixer_round,
                   inner_round, cur_init_state))
 
-            # Inner variational loop
+            # Begin Inner variational loop
             num_nonzero = len(G.nodes()) - hamming_weight(cur_init_state)
             if param_lim is None:
                 num_params = min(P * (len(G.nodes()) + 1), (P+1) * (num_nonzero + 1))
             else:
                 num_params = param_lim
             print('\tNum params =', num_params)
-            #init_params = np.random.uniform(low=0.0, high=2*np.pi, size=num_params)
             init_params = np.zeros(num_params)
             print('\tCurrent Mixer Order:', cur_permutation)
+
             out = minimize(f, x0=init_params, method='COBYLA')
+
             opt_params = out['x']
             opt_cost = out['fun']
             #print('\tOptimal Parameters:', opt_params)
@@ -352,8 +401,8 @@ def solve_mis_dqva(init_state, G, P=1, m=1, mixer_order=None, threshold=1e-5,
             # Select the top [cutoff] counts
             top_counts = sorted([(key, val) for key, val in probs.items() if val > threshold],
                                 key=lambda tup: tup[1], reverse=True)[:cutoff]
+
             # Check if we have improved the Hamming weight
-            #old_hamming_weight = hamming_weight(cur_init_state)
             best_hamming_weight = hamming_weight(best_indset)
             better_strs = []
             for bitstr, prob in top_counts:
@@ -361,7 +410,6 @@ def solve_mis_dqva(init_state, G, P=1, m=1, mixer_order=None, threshold=1e-5,
                 if is_indset(bitstr, G) and this_hamming > best_hamming_weight:
                     better_strs.append((bitstr, this_hamming))
             better_strs = sorted(better_strs, key=lambda t: t[1], reverse=True)
-            #prev_init_state = cur_init_state
 
             # Save current results to history
             inner_history = {'mixer_round':mixer_round, 'inner_round':inner_round,
@@ -372,7 +420,6 @@ def solve_mis_dqva(init_state, G, P=1, m=1, mixer_order=None, threshold=1e-5,
             # If no improvement was made, break and go to next mixer round
             if len(better_strs) == 0:
                 print('\tNone of the measured bitstrings had higher Hamming weight than:', best_indset)
-                #history.append(temp_history)
                 break
 
             # Otherwise, save the new bitstring and repeat
@@ -410,7 +457,15 @@ def solve_mis_dqva(init_state, G, P=1, m=1, mixer_order=None, threshold=1e-5,
 
 def solve_mis_qaoa(init_state, G, P=1, m=1, mixer_order=None, threshold=1e-5,
                    cutoff=5, sim='statevector', shots=8192, verbose=0):
+    """
+    Find the MIS of G using a qaoa ansatz, the structure of the driver and mixer
+    unitaries is the same as that used by DQVA and QVA, but each unitary is
+    parameterized by a single angle:
 
+        U_C_P(gamma_P) * U_M_P(beta_P) * ... * U_C_1(gamma_1) * U_M_1(beta_1)|0>
+    """
+
+    # Initialization
     if sim == 'statevector' or sim == 'qasm':
         backend = Aer.get_backend(sim+'_simulator')
     elif sim == 'cloud':
@@ -418,6 +473,7 @@ def solve_mis_qaoa(init_state, G, P=1, m=1, mixer_order=None, threshold=1e-5,
     else:
         raise Exception('Unknown simulator:', sim)
 
+    # Select an ordering for the partial mixers
     if mixer_order == None:
         cur_permutation = list(np.random.permutation(list(G.nodes)))
     else:
@@ -425,6 +481,7 @@ def solve_mis_qaoa(init_state, G, P=1, m=1, mixer_order=None, threshold=1e-5,
 
     history = []
 
+    # This function will be what scipy.minimize optimizes
     def f(params):
         # Generate a QAOA circuit
         circ = qaoa.gen_qaoa(G, P, params=params, init_state=cur_init_state,
@@ -453,7 +510,6 @@ def solve_mis_qaoa(init_state, G, P=1, m=1, mixer_order=None, threshold=1e-5,
         #print('Expectation value:', avg_cost)
         return -avg_cost
 
-    # Step 3: Dynamic Ansatz Update
     # Begin outer optimization loop
     best_indset = init_state
     best_init_state = init_state
@@ -470,13 +526,14 @@ def solve_mis_qaoa(init_state, G, P=1, m=1, mixer_order=None, threshold=1e-5,
             print('Start round {}.{}, Initial state = {}'.format(mixer_round,
                 inner_round, cur_init_state))
 
-            # Inner variational loop
+            # Begin Inner variational loop
             num_params = 2 * P
             print('\tNum params =', num_params)
-            #init_params = np.random.uniform(low=0.0, high=2*np.pi, size=num_params)
             init_params = np.zeros(num_params)
             print('\tCurrent Mixer Order:', cur_permutation)
+
             out = minimize(f, x0=init_params, method='COBYLA')
+
             opt_params = out['x']
             opt_cost = out['fun']
             #print('\tOptimal Parameters:', opt_params)
@@ -503,8 +560,8 @@ def solve_mis_qaoa(init_state, G, P=1, m=1, mixer_order=None, threshold=1e-5,
             # Select the top [cutoff] bitstrings
             top_counts = sorted([(key, val) for key, val in probs.items() if val > threshold],
                                 key=lambda tup: tup[1], reverse=True)[:cutoff]
+
             # Check if we have improved the Hamming weight
-            #old_hamming_weight = hamming_weight(cur_init_state)
             best_hamming_weight = hamming_weight(best_indset)
             better_strs = []
             for bitstr, prob in top_counts:
@@ -522,7 +579,6 @@ def solve_mis_qaoa(init_state, G, P=1, m=1, mixer_order=None, threshold=1e-5,
             # If no improvement was made, break and go to next mixer round
             if len(better_strs) == 0:
                 print('\tNone of the measured bitstrings had higher Hamming weight than:', best_indset)
-                #history.append(temp_history)
                 break
 
             # Otherwise, save the new bitstring and repeat
@@ -547,7 +603,13 @@ def solve_mis_qaoa(init_state, G, P=1, m=1, mixer_order=None, threshold=1e-5,
 
 def solve_mis_qva(init_state, G, P=1, m=1, mixer_order=None, threshold=1e-5,
                    cutoff=5, sim='statevector', shots=8192, verbose=0):
+    """
+    Find the MIS of G using the quantum variational ansatz (QVA), this ansatz
+    has the same structure as DQVA but does not include DQVA's parameter limit
+    and dynamic reuse of partial mixers
+    """
 
+    # Initialization
     if sim == 'statevector' or sim == 'qasm':
         backend = Aer.get_backend(sim+'_simulator')
     elif sim == 'cloud':
@@ -555,6 +617,7 @@ def solve_mis_qva(init_state, G, P=1, m=1, mixer_order=None, threshold=1e-5,
     else:
         raise Exception('Unknown simulator:', sim)
 
+    # Select and order for the partial mixers
     if mixer_order == None:
         cur_permutation = list(np.random.permutation(list(G.nodes)))
     else:
@@ -562,6 +625,7 @@ def solve_mis_qva(init_state, G, P=1, m=1, mixer_order=None, threshold=1e-5,
 
     history = []
 
+    # This is the function which scipy.minimize will optimize
     def f(params):
         # Generate a QAOA circuit
         circ = qv_ansatz.gen_qv_ansatz(G, P, params=params,
@@ -590,7 +654,6 @@ def solve_mis_qva(init_state, G, P=1, m=1, mixer_order=None, threshold=1e-5,
         #print('Expectation value:', avg_cost)
         return -avg_cost
 
-    # Step 3: Dynamic Ansatz Update
     # Begin outer optimization loop
     best_indset = init_state
     best_init_state = init_state
@@ -607,13 +670,14 @@ def solve_mis_qva(init_state, G, P=1, m=1, mixer_order=None, threshold=1e-5,
             print('Start round {}.{}, Initial state = {}'.format(mixer_round,
                 inner_round, cur_init_state))
 
-            # Inner variational loop
+            # Begin Inner variational loop
             num_params = P * (len(G.nodes()) + 1)
             print('\tNum params =', num_params)
-            #init_params = np.random.uniform(low=0.0, high=2*np.pi, size=num_params)
             init_params = np.zeros(num_params)
             print('\tCurrent Mixer Order:', cur_permutation)
+
             out = minimize(f, x0=init_params, method='COBYLA')
+
             opt_params = out['x']
             opt_cost = out['fun']
             #print('\tOptimal Parameters:', opt_params)
@@ -639,8 +703,8 @@ def solve_mis_qva(init_state, G, P=1, m=1, mixer_order=None, threshold=1e-5,
             # Select the top [cutoff] bitstrings
             top_counts = sorted([(key, val) for key, val in probs.items() if val > threshold],
                                 key=lambda tup: tup[1], reverse=True)[:cutoff]
+
             # Check if we have improved the Hamming weight
-            #old_hamming_weight = hamming_weight(cur_init_state)
             best_hamming_weight = hamming_weight(best_indset)
             better_strs = []
             for bitstr, prob in top_counts:
@@ -648,7 +712,6 @@ def solve_mis_qva(init_state, G, P=1, m=1, mixer_order=None, threshold=1e-5,
                 if is_indset(bitstr, G) and this_hamming > best_hamming_weight:
                     better_strs.append((bitstr, this_hamming))
             better_strs = sorted(better_strs, key=lambda t: t[1], reverse=True)
-            #prev_init_state = cur_init_state
 
             # Save current results to history
             inner_history = {'mixer_round':mixer_round, 'inner_round':inner_round,
@@ -659,7 +722,6 @@ def solve_mis_qva(init_state, G, P=1, m=1, mixer_order=None, threshold=1e-5,
             # If no improvement was made, break and go to next mixer round
             if len(better_strs) == 0:
                 print('\tNone of the measured bitstrings had higher Hamming weight than:', best_indset)
-                #history.append(temp_history)
                 break
 
             # Otherwise, save the new bitstring and repeat
