@@ -585,7 +585,7 @@ def solve_mis_qaoa(init_state, G, P=1, m=1, mixer_order=None, threshold=1e-5,
             best_indset, new_hamming_weight = better_strs[0]
             best_init_state = cur_init_state
             best_params = opt_params
-            best_perm = cur_permutation
+            best_perm = copy.copy(cur_permutation)
             cur_init_state = best_indset
             print('\tFound new independent set: {}, Hamming weight = {}'.format(
                                                best_indset, new_hamming_weight))
@@ -728,7 +728,7 @@ def solve_mis_qva(init_state, G, P=1, m=1, mixer_order=None, threshold=1e-5,
             best_indset, new_hamming_weight = better_strs[0]
             best_init_state = cur_init_state
             best_params = opt_params
-            best_perm = cur_permutation
+            best_perm = copy.copy(cur_permutation)
             cur_init_state = best_indset
             print('\tFound new independent set: {}, Hamming weight = {}'.format(
                                                best_indset, new_hamming_weight))
