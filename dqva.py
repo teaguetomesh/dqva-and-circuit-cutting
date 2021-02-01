@@ -118,7 +118,7 @@ def sim_with_cutting(circ, cutqc, mip_model, simulation_backend, shots, G,
 
     return probs
 
-def solve_mis_cut_dqva(init_state, G, m=4, threshold=1e-5, cutoff=5,
+def solve_mis_cut_dqva(init_state, G, m=4, threshold=1e-5, cutoff=1,
                       sim='statevector', shots=8192, verbose=0):
     """
     Find the MIS of G using the dqva and circuit cutting
@@ -289,7 +289,7 @@ def solve_mis_cut_dqva(init_state, G, m=4, threshold=1e-5, cutoff=5,
 
 
 def solve_mis_dqva(init_state, G, P=1, m=1, mixer_order=None, threshold=1e-5,
-                   cutoff=5, sim='statevector', shots=8192, verbose=0,
+                   cutoff=1, sim='statevector', shots=8192, verbose=0,
                    param_lim=None):
     """
     Find the MIS of G using the Dynamic Quantum Variational Ansatz (DQVA), this
@@ -456,7 +456,7 @@ def solve_mis_dqva(init_state, G, P=1, m=1, mixer_order=None, threshold=1e-5,
 
 
 def solve_mis_qaoa(init_state, G, P=1, m=1, mixer_order=None, threshold=1e-5,
-                   cutoff=5, sim='statevector', shots=8192, verbose=0):
+                   cutoff=1, sim='statevector', shots=8192, verbose=0):
     """
     Find the MIS of G using a qaoa ansatz, the structure of the driver and mixer
     unitaries is the same as that used by DQVA and QVA, but each unitary is
@@ -602,7 +602,7 @@ def solve_mis_qaoa(init_state, G, P=1, m=1, mixer_order=None, threshold=1e-5,
 
 
 def solve_mis_qva(init_state, G, P=1, m=1, mixer_order=None, threshold=1e-5,
-                   cutoff=5, sim='statevector', shots=8192, verbose=0):
+                   cutoff=1, sim='statevector', shots=8192, verbose=0):
     """
     Find the MIS of G using the quantum variational ansatz (QVA), this ansatz
     has the same structure as DQVA but does not include DQVA's parameter limit
@@ -754,7 +754,7 @@ def main():
     for i in range(len(G.nodes)):
         init_str = list(base_str)
         init_str[i] = '1'
-        out = cut_dqva(''.join(init_str), G, m=4, threshold=1e-5, cutoff=5, sim='qasm', shots=8192, verbose=0)
+        out = cut_dqva(''.join(init_str), G, m=4, threshold=1e-5, cutoff=1, sim='qasm', shots=8192, verbose=0)
         print('Init string: {}, Best MIS: {}'.format(''.join(init_str), out[0]))
         print()
 
