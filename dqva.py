@@ -385,7 +385,7 @@ def solve_mis_dqva(init_state, G, P=1, m=1, mixer_order=None, threshold=1e-5,
             opt_circ = dqv_ansatz.gen_dqva(G, P=P, params=opt_params,
                       init_state=cur_init_state, barriers=0,
                       decompose_toffoli=1, mixer_order=cur_permutation,
-                      verbose=1, param_lim=param_lim)
+                      verbose=0, param_lim=param_lim)
 
             if sim == 'qasm':
                 opt_circ.measure_all()
@@ -573,7 +573,7 @@ def solve_mis_qaoa(init_state, G, P=1, m=1, mixer_order=None, threshold=1e-5,
             # Save current results to history
             inner_history = {'mixer_round':mixer_round, 'inner_round':inner_round,
                              'cost':opt_cost, 'init_state':cur_init_state,
-                             'mixer_order':cur_permutation}
+                             'mixer_order':copy.copy(cur_permutation), 'num_params':num_params}
             mixer_history.append(inner_history)
 
             # If no improvement was made, break and go to next mixer round
@@ -716,7 +716,7 @@ def solve_mis_qva(init_state, G, P=1, m=1, mixer_order=None, threshold=1e-5,
             # Save current results to history
             inner_history = {'mixer_round':mixer_round, 'inner_round':inner_round,
                              'cost':opt_cost, 'init_state':cur_init_state,
-                             'mixer_order':cur_permutation}
+                             'mixer_order':copy.copy(cur_permutation), 'num_params':num_params}
             mixer_history.append(inner_history)
 
             # If no improvement was made, break and go to next mixer round
