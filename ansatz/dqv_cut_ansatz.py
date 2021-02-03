@@ -1,3 +1,9 @@
+"""
+01/30/2021 - Teague Tomesh
+
+The functions in the file are used to generate the Dynamic Quantum Variational
+Ansatz (DQVA) with the proper structure such that they can be cut
+"""
 from qiskit import QuantumCircuit, AncillaRegister
 from qiskit.circuit import ControlledGate
 from qiskit.circuit.library.standard_gates import XGate
