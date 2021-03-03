@@ -4,7 +4,7 @@
 This file contains a set of functions for solving the maximum independent set
 (MIS) problem on a given graph using a variety of ansatzes.
 
-Each ansatz (qaoa, qva, dqva, dqva+cutting) has its own function which
+Each ansatz (qaoa, dqva, qlsa, dqva+cutting) has its own function which
 implements the variational algorithm used to find the MIS.
 """
 import time, random, queue, copy, itertools
@@ -18,7 +18,7 @@ from scipy.optimize import minimize
 from qiskit import *
 from qiskit.quantum_info import Statevector
 
-from ansatz import qaoa, qv_ansatz, dqv_ansatz, dqv_cut_ansatz
+from ansatz import qaoa, dqv_ansatz, qls_ansatz, dqv_cut_ansatz
 
 import qsplit_circuit_cutter as qcc
 import qsplit_mlrecon_methods as qmm
@@ -288,16 +288,16 @@ def solve_mis_cut_dqva(init_state, G, m=4, threshold=1e-5, cutoff=1,
     return best_indset, opt_params, best_init_state, kl_bisection, history
 
 
-def solve_mis_dqva(init_state, G, P=1, m=1, mixer_order=None, threshold=1e-5,
+def solve_mis_qls(init_state, G, P=1, m=1, mixer_order=None, threshold=1e-5,
                    cutoff=1, sim='statevector', shots=8192, verbose=0,
                    param_lim=None):
     """
-    Find the MIS of G using the Dynamic Quantum Variational Ansatz (DQVA), this
+    Find the MIS of G using Quantum Local Search (QLS), this
     ansatz is composed of two types of unitaries: the cost unitary U_C and the
     mixer unitary U_M. The mixer U_M is made up of individual partial mixers
     which are independently parametrized.
 
-    DQVA's key feature is the parameter limit which truncates the number of
+    QLS's key feature is the parameter limit which truncates the number of
     partial mixers that are applied at any one time, and its dynamic reuse of
     quantum resources (i.e. the partial mixers for qubits which are in the MIS
     are turned off and applied to other qubits not currently in the set)
@@ -322,9 +322,9 @@ def solve_mis_dqva(init_state, G, P=1, m=1, mixer_order=None, threshold=1e-5,
     # This function will be what scipy.minimize optimizes
     def f(params):
         # Generate a circuit
-        circ = dqv_ansatz.gen_dqva(G, P=P, params=params,
-                      init_state=cur_init_state, barriers=0, decompose_toffoli=1,
-                      mixer_order=cur_permutation, verbose=0, param_lim=param_lim)
+        circ = qls_ansatz.gen_qlsa(G, P=P, params=params,
+                     init_state=cur_init_state, barriers=0, decompose_toffoli=1,
+                    mixer_order=cur_permutation, verbose=0, param_lim=param_lim)
 
         if sim == 'qasm':
             circ.measure_all()
@@ -382,10 +382,10 @@ def solve_mis_dqva(init_state, G, P=1, m=1, mixer_order=None, threshold=1e-5,
             print('\tOptimal cost:', opt_cost)
 
             # Get the results of the optimized circuit
-            opt_circ = dqv_ansatz.gen_dqva(G, P=P, params=opt_params,
-                      init_state=cur_init_state, barriers=0,
-                      decompose_toffoli=1, mixer_order=cur_permutation,
-                      verbose=0, param_lim=param_lim)
+            opt_circ = qls_ansatz.gen_qlsa(G, P=P, params=opt_params,
+                               init_state=cur_init_state, barriers=0,
+                               decompose_toffoli=1, mixer_order=cur_permutation,
+                               verbose=0, param_lim=param_lim)
 
             if sim == 'qasm':
                 opt_circ.measure_all()
@@ -458,9 +458,9 @@ def solve_mis_dqva(init_state, G, P=1, m=1, mixer_order=None, threshold=1e-5,
 def solve_mis_qaoa(init_state, G, P=1, m=1, mixer_order=None, threshold=1e-5,
                    cutoff=1, sim='statevector', shots=8192, verbose=0):
     """
-    Find the MIS of G using a qaoa ansatz, the structure of the driver and mixer
-    unitaries is the same as that used by DQVA and QVA, but each unitary is
-    parameterized by a single angle:
+    Find the MIS of G using a Quantum Alternating Operator Ansatz (QAOA), the
+    structure of the driver and mixer unitaries is the same as that used by
+    DQVA and QLS, but each unitary is parameterized by a single angle:
 
         U_C_P(gamma_P) * U_M_P(beta_P) * ... * U_C_1(gamma_1) * U_M_1(beta_1)|0>
     """
@@ -601,12 +601,12 @@ def solve_mis_qaoa(init_state, G, P=1, m=1, mixer_order=None, threshold=1e-5,
     return best_indset, best_params, best_init_state, best_perm, history
 
 
-def solve_mis_qva(init_state, G, P=1, m=1, mixer_order=None, threshold=1e-5,
+def solve_mis_dqva(init_state, G, P=1, m=1, mixer_order=None, threshold=1e-5,
                    cutoff=1, sim='statevector', shots=8192, verbose=0):
     """
-    Find the MIS of G using the quantum variational ansatz (QVA), this ansatz
-    has the same structure as DQVA but does not include DQVA's parameter limit
-    and dynamic reuse of partial mixers
+    Find the MIS of G using the dynamic quantum variational ansatz (DQVA),
+    this ansatz has the same structure as QLS but does not include QLS's
+    parameter limit
     """
 
     # Initialization
@@ -628,7 +628,7 @@ def solve_mis_qva(init_state, G, P=1, m=1, mixer_order=None, threshold=1e-5,
     # This is the function which scipy.minimize will optimize
     def f(params):
         # Generate a QAOA circuit
-        circ = qv_ansatz.gen_qv_ansatz(G, P, params=params,
+        circ = dqv_ansatz.gen_dqva(G, P, params=params,
                      init_state=cur_init_state, barriers=0, decompose_toffoli=1,
                      mixer_order=cur_permutation, verbose=0)
 
@@ -671,7 +671,7 @@ def solve_mis_qva(init_state, G, P=1, m=1, mixer_order=None, threshold=1e-5,
                 inner_round, cur_init_state))
 
             # Begin Inner variational loop
-            num_params = P * (len(G.nodes()) + 1)
+            num_params = P * ((len(G.nodes()) - hamming_weight(cur_init_state)) + 1)
             print('\tNum params =', num_params)
             init_params = np.zeros(num_params)
             print('\tCurrent Mixer Order:', cur_permutation)
@@ -684,7 +684,7 @@ def solve_mis_qva(init_state, G, P=1, m=1, mixer_order=None, threshold=1e-5,
             print('\tOptimal cost:', opt_cost)
 
             # Get the results of the optimized circuit
-            opt_circ = qv_ansatz.gen_qv_ansatz(G, P, params=opt_params,
+            opt_circ = dqv_ansatz.gen_dqva(G, P, params=opt_params,
                                init_state=cur_init_state, barriers=0,
                                decompose_toffoli=1, mixer_order=cur_permutation,
                                verbose=0)

@@ -42,7 +42,7 @@ def main():
         DQVAROOT += '/'
     sys.path.append(DQVAROOT)
 
-    if args.alg not in ['qaoa', 'qva', 'dqva', 'cut_dqva']:
+    if args.alg not in ['qaoa', 'dqva', 'qls', 'cut_dqva']:
         raise Exception('Unknown algorithm:', args.alg)
     if args.sim not in ['qasm', 'statevector', 'cloud']:
         raise Exception('Unknown backend:', args.sim)
@@ -73,12 +73,12 @@ def main():
                 out = dqva.solve_mis_qaoa(init_state, G, P=args.P, m=args.m,
                                           sim=args.sim, shots=args.shots,
                                           verbose=args.v)
-            elif args.alg == 'qva':
-                out = dqva.solve_mis_qva(init_state, G, P=args.P, m=args.m,
-                                         sim=args.sim, shots=args.shots,
-                                         verbose=args.v)
             elif args.alg == 'dqva':
                 out = dqva.solve_mis_dqva(init_state, G, P=args.P, m=args.m,
+                                         sim=args.sim, shots=args.shots,
+                                         verbose=args.v)
+            elif args.alg == 'qls':
+                out = dqva.solve_mis_qls(init_state, G, P=args.P, m=args.m,
                                           sim=args.sim, shots=args.shots,
                                           verbose=args.v, param_lim=args.plim)
             elif args.alg == 'cut_dqva':
