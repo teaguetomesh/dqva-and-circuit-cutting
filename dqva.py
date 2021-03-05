@@ -352,6 +352,8 @@ def solve_mis_qls(init_state, G, P=1, m=1, mixer_order=None, threshold=1e-5,
     best_indset = init_state
     best_init_state = init_state
     cur_init_state = init_state
+    best_params = None
+    best_perm = copy.copy(cur_permutation)
 
     # Randomly permute the order of mixer unitaries m times
     for mixer_round in range(1, m+1):
@@ -514,6 +516,8 @@ def solve_mis_qaoa(init_state, G, P=1, m=1, mixer_order=None, threshold=1e-5,
     best_indset = init_state
     best_init_state = init_state
     cur_init_state = init_state
+    best_params = None
+    best_perm = copy.copy(cur_permutation)
 
     # Randomly permute the order of mixer unitaries m times
     for mixer_round in range(1, m+1):
@@ -658,6 +662,8 @@ def solve_mis_dqva(init_state, G, P=1, m=1, mixer_order=None, threshold=1e-5,
     best_indset = init_state
     best_init_state = init_state
     cur_init_state = init_state
+    best_params = None
+    best_perm = copy.copy(cur_permutation)
 
     # Randomly permute the order of mixer unitaries m times
     for mixer_round in range(1, m+1):

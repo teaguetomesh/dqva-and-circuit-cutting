@@ -1,0 +1,3 @@
+[submodule "CutBranching"]
+	path = CutBranching
+	url = https://github.com/teaguetomesh/CutBranching.git
