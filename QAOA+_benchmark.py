@@ -81,6 +81,10 @@ def main():
                     data_dict['prob'] = rp[1]*100
                     break
 
+            if 'rank' not in data_dict.keys():
+                data_dict['rank'] = -1
+                data_dict['prob'] = 0
+
             print('lambda: {:.3f}, ratio = {:.3f}, rank = {}, prob = {:.3f}'.format(
                       Lambda, ratio, data_dict['rank'], data_dict['prob']))
 
