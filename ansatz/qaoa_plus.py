@@ -91,4 +91,19 @@ def get_ranked_probs(P, G, params, shots=8192):
     return probs
 
 
+def get_approximation_ratio(out, P, G, shots=8192):
+    opt_mis = brute_force_search(G)[1]
+
+    circ = construct_qaoa_plus(P, G, params=out['x'], measure=True)
+    result = execute(circ, backend=Aer.get_backend('qasm_simulator'), shots=shots).result()
+    counts = result.get_counts(circ)
+
+    # Approximation ratio is computed using ONLY valid independent sets
+    # E(gamma, beta) = SUM_bitstrs { (bitstr_counts / total_shots) * hamming_weight(bitstr) } / opt_mis
+    ratio = sum([count * hamming_weight(bitstr) / shots for bitstr, count in counts.items() \
+                 if is_indset(bitstr, G)]) / opt_mis
+
+    return ratio
+
+
 

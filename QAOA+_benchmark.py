@@ -63,15 +63,13 @@ def main():
         print(graphname, G.edges())
         nq = len(G.nodes)
 
-        optimal = brute_force_search(G)
-
         data_list = []
-        for Lambda in np.arange(0.1, 1.6, 0.2):
+        for Lambda in np.arange(0.1, 10, 0.7):
             data_dict = {'lambda':Lambda, 'graph':graphfn}
             out = qaoa_plus.solve_mis(args.P, G, Lambda)
 
-            exp_val = -1 * out['fun']
-            ratio = exp_val / optimal[1]
+            # Compute the approximation ratio by pruning the resulting measurements
+            ratio = qaoa_plus.get_approximation_ratio(out, args.P, G)
             data_dict['ratio'] = ratio
 
             ranked_probs = qaoa_plus.get_ranked_probs(args.P, G, out['x'])
