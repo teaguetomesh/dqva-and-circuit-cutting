@@ -1,6 +1,6 @@
 from qiskit.dagcircuit.dagcircuit import DAGCircuit
 from qiskit.converters import circuit_to_dag, dag_to_circuit
-from gurobipy import *
+# from gurobipy import *
 import numpy as np
 import math
 from qiskit import QuantumCircuit, QuantumRegister
