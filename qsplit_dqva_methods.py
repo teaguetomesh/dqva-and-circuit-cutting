@@ -82,12 +82,19 @@ def choose_hot_nodes(graph, subgraphs, cut_nodes, uncut_nodes, max_cuts):
 
 ##########################################################################################
 
+# fidelity between two probability distributions
 def fidelity(dist, actual_dist):
     qubit_num = len(list(actual_dist.keys())[0])
     fidelity = sum( np.sqrt(actual_dist[bits] * dist[bits], dtype = complex)
                     for bits in actual_dist.keys()
                     if actual_dist.get(bits) and dist.get(bits) )**2
     return fidelity.real if fidelity.imag == 0 else fidelity
+
+# determine the number of gates applied to a given qubit in a circuit
+def num_gates(circuit, qubit):
+    graph = qiskit.converters.circuit_to_dag(circuit)
+    graph.remove_all_ops_named("barrier")
+    return sum([ qubit in node.qargs for node in graph.topological_op_nodes() ])
 
 def apply_mixer(circ, alpha, init_state, G, cut_nodes, cutedges, subgraph_dict,
                 barriers, decompose_toffoli, mixer_order, hot_nodes,
@@ -112,9 +119,6 @@ def apply_mixer(circ, alpha, init_state, G, cut_nodes, cutedges, subgraph_dict,
 
     cuts = [] # initialize a trivial set of cuts
 
-    # keep track of the number of gates applied to every qubit
-    qubit_gates = { qubit : 0 for qubit in mixer_order }
-
     # identify the first qubit in the second subgraph
     # we identify cuts before applying mixers to this qubit
     if hot_nodes:
@@ -130,11 +134,11 @@ def apply_mixer(circ, alpha, init_state, G, cut_nodes, cutedges, subgraph_dict,
         if hot_nodes and qubit == swap_qubit:
             # find all neighbors of the hot nodes
             hot_neighbors = set.union(*[ set(G.neighbors(node)) for node in hot_nodes ])
-            # find all cut nodes in the non-hot graph
-            adj_cut_nodes = [ node for node in hot_neighbors
-                              if subgraph_dict[node] != subgraph_dict[hot_nodes[0]] ]
+            # find all cut qubits in the non-hot graph
+            adj_cut_qubits = [ circ.qubits[node] for node in hot_neighbors
+                               if subgraph_dict[node] != subgraph_dict[hot_nodes[0]] ]
             # cut after all gates on adj_cut_nodes
-            cuts = [ ( circ.qubits[node], qubit_gates[node] ) for node in adj_cut_nodes ]
+            cuts = [ ( qubit, num_gates(circ,qubit) ) for qubit in adj_cut_qubits ]
 
         # turn off mixers for qubits which are already 1
         if pad_alpha[qubit] == None or not G.has_node(qubit):
@@ -159,21 +163,16 @@ def apply_mixer(circ, alpha, init_state, G, cut_nodes, cutedges, subgraph_dict,
                 circ.mcx(ctrl_qubits, circ.ancillas[anc_idx])
                 for ctrl in ctrl_qubits:
                     circ.x(ctrl)
-                for qq in neighbors:
-                    qubit_gates[qq] += 3
             else:
                 mc_toffoli = ControlledGate('mc_toffoli', len(neighbors)+1, [],
                                             num_ctrl_qubits=len(neighbors),
                                             ctrl_state='0'*len(neighbors), base_gate=XGate())
                 circ.append(mc_toffoli, ctrl_qubits + [circ.ancillas[anc_idx]])
-                for qq in neighbors:
-                    qubit_gates[qq] += 1
 
         _apply_mc_toffoli()
 
         # apply an X rotation controlled by the state of the ancilla qubit
         circ.crx(2*pad_alpha[qubit], circ.ancillas[anc_idx], circ.qubits[qubit])
-        qubit_gates[qubit] += 1
 
         _apply_mc_toffoli()
 
@@ -290,4 +289,23 @@ def gen_cut_dqva(G, partition, uncut_nodes, mixing_layers=1, params=[], init_sta
         pm = PassManager(pass_)
         dqv_circ = pm.run(dqv_circ)
 
-    return dqv_circ, cuts
+    # push cuts forward past single-qubit gates
+    # to (possibly) get rid of some trivial single-qubit fragments
+    circ_graph = qiskit.converters.circuit_to_dag(dqv_circ)
+    circ_graph.remove_all_ops_named("barrier")
+    fixed_cuts = []
+    for qubit, cut_loc in cuts:
+        qubit_gates = 0
+        for node in circ_graph.topological_op_nodes():
+            if qubit not in node.qargs: continue
+            qubit_gates += 1
+            if qubit_gates <= cut_loc: continue
+            if len(node.qargs) == 1: cut_loc += 1
+            else: break
+        fixed_cuts.append( (qubit,cut_loc) )
+
+    # remove trivial cuts at the beginning or end of the circuit
+    fixed_cuts = [ (qubit,cut_loc) for qubit, cut_loc in fixed_cuts
+                   if cut_loc not in [ 0, num_gates(dqv_circ,qubit) ] ]
+
+    return dqv_circ, fixed_cuts

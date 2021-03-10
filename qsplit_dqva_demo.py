@@ -12,7 +12,7 @@ from qsplit_dqva_methods import *
 show_graphs = len(sys.argv) > 1
 
 max_cuts = 1
-mixing_layers = 1
+mixing_layers = 2
 shots = 500000
 
 verbosity = 1
@@ -25,7 +25,7 @@ dist_cutoff = 1e-4
 ##########################################################################################
 
 # pick a graph
-test_graphs = glob.glob("benchmark_graphs/N6_d2_graphs/*")
+test_graphs = glob.glob("benchmark_graphs/N8_p30_graphs/*")
 test_graph = np.random.choice(test_graphs)
 graph = graph_from_file(test_graph)
 qubit_num = graph.number_of_nodes()
@@ -34,7 +34,7 @@ qubit_num = graph.number_of_nodes()
 kl_bisection = kernighan_lin_bisection(graph)
 subgraphs, cut_edges = get_subgraphs(graph, kl_bisection)
 
-# identify nodes incident to a cut, as as their complement
+# identify nodes incident to a cut, as well as their complement
 cut_nodes = []
 for edge in cut_edges:
     cut_nodes.extend(edge)
@@ -64,7 +64,6 @@ circuit, cuts = gen_cut_dqva(graph, kl_bisection, uncut_nodes, mixing_layers=mix
                              params=params, init_state=init_state, barriers=barriers,
                              decompose_toffoli=decompose_toffoli, mixer_order=mixer_order,
                              hot_nodes=hot_nodes, verbose=verbosity)
-
 print("circuit:")
 print(circuit)
 print("cuts:")
@@ -72,7 +71,6 @@ print(cuts)
 print()
 
 fragments, wire_path_map = qcc.cut_circuit(circuit, cuts)
-assert len(fragments) == 2
 if verbosity > 0:
     for idx, frag in enumerate(fragments):
         print("fragment:",idx)
@@ -84,9 +82,6 @@ if verbosity > 0:
     print()
 
 if show_graphs:
-    plt.figure()
-    nx.draw_spring(graph, with_labels=True, node_color="gold")
-    plt.figure()
     view_partition(kl_bisection, graph)
     plt.show()
 
@@ -110,7 +105,8 @@ if verbosity > 0:
     print()
 
 # simulate fragments, build fragment models, and recombine fragment models
-frag_data = qmm.collect_fragment_data(fragments, wire_path_map, shots = shots,
+frag_shots = shots // qmm.fragment_variants(wire_path_map)
+frag_data = qmm.collect_fragment_data(fragments, wire_path_map, shots = frag_shots,
                                       tomography_backend = "qasm_simulator")
 direct_models = qmm.direct_fragment_model(frag_data)
 likely_models = qmm.maximum_likelihood_model(direct_models)
