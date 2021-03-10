@@ -91,10 +91,10 @@ def sim_with_cutting(circ, cutqc, mip_model, simulation_backend, shots, G,
     direct_models = qmm.direct_fragment_model(frag_data)
     model_end_time = time.time()
     recombine_start_time = time.time()
-    if mode is 'direct':
+    if mode == 'direct':
         direct_recombined_dist = qmm.recombine_fragment_models(direct_models, wpm)
         dirty_probs = strip_ancillas(qmm.naive_fix(direct_recombined_dist), circ)
-    elif mode is 'likely':
+    elif mode == 'likely':
         likely_models = qmm.maximum_likelihood_model(direct_models)
         dirty_probs = strip_ancillas(qmm.recombine_fragment_models(likely_models, wpm), circ)
     else:

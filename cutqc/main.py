@@ -5,8 +5,8 @@ import itertools
 import multiprocessing as mp
 from datetime import datetime
 
-from qiskit_helper_functions.non_ibmq_functions import evaluate_circ, read_dict, find_process_jobs
-from qiskit_helper_functions.schedule import Scheduler
+# from qiskit_helper_functions.non_ibmq_functions import evaluate_circ, read_dict, find_process_jobs
+# from qiskit_helper_functions.schedule import Scheduler
 
 from cutqc.helper_fun import check_valid, get_dirname
 from cutqc.cutter import find_cuts, solve_model, subcircuits_parser

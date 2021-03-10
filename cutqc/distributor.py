@@ -10,7 +10,7 @@ import copy
 
 from cutqc.helper_fun import get_dirname
 from cutqc.post_process import get_combinations, build
-from qiskit_helper_functions.non_ibmq_functions import read_dict, find_process_jobs
+# from qiskit_helper_functions.non_ibmq_functions import read_dict, find_process_jobs
 
 def distribute_load(total_load,capacities):
     assert total_load<=sum(capacities)

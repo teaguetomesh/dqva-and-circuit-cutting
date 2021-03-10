@@ -1,0 +1,125 @@
+#!/usr/bin/env python3
+
+import sys, glob, qiskit
+import matplotlib.pyplot as plt
+from networkx.algorithms.community.kernighan_lin import kernighan_lin_bisection
+
+import qsplit_circuit_cutter as qcc
+import qsplit_mlrecon_methods as qmm
+
+from qsplit_dqva_methods import *
+
+show_graphs = len(sys.argv) > 1
+
+max_cuts = 1
+mixing_layers = 1
+shots = 500000
+
+verbosity = 1
+barriers = 2
+decompose_toffoli = 1 # values != 1 currently not supported
+
+# cutoff for probability distributions
+dist_cutoff = 1e-4
+
+##########################################################################################
+
+# pick a graph
+test_graphs = glob.glob("benchmark_graphs/N6_d2_graphs/*")
+test_graph = np.random.choice(test_graphs)
+graph = graph_from_file(test_graph)
+qubit_num = graph.number_of_nodes()
+
+# bisect the graph
+kl_bisection = kernighan_lin_bisection(graph)
+subgraphs, cut_edges = get_subgraphs(graph, kl_bisection)
+
+# identify nodes incident to a cut, as as their complement
+cut_nodes = []
+for edge in cut_edges:
+    cut_nodes.extend(edge)
+uncut_nodes = list(set(graph.nodes).difference(set(cut_nodes)))
+
+# choose a random mixing order
+mixer_order = list(range(qubit_num))
+np.random.shuffle(mixer_order)
+
+# set the initial state
+init_state = "0" * qubit_num
+
+# choose "hot nodes": nodes incident to a cut to which we will nonetheless
+#   apply a partial mixer in the first mixing layer
+hot_nodes = choose_hot_nodes(graph, subgraphs, cut_nodes, uncut_nodes, max_cuts)
+
+# set variational parameters
+# todo: don't apply phase separators in the last mixing layer
+uncut_nonzero = len([n for n in uncut_nodes if init_state[n] != "1"])
+num_params = mixing_layers * (uncut_nonzero + 1) + len(hot_nodes)
+params = list(range(1, num_params + 1))
+
+##########################################################################################
+# generate and cut a circuit
+
+circuit, cuts = gen_cut_dqva(graph, kl_bisection, uncut_nodes, mixing_layers=mixing_layers,
+                             params=params, init_state=init_state, barriers=barriers,
+                             decompose_toffoli=decompose_toffoli, mixer_order=mixer_order,
+                             hot_nodes=hot_nodes, verbose=verbosity)
+
+print("circuit:")
+print(circuit)
+print("cuts:")
+print(cuts)
+print()
+
+fragments, wire_path_map = qcc.cut_circuit(circuit, cuts)
+assert len(fragments) == 2
+if verbosity > 0:
+    for idx, frag in enumerate(fragments):
+        print("fragment:",idx)
+        print(frag.draw(fold=120))
+        print()
+    print("wire path map:")
+    for key, val in wire_path_map.items():
+        print(key, "-->", val)
+    print()
+
+if show_graphs:
+    plt.figure()
+    nx.draw_spring(graph, with_labels=True, node_color="gold")
+    plt.figure()
+    view_partition(kl_bisection, graph)
+    plt.show()
+
+##########################################################################################
+# compute true circuit output, and circuit output acquried via circuit cutting
+
+def chop_dist(dist):
+    return { key : val for key, val in dist.items() if val > dist_cutoff}
+
+# get the actual state / probability distribution for the full circuit
+bit_num = qubit_num + len(subgraphs) # include ancilla qubits
+all_bits = [ "".join(bits) for bits in itertools.product(["0","1"], repeat = bit_num) ]
+actual_state = qmm.get_statevector(circuit)
+actual_dist = { "".join(bits) : abs(amp)**2
+                for bits, amp in zip(all_bits, actual_state)
+                if amp != 0 }
+
+if verbosity > 0:
+    print("actual distribution:")
+    print(chop_dist(actual_dist))
+    print()
+
+# simulate fragments, build fragment models, and recombine fragment models
+frag_data = qmm.collect_fragment_data(fragments, wire_path_map, shots = shots,
+                                      tomography_backend = "qasm_simulator")
+direct_models = qmm.direct_fragment_model(frag_data)
+likely_models = qmm.maximum_likelihood_model(direct_models)
+recombined_dist = qmm.recombine_fragment_models(likely_models, wire_path_map)
+
+if verbosity > 0:
+    print("recombined distribution:")
+    print(chop_dist(recombined_dist))
+    print()
+
+recombined_fidelity = fidelity(recombined_dist, actual_dist)
+print("fielity:",recombined_fidelity)
