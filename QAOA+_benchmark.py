@@ -89,7 +89,7 @@ def main():
             data_list.append(data_dict)
 
         # Save the results
-        savename = '{}_{}_P{}_{}.pickle'.format(graphname, args.alg, args.P,
+        savename = '{}_{}_P{}_{}_ext.pickle'.format(graphname, args.alg, args.P,
                                                 args.sim)
 
         with open(cur_savepath+savename, 'ab') as pf:
