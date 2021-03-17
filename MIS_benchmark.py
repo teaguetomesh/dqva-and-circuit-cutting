@@ -63,7 +63,8 @@ def main():
     sys.path.append(DQVAROOT)
 
     if args.alg not in ['qaoa', 'dqva', 'qls', 'cut_dqva',
-                        'qaoaHotStart', 'dqvaHotStart', 'qlsHotStart']:
+                        'qaoaHotStart', 'dqvaHotStart', 'qlsHotStart',
+                        'qaoaWStart']:
         raise Exception('Unknown algorithm:', args.alg)
     if args.sim not in ['qasm', 'statevector', 'cloud']:
         raise Exception('Unknown backend:', args.sim)
@@ -112,12 +113,13 @@ def main():
                 if not overlap:
                     init_states.append(temp_str)
             print('init states:', init_states)
-
+        elif 'WStart' in args.alg:
+            init_state = 'W'
         else:
             init_state = '0'*nq
 
         for rep in range(1, args.reps+1):
-            if args.alg == 'qaoa':
+            if args.alg == 'qaoa' or args.alg == 'qaoaWStart':
                 out = dqva.solve_mis_qaoa(init_state, G, P=args.P, m=args.m,
                                           sim=args.sim, shots=args.shots,
                                           verbose=args.v)

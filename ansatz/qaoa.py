@@ -1,3 +1,4 @@
+import numpy as np
 from qiskit import QuantumCircuit, AncillaRegister
 from qiskit.circuit import ControlledGate
 from qiskit.circuit.library.standard_gates import XGate
@@ -16,10 +17,6 @@ def apply_mixer(circ, G, beta, anc_idx, barriers, decompose_toffoli,
     if verbose > 0:
         print('Mixer order:', mixer_order)
     for qubit in mixer_order:
-        #if list(reversed(init_state))[qubit] == '1' or not G.has_node(qubit):
-        #    # Turn off mixers for qubits which are already 1
-        #    continue
-
         neighbors = list(G.neighbors(qubit))
 
         if verbose > 0:
@@ -82,10 +79,19 @@ def gen_qaoa(G, P, params=[], init_state=None, barriers=1, decompose_toffoli=1,
     anc_reg = AncillaRegister(1, 'anc')
     qaoa_circ.add_register(anc_reg)
 
-    #print('Init state:', init_state)
-    for qb, bit in enumerate(reversed(init_state)):
-        if bit == '1':
-            qaoa_circ.x(qb)
+    if init_state == 'W':
+        # Prepare the |W> initial state
+        W_vector = np.zeros(2**nq)
+        for i in range(len(W_vector)):
+            bitstr = '{:0{}b}'.format(i, nq)
+            if hamming_weight(bitstr) == 1:
+                W_vector[i] = 1 / np.sqrt(nq)
+        qaoa_circ.initialize(W_vector, qaoa_circ.qubits[:-1])
+    else:
+        for qb, bit in enumerate(reversed(init_state)):
+            if bit == '1':
+                qaoa_circ.x(qb)
+
     if barriers > 0:
         qaoa_circ.barrier()
 

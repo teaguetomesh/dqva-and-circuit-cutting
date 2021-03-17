@@ -52,16 +52,6 @@ def expectation_value(counts, G, Lambda):
     return energy
 
 
-def top_strs(counts, G, top=5):
-    total_shots = sum(counts.values())
-    probs = [(bitstr, counts[bitstr] / total_shots) for bitstr in counts.keys()]
-    probs = sorted(probs, key=lambda p: p[1], reverse=True)
-
-    for i in range(top):
-        print('{} -> {:.4f}%, Is MIS? {}'.format(probs[i][0], probs[i][1] * 100,
-                                                 is_indset(probs[i][0], G)))
-
-
 def solve_mis(P, G, Lambda):
 
     backend = Aer.get_backend('qasm_simulator')
@@ -100,10 +90,28 @@ def get_approximation_ratio(out, P, G, shots=8192):
 
     # Approximation ratio is computed using ONLY valid independent sets
     # E(gamma, beta) = SUM_bitstrs { (bitstr_counts / total_shots) * hamming_weight(bitstr) } / opt_mis
-    ratio = sum([count * hamming_weight(bitstr) / shots for bitstr, count in counts.items() \
-                 if is_indset(bitstr, G)]) / opt_mis
+    numerator = 0
+    for bitstr, count in counts.items():
+        if is_indset(bitstr, G):
+            numerator += count * hamming_weight(bitstr) / shots
+    ratio = numerator / opt_mis
+
+    #ratio = sum([count * hamming_weight(bitstr) / shots for bitstr, count in counts.items() \
+    #             if is_indset(bitstr, G)]) / opt_mis
 
     return ratio
+
+
+def top_strs(counts, G, top=5):
+    total_shots = sum(counts.values())
+    probs = [(bitstr, counts[bitstr] / total_shots) for bitstr in counts.keys()]
+    probs = sorted(probs, key=lambda p: p[1], reverse=True)
+    opt_mis = brute_force_search(G)[1]
+
+    for i in range(top):
+        ratio = hamming_weight(probs[i][0]) * probs[i][1] / opt_mis
+        print('{} ({}) -> {:.4f}%, Ratio = {:.4f}, Is MIS? {}'.format(probs[i][0], hamming_weight(probs[i][0]),
+                                                 probs[i][1] * 100, ratio, is_indset(probs[i][0], G)))
 
 
 
