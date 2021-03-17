@@ -55,7 +55,7 @@ def apply_mixer(circ, alpha, init_state, G, anc_idx, barriers,
     next_alpha = 0
     for qubit in mixer_order:
         bit = list(reversed(init_state))[qubit]
-        if bit == '1':
+        if bit == '1' or next_alpha >= len(alpha):
             continue
         else:
             pad_alpha[qubit] = alpha[next_alpha]
@@ -143,31 +143,45 @@ def gen_dqva(G, P=1, params=[], init_state=None, barriers=1, decompose_toffoli=1
 
     # parse the variational parameters
     # The dqva ansatz dynamically turns off partial mixers for qubits in |1>
+    # and adds extra mixers to the end of the circuit
     num_nonzero = nq - hamming_weight(init_state)
-    assert (len(params) == (num_nonzero + 1) * P), "Incorrect number of parameters!"
+    assert (len(params) == (nq + 1) * P), "Incorrect number of parameters!"
     alpha_list = []
     gamma_list = []
+    last_idx = 0
     for p in range(P):
         chunk = num_nonzero + 1
         cur_section = params[p*chunk:(p+1)*chunk]
         alpha_list.append(cur_section[:-1])
         gamma_list.append(cur_section[-1])
+        last_idx = (p+1)*chunk
+
+    # Add the leftover parameters as extra mixers
+    alpha_list.append(params[last_idx:])
+
     if verbose > 0:
-        for i in range(P):
+        for i in range(len(alpha_list)):
             print('alpha_{}: {}'.format(i, alpha_list[i]))
-            print('gamma_{}: {}'.format(i, gamma_list[i]))
+            if i < len(gamma_list):
+                print('gamma_{}: {}'.format(i, gamma_list[i]))
 
     # Construct the dqva ansatz
     anc_idx = 0
-    for alphas, gamma in zip(alpha_list, gamma_list):
+    #for alphas, gamma in zip(alpha_list, gamma_list):
+    for i in range(len(alpha_list)):
+        alphas = alpha_list[i]
         apply_mixer(dqva_circ, alphas, init_state, G, anc_idx, barriers,
                     decompose_toffoli, mixer_order, verbose=verbose)
+
         if barriers > 0:
             dqva_circ.barrier()
 
-        apply_phase_separator(dqva_circ, gamma, G)
-        if barriers > 0:
-            dqva_circ.barrier()
+        if i < len(gamma_list):
+            gamma = gamma_list[i]
+            apply_phase_separator(dqva_circ, gamma, G)
+
+            if barriers > 0:
+                dqva_circ.barrier()
 
     if decompose_toffoli > 1:
         #basis_gates = ['x', 'cx', 'barrier', 'crx', 'tdg', 't', 'rz', 'h']
