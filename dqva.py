@@ -677,7 +677,8 @@ def solve_mis_dqva(init_state, G, P=1, m=1, mixer_order=None, threshold=1e-5,
                 inner_round, cur_init_state))
 
             # Begin Inner variational loop
-            num_params = P * ((len(G.nodes()) - hamming_weight(cur_init_state)) + 1)
+            #num_params = P * ((len(G.nodes()) - hamming_weight(cur_init_state)) + 1)
+            num_params = P * (len(G.nodes()) + 1)
             print('\tNum params =', num_params)
             init_params = np.zeros(num_params)
             print('\tCurrent Mixer Order:', cur_permutation)
