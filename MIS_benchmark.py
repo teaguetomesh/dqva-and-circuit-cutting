@@ -50,6 +50,8 @@ def parse_args():
                         help='verbose')
     parser.add_argument('--plim', type=int, default=None,
                         help='Limit the number of parameters')
+    parser.add_argument('--extend', type=int, default=0,
+                        help='Flag for whether to overwrite or extend repetitions')
     args = parser.parse_args()
     return args
 
@@ -118,7 +120,20 @@ def main():
         else:
             init_state = '0'*nq
 
-        for rep in range(1, args.reps+1):
+        if args.extend:
+            print('savepath:', cur_savepath)
+            all_reps = glob.glob(cur_savepath + '*rep*')
+            print('{} reps completed'.format(len(all_reps)))
+            if len(all_reps) < args.reps:
+                rep_range = range(len(all_reps)+1, args.reps+1)
+                print('rep_range =', list(rep_range))
+            else:
+                print('Skipping graph {}'.format(graphname))
+                continue
+        else:
+            rep_range = range(1, args.reps+1)
+
+        for rep in rep_range:
             if args.alg == 'qaoa' or args.alg == 'qaoaWStart':
                 out = dqva.solve_mis_qaoa(init_state, G, P=args.P, m=args.m,
                                           sim=args.sim, shots=args.shots,
