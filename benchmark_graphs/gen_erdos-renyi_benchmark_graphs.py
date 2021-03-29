@@ -1,7 +1,7 @@
 import glob
 import networkx as nx
 
-dirs = glob.glob('N*_p*')
+dirs = glob.glob('N14_p60*')
 
 for folder in dirs:
     print(folder)
