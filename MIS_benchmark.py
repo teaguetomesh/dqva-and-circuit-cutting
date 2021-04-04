@@ -52,6 +52,8 @@ def parse_args():
                         help='Limit the number of parameters')
     parser.add_argument('--extend', type=int, default=0,
                         help='Flag for whether to overwrite or extend repetitions')
+    parser.add_argument('--startrep', type=int, default=0,
+                        help='Integer repetition label')
     args = parser.parse_args()
     return args
 
@@ -125,7 +127,10 @@ def main():
             all_reps = glob.glob(cur_savepath + '*rep*')
             print('{} reps completed'.format(len(all_reps)))
             if len(all_reps) < args.reps:
-                rep_range = range(len(all_reps)+1, args.reps+1)
+                if args.startrep > 0:
+                    rep_range = range(args.startrep, args.startrep+args.reps)
+                else:
+                    rep_range = range(len(all_reps)+1, args.reps+1)
                 print('rep_range =', list(rep_range))
             else:
                 print('Skipping graph {}'.format(graphname))
