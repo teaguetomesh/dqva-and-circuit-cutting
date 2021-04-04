@@ -126,15 +126,14 @@ def main():
             print('savepath:', cur_savepath)
             all_reps = glob.glob(cur_savepath + '*rep*')
             print('{} reps completed'.format(len(all_reps)))
-            if len(all_reps) < args.reps:
-                if args.startrep > 0:
-                    rep_range = range(args.startrep, args.startrep+args.reps)
-                else:
-                    rep_range = range(len(all_reps)+1, args.reps+1)
-                print('rep_range =', list(rep_range))
+            if args.startrep > 0:
+                rep_range = range(args.startrep, args.startrep+args.reps)
+            elif len(all_reps) < args.reps:
+                rep_range = range(len(all_reps)+1, args.reps+1)
             else:
                 print('Skipping graph {}'.format(graphname))
                 continue
+            print('rep_range =', list(rep_range))
         else:
             rep_range = range(1, args.reps+1)
 
