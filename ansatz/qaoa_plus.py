@@ -2,6 +2,7 @@ from qiskit import QuantumCircuit, Aer, execute
 from utils.helper_funcs import *
 from utils.graph_funcs import *
 import scipy
+import numpy as np
 
 
 def construct_qaoa_plus(P, G, params, barriers=False, measure=False):
@@ -64,7 +65,7 @@ def solve_mis(P, G, Lambda):
 
         return -1 * expectation_value(counts, G, Lambda)
 
-    init_params = [0] * 2 * P
+    init_params = np.random.uniform(low=0.0, high=2*np.pi, size=2*P)
     out = scipy.optimize.minimize(f, x0=init_params, method='COBYLA')
 
     return out

@@ -373,7 +373,9 @@ def solve_mis_qls(init_state, G, P=1, m=1, mixer_order=None, threshold=1e-5,
             else:
                 num_params = param_lim
             print('\tNum params =', num_params)
-            init_params = np.zeros(num_params)
+            # Important to start from random initial points
+            #init_params = np.zeros(num_params)
+            init_params = np.random.uniform(low=0.0, high=2*np.pi, size=num_params)
             print('\tCurrent Mixer Order:', cur_permutation)
 
             out = minimize(f, x0=init_params, method='COBYLA')
@@ -533,7 +535,9 @@ def solve_mis_qaoa(init_state, G, P=1, m=1, mixer_order=None, threshold=1e-5,
             # Begin Inner variational loop
             num_params = 2 * P
             print('\tNum params =', num_params)
-            init_params = np.zeros(num_params)
+            # Important to start from random initial points
+            #init_params = np.zeros(num_params)
+            init_params = np.random.uniform(low=0.0, high=2*np.pi, size=num_params)
             print('\tCurrent Mixer Order:', cur_permutation)
 
             out = minimize(f, x0=init_params, method='COBYLA')
@@ -680,7 +684,9 @@ def solve_mis_dqva(init_state, G, P=1, m=1, mixer_order=None, threshold=1e-5,
             #num_params = P * ((len(G.nodes()) - hamming_weight(cur_init_state)) + 1)
             num_params = P * (len(G.nodes()) + 1)
             print('\tNum params =', num_params)
-            init_params = np.zeros(num_params)
+            # Important to start from random initial points
+            #init_params = np.zeros(num_params)
+            init_params = np.random.uniform(low=0.0, high=2*np.pi, size=num_params)
             print('\tCurrent Mixer Order:', cur_permutation)
 
             out = minimize(f, x0=init_params, method='COBYLA')
