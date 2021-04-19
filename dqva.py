@@ -15,6 +15,7 @@ from networkx.algorithms.community.kernighan_lin import kernighan_lin_bisection
 from scipy.optimize import minimize
 
 #from cutqc.main import CutQC
+import qiskit
 from qiskit import *
 from qiskit.quantum_info import Statevector
 
@@ -289,8 +290,8 @@ def solve_mis_cut_dqva(init_state, G, m=4, threshold=1e-5, cutoff=1,
 
 
 def solve_mis_qls(init_state, G, P=1, m=1, mixer_order=None, threshold=1e-5,
-                   cutoff=1, sim='statevector', shots=8192, verbose=0,
-                   param_lim=None):
+                   cutoff=1, sim='aer', shots=8192, verbose=0,
+                   param_lim=None, threads=0):
     """
     Find the MIS of G using Quantum Local Search (QLS), this
     ansatz is composed of two types of unitaries: the cost unitary U_C and the
@@ -305,7 +306,10 @@ def solve_mis_qls(init_state, G, P=1, m=1, mixer_order=None, threshold=1e-5,
 
     # Initialization
     if sim == 'statevector' or sim == 'qasm':
-        backend = Aer.get_backend(sim+'_simulator')
+        backend = Aer.get_backend(sim+'_simulator', max_parallel_threads=threads)
+    elif sim == 'aer':
+        backend = Aer.get_backend(name='aer_simulator', method='statevector',
+                                      max_parallel_threads=threads)
     elif sim == 'cloud':
         raise Exception('NOT YET IMPLEMENTED')
     else:
@@ -326,7 +330,7 @@ def solve_mis_qls(init_state, G, P=1, m=1, mixer_order=None, threshold=1e-5,
                      init_state=cur_init_state, barriers=0, decompose_toffoli=1,
                     mixer_order=cur_permutation, verbose=0, param_lim=param_lim)
 
-        if sim == 'qasm':
+        if sim == 'qasm' or sim == 'aer':
             circ.measure_all()
 
         # Compute the cost function
@@ -334,7 +338,7 @@ def solve_mis_qls(init_state, G, P=1, m=1, mixer_order=None, threshold=1e-5,
         if sim == 'statevector':
             statevector = Statevector(result.get_statevector(circ))
             probs = strip_ancillas(statevector.probabilities_dict(decimals=5), circ)
-        elif sim == 'qasm':
+        elif sim == 'qasm' or sim == 'aer':
             counts = result.get_counts(circ)
             probs = strip_ancillas({key: val/shots for key, val in counts.items()}, circ)
 
@@ -391,14 +395,14 @@ def solve_mis_qls(init_state, G, P=1, m=1, mixer_order=None, threshold=1e-5,
                                decompose_toffoli=1, mixer_order=cur_permutation,
                                verbose=0, param_lim=param_lim)
 
-            if sim == 'qasm':
+            if sim == 'qasm' or sim == 'aer':
                 opt_circ.measure_all()
 
             result = execute(opt_circ, backend=backend, shots=shots).result()
             if sim == 'statevector':
                 statevector = Statevector(result.get_statevector(opt_circ))
                 probs = strip_ancillas(statevector.probabilities_dict(decimals=5), opt_circ)
-            elif sim == 'qasm':
+            elif sim == 'qasm' or sim == 'aer':
                 counts = result.get_counts(opt_circ)
                 probs = strip_ancillas({key: val/shots for key, val in counts.items()}, opt_circ)
 
@@ -460,7 +464,8 @@ def solve_mis_qls(init_state, G, P=1, m=1, mixer_order=None, threshold=1e-5,
 
 
 def solve_mis_qaoa(init_state, G, P=1, m=1, mixer_order=None, threshold=1e-5,
-                   cutoff=1, sim='statevector', shots=8192, verbose=0):
+                   cutoff=1, sim='aer', shots=8192, verbose=0,
+                   threads=0):
     """
     Find the MIS of G using a Quantum Alternating Operator Ansatz (QAOA), the
     structure of the driver and mixer unitaries is the same as that used by
@@ -471,7 +476,10 @@ def solve_mis_qaoa(init_state, G, P=1, m=1, mixer_order=None, threshold=1e-5,
 
     # Initialization
     if sim == 'statevector' or sim == 'qasm':
-        backend = Aer.get_backend(sim+'_simulator')
+        backend = Aer.get_backend(sim+'_simulator', max_parallel_threads=threads)
+    elif sim == 'aer':
+        backend = Aer.get_backend(name='aer_simulator', method='statevector',
+                                      max_parallel_threads=threads)
     elif sim == 'cloud':
         raise Exception('NOT YET IMPLEMENTED!')
     else:
@@ -492,7 +500,7 @@ def solve_mis_qaoa(init_state, G, P=1, m=1, mixer_order=None, threshold=1e-5,
                              barriers=0, decompose_toffoli=1,
                              mixer_order=cur_permutation, verbose=0)
 
-        if sim == 'qasm':
+        if sim == 'qasm' or sim == 'aer':
             circ.measure_all()
 
         # Compute the cost function
@@ -500,7 +508,7 @@ def solve_mis_qaoa(init_state, G, P=1, m=1, mixer_order=None, threshold=1e-5,
         if sim == 'statevector':
             statevector = Statevector(result.get_statevector(circ))
             probs = strip_ancillas(statevector.probabilities_dict(decimals=5), circ)
-        elif sim == 'qasm':
+        elif sim == 'qasm' or sim == 'aer':
             counts = result.get_counts(circ)
             probs = strip_ancillas({key: val/shots for key, val in counts.items()}, circ)
 
@@ -554,14 +562,14 @@ def solve_mis_qaoa(init_state, G, P=1, m=1, mixer_order=None, threshold=1e-5,
                                      mixer_order=cur_permutation,
                                      verbose=0)
 
-            if sim == 'qasm':
+            if sim == 'qasm' or sim == 'aer':
                 opt_circ.measure_all()
 
             result = execute(opt_circ, backend=backend, shots=shots).result()
             if sim == 'statevector':
                 statevector = Statevector(result.get_statevector(opt_circ))
                 probs = strip_ancillas(statevector.probabilities_dict(decimals=5), opt_circ)
-            elif sim == 'qasm':
+            elif sim == 'qasm' or sim == 'aer':
                 counts = result.get_counts(opt_circ)
                 probs = strip_ancillas({key: val/shots for key, val in counts.items()}, opt_circ)
 
@@ -610,7 +618,7 @@ def solve_mis_qaoa(init_state, G, P=1, m=1, mixer_order=None, threshold=1e-5,
 
 
 def solve_mis_dqva(init_state, G, P=1, m=1, mixer_order=None, threshold=1e-5,
-                   cutoff=1, sim='statevector', shots=8192, verbose=0):
+                   cutoff=1, sim='aer', shots=8192, verbose=0, threads=0):
     """
     Find the MIS of G using the dynamic quantum variational ansatz (DQVA),
     this ansatz has the same structure as QLS but does not include QLS's
@@ -619,7 +627,10 @@ def solve_mis_dqva(init_state, G, P=1, m=1, mixer_order=None, threshold=1e-5,
 
     # Initialization
     if sim == 'statevector' or sim == 'qasm':
-        backend = Aer.get_backend(sim+'_simulator')
+        backend = Aer.get_backend(sim+'_simulator', max_parallel_threads=threads)
+    elif sim == 'aer':
+        backend = Aer.get_backend(name='aer_simulator', method='statevector',
+                                      max_parallel_threads=threads)
     elif sim == 'cloud':
         raise Exception('NOT YET IMPLEMENTED!')
     else:
@@ -640,7 +651,7 @@ def solve_mis_dqva(init_state, G, P=1, m=1, mixer_order=None, threshold=1e-5,
                      init_state=cur_init_state, barriers=0, decompose_toffoli=1,
                      mixer_order=cur_permutation, verbose=0)
 
-        if sim == 'qasm':
+        if sim == 'qasm' or sim == 'aer':
             circ.measure_all()
 
         # Compute the cost function
@@ -648,7 +659,7 @@ def solve_mis_dqva(init_state, G, P=1, m=1, mixer_order=None, threshold=1e-5,
         if sim == 'statevector':
             statevector = Statevector(result.get_statevector(circ))
             probs = strip_ancillas(statevector.probabilities_dict(decimals=5), circ)
-        elif sim == 'qasm':
+        elif sim == 'qasm' or sim == 'aer':
             counts = result.get_counts(circ)
             probs = strip_ancillas({key: val/shots for key, val in counts.items()}, circ)
 
@@ -702,14 +713,14 @@ def solve_mis_dqva(init_state, G, P=1, m=1, mixer_order=None, threshold=1e-5,
                                decompose_toffoli=1, mixer_order=cur_permutation,
                                verbose=0)
 
-            if sim == 'qasm':
+            if sim == 'qasm' or sim == 'aer':
                 opt_circ.measure_all()
 
             result = execute(opt_circ, backend=backend, shots=shots).result()
             if sim == 'statevector':
                 statevector = Statevector(result.get_statevector(opt_circ))
                 probs = strip_ancillas(statevector.probabilities_dict(decimals=5), opt_circ)
-            elif sim == 'qasm':
+            elif sim == 'qasm' or sim == 'aer':
                 counts = result.get_counts(opt_circ)
                 probs = strip_ancillas({key: val/shots for key, val in counts.items()}, opt_circ)
 
