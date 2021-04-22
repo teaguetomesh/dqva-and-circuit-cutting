@@ -606,6 +606,9 @@ def solve_mis_qaoa(init_state, G, P=1, m=1, mixer_order=None, threshold=1e-5,
             print('\tFound new independent set: {}, Hamming weight = {}'.format(
                                                best_indset, new_hamming_weight))
             inner_round += 1
+            # QAOA only uses a single inner round
+            # Break out of the While loop after the 1st iteration
+            break
 
         # Save the history of the current mixer round
         history.append(mixer_history)
