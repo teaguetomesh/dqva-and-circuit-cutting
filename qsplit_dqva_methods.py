@@ -2,24 +2,29 @@
 
 import numpy as np
 import networkx as nx
-
 import itertools, qiskit
 
 from qiskit.circuit.library.standard_gates import XGate
 from qiskit.circuit import ControlledGate
 
-from utils.graph_funcs import *
-from utils.helper_funcs import *
+import utils.graph_funcs as graph_funcs
+import utils.helper_funcs as helper_funcs
 
 ##########################################################################################
 
-# choose "hot nodes": nodes incident to a graph partition,
-#   to which we will nonetheless apply a partial mixer in the first mixing layer
+# (1) idetify cut_nodes and uncut_nodes (nodes incident to a cut and their complement)
+# (2) choose "hot nodes": nodes incident to a graph partition,
+#       to which we will nonetheless apply a partial mixer in the first mixing layer
 # WARNING: this algorithm has combinatorial complexity:
 #   O({ #cut_nodes_in_subgraph \choose #max_cuts })
 # I am simply assuming that this complexity won't be a problem for now
 # if it becomes a problem when we scale up, we should rethink this algorithm
-def choose_hot_nodes(graph, subgraphs, cut_nodes, uncut_nodes, max_cuts):
+def choose_nodes(graph, subgraphs, cut_edges, max_cuts):
+    cut_nodes = []
+    for edge in cut_edges:
+        cut_nodes.extend(edge)
+    uncut_nodes = list(set(graph.nodes).difference(set(cut_nodes)))
+
     # collect subgraph data
     subgraph_A, subgraph_B = subgraphs
     cut_nodes_A = [node for node in subgraph_A.nodes if node in cut_nodes]
@@ -78,7 +83,8 @@ def choose_hot_nodes(graph, subgraphs, cut_nodes, uncut_nodes, max_cuts):
         return any( neighbor in toss_nodes for neighbor in graph.neighbors(ext_node) )
 
     # hot nodes = those without neighbors that we are tossing out
-    return list(filter(_neighbors_in_toss_nodes, ext_cut_nodes))
+    hot_nodes = list(filter(_neighbors_in_toss_nodes, ext_cut_nodes))
+    return cut_nodes, uncut_nodes, hot_nodes
 
 ##########################################################################################
 
@@ -191,7 +197,7 @@ def gen_cut_dqva(G, partition, uncut_nodes, mixing_layers=1, params=[], init_sta
     assert nx.is_connected(G), "we do not currently support disconnected graphs!"
 
     nq = len(G.nodes)
-    subgraphs, cutedges = get_subgraphs(G, partition)
+    subgraphs, cutedges = graph_funcs.get_subgraphs(G, partition)
 
     # check that all hot nodes are in the same subgraph
     assert len(set([ node in subgraphs[0] for node in hot_nodes ])) == 1
