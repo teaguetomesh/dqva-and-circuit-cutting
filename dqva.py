@@ -580,6 +580,7 @@ def solve_mis_qaoa(init_state, G, P=1, m=1, mixer_order=None, threshold=1e-5,
                                 key=lambda tup: tup[1], reverse=True)[:cutoff]
 
             # Check if we have improved the Hamming weight
+            #     NOTE: hamming_weight(W) = 0
             best_hamming_weight = hamming_weight(best_indset)
             better_strs = []
             for bitstr, prob in top_counts:
