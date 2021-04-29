@@ -23,7 +23,6 @@ def choose_nodes(graph, subgraphs, cut_edges, max_cuts):
     cut_nodes = []
     for edge in cut_edges:
         cut_nodes.extend(edge)
-    uncut_nodes = list(set(graph.nodes).difference(set(cut_nodes)))
 
     # collect subgraph data
     subgraph_A, subgraph_B = subgraphs
@@ -84,7 +83,7 @@ def choose_nodes(graph, subgraphs, cut_edges, max_cuts):
 
     # hot nodes = those without neighbors that we are tossing out
     hot_nodes = list(filter(_no_tossed_neighbors, ext_cut_nodes))
-    return cut_nodes, uncut_nodes, hot_nodes
+    return cut_nodes, hot_nodes
 
 ##########################################################################################
 
@@ -102,7 +101,7 @@ def num_gates(circuit, qubit):
     graph.remove_all_ops_named("barrier")
     return sum([ qubit in node.qargs for node in graph.topological_op_nodes() ])
 
-def apply_mixer(circ, alpha, init_state, G, cut_nodes, cutedges, subgraph_dict,
+def apply_mixer(circ, alpha, init_state, G, cut_nodes, subgraph_dict,
                 barriers, decompose_toffoli, mixer_order, hot_nodes,
                 verbose=0):
 
@@ -191,7 +190,7 @@ def apply_phase_separator(circ, gamma, G):
     for qb in G.nodes:
         circ.rz(2*gamma, qb)
 
-def gen_cut_dqva(G, partition, uncut_nodes, mixing_layers=1, params=[], init_state=None,
+def gen_cut_dqva(G, partition, cut_nodes, mixing_layers=1, params=[], init_state=None,
                  barriers=1, decompose_toffoli=1, mixer_order=None,
                  hot_nodes=[], verbose=0):
     assert nx.is_connected(G), "we do not currently support disconnected graphs!"
@@ -253,7 +252,7 @@ def gen_cut_dqva(G, partition, uncut_nodes, mixing_layers=1, params=[], init_sta
         dqv_circ.barrier()
 
     # parse the variational parameters
-    cut_nodes = [n for n in G.nodes if n not in uncut_nodes]
+    uncut_nodes = [ n for n in G.nodes if n not in cut_nodes ]
     uncut_nonzero = len([n for n in uncut_nodes if init_state[n] != '1'])
     num_params = mixing_layers * (uncut_nonzero + 1) + len(hot_nodes)
     assert (len(params) == num_params),"Incorrect number of parameters!"
@@ -273,7 +272,7 @@ def gen_cut_dqva(G, partition, uncut_nodes, mixing_layers=1, params=[], init_sta
             print('gamma_{}: {}'.format(i, gamma_list[i]))
 
     for i, (alphas, gamma) in enumerate(zip(alpha_list, gamma_list)):
-        _cuts = apply_mixer(dqv_circ, alphas, init_state, G, cut_nodes, cutedges,
+        _cuts = apply_mixer(dqv_circ, alphas, init_state, G, cut_nodes,
                             subgraph_dict, barriers, decompose_toffoli, mixer_order,
                             hot_nodes, verbose=verbose)
         if i == 0: cuts = _cuts

@@ -35,13 +35,14 @@ graph = graph_funcs.graph_from_file(test_graph)
 qubit_num = graph.number_of_nodes()
 
 # bisect the graph
-kl_bisection = kernighan_lin_bisection(graph)
-subgraphs, cut_edges = graph_funcs.get_subgraphs(graph, kl_bisection)
+partition = kernighan_lin_bisection(graph)
+subgraphs, cut_edges = graph_funcs.get_subgraphs(graph, partition)
 
 # identify nodes incident to a cut (cut_nodes), as well as their complement (uncut_nodes)
 # choose "hot nodes": nodes incident to a cut to which we will nonetheless
 #   apply a partial mixer in the first mixing layer
-cut_nodes, uncut_nodes, hot_nodes = qdm.choose_nodes(graph, subgraphs, cut_edges, max_cuts)
+cut_nodes, hot_nodes = qdm.choose_nodes(graph, subgraphs, cut_edges, max_cuts)
+uncut_nodes = list(set(graph.nodes).difference(set(cut_nodes)))
 
 # set the initial state
 init_state = "0" * qubit_num
@@ -59,7 +60,7 @@ np.random.shuffle(mixer_order)
 ##########################################################################################
 # generate and cut a circuit
 
-circuit, cuts = qdm.gen_cut_dqva(graph, kl_bisection, uncut_nodes, mixing_layers=mixing_layers,
+circuit, cuts = qdm.gen_cut_dqva(graph, partition, cut_nodes, mixing_layers=mixing_layers,
                                  params=params, init_state=init_state, barriers=barriers,
                                  decompose_toffoli=decompose_toffoli, mixer_order=mixer_order,
                                  hot_nodes=hot_nodes, verbose=verbosity)
