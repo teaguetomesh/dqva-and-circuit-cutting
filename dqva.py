@@ -171,7 +171,8 @@ def solve_mis_cut_dqva(init_state, graph, m=4, threshold=1e-5, cutoff=1,
     history = []
 
     # build circuit fragments and stitching data
-    def _get_circuit_and_cuts(params, init_state, mixer_order):
+    def _get_circuit_and_cuts(num_params, init_state, mixer_order):
+        params = [ qiskit.circuit.Parameter(f"var_{num}") for num in range(num_params) ]
         kwargs = dict( params = params, init_state = init_state, mixer_order = mixer_order,
                        decompose_toffoli = 1, verbose = verbose,
                        partition = partition, P = len(partition),
@@ -181,31 +182,28 @@ def solve_mis_cut_dqva(init_state, graph, m=4, threshold=1e-5, cutoff=1,
         fragments, wire_path_map = qcc.cut_circuit(circuit, cuts)
         return fragments, wire_path_map
 
-    # get output (probability distribution) of a circuit
-    def _get_circuit_output(params, init_state, mixer_order):
-        start_time = time.time()
-        fragments, wire_path_map = _get_circuit_and_cuts(params, init_state, mixer_order)
-        end_time = time.time()
-        print('Split circuit into {} subcircuits with {} qubits in {:.3f} s'.format(
-            len(fragments),
-            [ len(frag.qubits) for frag in fragments ],
-            end_time - start_time))
+    # strip a string of non-digit characters
+    def _digit_substr(string):
+        return "".join(filter(str.isdigit,string))
+    # bind numerical values to the parameters of a circuit
+    def _bind(circuit, params):
+        binding = { circuit_param : params[int(_digit_substr(circuit_param.name))]
+                    for circuit_param in circuit.parameters }
+        return circuit.bind_parameters(binding)
 
+    # get output (probability distribution) of a circuit
+    def _get_circuit_output(params, var_fragments, wire_path_map, frag_shots):
         start_time = time.time()
-        frag_shots = shots // qmm.fragment_variants(wire_path_map)
+        fragments = [ _bind(fragment, params) for fragment in var_fragments ]
         recombined_dist = sim_with_cutting(fragments, wire_path_map, frag_shots, backend)
         end_time = time.time()
         print('Elapsed time: {:.3f}'.format(end_time-start_time))
-
         return recombined_dist
 
     # This function will be what scipy.minimize optimizes
-    # TODO: rather than building the circuit + fragments every time `avg_cost` is called,
-    #       it should be possible to generate this data ONCE, with (symbolic) variables,
-    #       and then substitute numerical values for the parameters in `avg_cost`
-    def avg_cost(params, init_state, mixer_order):
+    def avg_cost(params, *args):
         # get output probability distribution for the circuit
-        probs = _get_circuit_output(params, init_state, mixer_order)
+        probs = _get_circuit_output(params, *args)
 
         # compute the average Hamming weight
         avg_weight = sum( prob * sum(map(int,bit_string))
@@ -230,20 +228,31 @@ def solve_mis_cut_dqva(init_state, graph, m=4, threshold=1e-5, cutoff=1,
         # Attempt to improve the Hamming weight until no further improvements can be made
         while new_hamming_weight > old_hamming_weight:
             print('Start round {}.{}, Initial state = {}'.format(step4_round, step3_round, cur_init_state))
-
             # Inner variational loop
             num_params = 2 * (len(cur_init_state) - hamming_weight(cur_init_state)) + 1
             print('\tNum params =', num_params)
             init_params = np.random.uniform(low=0.0, high=2*np.pi, size=num_params)
             print('\tCurrent Mixer Order:', cur_permutation)
-            kwargs = dict( args = (cur_init_state, cur_permutation), method = 'COBYLA' )
-            out = minimize(avg_cost, init_params, **kwargs)
+
+            # build parameterized fragments
+            start_time = time.time()
+            fragments, wire_path_map \
+                = _get_circuit_and_cuts(num_params, cur_init_state, cur_permutation)
+            frag_shots = shots // qmm.fragment_variants(wire_path_map)
+            end_time = time.time()
+            print('Split circuit into {} subcircuits with {} qubits in {:.3f} s'.format(
+                len(fragments),
+                [ len(frag.qubits) for frag in fragments ],
+                end_time - start_time))
+
+            args = ( fragments, wire_path_map, frag_shots )
+            out = minimize(avg_cost, init_params, args = args, method = 'COBYLA')
             opt_params = out['x']
             opt_cost = out['fun']
             print('\tOptimal cost:', opt_cost)
 
             # Get the results of the optimized circuit
-            probs = _get_circuit_output(out_params, cur_init_state, cur_permutation)
+            probs = _get_circuit_output(out_params, *args)
 
             # Select the top [cutoff] probs
             top_probs = sorted([(key, probs[key]) for key in probs if probs[key] > threshold],
