@@ -27,19 +27,85 @@ import qsplit_mlrecon_methods as qmm
 from utils.graph_funcs import *
 from utils.helper_funcs import *
 
-#def get_cut_solution(cutqc, max_subcirc_qubit):
-#    circname = list(cutqc.circuits.keys())[0]
-#    subcirc_file = 'cutqc_data/' + circname + '/cc_{}/subcircuits.pckl'.format(max_subcirc_qubit)
-#    picklefile = open(subcirc_file, 'rb')
-#    cutsoln = pickle.load(picklefile)
-#    return cutsoln
+##########################################################################################
+# circuit cutting methods (should probably be moved to a different file)
 
-def sim_with_cutting(circ, cutqc, mip_model, simulation_backend, shots, G,
-                     verbose, mode='direct'):
+# (1) idetify cut_nodes and uncut_nodes (nodes incident to a cut and their complement)
+# (2) choose "hot nodes": nodes incident to a graph partition,
+#       to which we will nonetheless apply a partial mixer in the first mixing layer
+# WARNING: this algorithm has combinatorial complexity:
+#   O({ #cut_nodes_in_subgraph \choose #max_cuts })
+# I am simply assuming that this complexity won't be a problem for now
+# if it becomes a problem when we scale up, we should rethink this algorithm
+def choose_nodes(graph, subgraphs, cut_edges, max_cuts):
+    cut_nodes = []
+    for edge in cut_edges:
+        cut_nodes.extend(edge)
+
+    # collect subgraph data
+    subgraph_A, subgraph_B = subgraphs
+    cut_nodes_A = [node for node in subgraph_A.nodes if node in cut_nodes]
+    cut_nodes_B = [node for node in subgraph_B.nodes if node in cut_nodes]
+    subgraph_cut_nodes = [ (subgraph_A, cut_nodes_A), (subgraph_B, cut_nodes_B) ]
+
+    # compute the cost of each choice of hot nodes
+    # hot nodes should all be chosen from one subgraph, so loop over subgraph indices
+    choice_cost = {}
+    for ext_idx in [ 0, 1 ]:
+        # ext_graph: subgraph we're "extending" with nodes from the complement graph
+        # ext_cut_nodes: cut_nodes in ext_graph
+        ext_graph, ext_cut_nodes = subgraph_cut_nodes[ext_idx]
+
+        # adjacent (complement) graph and cut nodes
+        adj_graph, adj_cut_nodes = subgraph_cut_nodes[1-ext_idx]
+
+        # determine the number nodes in adj_cut_nodes that we need to "throw out".
+        # nodes that are *not* thrown out are attached to ext_graph in the first mixing layer
+        num_to_toss = len(adj_cut_nodes) - max_cuts
+        num_to_toss = max(num_to_toss,0)
+
+        # determine size of fragments after circuit cutting.
+        # if there are several options (of nodes to toss) with the same "cut cost",
+        # these fragment sizes are used to choose between those options
+        ext_size = ext_graph.number_of_nodes() + len(adj_cut_nodes) - num_to_toss
+        complement_size = subgraphs[1-ext_idx].number_of_nodes()
+        frag_sizes = tuple(sorted([ ext_size, complement_size ], reverse = True))
+
+        # if we don't need to throw out any nodes,
+        # log a choice_cost of 0 and skip the calculation below
+        if num_to_toss == 0:
+            choice_cost[ext_idx,()] = (0,) + frag_sizes
+            continue
+
+        # for some node (in adj_cut_nodes) that we might throw out
+        # (i) determine its neighbors in ext_graph
+        # (ii) determine the degrees of those neighbors
+        # (iii) add up those degrees
+        def single_choice_cost(adj_node):
+            return sum([ graph.degree[ext_node]
+                         for ext_node in graph.neighbors(adj_node)
+                         if ext_node in ext_graph ])
+
+        # loop over all combinations of adjacent nodes that we could throw out
+        for toss_nodes in itertools.combinations(adj_cut_nodes, num_to_toss):
+             _choice_cost = sum([ single_choice_cost(node) for node in toss_nodes ])
+             choice_cost[ext_idx,toss_nodes] = (_choice_cost,) + frag_sizes
+
+    # get the index subgraph we're "extending" and the adjacent nodes we're tossing out
+    ext_idx, toss_nodes = min(choice_cost, key = choice_cost.get)
+    ext_graph, ext_cut_nodes = subgraph_cut_nodes[ext_idx]
+
+    # determine whether a node in ext_graph has any neighbors in toss_nodes
+    def _no_tossed_neighbors(ext_node):
+        return not any( neighbor in toss_nodes for neighbor in graph.neighbors(ext_node) )
+
+    # hot nodes = those without neighbors that we are tossing out
+    hot_nodes = list(filter(_no_tossed_neighbors, ext_cut_nodes))
+    return cut_nodes, hot_nodes
+
+def sim_with_cutting(fragments, wire_path_map, frag_shots, backend, mode = "likely"):
     """
-    A helper function which takes a large quantum circuit as input, cuts it into
-    two pieces, evaluates each piece independently, and finally stitches the
-    results together to simulate the execution of the larger, original circuit.
+    A helper function to simulate a fragmented circuit.
 
     Output:
     probs: dict{bitstring : float}
@@ -48,79 +114,38 @@ def sim_with_cutting(circ, cutqc, mip_model, simulation_backend, shots, G,
         they occurred with.
     """
 
-    cut_start_time = time.time()
+    # build fragment models
+    model_time_start = time.time()
 
-    #circuits = {'my_circ':circ}
-
-    #if cut_options is None:
-    #    max_subcircuit_qubit = len(circ.qubits) - 1
-    #    num_subcircuits = [2]
-    #    max_cuts = 4
-    #else:
-    #    max_subcircuit_qubit = cut_options['max_subcircuit_qubit']
-    #    num_subcircuits = cut_options['num_subcircuits']
-    #    max_cuts = cut_options['max_cuts']
-
-    #cutqc = CutQC(circuits=circuits, max_subcircuit_qubit=max_subcircuit_qubit,
-    #              num_subcircuits=num_subcircuits, max_cuts=max_cuts, verbose=verbose)
-
-    #cutsoln = get_cut_solution(cutqc, max_subcircuit_qubit)
-    #cutsoln = cutqc.cut_solns[0]
-    #if len(cutsoln) == 0:
-    #    raise Exception('Cut solution is empty!')
-    subcircs, cpm = cutqc.get_subcircs_from_model(circ, mip_model)
-    cut_end_time = time.time()
-    print('Split circuit into {} subcircuits with {} qubits in {:.3f} s'.format(
-               len(subcircs),
-               [len(sc.qubits) for sc in subcircs],
-               cut_end_time - cut_start_time))
-
-    wpm = {}
-    for key in cpm:
-        temp = []
-        for frag_qubit in cpm[key]:
-            temp.append((frag_qubit['subcircuit_idx'], frag_qubit['subcircuit_qubit']))
-        wpm[key] = tuple(temp)
-
-    #shots = 999999
-    #total_variants = 7
-    model_start_time = time.time()
-    frag_data = qmm.collect_fragment_data(subcircs, wpm,
-                                          shots=shots,
-                                          tomography_backend=simulation_backend)
-
+    frag_data = qmm.collect_fragment_data(fragments, wire_path_map,
+                                          shots = frag_shots,
+                                          tomography_backend = backend)
     direct_models = qmm.direct_fragment_model(frag_data)
-    model_end_time = time.time()
-    recombine_start_time = time.time()
-    if mode == 'direct':
-        direct_recombined_dist = qmm.recombine_fragment_models(direct_models, wpm)
-        dirty_probs = strip_ancillas(qmm.naive_fix(direct_recombined_dist), circ)
-    elif mode == 'likely':
+    if mode == "direct":
+        models = direct_models
+    elif mode == "likely":
         likely_models = qmm.maximum_likelihood_model(direct_models)
-        dirty_probs = strip_ancillas(qmm.recombine_fragment_models(likely_models, wpm), circ)
+        models = likely_models
     else:
         raise Exception('Unknown recombination mode:', mode)
-    recombine_end_time = time.time()
 
-    clean_start_time = time.time()
-    clean_probs = {}
-    for bitstr, probability in dirty_probs.items():
-        if is_indset(bitstr, G):
-            clean_probs[bitstr] = probability
+    model_time = time.time() - model_time_start
 
-    factor = 1.0 / sum(clean_probs.values())
-    probs = {k: v*factor for k, v in clean_probs.items() }
-    clean_end_time = time.time()
+    # recombine models to recover full circuit output
+    recombine_time_start = time.time()
+    recombined_dist = qmm.recombine_fragment_models(models, wire_path_map)
+    recombine_time = time.time() - recombine_time_start
 
-    print('Model time: {:.3f}, Recombine time: {:.3f}, Clean time {:.3f}'.format(
-            model_end_time - model_start_time,
-            recombine_end_time - recombine_start_time,
-            clean_end_time - clean_start_time))
+    # print timing info
+    print(f"Model time: {model_time:.3f}, Recombine time: {recombine_time:.3f}")
 
-    return probs
+    return recombined_dist
 
-def solve_mis_cut_dqva(init_state, G, m=4, threshold=1e-5, cutoff=1,
-                      sim='statevector', shots=8192, verbose=0):
+##########################################################################################
+
+def solve_mis_cut_dqva(init_state, graph, m=4, threshold=1e-5, cutoff=1,
+                       sim='statevector', shots=8192, verbose=0,
+                       max_cuts=1, mixing_layers=1):
     """
     Find the MIS of G using the dqva and circuit cutting
     """
@@ -128,64 +153,67 @@ def solve_mis_cut_dqva(init_state, G, m=4, threshold=1e-5, cutoff=1,
     # Initialization
     backend = Aer.get_backend(sim+'_simulator')
 
-    # Kernighan-Lin partitions G into two relatively equal subgraphs
-    kl_bisection = kernighan_lin_bisection(G)
-    print('kl bisection:', kl_bisection)
+    # Kernighan-Lin partitions a graph into two relatively equal subgraphs
+    partition = kernighan_lin_bisection(graph)
+    print('kl bisection:', partition)
 
-    # Collect the nodes that have cut edges
-    cut_nodes = []
-    for node in kl_bisection[0]:
-        for neighbor in G.neighbors(node):
-            if neighbor in kl_bisection[1]:
-                cut_nodes.extend([node, neighbor])
-    cut_nodes = list(set(cut_nodes))
+    subgraphs, cut_edges = get_subgraphs(graph, partition)
 
-    # For now, randomly select a SINGLE node to be the "hot node" - its mixer
-    # will be applied across the cut (and so will require circuit cutting).
-    # Only using a single hot node now to keep the number of cuts low, but this
-    # requirement can be removed in the future.
-    hotnode = random.choice(cut_nodes)
-    print('Cut nodes and hotnode:', cut_nodes, hotnode)
-
+    # identify nodes incident to a cut (cut_nodes),
+    #   and choose "hot nodes": a subset of cut_nodes to which we will
+    #   apply a partial mixer in the first mixing layer
+    cut_nodes, hot_nodes = choose_nodes(graph, subgraphs, cut_edges, max_cuts)
+    uncut_nodes = list(set(graph.nodes).difference(set(cut_nodes)))
 
     # Randomly permute the order of the partial mixers
-    cur_permutation = list(np.random.permutation(list(G.nodes)))
-
-    # Options relevant to the circuit cutting code
-    cut_options = {'max_subcircuit_qubit':len(G.nodes)+len(kl_bisection)-1,
-                   'num_subcircuits':[2],
-                   'max_cuts':2}
+    cur_permutation = list(np.random.permutation(list(graph.nodes)))
 
     history = []
 
-    # This function will be what scipy.minimize optimizes
-    def f(params, cutqc, mip_model):
-        # Generate a circuit
-        # Circuit cutting is not required here, but the circuit should be generated using
-        # as much info about the cutting as possible
-        dqv_circ = gen_dqva(G, kl_bisection, params=params,
-                            init_state=cur_init_state, cut=True,
-                            mixer_order=cur_permutation, verbose=verbose,
-                            decompose_toffoli=2, barriers=0, hot_nodes=[hotnode])
+    # build circuit fragments and stitching data
+    def _get_circuit_and_cuts(params, init_state, mixer_order):
+        kwargs = dict( params = params, init_state = init_state, mixer_order = mixer_order,
+                       decompose_toffoli = 1, verbose = verbose,
+                       partition = partition, P = len(partition),
+                       cut_nodes = cut_nodes, hot_nodes = hot_nodes,
+                       mixing_layers = mixing_layers )
+        circuit, cuts = dqv_ansatz.gen_dqva(graph, **kwargs)
+        fragments, wire_path_map = qcc.cut_circuit(circuit, cuts)
+        return fragments, wire_path_map
 
-        # Compute the cost function
-        # Circuit cutting will need to be used to perform the execution
-        # Time the full cutting+evaluating+reconstruction process
+    # get output (probability distribution) of a circuit
+    def _get_circuit_output(params, init_state, mixer_order):
         start_time = time.time()
-        probs = sim_with_cutting(dqv_circ, cutqc, mip_model, 'qasm_simulator',
-                                 shots, G, verbose)
+        fragments, wire_path_map = _get_circuit_and_cuts(params, init_state, mixer_order)
+        end_time = time.time()
+        print('Split circuit into {} subcircuits with {} qubits in {:.3f} s'.format(
+            len(fragments),
+            [ len(frag.qubits) for frag in fragments ],
+            end_time - start_time))
+
+        start_time = time.time()
+        frag_shots = shots // qmm.fragment_variants(wire_path_map)
+        recombined_dist = sim_with_cutting(fragments, wire_path_map, frag_shots, backend)
         end_time = time.time()
         print('Elapsed time: {:.3f}'.format(end_time-start_time))
 
-        avg_cost = 0
-        for sample in probs.keys():
-            x = [int(bit) for bit in list(sample)]
-            # Cost function is Hamming weight
-            avg_cost += probs[sample] * sum(x)
+        return recombined_dist
 
-        # Return the negative of the cost for minimization
-        print('Expectation value:', avg_cost)
-        return -avg_cost
+    # This function will be what scipy.minimize optimizes
+    # TODO: rather than building the circuit + fragments every time `avg_cost` is called,
+    #       it should be possible to generate this data ONCE, with (symbolic) variables,
+    #       and then substitute numerical values for the parameters in `avg_cost`
+    def avg_cost(params, init_state, mixer_order):
+        # get output probability distribution for the circuit
+        probs = _get_circuit_output(params, init_state, mixer_order)
+
+        # compute the average Hamming weight
+        avg_weight = sum( prob * sum(map(int,bit_string))
+                          for bit_string, prob in probs.items() )
+        print('Expectation value:', avg_weight)
+
+        # we want to maximize avg_weight <--> minimize -avg_weight
+        return -avg_weight
 
     # Step 3: Dynamic Ansatz Update
     # Begin outer optimization loop
@@ -208,45 +236,24 @@ def solve_mis_cut_dqva(init_state, G, m=4, threshold=1e-5, cutoff=1,
             print('\tNum params =', num_params)
             init_params = np.random.uniform(low=0.0, high=2*np.pi, size=num_params)
             print('\tCurrent Mixer Order:', cur_permutation)
-            circuits = {'dqva_circ':gen_dqva(G, kl_bisection, params=init_params,
-                                             init_state=cur_init_state, cut=True,
-                                             mixer_order=cur_permutation,
-                                             verbose=0, decompose_toffoli=2,
-                                             barriers=0, hot_nodes=[hotnode])}
-            cutqc = CutQC(circuits, cut_options['max_subcircuit_qubit'],
-                          cut_options['num_subcircuits'],
-                          cut_options['max_cuts'], verbose)
-            mip_model = cutqc.get_MIP_model(cut_options['max_subcircuit_qubit'],
-                                            cut_options['num_subcircuits'],
-                                            cut_options['max_cuts'])
-            out = minimize(f, x0=init_params, args=(cutqc, mip_model), method='COBYLA')
+            kwargs = dict( args = (cur_init_state, cur_permutation), method = 'COBYLA' )
+            out = minimize(avg_cost, init_params, **kwargs)
             opt_params = out['x']
             opt_cost = out['fun']
-            #print('\tOptimal Parameters:', opt_params)
             print('\tOptimal cost:', opt_cost)
 
             # Get the results of the optimized circuit
-            dqv_circ = gen_dqva(G, kl_bisection, params=opt_params,
-                                init_state=cur_init_state,
-                                mixer_order=cur_permutation, cut=True,
-                                verbose=verbose, decompose_toffoli=2,
-                                barriers=0, hot_nodes=[hotnode])
-            counts = sim_with_cutting(dqv_circ, cutqc, mip_model,
-                                      'qasm_simulator', shots, G, verbose)
+            probs = _get_circuit_output(out_params, cur_init_state, cur_permutation)
 
-            #result = execute(dqv_circ, backend=Aer.get_backend('statevector_simulator')).result()
-            #statevector = Statevector(result.get_statevector(dqv_circ))
-            #counts = strip_ancillas(statevector.probabilities_dict(decimals=5), dqv_circ)
-
-            # Select the top [cutoff] counts
-            top_counts = sorted([(key, counts[key]) for key in counts if counts[key] > threshold],
+            # Select the top [cutoff] probs
+            top_probs = sorted([(key, probs[key]) for key in probs if probs[key] > threshold],
                                 key=lambda tup: tup[1], reverse=True)[:cutoff]
             # Check if we have improved the Hamming weight
             old_hamming_weight = hamming_weight(cur_init_state)
             better_strs = []
-            for bitstr, prob in top_counts:
+            for bitstr, prob in top_probs:
                 this_hamming = hamming_weight(bitstr)
-                if is_indset(bitstr, G) and this_hamming > old_hamming_weight:
+                if is_indset(bitstr, graph) and this_hamming > old_hamming_weight:
                     better_strs.append((bitstr, this_hamming))
             better_strs = sorted(better_strs, key=lambda t: t[1], reverse=True)
             prev_init_state = cur_init_state
@@ -254,7 +261,7 @@ def solve_mis_cut_dqva(init_state, G, m=4, threshold=1e-5, cutoff=1,
             # Save current results to history
             temp_history = {'round':'{}.{}'.format(step4_round, step3_round),
                             'cost':opt_cost, 'permutation':cur_permutation,
-                            'topcounts':top_counts, 'previnit':prev_init_state}
+                            'topcounts':top_probs, 'previnit':prev_init_state}
 
             # If no improvement was made, break and go to next step4 round
             if len(better_strs) == 0:
@@ -769,7 +776,6 @@ def solve_mis_dqva(init_state, G, P=1, m=1, mixer_order=None, threshold=1e-5,
 
     print('\tRETURNING, best hamming weight:', new_hamming_weight)
     return best_indset, best_params, best_init_state, best_perm, history
-
 
 def main():
     G = nx.Graph()
