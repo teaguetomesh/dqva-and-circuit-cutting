@@ -78,12 +78,12 @@ def choose_nodes(graph, subgraphs, cut_edges, max_cuts):
     ext_idx, toss_nodes = min(choice_cost, key = choice_cost.get)
     ext_graph, ext_cut_nodes = subgraph_cut_nodes[ext_idx]
 
-    # determine if a node in ext_graph has any neighbors in toss_nodes
-    def _neighbors_in_toss_nodes(ext_node):
-        return any( neighbor in toss_nodes for neighbor in graph.neighbors(ext_node) )
+    # determine whether a node in ext_graph has any neighbors in toss_nodes
+    def _no_tossed_neighbors(ext_node):
+        return not any( neighbor in toss_nodes for neighbor in graph.neighbors(ext_node) )
 
     # hot nodes = those without neighbors that we are tossing out
-    hot_nodes = list(filter(_neighbors_in_toss_nodes, ext_cut_nodes))
+    hot_nodes = list(filter(_no_tossed_neighbors, ext_cut_nodes))
     return cut_nodes, uncut_nodes, hot_nodes
 
 ##########################################################################################
@@ -200,6 +200,8 @@ def gen_cut_dqva(G, partition, uncut_nodes, mixing_layers=1, params=[], init_sta
     subgraphs, cutedges = graph_funcs.get_subgraphs(G, partition)
 
     # check that all hot nodes are in the same subgraph
+    # this assertion fails if there are *no* hot nodes,
+    # ... in which case you should not be using ciruit cutting!
     assert len(set([ node in subgraphs[0] for node in hot_nodes ])) == 1
 
     # identify the subgraph of every node
