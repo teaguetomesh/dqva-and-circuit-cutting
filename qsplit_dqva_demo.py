@@ -118,4 +118,4 @@ if verbosity > 0:
     print()
 
 recombined_fidelity = qdm.fidelity(recombined_dist, actual_dist)
-print("fielity:",recombined_fidelity)
+print("fidelity:",recombined_fidelity)

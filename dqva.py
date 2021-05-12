@@ -26,142 +26,28 @@ import qsplit_mlrecon_methods as qmm
 
 from utils.graph_funcs import *
 from utils.helper_funcs import *
+from utils.cutting_funcs import *
 
-##########################################################################################
-# circuit cutting methods (should probably be moved to a different file)
 
-# (1) idetify cut_nodes and uncut_nodes (nodes incident to a cut and their complement)
-# (2) choose "hot nodes": nodes incident to a graph partition,
-#       to which we will nonetheless apply a partial mixer in the first mixing layer
-# WARNING: this algorithm has combinatorial complexity:
-#   O({ #cut_nodes_in_subgraph \choose #max_cuts })
-# I am simply assuming that this complexity won't be a problem for now
-# if it becomes a problem when we scale up, we should rethink this algorithm
-def choose_nodes(graph, subgraphs, cut_edges, max_cuts):
-    cut_nodes = []
-    for edge in cut_edges:
-        cut_nodes.extend(edge)
-
-    # collect subgraph data
-    subgraph_A, subgraph_B = subgraphs
-    cut_nodes_A = [node for node in subgraph_A.nodes if node in cut_nodes]
-    cut_nodes_B = [node for node in subgraph_B.nodes if node in cut_nodes]
-    subgraph_cut_nodes = [ (subgraph_A, cut_nodes_A), (subgraph_B, cut_nodes_B) ]
-
-    # compute the cost of each choice of hot nodes
-    # hot nodes should all be chosen from one subgraph, so loop over subgraph indices
-    choice_cost = {}
-    for ext_idx in [ 0, 1 ]:
-        # ext_graph: subgraph we're "extending" with nodes from the complement graph
-        # ext_cut_nodes: cut_nodes in ext_graph
-        ext_graph, ext_cut_nodes = subgraph_cut_nodes[ext_idx]
-
-        # adjacent (complement) graph and cut nodes
-        adj_graph, adj_cut_nodes = subgraph_cut_nodes[1-ext_idx]
-
-        # determine the number nodes in adj_cut_nodes that we need to "throw out".
-        # nodes that are *not* thrown out are attached to ext_graph in the first mixing layer
-        num_to_toss = len(adj_cut_nodes) - max_cuts
-        num_to_toss = max(num_to_toss,0)
-
-        # determine size of fragments after circuit cutting.
-        # if there are several options (of nodes to toss) with the same "cut cost",
-        # these fragment sizes are used to choose between those options
-        ext_size = ext_graph.number_of_nodes() + len(adj_cut_nodes) - num_to_toss
-        complement_size = subgraphs[1-ext_idx].number_of_nodes()
-        frag_sizes = tuple(sorted([ ext_size, complement_size ], reverse = True))
-
-        # if we don't need to throw out any nodes,
-        # log a choice_cost of 0 and skip the calculation below
-        if num_to_toss == 0:
-            choice_cost[ext_idx,()] = (0,) + frag_sizes
-            continue
-
-        # for some node (in adj_cut_nodes) that we might throw out
-        # (i) determine its neighbors in ext_graph
-        # (ii) determine the degrees of those neighbors
-        # (iii) add up those degrees
-        def single_choice_cost(adj_node):
-            return sum([ graph.degree[ext_node]
-                         for ext_node in graph.neighbors(adj_node)
-                         if ext_node in ext_graph ])
-
-        # loop over all combinations of adjacent nodes that we could throw out
-        for toss_nodes in itertools.combinations(adj_cut_nodes, num_to_toss):
-             _choice_cost = sum([ single_choice_cost(node) for node in toss_nodes ])
-             choice_cost[ext_idx,toss_nodes] = (_choice_cost,) + frag_sizes
-
-    # get the index subgraph we're "extending" and the adjacent nodes we're tossing out
-    ext_idx, toss_nodes = min(choice_cost, key = choice_cost.get)
-    ext_graph, ext_cut_nodes = subgraph_cut_nodes[ext_idx]
-
-    # determine whether a node in ext_graph has any neighbors in toss_nodes
-    def _no_tossed_neighbors(ext_node):
-        return not any( neighbor in toss_nodes for neighbor in graph.neighbors(ext_node) )
-
-    # hot nodes = those without neighbors that we are tossing out
-    hot_nodes = list(filter(_no_tossed_neighbors, ext_cut_nodes))
-    return cut_nodes, hot_nodes
-
-def sim_with_cutting(fragments, wire_path_map, frag_shots, backend, mode = "likely"):
-    """
-    A helper function to simulate a fragmented circuit.
-
-    Output:
-    probs: dict{bitstring : float}
-        Outputs a dictionary containing the simulation results. Keys are the
-        bitstrings which were observed and their values are the probability that
-        they occurred with.
-    """
-
-    # build fragment models
-    model_time_start = time.time()
-
-    frag_data = qmm.collect_fragment_data(fragments, wire_path_map,
-                                          shots = frag_shots,
-                                          tomography_backend = backend)
-    direct_models = qmm.direct_fragment_model(frag_data)
-    if mode == "direct":
-        models = direct_models
-    elif mode == "likely":
-        likely_models = qmm.maximum_likelihood_model(direct_models)
-        models = likely_models
-    else:
-        raise Exception('Unknown recombination mode:', mode)
-
-    model_time = time.time() - model_time_start
-
-    # recombine models to recover full circuit output
-    recombine_time_start = time.time()
-    recombined_dist = qmm.recombine_fragment_models(models, wire_path_map)
-    recombine_time = time.time() - recombine_time_start
-
-    # print timing info
-    print(f"Model time: {model_time:.3f}, Recombine time: {recombine_time:.3f}")
-
-    return recombined_dist
-
-##########################################################################################
-
-def solve_mis_cut_dqva(init_state, graph, m=4, threshold=1e-5, cutoff=1,
-                       sim='statevector', shots=8192, verbose=0,
-                       max_cuts=1, mixing_layers=1):
+def solve_mis_cut_dqva(init_state, graph, P=1, m=4, threshold=1e-5, cutoff=1,
+                       sim='aer', shots=8192, verbose=0, max_cuts=1):
     """
     Find the MIS of G using the dqva and circuit cutting
     """
 
     # Initialization
-    backend = Aer.get_backend(sim+'_simulator')
+    backend = Aer.get_backend(name='aer_simulator', method='statevector')
 
     # Kernighan-Lin partitions a graph into two relatively equal subgraphs
     partition = kernighan_lin_bisection(graph)
-    print('kl bisection:', partition)
+    if verbose:
+        print('kl bisection:', partition)
 
     subgraphs, cut_edges = get_subgraphs(graph, partition)
 
     # identify nodes incident to a cut (cut_nodes),
-    #   and choose "hot nodes": a subset of cut_nodes to which we will
-    #   apply a partial mixer in the first mixing layer
+    # and choose "hot nodes": a subset of cut_nodes to which we will
+    # apply a partial mixer in the first mixing layer
     cut_nodes, hot_nodes = choose_nodes(graph, subgraphs, cut_edges, max_cuts)
     uncut_nodes = list(set(graph.nodes).difference(set(cut_nodes)))
 
@@ -172,19 +58,21 @@ def solve_mis_cut_dqva(init_state, graph, m=4, threshold=1e-5, cutoff=1,
 
     # build circuit fragments and stitching data
     def _get_circuit_and_cuts(num_params, init_state, mixer_order):
-        params = [ qiskit.circuit.Parameter(f"var_{num}") for num in range(num_params) ]
-        kwargs = dict( params = params, init_state = init_state, mixer_order = mixer_order,
-                       decompose_toffoli = 1, verbose = verbose,
-                       partition = partition, P = len(partition),
-                       cut_nodes = cut_nodes, hot_nodes = hot_nodes,
-                       mixing_layers = mixing_layers )
-        circuit, cuts = dqv_ansatz.gen_dqva(graph, **kwargs)
+        params = [ qiskit.circuit.Parameter('var_{}'.format(num)) for num in range(num_params) ]
+
+        kwargs = dict(params=params, init_state=init_state,
+                      mixer_order=mixer_order, decompose_toffoli=1,
+                      verbose=verbose, P=P)
+
+        circuit, cuts = dqv_cut_ansatz.gen_dqva(graph, partition, cut_nodes,
+                                                hot_nodes, **kwargs)
         fragments, wire_path_map = qcc.cut_circuit(circuit, cuts)
         return fragments, wire_path_map
 
     # strip a string of non-digit characters
     def _digit_substr(string):
         return "".join(filter(str.isdigit,string))
+
     # bind numerical values to the parameters of a circuit
     def _bind(circuit, params):
         binding = { circuit_param : params[int(_digit_substr(circuit_param.name))]
@@ -197,7 +85,8 @@ def solve_mis_cut_dqva(init_state, graph, m=4, threshold=1e-5, cutoff=1,
         fragments = [ _bind(fragment, params) for fragment in var_fragments ]
         recombined_dist = sim_with_cutting(fragments, wire_path_map, frag_shots, backend)
         end_time = time.time()
-        print('Elapsed time: {:.3f}'.format(end_time-start_time))
+        if verbose:
+            print('sim_with_cutting elapsed time: {:.3f}'.format(end_time-start_time))
         return recombined_dist
 
     # This function will be what scipy.minimize optimizes
@@ -208,101 +97,101 @@ def solve_mis_cut_dqva(init_state, graph, m=4, threshold=1e-5, cutoff=1,
         # compute the average Hamming weight
         avg_weight = sum( prob * sum(map(int,bit_string))
                           for bit_string, prob in probs.items() )
-        print('Expectation value:', avg_weight)
 
         # we want to maximize avg_weight <--> minimize -avg_weight
         return -avg_weight
 
-    # Step 3: Dynamic Ansatz Update
     # Begin outer optimization loop
     best_indset = init_state
     best_init_state = init_state
     cur_init_state = init_state
+    best_params = None
+    best_perm = copy.copy(cur_permutation)
 
     # Randomly permute the order of mixer unitaries m times
-    for step4_round in range(1, m+1):
-        step3_round = 1
+    for mixer_round in range(1, m+1):
+        mixer_history = []
+        inner_round = 1
         new_hamming_weight = hamming_weight(cur_init_state)
-        old_hamming_weight = -1
 
         # Attempt to improve the Hamming weight until no further improvements can be made
-        while new_hamming_weight > old_hamming_weight:
-            print('Start round {}.{}, Initial state = {}'.format(step4_round, step3_round, cur_init_state))
-            # Inner variational loop
+        while True:
+            if verbose:
+                print('Start round {}.{}, Initial state = {}'.format(mixer_round,
+                                                   inner_round, cur_init_state))
+
+            # Begin Inner variational loop
+            # TODO: fix the num_params computation
             num_params = 2 * (len(cur_init_state) - hamming_weight(cur_init_state)) + 1
-            print('\tNum params =', num_params)
             init_params = np.random.uniform(low=0.0, high=2*np.pi, size=num_params)
-            print('\tCurrent Mixer Order:', cur_permutation)
+            if verbose:
+                print('\tNum params =', num_params)
+                print('\tCurrent Mixer Order:', cur_permutation)
 
-            # build parameterized fragments
-            start_time = time.time()
-            fragments, wire_path_map \
-                = _get_circuit_and_cuts(num_params, cur_init_state, cur_permutation)
+            # build parameterized fragments and optimize
+            cut_start_time = time.time()
+            fragments, wire_path_map = _get_circuit_and_cuts(num_params,
+                                                cur_init_state, cur_permutation)
             frag_shots = shots // qmm.fragment_variants(wire_path_map)
-            end_time = time.time()
-            print('Split circuit into {} subcircuits with {} qubits in {:.3f} s'.format(
-                len(fragments),
-                [ len(frag.qubits) for frag in fragments ],
-                end_time - start_time))
+            cut_end_time = time.time()
+            if verbose:
+                print('Split circuit into {} subcircuits with {} qubits in {:.3f} s'.format(
+                       len(fragments), [len(frag.qubits) for frag in fragments],
+                       cut_end_time - cut_start_time))
 
-            args = ( fragments, wire_path_map, frag_shots )
-            out = minimize(avg_cost, init_params, args = args, method = 'COBYLA')
+            args = (fragments, wire_path_map, frag_shots)
+            out = minimize(avg_cost, init_params, args=args, method='COBYLA')
             opt_params = out['x']
             opt_cost = out['fun']
-            print('\tOptimal cost:', opt_cost)
+            if verbose:
+                print('\tOptimal cost:', opt_cost)
 
             # Get the results of the optimized circuit
-            probs = _get_circuit_output(out_params, *args)
+            probs = _get_circuit_output(opt_params, *args)
 
             # Select the top [cutoff] probs
-            top_probs = sorted([(key, probs[key]) for key in probs if probs[key] > threshold],
+            top_probs = sorted([(key, val) for key, val in probs.items() if val > threshold],
                                 key=lambda tup: tup[1], reverse=True)[:cutoff]
+
             # Check if we have improved the Hamming weight
-            old_hamming_weight = hamming_weight(cur_init_state)
+            best_hamming_weight = hamming_weight(best_indset)
             better_strs = []
             for bitstr, prob in top_probs:
                 this_hamming = hamming_weight(bitstr)
-                if is_indset(bitstr, graph) and this_hamming > old_hamming_weight:
+                if is_indset(bitstr, graph) and this_hamming > best_hamming_weight:
                     better_strs.append((bitstr, this_hamming))
             better_strs = sorted(better_strs, key=lambda t: t[1], reverse=True)
-            prev_init_state = cur_init_state
 
             # Save current results to history
-            temp_history = {'round':'{}.{}'.format(step4_round, step3_round),
-                            'cost':opt_cost, 'permutation':cur_permutation,
-                            'topcounts':top_probs, 'previnit':prev_init_state}
+            inner_history = {'mixer_round':mixer_round, 'inner_round':inner_round,
+                             'cost':opt_cost, 'init_state':cur_init_state,
+                             'mixer_order':copy.copy(cur_permutation),
+                             'num_params':num_params}
+            mixer_history.append(inner_history)
 
-            # If no improvement was made, break and go to next step4 round
+            # If no improvement was made, break and go to next mixer round
             if len(better_strs) == 0:
-                print('\tNone of the measured bitstrings had higher Hamming weight than:', prev_init_state)
-                history.append(temp_history)
+                print('\tNone of the measured bitstrings had higher Hamming weight than:', best_indset)
                 break
 
-            # Otherwise, save the new bitstring and check if it is better than all we have seen thus far
-            cur_init_state, new_hamming_weight = better_strs[0]
-            if new_hamming_weight > hamming_weight(best_indset):
-                best_indset = cur_init_state
-                best_init_state = prev_init_state
-            print('\tFound new independent set: {}, Hamming weight = {}'.format(cur_init_state, new_hamming_weight))
-            temp_history['curinit'] = cur_init_state
-            history.append(temp_history)
-            step3_round += 1
+            # Otherwise, save the new bitstring and repeat
+            best_indset, new_hamming_weight = better_strs[0]
+            best_init_state = cur_init_state
+            best_params = opt_params
+            best_perm = copy.copy(cur_permutation)
+            cur_init_state = best_indset
+            print('\tFound new independent set: {}, Hamming weight = {}'.format(
+                                               best_indset, new_hamming_weight))
+            inner_round += 1
 
-        # Choose a new permutation of the mixer unitaries that have NOT been set to identity
-        identity_mixers = [i for i in range(len(cur_init_state)) if list(reversed(cur_init_state))[i] == '1']
-        non_identity_mixers = [i for i in range(len(cur_init_state)) if list(reversed(cur_init_state))[i] == '0']
-        permutation = np.random.permutation(non_identity_mixers)
-        perm_queue = queue.Queue()
-        for p in permutation:
-            perm_queue.put(p)
-        for i, mixer in enumerate(cur_permutation):
-            if mixer in identity_mixers:
-                continue
-            else:
-                cur_permutation[i] = perm_queue.get()
+        # Save the history of the current mixer round
+        history.append(mixer_history)
+
+        # Choose a new permutation of the mixer unitaries
+        cur_permutation = list(np.random.permutation(list(G.nodes)))
 
     print('\tRETURNING, best hamming weight:', new_hamming_weight)
-    return best_indset, opt_params, best_init_state, kl_bisection, history
+    return best_indset, best_params, best_init_state, best_perm, partition, cut_nodes, hot_nodes, history
 
 
 def solve_mis_qls(init_state, G, P=1, m=1, mixer_order=None, threshold=1e-5,
