@@ -249,6 +249,7 @@ def gen_dqva(G, partition, cut_nodes, hot_nodes, P=1, params=[], init_state=None
         _cuts = apply_mixer(dqva_circ, alphas, init_state, G, barriers,
                             decompose_toffoli, mixer_order, subgraph_dict,
                             cut_nodes, hot_nodes, verbose=verbose)
+        print('i =', i, 'and cuts =', _cuts)
 
         if barriers > 0:
             dqva_circ.barrier()
@@ -264,6 +265,8 @@ def gen_dqva(G, partition, cut_nodes, hot_nodes, P=1, params=[], init_state=None
         if i == 0:
             cuts = _cuts
             hot_nodes = []
+
+    print('Outside loop, cuts =', cuts)
 
     if decompose_toffoli > 1:
         #basis_gates = ['x', 'cx', 'barrier', 'crx', 'tdg', 't', 'rz', 'h']
@@ -290,5 +293,6 @@ def gen_dqva(G, partition, cut_nodes, hot_nodes, P=1, params=[], init_state=None
     # remove trivial cuts at the beginning or end of the circuit
     fixed_cuts = [ (qubit,cut_loc) for qubit, cut_loc in fixed_cuts
                     if cut_loc not in [ 0, num_gates(dqva_circ,qubit) ] ]
+    print('fixed cuts:', fixed_cuts)
 
     return dqva_circ, fixed_cuts

@@ -36,7 +36,11 @@ def solve_mis_cut_dqva(init_state, graph, P=1, m=4, threshold=1e-5, cutoff=1,
     """
 
     # Initialization
-    backend = Aer.get_backend(name='aer_simulator', method='statevector')
+    # NOTE: the backend to use is very version dependent. 
+    # Qiskit 0.23.2 does not support the newer Aer_simulators that
+    # are available in Qiskit 0.26.0.
+    # For now, just use the statevector_simulator
+    #backend = Aer.get_backend(name='aer_simulator', method='statevector')
 
     # Kernighan-Lin partitions a graph into two relatively equal subgraphs
     partition = kernighan_lin_bisection(graph)
