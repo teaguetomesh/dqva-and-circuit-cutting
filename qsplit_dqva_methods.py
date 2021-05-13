@@ -2,24 +2,28 @@
 
 import numpy as np
 import networkx as nx
-
 import itertools, qiskit
 
 from qiskit.circuit.library.standard_gates import XGate
 from qiskit.circuit import ControlledGate
 
-from utils.graph_funcs import *
-from utils.helper_funcs import *
+import utils.graph_funcs as graph_funcs
+import utils.helper_funcs as helper_funcs
 
 ##########################################################################################
 
-# choose "hot nodes": nodes incident to a graph partition,
-#   to which we will nonetheless apply a partial mixer in the first mixing layer
+# (1) idetify cut_nodes and uncut_nodes (nodes incident to a cut and their complement)
+# (2) choose "hot nodes": nodes incident to a graph partition,
+#       to which we will nonetheless apply a partial mixer in the first mixing layer
 # WARNING: this algorithm has combinatorial complexity:
 #   O({ #cut_nodes_in_subgraph \choose #max_cuts })
 # I am simply assuming that this complexity won't be a problem for now
 # if it becomes a problem when we scale up, we should rethink this algorithm
-def choose_hot_nodes(graph, subgraphs, cut_nodes, uncut_nodes, max_cuts):
+def choose_nodes(graph, subgraphs, cut_edges, max_cuts):
+    cut_nodes = []
+    for edge in cut_edges:
+        cut_nodes.extend(edge)
+
     # collect subgraph data
     subgraph_A, subgraph_B = subgraphs
     cut_nodes_A = [node for node in subgraph_A.nodes if node in cut_nodes]
@@ -73,12 +77,13 @@ def choose_hot_nodes(graph, subgraphs, cut_nodes, uncut_nodes, max_cuts):
     ext_idx, toss_nodes = min(choice_cost, key = choice_cost.get)
     ext_graph, ext_cut_nodes = subgraph_cut_nodes[ext_idx]
 
-    # determine if a node in ext_graph has any neighbors in toss_nodes
-    def _neighbors_in_toss_nodes(ext_node):
-        return any( neighbor in toss_nodes for neighbor in graph.neighbors(ext_node) )
+    # determine whether a node in ext_graph has any neighbors in toss_nodes
+    def _no_tossed_neighbors(ext_node):
+        return not any( neighbor in toss_nodes for neighbor in graph.neighbors(ext_node) )
 
     # hot nodes = those without neighbors that we are tossing out
-    return list(filter(_neighbors_in_toss_nodes, ext_cut_nodes))
+    hot_nodes = list(filter(_no_tossed_neighbors, ext_cut_nodes))
+    return cut_nodes, hot_nodes
 
 ##########################################################################################
 
@@ -96,7 +101,7 @@ def num_gates(circuit, qubit):
     graph.remove_all_ops_named("barrier")
     return sum([ qubit in node.qargs for node in graph.topological_op_nodes() ])
 
-def apply_mixer(circ, alpha, init_state, G, cut_nodes, cutedges, subgraph_dict,
+def apply_mixer(circ, alpha, init_state, G, cut_nodes, subgraph_dict,
                 barriers, decompose_toffoli, mixer_order, hot_nodes,
                 verbose=0):
 
@@ -185,15 +190,17 @@ def apply_phase_separator(circ, gamma, G):
     for qb in G.nodes:
         circ.rz(2*gamma, qb)
 
-def gen_cut_dqva(G, partition, uncut_nodes, mixing_layers=1, params=[], init_state=None,
+def gen_cut_dqva(G, partition, cut_nodes, mixing_layers=1, params=[], init_state=None,
                  barriers=1, decompose_toffoli=1, mixer_order=None,
                  hot_nodes=[], verbose=0):
     assert nx.is_connected(G), "we do not currently support disconnected graphs!"
 
     nq = len(G.nodes)
-    subgraphs, cutedges = get_subgraphs(G, partition)
+    subgraphs, cutedges = graph_funcs.get_subgraphs(G, partition)
 
     # check that all hot nodes are in the same subgraph
+    # this assertion fails if there are *no* hot nodes,
+    # ... in which case you should not be using ciruit cutting!
     assert len(set([ node in subgraphs[0] for node in hot_nodes ])) == 1
 
     # identify the subgraph of every node
@@ -245,7 +252,7 @@ def gen_cut_dqva(G, partition, uncut_nodes, mixing_layers=1, params=[], init_sta
         dqv_circ.barrier()
 
     # parse the variational parameters
-    cut_nodes = [n for n in G.nodes if n not in uncut_nodes]
+    uncut_nodes = [ n for n in G.nodes if n not in cut_nodes ]
     uncut_nonzero = len([n for n in uncut_nodes if init_state[n] != '1'])
     num_params = mixing_layers * (uncut_nonzero + 1) + len(hot_nodes)
     assert (len(params) == num_params),"Incorrect number of parameters!"
@@ -265,7 +272,7 @@ def gen_cut_dqva(G, partition, uncut_nodes, mixing_layers=1, params=[], init_sta
             print('gamma_{}: {}'.format(i, gamma_list[i]))
 
     for i, (alphas, gamma) in enumerate(zip(alpha_list, gamma_list)):
-        _cuts = apply_mixer(dqv_circ, alphas, init_state, G, cut_nodes, cutedges,
+        _cuts = apply_mixer(dqv_circ, alphas, init_state, G, cut_nodes,
                             subgraph_dict, barriers, decompose_toffoli, mixer_order,
                             hot_nodes, verbose=verbose)
         if i == 0: cuts = _cuts

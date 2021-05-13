@@ -1,7 +1,23 @@
 import glob
 import networkx as nx
 
-dirs = glob.glob('N14_p60*')
+import sys
+sys.path.append('../')
+
+from utils.graph_funcs import graph_from_file
+
+
+def is_unique(folder, G):
+    all_graphs = glob.glob(folder+'/*')
+
+    for graph in all_graphs:
+        cur_G = graph_from_file(graph)
+        if nx.is_isomorphic(G, cur_G):
+            return False
+
+    return True
+
+dirs = glob.glob('N14_p*')
 
 for folder in dirs:
     print(folder)
@@ -10,9 +26,9 @@ for folder in dirs:
     print('Nodes: {}, probability: {}'.format(n, p))
 
     count = 0
-    while count < 50:
+    while count < 25:
         G = nx.generators.random_graphs.erdos_renyi_graph(n, p)
-        if nx.is_connected(G):
+        if nx.is_connected(G) and is_unique(folder, G):
             count += 1
             edges = list(G.edges())
 
@@ -20,4 +36,5 @@ for folder in dirs:
                 edgestr = ''.join(['{}, '.format(e) for e in edges])
                 edgestr = edgestr.strip(', ')
                 fn.write(edgestr)
+
 

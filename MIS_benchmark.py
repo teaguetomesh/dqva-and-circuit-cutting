@@ -54,6 +54,8 @@ def parse_args():
                         help='Flag for whether to overwrite or extend repetitions')
     parser.add_argument('--startrep', type=int, default=0,
                         help='Integer repetition label')
+    parser.add_argument('--threads', type=int, default=1,
+                        help='Number of parallel threads passed to Aer')
     args = parser.parse_args()
     return args
 
@@ -140,16 +142,17 @@ def main():
         for rep in rep_range:
             if args.alg == 'qaoa' or args.alg == 'qaoaWStart':
                 out = dqva.solve_mis_qaoa(init_state, G, P=args.P, m=args.m,
-                                          sim=args.sim, shots=args.shots,
-                                          verbose=args.v)
+                                          sim='aer', shots=args.shots,
+                                          verbose=args.v, threads=args.threads)
             elif args.alg == 'dqva':
                 out = dqva.solve_mis_dqva(init_state, G, P=args.P, m=args.m,
-                                         sim=args.sim, shots=args.shots,
-                                         verbose=args.v)
+                                         sim='aer', shots=args.shots,
+                                         verbose=args.v, threads=args.threads)
             elif args.alg == 'qls':
                 out = dqva.solve_mis_qls(init_state, G, P=args.P, m=args.m,
-                                          sim=args.sim, shots=args.shots,
-                                          verbose=args.v, param_lim=args.plim)
+                                          sim='aer', shots=args.shots,
+                                          verbose=args.v, param_lim=args.plim,
+                                          threads=args.threads)
             elif args.alg == 'cut_dqva':
                 out = dqva.solve_mis_cut_dqva()
 
