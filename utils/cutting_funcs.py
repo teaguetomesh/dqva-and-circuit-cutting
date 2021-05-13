@@ -80,7 +80,8 @@ def choose_nodes(graph, subgraphs, cut_edges, max_cuts):
     hot_nodes = list(filter(_no_tossed_neighbors, ext_cut_nodes))
     return cut_nodes, hot_nodes
 
-def sim_with_cutting(fragments, wire_path_map, frag_shots, backend, mode = "likely"):
+def sim_with_cutting(fragments, wire_path_map, frag_shots, backend, mode="likely",
+                     verbose=0):
     """
     A helper function to simulate a fragmented circuit.
 
@@ -114,6 +115,7 @@ def sim_with_cutting(fragments, wire_path_map, frag_shots, backend, mode = "like
     recombine_time = time.time() - recombine_time_start
 
     # print timing info
-    print(f"Model time: {model_time:.3f}, Recombine time: {recombine_time:.3f}")
+    if verbose:
+        print(f"\tModel time: {model_time:.3f}, Recombine time: {recombine_time:.3f}")
 
     return recombined_dist
