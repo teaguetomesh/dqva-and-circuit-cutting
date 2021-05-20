@@ -1,6 +1,7 @@
 import sys
 import itertools
 import time
+import numpy as np
 
 sys.path.append('../')
 
@@ -79,6 +80,46 @@ def choose_nodes(graph, subgraphs, cut_edges, max_cuts):
     # hot nodes = those without neighbors that we are tossing out
     hot_nodes = list(filter(_no_tossed_neighbors, ext_cut_nodes))
     return cut_nodes, hot_nodes
+
+
+def simple_choose_nodes(graph, subgraphs, cut_edges, max_cuts, init_state):
+    cut_nodes = []
+    for edge in cut_edges:
+        cut_nodes.extend(edge)
+
+    # collect subgraph data
+    subgraph_A, subgraph_B = subgraphs
+    cut_nodes_A = [node for node in subgraph_A.nodes if node in cut_nodes]
+    cut_nodes_B = [node for node in subgraph_B.nodes if node in cut_nodes]
+    subgraph_cut_nodes = [ (subgraph_A, cut_nodes_A), (subgraph_B, cut_nodes_B) ]
+
+    # Randomly select the subgraph to draw hot nodes from
+    rand_index = np.random.choice([0,1])
+    cur_subgraph, cur_cut_nodes = subgraph_cut_nodes[rand_index]
+    other_subgraph, other_cut_nodes = subgraph_cut_nodes[(rand_index + 1) % 2]
+
+    # Collect all potential hot nodes (i.e. where cost < max_cuts and the node is not already in the MIS)
+    valid_hot_nodes = []
+    for node in cur_cut_nodes:
+        neighbors = list(graph.neighbors(node))
+        cost = len([n for n in neighbors if n in other_cut_nodes])
+        if cost <= max_cuts and list(reversed(init_state))[node] == '0':
+            valid_hot_nodes.append(node)
+
+    np.random.shuffle(valid_hot_nodes)
+    hot_nodes = []
+    cur_cost = 0
+    for node in valid_hot_nodes:
+        neighbors = list(graph.neighbors(node))
+        temp_cost = len([n for n in neighbors if n in other_cut_nodes])
+        if cur_cost + temp_cost <= max_cuts:
+            hot_nodes.append(node)
+            cur_cost += temp_cost
+        if cur_cost == max_cuts:
+            break
+
+    return cut_nodes, hot_nodes
+
 
 def sim_with_cutting(fragments, wire_path_map, frag_shots, backend, mode="likely",
                      verbose=0):

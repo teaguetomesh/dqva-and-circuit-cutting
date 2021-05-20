@@ -52,7 +52,7 @@ def solve_mis_cut_dqva(init_state, graph, P=1, m=4, threshold=1e-5, cutoff=1,
     # identify nodes incident to a cut (cut_nodes),
     # and choose "hot nodes": a subset of cut_nodes to which we will
     # apply a partial mixer in the first mixing layer
-    cut_nodes, hot_nodes = choose_nodes(graph, subgraphs, cut_edges, max_cuts)
+    cut_nodes, hot_nodes = simple_choose_nodes(graph, subgraphs, cut_edges, max_cuts, init_state)
     uncut_nodes = list(set(graph.nodes).difference(set(cut_nodes)))
 
     # Randomly permute the order of the partial mixers
