@@ -88,7 +88,7 @@ def apply_mixer(circ, alpha, init_state, G, barriers,
     for qubit in mixer_order:
 
         # identify the location of cuts
-        if qubit == swap_qubit and pad_alpha[qubit] != None:
+        if qubit == swap_qubit and pad_alpha[qubit] != None and len(hot_nodes) > 0:
             # find all neighbors of the hot nodes
             hot_neighbors = set.union(*[ set(G.neighbors(node)) for node in hot_nodes ])
             # find all cut qubits in the non-hot graph
