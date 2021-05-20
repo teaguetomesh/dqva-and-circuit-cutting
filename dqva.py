@@ -41,6 +41,7 @@ def solve_mis_cut_dqva(init_state, graph, P=1, m=4, threshold=1e-5, cutoff=1,
     # are available in Qiskit 0.26.0.
     # For now, just use the statevector_simulator
     #backend = Aer.get_backend(name='aer_simulator', method='statevector')
+    backend = Aer.get_backend('qasm_simulator')
 
     # Kernighan-Lin partitions a graph into two relatively equal subgraphs
     partition = kernighan_lin_bisection(graph)
@@ -62,7 +63,7 @@ def solve_mis_cut_dqva(init_state, graph, P=1, m=4, threshold=1e-5, cutoff=1,
 
     # build circuit fragments and stitching data
     def _get_circuit_and_cuts(num_params, init_state, mixer_order):
-        params = [ qiskit.circuit.Parameter('var_{}'.format(num)) for num in range(num_params) ]
+        params = [qiskit.circuit.Parameter('var_{}'.format(num)) for num in range(num_params)]
 
         kwargs = dict(params=params, init_state=init_state,
                       mixer_order=mixer_order, decompose_toffoli=1,
@@ -71,6 +72,10 @@ def solve_mis_cut_dqva(init_state, graph, P=1, m=4, threshold=1e-5, cutoff=1,
         circuit, cuts = dqv_cut_ansatz.gen_dqva(graph, partition, cut_nodes,
                                                 hot_nodes, **kwargs)
         fragments, wire_path_map = qcc.cut_circuit(circuit, cuts)
+        if verbose:
+            print('Cut {}-qubit circuit into {} fragments with ({})-qubits'.format(
+                                             circuit.num_qubits, len(fragments),
+                                             [f.num_qubits for f in fragments]))
         return fragments, wire_path_map
 
     # strip a string of non-digit characters
@@ -87,20 +92,29 @@ def solve_mis_cut_dqva(init_state, graph, P=1, m=4, threshold=1e-5, cutoff=1,
     def _get_circuit_output(params, var_fragments, wire_path_map, frag_shots):
         start_time = time.time()
         fragments = [ _bind(fragment, params) for fragment in var_fragments ]
-        recombined_dist = sim_with_cutting(fragments, wire_path_map, frag_shots, backend)
+        recombined_dist = sim_with_cutting(fragments, wire_path_map, frag_shots,
+                                           backend, verbose=0)
         end_time = time.time()
         if verbose:
-            print('sim_with_cutting elapsed time: {:.3f}'.format(end_time-start_time))
+            print('\t\tsim_with_cutting elapsed time: {:.3f}'.format(end_time-start_time))
         return recombined_dist
 
     # This function will be what scipy.minimize optimizes
     def avg_cost(params, *args):
         # get output probability distribution for the circuit
+        start = time.time()
         probs = _get_circuit_output(params, *args)
 
-        # compute the average Hamming weight
-        avg_weight = sum( prob * sum(map(int,bit_string))
-                          for bit_string, prob in probs.items() )
+        # Compute the average Hamming weight.
+        # Have to check each string to ensure it is a valid IS because of the
+        # noise introduced by the cutting process.
+        avg_weight = sum([prob * hamming_weight(bitstr) for bitstr, prob \
+                          in probs.items() if is_indset(bitstr, graph)])
+        end = time.time()
+
+        if verbose:
+            print('\t\t\tTotal time = {:.3f}, avg weight = {:.4f}'.format(
+                                                         end-start, avg_weight))
 
         # we want to maximize avg_weight <--> minimize -avg_weight
         return -avg_weight
@@ -126,20 +140,29 @@ def solve_mis_cut_dqva(init_state, graph, P=1, m=4, threshold=1e-5, cutoff=1,
 
             # Begin Inner variational loop
             # TODO: fix the num_params computation
-            num_params = 2 * (len(cur_init_state) - hamming_weight(cur_init_state)) + 1
+            num_params = P * (graph.number_of_nodes() + 1)
             init_params = np.random.uniform(low=0.0, high=2*np.pi, size=num_params)
-            if verbose:
-                print('\tNum params =', num_params)
-                print('\tCurrent Mixer Order:', cur_permutation)
 
             # build parameterized fragments and optimize
             cut_start_time = time.time()
-            fragments, wire_path_map = _get_circuit_and_cuts(num_params,
+            # Sometimes the cutter will fail to find any cuts, in which case
+            # the code will break down. Loop to prevent this
+            fragments = [None]
+            counter = 0
+            while len(fragments) == 1:
+                counter += 1
+                fragments, wire_path_map = _get_circuit_and_cuts(num_params,
                                                 cur_init_state, cur_permutation)
+                if len(fragments) == 1:
+                    cur_permutation = list(np.random.permutation(list(graph.nodes)))
+                if counter > 100:
+                    raise Exception('Unable to find viable cuts after 100 iterations!')
             frag_shots = shots // qmm.fragment_variants(wire_path_map)
             cut_end_time = time.time()
             if verbose:
-                print('Split circuit into {} subcircuits with {} qubits in {:.3f} s'.format(
+                print('\tNum params =', num_params)
+                print('\tCurrent Mixer Order:', cur_permutation)
+                print('\tSplit circuit into {} subcircuits with {} qubits in {:.3f} s'.format(
                        len(fragments), [len(frag.qubits) for frag in fragments],
                        cut_end_time - cut_start_time))
 
@@ -149,6 +172,7 @@ def solve_mis_cut_dqva(init_state, graph, P=1, m=4, threshold=1e-5, cutoff=1,
             opt_cost = out['fun']
             if verbose:
                 print('\tOptimal cost:', opt_cost)
+                print('\t{} function evaluations'.format(out['nfev']))
 
             # Get the results of the optimized circuit
             probs = _get_circuit_output(opt_params, *args)
@@ -170,7 +194,8 @@ def solve_mis_cut_dqva(init_state, graph, P=1, m=4, threshold=1e-5, cutoff=1,
             inner_history = {'mixer_round':mixer_round, 'inner_round':inner_round,
                              'cost':opt_cost, 'init_state':cur_init_state,
                              'mixer_order':copy.copy(cur_permutation),
-                             'num_params':num_params}
+                             'num_params':num_params,
+                             'frag_qubits':[f.num_qubits for f in fragments]}
             mixer_history.append(inner_history)
 
             # If no improvement was made, break and go to next mixer round
@@ -192,7 +217,7 @@ def solve_mis_cut_dqva(init_state, graph, P=1, m=4, threshold=1e-5, cutoff=1,
         history.append(mixer_history)
 
         # Choose a new permutation of the mixer unitaries
-        cur_permutation = list(np.random.permutation(list(G.nodes)))
+        cur_permutation = list(np.random.permutation(list(graph.nodes)))
 
     print('\tRETURNING, best hamming weight:', new_hamming_weight)
     return best_indset, best_params, best_init_state, best_perm, partition, cut_nodes, hot_nodes, history
