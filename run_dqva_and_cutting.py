@@ -28,9 +28,5 @@ for rounds in range(4):
     init_state = out[0]
     full_history.append(out)
 
-if cutting:
-    savefn = 'dqva_and_cutting_1cuts.pickle'
-else:
-    savefn = 'dqva_and_NO_cutting.pickle'
-with open('benchmark_results/'+savefn, 'wb') as pf:
+with open('benchmark_results/dqva_and_cutting_0cuts.pickle', 'wb') as pf:
     pickle.dump((G, full_history), pf)
