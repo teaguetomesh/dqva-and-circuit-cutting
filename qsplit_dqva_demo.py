@@ -1,13 +1,17 @@
 #!/usr/bin/env python3
 
-import sys, glob, qiskit
+import sys, glob, itertools
+import numpy as np
 import matplotlib.pyplot as plt
 from networkx.algorithms.community.kernighan_lin import kernighan_lin_bisection
+import qiskit
+
+import utils.graph_funcs as graph_funcs
+import utils.helper_funcs as helper_funcs
 
 import qsplit_circuit_cutter as qcc
 import qsplit_mlrecon_methods as qmm
-
-from qsplit_dqva_methods import *
+import qsplit_dqva_methods as qdm
 
 show_graphs = len(sys.argv) > 1
 
@@ -27,29 +31,21 @@ dist_cutoff = 1e-4
 # pick a graph
 test_graphs = glob.glob("benchmark_graphs/N8_p30_graphs/*")
 test_graph = np.random.choice(test_graphs)
-graph = graph_from_file(test_graph)
+graph = graph_funcs.graph_from_file(test_graph)
 qubit_num = graph.number_of_nodes()
 
 # bisect the graph
-kl_bisection = kernighan_lin_bisection(graph)
-subgraphs, cut_edges = get_subgraphs(graph, kl_bisection)
+partition = kernighan_lin_bisection(graph)
+subgraphs, cut_edges = graph_funcs.get_subgraphs(graph, partition)
 
-# identify nodes incident to a cut, as well as their complement
-cut_nodes = []
-for edge in cut_edges:
-    cut_nodes.extend(edge)
+# identify nodes incident to a cut (cut_nodes), as well as their complement (uncut_nodes)
+# choose "hot nodes": nodes incident to a cut to which we will nonetheless
+#   apply a partial mixer in the first mixing layer
+cut_nodes, hot_nodes = qdm.choose_nodes(graph, subgraphs, cut_edges, max_cuts)
 uncut_nodes = list(set(graph.nodes).difference(set(cut_nodes)))
-
-# choose a random mixing order
-mixer_order = list(range(qubit_num))
-np.random.shuffle(mixer_order)
 
 # set the initial state
 init_state = "0" * qubit_num
-
-# choose "hot nodes": nodes incident to a cut to which we will nonetheless
-#   apply a partial mixer in the first mixing layer
-hot_nodes = choose_hot_nodes(graph, subgraphs, cut_nodes, uncut_nodes, max_cuts)
 
 # set variational parameters
 # todo: don't apply phase separators in the last mixing layer
@@ -57,13 +53,17 @@ uncut_nonzero = len([n for n in uncut_nodes if init_state[n] != "1"])
 num_params = mixing_layers * (uncut_nonzero + 1) + len(hot_nodes)
 params = list(range(1, num_params + 1))
 
+# choose a random mixing order
+mixer_order = list(range(qubit_num))
+np.random.shuffle(mixer_order)
+
 ##########################################################################################
 # generate and cut a circuit
 
-circuit, cuts = gen_cut_dqva(graph, kl_bisection, uncut_nodes, mixing_layers=mixing_layers,
-                             params=params, init_state=init_state, barriers=barriers,
-                             decompose_toffoli=decompose_toffoli, mixer_order=mixer_order,
-                             hot_nodes=hot_nodes, verbose=verbosity)
+circuit, cuts = qdm.gen_cut_dqva(graph, partition, cut_nodes, mixing_layers=mixing_layers,
+                                 params=params, init_state=init_state, barriers=barriers,
+                                 decompose_toffoli=decompose_toffoli, mixer_order=mixer_order,
+                                 hot_nodes=hot_nodes, verbose=verbosity)
 print("circuit:")
 print(circuit)
 print("cuts:")
@@ -117,5 +117,5 @@ if verbosity > 0:
     print(chop_dist(recombined_dist))
     print()
 
-recombined_fidelity = fidelity(recombined_dist, actual_dist)
+recombined_fidelity = qdm.fidelity(recombined_dist, actual_dist)
 print("fielity:",recombined_fidelity)
