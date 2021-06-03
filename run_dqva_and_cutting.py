@@ -1,4 +1,4 @@
-
+#!/usr/bin/env python
 import sys, os, argparse, glob
 import dqva
 import partition_no_cuts
@@ -18,6 +18,8 @@ def parse_args():
                          help='Number of partition rounds')
     parser.add_argument('--shots', type=int, default=8192,
                         help='Number of shots')
+    parser.add_argument('--rep', type=int, default=1,
+                        help='Rep number for labelling')
     args = parser.parse_args()
     return args
 
@@ -60,7 +62,7 @@ def main():
             init_state = out[0]
             full_history.append(out)
 
-        savefn = 'dqva_{}_{}cuts.pickle'.format(graphname, args.numcuts)
+        savefn = 'dqva_{}_{}cuts_rep{}.pickle'.format(graphname, args.numcuts, args.rep)
         with open(cur_savepath+savefn, 'wb') as pf:
             pickle.dump((G, full_history), pf)
 
