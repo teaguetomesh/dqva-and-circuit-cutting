@@ -21,13 +21,16 @@ def gen_binary_str(n, bitstr, ret):
         ret.append(bitstr)
     return ret
 
-def brute_force_search(G):
+def brute_force_search(G, lim=None):
     num_nodes = len((list(G.nodes)))
     bitstrs = gen_binary_str(num_nodes, '', [])
-    best_str, best_hamming_weight = '', 0
+    if lim is not None:
+        bitstrs = [b for b in bitstrs if hamming_weight(b) >= lim]
+    best_hamming_weight = 0
     for bitstr in bitstrs:
         if is_indset(bitstr, G) and hamming_weight(bitstr) > best_hamming_weight:
-            best_str = bitstr
             best_hamming_weight = hamming_weight(bitstr)
-    return best_str, best_hamming_weight
+    best_strs = [b for b in bitstrs if hamming_weight(b) == best_hamming_weight \
+                                       and is_indset(b, G)]
+    return best_strs, best_hamming_weight
 
