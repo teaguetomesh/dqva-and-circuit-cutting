@@ -5,8 +5,6 @@ gurobi.log
 .DS_Store
 *.pckl
 *.pyc
-
-*.txt
 !*_logs.txt
 paper_plots/
 qiskit_helper_functions/
