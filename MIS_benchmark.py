@@ -4,7 +4,7 @@ to solve the MIS problem
 """
 import os, sys, argparse, glob
 import numpy as np
-import dqva
+import mis
 import pickle, random
 from utils.graph_funcs import graph_from_file, is_indset
 
@@ -141,26 +141,26 @@ def main():
 
         for rep in rep_range:
             if args.alg == 'qaoa' or args.alg == 'qaoaWStart':
-                out = dqva.solve_mis_qaoa(init_state, G, P=args.P, m=args.m,
+                out = mis.solve_mis_qaoa(init_state, G, P=args.P, m=args.m,
                                           sim='aer', shots=args.shots,
                                           verbose=args.v, threads=args.threads)
             elif args.alg == 'dqva':
-                out = dqva.solve_mis_dqva(init_state, G, P=args.P, m=args.m,
+                out = mis.solve_mis_dqva(init_state, G, P=args.P, m=args.m,
                                          sim='aer', shots=args.shots,
                                          verbose=args.v, threads=args.threads)
             elif args.alg == 'qls':
-                out = dqva.solve_mis_qls(init_state, G, P=args.P, m=args.m,
+                out = mis.solve_mis_qls(init_state, G, P=args.P, m=args.m,
                                           sim='aer', shots=args.shots,
                                           verbose=args.v, param_lim=args.plim,
                                           threads=args.threads)
             elif args.alg == 'cut_dqva':
-                out = dqva.solve_mis_cut_dqva()
+                out = mis.solve_mis_cut_dqva()
 
             # We can also hot start the optimization to escape local minima
             elif args.alg == 'qaoaHotStart':
                 out_results = []
                 for i, init_state in enumerate(init_states):
-                    out = dqva.solve_mis_qaoa(init_state, G, P=args.P, m=args.m,
+                    out = mis.solve_mis_qaoa(init_state, G, P=args.P, m=args.m,
                                               sim=args.sim, shots=args.shots,
                                               verbose=args.v)
                     out_results.append((i+1, out))
@@ -168,7 +168,7 @@ def main():
             elif args.alg == 'dqvaHotStart':
                 out_results = []
                 for i, init_state in enumerate(init_states):
-                    out = dqva.solve_mis_dqva(init_state, G, P=args.P, m=args.m,
+                    out = mis.solve_mis_dqva(init_state, G, P=args.P, m=args.m,
                                               sim=args.sim, shots=args.shots,
                                               verbose=args.v)
                     out_results.append((i+1, out))
@@ -176,7 +176,7 @@ def main():
             elif args.alg == 'qlsHotStart':
                 out_results = []
                 for i, init_state in enumerate(init_states):
-                    out = dqva.solve_mis_qls(init_state, G, P=args.P, m=args.m,
+                    out = mis.solve_mis_qls(init_state, G, P=args.P, m=args.m,
                                             sim=args.sim, shots=args.shots,
                                             verbose=args.v, param_lim=args.plim)
                     out_results.append((i+1, out))

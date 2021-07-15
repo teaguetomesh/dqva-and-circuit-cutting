@@ -1,3 +1,14 @@
+"""
+07/15/2021 - Teague Tomesh
+
+The functions in the file are used to generate the Quantum Alternatiing
+Operator Ansatz (QAO-Ansatz) for solving constrained combinatorial optimization
+problems.
+
+Note that the QAO-Ansatz differs from the typical Quantum Approximate Optimization
+Algorithm in the structure of the quantum circuits it uses. In this file, all
+mentions of "qaoa" actually refer to the QAO-Ansatz.
+"""
 import numpy as np
 from qiskit import QuantumCircuit, AncillaRegister
 from qiskit.circuit import ControlledGate

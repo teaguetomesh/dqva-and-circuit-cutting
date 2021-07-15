@@ -5,7 +5,7 @@ import numpy as np
 
 sys.path.append('../')
 
-import qsplit_mlrecon_methods as qmm
+import qsplit.qsplit_mlrecon_methods as qmm
 
 
 # (1) idetify cut_nodes and uncut_nodes (nodes incident to a cut and their complement)

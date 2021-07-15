@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 from qiskit import *
 from qiskit.quantum_info import Statevector
 
-import dqva
+import mis
 
 from utils.graph_funcs import *
 from utils.helper_funcs import *
@@ -35,7 +35,7 @@ def get_data(sample_graphs):
         print('\n\nBEGIN QAOA\n\n')
 
         for P in [1,2,3]:
-            output = dqva.solve_mis_qaoa(init_state, G, P=P, mixer_order=mixer_order, sim='qasm')
+            output = mis.solve_mis_qaoa(init_state, G, P=P, mixer_order=mixer_order, sim='qasm')
             ap_ratio = hamming_weight(output[0]) / opt_mis
             mixer_count = nq * P
             print('-'*30)
@@ -48,7 +48,7 @@ def get_data(sample_graphs):
         print('\n\nBEGIN DQVA\n\n')
 
         for plim in [3, 9, 15, 21]:
-            output = dqva.solve_mis_dqva(init_state, G, m=5, mixer_order=mixer_order, sim='qasm', param_lim=plim)
+            output = mis.solve_mis_dqva(init_state, G, m=5, mixer_order=mixer_order, sim='qasm', param_lim=plim)
             ap_ratio = hamming_weight(output[0]) / opt_mis
             mixer_count = plim - 1
             print('-'*30)

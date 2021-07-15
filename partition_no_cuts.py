@@ -12,8 +12,8 @@ from qiskit.quantum_info import Statevector
 
 from ansatz import subgraph_dqva
 
-import qsplit_circuit_cutter as qcc
-import qsplit_mlrecon_methods as qmm
+import qsplit.qsplit_circuit_cutter as qcc
+import qsplit.qsplit_mlrecon_methods as qmm
 
 from utils.graph_funcs import *
 from utils.helper_funcs import *

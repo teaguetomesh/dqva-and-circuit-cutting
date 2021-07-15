@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 import sys, os, argparse, glob
-import dqva
+import mis
 import partition_no_cuts
 import pickle
 import networkx as nx
@@ -56,7 +56,7 @@ def main():
         for rounds in range(args.rounds):
             print('-------------- ROUND {} BEGIN --------------\n\n'.format(rounds+1))
             if args.numcuts > 0:
-                out = dqva.solve_mis_cut_dqva(init_state, G, m=1, verbose=1,
+                out = mis.solve_mis_cut_dqva(init_state, G, m=1, verbose=1,
                                         shots=args.shots, max_cuts=args.numcuts)
             else:
                 out = partition_no_cuts.solve_mis_no_cut_dqva(init_state, G, m=1,

@@ -1,6 +1,6 @@
 import qiskit
-import qsplit_circuit_cutter as qcc
-import qsplit_mlrecon_methods as qmm
+import qsplit.qsplit_circuit_cutter as qcc
+import qsplit.qsplit_mlrecon_methods as qmm
 from utils import cutting_funcs
 
 # Build a simple circuit
