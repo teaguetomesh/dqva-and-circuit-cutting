@@ -55,7 +55,5 @@ sympy==1.8
 tensornetwork==0.4.5
 threadpoolctl==2.1.0
 typing-extensions==3.10.0.0
-urllib3==1.26.4
-websockets==9.0.2
 yfinance==0.1.59
 zipp==3.4.1
