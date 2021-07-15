@@ -144,6 +144,11 @@ def solve_mis_cut_dqva(init_state, graph, P=1, m=4, threshold=1e-5, cutoff=1,
             counter = 0
             while len(fragments) == 1 or len(found_cuts) == 0:
                 counter += 1
+                if counter > 100:
+                    print('Unable to find viable cuts after 100 iterations!')
+                    print('Returning current solution:', best_indset)
+                    return best_indset, best_params, best_init_state, best_perm, partition, cut_nodes, hot_nodes, history
+
                 # Kernighan-Lin partitions a graph into two relatively equal subgraphs
                 partition = kernighan_lin_bisection(graph)
 
@@ -153,15 +158,16 @@ def solve_mis_cut_dqva(init_state, graph, P=1, m=4, threshold=1e-5, cutoff=1,
                 # and choose "hot nodes": a subset of cut_nodes to which we will
                 # apply a partial mixer in the first mixing layer
                 cut_nodes, hot_nodes = simple_choose_nodes(graph, subgraphs, cut_edges, max_cuts, init_state)
+                if len(hot_nodes) == 0:
+                  # no hot nodes were selected -> will cause an assertion error in gen_dqva
+                  # repeat the cutting process to find a better selection of nodes
+                  continue
                 uncut_nodes = list(set(graph.nodes).difference(set(cut_nodes)))
 
                 fragments, wire_path_map, found_cuts = _get_circuit_and_cuts(num_params,
                                                 cur_init_state, cur_permutation)
                 if len(fragments) == 1 or len(found_cuts) == 0:
                     cur_permutation = list(np.random.permutation(list(graph.nodes)))
-                if counter > 100:
-                    print('Unable to find viable cuts after 100 iterations!')
-                    print('Returning current solution:', best_indset)
 
             frag_shots = shots // qmm.fragment_variants(wire_path_map)
             cut_end_time = time.time()

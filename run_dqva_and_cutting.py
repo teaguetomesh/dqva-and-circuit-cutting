@@ -34,7 +34,9 @@ def main():
 
     all_graphs = glob.glob(DQVAROOT + args.graph)
 
-    savepath = DQVAROOT + 'benchmark_results/dqva_{}cuts/'.format(args.numcuts)
+    graphsave = args.graph.split('/')[1].strip('_graphs')
+
+    savepath = DQVAROOT + 'benchmark_results/{}/dqva_{}cuts/'.format(graphsave, args.numcuts)
     if not os.path.isdir(savepath):
         os.mkdir(savepath)
 
