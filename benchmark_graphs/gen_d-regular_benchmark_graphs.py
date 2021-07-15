@@ -2,8 +2,8 @@ import glob
 import networkx as nx
 
 dirs = []
-for n in range(26, 27):
-    temp_dirs = glob.glob('N{}*'.format(n))
+for n in range(18, 26, 2):
+    temp_dirs = glob.glob('N{}_d3_graphs*'.format(n))
     dirs.extend(temp_dirs)
 print('Dirs:', dirs)
 
