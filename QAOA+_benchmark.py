@@ -20,8 +20,8 @@ def parse_args():
                         help='P-value for algorithm')
     parser.add_argument('--sim', type=str, default='qasm',
                         help='Choose the simulation backend')
-    #parser.add_argument('--reps', type=int, default=4,
-    #                    help='Number of repetitions to run')
+    parser.add_argument('--reps', type=int, default=4,
+                        help='Number of repetitions to run')
     #parser.add_argument('-m', type=int, default=3,
     #                    help='Number of mixer rounds')
     #parser.add_argument('--shots', type=int, default=8192,
@@ -63,37 +63,40 @@ def main():
         print(graphname, G.edges())
         nq = len(G.nodes)
 
-        data_list = []
-        for Lambda in np.arange(0.1, 10, 0.7):
-            data_dict = {'lambda':Lambda, 'graph':graphfn}
-            out = qaoa_plus.solve_mis(args.P, G, Lambda)
+        for i in range(args.reps):
+            print('Rep {}/{}'.format(i+1, args.reps))
 
-            # Compute the approximation ratio by pruning the resulting measurements
-            ratio = qaoa_plus.get_approximation_ratio(out, args.P, G)
-            data_dict['ratio'] = ratio
+            data_list = []
+            for Lambda in np.arange(0.1, 10, 0.7):
+                data_dict = {'lambda':Lambda, 'graph':graphfn}
+                out = qaoa_plus.solve_mis(args.P, G, Lambda)
 
-            ranked_probs = qaoa_plus.get_ranked_probs(args.P, G, out['x'])
-            for i, rp in enumerate(ranked_probs):
-                if rp[2]:
-                    data_dict['rank'] = i+1
-                    data_dict['prob'] = rp[1]*100
-                    break
+                # Compute the approximation ratio by pruning the resulting measurements
+                ratio = qaoa_plus.get_approximation_ratio(out, args.P, G)
+                data_dict['ratio'] = ratio
 
-            if 'rank' not in data_dict.keys():
-                data_dict['rank'] = -1
-                data_dict['prob'] = 0
+                ranked_probs = qaoa_plus.get_ranked_probs(args.P, G, out['x'])
+                for i, rp in enumerate(ranked_probs):
+                    if rp[2]:
+                        data_dict['rank'] = i+1
+                        data_dict['prob'] = rp[1]*100
+                        break
 
-            print('lambda: {:.3f}, ratio = {:.3f}, rank = {}, prob = {:.3f}'.format(
-                      Lambda, ratio, data_dict['rank'], data_dict['prob']))
+                if 'rank' not in data_dict.keys():
+                    data_dict['rank'] = -1
+                    data_dict['prob'] = 0
 
-            data_list.append(data_dict)
+                print('lambda: {:.3f}, ratio = {:.3f}, rank = {}, prob = {:.3f}'.format(
+                          Lambda, ratio, data_dict['rank'], data_dict['prob']))
 
-        # Save the results
-        savename = '{}_{}_P{}_{}_ext.pickle'.format(graphname, args.alg, args.P,
-                                                args.sim)
+                data_list.append(data_dict)
 
-        with open(cur_savepath+savename, 'ab') as pf:
-            pickle.dump(data_list, pf)
+            # Save the results
+            savename = '{}_{}_P{}_{}_rep{}.pickle'.format(graphname, args.alg, args.P,
+                                                      args.sim, i+1)
+
+            with open(cur_savepath+savename, 'ab') as pf:
+                pickle.dump(data_list, pf)
 
 if __name__ == '__main__':
     main()
