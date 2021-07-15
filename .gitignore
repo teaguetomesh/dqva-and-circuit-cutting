@@ -8,3 +8,6 @@ gurobi.log
 !*_logs.txt
 paper_plots/
 qiskit_helper_functions/
+G1_14node_qaoaW.txt
+papers/
+figures/
