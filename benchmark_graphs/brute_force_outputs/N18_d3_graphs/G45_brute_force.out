@@ -1,0 +1,8 @@
+N18_d3_graphs, G45
+Optimal MIS is 8
+Optimal MIS:
+	000001101111001100, valid: True
+	001001011101001100, valid: True
+	001011011100001100, valid: True
+	110100100000110011, valid: True
+	110100100010110001, valid: True
