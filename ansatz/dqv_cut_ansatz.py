@@ -57,7 +57,7 @@ def apply_mixer(circ, alpha, init_state, G, barriers,
         mixer_order = list(G.nodes)
     if verbose > 0:
         print('APPLYING MIXER UNITARY')
-        print('\tMixer order:', mixer_order, 'Cut nodes:', cut_nodes, 'Hot nodes:', hot_nodes)
+        print('\t\tMixer order:', mixer_order, 'Cut nodes:', cut_nodes, 'Hot nodes:', hot_nodes)
 
     # Pad the given alpha parameters to account for the zeroed angles
     pad_alpha = [None]*len(init_state)
@@ -71,7 +71,7 @@ def apply_mixer(circ, alpha, init_state, G, barriers,
             pad_alpha[qubit] = alpha[next_alpha]
             next_alpha += 1
     if verbose > 0:
-        print('\tinit_state: {}\n\talpha: {}\n\tpad_alpha: {}'.format(init_state,
+        print('\t\tinit_state: {}\n\t\talpha: {}\n\t\tpad_alpha: {}'.format(init_state,
                                                               alpha, pad_alpha))
 
     cuts = [] # initialize a trivial set of cuts
@@ -83,12 +83,12 @@ def apply_mixer(circ, alpha, init_state, G, barriers,
             swap_qubit = qubit
             break
     if verbose:
-        print('\tSwap qubit =', swap_qubit)
+        print('\t\tSwap qubit =', swap_qubit)
 
     for qubit in mixer_order:
 
         # identify the location of cuts
-        if qubit == swap_qubit and pad_alpha[qubit] != None and len(hot_nodes) > 0:
+        if qubit == swap_qubit and len(hot_nodes) > 0:
             # find all neighbors of the hot nodes
             hot_neighbors = set.union(*[ set(G.neighbors(node)) for node in hot_nodes ])
             # find all cut qubits in the non-hot graph
@@ -97,7 +97,7 @@ def apply_mixer(circ, alpha, init_state, G, barriers,
             # cut after all gates on adj_cut_nodes
             cuts = [ ( qubit, num_gates(circ,qubit) ) for qubit in adj_cut_qubits ]
             if verbose:
-                print('\tcuts:', cuts)
+                print('\t\tcuts:', cuts)
 
         if pad_alpha[qubit] == None or not G.has_node(qubit):
             # Turn off mixers for qubits which are already 1
@@ -107,7 +107,7 @@ def apply_mixer(circ, alpha, init_state, G, barriers,
         anc_idx = subgraph_dict[qubit]
 
         if verbose > 0:
-            print('\tqubit:', qubit, 'num_qubits =', len(circ.qubits),
+            print('\t\tqubit:', qubit, 'num_qubits =', len(circ.qubits),
                   'neighbors:', neighbors)
 
         # construct a multi-controlled Toffoli gate, with open-controls on q's neighbors
@@ -249,7 +249,6 @@ def gen_dqva(G, partition, cut_nodes, hot_nodes, P=1, params=[], init_state=None
         _cuts = apply_mixer(dqva_circ, alphas, init_state, G, barriers,
                             decompose_toffoli, mixer_order, subgraph_dict,
                             cut_nodes, hot_nodes, verbose=verbose)
-        print('i =', i, 'and cuts =', _cuts)
 
         if barriers > 0:
             dqva_circ.barrier()
@@ -266,7 +265,10 @@ def gen_dqva(G, partition, cut_nodes, hot_nodes, P=1, params=[], init_state=None
             cuts = _cuts
             hot_nodes = []
 
-    print('Outside loop, cuts =', cuts)
+    if verbose > 0:
+        print('\tIn gen_dqva: Outside loop, cuts =', cuts)
+        print('Ansatz:')
+        print(dqva_circ.draw(fold=800))
 
     if decompose_toffoli > 1:
         #basis_gates = ['x', 'cx', 'barrier', 'crx', 'tdg', 't', 'rz', 'h']
@@ -293,6 +295,7 @@ def gen_dqva(G, partition, cut_nodes, hot_nodes, P=1, params=[], init_state=None
     # remove trivial cuts at the beginning or end of the circuit
     fixed_cuts = [ (qubit,cut_loc) for qubit, cut_loc in fixed_cuts
                     if cut_loc not in [ 0, num_gates(dqva_circ,qubit) ] ]
-    print('fixed cuts:', fixed_cuts)
+    if verbose > 0:
+        print('\tIn gen_dqva: fixed cuts:', fixed_cuts)
 
-    return dqva_circ, fixed_cuts
+    return dqva_circ, fixed_cuts, mixer_order

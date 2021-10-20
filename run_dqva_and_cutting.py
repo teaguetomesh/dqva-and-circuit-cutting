@@ -36,7 +36,8 @@ def main():
 
     graphsave = args.graph.split('/')[1].strip('_graphs')
 
-    savepath = DQVAROOT + 'benchmark_results/{}/dqva_{}cuts/'.format(graphsave, args.numcuts)
+    #savepath = DQVAROOT + 'benchmark_results/{}/dqva_{}cuts/'.format(graphsave, args.numcuts)
+    savepath = DQVAROOT + f'benchmark_results/isca_debug/{graphsave}_{args.numcuts}cuts/'
     if not os.path.isdir(savepath):
         os.mkdir(savepath)
 
@@ -50,6 +51,8 @@ def main():
         nq = len(G.nodes)
 
         print('Loaded graph: {}, with {} nodes'.format(graphfn, nq))
+        print('Nodes:', G.nodes)
+        print('Edges:', G.edges)
 
         init_state = '0'*G.number_of_nodes()
         full_history = []
@@ -57,7 +60,8 @@ def main():
             print('-------------- ROUND {} BEGIN --------------\n\n'.format(rounds+1))
             if args.numcuts > 0:
                 out = mis.solve_mis_cut_dqva(init_state, G, m=1, verbose=1,
-                                        shots=args.shots, max_cuts=args.numcuts)
+                                        shots=args.shots, max_cuts=args.numcuts,
+                                        num_frags=2)
             else:
                 out = partition_no_cuts.solve_mis_no_cut_dqva(init_state, G, m=1,
                                                     shots=args.shots, verbose=1)
