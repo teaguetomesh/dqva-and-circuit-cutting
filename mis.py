@@ -38,36 +38,51 @@ def solve_mis_cut_dqva(init_state, graph, P=1, m=4, threshold=1e-5, cutoff=1,
     if max_cuts < num_frags-1:
         raise ValueError(f'Number of cuts {max_cuts} is too few for {num_frags} fragments')
 
-    # Initialization
-    # NOTE: the backend to use is very version dependent.
-    # Qiskit 0.23.2 does not support the newer Aer_simulators that
-    # are available in Qiskit 0.26.0.
-    # For now, just use the statevector_simulator
-    #backend = Aer.get_backend(name='aer_simulator', method='statevector')
-    backend = Aer.get_backend('qasm_simulator')
-
-    # Randomly permute the order of the partial mixers
-    cur_permutation = list(np.random.permutation(list(graph.nodes)))
-
-    history = []
 
     # build circuit fragments and stitching data
     def _get_circuit_and_cuts(num_params, init_state, mixer_order):
+
         params = [qiskit.circuit.Parameter('var_{}'.format(num)) for num in range(num_params)]
 
         kwargs = dict(params=params, init_state=init_state,
                       mixer_order=mixer_order, decompose_toffoli=1,
-                      verbose=0, P=P)
+                      verbose=1, P=P)
+
+        fragments = [None]
+        #counter = 0
+        cuts = []
+        #while len(fragments) != num_frags or len(cuts) == 0:
+            #counter += 1
+            #if counter > 100:
+            #    print('Unable to find viable cuts after 100 iterations!')
+            #    print('Returning current solution:', best_indset)
+            #    return best_indset, best_params, best_init_state, best_perm, partition, cut_nodes, hot_nodes, history
+
+
+            # identify nodes incident to a cut (cut_nodes),
+            # and choose "hot nodes": a subset of cut_nodes to which we will
+            # apply a partial mixer in the first mixing layer
+            #cut_nodes, hot_nodes = simple_choose_nodes(graph, subgraphs, cut_edges, max_cuts, init_state)
+        cut_nodes, hot_nodes = choose_nodes(graph, subgraphs, cut_edges, max_cuts)
+        print(f'Out of cut nodes {cut_nodes}, selected hot nodes {hot_nodes}')
+
+        if len(hot_nodes) == 0:
+          # no hot nodes were selected -> will cause an assertion error in gen_dqva
+          # repeat the cutting process to find a better selection of nodes
+          #continue
+          raise Exception('No hot nodes selected!')
 
         circuit, cuts, fixed_mixer_order = dqv_cut_ansatz.gen_dqva(
                                graph, partition, cut_nodes, hot_nodes, **kwargs)
+
         fragments, wire_path_map = qcc.cut_circuit(circuit, cuts)
+
         if verbose:
             print('\tFound cut locations:', cuts)
             print(f'\tCut {circuit.num_qubits}-qubit circuit into {len(fragments)}',
                   f'fragments with ({[f.num_qubits for f in fragments]})-qubits')
 
-        return fragments, wire_path_map, cuts, fixed_mixer_order, len(circuit.parameters)
+        return fragments, wire_path_map, cuts, fixed_mixer_order, len(circuit.parameters), cut_nodes, hot_nodes
 
     # strip a string of non-digit characters
     def _digit_substr(string):
@@ -109,6 +124,25 @@ def solve_mis_cut_dqva(init_state, graph, P=1, m=4, threshold=1e-5, cutoff=1,
         # we want to maximize avg_weight <--> minimize -avg_weight
         return -avg_weight
 
+    # Initialization
+    # NOTE: the backend to use is very version dependent.
+    # Qiskit 0.23.2 does not support the newer Aer_simulators that
+    # are available in Qiskit 0.26.0.
+    # For now, just use the statevector_simulator
+    #backend = Aer.get_backend(name='aer_simulator', method='statevector')
+    backend = Aer.get_backend('qasm_simulator')
+
+    history = []
+
+    # Kernighan-Lin partitions a graph into two relatively equal subgraphs
+    partition = kernighan_lin_bisection(graph)
+
+    subgraphs, cut_edges = get_subgraphs(graph, partition)
+    print(f'Partitioned graph into subgraphs = {[list(sg.nodes) for sg in subgraphs]}, with cut edges = {cut_edges}')
+
+    # Randomly permute the order of the partial mixers
+    cur_permutation = list(np.random.permutation(list(graph.nodes)))
+
     # Begin outer optimization loop
     best_indset = init_state
     best_init_state = init_state
@@ -118,6 +152,7 @@ def solve_mis_cut_dqva(init_state, graph, P=1, m=4, threshold=1e-5, cutoff=1,
 
     # Randomly permute the order of mixer unitaries m times
     for mixer_round in range(1, m+1):
+
         mixer_history = []
         inner_round = 1
         new_hamming_weight = hamming_weight(cur_init_state)
@@ -138,39 +173,12 @@ def solve_mis_cut_dqva(init_state, graph, P=1, m=4, threshold=1e-5, cutoff=1,
             cut_start_time = time.time()
             # Sometimes the cutter will fail to find any cuts, in which case
             # the code will break down. Loop to prevent this
-            fragments = [None]
-            counter = 0
             print('\nAttempting to locate viable cuts...')
-            while len(fragments) != num_frags or len(found_cuts) == 0:
-                counter += 1
-                if counter > 100:
-                    print('Unable to find viable cuts after 100 iterations!')
-                    print('Returning current solution:', best_indset)
-                    return best_indset, best_params, best_init_state, best_perm, partition, cut_nodes, hot_nodes, history
-
-                # Kernighan-Lin partitions a graph into two relatively equal subgraphs
-                partition = kernighan_lin_bisection(graph)
-
-                subgraphs, cut_edges = get_subgraphs(graph, partition)
-                print(f'Partitioned graph into subgraphs = {[list(sg.nodes) for sg in subgraphs]}, with cut edges = {cut_edges}')
-
-                # identify nodes incident to a cut (cut_nodes),
-                # and choose "hot nodes": a subset of cut_nodes to which we will
-                # apply a partial mixer in the first mixing layer
-                cut_nodes, hot_nodes = simple_choose_nodes(graph, subgraphs, cut_edges, max_cuts, init_state)
-                print(f'Out of cut nodes {cut_nodes}, selected hot nodes {hot_nodes}')
-                if len(hot_nodes) == 0:
-                  # no hot nodes were selected -> will cause an assertion error in gen_dqva
-                  # repeat the cutting process to find a better selection of nodes
-                  continue
-                uncut_nodes = list(set(graph.nodes).difference(set(cut_nodes)))
-
-                fragments, wire_path_map, found_cuts, fixed_mixer_order, num_used_params = _get_circuit_and_cuts(
-                                    num_params, cur_init_state, cur_permutation)
-                if fixed_mixer_order != cur_permutation:
-                    print(f'Updated mixer ordering to {fixed_mixer_order}')
-                    cur_permutation = fixed_mixer_order
-                print()
+            fragments, wire_path_map, found_cuts, fixed_mixer_order, num_used_params, cut_nodes, hot_nodes = _get_circuit_and_cuts(
+                                num_params, cur_init_state, cur_permutation)
+            if fixed_mixer_order != cur_permutation:
+                print(f'Updated mixer ordering to {fixed_mixer_order}')
+                cur_permutation = fixed_mixer_order
 
             frag_shots = shots // qmm.fragment_variants(wire_path_map)
             cut_end_time = time.time()
