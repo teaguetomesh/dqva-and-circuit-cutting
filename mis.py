@@ -48,9 +48,9 @@ def solve_mis_cut_dqva(init_state, graph, P=1, m=4, threshold=1e-5, cutoff=1,
                       mixer_order=mixer_order, decompose_toffoli=1,
                       verbose=1, P=P)
 
-        fragments = [None]
+        #fragments = [None]
         #counter = 0
-        cuts = []
+        #cuts = []
         #while len(fragments) != num_frags or len(cuts) == 0:
             #counter += 1
             #if counter > 100:

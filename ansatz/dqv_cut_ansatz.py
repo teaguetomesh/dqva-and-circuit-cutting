@@ -159,6 +159,25 @@ def num_gates(circuit, qubit):
     graph.remove_all_ops_named("barrier")
     return sum([ qubit in node.qargs for node in graph.topological_op_nodes() ])
 
+
+def tie_subgraph_qubits_together(circ, subgraph, anc_idx):
+    print('In tie together:', type(subgraph), subgraph.nodes)
+    identity_circ = QuantumCircuit(len(subgraph.nodes)+1, name='Id')
+    for i in range(len(subgraph.nodes)+1):
+        identity_circ.id(i)
+
+    identity_gate = identity_circ.to_instruction()
+
+    target_qubits = []
+    for i, qubit in enumerate(circ.qubits):
+        if i in subgraph.nodes:
+            target_qubits.append(qubit)
+    for i, ancilla in enumerate(circ.ancillas):
+        if i == anc_idx:
+            target_qubits.append(ancilla)
+    print(target_qubits)
+    circ.append(identity_gate, target_qubits)
+
 def gen_dqva(G, partition, cut_nodes, hot_nodes, P=1, params=[], init_state=None,
              barriers=1, decompose_toffoli=1, mixer_order=None, verbose=0):
 
@@ -206,6 +225,8 @@ def gen_dqva(G, partition, cut_nodes, hot_nodes, P=1, params=[], init_state=None
     anc_num = len(partition)
     anc_reg = AncillaRegister(anc_num, 'anc')
     dqva_circ.add_register(anc_reg)
+
+    tie_subgraph_qubits_together(dqva_circ, subgraphs[subgraph_dict[mixer_order[0]]], subgraph_dict[mixer_order[0]])
 
     #print('Init state:', init_state)
     for qb, bit in enumerate(reversed(init_state)):
@@ -265,10 +286,12 @@ def gen_dqva(G, partition, cut_nodes, hot_nodes, P=1, params=[], init_state=None
             cuts = _cuts
             hot_nodes = []
 
+    tie_subgraph_qubits_together(dqva_circ, subgraphs[subgraph_dict[mixer_order[-1]]], subgraph_dict[mixer_order[-1]])
+
     if verbose > 0:
         print('\tIn gen_dqva: Outside loop, cuts =', cuts)
         print('Ansatz:')
-        print(dqva_circ.draw(fold=800))
+        print(dqva_circ.draw(fold=400))
 
     if decompose_toffoli > 1:
         #basis_gates = ['x', 'cx', 'barrier', 'crx', 'tdg', 't', 'rz', 'h']
@@ -279,23 +302,23 @@ def gen_dqva(G, partition, cut_nodes, hot_nodes, P=1, params=[], init_state=None
 
     # push cuts forward past single-qubit gates
     # to (possibly) get rid of some trivial single-qubit fragments
-    circ_graph = converters.circuit_to_dag(dqva_circ)
-    circ_graph.remove_all_ops_named("barrier")
-    fixed_cuts = []
-    for qubit, cut_loc in cuts:
-        qubit_gates = 0
-        for node in circ_graph.topological_op_nodes():
-            if qubit not in node.qargs: continue
-            qubit_gates += 1
-            if qubit_gates <= cut_loc: continue
-            if len(node.qargs) == 1: cut_loc += 1
-            else: break
-        fixed_cuts.append( (qubit,cut_loc) )
+    #circ_graph = converters.circuit_to_dag(dqva_circ)
+    #circ_graph.remove_all_ops_named("barrier")
+    #fixed_cuts = []
+    #for qubit, cut_loc in cuts:
+    #    qubit_gates = 0
+    #    for node in circ_graph.topological_op_nodes():
+    #        if qubit not in node.qargs: continue
+    #        qubit_gates += 1
+    #        if qubit_gates <= cut_loc: continue
+    #        if len(node.qargs) == 1: cut_loc += 1
+    #        else: break
+    #    fixed_cuts.append( (qubit,cut_loc) )
 
     # remove trivial cuts at the beginning or end of the circuit
-    fixed_cuts = [ (qubit,cut_loc) for qubit, cut_loc in fixed_cuts
-                    if cut_loc not in [ 0, num_gates(dqva_circ,qubit) ] ]
-    if verbose > 0:
-        print('\tIn gen_dqva: fixed cuts:', fixed_cuts)
+    #fixed_cuts = [ (qubit,cut_loc) for qubit, cut_loc in fixed_cuts
+    #                if cut_loc not in [ 0, num_gates(dqva_circ,qubit) ] ]
+    #if verbose > 0:
+    #    print('\tIn gen_dqva: fixed cuts:', fixed_cuts)
 
-    return dqva_circ, fixed_cuts, mixer_order
+    return dqva_circ, cuts, mixer_order
