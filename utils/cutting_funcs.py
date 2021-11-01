@@ -114,14 +114,17 @@ def _cut_cost(graph, partition, hot_nodes, subgraph_dict, cut_nodes):
                     subgraph_appearances[partial_mixer_node].append(subgraph_idx)
 
     num_cuts = 0
-    for key, val in subgraph_appearances.items():
-        num_cuts += len(set(val)) - 1
+    for cut_node, appearances in subgraph_appearances.items():
+        cut_node_subgraph = subgraph_dict[cut_node]
+        for subgraph in set(appearances):
+            if cut_node_subgraph != subgraph:
+                num_cuts += 1
     return num_cuts
 
 
 def simple_choose_nodes(graph: nx.Graph, partition: List[List[int]],
                         cut_edges: List[Tuple[int, int]], max_cuts: int,
-                        init_state: str) -> Tuple[List[int], List[int]]:
+                        ) -> Tuple[List[int], List[int]]:
     subgraph_dict = {}
     for i, subgraph_nodes in enumerate(partition):
         for node in subgraph_nodes:

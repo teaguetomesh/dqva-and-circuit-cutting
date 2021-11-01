@@ -61,22 +61,26 @@ def apply_mixer(circ, alpha, init_state, G, barriers,
     if mixer_order is None:
         mixer_order = list(G.nodes)
     if verbose > 0:
-        print('APPLYING MIXER UNITARY')
-        print('\t\tMixer order:', mixer_order, 'Cut nodes:', cut_nodes, 'Hot nodes:', hot_nodes)
+        print('Mixer order:', mixer_order, 'Cut nodes:', cut_nodes, 'Hot nodes:', hot_nodes)
 
     # Pad the given alpha parameters to account for the zeroed angles
     pad_alpha = [None]*len(init_state)
     next_alpha = 0
     for qubit in mixer_order:
         bit = list(reversed(init_state))[qubit]
-        if (bit == '1' and qubit not in hot_nodes) or next_alpha >= len(alpha) \
-           or ( qubit in cut_nodes and qubit not in hot_nodes ):
+        #if (bit == '1' and qubit not in hot_nodes) or next_alpha >= len(alpha) \
+        #   or ( qubit in cut_nodes and qubit not in hot_nodes ):
+        if qubit in cut_nodes and qubit not in hot_nodes:
+            # NOTE: We've relaxed the dynamic turning off of partial mixers for qubits in 1
+            # because it creates odd cutting situations where none of the partial mixers
+            # in a subgraph are present, so the cutting code doesn't apply and cuts, and we
+            # end up simulating the full circuit (see the note in find_cuts)
             continue
         else:
             pad_alpha[qubit] = alpha[next_alpha]
             next_alpha += 1
     if verbose > 0:
-        print('\t\tinit_state: {}\n\t\talpha: {}\n\t\tpad_alpha: {}'.format(init_state,
+        print('init_state: {}\nalpha: {}\npad_alpha: {}'.format(init_state,
                                                               alpha, pad_alpha))
     active_qubits = [v is not None for v in pad_alpha]
 
@@ -89,7 +93,7 @@ def apply_mixer(circ, alpha, init_state, G, barriers,
             cur_qubit = qubit
             swap_qubits.append(qubit)
     if verbose:
-        print('\t\tSwap qubits =', swap_qubits)
+        print('Swap qubits =', swap_qubits)
 
     cuts = [] # initialize a trivial set of cuts
     for qubit_index, qubit in enumerate(mixer_order):
@@ -104,7 +108,7 @@ def apply_mixer(circ, alpha, init_state, G, barriers,
                 cuts.append((qb, num_gates(circ, qb)))
 
             if verbose:
-                print('\t\t\tcuts:', cuts)
+                print('\t\tcuts:', cuts)
 
         if pad_alpha[qubit] == None or not G.has_node(qubit):
             # Turn off mixers for qubits which are already 1
@@ -114,7 +118,7 @@ def apply_mixer(circ, alpha, init_state, G, barriers,
         anc_idx = subgraph_dict[qubit]
 
         if verbose > 0:
-            print('\t\tqubit:', qubit, 'num_qubits =', len(circ.qubits),
+            print('\tqubit:', qubit, 'num_qubits =', len(circ.qubits),
                   'neighbors:', neighbors)
 
         # construct a multi-controlled Toffoli gate, with open-controls on q's neighbors
@@ -296,6 +300,9 @@ def gen_dqva(G, partition, cut_nodes, hot_nodes, mixer_order, P=1, params=[], in
         alpha_list.append(params[last_idx:])
 
     if verbose > 0:
+        print('='*30)
+        print('ANSATZ CONSTRUCTION')
+        print('Graph partition:', partition)
         print('Parameters:')
         for i in range(len(alpha_list)):
             print('\talpha_{}: {}'.format(i, alpha_list[i]))
@@ -330,7 +337,6 @@ def gen_dqva(G, partition, cut_nodes, hot_nodes, mixer_order, P=1, params=[], in
             break
 
     if verbose > 0:
-        print('\tIn gen_dqva: Outside loop, cuts =', cuts)
         print('Ansatz:')
         print(dqva_circ.draw(fold=150))
 
