@@ -1,7 +1,11 @@
 import sys
 import itertools
+import random
 import time
+from typing import List, Tuple
+
 import numpy as np
+import networkx as nx
 
 sys.path.append('../')
 
@@ -82,43 +86,77 @@ def choose_nodes(graph, subgraphs, cut_edges, max_cuts):
     return cut_nodes, hot_nodes
 
 
-def simple_choose_nodes(graph, subgraphs, cut_edges, max_cuts, init_state):
+def _is_connected(graph, partition, hot_nodes, subgraph_dict):
+    meta_graph = nx.Graph()
+    for i in range(len(partition)):
+        meta_graph.add_node(i)
+
+    for hot_node in hot_nodes:
+        for edge in graph.edges:
+            if hot_node in edge:
+                subgraph_i = subgraph_dict[edge[0]]
+                subgraph_j = subgraph_dict[edge[1]]
+                if subgraph_i != subgraph_j:
+                    meta_graph.add_edge(subgraph_i, subgraph_j)
+
+    return nx.is_connected(meta_graph)
+
+
+def _cut_cost(graph, partition, hot_nodes, subgraph_dict, cut_nodes):
+    subgraph_appearances = {cut_node: [] for cut_node in cut_nodes}
+
+    for subgraph_idx, subgraph_nodes in enumerate(partition):
+        for subgraph_node in subgraph_nodes:
+            if (subgraph_node in cut_nodes) and (subgraph_node not in hot_nodes):
+                continue
+            for partial_mixer_node in list(graph.neighbors(subgraph_node)) + [subgraph_node]:
+                if partial_mixer_node in cut_nodes:
+                    subgraph_appearances[partial_mixer_node].append(subgraph_idx)
+
+    num_cuts = 0
+    for key, val in subgraph_appearances.items():
+        num_cuts += len(set(val)) - 1
+    return num_cuts
+
+
+def simple_choose_nodes(graph: nx.Graph, partition: List[List[int]],
+                        cut_edges: List[Tuple[int, int]], max_cuts: int,
+                        init_state: str) -> Tuple[List[int], List[int]]:
+    subgraph_dict = {}
+    for i, subgraph_nodes in enumerate(partition):
+        for node in subgraph_nodes:
+            subgraph_dict[node] = i
+
     cut_nodes = []
     for edge in cut_edges:
         cut_nodes.extend(edge)
+    cut_nodes = list(set(cut_nodes))
 
-    # collect subgraph data
-    subgraph_A, subgraph_B = subgraphs
-    cut_nodes_A = [node for node in subgraph_A.nodes if node in cut_nodes]
-    cut_nodes_B = [node for node in subgraph_B.nodes if node in cut_nodes]
-    subgraph_cut_nodes = [ (subgraph_A, cut_nodes_A), (subgraph_B, cut_nodes_B) ]
+    # Generate the set of all possible hot node sets
+    # NOTE: this is extremely inefficient, for n hot nodes,
+    # there are n-choose-1 + n-choose-2 + ... n-choose-n possible hot node sets
+    all_possible_hot_nodes = []
+    for r in range(1, len(cut_nodes)+1):
+        for length_r_hot_nodes in itertools.combinations(cut_nodes, r):
+            all_possible_hot_nodes.append(length_r_hot_nodes)
 
-    # Randomly select the subgraph to draw hot nodes from
-    rand_index = np.random.choice([0,1])
-    cur_subgraph, cur_cut_nodes = subgraph_cut_nodes[rand_index]
-    other_subgraph, other_cut_nodes = subgraph_cut_nodes[(rand_index + 1) % 2]
+    # Eliminate those hot node sets that result in a disconnected graph
+    all_connected_hot_nodes = []
+    for possible_hot_nodes in all_possible_hot_nodes:
+        if _is_connected(graph, partition, possible_hot_nodes, subgraph_dict):
+            all_connected_hot_nodes.append(possible_hot_nodes)
 
-    # Collect all potential hot nodes (i.e. where cost < max_cuts and the node is not already in the MIS)
-    valid_hot_nodes = []
-    for node in cur_cut_nodes:
-        neighbors = list(graph.neighbors(node))
-        cost = len([n for n in neighbors if n in other_cut_nodes])
-        if cost <= max_cuts and list(reversed(init_state))[node] == '0':
-            valid_hot_nodes.append(node)
+    # Eliminate those hot node sets that require cuts > max_cuts
+    all_feasible_hot_nodes = []
+    for possible_hot_nodes in all_connected_hot_nodes:
+        cost = _cut_cost(graph, partition, possible_hot_nodes, subgraph_dict, cut_nodes)
+        if cost <= max_cuts:
+            all_feasible_hot_nodes.append(possible_hot_nodes)
 
-    np.random.shuffle(valid_hot_nodes)
-    hot_nodes = []
-    cur_cost = 0
-    for node in valid_hot_nodes:
-        neighbors = list(graph.neighbors(node))
-        temp_cost = len([n for n in neighbors if n in other_cut_nodes])
-        if cur_cost + temp_cost <= max_cuts:
-            hot_nodes.append(node)
-            cur_cost += temp_cost
-        if cur_cost == max_cuts:
-            break
+    # For now, uniform random sampling
+    hot_nodes = random.choice(all_feasible_hot_nodes)
 
-    return cut_nodes, hot_nodes
+    return cut_nodes, list(hot_nodes)
 
 
 def sim_with_cutting(fragments, wire_path_map, frag_shots, backend, mode="likely",
