@@ -74,7 +74,7 @@ def apply_mixer(circ, alpha, init_state, G, barriers,
             # NOTE: We've relaxed the dynamic turning off of partial mixers for qubits in 1
             # because it creates odd cutting situations where none of the partial mixers
             # in a subgraph are present, so the cutting code doesn't apply and cuts, and we
-            # end up simulating the full circuit (see the note in find_cuts)
+            # end up simulating the full circuit
             continue
         else:
             pad_alpha[qubit] = alpha[next_alpha]
@@ -200,26 +200,32 @@ def find_cuts(G: nx.Graph, circ: QuantumCircuit, subgraphs: nx.Graph,
 
     cut_nodes_in_prev_subgraph = []
     for prev_node in subgraphs[prev_subgraph].nodes:
+        # Add all this subgraph's cut nodes to the list
+        if prev_node in cut_nodes:
+            cut_nodes_in_prev_subgraph.append(prev_node)
+
+        # Check if any cut nodes from other subgraphs are used
         # Was this node's partial mixer applied?
         if active_qubits[prev_node]:
             for node in list(G.neighbors(prev_node)) + [prev_node]:
                 # If this node is a cut node, add it to the list
                 if node in cut_nodes:
                     cut_nodes_in_prev_subgraph.append(node)
+
     cut_nodes_in_prev_subgraph = list(set(cut_nodes_in_prev_subgraph))
 
     subgraphs_to_come = list(set([subgraph_dict[mixer_order[i]] for i in range(qubit_index, len(mixer_order))]))
     cut_these_qubits = []
     for node in cut_nodes_in_prev_subgraph:
         # Is this node used in any later subgraphs?
-        # NOTE: There is a corner case where in later rounds of the algorithm, when the initial state
-        # has a high hamming weight, it's possible that a subgraph will have 0 active qubits. In this
-        # case no cuts will be applied to separate the circuit (but in reality it could be separated
-        # without any cuts).
         for later_subgraph in subgraphs_to_come:
             later_subgraph_nodes = set(subgraphs[later_subgraph].nodes)
             for later_node in later_subgraph_nodes:
+                # Check all neighbors of active qubits
                 if active_qubits[later_node] and (node in list(G.neighbors(later_node)) + [later_node]):
+                    cut_these_qubits.append(circ.qubits[node])
+                # If node belongs to this subgraph, it needs to be cut
+                if node == later_node:
                     cut_these_qubits.append(circ.qubits[node])
 
     return list(set(cut_these_qubits))
