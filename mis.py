@@ -10,6 +10,7 @@ implements the variational algorithm used to find the MIS.
 import time, random, queue, copy, itertools
 import numpy as np
 import networkx as nx
+import metis
 
 from networkx.algorithms.community.kernighan_lin import kernighan_lin_bisection
 from scipy.optimize import minimize
@@ -135,19 +136,22 @@ def solve_mis_cut_dqva(init_state, graph, P=1, m=4, threshold=1e-5, cutoff=1,
     # NOTE: the backend to use is very version dependent.
     # Qiskit 0.23.2 does not support the newer Aer_simulators that
     # are available in Qiskit 0.26.0.
-    # For now, just use the statevector_simulator
     #backend = Aer.get_backend(name='aer_simulator', method='statevector')
     backend = Aer.get_backend('qasm_simulator')
 
     history = []
 
     # Kernighan-Lin partitions a graph into two relatively equal subgraphs
-    # TODO: generalize graph partition to >2 subgraphs
-    partition = kernighan_lin_bisection(graph)
+    #partition = kernighan_lin_bisection(graph)
+    # For generalizing to >2 subgraphs, we'll use the METIS graph partitioning software
+    partition_assignment = metis.part_graph(graph, nparts=num_frags)[1]
+    partition = [[] for _ in set(partition_assignment)]
+    for node, assignment in enumerate(partition_assignment):
+        partition[assignment].append(node)
     subgraphs, cut_edges = get_subgraphs(graph, partition)
     print('='*30)
     print('GRAPH PARTITIONING')
-    print(f'Partitioned graph into {len(subgraphs)} subgraphs = {[list(sg.nodes) for sg in subgraphs]}')
+    print(f'Partitioned graph into {len(subgraphs)} subgraphs = {partition}')
     print(f'with cut edges = {cut_edges}')
 
     # identify the subgraph of every node
@@ -204,6 +208,7 @@ def solve_mis_cut_dqva(init_state, graph, P=1, m=4, threshold=1e-5, cutoff=1,
                 print('Split circuit into {} subcircuits with {} qubits in {:.3f} s'.format(
                        len(fragments), [len(frag.qubits) for frag in fragments],
                        cut_end_time - cut_start_time))
+                print('fragment shots =', frag_shots)
 
             init_params = np.random.uniform(low=0.0, high=2*np.pi, size=num_used_params)
             args = (fragments, wire_path_map, frag_shots)
@@ -232,10 +237,12 @@ def solve_mis_cut_dqva(init_state, graph, P=1, m=4, threshold=1e-5, cutoff=1,
 
             # Save current results to history
             inner_history = {'mixer_round':mixer_round, 'inner_round':inner_round,
-                             'cost':opt_cost, 'init_state':cur_init_state,
-                             'mixer_order':copy.copy(cur_permutation),
-                             'num_params':num_params,
-                             'frag_qubits':[f.num_qubits for f in fragments]}
+                    'cost':opt_cost, 'function_evals':out['nfev'],
+                    'init_state':cur_init_state,
+                    'mixer_order':copy.copy(cur_permutation),
+                    'num_params':num_used_params, 'frag_shots':frag_shots,
+                    'frag_qubits':[f.num_qubits for f in fragments],
+                    'cuts':found_cuts, 'hot_nodes':hot_nodes}
             mixer_history.append(inner_history)
 
             # If no improvement was made, break and go to next mixer round
@@ -260,7 +267,7 @@ def solve_mis_cut_dqva(init_state, graph, P=1, m=4, threshold=1e-5, cutoff=1,
         cur_permutation = _sort_mixers(graph, list(np.random.permutation(list(graph.nodes))), subgraph_dict)
 
     print('\tRETURNING, best hamming weight:', new_hamming_weight)
-    return best_indset, best_params, best_init_state, best_perm, partition, cut_nodes, hot_nodes, history
+    return best_indset, best_params, best_init_state, best_perm, partition, cut_nodes, history
 
 
 def solve_mis_qls(init_state, G, P=1, m=1, mixer_order=None, threshold=1e-5,

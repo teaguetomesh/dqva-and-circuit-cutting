@@ -1,9 +1,11 @@
 #!/usr/bin/env python
-import sys, os, argparse, glob
-import mis
-import partition_no_cuts
+import sys, argparse, glob
 import pickle
 import networkx as nx
+from pathlib import Path
+
+import mis
+import partition_no_cuts
 from utils.graph_funcs import graph_from_file
 
 def parse_args():
@@ -20,6 +22,8 @@ def parse_args():
                         help='Number of shots')
     parser.add_argument('--rep', type=int, default=1,
                         help='Rep number for labelling')
+    parser.add_argument('--numfrags', type=int, default=2,
+                        help='Number of subgraphs to generate')
     args = parser.parse_args()
     return args
 
@@ -36,16 +40,13 @@ def main():
 
     graphsave = args.graph.split('/')[1].strip('_graphs')
 
-    #savepath = DQVAROOT + 'benchmark_results/{}/dqva_{}cuts/'.format(graphsave, args.numcuts)
-    savepath = DQVAROOT + f'benchmark_results/isca_debug/{graphsave}_{args.numcuts}cuts/'
-    if not os.path.isdir(savepath):
-        os.mkdir(savepath)
+    savepath = DQVAROOT + f'benchmark_results/ISCA_results/COBYLA/{graphsave}_{args.numfrags}frags_{args.numcuts}cuts/'
+    Path(savepath).mkdir(parents=True, exist_ok=True)
 
     for graphfn in all_graphs:
         graphname = graphfn.split('/')[-1].strip('.txt')
         cur_savepath = savepath + '{}/'.format(graphname)
-        if not os.path.isdir(cur_savepath):
-            os.mkdir(cur_savepath)
+        Path(cur_savepath).mkdir(parents=True, exist_ok=True)
 
         G = graph_from_file(graphfn)
         nq = len(G.nodes)
@@ -61,7 +62,7 @@ def main():
             if args.numcuts > 0:
                 out = mis.solve_mis_cut_dqva(init_state, G, m=1, verbose=1,
                                         shots=args.shots, max_cuts=args.numcuts,
-                                        num_frags=2)
+                                        num_frags=args.numfrags)
             else:
                 out = partition_no_cuts.solve_mis_no_cut_dqva(init_state, G, m=1,
                                                     shots=args.shots, verbose=1)

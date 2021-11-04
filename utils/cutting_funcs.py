@@ -140,6 +140,8 @@ def simple_choose_nodes(graph: nx.Graph, partition: List[List[int]],
     # there are n-choose-1 + n-choose-2 + ... n-choose-n possible hot node sets
     all_possible_hot_nodes = []
     for r in range(1, len(cut_nodes)+1):
+        if r > max_cuts:
+            break
         for length_r_hot_nodes in itertools.combinations(cut_nodes, r):
             all_possible_hot_nodes.append(length_r_hot_nodes)
 
