@@ -146,7 +146,7 @@ def solve_mis_cut_dqva(init_state, graph, P=1, m=4, threshold=1e-5, cutoff=1,
     # For generalizing to >2 subgraphs, we'll use the METIS graph partitioning software
     partition_assignment = metis.part_graph(graph, nparts=num_frags)[1]
     partition = [[] for _ in set(partition_assignment)]
-    for node, assignment in enumerate(partition_assignment):
+    for node, assignment in zip(list(graph), partition_assignment):
         partition[assignment].append(node)
     subgraphs, cut_edges = get_subgraphs(graph, partition)
     print('='*30)
