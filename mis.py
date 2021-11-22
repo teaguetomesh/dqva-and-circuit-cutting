@@ -144,6 +144,7 @@ def solve_mis_cut_dqva(init_state, graph, P=1, m=4, threshold=1e-5, cutoff=1,
     # Kernighan-Lin partitions a graph into two relatively equal subgraphs
     #partition = kernighan_lin_bisection(graph)
     # For generalizing to >2 subgraphs, we'll use the METIS graph partitioning software
+    #    https://metis.readthedocs.io/en/latest/
     partition_assignment = metis.part_graph(graph, nparts=num_frags)[1]
     partition = [[] for _ in set(partition_assignment)]
     for node, assignment in zip(list(graph), partition_assignment):
