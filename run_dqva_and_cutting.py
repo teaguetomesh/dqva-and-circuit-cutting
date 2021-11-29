@@ -24,6 +24,8 @@ def parse_args():
                         help='Rep number for labelling')
     parser.add_argument('--numfrags', type=int, default=2,
                         help='Number of subgraphs to generate')
+    parser.add_argument('--optimizer', type=str, default='COBYLA',
+                        help='Optimizer passed to sklearn.minimize()')
     args = parser.parse_args()
     return args
 
@@ -40,7 +42,7 @@ def main():
 
     graphsave = args.graph.split('/')[1].strip('_graphs')
 
-    savepath = DQVAROOT + f'benchmark_results/ISCA_results/COBYLA/{graphsave}_{args.numfrags}frags_{args.numcuts}cuts_{args.shots}shots/'
+    savepath = DQVAROOT + f'benchmark_results/ISCA_results/{args.optimizer}/{graphsave}_{args.numfrags}frags_{args.numcuts}cuts_{args.shots}shots/'
     Path(savepath).mkdir(parents=True, exist_ok=True)
 
     for graphfn in all_graphs:
@@ -62,7 +64,7 @@ def main():
             if args.numcuts > 0:
                 out = mis.solve_mis_cut_dqva(init_state, G, m=1, verbose=1,
                                         shots=args.shots, max_cuts=args.numcuts,
-                                        num_frags=args.numfrags)
+                                        num_frags=args.numfrags, optimizer=args.optimizer)
             else:
                 out = partition_no_cuts.solve_mis_no_cut_dqva(init_state, G, m=1,
                                                     shots=args.shots, verbose=1)
