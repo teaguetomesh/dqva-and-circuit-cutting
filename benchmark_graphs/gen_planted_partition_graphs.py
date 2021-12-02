@@ -4,30 +4,14 @@ import glob
 import networkx as nx
 
 graph_params = [
-                (9, 2, 0.20, 0.02),
-                (9, 2, 0.20, 0.10),
-                (9, 2, 0.80, 0.02),
-                (9, 2, 0.80, 0.10),
-                (11, 2, 0.20, 0.02),
-                (11, 2, 0.20, 0.10),
-                (11, 2, 0.80, 0.02),
-                (11, 2, 0.80, 0.10),
                 (13, 2, 0.20, 0.02),
                 (13, 2, 0.20, 0.10),
                 (13, 2, 0.80, 0.02),
                 (13, 2, 0.80, 0.10),
-                (8, 3, 0.20, 0.02),
-                (8, 3, 0.20, 0.10),
-                (8, 3, 0.80, 0.02),
-                (8, 3, 0.80, 0.10),
                 (10, 3, 0.20, 0.02),
                 (10, 3, 0.20, 0.10),
                 (10, 3, 0.80, 0.02),
                 (10, 3, 0.80, 0.10),
-                (11, 3, 0.20, 0.02),
-                (11, 3, 0.20, 0.10),
-                (11, 3, 0.80, 0.02),
-                (11, 3, 0.80, 0.10),
                ]
 
 for commSize, numComm, p_in, p_out in graph_params:
@@ -37,8 +21,8 @@ for commSize, numComm, p_in, p_out in graph_params:
     if not os.path.isdir(folder):
         os.mkdir(folder)
 
-    count = 1
-    while count <= 10:
+    count = 11
+    while count <= 30:
         G = nx.generators.planted_partition_graph(l=numComm, k=commSize,
                                                   p_in=p_in, p_out=p_out)
         if nx.is_connected(G):
