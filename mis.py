@@ -31,7 +31,8 @@ from utils.cutting_funcs import *
 
 
 def solve_mis_cut_dqva(init_state, graph, P=1, m=4, threshold=1e-5, cutoff=1,
-                       sim='aer', shots=8192, verbose=0, max_cuts=1, num_frags=2):
+                       sim='aer', shots=8192, verbose=0, max_cuts=1, num_frags=2,
+                       optimizer='COBYLA'):
     """
     Find the MIS of G using the dqva and circuit cutting
     """
@@ -144,9 +145,10 @@ def solve_mis_cut_dqva(init_state, graph, P=1, m=4, threshold=1e-5, cutoff=1,
     # Kernighan-Lin partitions a graph into two relatively equal subgraphs
     #partition = kernighan_lin_bisection(graph)
     # For generalizing to >2 subgraphs, we'll use the METIS graph partitioning software
+    #    https://metis.readthedocs.io/en/latest/
     partition_assignment = metis.part_graph(graph, nparts=num_frags)[1]
     partition = [[] for _ in set(partition_assignment)]
-    for node, assignment in enumerate(partition_assignment):
+    for node, assignment in zip(list(graph), partition_assignment):
         partition[assignment].append(node)
     subgraphs, cut_edges = get_subgraphs(graph, partition)
     print('='*30)
@@ -212,7 +214,7 @@ def solve_mis_cut_dqva(init_state, graph, P=1, m=4, threshold=1e-5, cutoff=1,
 
             init_params = np.random.uniform(low=0.0, high=2*np.pi, size=num_used_params)
             args = (fragments, wire_path_map, frag_shots)
-            out = minimize(avg_cost, init_params, args=args, method='COBYLA')
+            out = minimize(avg_cost, init_params, args=args, method=optimizer)
             opt_params = out['x']
             opt_cost = out['fun']
             if verbose:
