@@ -42,7 +42,8 @@ def main():
 
     graphsave = args.graph.split('/')[1].strip('_graphs')
 
-    savepath = DQVAROOT + f'benchmark_results/ISCA_results/{args.optimizer}/{graphsave}_{args.numfrags}frags_{args.numcuts}cuts_{args.shots}shots/'
+    #savepath = DQVAROOT + f'benchmark_results/ISCA_results/{args.optimizer}/{graphsave}_{args.numfrags}frags_{args.numcuts}cuts_{args.shots}shots/'
+    savepath = DQVAROOT + f'benchmark_results/MICRO_results/{args.optimizer}/{graphsave}_{args.numfrags}frags_{args.numcuts}cuts_{args.shots}shots/'
     Path(savepath).mkdir(parents=True, exist_ok=True)
 
     for graphfn in all_graphs:
