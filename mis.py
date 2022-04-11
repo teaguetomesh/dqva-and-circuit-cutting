@@ -244,7 +244,8 @@ def solve_mis_cut_dqva(init_state, graph, P=1, m=4, threshold=1e-5, cutoff=1,
                     'mixer_order':copy.copy(cur_permutation),
                     'num_params':num_used_params, 'frag_shots':frag_shots,
                     'frag_qubits':[f.num_qubits for f in fragments],
-                    'cuts':found_cuts, 'hot_nodes':hot_nodes}
+                    'cuts':found_cuts, 'hot_nodes':hot_nodes, 'better_strs':better_strs,
+                    'cur_params':out['x'], 'cur_args':args}
             mixer_history.append(inner_history)
 
             # If no improvement was made, break and go to next mixer round
