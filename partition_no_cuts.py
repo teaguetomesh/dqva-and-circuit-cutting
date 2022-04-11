@@ -164,9 +164,10 @@ def solve_mis_no_cut_dqva(init_state, graph, P=1, m=4, threshold=1e-5, cutoff=1,
 
             # Save current results to history
             inner_history = {'mixer_round':mixer_round, 'inner_round':inner_round,
-                             'cost':opt_cost, 'init_state':cur_init_state,
-                             'mixer_order':copy.copy(cur_permutation),
-                             'num_params':num_params}
+                'cost':opt_cost, 'function_evals':out['nfev'], 'init_state':cur_init_state,
+                'mixer_order':copy.copy(cur_permutation), 'num_params':num_params,
+                'frag_shots':shots, 'frag_qubits':[sg.number_of_nodes() for sg in subgraphs],
+                'better_strs':better_strs}
             mixer_history.append(inner_history)
 
             # If no improvement was made, break and go to next mixer round
