@@ -5,6 +5,7 @@ import networkx as nx
 
 graph_params = [
                 (9, 2, 0.20, 0.02),
+                (13, 2, 0.20, 0.02),
                ]
 
 for commSize, numComm, p_in, p_out in graph_params:
@@ -14,8 +15,8 @@ for commSize, numComm, p_in, p_out in graph_params:
     if not os.path.isdir(folder):
         os.mkdir(folder)
 
-    count = 11
-    while count <= 30:
+    count = 31
+    while count <= 60:
         G = nx.generators.planted_partition_graph(l=numComm, k=commSize,
                                                   p_in=p_in, p_out=p_out)
         if nx.is_connected(G):
