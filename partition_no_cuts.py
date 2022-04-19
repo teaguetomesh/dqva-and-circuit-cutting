@@ -1,6 +1,7 @@
 import time, random, queue, copy, itertools
 import numpy as np
 import networkx as nx
+import metis
 
 from networkx.algorithms.community.kernighan_lin import kernighan_lin_bisection
 from scipy.optimize import minimize
@@ -21,7 +22,8 @@ from utils.cutting_funcs import *
 
 
 def solve_mis_no_cut_dqva(init_state, graph, P=1, m=4, threshold=1e-5, cutoff=1,
-                          sim='aer', shots=8192, verbose=0, max_cuts=1):
+                          sim='aer', shots=8192, verbose=0, max_cuts=1,
+                          partition_alg='klb', num_frags=2):
     """
     Find the MIS of G using the dqva and partition but no circuit cutting
     """
@@ -34,12 +36,22 @@ def solve_mis_no_cut_dqva(init_state, graph, P=1, m=4, threshold=1e-5, cutoff=1,
     #backend = Aer.get_backend(name='aer_simulator', method='statevector')
     backend = Aer.get_backend('qasm_simulator')
 
-    # Kernighan-Lin partitions a graph into two relatively equal subgraphs
-    partition = kernighan_lin_bisection(graph)
-    if verbose:
-        print('kl bisection:', partition)
-
+    if partition_alg == 'klb':
+        # Kernighan-Lin partitions a graph into two relatively equal subgraphs
+        partition = kernighan_lin_bisection(graph)
+    elif partition_alg == 'metis':
+        # For generalizing to >2 subgraphs, we'll use the METIS graph partitioning software
+        #    https://metis.readthedocs.io/en/latest/
+        partition_assignment = metis.part_graph(graph, nparts=num_frags)[1]
+        partition = [[] for _ in set(partition_assignment)]
+        for node, assignment in zip(list(graph), partition_assignment):
+            partition[assignment].append(node)
     subgraphs, cut_edges = get_subgraphs(graph, partition)
+    print('='*30)
+    print('GRAPH PARTITIONING')
+    print(f'Partitioned graph into {len(subgraphs)} subgraphs = {partition}')
+    print(f'with cut edges = {cut_edges}')
+
     cut_nodes = []
     for edge in cut_edges:
         cut_nodes.extend(edge)

@@ -32,7 +32,7 @@ from utils.cutting_funcs import *
 
 def solve_mis_cut_dqva(init_state, graph, P=1, m=4, threshold=1e-5, cutoff=1,
                        sim='aer', shots=8192, verbose=0, max_cuts=1, num_frags=2,
-                       optimizer='COBYLA'):
+                       optimizer='COBYLA', partition_alg='metis'):
     """
     Find the MIS of G using the dqva and circuit cutting
     """
@@ -142,14 +142,18 @@ def solve_mis_cut_dqva(init_state, graph, P=1, m=4, threshold=1e-5, cutoff=1,
 
     history = []
 
-    # Kernighan-Lin partitions a graph into two relatively equal subgraphs
-    #partition = kernighan_lin_bisection(graph)
-    # For generalizing to >2 subgraphs, we'll use the METIS graph partitioning software
-    #    https://metis.readthedocs.io/en/latest/
-    partition_assignment = metis.part_graph(graph, nparts=num_frags)[1]
-    partition = [[] for _ in set(partition_assignment)]
-    for node, assignment in zip(list(graph), partition_assignment):
-        partition[assignment].append(node)
+    if partition_alg == 'klb':
+        # Kernighan-Lin partitions a graph into two relatively equal subgraphs
+        partition = kernighan_lin_bisection(graph)
+    elif partition_alg == 'metis':
+        # For generalizing to >2 subgraphs, we'll use the METIS graph partitioning software
+        #    https://metis.readthedocs.io/en/latest/
+        partition_assignment = metis.part_graph(graph, nparts=num_frags)[1]
+        partition = [[] for _ in set(partition_assignment)]
+        for node, assignment in zip(list(graph), partition_assignment):
+            partition[assignment].append(node)
+    else:
+        raise ValueError(f"Unknown graph partitioning algorithm: {partition_alg}")
     subgraphs, cut_edges = get_subgraphs(graph, partition)
     print('='*30)
     print('GRAPH PARTITIONING')

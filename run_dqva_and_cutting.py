@@ -26,6 +26,10 @@ def parse_args():
                         help='Number of subgraphs to generate')
     parser.add_argument('--optimizer', type=str, default='COBYLA',
                         help='Optimizer passed to sklearn.minimize()')
+    parser.add_argument('--graphalg', type=str, default='metis',
+                        help='Graph partitioning algorithm to use')
+    parser.add_argument('--resultdir', type=str, default='MICRO_testing',
+                        help='Directory within benchmark_results to store sims')
     args = parser.parse_args()
     return args
 
@@ -42,8 +46,7 @@ def main():
 
     graphsave = args.graph.split('/')[1].strip('_graphs')
 
-    #savepath = DQVAROOT + f'benchmark_results/ISCA_results/{args.optimizer}/{graphsave}_{args.numfrags}frags_{args.numcuts}cuts_{args.shots}shots/'
-    savepath = DQVAROOT + f'benchmark_results/MICRO_results/{args.optimizer}/{graphsave}_{args.numfrags}frags_{args.numcuts}cuts_{args.shots}shots/'
+    savepath = DQVAROOT + f'benchmark_results/{args.resultdir}/{args.optimizer}/{graphsave}_{args.numfrags}frags_{args.numcuts}cuts_{args.shots}shots/'
     Path(savepath).mkdir(parents=True, exist_ok=True)
 
     for graphfn in all_graphs:
@@ -65,10 +68,13 @@ def main():
             if args.numcuts > 0:
                 out = mis.solve_mis_cut_dqva(init_state, G, m=1, verbose=1,
                                         shots=args.shots, max_cuts=args.numcuts,
-                                        num_frags=args.numfrags, optimizer=args.optimizer)
+                                        num_frags=args.numfrags, optimizer=args.optimizer,
+                                        partition_alg=args.graphalg)
             else:
                 out = partition_no_cuts.solve_mis_no_cut_dqva(init_state, G, m=1,
-                                                    shots=args.shots, verbose=1)
+                                                    shots=args.shots, verbose=1,
+                                                    num_frags=args.numfrags,
+                                                    partition_alg=args.graphalg)
             init_state = out[0]
             full_history.append(out)
 
