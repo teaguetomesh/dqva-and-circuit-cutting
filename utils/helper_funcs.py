@@ -1,10 +1,18 @@
 from utils.graph_funcs import is_indset
 
-def strip_ancillas(counts, circ):
-    num_anc = len(circ.ancillas)
+def strip_ancillas(counts, circ=None, num_anc=None):
+    if not circ is None:
+        num_anc = len(circ.ancillas)
+    elif not num_anc:
+        raise Exception('A valid qiskit circuit or number of ancillas must be provided')
     new_counts = {}
     for key in counts:
-        new_counts[key[num_anc:]] = counts[key]
+        new_key = key[num_anc:]
+        if new_key in new_counts.keys():
+            new_counts[new_key] += counts[key]
+        else:
+            new_counts[new_key] = counts[key]
+
     return new_counts
 
 def hamming_weight(bitstr):

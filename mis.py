@@ -111,7 +111,7 @@ def solve_mis_cut_dqva(init_state, graph, P=1, m=4, threshold=1e-5, cutoff=1,
         end_time = time.time()
         #if verbose:
         #    print('\t\tsim_with_cutting elapsed time: {:.3f}'.format(end_time-start_time))
-        return recombined_dist
+        return strip_ancillas(recombined_dist, num_anc=len(var_fragments))
 
     # This function will be what scipy.minimize optimizes
     def avg_cost(params, *args):
