@@ -1,0 +1,6 @@
+N18_com2_pin20_pout2_graphs, G48
+Optimal MIS is 11
+Optimal MIS:
+	110111010101101001, valid: True
+	111111000011101001, valid: True
+	111111000101101001, valid: True
