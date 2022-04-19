@@ -46,6 +46,8 @@ def solve_mis_no_cut_dqva(init_state, graph, P=1, m=4, threshold=1e-5, cutoff=1,
         partition = [[] for _ in set(partition_assignment)]
         for node, assignment in zip(list(graph), partition_assignment):
             partition[assignment].append(node)
+    else:
+        raise ValueError(f"Unknown graph partitioning algorithm: {partition_alg}")
     subgraphs, cut_edges = get_subgraphs(graph, partition)
     print('='*30)
     print('GRAPH PARTITIONING')
