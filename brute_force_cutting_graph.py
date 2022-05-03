@@ -25,7 +25,7 @@ def main():
         print('Loaded graph with {} nodes'.format(len(G.nodes)))
 
         start = time.time()
-        opt_strs, opt_mis = helper_funcs.brute_force_search(G)
+        opt_strs, opt_mis = helper_funcs.brute_force_search_memory_efficient(G)
         end = time.time()
         print('Finished brute force search in {:.3f} min'.format((end - start) / 60))
 

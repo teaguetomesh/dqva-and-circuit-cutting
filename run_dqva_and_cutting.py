@@ -1,9 +1,11 @@
 #!/usr/bin/env python
-import sys, os, argparse, glob
-import mis
-import partition_no_cuts
+import sys, argparse, glob
 import pickle
 import networkx as nx
+from pathlib import Path
+
+import mis
+import partition_no_cuts
 from utils.graph_funcs import graph_from_file
 
 def parse_args():
@@ -20,6 +22,14 @@ def parse_args():
                         help='Number of shots')
     parser.add_argument('--rep', type=int, default=1,
                         help='Rep number for labelling')
+    parser.add_argument('--numfrags', type=int, default=2,
+                        help='Number of subgraphs to generate')
+    parser.add_argument('--optimizer', type=str, default='COBYLA',
+                        help='Optimizer passed to sklearn.minimize()')
+    parser.add_argument('--graphalg', type=str, default='metis',
+                        help='Graph partitioning algorithm to use')
+    parser.add_argument('--resultdir', type=str, default='MICRO_testing',
+                        help='Directory within benchmark_results to store sims')
     args = parser.parse_args()
     return args
 
@@ -36,20 +46,20 @@ def main():
 
     graphsave = args.graph.split('/')[1].strip('_graphs')
 
-    savepath = DQVAROOT + 'benchmark_results/{}/dqva_{}cuts/'.format(graphsave, args.numcuts)
-    if not os.path.isdir(savepath):
-        os.mkdir(savepath)
+    savepath = DQVAROOT + f'benchmark_results/{args.resultdir}/{args.graphalg.upper()}_{args.optimizer}/{graphsave}_{args.numfrags}frags_{args.numcuts}cuts_{args.shots}shots/'
+    Path(savepath).mkdir(parents=True, exist_ok=True)
 
     for graphfn in all_graphs:
         graphname = graphfn.split('/')[-1].strip('.txt')
         cur_savepath = savepath + '{}/'.format(graphname)
-        if not os.path.isdir(cur_savepath):
-            os.mkdir(cur_savepath)
+        Path(cur_savepath).mkdir(parents=True, exist_ok=True)
 
         G = graph_from_file(graphfn)
         nq = len(G.nodes)
 
         print('Loaded graph: {}, with {} nodes'.format(graphfn, nq))
+        print('Nodes:', G.nodes)
+        print('Edges:', G.edges)
 
         init_state = '0'*G.number_of_nodes()
         full_history = []
@@ -57,10 +67,14 @@ def main():
             print('-------------- ROUND {} BEGIN --------------\n\n'.format(rounds+1))
             if args.numcuts > 0:
                 out = mis.solve_mis_cut_dqva(init_state, G, m=1, verbose=1,
-                                        shots=args.shots, max_cuts=args.numcuts)
+                                        shots=args.shots, max_cuts=args.numcuts,
+                                        num_frags=args.numfrags, optimizer=args.optimizer,
+                                        partition_alg=args.graphalg)
             else:
                 out = partition_no_cuts.solve_mis_no_cut_dqva(init_state, G, m=1,
-                                                    shots=args.shots, verbose=1)
+                                                    shots=args.shots, verbose=1,
+                                                    num_frags=args.numfrags,
+                                                    partition_alg=args.graphalg)
             init_state = out[0]
             full_history.append(out)
 

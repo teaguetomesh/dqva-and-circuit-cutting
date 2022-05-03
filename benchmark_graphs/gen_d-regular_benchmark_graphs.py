@@ -3,7 +3,7 @@ import glob
 import networkx as nx
 
 dirs = []
-for n in range(18, 28, 2):
+for n in [18, 26]:
     temp_dirs = glob.glob('N{}_d3_graphs*'.format(n))
     dirs.extend(temp_dirs)
 print('Dirs:', dirs)
@@ -13,7 +13,7 @@ for folder in dirs:
     d = int(folder.split('_')[1][1:])
     print('Nodes: {}, degree: {}'.format(n, d))
 
-    for j in range(15, 50):
+    for j in range(50, 60):
         G = nx.random_regular_graph(d, n)
         edges = list(G.edges())
 

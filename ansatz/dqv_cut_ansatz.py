@@ -5,8 +5,13 @@ The functions in the file are used to generate the Dynamic
 Quantum Variational Ansatz (DQVA) in a manner that is amenable
 to circuit cutting.
 """
+from typing import Dict, List, Tuple
+
+import numpy as np
+import networkx as nx
+
 from qiskit import QuantumCircuit, AncillaRegister, converters
-from qiskit.circuit import ControlledGate
+from qiskit.circuit import ControlledGate, Qubit
 from qiskit.circuit.library.standard_gates import XGate
 from qiskit.transpiler.passes import Unroller
 from qiskit.transpiler import PassManager
@@ -15,7 +20,7 @@ from utils.helper_funcs import *
 
 def apply_mixer(circ, alpha, init_state, G, barriers,
                 decompose_toffoli, mixer_order, subgraph_dict,
-                cut_nodes, hot_nodes, verbose=0):
+                cut_nodes, hot_nodes, subgraphs, verbose=0):
     """
     Apply the mixer unitary U_M(alpha) to circ
 
@@ -56,48 +61,54 @@ def apply_mixer(circ, alpha, init_state, G, barriers,
     if mixer_order is None:
         mixer_order = list(G.nodes)
     if verbose > 0:
-        print('APPLYING MIXER UNITARY')
-        print('\tMixer order:', mixer_order, 'Cut nodes:', cut_nodes, 'Hot nodes:', hot_nodes)
+        print('Mixer order:', mixer_order, 'Cut nodes:', cut_nodes, 'Hot nodes:', hot_nodes)
 
     # Pad the given alpha parameters to account for the zeroed angles
     pad_alpha = [None]*len(init_state)
     next_alpha = 0
     for qubit in mixer_order:
         bit = list(reversed(init_state))[qubit]
-        if bit == '1' or next_alpha >= len(alpha) \
-           or ( qubit in cut_nodes and qubit not in hot_nodes ):
+        #if (bit == '1' and qubit not in hot_nodes) or next_alpha >= len(alpha) \
+        #   or ( qubit in cut_nodes and qubit not in hot_nodes ):
+        if qubit in cut_nodes and qubit not in hot_nodes:
+            # NOTE: We've relaxed the dynamic turning off of partial mixers for qubits in 1
+            # because it creates odd cutting situations where none of the partial mixers
+            # in a subgraph are present, so the cutting code doesn't apply and cuts, and we
+            # end up simulating the full circuit
             continue
         else:
             pad_alpha[qubit] = alpha[next_alpha]
             next_alpha += 1
     if verbose > 0:
-        print('\tinit_state: {}\n\talpha: {}\n\tpad_alpha: {}'.format(init_state,
+        print('init_state: {}\nalpha: {}\npad_alpha: {}'.format(init_state,
                                                               alpha, pad_alpha))
+    active_qubits = [v is not None for v in pad_alpha]
+
+    # identify the first qubit in each subgraph after the first, which is used to
+    # identify cut locations
+    swap_qubits = []
+    cur_qubit = mixer_order[0]
+    for qubit in mixer_order[1:]:
+        if subgraph_dict[qubit] != subgraph_dict[cur_qubit]:
+            cur_qubit = qubit
+            swap_qubits.append(qubit)
+    if verbose:
+        print('Swap qubits =', swap_qubits)
 
     cuts = [] # initialize a trivial set of cuts
-    # identify the first qubit in the "second" subgraph,  which is used to
-    # identify cut locations
-    swap_qubit = mixer_order[0]
-    for qubit in mixer_order[1:]:
-        if subgraph_dict[qubit] != subgraph_dict[swap_qubit]:
-            swap_qubit = qubit
-            break
-    if verbose:
-        print('\tSwap qubit =', swap_qubit)
+    for qubit_index, qubit in enumerate(mixer_order):
 
-    for qubit in mixer_order:
+        if qubit in swap_qubits and len(hot_nodes) > 0:
+            # We just switched subgraphs, identify the cut locations
+            cut_these_qubits = find_cuts(G, circ, subgraphs, subgraph_dict,
+                                     mixer_order, qubit_index, qubit, hot_nodes,
+                                     cut_nodes, active_qubits)
 
-        # identify the location of cuts
-        if qubit == swap_qubit and pad_alpha[qubit] != None and len(hot_nodes) > 0:
-            # find all neighbors of the hot nodes
-            hot_neighbors = set.union(*[ set(G.neighbors(node)) for node in hot_nodes ])
-            # find all cut qubits in the non-hot graph
-            adj_cut_qubits = [ circ.qubits[node] for node in hot_neighbors
-                               if subgraph_dict[node] != subgraph_dict[hot_nodes[0]] ]
-            # cut after all gates on adj_cut_nodes
-            cuts = [ ( qubit, num_gates(circ,qubit) ) for qubit in adj_cut_qubits ]
+            for qb in cut_these_qubits:
+                cuts.append((qb, num_gates(circ, qb)))
+
             if verbose:
-                print('\tcuts:', cuts)
+                print('\t\tcuts:', cuts)
 
         if pad_alpha[qubit] == None or not G.has_node(qubit):
             # Turn off mixers for qubits which are already 1
@@ -143,8 +154,14 @@ def apply_mixer(circ, alpha, init_state, G, barriers,
 
         if barriers > 1:
             circ.barrier()
+    else:
+        # Upon exiting the for loop, tie the last subgraph together
+        if len(hot_nodes) > 0:
+            subgraph_idx = subgraph_dict[qubit]
+            tie_subgraph_qubits_together(circ, subgraphs[subgraph_idx], subgraph_idx)
 
     return cuts
+
 
 def apply_phase_separator(circ, gamma, G):
     """
@@ -153,45 +170,100 @@ def apply_phase_separator(circ, gamma, G):
     for qb in G.nodes:
         circ.rz(2*gamma, qb)
 
-# determine the number of gates applied to a given qubit in a circuit
-def num_gates(circuit, qubit):
+
+def num_gates(circuit: QuantumCircuit, qubit: Qubit) -> int:
+    """
+    Determine the number of gates applied to a given qubit in a circuit
+    """
     graph = converters.circuit_to_dag(circuit)
     graph.remove_all_ops_named("barrier")
     return sum([ qubit in node.qargs for node in graph.topological_op_nodes() ])
 
-def gen_dqva(G, partition, cut_nodes, hot_nodes, P=1, params=[], init_state=None,
-             barriers=1, decompose_toffoli=1, mixer_order=None, verbose=0):
+
+def find_cuts(G: nx.Graph, circ: QuantumCircuit, subgraphs: nx.Graph,
+              subgraph_dict: Dict[int, int], mixer_order: List[int],
+              qubit_index: int, qubit: int, hot_nodes: List[int],
+              cut_nodes: List[int], active_qubits: List[bool]) -> List[Qubit]:
+    """
+    This function is called during the construction of the partial mixer when
+    switching from one subgraph to another. Identify the qubits that need to be
+    cut.
+
+        ansatz overview: [prev_subgraph]---(apply cuts here)--->[cur_subgraph]
+
+    If any of the cut nodes used in the previous subgraph appear in any of the
+    later subgraphs, then they must be cut now.
+    """
+    this_subgraph = subgraph_dict[qubit]
+    prev_subgraph = subgraph_dict[mixer_order[qubit_index - 1]]
+    tie_subgraph_qubits_together(circ, subgraphs[prev_subgraph], prev_subgraph)
+
+    cut_nodes_in_prev_subgraph = []
+    for prev_node in subgraphs[prev_subgraph].nodes:
+        # Add all this subgraph's cut nodes to the list
+        if prev_node in cut_nodes:
+            cut_nodes_in_prev_subgraph.append(prev_node)
+
+        # Check if any cut nodes from other subgraphs are used
+        # Was this node's partial mixer applied?
+        if active_qubits[prev_node]:
+            for node in list(G.neighbors(prev_node)) + [prev_node]:
+                # If this node is a cut node, add it to the list
+                if node in cut_nodes:
+                    cut_nodes_in_prev_subgraph.append(node)
+
+    cut_nodes_in_prev_subgraph = list(set(cut_nodes_in_prev_subgraph))
+
+    subgraphs_to_come = list(set([subgraph_dict[mixer_order[i]] for i in range(qubit_index, len(mixer_order))]))
+    cut_these_qubits = []
+    for node in cut_nodes_in_prev_subgraph:
+        # Is this node used in any later subgraphs?
+        for later_subgraph in subgraphs_to_come:
+            later_subgraph_nodes = set(subgraphs[later_subgraph].nodes)
+            for later_node in later_subgraph_nodes:
+                # Check all neighbors of active qubits
+                if active_qubits[later_node] and (node in list(G.neighbors(later_node)) + [later_node]):
+                    cut_these_qubits.append(circ.qubits[node])
+                # If node belongs to this subgraph, it needs to be cut
+                if node == later_node:
+                    cut_these_qubits.append(circ.qubits[node])
+
+    return list(set(cut_these_qubits))
+
+
+def tie_subgraph_qubits_together(circ: QuantumCircuit, subgraph: nx.Graph,
+                                 anc_idx: int) -> None:
+    """
+    The circuit cutting can behave oddly if a qubit doesn't have any two-qubit
+    gates applied to it. To keep the subcircuits together and corresponding
+    to the subgraphs, apply an identity gate to all qubits in the subgraph.
+    """
+    identity_circ = QuantumCircuit(len(subgraph.nodes)+1, name='Id')
+    for i in range(len(subgraph.nodes)+1):
+        identity_circ.id(i)
+
+    identity_gate = identity_circ.to_instruction()
+
+    target_qubits = [circ.qubits[node] for node in subgraph.nodes]
+    target_qubits.append(circ.ancillas[anc_idx])
+    circ.append(identity_gate, target_qubits)
+
+
+def gen_dqva(G, partition, cut_nodes, hot_nodes, mixer_order, P=1, params=[], init_state=None,
+             barriers=1, decompose_toffoli=1, verbose=0):
 
     nq = len(G.nodes)
 
     if P != 1:
         raise Exception("P != 1 currently unsupported")
 
-    subgraph_dict = None
     subgraphs, _ = get_subgraphs(G, partition)
-
-    # check that all hot nodes are in the same subgraph
-    # this assertion fails if there are *no* hot nodes,
-    # ... in which case you should not be using ciruit cutting!
-    assert len(set([ node in subgraphs[0] for node in hot_nodes ])) == 1
 
     # identify the subgraph of every node
     subgraph_dict = {}
     for i, subgraph in enumerate(subgraphs):
         for qubit in subgraph:
             subgraph_dict[qubit] = i
-
-    # sort mixers by subgraph, with the "hot subgraph" first
-    if mixer_order is None:
-        mixer_order = list(G.nodes)
-
-    hot_subgraph = subgraph_dict[hot_nodes[0]]
-    def _node_in_hot_graph(node):
-        return subgraph_dict[node] == hot_subgraph
-    new_mixer_order = sorted(mixer_order, key=_node_in_hot_graph, reverse=True)
-    if new_mixer_order != mixer_order:
-        print(f"WARNING: mixer order changed from {mixer_order} to {new_mixer_order} to respect subgraph ordering")
-        mixer_order = new_mixer_order
 
     # Step 1: Jump Start
     # Run an efficient classical approximation algorithm to warm-start the optimization
@@ -217,10 +289,8 @@ def gen_dqva(G, partition, cut_nodes, hot_nodes, P=1, params=[], init_state=None
     # parse the variational parameters
     # The dqva ansatz dynamically turns off partial mixers for qubits in |1>
     # and adds extra mixers to the end of the circuit
-    num_nonzero = nq - hamming_weight(init_state)
-    # WARNING: this assertion is not performed for cutting because we are too lazy
-    #          to figure out how many parameters there should actually be
-    #assert (len(params) == (nq + 1) * P), "Incorrect number of parameters!"
+    #num_nonzero = nq - hamming_weight(init_state)
+    num_nonzero = nq # Hacking this part because is it breaks for num_fragments > 2
     alpha_list = []
     gamma_list = []
     last_idx = 0
@@ -236,6 +306,9 @@ def gen_dqva(G, partition, cut_nodes, hot_nodes, P=1, params=[], init_state=None
         alpha_list.append(params[last_idx:])
 
     if verbose > 0:
+        print('='*30)
+        print('ANSATZ CONSTRUCTION')
+        print('Graph partition:', partition)
         print('Parameters:')
         for i in range(len(alpha_list)):
             print('\talpha_{}: {}'.format(i, alpha_list[i]))
@@ -248,8 +321,7 @@ def gen_dqva(G, partition, cut_nodes, hot_nodes, P=1, params=[], init_state=None
         alphas = alpha_list[i]
         _cuts = apply_mixer(dqva_circ, alphas, init_state, G, barriers,
                             decompose_toffoli, mixer_order, subgraph_dict,
-                            cut_nodes, hot_nodes, verbose=verbose)
-        print('i =', i, 'and cuts =', _cuts)
+                            cut_nodes, hot_nodes, subgraphs, verbose=verbose)
 
         if barriers > 0:
             dqva_circ.barrier()
@@ -265,8 +337,14 @@ def gen_dqva(G, partition, cut_nodes, hot_nodes, P=1, params=[], init_state=None
         if i == 0:
             cuts = _cuts
             hot_nodes = []
+            # Breaking after the first layer of the ansatz is applied.
+            # Weird things happen to the cutting when partial mixers past the
+            # first layer are applied.
+            break
 
-    print('Outside loop, cuts =', cuts)
+    if verbose > 0:
+        print('Ansatz:')
+        print(dqva_circ.draw(fold=150))
 
     if decompose_toffoli > 1:
         #basis_gates = ['x', 'cx', 'barrier', 'crx', 'tdg', 't', 'rz', 'h']
@@ -275,24 +353,4 @@ def gen_dqva(G, partition, cut_nodes, hot_nodes, P=1, params=[], init_state=None
         pm = PassManager(pass_)
         dqva_circ = pm.run(dqva_circ)
 
-    # push cuts forward past single-qubit gates
-    # to (possibly) get rid of some trivial single-qubit fragments
-    circ_graph = converters.circuit_to_dag(dqva_circ)
-    circ_graph.remove_all_ops_named("barrier")
-    fixed_cuts = []
-    for qubit, cut_loc in cuts:
-        qubit_gates = 0
-        for node in circ_graph.topological_op_nodes():
-            if qubit not in node.qargs: continue
-            qubit_gates += 1
-            if qubit_gates <= cut_loc: continue
-            if len(node.qargs) == 1: cut_loc += 1
-            else: break
-        fixed_cuts.append( (qubit,cut_loc) )
-
-    # remove trivial cuts at the beginning or end of the circuit
-    fixed_cuts = [ (qubit,cut_loc) for qubit, cut_loc in fixed_cuts
-                    if cut_loc not in [ 0, num_gates(dqva_circ,qubit) ] ]
-    print('fixed cuts:', fixed_cuts)
-
-    return dqva_circ, fixed_cuts
+    return dqva_circ, cuts
